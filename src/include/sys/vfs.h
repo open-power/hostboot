@@ -100,6 +100,8 @@ extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 
 extern uint64_t VFS_LAST_ADDRESS;
 
+#define VFS_MODULE_TABLE_SIZE (VFS_EXTENDED_MODULE_MAX * sizeof(VfsSystemModule))
+
 #ifdef __cplusplus
 }
 #endif

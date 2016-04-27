@@ -449,8 +449,10 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                             ((o_TOC[secId].size * 8 ) / 9);
                     }
 
-                    // TODO RTC:96009 handle version header w/secureboot
-                    if (o_TOC[secId].version == FFS_VERS_SHA512)
+                    // @TODO RTC:153773 move header handling to secure pnor rp
+                    // Don't skip header if verification is needed.
+                    if (o_TOC[secId].version == FFS_VERS_SHA512
+                        && strcmp(cur_entry->name,"HBI") != 0)
                     {
                         TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
                                 " Flash Address for SHA Header");
@@ -476,7 +478,6 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                             break;
                         }
                     }
-
 
                     if((o_TOC[secId].flashAddr + o_TOC[secId].size) >
                             (l_ffs_hdr->block_count*PAGESIZE))

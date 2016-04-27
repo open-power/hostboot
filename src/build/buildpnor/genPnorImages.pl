@@ -172,9 +172,9 @@ sub manipulateImages
         PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.protected_payload.bin"
     );
 
-    # @TODO RTC:125298 add HBI to this list, not supported until vfsrp code
-    # is modified.
-    my %hashPageTablePartitions = ();
+    # Partitions that have a hash page table at the beginning of the section
+    # for secureboot purposes.
+    my %hashPageTablePartitions = (HBI => 1);
 
     foreach my $key ( keys %{$i_binFilesRef})
     {
@@ -290,6 +290,13 @@ sub manipulateImages
         {
             $fsp_file =~ s/.bin/$fsp_prefix.bin/;
             run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+        }
+
+        # Hack HBI page to fail verification, Ensure location is past hash page table
+        if ($eyeCatch eq "HBI")
+        {
+            # Leave in here for now
+            # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00013000))");
         }
 
         # ECC Phase
@@ -436,7 +443,7 @@ sub gen_test_containers
     # Create a signed test container with a hash page table
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
-    run_command("dd if=/dev/urandom count=50 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
+    run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
     $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
     run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");

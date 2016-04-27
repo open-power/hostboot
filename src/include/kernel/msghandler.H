@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,6 +33,8 @@
 #include <kernel/msg.H>
 #include <kernel/spinlock.H>
 #include <util/locked/list.H>
+#include <map>
+#include <errno.h>
 
 // Forward declaration.
 namespace Systemcalls { void MsgRespond(task_t*); };
@@ -164,6 +168,9 @@ class MessageHandler
          */
         virtual HandleResult handleResponse(msg_sys_types_t i_type, void* i_key,
                                             task_t* i_task, int i_rc);
+
+        // @brief Map to print out string of errorno received by msg handler
+        static ErrorNoNames iv_errnoNames;
 
     protected:
         /** @brief 'Recv message' interface.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,9 @@
 #include <util/align.H>
 #include <errl/errludstring.H>
 #include <errl/errlmanager.H>
+#include <secureboot/service.H>
+#include <secureboot/containerheader.H>
+#include <kernel/console.H>
 
 using namespace VFS;
 
@@ -146,6 +149,22 @@ errlHndl_t VfsRp::_init()
     if(!err)
     {
         iv_pnor_vaddr = l_pnor_info.vaddr;
+
+        // @TODO RTC:153773 move header handling to secure pnor rp
+        SECUREBOOT::ContainerHeader l_conHdr(reinterpret_cast<void*>(iv_pnor_vaddr));
+
+        // Done with the container header so increment vaddr
+        iv_pnor_vaddr += PAGE_SIZE;
+        // @TODO RTC:155374 remove check
+        if(l_conHdr.isValid())
+        {
+            // @TODO RTC:153773 These variables will be set via getSectionInfo
+            iv_hashPageTableOffset = iv_pnor_vaddr;
+            TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT payload_text_size = 0x%X",
+                        l_conHdr.payloadTextSize());
+            iv_hashPageTableSize = l_conHdr.payloadTextSize()-VFS_MODULE_TABLE_SIZE;
+            iv_pnor_vaddr += iv_hashPageTableSize;
+        }
 
         rc = mm_alloc_block
             (iv_msgQ,
@@ -308,15 +327,26 @@ void VfsRp::msgHandler()
                     iv_msg = msg; // save message in case task crashes
                     uint64_t vaddr = msg->data[0]; //page aligned
                     uint64_t paddr = msg->data[1]; //page aligned
-
-                    vaddr -= VFS_EXTENDED_MODULE_VADDR;
-                    memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
-                           PAGE_SIZE);
-
-                    mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
-
+                    // Get relative virtual address within VFS space
+                    vaddr-=VFS_EXTENDED_MODULE_VADDR;
+                    do
+                    {
+                        if (SECUREBOOT::enabled())
+                        {
+                            uint64_t l_rc = verify_page(vaddr);
+                            // Failed to pass secureboot verification
+                            if(l_rc)
+                            {
+                                msg->data[1] = -l_rc;
+                                break;
+                            }
+                        }
+                        memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
+                               PAGE_SIZE);
+                        mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
+                        msg->data[1] = 0;
+                    } while(0);
                 }
-                msg->data[1] = 0;
                 msg_respond(iv_msgQ, msg);
                 break;
 
@@ -336,6 +366,52 @@ void VfsRp::msgHandler()
                 break;
         }
     } // while(1)
+}
+
+uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
+                            uint64_t i_hashPageTableOffset) const
+{
+    uint64_t rc = 0;
+    uint64_t l_pnorVaddr = iv_pnor_vaddr + i_vaddr;
+
+    // Get current hash page table entry
+    TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Current Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
+             i_vaddr,
+             getHashPageTableIndex(i_vaddr,i_baseOffset),
+             i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+    PAGE_TABLE_ENTRY_t* l_pageTableEntry = getHashPageTableEntry(i_vaddr,
+                                                        i_baseOffset,
+                                                        i_hashPageTableOffset);
+
+    // Get previous hash page table entry
+    uint64_t l_prevPage = i_vaddr - PAGE_SIZE;
+    TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Prev Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
+             l_prevPage,
+             getHashPageTableIndex(l_prevPage,i_baseOffset),
+             i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+    PAGE_TABLE_ENTRY_t* l_prevPageTableEntry = getHashPageTableEntry(
+                                                        l_prevPage,
+                                                        i_baseOffset,
+                                                        i_hashPageTableOffset);
+
+    // Concatenate previous page table entry with current page data
+    SHA512_t l_curPageHash = {0};
+    SECUREBOOT::hashConcatBlobs(l_prevPageTableEntry,
+                                HASH_PAGE_TABLE_ENTRY_SIZE,
+                                reinterpret_cast<void*>(l_pnorVaddr), PAGE_SIZE,
+                                l_curPageHash);
+
+    // Compare existing hash page table entry with the derived one.
+    if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)
+    {
+        TRACFCOMP(g_trac_vfs, "ERROR:>VfsRp::verify_page secureboot verify fail on vaddr 0x%llX, offset into HBI 0x%llX",
+                              i_vaddr,
+                              i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+        printk("Secureboot Verification Failure in HBI\n");
+        rc = EACCES;
+    }
+
+    return rc;
 }
 
 // ----------------------------------------------------------------------------
@@ -703,6 +779,12 @@ void VfsRp::get_test_modules(std::vector<const char *> & o_list) const
     }
 }
 
+// ----------------------------------------------------------------------------
+
+VfsRp& VfsRp::getInstance()
+{
+    return Singleton<VfsRp>::instance();
+}
 
 // -- External interface ------------------------------------------------------
 
@@ -812,5 +894,3 @@ bool VFS::module_is_loaded(const char * i_name)
 {
     return Singleton<VfsRp>::instance().is_module_loaded(i_name);
 }
-
-

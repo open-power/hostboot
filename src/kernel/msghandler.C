@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,8 @@
 #include <kernel/scheduler.H>
 #include <kernel/taskmgr.H>
 #include <kernel/console.H>
+
+ErrorNoNames MessageHandler::iv_errnoNames = init_map();
 
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
@@ -172,8 +176,18 @@ int MessageHandler::recvMessage(msg_t* i_msg)
         else if (UNHANDLED_RC == rc)
         {
             // Unsuccessful, unhandled response.  Kill task.
-            printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
+            // Print the errorno string if we have mapped it in errno.h
+            if (iv_errnoNames.count(msg_rc) > 0)
+            {
+                printk("Unhandled msg rc %s for key %p on task %d @ %p\n",
+                                iv_errnoNames[msg_rc], key, deferred_task->tid,
+                                deferred_task->context.nip);
+            }
+            else
+            {
+                printk("Unhandled msg rc %d for key %p on task %d @ %p\n",
                    msg_rc, key, deferred_task->tid, deferred_task->context.nip);
+            }
             endTaskList.insert(deferred_task);
         }
         else if (CONTINUE_DEFER == rc)

@@ -307,6 +307,7 @@ hbicore_test_DATA_MODULES += ${hbicore_DATA_MODULES}
 hbicore_test_DATA_MODULES += testdata
 ifndef SKIP_BINARY_FILES
 hbicore_test_DATA_MODULES += secureboot_signed_container
+hbicore_test_DATA_MODULES += secureboot_hash_page_table_container
 endif
 
 hbirt_OBJECTS += ${RUNTIME_OBJECTS}

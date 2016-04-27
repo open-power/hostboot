@@ -87,6 +87,23 @@ namespace SECUREBOOT
      */
      void getHwHashKeys(sha2_hash_t o_hash);
 
+    /*
+     * @brief Hash the concatenation of two Blobs
+     *
+     *  Asserts if either blobs are NULL
+     *
+     * @param[in]  i_blob1      Void pointer to effective address of blob1
+     * @param[in]  i_blob1Size  Size of blob1 in bytes
+     * @param[in]  i_blob2      Void pointer to effective address of blob2
+     * @param[in]  i_blob2Size  Size of blob2 in bytes
+     * @param[out] o_hash       SHA512 hash
+     *
+     * @return errlHndl_t  NULL on success
+     */
+    errlHndl_t hashConcatBlobs (const void* i_blob1, size_t i_blob1Size,
+                                const void* i_blob2, size_t i_blob2Size,
+                                SHA512_t o_buf);
+
 }
 
 #endif

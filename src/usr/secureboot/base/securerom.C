@@ -81,7 +81,18 @@ errlHndl_t verifyContainer(void * i_container, size_t i_size)
 errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
 {
     return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size, io_buf);
+}
 
+/**
+ * @brief Hash concatenation of 2 Blobs
+ *
+ */
+errlHndl_t hashConcatBlobs(const void* i_blob1, size_t i_blob1Size,
+                           const void* i_blob2, size_t i_blob2Size,
+                           SHA512_t o_buf)
+{
+    return Singleton<SecureROM>::instance().hashConcatBlobs(i_blob1,
+                                    i_blob1Size, i_blob2, i_blob2Size, o_buf);
 }
 
 /*
@@ -391,7 +402,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 /**
  * @brief Hash Blob
  */
-errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
+errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf) const
 {
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
@@ -427,6 +438,33 @@ errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
     return l_errl;
 }
 
+/**
+ * @brief Hash concatenation of 2 Blobs
+ */
+errlHndl_t SecureROM::hashConcatBlobs(const void* i_blob1, size_t i_blob1Size,
+                                      const void* i_blob2, size_t i_blob2Size,
+                                      SHA512_t o_buf) const
+{
+    errlHndl_t l_errl = NULL;
+
+    assert(i_blob1 != NULL);
+    assert(i_blob2 != NULL);
+
+    size_t l_concatSize = i_blob1Size + i_blob2Size;
+    uint8_t* l_concatBuf = new uint8_t[l_concatSize]();
+
+    // Copy first blob
+    memcpy(l_concatBuf, i_blob1, i_blob1Size);
+    // Copy second blob
+    memcpy(l_concatBuf + i_blob1Size, i_blob2, i_blob2Size);
+
+    // Call hash blob on new concatenated buffer
+    l_errl = hashBlob(l_concatBuf,l_concatSize,o_buf);
+
+    delete[] l_concatBuf;
+    l_concatBuf = NULL;
+    return l_errl;
+}
 
 /********************
  Internal Methods
@@ -610,5 +648,3 @@ SecureROM& SecureROM::getInstance()
 {
     return Singleton<SecureROM>::instance();
 }
-
-

@@ -1354,7 +1354,7 @@ errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
     TRACFCOMP(g_trac_pnor, "PnorRP::clearSection Section id = %d", i_section);
     errlHndl_t l_errl = NULL;
     const uint64_t CLEAR_BYTE = 0xFF;
-    uint8_t* l_buf = new uint8_t[PAGESIZE];
+    uint8_t* l_buf = new uint8_t[PAGESIZE]();
     uint8_t* l_eccBuf = NULL;
 
     do
@@ -1390,7 +1390,7 @@ errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
         // apply ECC to data if needed
         if(l_ecc)
         {
-            l_eccBuf = new uint8_t[PAGESIZE_PLUS_ECC];
+            l_eccBuf = new uint8_t[PAGESIZE_PLUS_ECC]();
             PNOR::ECC::injectECC( reinterpret_cast<uint8_t*>(l_buf),
                                   PAGESIZE,
                                   reinterpret_cast<uint8_t*>(l_eccBuf) );
