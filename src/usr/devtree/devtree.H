@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,6 +209,15 @@ typedef size_t dtOffset_t;
 
         /*Destructor*/
         ~devTree();
+
+        /**
+         * Load the BMC Inventory from BMC_INV if possible.
+         * If the PNOR contians a PNOR partition of BMC_INV and it has
+         * populated data, then use it as the base device tree
+         * @return bool -- if the BMC devtree was loaded as starting
+         *                 point for the device tree
+         */
+        bool loadBmcInventory();
 
         /**
          * Get the internal struct section at node offset

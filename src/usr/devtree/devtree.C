@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include "devtree.H"
 #include <sys/mm.h>
 #include <limits.h>
+#include <pnor/pnorif.H>
 
 extern trace_desc_t *g_trac_devtree;
 
@@ -48,6 +49,74 @@ uint32_t devTree::getSize()
 {
     return mHeader->totalSize;
 }
+
+bool  devTree::loadBmcInventory()
+{
+    errlHndl_t l_errl = NULL;
+    PNOR::SectionInfo_t l_info;
+    bool l_useBMC = false;
+
+    do
+    {
+        // Get BMC_INV PNOR section info from PNOR RP
+        l_errl = PNOR::getSectionInfo( PNOR::BMC_INV, l_info );
+        if( l_errl )
+        {
+            delete l_errl; //okay not to find it, toss error
+            TRACFCOMP( g_trac_devtree, "No BMC_INV section");
+            break;
+        }
+
+        // Check to see if data is valid -- check magic and length
+        dtHeader_t * l_bmcDt =  reinterpret_cast<dtHeader_t *>(l_info.vaddr);
+
+        if ((l_bmcDt->magicNumber != DT_MAGIC) ||
+            (l_bmcDt->totalSize >= l_info.size))
+        {
+            TRACFCOMP( g_trac_devtree, "Bad BMC magic[%08X] or len[%x] exceeds ",
+                       "partition size[%x]", l_bmcDt->magicNumber,
+                       l_bmcDt->totalSize,l_info.size);
+            break;
+        }
+
+        //Check to see that BMC size is less than Host size
+        if(l_bmcDt->totalSize >= mMaxSize)
+        {
+            TRACFCOMP( g_trac_devtree, "BMC devtree [%x] is larger than host [%x]",
+                       l_bmcDt->totalSize, mMaxSize);
+            break;
+        }
+
+        //All good, copy BMC into Host space
+        //Note that we only copy the string/struct section because Host
+        //has larger reserved mem requirements (and we don't replicate
+        //BMC version up)
+        l_useBMC = true;
+        TRACFCOMP( g_trac_devtree, "Using BMC devtree as starting point");
+
+        //Copy struct, determine strings offset
+        char* src = reinterpret_cast<char*>(l_info.vaddr)+l_bmcDt->offsetStruct;
+        char* dest = mSpace + mHeader->offsetStruct;
+        memcpy(dest, src, l_bmcDt->sizeStruct);
+        mHeader->sizeStruct = l_bmcDt->sizeStruct;
+        mHeader->offsetStrings = mHeader->offsetStruct + mHeader->sizeStruct;
+
+        //Copy strings, adjust totalSize
+        src = reinterpret_cast<char*>(l_info.vaddr) + l_bmcDt->offsetStrings;
+        dest = mSpace + mHeader->offsetStrings;
+        memcpy(dest, src, l_bmcDt->sizeStrings);
+        mHeader->sizeStrings = l_bmcDt->sizeStrings;
+        mHeader->totalSize += mHeader->sizeStruct + mHeader->sizeStrings;
+    } while ( 0 );
+
+    if(!l_useBMC)
+    {
+        TRACFCOMP( g_trac_devtree, "Default to Host only devtree");
+    }
+
+    return  l_useBMC;
+}
+
 
 void devTree::initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual)
 {
@@ -82,18 +151,24 @@ void devTree::initialize(uint64_t i_addr, size_t i_maxSize, bool i_virtual)
     mHeader->sizeStrings = 0;
     mHeader->sizeStruct = 0;
 
-    /* Create the initial root node. */
-    uint32_t* curWord = getStructSectionAtOffset(0);
-    *curWord++ = DT_BEGIN_NODE;
-    *curWord++ = 0;
-    *curWord++ = DT_END_NODE;
-    *curWord = DT_END;
+    //Attempt to load the BMC inventory as a starting point for the devTree
+    //If not possible (normal occurance) then populate starting value for
+    //host only
+    if (!loadBmcInventory())
+    {
+        /* Create the initial root node. */
+        uint32_t* curWord = getStructSectionAtOffset(0);
+        *curWord++ = DT_BEGIN_NODE;
+        *curWord++ = 0;
+        *curWord++ = DT_END_NODE;
+        *curWord = DT_END;
 
-    /* Adjust offsets and sizes to account for the root node we just added*/
-    uint32_t structSizeAdded = sizeof(uint32_t) * 4;
-    mHeader->offsetStrings += structSizeAdded;
-    mHeader->sizeStruct += structSizeAdded;
-    mHeader->totalSize += structSizeAdded;
+        /* Adjust offsets and sizes to account for the root node we just added*/
+        uint32_t structSizeAdded = sizeof(uint32_t) * 4;
+        mHeader->offsetStrings += structSizeAdded;
+        mHeader->sizeStruct += structSizeAdded;
+        mHeader->totalSize += structSizeAdded;
+    }
 
     /* Add the standard root node properties. */
     dtOffset_t rootNode = findNode("/");

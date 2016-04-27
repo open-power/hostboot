@@ -72,6 +72,7 @@ const char* cv_EYECATCHER[] = {
     "VERSION",   /**< PNOR::VERSION        : PNOR Version string */
     "TEST",      /**< PNOR::TEST           : Test space for PNOR*/
     "TESTRO",    /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
+    "BMC_INV",   /**< PNOR::BMC_INV        : BMC Inventory */
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };
