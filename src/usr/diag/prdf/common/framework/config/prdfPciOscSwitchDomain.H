@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,9 +116,11 @@ protected:
      * @brief  callout hardware parts and add signature based analysis data.
      * @param   i_sc    The step code data struct.
      * @param   i_pciOscSwitchData contains PCI osc failover data.
+     * @param   i_chip  A P8 chip
      */
     void addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
-                                 PciOscConnList & i_pciOscSwitchData );
+                                 PciOscConnList & i_pciOscSwitchData,
+                                 ExtensibleChip * i_chip );
     /**
      * @brief checks if there is multiple PCI Osc failure.
      * @param  pciOscSwitchData PCI Osc fault data.

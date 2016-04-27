@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,7 +153,7 @@ int32_t PciOscSwitchDomain::Analyze( STEP_CODE_DATA_STRUCT & i_sc,
                 break;
             }
 
-            addHwCalloutAndSignature( i_sc, l_pciOscData );
+            addHwCalloutAndSignature( i_sc, l_pciOscData, l_chip );
 
             // Set dump flag
             i_sc.service_data->SetDump( CONTENT_HW,
@@ -292,7 +292,8 @@ bool PciOscSwitchDomain::checkMultiOscFailure( PciOscConnList & i_pciOscData )
 //------------------------------------------------------------------------------
 
 void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
-                                        PciOscConnList & i_pciOscSwitchData )
+                                        PciOscConnList & i_pciOscSwitchData,
+                                        ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "PciOscSwitchDomain::addHwCalloutAndSignature "
     ErrorSignature * esig = i_sc.service_data->GetErrorSignature();
@@ -300,6 +301,42 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
 
     do
     {
+        // Check if system has checkstopped with failures on both ref clks
+        // Loss of system ref clock would cause a false positive on PCI OSC
+        // fault detection
+        if (i_sc.service_data->getPrimaryAttnType() == CHECK_STOP)
+        {
+            int32_t rc = SUCCESS;
+
+            SCAN_COMM_REGISTER_CLASS * oscCerrReg =
+            i_chip->getRegister("OSCERR");
+
+            rc = oscCerrReg->Read();
+            if (rc != SUCCESS)
+            {
+                PRDF_ERR(PRDF_FUNC "OSCERR read failed"
+                     "for chip: 0x%08x", i_chip->GetId());
+            }
+            else if ( oscCerrReg->IsBitSet( 0 ) && oscCerrReg->IsBitSet( 1 ) )
+            {
+                // Callout both ref clocks
+
+                TARGETING::TargetHandleList clkList =
+                    getFunctionalTargetList( TYPE_OSCREFCLK );
+
+                signature = PRDFSIG_SYS_REF_CLK_LOSS;
+
+                for ( TargetHandleList::const_iterator itr = clkList.begin();
+                      itr != clkList.end(); ++itr )
+                {
+                    i_sc.service_data->SetCallout( *itr, MRU_HIGH );
+                }
+
+                // No other callouts from PCI OSC analysis
+                break;
+            }
+        }
+
         uint32_t listSize = i_pciOscSwitchData.size();
 
         if( 0 == listSize )

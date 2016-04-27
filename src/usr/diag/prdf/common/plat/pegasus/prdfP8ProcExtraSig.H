@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,5 +40,7 @@ PRDR_ERROR_SIGNATURE( PCI_OSC_ANL_FAILED, 0x00ed0006, "",
                       "PCI Osc Switch Over: Analysis failed" );
 PRDR_ERROR_SIGNATURE( PCI_MULTIPLE_OSC_FO, 0x00ed0007, "",
                       "PCI Osc Failed: Multiple Osc" );
+PRDR_ERROR_SIGNATURE( SYS_REF_CLK_LOSS, 0x00ed0008, "",
+                      "Loss of system ref clocks" );
 
 #endif // __prdfP8ProcExtraSig.H
