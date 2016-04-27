@@ -211,8 +211,9 @@ void IntrRp::acknowledgeInterrupt()
     //A uint16 store from the Acknowledge Hypervisor Interrupt
     // offset in the Thread Management BAR space signals
     // the interrupt is acknowledged
-    uint16_t * l_ack_int_ptr = (uint16_t *)iv_xiveTmBar1Address;
+    volatile uint16_t * l_ack_int_ptr = (uint16_t *)iv_xiveTmBar1Address;
     l_ack_int_ptr += ACK_HYPERVISOR_INT_REG_OFFSET;
+    eieio();
 
     uint16_t l_ackRead = *l_ack_int_ptr;
     TRACFCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
@@ -370,7 +371,7 @@ errlHndl_t IntrRp::enableInterrupts()
         uint64_t * l_ic_ptr = iv_xiveIcBarAddress;
         l_ic_ptr += XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET;
 
-        XIVE_IC_THREAD_CONTEXT_t * l_xive_ic_ptr =
+        volatile XIVE_IC_THREAD_CONTEXT_t * l_xive_ic_ptr =
                 reinterpret_cast<XIVE_IC_THREAD_CONTEXT_t *>(l_ic_ptr);
 
         TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::enableInterrupts() "
@@ -399,6 +400,7 @@ errlHndl_t IntrRp::enableInterrupts()
                     " Set phys_thread_enable1_reg: 0x%016lx", l_enable);
             l_xive_ic_ptr->phys_thread_enable1_set = l_enable;
         }
+        eieio();
 
         //Set bit to configure LSI mode for HB cec interrupts
         volatile XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
@@ -856,7 +858,7 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource)
         TRACDCOMP(g_trac_intr, "IntrRp::sendEOI read response: %lx", eoiRead);
 
         //EOI Part 2 - LSI ESB Internal to the IVPE
-        uint64_t * l_lsiEoi = iv_xiveIcBarAddress;
+        volatile uint64_t * l_lsiEoi = iv_xiveIcBarAddress;
         l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
         uint64_t l_intPending = *l_lsiEoi;
 
@@ -1047,7 +1049,7 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
     uint32_t l_addr = PSI_BRIDGE_PSU_DOORBELL_REG;
     size_t scom_len = sizeof(uint64_t);
     uint64_t reg = 0x0;
-    uint64_t l_elapsed_time_ns = 0;
+    uint64_t l_num_yields = 0;
     TARGETING::Target* procTarget = NULL;
     TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
@@ -1072,15 +1074,15 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
             TRACDCOMP(g_trac_intr, "Host/SBE Mailbox "
                                    "response. Wait for Polling to handle"
                                    " response");
-            nanosleep(0,10000);
-            l_elapsed_time_ns += 10000;
+            task_yield(); // allow PSU mbox task to handle
+            l_num_yields += 1;
         }
         else
         {
             //Polling Complete
             break;
         }
-        if (l_elapsed_time_ns > MAX_PSU_LONG_TIMEOUT_NS)
+        if (l_num_yields > 30)
         {
             TRACFCOMP(g_trac_intr, "PSU Timeout hit");
             /*@ errorlog tag

@@ -28,6 +28,7 @@
  */
 
 #include <sys/time.h>
+#include <sys/task.h>
 #include <trace/interface.H>
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
@@ -342,8 +343,8 @@ errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
         }
 
         // try later
-        nanosleep( 0, 10000 ); //sleep for 10,000 ns
-        l_elapsed_time_ns += 10000;
+        task_yield();
+        l_elapsed_time_ns += 100;
 
         // There will be many polls to check for the complete. If there
         // is a problem, then there will be hundreds before timing out
@@ -353,6 +354,8 @@ errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
         l_trace = false; //only trace once to avoid flooding the trace
     }
     while (1);
+
+    task_yield(); //let INTR in
 
     SBE_TRACD(EXIT_MRK "pollForPsuComplete");
 
