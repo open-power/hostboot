@@ -1,0 +1,84 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_get_mem_vpd_keyword.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_MAPPING_TOO_SMALL</rc>
+    <description>Mapping keyword smaller than minimum expected</description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_UNSUPPORTED_VERSION</rc>
+    <description>Version in vpd mapping keyword not supported</description>
+    <ffdc>VERSION</ffdc>
+    <ffdc>EXPECTED</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_UNSUPPORTED_TYPE</rc>
+    <description>Type not supported. Supported types are MR and MT</description>
+    <ffdc>TYPE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_UNSUPPORTED_FREQUENCY</rc>
+    <description>Frequency not in ATTR_MEMVPD_FREQS_MHZ</description>
+    <ffdc>UNSUPPORTEDFREQ</ffdc>
+    <ffdc>MEMVPDFREQ0</ffdc>
+    <ffdc>MEMVPDFREQ1</ffdc>
+    <ffdc>MEMVPDFREQ2</ffdc>
+    <ffdc>MEMVPDFREQ3</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_UNSUPPORTED_RANK</rc>
+    <description>Invalid Rank. Valid values are 0,1,2 and 4</description>
+    <ffdc>RANK</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_NO_MATCH_FOUND</rc>
+    <description>
+      No keyword specified for MCA, Ranks, and frequency
+    </description>
+    <ffdc>TYPE</ffdc>
+    <ffdc>MCA</ffdc>
+    <ffdc>FREQ</ffdc>
+    <ffdc>DIMM0RANK</ffdc>
+    <ffdc>DIMM1RANK</ffdc>
+    <ffdc>HEADER</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_GET_MEM_VPD_UNSUPPORTED_CONFIGURATION</rc>
+    <description>Unsupported MCA, Ranks, and frequency</description>
+    <ffdc>TYPE</ffdc>
+    <ffdc>MCA</ffdc>
+    <ffdc>FREQ</ffdc>
+    <ffdc>DIMM0RANK</ffdc>
+    <ffdc>DIMM1RANK</ffdc>
+    <ffdc>VPDMCAMASK</ffdc>
+    <ffdc>VPDFREQMASK</ffdc>
+    <ffdc>VPDRANKMASK</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
