@@ -77,4 +77,18 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEMVPD_POS</id>
+    <targetType>TARGET_TYPE_MCA</targetType>
+    <description>
+      The position of the MCA target's VPD selector data, relative to the EEPROM
+      that contains its data. For systems with a single EEPROM for all chips,
+      this should be equivalent to ATTR_FAPI_POS (the logical MCA position).
+      For systems with an EEPROM per chip, this value should be equivalent to
+      ATTR_CHIP_UNIT_POS.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
