@@ -72,6 +72,17 @@ bool is_rank_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, con
 size_t get_dimm_from_rank(const uint64_t i_rank);
 
 ///
+/// @brief Given a target, get the rank pair assignments, based on DIMMs
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target the target (MCA or MBA?)
+/// @param[out] o_registers the regiter settings for the appropriate rank pairs
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T>
+fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<T>& i_target,
+        std::pair<uint64_t, uint64_t>& o_registers);
+
+///
 /// @brief Setup the rank information in the port
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)
@@ -89,6 +100,18 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<T>& i_target);
 ///
 template< fapi2::TargetType T>
 fapi2::ReturnCode get_rank_pairs(const fapi2::Target<T>& i_target, std::vector<uint64_t>& o_pairs);
+
+///
+/// @brief Get a rank-pair id from a physical rank
+/// Returns a number representing which rank-pair this rank is a part of
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target  the target (MCA or MBA?)
+/// @param[in] i_rank the physical rank number
+/// @param[out] o_pairs the rank pair
+/// @return FAPI2_RC_SUCCESS if and only if ok, FAPI2_RC_INVALID_PARAMETER if the rank isn't found
+///
+template< fapi2::TargetType T>
+fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<T>& i_target, const uint64_t i_rank, uint64_t& o_pair);
 
 }
 #endif

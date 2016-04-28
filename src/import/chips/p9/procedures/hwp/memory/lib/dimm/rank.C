@@ -32,6 +32,8 @@
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
+using fapi2::FAPI2_RC_SUCCESS;
+using fapi2::FAPI2_RC_INVALID_PARAMETER;
 
 namespace mss
 {
@@ -229,6 +231,34 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Given a target, get the rank pair assignments, based on DIMMs
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target the target (MCA or MBA?)
+/// @param[out] o_registers the regiter settings for the appropriate rank pairs
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        std::pair<uint64_t, uint64_t>& o_registers)
+{
+    // Get the count of rank pairs for all DIMM on the port
+    std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
+
+    for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
+    {
+        FAPI_TRY( mss::eff_num_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
+    }
+
+    o_registers = rank_pair_assignments[l_rank_count[1]][l_rank_count[0]];
+
+    FAPI_DBG("rank pair assignments for %s. [%d,%d] (0x%08llx, 0x%08llx)",
+             mss::c_str(i_target), l_rank_count[1], l_rank_count[0], o_registers.first, o_registers.second);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup the rank information in the port
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)
@@ -247,25 +277,14 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     // to set only the bits for the rank pairs configured, or whether 0xff00 will suffice. BRS
     fapi2::buffer<uint64_t> l_csid_data(0xFF00);
 
-    fapi2::buffer<uint64_t> l_rp0_register;
-    fapi2::buffer<uint64_t> l_rp1_register;
+    std::pair<uint64_t, uint64_t> l_rp_registers;
+    FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
 
-    // Get the count of rank pairs for all DIMM on the port
-    std::vector<uint8_t> l_rank_count(MAX_DIMM_PER_PORT, 0);
+    FAPI_DBG("setting rank pairs for %s. 0x%08llx, 0x%08llx csid: 0x%016llx",
+             mss::c_str(i_target), l_rp_registers.first, l_rp_registers.second, l_csid_data);
 
-    for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
-    {
-        FAPI_TRY( mss::eff_num_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
-    }
-
-    l_rp0_register = rank_pair_assignments[l_rank_count[1]][l_rank_count[0]].first;
-    l_rp1_register = rank_pair_assignments[l_rank_count[1]][l_rank_count[0]].second;
-
-    FAPI_DBG("setting rank pairs for %s. [%d,%d] (0x%08llx, 0x%08llx) csid: 0x%016llx",
-             mss::c_str(i_target), l_rank_count[1], l_rank_count[0], l_rp0_register, l_rp1_register, l_csid_data);
-
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_rp0_register) );
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_rp1_register) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_rp_registers.first) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_rp_registers.second) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
 
     // HACK HACK HACK: put this in the code properly!! BRS
@@ -311,6 +330,83 @@ fapi2::ReturnCode get_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         o_pairs.push_back(l_index);
         l_index += 1;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get a rank-pair id from a physical rank
+/// Returns a number representing which rank-pair this rank is a part of
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target  the target (MCA or MBA?)
+/// @param[in] i_rank the physical rank number
+/// @param[out] o_pairs the rank pair
+/// @return FAPI2_RC_SUCCESS if and only if ok, FAPI2_RC_INVALID_PARAMETER if the rank isn't found
+///
+template<>
+fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+                                     uint64_t i_rank, uint64_t& o_pair)
+{
+    // Sort of brute-force, but no real good other way to do it. Given the
+    // rank-pair configuration we walk the config looking for our rank, and
+    // return the pair. This is always a small 'search' as there are only
+    // 4 possible rank pair registers
+    // TK this is a std::pair and needs to change to support 3DS
+
+    // So we're being a bit tricky here. The rp fields in the registers have
+    // a 'valid' bit. So, if you think about it, our 'rank' is really 3 bits
+    // of 'rank number' and a set valid-bit. So we move the rank over one
+    // and set the right-most bit. If this matches the 4 bits in the rp register
+    // then this is really the rank pair we're looking for.
+    constexpr uint64_t l_rp_even_primary_mask =   0xF000;
+    constexpr uint64_t l_rp_even_secondary_mask = 0x0F00;
+    constexpr uint64_t l_rp_odd_primary_mask =    0x00F0;
+    constexpr uint64_t l_rp_odd_secondary_mask =  0x000F;
+
+    // Shift rank over to accomoate the valid bit in the field, add one for the valid bit
+    i_rank = (i_rank << 1) + 1;
+
+    std::pair<uint64_t, uint64_t> l_rp_registers;
+    FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
+
+    FAPI_DBG("seeing rank pair registers: 0x%016lx 0x%016lx, rank %d (0x%x)",
+             l_rp_registers.first, l_rp_registers.second, i_rank >> 1, i_rank);
+
+    // Check RP0
+    if ((((l_rp_registers.first & l_rp_even_primary_mask) >> 12) == i_rank) ||
+        (((l_rp_registers.first & l_rp_even_secondary_mask) >> 8) == i_rank))
+    {
+        o_pair = 0;
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // Check RP1
+    if ((((l_rp_registers.first & l_rp_odd_primary_mask) >> 4) == i_rank) ||
+        (((l_rp_registers.first & l_rp_odd_secondary_mask) >> 0) == i_rank))
+    {
+        o_pair = 1;
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // Check RP2
+    if ((((l_rp_registers.second & l_rp_even_primary_mask) >> 12) == i_rank) ||
+        (((l_rp_registers.second & l_rp_even_secondary_mask) >> 8) == i_rank))
+    {
+        o_pair = 2;
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // Check RP3
+    if ((((l_rp_registers.second & l_rp_odd_primary_mask) >> 4) == i_rank) ||
+        (((l_rp_registers.second & l_rp_odd_secondary_mask) >> 0) == i_rank))
+    {
+        o_pair = 3;
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // Rank not found
+    return FAPI2_RC_INVALID_PARAMETER;
 
 fapi_try_exit:
     return fapi2::current_err;
