@@ -1,4 +1,4 @@
-#-- $Id: p8.npu.scom.initfile,v 1.6 2015/03/16 14:33:36 lonny Exp $
+#-- $Id: p8.npu.scom.initfile,v 1.7 2015/11/02 16:43:51 camille Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -34,7 +34,9 @@ SyntaxVersion = 1
 # spy name  ES.NPU.NP_AT.REG.FIR_MASK_REG   
 scom 0x0000000008013D83 {
      bits,   	 scom_data        ;
-    0:63,  	0xE0002C12000F5F3F      ;
+#  0:63,  	0xE0002C12000F5F3F      ; --hw341060
+#   0:63,  	0xE0002C92000F5F3F      ; --hw341036
+    0:63,  	0xE0000C92000F5F3F      ;
     }
 
 # set the clock speed in the gp0 registers
@@ -124,7 +126,9 @@ scom 0x0000000008013D6A {
 # spy name  ES.NPU.NP_AT.REG.FIR_ACTION0_REG
 scom 0x0000000008013D86 {
     bits, 	scom_data        		;
-    0:63, 	0x1CBFC1FCB7F0A300      ;
+#    0:63, 	0x1CBFC1FCB7F0A300      ;  --hw341060
+#    0:63, 	0x1CBFC17CB7F0A300      ;  --hw341036
+    0:63, 	0x1CBFE17CB7F0A300      ;
       }
 
 # spy name  ES.NPU.NP_AT.REG.FIR_ACTION1_REG
@@ -162,19 +166,24 @@ scom 0x0000000008013D9C {
 # spy name  ES.NPU.NP_AT.REG.NPU_AT_SI_ER    (LSI enable)
 scom 0x0000000008013D9D {
      bits,   	 scom_data        ;
-    0:63,  	0xE000240200000000      ;
+#   0:63,  	0xE000240200000000      ;  --hw341036
+    0:63,  	0xE000040200000000      ;
     }
 
 # spy name  ES.NPU.NP_AT.REG.NPU_AT_FR_ER    (freeze enable)
 scom 0x0000000008013D9E {
      bits,   	 scom_data        ;
-    0:63,  	0xE00024020C000000      ;
+#   0:63,  	0xE00024020C000000      ;  --hw341060
+#   0:63,  	0xE00024820C000000      ;  --hw341036 
+    0:63,  	0xE00004820C000000      ;
     }
 
 # spy name  ES.NPU.NP_AT.REG.NPU_AT_FE_ER    (fence enable)
 scom 0x0000000008013D9F {
      bits,   	 scom_data        ;
-    0:63,  	0x1CBFC1FCB7F0A000      ;
+#   0:63,  	0x1CBFC1FCB7F0A000      ;  --hw341060
+#   0:63,  	0x1CBFC17CB7F0A000      ;  --hw341036
+    0:63,  	0x1CBFE17CB7F0A000      ;
     }
 
 # spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
