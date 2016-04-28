@@ -45,7 +45,7 @@ SECTIONS
     }
 
     .rodata ALIGN(0x8): {
-        __minimum_data_start_addr = ALIGN(0x1000);
+        __minimum_data_start_addr = ALIGN(0x400);
         ctor_start_address = .;
         *(.ctors)
         *(.ctors.*)
