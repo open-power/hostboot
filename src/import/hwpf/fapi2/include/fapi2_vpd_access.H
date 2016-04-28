@@ -33,28 +33,32 @@
 namespace fapi2
 {
 
+/// constants for VPD Info
+constexpr uint64_t VPD_INFO_INVALID  = 0xffffffffffffffff;
+
 /// @brief  Specialized class representing required VPDInfo to be used
-///         in collecting VPD for the MCS target type.
-/// @tparam T fapi2::TARGET_TYPE_MCS
+///         in collecting VPD for the MCA target type.
+/// @tparam T fapi2::TARGET_TYPE_MCA
 template<>
-class VPDInfo<TARGET_TYPE_MCS>
+class VPDInfo<TARGET_TYPE_MCA>
 {
     public:
         // @brief VPDInfo constructor
         VPDInfo( const fapi2::MemVpdData& i_vpd_type)
             : iv_vpd_type(i_vpd_type),
-              iv_size(0), iv_freq(0), iv_rank_count_dimm_0(0),
-              iv_rank_count_dimm_1(0), iv_dimm_drop_per_port(0)
+              iv_size(VPD_INFO_INVALID),
+              iv_freq_mhz(VPD_INFO_INVALID),
+              iv_rank_count_dimm_0(VPD_INFO_INVALID),
+              iv_rank_count_dimm_1(VPD_INFO_INVALID)
         {};
         // type of vpd field to return
         fapi2::MemVpdData_t iv_vpd_type;
 
         // size of the vpd data
         size_t   iv_size;
-        uint64_t iv_freq;
+        uint64_t iv_freq_mhz;
         uint64_t iv_rank_count_dimm_0;
         uint64_t iv_rank_count_dimm_1;
-        uint64_t iv_dimm_drop_per_port;
 
 };
 
@@ -67,15 +71,15 @@ class VPDInfo<TARGET_TYPE_MCS>
 /// @note passing nullptr for o_blob will return the size of the keyword
 ///
 /// Example:
-/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> vpdInfo(MR_keyword);
-/// vpdInfo.iv_speed_bin = 2400_SPEED_BIN;
+/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCA> vpdInfo(MR_keyword);
+/// vpdInfo.iv_freq = 2667;
 ///
 /// uint8_t * blob = NULL;
 ///
 /// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
 /// blob = static_cast<uint8_t *>(malloc(vpdInfo.iv_size));
 /// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob now contains the VPD data for the MCS.
+/// blob now contains the VPD data for the MCA.
 ///
 template<TargetType T>
 ReturnCode getVPD(const Target<T>& i_target,

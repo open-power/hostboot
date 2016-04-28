@@ -102,6 +102,15 @@
     </attribute>
     <attribute>
         <id>ATTR_SDISN_SETUP</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_MEMVPD_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_MEMVPD_FREQS_MHZ</id>
+        <default>0,0,0,0</default>
     </attribute>
     <attribute>
         <id>ATTR_VPD_OVERRIDE_MT</id>
