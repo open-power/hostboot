@@ -1905,6 +1905,7 @@
         <default>0</default>
     </attribute>
     <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
+    <attribute><id>TPM_REQUIRED</id></attribute>
     <!-- Max/min config attributes -->
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>

@@ -1813,7 +1813,7 @@
             <description>Boolean indicating whether this TPM is available
               in the system</description>
             <type>uint8_t</type>
-            <default>0x0</default>
+            <default>0x1</default>
         </field>
         <field>
             <name>i2cMasterPath</name>

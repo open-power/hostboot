@@ -80,7 +80,7 @@ static const size_t TPM_MAX_NACK_RETRIES = 2;
 // Register the perform Op with the routing code for Nodes.
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::TPM,
-                       TARGETING::TYPE_NODE,
+                       DeviceFW::WILDCARD,
                        tpmPerformOp );
 
 

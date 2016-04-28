@@ -114,6 +114,10 @@
         <attribute><id>XSCOM_BASE_ADDRESS</id>
         <default>0x000603FC00000000</default>
     </attribute>
+    <attribute>
+        <id>TPM_REQUIRED</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -141,6 +145,19 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>TPM_PRIMARY_INFO</id>
+        <default>
+             <field><id>tpmEnabled</id><value>1</value></field>
+             <field><id>i2cMasterPath</id>
+               <value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>0</value></field>
+             <field><id>devAddrLocality0</id><value>0xAE</value></field>
+             <field><id>devAddrLocality4</id><value>0xFF</value></field>
+             <field><id>engine</id><value>2</value></field>
+             <field><id>byteAddrOffset</id><value>0x01</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
