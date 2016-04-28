@@ -49,17 +49,6 @@
 #include "trustedboot.H"
 #include "trustedTypes.H"
 
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-extern trace_desc_t* g_trac_trustedboot;
-
-// Easy macro replace for unit testing
-#define TRACUCOMP(args...)  TRACFCOMP(args)
-//#define TRACUCOMP(args...)
-#define TRACUBIN(args...)  TRACFBIN(args)
-//#define TRACUBIN(args...)
-
 
 namespace TRUSTEDBOOT
 {
