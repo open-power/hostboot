@@ -148,7 +148,6 @@ namespace TRUSTEDBOOT
     {
         errlHndl_t err = TB_SUCCESS;
         size_t newLogSize = TCG_PCR_EVENT2_marshalSize(logEvent);
-        uint8_t* startPtr = val->newEventPtr;
 
         TRACUCOMP( g_trac_trustedboot,
                    ">>tpmAddEvent() PCR:%d Type:%d Size:%d",
@@ -212,13 +211,6 @@ namespace TRUSTEDBOOT
                                          0);
                 break;
             }
-
-            // Debug display of raw data
-            TRACUCOMP(g_trac_trustedboot, "tpmAddEvent: Start %p",
-                      startPtr);
-            TRACUBIN(g_trac_trustedboot, "tpmAddEvent",
-                     startPtr, newLogSize);
-
 
             val->logSize += newLogSize;
 
