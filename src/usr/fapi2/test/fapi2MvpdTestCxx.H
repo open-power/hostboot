@@ -41,6 +41,8 @@
 #include "../plat_mvpd_access.C"
 #include <fapi2.H>
 #include <devicefw/userif.H>
+#include <p9_pm_get_poundv_bucket.H>
+#include <utilFilter.H>
 #include <vpd/mvpdenums.H>
 
 using   namespace   TARGETING;
@@ -332,6 +334,93 @@ class MVPDTest: public CxxTest::TestSuite
             FAPI_INF("testMvpdValidate: EXIT !!");
 
         } //testMvpdValidate
+
+  void testMvpdGetPoundVBucket(void)
+  {
+      int numTests = 0;
+      int numFails = 0;
+      fapi2::ReturnCode   l_rc;
+      FAPI_INF("MvpdGetPoundVBucket Test entry... ");
+
+      // Create a vector of TARGETING::Target pointers
+      TARGETING::TargetHandleList l_chipletList;
+
+      // Get a list of all of the EQ chips
+      TARGETING::getChipletResources(l_chipletList,
+                                    TARGETING::TYPE_EQ,
+                                    TARGETING::UTIL_FILTER_PRESENT);
+      fapi2::voltageBucketData_t voltageData;
+
+      for(const auto & eqChiplet : l_chipletList )
+      {
+          fapi2::Target<TARGET_TYPE_EQ>
+          l_fapi_eq_target(eqChiplet);
+          l_rc = p9_pm_get_poundv_bucket(l_fapi_eq_target, voltageData);
+
+
+          //Set up a char array to hold the bucket data from an attr read
+          fapi2::ATTR_POUNDV_BUCKET_DATA_Type l_bucketAttr;
+
+          //Perform an ATTR_GET for POUNDV_BUCKET data on the EQ target
+          FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA,
+                                l_fapi_eq_target,
+                                l_bucketAttr);
+
+          uint32_t l_huid = TARGETING::get_huid(l_fapi_eq_target);
+          uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+          //PROC0EQ1 has an override set in nimbus's standalone xml, this branch checks it
+          if(l_pos == 1)
+          {
+
+              numTests++;
+              if(voltageData.bucketId != 2)
+              {
+                  numFails++;
+                  TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 2, not %d",l_huid, voltageData.bucketId);
+              }
+
+              numTests++;
+              if(*l_bucketAttr != 2)
+              {
+                  numFails++;
+                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 1, not %d",l_huid, voltageData.bucketId);
+              }
+
+              if(l_rc)
+              {
+                  numFails++;
+                  TS_FAIL("Error: Error occured while trying to read voltage data from mvpd");
+                  continue;
+              }
+              continue;
+          }
+          numTests++;
+          if(voltageData.bucketId != 1)
+          {
+              numFails++;
+              TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 1, not %d",l_huid, voltageData.bucketId);
+              continue;
+          }
+          numTests++;
+          if(*l_bucketAttr != 1)
+          {
+              numFails++;
+              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 1, not %d",l_huid, voltageData.bucketId);
+          }
+
+          if(l_rc)
+          {
+              numFails++;
+              TS_FAIL("Error: Error occured while trying to read voltage data from mvpd");
+              continue;
+          }
+          FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, voltageData.bucketId);
+      }
+
+      FAPI_INF("MvpdGetPoundVBucket:: Test Complete. %d/%d fails",  numFails , numTests);
+      FAPI_INF("MvpdGetPoundVBucket Test exit... ");
+  }
 };
 
 #endif

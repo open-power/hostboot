@@ -584,7 +584,8 @@
     <attribute><id>PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id></attribute>
-
+    <attribute><id>POUNDV_BUCKET_NUM</id><default>0</default></attribute>
+    <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>UNIT_TEST_MCA_MEMORY_SIZES</id></attribute>
 
 </targetType>
