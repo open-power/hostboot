@@ -249,6 +249,9 @@
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
+    <attribute><id>XSCOM_BASE_ADDRESS</id>
+        <default>0x000603FC00000000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 EQ units -->
