@@ -123,6 +123,9 @@ namespace HTMGT
     enum htmgtPassThruCmds
     {
         PASSTHRU_OCC_STATUS             = 0x01,
+        PASSTHRU_SEND_OCC_COMMAND       = 0x03, // send raw OCC command
+        PASSTHRU_CLEAR_RESET_COUNTS     = 0x04,
+        PASSTHRU_EXIT_SAFE_MODE         = 0x05,
         PASSTHRU_GENERATE_MFG_PSTATE    = 0x81,
         PASSTHRU_LOAD_PSTATE            = 0x82
     };

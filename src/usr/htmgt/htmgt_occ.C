@@ -505,6 +505,26 @@ namespace HTMGT
     } // end OccManager::_addOcc()
 
 
+    // Get pointer to specified OCC
+    Occ * OccManager::_getOcc(const uint8_t i_instance)
+    {
+        Occ *targetOcc = NULL;
+        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+             pOcc < iv_occArray.end();
+             pOcc++)
+        {
+            if ((*pOcc)->getInstance() == i_instance)
+            {
+                targetOcc = (*pOcc);
+                break;
+            }
+        }
+
+        return targetOcc;
+
+    } // eng OccManager::_getOcc()
+
+
     // Set the OCC state
     errlHndl_t OccManager::_setOccState(const occStateId i_state)
     {
@@ -666,7 +686,8 @@ namespace HTMGT
 
 
     errlHndl_t OccManager::_resetOccs(TARGETING::Target * i_failedOccTarget,
-                                      bool i_skipCountIncrement)
+                                      bool i_skipCountIncrement,
+                                      bool i_skipComm)
     {
         errlHndl_t err = NULL;
         bool atThreshold = false;
@@ -682,13 +703,16 @@ namespace HTMGT
                 ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
             }
 
-            // Send poll cmd to all OCCs to establish comm
-            err = _sendOccPoll(false,NULL);
-            if (err)
+            if (false == i_skipComm)
             {
-                TMGT_ERR("_resetOccs: Poll OCCs failed.");
-                // Proceed with reset even if failed
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                // Send poll cmd to all OCCs to establish comm
+                err = _sendOccPoll(false,NULL);
+                if (err)
+                {
+                    TMGT_ERR("_resetOccs: Poll OCCs failed.");
+                    // Proceed with reset even if failed
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
             }
 
             for(occList_t::const_iterator occ = iv_occArray.begin();
@@ -700,15 +724,20 @@ namespace HTMGT
                     (*occ)->failed(true);
                 }
 
-                if((*occ)->resetPrep())
+
+                if (false == i_skipComm)
                 {
-                    atThreshold = true;
+                    // Send reset prep cmd to all OCCs
+                    if((*occ)->resetPrep())
+                    {
+                        atThreshold = true;
+                    }
                 }
             }
 
             if ((false == i_skipCountIncrement) && (false == _occFailed()))
             {
-                // No OCC has been marked failed, increment system reset count
+                // No OCC has been marked failed, increment sys reset count
                 ++iv_resetCount;
 
                 TMGT_INF("_resetOCCs: Incrementing system OCC reset count"
@@ -719,7 +748,15 @@ namespace HTMGT
                     atThreshold = true;
                 }
             }
-            // else the failed OCC reset count will be incremented automatically
+            // else failed OCC reset count will be incremented automatically
+
+            // Update OCC states to RESET
+            for(occList_t::const_iterator occ = iv_occArray.begin();
+                occ != iv_occArray.end();
+                ++occ)
+            {
+                (*occ)->iv_state = OCC_STATE_RESET;
+            }
 
             uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
             while(retryCount)
@@ -813,11 +850,12 @@ namespace HTMGT
         TARGETING::targetService().getTopLevelTarget(sys);
         const uint8_t safeMode = 1;
 
-        // Put into safemode
+        // Mark system as being in safe mode
         if(sys)
         {
             sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
         }
+        iv_state = OCC_STATE_SAFE;
 
         _updateSafeModeReason(io_err->reasonCode(), 0);
 
@@ -908,9 +946,11 @@ namespace HTMGT
     void OccManager::_updateSafeModeReason(uint32_t i_src,
                                            uint32_t i_instance)
     {
-        if (cv_safeReturnCode == 0)
+        if ((cv_safeReturnCode == 0) ||
+            ((i_src == 0) && (i_instance == 0)))
         {
-            // Only update safe mode reason for the first failure
+            // Only update safe mode reason for the first failure,
+            // or if trying to clear safe mode
             cv_safeReturnCode = i_src;
             cv_safeOccInstance = i_instance;
         }
@@ -1088,6 +1128,42 @@ namespace HTMGT
     }
 
 
+    // Clear all OCC reset counts
+    void OccManager::_clearResetCounts()
+    {
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        if (sys)
+        {
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
+        }
+        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+             pOcc < iv_occArray.end();
+             pOcc++)
+        {
+            if ((*pOcc)->iv_resetCount != 0)
+            {
+                TMGT_INF("_clearResetCounts: Clearing OCC%d reset count "
+                         "(was %d)",
+                         (*pOcc)->getInstance(), (*pOcc)->iv_resetCount);
+                (*pOcc)->iv_resetCount = 0;
+                if (safeMode)
+                {
+                    // Clear OCC flags (failed, commEstablished, etc)
+                    (*pOcc)->postResetClear();
+                }
+            }
+        }
+        if (iv_resetCount != 0)
+        {
+            TMGT_INF("_clearResetCounts: Clearing system reset count "
+                     "(was %d)", iv_resetCount);
+            iv_resetCount = 0;
+        }
+    }
+
+
     uint8_t  OccManager::getNumOccs()
     {
         return Singleton<OccManager>::instance()._getNumOccs();
@@ -1112,15 +1188,26 @@ namespace HTMGT
     }
 
 
+    Occ * OccManager::getOcc(const uint8_t i_instance)
+    {
+        return Singleton<OccManager>::instance()._getOcc(i_instance);
+    }
+
+
     errlHndl_t OccManager::setOccState(const occStateId i_state)
     {
         return Singleton<OccManager>::instance()._setOccState(i_state);
     }
 
-    errlHndl_t OccManager::resetOccs(TARGETING::Target * i_failedOccTarget)
+
+    errlHndl_t OccManager::resetOccs(TARGETING::Target * i_failedOccTarget,
+                                     bool i_skipCountIncrement,
+                                     bool i_skipComm)
     {
         return
-            Singleton<OccManager>::instance()._resetOccs(i_failedOccTarget);
+            Singleton<OccManager>::instance()._resetOccs(i_failedOccTarget,
+                                                         i_skipCountIncrement,
+                                                         i_skipComm);
     }
 
 
@@ -1176,6 +1263,11 @@ namespace HTMGT
     void OccManager::setPstateTable(bool i_useNormal)
     {
         Singleton<OccManager>::instance()._setPstateTable(i_useNormal);
+    }
+
+    void OccManager::clearResetCounts()
+    {
+        Singleton<OccManager>::instance()._clearResetCounts();
     }
 
     void OccManager::syncOccStates()
