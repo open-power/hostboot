@@ -8,3 +8,9 @@ config BMC_BT_LPC_IPMI
     depends on BMC_IPMI
     help
         Determines if the BMC uses the LPC bus for block-transfer IPMI traffic
+
+config BMC_IPMI_LONG_WATCHDOG
+    default n
+    depends on BMC_IPMI
+    help
+        Sets watchdog default timer to several times normal for debugging
