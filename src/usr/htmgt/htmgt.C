@@ -104,9 +104,9 @@ namespace HTMGT
                         {
                             if (OccManager::occNeedsReset())
                             {
-                                // No need to continue if a reset is required
-                                TMGT_ERR("sendOccConfigData(): OCCs need to "
-                                         "be reset");
+                                // No need to continue if reset is required
+                                TMGT_ERR("sendOccConfigData(): OCCs need "
+                                         "to be reset");
                                 break;
                             }
                             else
@@ -186,8 +186,8 @@ namespace HTMGT
 
         if (NULL != l_err)
         {
-            TMGT_ERR("OCCs not all active (rc=0x%04X).  Attempting OCC Reset",
-                     l_err->reasonCode());
+            TMGT_ERR("OCCs not all active (rc=0x%04X).  Attempting OCC "
+                     "Reset", l_err->reasonCode());
             TMGT_CONSOLE("OCCs are not active (rc=0x%04X). "
                          "Attempting OCC Reset",
                          l_err->reasonCode());
@@ -212,6 +212,7 @@ namespace HTMGT
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
         }
+
         TMGT_INF("<<processOccStartStatus()");
 
     } // end processOccStartStatus()
@@ -526,6 +527,94 @@ namespace HTMGT
                         TMGT_ERR("passThruCommand: invalid load pstate "
                                  "command length %d", i_cmdLength);
                         failingSrc = HTMGT_RC_INVALID_LENGTH;
+                    }
+                    break;
+
+                case PASSTHRU_SEND_OCC_COMMAND:
+                    if (i_cmdLength >= 3)
+                    {
+                        const uint8_t occInstance = i_cmdData[1];
+                        const occCommandType occCmd =
+                            (occCommandType)i_cmdData[2];
+                        const uint16_t dataLen = i_cmdLength-3;
+                        Occ *occPtr = OccManager::getOcc(occInstance);
+                        if (occPtr)
+                        {
+                            TMGT_INF("passThruCommand: Send OCC%d command "
+                                     "0x%02X (%d bytes)",
+                                     occInstance, occCmd, dataLen);
+                            OccCmd cmd(occPtr, occCmd, dataLen, &i_cmdData[3]);
+                            err = cmd.sendOccCmd();
+                            if (err != NULL)
+                            {
+                                TMGT_ERR("passThruCommand: OCC%d cmd 0x%02X "
+                                         "failed with rc 0x%04X",
+                                         occInstance, occCmd,
+                                         err->reasonCode());
+                            }
+                            else
+                            {
+                                uint8_t *rspPtr = NULL;
+                                o_rspLength = cmd.getResponseData(rspPtr);
+                                memcpy(o_rspData, rspPtr, o_rspLength);
+                                TMGT_INF("passThruCommand: OCC%d rsp status "
+                                         "0x%02X (%d bytes)", occInstance,
+                                         o_rspData[2], o_rspLength);
+                            }
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: Unable to find OCC%d",
+                                     occInstance);
+                            /*@
+                             * @errortype
+                             * @reasoncode   HTMGT_RC_OCC_UNAVAILABLE
+                             * @moduleid     HTMGT_MOD_PASS_THRU
+                             * @userdata1    command data[0-7]
+                             * @userdata2    command data length
+                             * @devdesc      Specified OCC not available
+                             */
+                            failingSrc = HTMGT_RC_OCC_UNAVAILABLE;
+                        }
+                    }
+                    else
+                    {
+                        TMGT_ERR("passThruCommand: invalid OCC command "
+                                 "length %d", i_cmdLength);
+                        failingSrc = HTMGT_RC_INVALID_LENGTH;
+                    }
+                    break;
+
+                case PASSTHRU_CLEAR_RESET_COUNTS:
+                    TMGT_INF("passThruCommand: Clear all OCC reset counts");
+                    OccManager::clearResetCounts();
+                    break;
+
+                case PASSTHRU_EXIT_SAFE_MODE:
+                    {
+                        TMGT_INF("passThruCommand: Clear Safe Mode");
+                        // Clear OCC reset counts and failed flags
+                        OccManager::clearResetCounts();
+                        // Clear safe mode reason
+                        OccManager::updateSafeModeReason(0, 0);
+                        // Clear system safe mode flag/attribute
+                        TARGETING::Target* sys = NULL;
+                        TARGETING::targetService().getTopLevelTarget(sys);
+                        const uint8_t safeMode = 0;
+                        if(sys)
+                        {
+                            sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>
+                                (safeMode);
+                        }
+                        // Reset the OCCs (do not increment reset count
+                        // or attempt comm with OCC since they are in reset)
+                        TMGT_INF("passThruCommand: Calling resetOccs");
+                        err = OccManager::resetOccs(NULL, true, true);
+                        if (err != NULL)
+                        {
+                            TMGT_ERR("passThruCommand: resetOccs failed "
+                                     "with rc 0x%04X", err->reasonCode());
+                        }
                     }
                     break;
 

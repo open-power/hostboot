@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -419,13 +419,29 @@ namespace HTMGT
              */
             static Occ * getMasterOcc();
 
+
+            /**
+             * @brief Return pointer to specified OCC
+             *
+             * @return pointer to specified OCC or NULL if not found
+             */
+            static Occ * getOcc(const uint8_t i_instance);
+
+
             /**
              * @brief Reset the OCCs
              *
              * @param[in] Failing occ target
+             * @param[in] i_skipCountIncrement  true will prevent incrementing
+             *            the system reset count
+             * @param[in] i_skipComm            true will prevent attempts to
+             *            communicate with OCC before reset (poll/resetPrep)
+             *            Used when exiting safe mode.
              * @return Error Log | NULL
              */
-            static errlHndl_t resetOccs(TARGETING::Target * i_failedOccTarget);
+            static errlHndl_t resetOccs(TARGETING::Target * i_failedOccTarget,
+                                        bool i_skipCountIncrement = false,
+                                        bool i_skipComm = false);
 
 
             /**
@@ -574,6 +590,13 @@ namespace HTMGT
             static void syncOccStates();
 
 
+            /**
+             * @brief Clear all OCC reset counts
+             *
+             */
+            static void clearResetCounts();
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -638,18 +661,19 @@ namespace HTMGT
             Occ * _getMasterOcc() { return iv_occMaster; };
 
 
+            /* See getOcc() above */
+            Occ * _getOcc(const uint8_t i_instance);
+
+
             /* See setOccState() above */
             errlHndl_t _setOccState(const occStateId i_state);
 
             void _waitForOccCheckpoint();
 
             /* See resetOccs() above */
-            /* @param[in] i_skipCountIncrement  true will prevent incrementing
-             *            the system reset count (used in loadPstate)
-             *            false (default) will increment counts as normal
-             */
             errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget,
-                                  bool i_skipCountIncrement = false);
+                                  bool i_skipCountIncrement = false,
+                                  bool i_skipComm = false);
 
             /** See sendOccPoll() above */
             errlHndl_t
@@ -689,6 +713,9 @@ namespace HTMGT
 
             /** See syncOccStates() above */
             void _syncOccStates();
+
+            /** See clearResetCounts() above */
+            void _clearResetCounts();
     };
 
     typedef Singleton<OccManager> occMgr;
