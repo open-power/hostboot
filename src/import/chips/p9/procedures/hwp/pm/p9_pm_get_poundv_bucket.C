@@ -32,7 +32,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
     fapi2::voltageBucketData_t& o_data)
 {
-    FAPI_INF("Entering p9_pm_get_poundv_bucket ....");
+    FAPI_IMP("Entering p9_pm_get_poundv_bucket ....");
 
 
     //Create a pointer version of the out param o_data so that
@@ -204,10 +204,10 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         //Allocate memory for vpd data
         l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
 
-        FAPI_ASSERT(l_vpdSize - 4 - (l_bucketId * 0x33) >= sizeof(fapi2::ATTR_POUNDV_BUCKET_DATA_Type),
+        FAPI_ASSERT(l_vpdSize - 4 - ((l_bucketId - 1) * 0x33) >= sizeof(fapi2::ATTR_POUNDV_BUCKET_DATA_Type),
                     fapi2::BAD_VPD_READ()
                     .set_EXPECTED_SIZE(sizeof(fapi2::ATTR_POUNDV_BUCKET_DATA_Type))
-                    .set_ACTUAL_SIZE(l_vpdSize - 4 - (l_bucketId * 0x33)),
+                    .set_ACTUAL_SIZE(l_vpdSize - 4 - ((l_bucketId - 1) * 0x33)),
                     "#V data read was too small!" );
 
         //Second read is to get data of vpd record
@@ -236,8 +236,8 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         //bucket f: 0x33 byte
         if( *l_fullVpdData == 0x2)
         {
-            memcpy(&o_data,
-                   l_fullVpdData + 4 + (l_bucketId) * 0x33,
+            memcpy(o_data,
+                   l_fullVpdData + 4 + (l_bucketId - 1) * 0x33,
                    sizeof(fapi2::ATTR_POUNDV_BUCKET_DATA_Type));
         }
         else
