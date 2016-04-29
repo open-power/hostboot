@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
+#include <initservice/isteps_trace.H>
 
 namespace ISTEP_06
 {
