@@ -58,17 +58,15 @@ namespace XSCOM
 // Master processor virtual address
 uint64_t* g_masterProcVirtAddr = NULL;
 
-// Max chip per node in this system
-extern uint8_t getMaxChipsPerNode();
-static uint8_t g_xscomMaxChipsPerNode = getMaxChipsPerNode();
-
 // Register XSCcom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::XSCOM,
                       TARGETING::TYPE_PROC,
                       xscomPerformOp);
 
-uint64_t* getCpuIdVirtualAddress();
+// Helper function to map in the master proc's XSCOM space
+uint64_t* getCpuIdVirtualAddress( XSComBase_t& o_mmioAddr );
+
 /**
  * @brief Internal routine that reset XSCOM status bits
  *        of HMER register before an XSCOM operation
@@ -187,32 +185,6 @@ errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
 }
 
 /**
- * @brief Returns maximum processors chip per node
- *        base on system type
- *
- * @return uint8_t
- */
-uint8_t getMaxChipsPerNode()
-{
-    uint8_t l_numOfChips = 0;
-
-    ProcessorCoreType l_coreType = cpu_core_type();
-    switch (l_coreType)
-    {
-        case CORE_POWER8_MURANO:
-        case CORE_POWER8_VENICE:
-        case CORE_POWER8_NAPLES:
-        case CORE_POWER9_NIMBUS:
-        case CORE_POWER9_CUMULUS:
-        case CORE_UNKNOWN:
-        default:
-            l_numOfChips = 8;
-            break;
-    }
-    return l_numOfChips;
-}
-
-/**
  * @brief Get the virtual address of the input target
  *        for an XSCOM access.
  *
@@ -291,7 +263,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
             {
                 // Note: can't call TARGETING code prior to PNOR being
                 // brought up.
-                uint64_t* l_tempVirtAddr = getCpuIdVirtualAddress();
+                uint64_t l_mmioAddr = 0;
+                uint64_t* l_tempVirtAddr = getCpuIdVirtualAddress(l_mmioAddr);
                 if (!__sync_bool_compare_and_swap(&g_masterProcVirtAddr,
                                          NULL, l_tempVirtAddr))
                 {
@@ -323,6 +296,14 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                         break;
                     }
                 }
+                else
+                {
+                    TRACFCOMP(g_trac_xscom,
+                              "Master Proc : pir=%.8X, mmio=0x%0.16llX, virt=0x%llX",
+                              task_getcpuid(),
+                              l_mmioAddr,
+                              reinterpret_cast<uint64_t>(l_tempVirtAddr));
+                }
             }
 
             // Set virtual address to sentinel's value
@@ -343,35 +324,25 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
             // the virtual address and save it in the xscom address attribute.
             if (o_virtAddr == NULL)
             {
-                uint64_t  xscomNodeId = 0;
+                uint64_t  xscomGroupId = 0;
                 uint64_t  xscomChipId = 0;
 
-                // Get the target Node Id
-                xscomNodeId =
+                // Get the target Group Id
+                xscomGroupId =
                   i_target->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
                 // Get the target Chip Id
                 xscomChipId =
                   i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-                // Get system XSCOM base address
-                TARGETING::TargetService& l_targetService =
-                                        TARGETING::targetService();
-                TARGETING::Target* l_pTopLevel = NULL;
-                (void) l_targetService.getTopLevelTarget(l_pTopLevel);
-                assert(l_pTopLevel != NULL);
-                XSComBase_t l_systemBaseAddr =
-                    l_pTopLevel->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-
-                // Target's XSCOM Base address
-                l_XSComBaseAddr = l_systemBaseAddr +
-                    ( ( (g_xscomMaxChipsPerNode * xscomNodeId) +
-                            xscomChipId ) * THIRTYTWO_GB);
+                // Get assigned XSCOM base address
+                l_XSComBaseAddr =
+                  i_target->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
 
                 TRACFCOMP(g_trac_xscom,
-                          "Target %.8X :: Node:%d Chip:%d :: XscomBase:0x%llX",
+                          "Target %.8X :: Group:%d Chip:%d :: XscomBase:0x%llX",
                           TARGETING::get_huid(i_target),
-                          xscomNodeId,
+                          xscomGroupId,
                           xscomChipId,
                           l_XSComBaseAddr);
 
@@ -390,7 +361,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
                 // logic. So there is possibility that this same thread is running
                 // on another thread at the exact same time. We can use atomic
                 // update instructions here.
-                // Comment for Nick: This is a good candidate for having a way
+                // Future note : This is a good candidate for having a way
                 // to return a reference to the attribute instead of requiring
                 // to call setAttr. We currently have no way to SMP-safely update
                 // this attribute, where as if we had a reference to it we could use
@@ -438,8 +409,8 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
                       HMER &io_hmer)
 {
 
-    // Build the XSCom address (relative to node 0, chip 0)
-    XSComP8Address l_mmioAddr(i_xscomAddr);
+    // Build the XSCom address (relative to group 0, chip 0)
+    XSComP9Address l_mmioAddr(i_xscomAddr);
 
     // Get the offset
     uint64_t l_offset = l_mmioAddr.offset();
@@ -488,7 +459,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
             //  an obscene amount of time
             if( l_retryCtr > 500000 )
             {
-                TRACFCOMP( g_trac_xscom, "Giving up, we're still locked..." );
+                TRACFCOMP( g_trac_xscom, "Giving up, we're still locked on 0x%.16llX...", l_offset );
                 break;
             }
         }
@@ -542,32 +513,24 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
  * @brief Get the Virtual Address of the XSCOM space for the processor
  *  associated with this thread (the source chip)
  *
+ * @param[out] o_mmioAddr  Physical mmio address that was mapped in
  * @return uint64_t* virtualAddress
  */
-uint64_t* getCpuIdVirtualAddress()
+uint64_t* getCpuIdVirtualAddress( XSComBase_t& o_mmioAddr )
 {
     uint64_t* o_virtAddr = 0;
 
     // Get the CPU core this thread is running on
     PIR_t cpuid = task_getcpuid();
 
-    // Can change the above hardcoded values to either a macro or use
-    // the info below to do the masking and shifting.
-    // uint64_t max_threads = cpu_thread_count();
-    // for the number of Chips  - use  g_xscomMaxChipsPerNode instead..
-    // For the number of Procs.. MAX_PROCS_RSV = P8_MAX_PROCS*2
-    // P8_MAX_PROCS = 8 -- space left for 2* that.
-
-    XSComBase_t l_systemBaseAddr = MASTER_PROC_XSCOM_BASE_ADDR;
-
     // Target's XSCOM Base address
-    XSComBase_t l_XSComBaseAddr = l_systemBaseAddr +
-      ( ( (g_xscomMaxChipsPerNode * cpuid.groupId) +
-          cpuid.chipId ) * THIRTYTWO_GB);
+    o_mmioAddr = MASTER_PROC_XSCOM_BASE_ADDR +
+      (MMIO_OFFSET_PER_GROUP * cpuid.groupId) +
+      (MMIO_OFFSET_PER_GROUP * cpuid.chipId);
 
     // Target's virtual address
     o_virtAddr = static_cast<uint64_t*>
-      (mmio_dev_map(reinterpret_cast<void*>(l_XSComBaseAddr),
+      (mmio_dev_map(reinterpret_cast<void*>(o_mmioAddr),
                     THIRTYTWO_GB));
 
     TRACDCOMP(g_trac_xscom, "getCpuIdVirtualAddress: o_Virtual Address   =  0x%llX\n",o_virtAddr);
@@ -611,7 +574,8 @@ void resetScomEngine(TARGETING::Target* i_target,
         // running on.  Need to find the virtAddr for that CPU.
         if (XscomAddr[i].target_type == CurThreadCpu)
         {
-            l_virtAddr =  getCpuIdVirtualAddress();
+            XSComBase_t l_ignored = 0;
+            l_virtAddr =  getCpuIdVirtualAddress(l_ignored);
         }
         // The rest are xscoms are to the target cpu.
         else

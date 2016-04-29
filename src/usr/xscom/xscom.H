@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,22 +33,20 @@
 #include <limits.h>
 
 /**
- *  @brief  Max number of retries if XSCOM fails with certain errors
- */
-#define MAX_XSCOM_RETRY     1
-
-/**
  *  @brief  The (fixed) base address value for master proc
  */
-// @todo-RTC:128077 XSCOM support for P9
-#define MASTER_PROC_XSCOM_BASE_ADDR     0x000603FC00000000
+constexpr uint64_t MASTER_PROC_XSCOM_BASE_ADDR = 0x000603FC00000000;
 
 /**
- *  @brief  Type definition for XSCom address and Chip ID
+ *  @brief  Static offsets into other chips
+ */
+constexpr uint64_t  MMIO_OFFSET_PER_CHIP  = (4*TERABYTE);
+constexpr uint64_t  MMIO_OFFSET_PER_GROUP = (32*TERABYTE);
+
+/**
+ *  @brief  Type definition for XSCom address and Base
  */
 typedef uint32_t XSComAddress_t;
-typedef uint16_t XSComChipId_t;
-typedef uint16_t XSComNodeId_t;
 typedef uint64_t XSComBase_t;
 
 namespace XSCOM
@@ -99,7 +97,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                           va_list i_args);
 
 /**
- *  @brief  Abstracts HMER register of a P8 (Murano/Venice) chip
+ *  @brief  Abstracts HMER register of a POWER9 chip
  */
 class HMER
 {
@@ -157,38 +155,38 @@ public:
 
 /**
  *  @brief  This class contains necessary information to build an XSCOM
- *  address for a P8/Salerno chip.
+ *  address for a POWER9 chip.
  */
-class XSComP8Address
+class XSComP9Address
 {
   public:
     /**
-     * @brief Constructor of XSComP8Address class
+     * @brief Constructor of XSComP9Address class
      *
      * @param[in]   i_addr          PCB address of the register being accessed
      *
      * @return  None
      */
-     ALWAYS_INLINE inline XSComP8Address(const XSComAddress_t i_addr);
+    ALWAYS_INLINE inline XSComP9Address(const XSComAddress_t i_addr);
 
     /**
-      * @brief Conversion operator
-      */
-      ALWAYS_INLINE inline operator uint64_t() const;
+     * @brief Conversion operator
+     */
+    ALWAYS_INLINE inline operator uint64_t() const;
 
     /**
-      * @brief Return the address' 64-bit full offset
-      *
-      * @return  uint64_t
-      */
-      ALWAYS_INLINE inline uint64_t offset(void) const;
+     * @brief Return the address' 64-bit full offset
+     *
+     * @return  uint64_t
+     */
+    ALWAYS_INLINE inline uint64_t offset(void) const;
 
   private:
     /**
       * @brief   Disabled copy constructor and assignment operator
       */
-    XSComP8Address(const XSComP8Address& i_right);
-    XSComP8Address& operator=(const XSComP8Address& right);
+    XSComP9Address(const XSComP9Address& i_right);
+    XSComP9Address& operator=(const XSComP9Address& right);
 
     // Layout of XSCOM address parts
     union
@@ -198,7 +196,7 @@ class XSComP8Address
         {
             uint64_t mReserved1:8;      // Not currently used (0:7)
             uint64_t mBaseAddrHi:7;     // Base address [8:14] (8:14)
-            uint64_t mNodeId:4;         // Node where target resides (15:18)
+            uint64_t mGroupId:4;        // Group where target resides (15:18)
             uint64_t mChipId:3;         // Targeted chip ID (19:21)
             uint64_t mBaseAddrLo:8;     // Base address [22:29] (22:29)
             uint64_t mSComAddr:31;      // PIB Address (30:60)
@@ -206,7 +204,7 @@ class XSComP8Address
         } mAddressParts;
     };
 
-}; // End XSComP8Address class
+}; // End XSComP9Address class
 
 //-----------------------------------------------------------------------
 // In-line functions
@@ -214,25 +212,25 @@ class XSComP8Address
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-XSComP8Address::XSComP8Address(const XSComAddress_t i_addr)
+XSComP9Address::XSComP9Address(const XSComAddress_t i_addr)
 :mMmioAddress(0)
 {
-    // Relative address of Node 0, chip 0
-    // The chip's nodeId and chip id will be taken into account
+    // Relative address of Group 0, chip 0
+    // The chip's groupId and chip id will be taken into account
     // when calculating its XSCOM base address
     mAddressParts.mSComAddr = i_addr;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-XSComP8Address::operator uint64_t() const
+XSComP9Address::operator uint64_t() const
 {
     return mMmioAddress;
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-uint64_t XSComP8Address::offset(void) const
+uint64_t XSComP9Address::offset(void) const
 {
     return (mMmioAddress / sizeof(uint64_t));
 }
