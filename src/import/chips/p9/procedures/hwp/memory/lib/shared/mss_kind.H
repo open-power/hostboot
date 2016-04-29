@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /// @brief Implementation of mss specific types
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Craig Hamilton <cchamilt@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -32,28 +32,11 @@
 
 #include <fapi2.H>
 
-///
-/// @brief Class to compile-time inspect whether an API has an overload
-/// @note contains a static bool which defaults to false. Any overload
-/// will specialize this template and replace the value with true.
-///
-#define REGISTER_API( __api_name, ... )                                 \
-    template< mss::kind_t K, __VA_ARGS__ >                              \
-    struct __api_name##_overload                                        \
-    { static const bool available = false; };
-
-//
-// Overload definitions for the specializations
-//
-#define REGISTER_OVERLOAD( __api_name, __kind, ... )           \
-    template<>                                                 \
-    struct __api_name##_overload< __kind, __VA_ARGS__>         \
-    { static const bool available = true; };
-
 namespace mss
 {
 
 // These must be contiguous and unique
+/// Kind's of DIMM/DRAM used to descriminate in templates.
 enum kind_t
 {
     // The default, base, etc. kind. Used to define the function
