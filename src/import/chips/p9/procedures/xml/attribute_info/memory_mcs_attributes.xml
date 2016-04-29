@@ -2345,7 +2345,7 @@
     </attribute>
 
     <attribute>
-        <id> ATTR_EFF_LRDIMM_WORD_X</id>
+        <id>ATTR_EFF_LRDIMM_WORD_X</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Additional buffer control word for LRDIMM building of the BCW</description>
         <valueType>uint64</valueType>
