@@ -909,6 +909,7 @@
         1 if override of poundv bucket num is available.
         0 if override is unavailable.
     </description>
+    <initToZero/>
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
@@ -926,6 +927,7 @@
           5 = Bucket E
           6 = Bucket F
       </description>
+      <initToZero/>
       <valueType>uint8</valueType>
       <platInit/>
 </attribute>
@@ -941,8 +943,8 @@
           if you are using this attribute.
       </description>
       <valueType>uint8</valueType>
+      <initToZero/>
       <array>51</array>
-      <writeable/>
       <platInit/>
   </attribute>
 </attributes>
