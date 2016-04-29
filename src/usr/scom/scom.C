@@ -280,7 +280,15 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //  or we saw an error, then we're done
                 if (scomout.done || scomout.piberr)
                 {
-                    break;
+                    // we should never see this error code so we are most
+                    //  likely going to fail, but since the hardware team
+                    //  cannot explain why we get this we're going to
+                    //  poll for awhile just in case it could work with
+                    //  a retry
+                    if( scomout.piberr != PIB::PIB_RESOURCE_OCCUPIED )
+                    {
+                        break;
+                    }
                 }
 
                 nanosleep( 0, 10000 ); //sleep for 10,000 ns
@@ -317,11 +325,23 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                       i_addr,
                                       scomout.data64);
 
-                //Add the callouts for the specific PCB/PIB error
-                PIB::addFruCallouts( i_target,
-                                     scomout.piberr,
-                                     i_addr,
-                                     l_err );
+                // we should never hit this so if we do we are going
+                //  to blame hardware
+                if( scomout.piberr == PIB::PIB_RESOURCE_OCCUPIED )
+                {
+                    l_err->addHwCallout( i_target,
+                                         HWAS::SRCI_PRIORITY_HIGH,
+                                         HWAS::NO_DECONFIG,
+                                         HWAS::GARD_NULL );
+                }
+                else
+                {
+                    //Add the callouts for the specific PCB/PIB error
+                    PIB::addFruCallouts( i_target,
+                                         scomout.piberr,
+                                         i_addr,
+                                         l_err );
+                }
 
                 //Add this target to the FFDC
                 ERRORLOG::ErrlUserDetailsTarget(i_target,"IndSCOM Target")
