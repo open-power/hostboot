@@ -204,6 +204,20 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
 ///
 ReturnCode platGetFusedCoreMode(uint8_t & o_isFused);
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// ATTR_POUNDV_BUCKET_DATA. It should not be called directly
+///
+///
+/// @param[in]  i_fapiTarget     FAPI2 Target reference
+/// @param[out] o_pos            Output pound v bucket data
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail
+///                              if a toplevel target cannot be found then
+///                              an assert triggers in the platform call
+///
+ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_EQ>& i_fapiTarget,
+                                  uint8_t * o_poundVData);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -268,5 +282,13 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetFusedCoreMode(VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_POUNDV_BUCKET_DATA access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_POUNDV_BUCKET_DATA_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetPoundVBucketData(TARGET,VAL)
 
 #endif // ATTRIBUTESERVICE_H_

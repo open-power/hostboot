@@ -66,10 +66,12 @@ namespace fapi2
         RC_UNKNOWN_MODEL               = HWPF_COMP_ID | 0x09,
         RC_NULL_FAPI_TARGET            = HWPF_COMP_ID | 0x0A,
         RC_LOOKING_FOR_TYPE_NA         = HWPF_COMP_ID | 0x0B,
+        RC_INCORRECT_TARGET            = HWPF_COMP_ID | 0x0C,
 
         // MVPD generated errors
-        RC_INVALID_RECORD              = HWPF_COMP_ID | 0x0C,
-        RC_INVALID_KEYWORD             = HWPF_COMP_ID | 0x0D,
+        RC_INVALID_RECORD              = HWPF_COMP_ID | 0x0D,
+        RC_INVALID_KEYWORD             = HWPF_COMP_ID | 0x0E,
+
 
         //Platform generated errors
         RC_NO_PROCS_FOUND              = FAPI2_COMP_ID | 0x0B,

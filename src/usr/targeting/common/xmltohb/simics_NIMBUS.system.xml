@@ -332,7 +332,7 @@
     then we can get rid of these poundv attributes for this EQ-->
     <attribute>
         <id>POUNDV_BUCKET_NUM</id>
-        <default>1</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>POUNDV_BUCKET_NUM_OVERRIDE</id>

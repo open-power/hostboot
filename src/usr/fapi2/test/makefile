@@ -34,13 +34,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fapi2/test/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
 
 
 # Procedures
 OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
 OBJS += fapi2TestUtils.o
+
 
 TESTS += fapi2HwpTest.H
 TESTS += fapi2HwAccessTest.H
@@ -53,5 +55,5 @@ TESTS += fapi2MvpdTestCxx.H
 
 include ${ROOTPATH}/config.mk
 
-vpath %.C ${GENDIR}
+vpath %.C ${GENDIR} ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 
