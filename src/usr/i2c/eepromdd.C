@@ -360,6 +360,12 @@ bool eepromPresence ( TARGETING::Target * i_target )
 
     } while( 0 );
 
+    // If there was an error commit the error log
+    if( err )
+    {
+        errlCommit( err, I2C_COMP_ID );
+    }
+
     TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence()");
     return l_present;
 }
