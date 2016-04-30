@@ -43,11 +43,11 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
 
         auto l_def_OBUS_FBC_ENABLED = (l_TGT0_ATTR_OPTICS_CONFIG_MODE == ENUM_ATTR_OPTICS_CONFIG_MODE_SMP);
         {
-            l_rc = fapi2::getScom( TGT0, 0x9010800ull, l_scom_buffer );
+            l_rc = fapi2::getScom( TGT0, 0x9010803ull, l_scom_buffer );
 
             if (l_rc)
             {
-                FAPI_ERR("ERROR executing: getScom (0x9010800ull)");
+                FAPI_ERR("ERROR executing: getScom (0x9010803ull)");
                 break;
             }
 
@@ -58,11 +58,11 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 }
             }
 
-            l_rc = fapi2::putScom(TGT0, 0x9010800ull, l_scom_buffer);
+            l_rc = fapi2::putScom(TGT0, 0x9010803ull, l_scom_buffer);
 
             if (l_rc)
             {
-                FAPI_ERR("ERROR executing: putScom (0x9010800ull)");
+                FAPI_ERR("ERROR executing: putScom (0x9010803ull)");
                 break;
             }
         }
