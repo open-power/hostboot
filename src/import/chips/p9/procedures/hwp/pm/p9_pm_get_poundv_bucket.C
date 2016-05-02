@@ -141,7 +141,8 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                 break;
             }
 
-            memcpy(&l_bucketId, (l_prDataPtr), sizeof(uint8_t));
+            //Bucket ID is byte[4] of the PR keyword
+            memcpy(&l_bucketId, (l_prDataPtr + 4), sizeof(uint8_t));
         }
 
 
