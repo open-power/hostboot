@@ -217,6 +217,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # N0 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register N0_CHIPLET_UCS_FIR
+    {
+        name        "N0 Chiplet Unit Checkstop FIR";
+        scomaddr    0x02040018;
+        capture     group default;
+    };
+
+    register N0_CHIPLET_UCS_FIR_MASK
+    {
+        name        "N0 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x02040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip N0_LFIR
     ############################################################################
 
@@ -346,6 +364,24 @@ chip p9_nimbus
     {
         name        "N1 Chiplet FIR MASK";
         scomaddr    0x03040002;
+        capture     group default;
+    };
+
+    ############################################################################
+    # N1 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register N1_CHIPLET_UCS_FIR
+    {
+        name        "N1 Chiplet Unit Checkstop FIR";
+        scomaddr    0x03040018;
+        capture     group default;
+    };
+
+    register N1_CHIPLET_UCS_FIR_MASK
+    {
+        name        "N1 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x03040019;
         capture     group default;
     };
 
@@ -519,6 +555,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # N2 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register N2_CHIPLET_UCS_FIR
+    {
+        name        "N2 Chiplet Unit Checkstop FIR";
+        scomaddr    0x04040018;
+        capture     group default;
+    };
+
+    register N2_CHIPLET_UCS_FIR_MASK
+    {
+        name        "N2 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x04040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip N2_LFIR
     ############################################################################
 
@@ -612,6 +666,24 @@ chip p9_nimbus
     {
         name        "N3 Chiplet FIR MASK";
         scomaddr    0x05040002;
+        capture     group default;
+    };
+
+    ############################################################################
+    # N3 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register N3_CHIPLET_UCS_FIR
+    {
+        name        "N3 Chiplet Unit Checkstop FIR";
+        scomaddr    0x05040018;
+        capture     group default;
+    };
+
+    register N3_CHIPLET_UCS_FIR_MASK
+    {
+        name        "N3 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x05040019;
         capture     group default;
     };
 
@@ -1253,6 +1325,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # XB Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register XB_CHIPLET_UCS_FIR
+    {
+        name        "XB Chiplet Unit Checkstop FIR";
+        scomaddr    0x06040018;
+        capture     group default;
+    };
+
+    register XB_CHIPLET_UCS_FIR_MASK
+    {
+        name        "XB Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x06040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip XB_LFIR
     ############################################################################
 
@@ -1350,6 +1440,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # MC0 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register MC0_CHIPLET_UCS_FIR
+    {
+        name        "MC0 Chiplet Unit Checkstop FIR";
+        scomaddr    0x07040018;
+        capture     group default;
+    };
+
+    register MC0_CHIPLET_UCS_FIR_MASK
+    {
+        name        "MC0 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x07040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip MC_LFIR 0
     ############################################################################
 
@@ -1407,6 +1515,24 @@ chip p9_nimbus
     {
         name        "MC1 Chiplet FIR MASK";
         scomaddr    0x08040002;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MC1 Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register MC1_CHIPLET_UCS_FIR
+    {
+        name        "MC1 Chiplet Unit Checkstop FIR";
+        scomaddr    0x08040018;
+        capture     group default;
+    };
+
+    register MC1_CHIPLET_UCS_FIR_MASK
+    {
+        name        "MC1 Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x08040019;
         capture     group default;
     };
 
@@ -1791,6 +1917,171 @@ rule rGLOBAL_UCS_FIR
 
 group gGLOBAL_UCS_FIR attntype UNIT_CS filter singlebit
 {
+    /** GLOBAL_UCS_FIR[2]
+     *  Attention from N0 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(2)) ? analyze(gN0_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[3]
+     *  Attention from N1 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(3)) ? analyze(gN1_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[4]
+     *  Attention from N2 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(4)) ? analyze(gN2_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[5]
+     *  Attention from N3 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(5)) ? analyze(gN3_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[6]
+     *  Attention from XB chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(6)) ? analyze(gXB_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[7]
+     *  Attention from MC0 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(7)) ? analyze(gMC0_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[8]
+     *  Attention from MC1 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(8)) ? analyze(gMC1_CHIPLET_UCS_FIR);
+
+    /** GLOBAL_UCS_FIR[9]
+     *  Attention from OB 0 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(9)) ? analyzeConnectedOBUS0;
+
+    /** GLOBAL_UCS_FIR[12]
+     *  Attention from OB 3 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(12)) ? analyzeConnectedOBUS3;
+
+    /** GLOBAL_UCS_FIR[32]
+     *  Attention from EC 0 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(32)) ? analyzeConnectedEC0;
+
+    /** GLOBAL_UCS_FIR[33]
+     *  Attention from EC 1 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(33)) ? analyzeConnectedEC1;
+
+    /** GLOBAL_UCS_FIR[34]
+     *  Attention from EC 2 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(34)) ? analyzeConnectedEC2;
+
+    /** GLOBAL_UCS_FIR[35]
+     *  Attention from EC 3 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(35)) ? analyzeConnectedEC3;
+
+    /** GLOBAL_UCS_FIR[36]
+     *  Attention from EC 4 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(36)) ? analyzeConnectedEC4;
+
+    /** GLOBAL_UCS_FIR[37]
+     *  Attention from EC 5 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(37)) ? analyzeConnectedEC5;
+
+    /** GLOBAL_UCS_FIR[38]
+     *  Attention from EC 6 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(38)) ? analyzeConnectedEC6;
+
+    /** GLOBAL_UCS_FIR[39]
+     *  Attention from EC 7 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(39)) ? analyzeConnectedEC7;
+
+    /** GLOBAL_UCS_FIR[40]
+     *  Attention from EC 8 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(40)) ? analyzeConnectedEC8;
+
+    /** GLOBAL_UCS_FIR[41]
+     *  Attention from EC 9 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(41)) ? analyzeConnectedEC9;
+
+    /** GLOBAL_UCS_FIR[42]
+     *  Attention from EC 10 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(42)) ? analyzeConnectedEC10;
+
+    /** GLOBAL_UCS_FIR[43]
+     *  Attention from EC 11 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(43)) ? analyzeConnectedEC11;
+
+    /** GLOBAL_UCS_FIR[44]
+     *  Attention from EC 12 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(44)) ? analyzeConnectedEC12;
+
+    /** GLOBAL_UCS_FIR[45]
+     *  Attention from EC 13 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(45)) ? analyzeConnectedEC13;
+
+    /** GLOBAL_UCS_FIR[46]
+     *  Attention from EC 14 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(46)) ? analyzeConnectedEC14;
+
+    /** GLOBAL_UCS_FIR[47]
+     *  Attention from EC 15 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(47)) ? analyzeConnectedEC15;
+
+    /** GLOBAL_UCS_FIR[48]
+     *  Attention from EC 16 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(48)) ? analyzeConnectedEC16;
+
+    /** GLOBAL_UCS_FIR[49]
+     *  Attention from EC 17 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(49)) ? analyzeConnectedEC17;
+
+    /** GLOBAL_UCS_FIR[50]
+     *  Attention from EC 18 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(50)) ? analyzeConnectedEC18;
+
+    /** GLOBAL_UCS_FIR[51]
+     *  Attention from EC 19 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(51)) ? analyzeConnectedEC19;
+
+    /** GLOBAL_UCS_FIR[52]
+     *  Attention from EC 20 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(52)) ? analyzeConnectedEC20;
+
+    /** GLOBAL_UCS_FIR[53]
+     *  Attention from EC 21 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(53)) ? analyzeConnectedEC21;
+
+    /** GLOBAL_UCS_FIR[54]
+     *  Attention from EC 22 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(54)) ? analyzeConnectedEC22;
+
+    /** GLOBAL_UCS_FIR[55]
+     *  Attention from EC 23 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(55)) ? analyzeConnectedEC23;
+
 };
 
 ################################################################################
@@ -2542,6 +2833,35 @@ group gN0_CHIPLET_FIR filter singlebit
 };
 
 ################################################################################
+# N0 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rN0_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    N0_CHIPLET_UCS_FIR & ~N0_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN0_CHIPLET_UCS_FIR filter singlebit
+{
+    /** N0_CHIPLET_UCS_FIR[1]
+     *  Attention from NXDMAENGFIR
+     */
+    (rN0_CHIPLET_UCS_FIR, bit(1)) ? analyze(gNXDMAENGFIR);
+
+    /** N0_CHIPLET_UCS_FIR[2]
+     *  Attention from NXCQFIR
+     */
+    (rN0_CHIPLET_UCS_FIR, bit(2)) ? analyze(gNXCQFIR);
+
+    /** N0_CHIPLET_UCS_FIR[3]
+     *  Attention from CXAFIR 0
+     */
+    (rN0_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedCAPP0;
+
+};
+
+################################################################################
 # P9 chip N0_LFIR
 ################################################################################
 
@@ -2887,6 +3207,8 @@ rule rNXCQFIR
     NXCQFIR & ~NXCQFIR_MASK & ~NXCQFIR_ACT0 & ~NXCQFIR_ACT1;
   RECOVERABLE:
     NXCQFIR & ~NXCQFIR_MASK & ~NXCQFIR_ACT0 &  NXCQFIR_ACT1;
+  UNIT_CS:
+    NXCQFIR & ~NXCQFIR_MASK &  NXCQFIR_ACT0 &  NXCQFIR_ACT1;
 };
 
 group gNXCQFIR filter singlebit
@@ -3223,6 +3545,8 @@ rule rNXDMAENGFIR
     NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 & ~NXDMAENGFIR_ACT1;
   RECOVERABLE:
     NXDMAENGFIR & ~NXDMAENGFIR_MASK & ~NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
+  UNIT_CS:
+    NXDMAENGFIR & ~NXDMAENGFIR_MASK &  NXDMAENGFIR_ACT0 &  NXDMAENGFIR_ACT1;
 };
 
 group gNXDMAENGFIR filter singlebit
@@ -3592,6 +3916,35 @@ group gN1_CHIPLET_FIR filter singlebit
      *  Attention from VASFIR
      */
     (rN1_CHIPLET_FIR, bit(8)) ? analyze(gVASFIR);
+
+};
+
+################################################################################
+# N1 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rN1_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    N1_CHIPLET_UCS_FIR & ~N1_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN1_CHIPLET_UCS_FIR filter singlebit
+{
+    /** N1_CHIPLET_UCS_FIR[1]
+     *  Attention from MCFIR 2
+     */
+    (rN1_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCS2;
+
+    /** N1_CHIPLET_UCS_FIR[2]
+     *  Attention from MCFIR 3
+     */
+    (rN1_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCS3;
+
+    /** N1_CHIPLET_UCS_FIR[5]
+     *  Attention from VASFIR
+     */
+    (rN1_CHIPLET_UCS_FIR, bit(5)) ? analyze(gVASFIR);
 
 };
 
@@ -4613,6 +4966,8 @@ rule rVASFIR
     VASFIR & ~VASFIR_MASK & ~VASFIR_ACT0 & ~VASFIR_ACT1;
   RECOVERABLE:
     VASFIR & ~VASFIR_MASK & ~VASFIR_ACT0 &  VASFIR_ACT1;
+  UNIT_CS:
+    VASFIR & ~VASFIR_MASK &  VASFIR_ACT0 &  VASFIR_ACT1;
 };
 
 group gVASFIR filter singlebit
@@ -4997,6 +5352,25 @@ group gN2_CHIPLET_FIR filter singlebit
      *  Attention from PSIFIR
      */
     (rN2_CHIPLET_FIR, bit(11)) ? analyze(gPSIFIR);
+
+};
+
+################################################################################
+# N2 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rN2_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    N2_CHIPLET_UCS_FIR & ~N2_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN2_CHIPLET_UCS_FIR filter singlebit
+{
+    /** N2_CHIPLET_UCS_FIR[1]
+     *  Attention from CXAFIR 1
+     */
+    (rN2_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedCAPP1;
 
 };
 
@@ -5789,6 +6163,50 @@ group gN3_CHIPLET_FIR filter singlebit
 };
 
 ################################################################################
+# N3 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rN3_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    N3_CHIPLET_UCS_FIR & ~N3_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN3_CHIPLET_UCS_FIR filter singlebit
+{
+    /** N3_CHIPLET_UCS_FIR[1]
+     *  Attention from MCFIR 0
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCS0;
+
+    /** N3_CHIPLET_UCS_FIR[2]
+     *  Attention from MCFIR 1
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCS1;
+
+    /** N3_CHIPLET_UCS_FIR[7]
+     *  Attention from NPU0FIR
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyze(gNPU0FIR);
+
+    /** N3_CHIPLET_UCS_FIR[8]
+     *  Attention from NPU1FIR
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(8)) ? analyze(gNPU1FIR);
+
+    /** N3_CHIPLET_UCS_FIR[9]
+     *  Attention from PBICQFIR
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(9)) ? analyze(gPBICQFIR);
+
+    /** N3_CHIPLET_UCS_FIR[10]
+     *  Attention from NMMUFIR
+     */
+    (rN3_CHIPLET_UCS_FIR, bit(10)) ? analyze(gNMMUFIR);
+
+};
+
+################################################################################
 # P9 chip N3_LFIR
 ################################################################################
 
@@ -6134,6 +6552,8 @@ rule rNPU0FIR
     NPU0FIR & ~NPU0FIR_MASK & ~NPU0FIR_ACT0 & ~NPU0FIR_ACT1;
   RECOVERABLE:
     NPU0FIR & ~NPU0FIR_MASK & ~NPU0FIR_ACT0 &  NPU0FIR_ACT1;
+  UNIT_CS:
+    NPU0FIR & ~NPU0FIR_MASK &  NPU0FIR_ACT0 &  NPU0FIR_ACT1;
 };
 
 group gNPU0FIR filter singlebit
@@ -6470,6 +6890,8 @@ rule rNPU1FIR
     NPU1FIR & ~NPU1FIR_MASK & ~NPU1FIR_ACT0 & ~NPU1FIR_ACT1;
   RECOVERABLE:
     NPU1FIR & ~NPU1FIR_MASK & ~NPU1FIR_ACT0 &  NPU1FIR_ACT1;
+  UNIT_CS:
+    NPU1FIR & ~NPU1FIR_MASK &  NPU1FIR_ACT0 &  NPU1FIR_ACT1;
 };
 
 group gNPU1FIR filter singlebit
@@ -9830,6 +10252,8 @@ rule rPBICQFIR
     PBICQFIR & ~PBICQFIR_MASK & ~PBICQFIR_ACT0 & ~PBICQFIR_ACT1;
   RECOVERABLE:
     PBICQFIR & ~PBICQFIR_MASK & ~PBICQFIR_ACT0 &  PBICQFIR_ACT1;
+  UNIT_CS:
+    PBICQFIR & ~PBICQFIR_MASK &  PBICQFIR_ACT0 &  PBICQFIR_ACT1;
 };
 
 group gPBICQFIR filter singlebit
@@ -10166,6 +10590,8 @@ rule rNMMUFIR
     NMMUFIR & ~NMMUFIR_MASK & ~NMMUFIR_ACT0 & ~NMMUFIR_ACT1;
   RECOVERABLE:
     NMMUFIR & ~NMMUFIR_MASK & ~NMMUFIR_ACT0 &  NMMUFIR_ACT1;
+  UNIT_CS:
+    NMMUFIR & ~NMMUFIR_MASK &  NMMUFIR_ACT0 &  NMMUFIR_ACT1;
 };
 
 group gNMMUFIR filter singlebit
@@ -11547,6 +11973,45 @@ group gXB_CHIPLET_FIR filter singlebit
 };
 
 ################################################################################
+# XB Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rXB_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    XB_CHIPLET_UCS_FIR & ~XB_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gXB_CHIPLET_UCS_FIR filter singlebit
+{
+    /** XB_CHIPLET_UCS_FIR[2]
+     *  Attention from IOELFIR 1
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedXBUS1;
+
+    /** XB_CHIPLET_UCS_FIR[3]
+     *  Attention from IOELFIR 2
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedXBUS2;
+
+    /** XB_CHIPLET_UCS_FIR[6]
+     *  Attention from IOXBFIR 1
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(6)) ? analyzeConnectedXBUS1;
+
+    /** XB_CHIPLET_UCS_FIR[7]
+     *  Attention from IOXBFIR 2
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedXBUS2;
+
+    /** XB_CHIPLET_UCS_FIR[8]
+     *  Attention from XBPPEFIR
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(8)) ? analyze(gXBPPEFIR);
+
+};
+
+################################################################################
 # P9 chip XB_LFIR
 ################################################################################
 
@@ -11892,6 +12357,8 @@ rule rXBPPEFIR
     XBPPEFIR & ~XBPPEFIR_MASK & ~XBPPEFIR_ACT0 & ~XBPPEFIR_ACT1;
   RECOVERABLE:
     XBPPEFIR & ~XBPPEFIR_MASK & ~XBPPEFIR_ACT0 &  XBPPEFIR_ACT1;
+  UNIT_CS:
+    XBPPEFIR & ~XBPPEFIR_MASK &  XBPPEFIR_ACT0 &  XBPPEFIR_ACT1;
 };
 
 group gXBPPEFIR filter singlebit
@@ -12301,6 +12768,65 @@ group gMC0_CHIPLET_FIR filter singlebit
      *  Attention from DDRPHYFIR 3
      */
     (rMC0_CHIPLET_FIR, bit(16)) ? analyzeConnectedMCA3;
+
+};
+
+################################################################################
+# MC0 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rMC0_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    MC0_CHIPLET_UCS_FIR & ~MC0_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gMC0_CHIPLET_UCS_FIR filter singlebit
+{
+    /** MC0_CHIPLET_UCS_FIR[1]
+     *  Attention from MCAECCFIR 0
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCA0;
+
+    /** MC0_CHIPLET_UCS_FIR[2]
+     *  Attention from MCACALFIR 0
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCA0;
+
+    /** MC0_CHIPLET_UCS_FIR[3]
+     *  Attention from MCAECCFIR 1
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedMCA1;
+
+    /** MC0_CHIPLET_UCS_FIR[4]
+     *  Attention from MCACALFIR 1
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(4)) ? analyzeConnectedMCA1;
+
+    /** MC0_CHIPLET_UCS_FIR[5]
+     *  Attention from MCAECCFIR 2
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedMCA2;
+
+    /** MC0_CHIPLET_UCS_FIR[6]
+     *  Attention from MCACALFIR 2
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(6)) ? analyzeConnectedMCA2;
+
+    /** MC0_CHIPLET_UCS_FIR[7]
+     *  Attention from MCAECCFIR 3
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedMCA3;
+
+    /** MC0_CHIPLET_UCS_FIR[8]
+     *  Attention from MCACALFIR 3
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(8)) ? analyzeConnectedMCA3;
+
+    /** MC0_CHIPLET_UCS_FIR[9]
+     *  Attention from MCBISTFIR 0
+     */
+    (rMC0_CHIPLET_UCS_FIR, bit(9)) ? analyzeConnectedMCBIST0;
 
 };
 
@@ -12723,6 +13249,65 @@ group gMC1_CHIPLET_FIR filter singlebit
      *  Attention from DDRPHYFIR 7
      */
     (rMC1_CHIPLET_FIR, bit(16)) ? analyzeConnectedMCA7;
+
+};
+
+################################################################################
+# MC1 Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rMC1_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    MC1_CHIPLET_UCS_FIR & ~MC1_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gMC1_CHIPLET_UCS_FIR filter singlebit
+{
+    /** MC1_CHIPLET_UCS_FIR[1]
+     *  Attention from MCAECCFIR 4
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCA4;
+
+    /** MC1_CHIPLET_UCS_FIR[2]
+     *  Attention from MCACALFIR 4
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCA4;
+
+    /** MC1_CHIPLET_UCS_FIR[3]
+     *  Attention from MCAECCFIR 5
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedMCA5;
+
+    /** MC1_CHIPLET_UCS_FIR[4]
+     *  Attention from MCACALFIR 5
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(4)) ? analyzeConnectedMCA5;
+
+    /** MC1_CHIPLET_UCS_FIR[5]
+     *  Attention from MCAECCFIR 6
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedMCA6;
+
+    /** MC1_CHIPLET_UCS_FIR[6]
+     *  Attention from MCACALFIR 6
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(6)) ? analyzeConnectedMCA6;
+
+    /** MC1_CHIPLET_UCS_FIR[7]
+     *  Attention from MCAECCFIR 7
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedMCA7;
+
+    /** MC1_CHIPLET_UCS_FIR[8]
+     *  Attention from MCACALFIR 7
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(8)) ? analyzeConnectedMCA7;
+
+    /** MC1_CHIPLET_UCS_FIR[9]
+     *  Attention from MCBISTFIR 1
+     */
+    (rMC1_CHIPLET_UCS_FIR, bit(9)) ? analyzeConnectedMCBIST1;
 
 };
 

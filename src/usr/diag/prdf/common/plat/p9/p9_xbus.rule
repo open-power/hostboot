@@ -142,9 +142,13 @@ rule rXBUS
     summary( 0, rIOXBFIR ) |
     summary( 1, rIOELFIR );
 
+  UNIT_CS:
+    summary( 0, rIOXBFIR ) |
+    summary( 1, rIOELFIR );
+
 };
 
-group gXBUS attntype CHECK_STOP, RECOVERABLE
+group gXBUS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
 {
     (rXBUS, bit(0)) ? analyze(gIOXBFIR);
     (rXBUS, bit(1)) ? analyze(gIOELFIR);
@@ -160,6 +164,8 @@ rule rIOXBFIR
     IOXBFIR & ~IOXBFIR_MASK & ~IOXBFIR_ACT0 & ~IOXBFIR_ACT1;
   RECOVERABLE:
     IOXBFIR & ~IOXBFIR_MASK & ~IOXBFIR_ACT0 &  IOXBFIR_ACT1;
+  UNIT_CS:
+    IOXBFIR & ~IOXBFIR_MASK &  IOXBFIR_ACT0 &  IOXBFIR_ACT1;
 };
 
 group gIOXBFIR filter singlebit
@@ -496,6 +502,8 @@ rule rIOELFIR
     IOELFIR & ~IOELFIR_MASK & ~IOELFIR_ACT0 & ~IOELFIR_ACT1;
   RECOVERABLE:
     IOELFIR & ~IOELFIR_MASK & ~IOELFIR_ACT0 &  IOELFIR_ACT1;
+  UNIT_CS:
+    IOELFIR & ~IOELFIR_MASK &  IOELFIR_ACT0 &  IOELFIR_ACT1;
 };
 
 group gIOELFIR filter singlebit

@@ -69,6 +69,24 @@ chip p9_obus
     };
 
     ############################################################################
+    # OB Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register OB_CHIPLET_UCS_FIR
+    {
+        name        "OB Chiplet Unit Checkstop FIR";
+        scomaddr    0x09040018;
+        capture     group default;
+    };
+
+    register OB_CHIPLET_UCS_FIR_MASK
+    {
+        name        "OB Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x09040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 OBUS target OB_LFIR
     ############################################################################
 
@@ -258,6 +276,30 @@ group gOB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
      *  Attention from OBPPEFIR
      */
     (rOB_CHIPLET_FIR, bit(6)) ? analyze(gOBPPEFIR);
+
+};
+
+################################################################################
+# OB Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rOB_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    OB_CHIPLET_UCS_FIR & ~OB_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gOB_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+{
+    /** OB_CHIPLET_UCS_FIR[2]
+     *  Attention from IOOBFIR
+     */
+    (rOB_CHIPLET_UCS_FIR, bit(2)) ? analyze(gIOOBFIR);
+
+    /** OB_CHIPLET_UCS_FIR[3]
+     *  Attention from OBPPEFIR
+     */
+    (rOB_CHIPLET_UCS_FIR, bit(3)) ? analyze(gOBPPEFIR);
 
 };
 
@@ -943,6 +985,8 @@ rule rIOOBFIR
     IOOBFIR & ~IOOBFIR_MASK & ~IOOBFIR_ACT0 & ~IOOBFIR_ACT1;
   RECOVERABLE:
     IOOBFIR & ~IOOBFIR_MASK & ~IOOBFIR_ACT0 &  IOOBFIR_ACT1;
+  UNIT_CS:
+    IOOBFIR & ~IOOBFIR_MASK &  IOOBFIR_ACT0 &  IOOBFIR_ACT1;
 };
 
 group gIOOBFIR filter singlebit
@@ -1279,6 +1323,8 @@ rule rOBPPEFIR
     OBPPEFIR & ~OBPPEFIR_MASK & ~OBPPEFIR_ACT0 & ~OBPPEFIR_ACT1;
   RECOVERABLE:
     OBPPEFIR & ~OBPPEFIR_MASK & ~OBPPEFIR_ACT0 &  OBPPEFIR_ACT1;
+  UNIT_CS:
+    OBPPEFIR & ~OBPPEFIR_MASK &  OBPPEFIR_ACT0 &  OBPPEFIR_ACT1;
 };
 
 group gOBPPEFIR filter singlebit
