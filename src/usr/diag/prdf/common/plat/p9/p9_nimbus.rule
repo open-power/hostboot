@@ -386,6 +386,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # N1 Chiplet Host Attention FIR
+    ############################################################################
+
+    register N1_CHIPLET_HA_FIR
+    {
+        name        "N1 Chiplet Host Attention FIR";
+        scomaddr    0x03040009;
+        capture     group default;
+    };
+
+    register N1_CHIPLET_HA_FIR_MASK
+    {
+        name        "N1 Chiplet Host Attention FIR MASK";
+        scomaddr    0x0304001a;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip N1_LFIR
     ############################################################################
 
@@ -684,6 +702,24 @@ chip p9_nimbus
     {
         name        "N3 Chiplet Unit Checkstop FIR MASK";
         scomaddr    0x05040019;
+        capture     group default;
+    };
+
+    ############################################################################
+    # N3 Chiplet Host Attention FIR
+    ############################################################################
+
+    register N3_CHIPLET_HA_FIR
+    {
+        name        "N3 Chiplet Host Attention FIR";
+        scomaddr    0x05040009;
+        capture     group default;
+    };
+
+    register N3_CHIPLET_HA_FIR_MASK
+    {
+        name        "N3 Chiplet Host Attention FIR MASK";
+        scomaddr    0x0504001a;
         capture     group default;
     };
 
@@ -1458,6 +1494,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # MC0 Chiplet Host Attention FIR
+    ############################################################################
+
+    register MC0_CHIPLET_HA_FIR
+    {
+        name        "MC0 Chiplet Host Attention FIR";
+        scomaddr    0x07040009;
+        capture     group default;
+    };
+
+    register MC0_CHIPLET_HA_FIR_MASK
+    {
+        name        "MC0 Chiplet Host Attention FIR MASK";
+        scomaddr    0x0704001a;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip MC_LFIR 0
     ############################################################################
 
@@ -1533,6 +1587,24 @@ chip p9_nimbus
     {
         name        "MC1 Chiplet Unit Checkstop FIR MASK";
         scomaddr    0x08040019;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MC1 Chiplet Host Attention FIR
+    ############################################################################
+
+    register MC1_CHIPLET_HA_FIR
+    {
+        name        "MC1 Chiplet Host Attention FIR";
+        scomaddr    0x08040009;
+        capture     group default;
+    };
+
+    register MC1_CHIPLET_HA_FIR_MASK
+    {
+        name        "MC1 Chiplet Host Attention FIR MASK";
+        scomaddr    0x0804001a;
         capture     group default;
     };
 
@@ -2096,6 +2168,26 @@ rule rGLOBAL_HA_FIR
 
 group gGLOBAL_HA_FIR attntype HOST_ATTN filter singlebit
 {
+    /** GLOBAL_HA_FIR[3]
+     *  Attention from N1 chiplet
+     */
+    (rGLOBAL_HA_FIR, bit(3)) ? analyze(gN1_CHIPLET_HA_FIR);
+
+    /** GLOBAL_HA_FIR[5]
+     *  Attention from N3 chiplet
+     */
+    (rGLOBAL_HA_FIR, bit(5)) ? analyze(gN3_CHIPLET_HA_FIR);
+
+    /** GLOBAL_HA_FIR[7]
+     *  Attention from MC0 chiplet
+     */
+    (rGLOBAL_HA_FIR, bit(7)) ? analyze(gMC0_CHIPLET_HA_FIR);
+
+    /** GLOBAL_HA_FIR[8]
+     *  Attention from MC1 chiplet
+     */
+    (rGLOBAL_HA_FIR, bit(8)) ? analyze(gMC1_CHIPLET_HA_FIR);
+
 };
 
 ################################################################################
@@ -3945,6 +4037,30 @@ group gN1_CHIPLET_UCS_FIR filter singlebit
      *  Attention from VASFIR
      */
     (rN1_CHIPLET_UCS_FIR, bit(5)) ? analyze(gVASFIR);
+
+};
+
+################################################################################
+# N1 Chiplet Host Attention FIR
+################################################################################
+
+rule rN1_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    N1_CHIPLET_HA_FIR & ~N1_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN1_CHIPLET_HA_FIR filter singlebit
+{
+    /** N1_CHIPLET_HA_FIR[1]
+     *  Attention from MCFIR 2
+     */
+    (rN1_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCS2;
+
+    /** N1_CHIPLET_HA_FIR[2]
+     *  Attention from MCFIR 3
+     */
+    (rN1_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCS3;
 
 };
 
@@ -6203,6 +6319,30 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
      *  Attention from NMMUFIR
      */
     (rN3_CHIPLET_UCS_FIR, bit(10)) ? analyze(gNMMUFIR);
+
+};
+
+################################################################################
+# N3 Chiplet Host Attention FIR
+################################################################################
+
+rule rN3_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    N3_CHIPLET_HA_FIR & ~N3_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gN3_CHIPLET_HA_FIR filter singlebit
+{
+    /** N3_CHIPLET_HA_FIR[1]
+     *  Attention from MCFIR 0
+     */
+    (rN3_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCS0;
+
+    /** N3_CHIPLET_HA_FIR[2]
+     *  Attention from MCFIR 1
+     */
+    (rN3_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCS1;
 
 };
 
@@ -12831,6 +12971,65 @@ group gMC0_CHIPLET_UCS_FIR filter singlebit
 };
 
 ################################################################################
+# MC0 Chiplet Host Attention FIR
+################################################################################
+
+rule rMC0_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    MC0_CHIPLET_HA_FIR & ~MC0_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gMC0_CHIPLET_HA_FIR filter singlebit
+{
+    /** MC0_CHIPLET_HA_FIR[1]
+     *  Attention from MCAECCFIR 0
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCA0;
+
+    /** MC0_CHIPLET_HA_FIR[2]
+     *  Attention from MCACALFIR 0
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCA0;
+
+    /** MC0_CHIPLET_HA_FIR[3]
+     *  Attention from MCAECCFIR 1
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(3)) ? analyzeConnectedMCA1;
+
+    /** MC0_CHIPLET_HA_FIR[4]
+     *  Attention from MCACALFIR 1
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(4)) ? analyzeConnectedMCA1;
+
+    /** MC0_CHIPLET_HA_FIR[5]
+     *  Attention from MCAECCFIR 2
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(5)) ? analyzeConnectedMCA2;
+
+    /** MC0_CHIPLET_HA_FIR[6]
+     *  Attention from MCACALFIR 2
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(6)) ? analyzeConnectedMCA2;
+
+    /** MC0_CHIPLET_HA_FIR[7]
+     *  Attention from MCAECCFIR 3
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(7)) ? analyzeConnectedMCA3;
+
+    /** MC0_CHIPLET_HA_FIR[8]
+     *  Attention from MCACALFIR 3
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(8)) ? analyzeConnectedMCA3;
+
+    /** MC0_CHIPLET_HA_FIR[9]
+     *  Attention from MCBISTFIR 0
+     */
+    (rMC0_CHIPLET_HA_FIR, bit(9)) ? analyzeConnectedMCBIST0;
+
+};
+
+################################################################################
 # P9 chip MC_LFIR 0
 ################################################################################
 
@@ -13308,6 +13507,65 @@ group gMC1_CHIPLET_UCS_FIR filter singlebit
      *  Attention from MCBISTFIR 1
      */
     (rMC1_CHIPLET_UCS_FIR, bit(9)) ? analyzeConnectedMCBIST1;
+
+};
+
+################################################################################
+# MC1 Chiplet Host Attention FIR
+################################################################################
+
+rule rMC1_CHIPLET_HA_FIR
+{
+  HOST_ATTN:
+    MC1_CHIPLET_HA_FIR & ~MC1_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gMC1_CHIPLET_HA_FIR filter singlebit
+{
+    /** MC1_CHIPLET_HA_FIR[1]
+     *  Attention from MCAECCFIR 4
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCA4;
+
+    /** MC1_CHIPLET_HA_FIR[2]
+     *  Attention from MCACALFIR 4
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCA4;
+
+    /** MC1_CHIPLET_HA_FIR[3]
+     *  Attention from MCAECCFIR 5
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(3)) ? analyzeConnectedMCA5;
+
+    /** MC1_CHIPLET_HA_FIR[4]
+     *  Attention from MCACALFIR 5
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(4)) ? analyzeConnectedMCA5;
+
+    /** MC1_CHIPLET_HA_FIR[5]
+     *  Attention from MCAECCFIR 6
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(5)) ? analyzeConnectedMCA6;
+
+    /** MC1_CHIPLET_HA_FIR[6]
+     *  Attention from MCACALFIR 6
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(6)) ? analyzeConnectedMCA6;
+
+    /** MC1_CHIPLET_HA_FIR[7]
+     *  Attention from MCAECCFIR 7
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(7)) ? analyzeConnectedMCA7;
+
+    /** MC1_CHIPLET_HA_FIR[8]
+     *  Attention from MCACALFIR 7
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(8)) ? analyzeConnectedMCA7;
+
+    /** MC1_CHIPLET_HA_FIR[9]
+     *  Attention from MCBISTFIR 1
+     */
+    (rMC1_CHIPLET_HA_FIR, bit(9)) ? analyzeConnectedMCBIST1;
 
 };
 

@@ -107,9 +107,12 @@ rule rMCS
   UNIT_CS:
     summary( 0, rMCFIR );
 
+  HOST_ATTN:
+    summary( 0, rMCFIR );
+
 };
 
-group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
+group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
 {
     (rMCS, bit(0)) ? analyze(gMCFIR);
 };
@@ -124,6 +127,8 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 & ~MCFIR_ACT1;
   RECOVERABLE:
     MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 &  MCFIR_ACT1;
+  HOST_ATTN:
+    MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 & ~MCFIR_ACT1;
   UNIT_CS:
     MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
