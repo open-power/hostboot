@@ -104,9 +104,12 @@ rule rMCS
   RECOVERABLE:
     summary( 0, rMCFIR );
 
+  UNIT_CS:
+    summary( 0, rMCFIR );
+
 };
 
-group gMCS attntype CHECK_STOP, RECOVERABLE
+group gMCS attntype CHECK_STOP, RECOVERABLE, UNIT_CS
 {
     (rMCS, bit(0)) ? analyze(gMCFIR);
 };
@@ -121,6 +124,8 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 & ~MCFIR_ACT1;
   RECOVERABLE:
     MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 &  MCFIR_ACT1;
+  UNIT_CS:
+    MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
 
 group gMCFIR filter singlebit

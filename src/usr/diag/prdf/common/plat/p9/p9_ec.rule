@@ -69,6 +69,24 @@ chip p9_ec
     };
 
     ############################################################################
+    # EC Chiplet Unit Checkstop FIR
+    ############################################################################
+
+    register EC_CHIPLET_UCS_FIR
+    {
+        name        "EC Chiplet Unit Checkstop FIR";
+        scomaddr    0x20040018;
+        capture     group default;
+    };
+
+    register EC_CHIPLET_UCS_FIR_MASK
+    {
+        name        "EC Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x20040019;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 EC target EC_LFIR
     ############################################################################
 
@@ -181,6 +199,25 @@ group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
      *  Attention from COREFIR
      */
     (rEC_CHIPLET_FIR, bit(4)) ? analyze(gCOREFIR);
+
+};
+
+################################################################################
+# EC Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rEC_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    EC_CHIPLET_UCS_FIR & ~EC_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+{
+    /** EC_CHIPLET_UCS_FIR[1]
+     *  Attention from COREFIR
+     */
+    (rEC_CHIPLET_UCS_FIR, bit(1)) ? analyze(gCOREFIR);
 
 };
 
@@ -530,6 +567,8 @@ rule rCOREFIR
     COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 & ~COREFIR_ACT1;
   RECOVERABLE:
     COREFIR_WOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
+  UNIT_CS:
+    COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
 group gCOREFIR filter singlebit

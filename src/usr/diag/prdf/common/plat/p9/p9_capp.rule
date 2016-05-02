@@ -104,9 +104,12 @@ rule rCAPP
   RECOVERABLE:
     summary( 0, rCXAFIR );
 
+  UNIT_CS:
+    summary( 0, rCXAFIR );
+
 };
 
-group gCAPP attntype CHECK_STOP, RECOVERABLE
+group gCAPP attntype CHECK_STOP, RECOVERABLE, UNIT_CS
 {
     (rCAPP, bit(0)) ? analyze(gCXAFIR);
 };
@@ -121,6 +124,8 @@ rule rCXAFIR
     CXAFIR & ~CXAFIR_MASK & ~CXAFIR_ACT0 & ~CXAFIR_ACT1;
   RECOVERABLE:
     CXAFIR & ~CXAFIR_MASK & ~CXAFIR_ACT0 &  CXAFIR_ACT1;
+  UNIT_CS:
+    CXAFIR & ~CXAFIR_MASK &  CXAFIR_ACT0 &  CXAFIR_ACT1;
 };
 
 group gCXAFIR filter singlebit
