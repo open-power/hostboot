@@ -50,23 +50,23 @@ chip p9_mcs
     register MCFIR
     {
         name        "P9 MCS target MCFIR";
-        scomaddr    0x03010800;
-        reset       (&, 0x03010801);
-        mask        (|, 0x03010805);
+        scomaddr    0x05010800;
+        reset       (&, 0x05010801);
+        mask        (|, 0x05010805);
         capture     group default;
     };
 
     register MCFIR_MASK
     {
         name        "P9 MCS target MCFIR MASK";
-        scomaddr    0x03010803;
+        scomaddr    0x05010803;
         capture     group default;
     };
 
     register MCFIR_ACT0
     {
         name        "P9 MCS target MCFIR ACT0";
-        scomaddr    0x03010806;
+        scomaddr    0x05010806;
         capture     group default;
         capture     req nonzero("MCFIR");
     };
@@ -74,7 +74,7 @@ chip p9_mcs
     register MCFIR_ACT1
     {
         name        "P9 MCS target MCFIR ACT1";
-        scomaddr    0x03010807;
+        scomaddr    0x05010807;
         capture     group default;
         capture     req nonzero("MCFIR");
     };

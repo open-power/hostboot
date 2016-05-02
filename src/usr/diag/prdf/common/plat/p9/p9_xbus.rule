@@ -44,6 +44,42 @@ chip p9_xbus
  #############################################################################
 
     ############################################################################
+    # P9 XBUS target IOXBFIR
+    ############################################################################
+
+    register IOXBFIR
+    {
+        name        "P9 XBUS target IOXBFIR";
+        scomaddr    0x06010c00;
+        reset       (&, 0x06010c01);
+        mask        (|, 0x06010c05);
+        capture     group default;
+    };
+
+    register IOXBFIR_MASK
+    {
+        name        "P9 XBUS target IOXBFIR MASK";
+        scomaddr    0x06010c03;
+        capture     group default;
+    };
+
+    register IOXBFIR_ACT0
+    {
+        name        "P9 XBUS target IOXBFIR ACT0";
+        scomaddr    0x06010c06;
+        capture     group default;
+        capture     req nonzero("IOXBFIR");
+    };
+
+    register IOXBFIR_ACT1
+    {
+        name        "P9 XBUS target IOXBFIR ACT1";
+        scomaddr    0x06010c07;
+        capture     group default;
+        capture     req nonzero("IOXBFIR");
+    };
+
+    ############################################################################
     # P9 XBUS target IOELFIR
     ############################################################################
 
@@ -99,16 +135,355 @@ chip p9_xbus
 rule rXBUS
 {
   CHECK_STOP:
-    summary( 0, rIOELFIR );
+    summary( 0, rIOXBFIR ) |
+    summary( 1, rIOELFIR );
 
   RECOVERABLE:
-    summary( 0, rIOELFIR );
+    summary( 0, rIOXBFIR ) |
+    summary( 1, rIOELFIR );
 
 };
 
 group gXBUS attntype CHECK_STOP, RECOVERABLE
 {
-    (rXBUS, bit(0)) ? analyze(gIOELFIR);
+    (rXBUS, bit(0)) ? analyze(gIOXBFIR);
+    (rXBUS, bit(1)) ? analyze(gIOELFIR);
+};
+
+################################################################################
+# P9 XBUS target IOXBFIR
+################################################################################
+
+rule rIOXBFIR
+{
+  CHECK_STOP:
+    IOXBFIR & ~IOXBFIR_MASK & ~IOXBFIR_ACT0 & ~IOXBFIR_ACT1;
+  RECOVERABLE:
+    IOXBFIR & ~IOXBFIR_MASK & ~IOXBFIR_ACT0 &  IOXBFIR_ACT1;
+};
+
+group gIOXBFIR filter singlebit
+{
+    /** IOXBFIR[0]
+     *  
+     */
+    (rIOXBFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[1]
+     *  
+     */
+    (rIOXBFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[2]
+     *  
+     */
+    (rIOXBFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[3]
+     *  
+     */
+    (rIOXBFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[4]
+     *  
+     */
+    (rIOXBFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[5]
+     *  
+     */
+    (rIOXBFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[6]
+     *  
+     */
+    (rIOXBFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[7]
+     *  
+     */
+    (rIOXBFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[8]
+     *  
+     */
+    (rIOXBFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[9]
+     *  
+     */
+    (rIOXBFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[10]
+     *  
+     */
+    (rIOXBFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[11]
+     *  
+     */
+    (rIOXBFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[12]
+     *  
+     */
+    (rIOXBFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[13]
+     *  
+     */
+    (rIOXBFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[14]
+     *  
+     */
+    (rIOXBFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[15]
+     *  
+     */
+    (rIOXBFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[16]
+     *  
+     */
+    (rIOXBFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[17]
+     *  
+     */
+    (rIOXBFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[18]
+     *  
+     */
+    (rIOXBFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[19]
+     *  
+     */
+    (rIOXBFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[20]
+     *  
+     */
+    (rIOXBFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[21]
+     *  
+     */
+    (rIOXBFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[22]
+     *  
+     */
+    (rIOXBFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[23]
+     *  
+     */
+    (rIOXBFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[24]
+     *  
+     */
+    (rIOXBFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[25]
+     *  
+     */
+    (rIOXBFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[26]
+     *  
+     */
+    (rIOXBFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[27]
+     *  
+     */
+    (rIOXBFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[28]
+     *  
+     */
+    (rIOXBFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[29]
+     *  
+     */
+    (rIOXBFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[30]
+     *  
+     */
+    (rIOXBFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[31]
+     *  
+     */
+    (rIOXBFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[32]
+     *  
+     */
+    (rIOXBFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[33]
+     *  
+     */
+    (rIOXBFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[34]
+     *  
+     */
+    (rIOXBFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[35]
+     *  
+     */
+    (rIOXBFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[36]
+     *  
+     */
+    (rIOXBFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[37]
+     *  
+     */
+    (rIOXBFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[38]
+     *  
+     */
+    (rIOXBFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[39]
+     *  
+     */
+    (rIOXBFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[40]
+     *  
+     */
+    (rIOXBFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[41]
+     *  
+     */
+    (rIOXBFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[42]
+     *  
+     */
+    (rIOXBFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[43]
+     *  
+     */
+    (rIOXBFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[44]
+     *  
+     */
+    (rIOXBFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[45]
+     *  
+     */
+    (rIOXBFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[46]
+     *  
+     */
+    (rIOXBFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[47]
+     *  
+     */
+    (rIOXBFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[48]
+     *  
+     */
+    (rIOXBFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[49]
+     *  
+     */
+    (rIOXBFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[50]
+     *  
+     */
+    (rIOXBFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[51]
+     *  
+     */
+    (rIOXBFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[52]
+     *  
+     */
+    (rIOXBFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[53]
+     *  
+     */
+    (rIOXBFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[54]
+     *  
+     */
+    (rIOXBFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[55]
+     *  
+     */
+    (rIOXBFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[56]
+     *  
+     */
+    (rIOXBFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[57]
+     *  
+     */
+    (rIOXBFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[58]
+     *  
+     */
+    (rIOXBFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[59]
+     *  
+     */
+    (rIOXBFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[60]
+     *  
+     */
+    (rIOXBFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[61]
+     *  
+     */
+    (rIOXBFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[62]
+     *  
+     */
+    (rIOXBFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** IOXBFIR[63]
+     *  
+     */
+    (rIOXBFIR, bit(63)) ? TBDDefaultCallout;
+
 };
 
 ################################################################################

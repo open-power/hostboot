@@ -136,6 +136,46 @@ group gEQ_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
      */
     (rEQ_CHIPLET_FIR, bit(3)) ? analyze(gEQ_LFIR);
 
+    /** EQ_CHIPLET_FIR[4]
+     *  Attention from L3FIR 0
+     */
+    (rEQ_CHIPLET_FIR, bit(4)) ? analyzeConnectedEX0;
+
+    /** EQ_CHIPLET_FIR[5]
+     *  Attention from L3FIR 1
+     */
+    (rEQ_CHIPLET_FIR, bit(5)) ? analyzeConnectedEX1;
+
+    /** EQ_CHIPLET_FIR[6]
+     *  Attention from L2FIR 0
+     */
+    (rEQ_CHIPLET_FIR, bit(6)) ? analyzeConnectedEX0;
+
+    /** EQ_CHIPLET_FIR[7]
+     *  Attention from L2FIR 1
+     */
+    (rEQ_CHIPLET_FIR, bit(7)) ? analyzeConnectedEX1;
+
+    /** EQ_CHIPLET_FIR[8]
+     *  Attention from NCUFIR 0
+     */
+    (rEQ_CHIPLET_FIR, bit(8)) ? analyzeConnectedEX0;
+
+    /** EQ_CHIPLET_FIR[9]
+     *  Attention from NCUFIR 1
+     */
+    (rEQ_CHIPLET_FIR, bit(9)) ? analyzeConnectedEX1;
+
+    /** EQ_CHIPLET_FIR[11]
+     *  Attention from CMEFIR 0
+     */
+    (rEQ_CHIPLET_FIR, bit(11)) ? analyzeConnectedEX0;
+
+    /** EQ_CHIPLET_FIR[12]
+     *  Attention from CMEFIR 1
+     */
+    (rEQ_CHIPLET_FIR, bit(12)) ? analyzeConnectedEX1;
+
 };
 
 ################################################################################
