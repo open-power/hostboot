@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2014                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2014,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_sbe_setup_evid_errors.xml,v 1.4 2014/07/23 19:51:50 jmcgill Exp $ -->
+<!-- $Id: proc_sbe_setup_evid_errors.xml,v 1.5 2015/04/07 17:34:02 jmcgill Exp $ -->
 <!-- Halt codes for proc_sbe_setup_evid -->
 <hwpErrors>
   <!-- ******************************************************************** -->
@@ -40,6 +40,13 @@
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>CHIP</target>
@@ -64,6 +71,13 @@
       <target>CHIP</target>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
     <deconfigure>
       <target>CHIP</target>
     </deconfigure>
@@ -86,6 +100,13 @@
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <refTarget>CHIP</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>CHIP</target>
