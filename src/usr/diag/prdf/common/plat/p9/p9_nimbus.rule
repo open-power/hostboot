@@ -62,17 +62,6 @@ chip p9_nimbus
     };
 
     ############################################################################
-    # Global Special Attention FIR
-    ############################################################################
-
-    register GLOBAL_SPA_FIR
-    {
-        name        "Global Special Attention FIR";
-        scomaddr    0x570F001A;
-        capture     group default;
-    };
-
-    ############################################################################
     # Global Unit Checkstop FIR
     ############################################################################
 
@@ -1961,20 +1950,6 @@ group gGLOBAL_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
      */
     (rGLOBAL_FIR, bit(55)) ? analyzeConnectedEC23;
 
-};
-
-################################################################################
-# Global Special Attention FIR
-################################################################################
-
-rule rGLOBAL_SPA_FIR
-{
-  SPECIAL:
-    GLOBAL_SPA_FIR;
-};
-
-group gGLOBAL_SPA_FIR attntype SPECIAL filter singlebit
-{
 };
 
 ################################################################################
