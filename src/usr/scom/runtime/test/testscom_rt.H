@@ -167,8 +167,8 @@ public:
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_SCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_SCOMreadWrite_proc> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SCOMreadWrite_proc> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_SCOMreadWrite_proc> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
       }
@@ -341,8 +341,8 @@ public:
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_centaur> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_FSISCOMreadWrite_centaur> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
       }
@@ -383,6 +383,8 @@ public:
       {
           scom_targets[x] = NULL;
       }
+
+      TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> num_targets: %d", NUM_TARGETS);
 
       // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
       TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
@@ -455,13 +457,13 @@ public:
           }
           if(test_data[x].expectErr)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is expected",
-                        test_data[x].data,test_data[x].addr,test_data[x].mode);
+              TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is expected on target: %d",
+                      test_data[x].data,test_data[x].addr,test_data[x].mode, x);
           }
           else
           {
-            TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is NOT expected",
-                      test_data[x].data,test_data[x].addr,test_data[x].mode);
+            TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is NOT expected on target: %d",
+                      test_data[x].data,test_data[x].addr,test_data[x].mode, x);
           }
           op_size = sizeof(uint64_t);
 
@@ -476,7 +478,7 @@ public:
           {
               if( l_err )
               {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Write: Error from device : addr=0x%X, RC=%X on target: %d", x,  test_data[x].addr, l_err->reasonCode(), x );
                   TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from deviceWrite" );
                   fails++;
                   errlCommit(l_err,SCOM_COMP_ID);
@@ -490,7 +492,7 @@ public:
               }
               else
               {
-                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected an error log and did not get one for addr 0x%X " ,test_data[x].addr );
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected an error log and did not get one for addr 0x%X on target: %d " ,test_data[x].addr, x );
                   TS_FAIL( "ScomTest::test_opModes> ERROR : Expected an Error log and did not get one" );
                   fails++;
               }
@@ -510,7 +512,14 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
-            TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> test target is null, continueing" );
+            TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> test target is null, continuing" );
+              continue;
+          }
+
+          if (test_data[x].target->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+          {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> Target %d is not functional", x );
               continue;
           }
 
@@ -519,12 +528,12 @@ public:
           if(test_data[x].expectErr)
           {
               TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is expected",
-                        test_data[x].data,test_data[x].addr, test_data[x].mode);
+                        test_data[x].addr,test_data[x].data,test_data[x].mode);
           }
           else
           {
             TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is not expected",
-                      test_data[x].data,test_data[x].addr, test_data[x].mode);
+                      test_data[x].addr,test_data[x].data,test_data[x].mode);
           }
 
           total++;
@@ -543,8 +552,8 @@ public:
               }
               else if((read_data[x]) != (test_data[x].data))
               {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-                  TS_FAIL( "ScomTest::test_opModes> ERROR : Data miss-match between read and expected data" );
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Data mismatch between read and expected data" );
                   fails++;
               }
           }
@@ -711,13 +720,13 @@ public:
           }
           else if((read_data[x]) != (test_data[x].data))
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
 
               //temp workaround for MCSs that have been turned off
               // (RTC Issue 84907)
               if (read_data[x] != 0x0)
               {
-                   TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Data miss-match between read and expected data" );
+                   TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Data mismatch between read and expected data" );
                    fails++;
               }
           }
@@ -885,15 +894,15 @@ public:
               if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
 
               {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_ABUS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-                  TS_FAIL( "ScomTest::test_TranslateScom_ABUS> ERROR : Data miss-match between read and expected data" );
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_ABUS> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+                  TS_FAIL( "ScomTest::test_TranslateScom_ABUS> ERROR : Data mismatch between read and expected data" );
                   fails++;
               }
           }
           else if((read_data[x]) != (test_data[x].data))
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_TranslateScom_MBA_MBS> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS> [%d] Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_TranslateScom_MBA_MBS> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
 
@@ -1027,8 +1036,8 @@ public:
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] XSCOM Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
 
@@ -1049,8 +1058,8 @@ public:
           }
           else if(read_data[x] != test_data[x].data)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data miss-match between read and expected data" );
+              TRACFCOMP(g_trac_scom, "ScomTest::test__MultiChipScomWrite_proc> [%d] FSISCOM Read: Data mismatch : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test__MultiChipScomWrite_proc> ERROR : Data mismatch between read and expected data" );
               fails++;
           }
 

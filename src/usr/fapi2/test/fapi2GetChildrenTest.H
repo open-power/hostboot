@@ -170,7 +170,8 @@ void test_fapi2GetChildren()
         l_actualSize = l_childCores.size();
 
         //Set expected size to be the number of cores per proc
-        l_expectedSize = EQ_PER_PROC * EX_PER_EQ * CORE_PER_EX;
+        //Nimbus model has 4 functional cores
+        l_expectedSize = SIMULATED_GOOD_CORES;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
