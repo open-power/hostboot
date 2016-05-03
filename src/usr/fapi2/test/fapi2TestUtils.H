@@ -40,6 +40,8 @@
 #define MCA_PER_MCS 2
 #define MCBIST_PER_PROC 2
 
+#define SIMULATED_GOOD_CORES 4
+
 #include <fapi2.H>
 
 namespace fapi2
