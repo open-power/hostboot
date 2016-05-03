@@ -92,6 +92,18 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Frequency (in MHz) to move to if the Power Management function fails.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_PCIE_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>

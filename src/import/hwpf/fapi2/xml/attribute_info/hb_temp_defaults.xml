@@ -235,16 +235,143 @@
         <id>ATTR_TARGET_IS_SCOMMABLE</id>
     </attribute>
     <attribute>
-        <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+         <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
     </attribute>
     <attribute>
-        <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+         <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
     </attribute>
     <attribute>
+        <id>ATTR_PROC_R_LOADLINE_VDD_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_R_DISTLOSS_VDD_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_VRM_VOFFSET_VDD_UV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_R_LOADLINE_VDN_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_R_DISTLOSS_VDN_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_VRM_VOFFSET_VDN_UV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_R_LOADLINE_VCS_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_R_DISTLOSS_VCS_UOHM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_VRM_VOFFSET_VCS_UV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_FREQ_BIAS_ULTRATURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_FREQ_BIAS_TURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_FREQ_BIAS_NOMINAL</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_FREQ_BIAS_POWERSAVE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_ULTRATURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_TURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_NOMINAL</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_POWERSAVE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VCS_BIAS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_EXT_VDN_BIAS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_ULTRATURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_TURBO</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_NOMINAL</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_POWERSAVE</id>
+    </attribute>
+     <attribute>
         <id>ATTR_VDM_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_DROOP_SMALL_OVERRIDE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_DROOP_LARGE_OVERRIDE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_DROOP_EXTREME_OVERRIDE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_OVERVOLT_OVERRIDE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_FMAX_OVERRIDE_KHZ</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_FMIN_OVERRIDE_KHZ</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VDM_VID_COMPARE_OVERRIDE_MV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DPLL_VDM_RESPONSE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_IVRM_DEADZONE_MV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_TDP_RDP_CURRENT_FACTOR</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_FREQ_REGIONS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_VALUE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_L3_VALUE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
     </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
 
 </attributes>
+

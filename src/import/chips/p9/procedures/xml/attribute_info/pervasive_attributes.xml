@@ -301,7 +301,7 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_BOOT_FREQ</id>
+  <id>ATTR_BOOT_FREQ_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>EQ boot frequency</description>
   <valueType>uint32</valueType>

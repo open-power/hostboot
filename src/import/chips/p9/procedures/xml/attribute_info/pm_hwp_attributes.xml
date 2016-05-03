@@ -23,13 +23,30 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
+      <id>ATTR_PROC_DPLL_DIVIDER</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>The product of the DPLL internal prescalar divide
+      (CD_DIV124_DC) and the output divider(CD_DPLLOUT124_DC).  This estalishes
+      the step size of the DPLL in terms of this number divided into the
+      processor reference clock.
+
+      if 0, consuming procedures will assume a default of 8.
+
+      Provided to override default value
+      </description>
+      <valueType>uint32</valueType>
+      <writeable/>
+      <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
       <id>ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET</id>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <description>Set by p9_hcode_image build with the offset value from
       the HOMER base where the SGPE Boot Copier interrupt vectors reside.  This
-      value must be 512B aligned. The HOMER base address will be pre-establish 
-      in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The SGPE 
-      will be Sreset after this value is established.  
+      value must be 512B aligned. The HOMER base address will be pre-establish
+      in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The SGPE
+      will be Sreset after this value is established.
       </description>
       <valueType>uint32</valueType>
       <writeable/>
@@ -40,13 +57,13 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <description>Set by p9_hcode_image build with the offset value from
       the HOMER base where the PGPE Boot Copier interrupt vectors reside. This
-      value must be 512B aligned. The HOMER base address will be pre-establish 
-      in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The PGPE 
+      value must be 512B aligned. The HOMER base address will be pre-establish
+      in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The PGPE
       will be Sreset after this value is established
       </description>
       <valueType>uint32</valueType>
       <writeable/>
-  </attribute> 
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_OCC_LFIR</id>
@@ -73,8 +90,10 @@
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       <description>
       0 = OCC has never been loaded and FIR Masks have never been initialized,
-      1 = FIR masks have been initialized and the hardware should reflect correct values,
-      2 = FIR masks have been initialized but the current hardware state is the reset value
+      1 = FIR masks have been initialized and the hardware should reflect
+          correct values,
+      2 = FIR masks have been initialized but the current hardware state is the
+          reset value
       </description>
       <valueType>uint8</valueType>
       <writeable/>
@@ -136,7 +155,8 @@
   <attribute>
        <id>ATTR_C0_EXEC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates the execution units in core 0 have clocks running and scommable
+       <description>Indicates the execution units in core 0 have clocks running
+       and scommable
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -145,7 +165,8 @@
   <attribute>
        <id>ATTR_C1_EXEC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates the execution units in core 1 have clocks running and scommable
+       <description>Indicates the execution units in core 1 have clocks running
+       and scommable
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -154,7 +175,8 @@
   <attribute>
        <id>ATTR_C0_PC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates the core pervasive unit in core 0 has clocks running and scommable
+       <description>Indicates the core pervasive unit in core 0 has clocks
+       running and scommable
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -163,7 +185,8 @@
   <attribute>
        <id>ATTR_C1_PC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates the core pervasive unit in core 1 has clocks running and scommable
+       <description>Indicates the core pervasive unit in core 1 has clocks
+       running and scommable
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -172,7 +195,8 @@
   <attribute>
        <id>ATTR_L2_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates L2 has power and has valid latch state that could be scanned
+       <description>Indicates L2 has power and has valid latch state that could
+       be scanned
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -181,7 +205,8 @@
   <attribute>
        <id>ATTR_L3_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates L3 has power and has valid latch state that could be scanned
+       <description>Indicates L3 has power and has valid latch state that could
+       be scanned
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -190,7 +215,8 @@
   <attribute>
        <id>ATTR_C0_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates core 0 has power and has valid latch state that could be scanned
+       <description>Indicates core 0 has power and has valid latch state that
+       could be scanned
        </description>
        <valueType>uint8</valueType>
        <writeable/>
@@ -199,7 +225,8 @@
   <attribute>
        <id>ATTR_C1_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
-       <description>Indicates core 1 has power and has valid latch state that could be scanned
+       <description>Indicates core 1 has power and has valid latch state that
+       could be scanned
        </description>
        <valueType>uint8</valueType>
        <writeable/>
