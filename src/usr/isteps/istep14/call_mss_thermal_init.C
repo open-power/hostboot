@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,11 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+#include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <p9_mss_thermal_init.H>
+
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -44,14 +49,18 @@ namespace ISTEP_14
 {
 void* call_mss_thermal_init (void *io_pArgs)
 {
-    errlHndl_t  l_errl  =   NULL;
     IStepError  l_StepError;
+
+//@TODO RTC:144076 L1 HWPs for Centaur+Cumulus
+#if 0
+    // -- Cumulus only ---
+    errlHndl_t  l_errl  =   NULL;
 
     do
     {
         // Get all Centaur targets
         TARGETING::TargetHandleList l_memBufTargetList;
-        getAllChips(l_memBufTargetList, TYPE_MEMBUF );
+        getAllChiplets(l_memBufTargetList, TYPE_MCBIST );
 
         //  --------------------------------------------------------------------
         //  run mss_thermal_init on all Centaurs
@@ -62,24 +71,21 @@ void* call_mss_thermal_init (void *io_pArgs)
                 ++l_iter)
         {
             //  make a local copy of the target for ease of use
-            const TARGETING::Target*  l_pCentaur = *l_iter;
+            TARGETING::Target*  l_pCentaur = *l_iter;
 
             //  write HUID of target
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-            //@TODO RTC:133831 cast OUR type of target to a FAPI type of target.
-            //const fapi::Target l_fapi_pCentaur( TARGET_TYPE_MEMBUF_CHIP,
-            //        (const_cast<TARGETING::Target*>(l_pCentaur)) );
+            fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_pCentaur
+                (l_pCentaur);
 
             // Current run on target
-            //TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            //        "Running call_mss_thermal_init HWP on "
-            //        "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running call_mss_thermal_init HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-
-            //  call the HWP with each fapi::Target
-            //FAPI_INVOKE_HWP( l_errl, mss_thermal_init, l_fapi_pCentaur );
+            FAPI_INVOKE_HWP( l_errl, p9_mss_thermal_init, l_fapi_pCentaur );
 
             if ( l_errl )
             {
@@ -122,7 +128,6 @@ void* call_mss_thermal_init (void *io_pArgs)
         {
             const TARGETING::Target* l_pTarget = *l_cpuIter;
 
-            //@TODO RTC:133831
             //fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
             //     (const_cast<TARGETING::Target*>(l_pTarget)));
 
@@ -166,6 +171,7 @@ void* call_mss_thermal_init (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "SUCCESS : call_mss_thermal_init" );
     }
+#endif
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

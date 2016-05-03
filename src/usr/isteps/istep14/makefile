@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,20 @@
 ROOTPATH = ../../../..
 MODULE = istep14
 
+PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+
+#Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${PROCEDURE_PATH}/xml/error_info/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
+
 OBJS += call_host_startprd_dram.o
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -35,4 +49,19 @@ OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_host_mpipl_service.o
 
+
+
+include ${ROOTPATH}/procedure.rules.mk
+# include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
+# include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
+# include ${PROCEDURE_PATH}/hwp/memory/p9_mss_memdiag.mk
+# include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
+include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
+
 include ${ROOTPATH}/config.mk
+
+
+VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/

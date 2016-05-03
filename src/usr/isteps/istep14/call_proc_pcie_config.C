@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,14 +25,19 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
-
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+
+//HWP Invoker
+#include    <fapi2/plat_hwp_invoker.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+#include <fapi2/target.H>
+
+#include <p9_pcie_config.H>
 
 
 using   namespace   ISTEP;
@@ -51,32 +56,24 @@ void* call_proc_pcie_config (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_pcie_config entry" );
 
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC );
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips(l_procChips, TYPE_PROC );
 
-    for ( TargetHandleList::const_iterator
-          l_iter = l_procTargetList.begin();
-          l_iter != l_procTargetList.end();
-          ++l_iter )
+    for (const auto & l_procChip: l_procChips)
     {
-        const TARGETING::Target* l_pTarget = *l_iter;
-
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi_cpu_target(l_procChip);
         //  write HUID of target
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X", TARGETING::get_huid(l_pTarget));
-
-        //@TODO RTC:133831
-        // build a FAPI type of target.
-        //const fapi::Target l_fapi_pTarget( TARGET_TYPE_PROC_CHIP,
-        //                  (const_cast<TARGETING::Target*>(l_pTarget)) );
+                "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
         //  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP( l_errl, proc_pcie_config, l_fapi_pTarget );
+//         FAPI_INVOKE_HWP( l_errl, p9_pcie_config, l_fapi_cpu_target );
 
         if ( l_errl )
         {
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pTarget).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
             // Create IStep error log and cross reference to error that occurred
             l_stepError.addErrorDetails( l_errl );

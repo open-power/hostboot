@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,10 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+#include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <p9_mss_power_cleanup.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -50,6 +54,49 @@ void* call_mss_power_cleanup (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_power_cleanup entry" );
 
+    TARGETING::TargetHandleList l_mcbistTargetList;
+    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
+
+    for (const auto & l_target : l_mcbistTargetList)
+    {
+        // Dump current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running mss_power_cleanup HWP on "
+                "target HUID %.8X",
+                TARGETING::get_huid(l_target));
+
+        fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_target
+            (l_target);
+
+        //  call the HWP with each fapi2::Target
+        FAPI_INVOKE_HWP(l_err, p9_mss_power_cleanup, l_fapi_target);
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_power_cleanup HWP returns error",
+                      l_err->reasonCode());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_target).addToLog(l_err);
+
+            // Create IStep error log and cross reference to error that
+            // occurred
+            l_stepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS :  mss_power_cleanup HWP( )" );
+        }
+    }
+
+//@TODO RTC:144076 L1 HWPs for Centaur+Cumulus
+#if 0
+    // -- Cumulus only
     // Get a list of all present Centaurs
     TargetHandleList l_presCentaurs;
     getChipResources(l_presCentaurs, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
@@ -132,7 +179,7 @@ void* call_mss_power_cleanup (void *io_pArgs)
                            l_currMBA0Huid, l_currMBA1Huid);
         }
     }
-
+#endif
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_power_cleanup exit" );
 
