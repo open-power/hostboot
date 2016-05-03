@@ -804,39 +804,8 @@ extern "C"
         {
             FAPI_ERR("Status mismatch detected");
 
-            FAPI_ERR("ADU Status bits: ");
-            FAPI_ERR("  FBC_ALTD_BUSY             = %d",
-                     o_busyBitStatus ? 1 : 0);
-            FAPI_ERR("  FBC_ALTD_WAIT_CMD_ARBIT   = %d",
-                     l_statusReg.getBit<ALTD_STATUS_WAIT_CMD_ARBIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_ADDR_DONE_BIT = %d",
-                     l_statusReg.getBit<ALTD_STATUS_ADDR_DONE_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_DATA_DONE_BIT = %d",
-                     l_statusReg.getBit<ALTD_STATUS_DATA_DONE_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_WAIT_RESP_BIT = %d",
-                     l_statusReg.getBit<ALTD_STATUS_WAIT_RESP_BIT>() ? 1 : 0);
-
-            FAPI_ERR("ADU Error bits:");
-            FAPI_ERR("  ALTD_STATUS_OVERRUN_ERROR_BIT    = %d",
-                     l_statusReg.getBit<ALTD_STATUS_OVERRUN_ERROR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_AUTOINC_ERR_BIT      = %d",
-                     l_statusReg.getBit<ALTD_STATUS_AUTOINC_ERR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_COMMAND_ERR_BIT      = %d",
-                     l_statusReg.getBit<ALTD_STATUS_COMMAND_ERR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_ADDRESS_ERR_BIT      = %d",
-                     l_statusReg.getBit<ALTD_STATUS_ADDRESS_ERR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_PB_OP_HANG_ERR_BIT   = %d",
-                     l_statusReg.getBit<ALTD_STATUS_PB_OP_HANG_ERR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_PB_DATA_HANG_ERR_BIT = %d",
-                     l_statusReg.getBit<ALTD_STATUS_PB_DATA_HANG_ERR_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_PBINIT_MISSING_BIT   = %d",
-                     l_statusReg.getBit<ALTD_STATUS_PBINIT_MISSING_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_ECC_CE_BIT           = %d",
-                     l_statusReg.getBit<ALTD_STATUS_ECC_CE_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_ECC_UE_BIT           = %d",
-                     l_statusReg.getBit<ALTD_STATUS_ECC_UE_BIT>() ? 1 : 0);
-            FAPI_ERR("  ALTD_STATUS_ECC_SUE_BIT          = %d",
-                     l_statusReg.getBit<ALTD_STATUS_ECC_SUE_BIT>() ? 1 : 0);
+            FAPI_ERR("FBC_ALTD_BUSY = %d", (o_busyBitStatus ? 1 : 0));
+            FAPI_ERR("ALTD_STATUS_REG = %016llX", l_statusReg);
         }
 
         FAPI_ASSERT( (l_statusError == false), fapi2::P9_ADU_STATUS_REG_ERR()
