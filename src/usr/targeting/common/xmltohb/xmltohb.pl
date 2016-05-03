@@ -2005,6 +2005,7 @@ sub writeAttrErrlCFile {
     print $outFile "    char *tmpBuffer = NULL;\n";
     print $outFile "    uint32_t attrSize = 0;\n";
     print $outFile "\n";
+    print $outFile "#if 0 //\@fixme-RTC:152874\n";
     print $outFile "    switch (i_attr) {\n";
 
     # loop through every attribute to make the swith/case
@@ -2111,6 +2112,8 @@ sub writeAttrErrlCFile {
     print $outFile "        }\n";
     print $outFile "    } //switch\n";
     print $outFile "\n";
+    print $outFile "#endif //\@fixme-RTC:152874\n"; 
+
     print $outFile "    // if we generated one, copy the string into the buffer\n";
     print $outFile "    if (attrSize) { // we have something to output\n";
     print $outFile "        // resize buffer and copy string into it\n";
