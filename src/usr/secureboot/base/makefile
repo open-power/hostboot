@@ -29,7 +29,6 @@ SUBDIRS += test.d
 OBJS += service.o
 OBJS += settings.o
 OBJS += header.o
-OBJS += purge.o
 OBJS += securerom.o
 OBJS += rom_entry.o
 OBJS += trustedboot_base.o

@@ -32,6 +32,7 @@
 #include "settings.H"
 #include "header.H"
 #include "purge.H"
+#include <kernel/misc.H>
 
 namespace SECUREBOOT
 {
@@ -51,17 +52,13 @@ namespace SECUREBOOT
                 Singleton<Header>::instance().loadBaseHeader();
             }
 
-            // Blind-purge lower portion of cache.
-            l_errl = issueBlindPurge();
-            if (l_errl)
-            {
-                break;
-            }
-#endif
+            // Run dcbz on the entire 10MB cache
+            assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
+#else
             // Extend memory footprint into lower portion of cache.
-            //   This can only fail is someone has already called to extend
-            //   to post-secureboot state.  Major coding bug, so just assert.
-            assert(0 == mm_extend(MM_EXTEND_POST_SECUREBOOT));
+            assert(0 == mm_extend(MM_EXTEND_PARTIAL_CACHE));
+
+#endif
 
 // Disable SecureROM in VPO
 #ifndef CONFIG_P9_VPO_COMPILE

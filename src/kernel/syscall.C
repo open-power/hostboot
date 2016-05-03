@@ -907,7 +907,7 @@ namespace Systemcalls
 
         switch (size)
         {
-            case MM_EXTEND_POST_SECUREBOOT:
+            case MM_EXTEND_PARTIAL_CACHE:
                 TASK_SETRTN(t, KernelMisc::expand_half_cache());
                 break;
 
