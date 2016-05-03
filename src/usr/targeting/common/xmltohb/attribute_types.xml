@@ -21774,4 +21774,47 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>EFF_DRAM_RANK_MIX</id>
+    <description>
+        DRAM Device Rank Mix
+        Used in various locations and is computed in mss_eff_cnfg.
+        creator: mss_eff_cnfg
+        consumer: various
+        firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <writeable/>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_RANK_MIX</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_MAC</id>
+    <description>
+        Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
+        creator: mss_eff_cnfg
+        consumer: various
+        firmware notes: none
+    </description>
+    <simpleType>
+      <uint16_t></uint16_t>
+      <array>2,2</array>
+    </simpleType>
+    <writeable/>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_MAC</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
