@@ -284,7 +284,7 @@ void HBVddrMsg::createVddrData(
                 (void)addMemoryVoltageDomains<
                     TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
                     TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_VPP_BASE,
+                    TARGETING::ATTR_MSS_VOLT_VPP,
                     TARGETING::ATTR_VPP_ID>(
                         pMembuf,
                         io_request);

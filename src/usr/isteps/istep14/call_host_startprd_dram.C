@@ -36,36 +36,6 @@ void* call_host_startprd_dram (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startPRD_dram entry" );
 
-#if 0
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-    //  figure out what targets we need
-    //  customize any other inputs
-    //  set up loops to go through all targets (if parallel, spin off a task)
-
-    //  write HUID of target
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "target HUID %.8X", TARGETING::get_huid(l_@targetN_target));
-
-    // cast OUR type of target to a FAPI type of target.
-    const fapi::Target l_fapi_@targetN_target( TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_@targetN_target)) );
-
-    //  call the HWP with each fapi::Target
-    FAPI_INVOKE_HWP( l_errl, host_startPRD_dram, _args_...);
-    if ( l_errl )
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : .........." );
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SUCCESS : .........." );
-    }
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
-#endif
-
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     // update firdata inputs for OCC
     TARGETING::Target* masterproc = NULL;

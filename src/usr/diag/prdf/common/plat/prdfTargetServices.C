@@ -1258,9 +1258,10 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
             break;
         }
 
-        TargetHandle_t mbaTarget = list[0];
 
-        o_isBuffered = mbaTarget->getAttr<ATTR_EFF_CUSTOM_DIMM>();
+//         @TODO RTC: 153297 ATTR_EFF_CUSTOM_DIMM Type has changed
+//         const TargetHandle_t mbaTarget = list[0];
+//         o_isBuffered = mbaTarget->getAttr<ATTR_EFF_CUSTOM_DIMM>();
 
         o_rc = SUCCESS;
 
@@ -1304,8 +1305,8 @@ int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen )
                       getHuid( i_mba ) );
             break;
         }
-
-        o_dramGen = i_mba->getAttr<ATTR_EFF_DRAM_GEN>( );
+        //@TODO RTC: 153297 ATTR_EFF_CUSTOM_DIMM Type has changed
+//         o_dramGen = i_mba->getAttr<ATTR_EFF_DRAM_GEN>( );
 
         o_rc = SUCCESS;
 

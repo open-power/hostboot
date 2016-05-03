@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,11 +49,11 @@ void* call_host_mpipl_service (void *io_pArgs)
 
     IStepError l_StepError;
 
-    errlHndl_t l_err = NULL;
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service entry" );
-
+//@TODO RTC: 134431 MPIPL Changes for P9 - Placeholder
+#if 0
+    errlHndl_t l_err = NULL;
     // call proc_mpipl_chip_cleanup.C
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC );
@@ -73,7 +73,6 @@ void* call_host_mpipl_service (void *io_pArgs)
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "target HUID %.8X", TARGETING::get_huid(l_pProcTarget));
 
-        //@TODO RTC:133831 cast OUR type of target to a FAPI type of target.
         //const fapi::Target l_fapi_pProcTarget( TARGET_TYPE_PROC_CHIP,
         //                   (const_cast<TARGETING::Target*> (l_pProcTarget)) );
 
@@ -260,6 +259,7 @@ void* call_host_mpipl_service (void *io_pArgs)
         // Commit Error
         errlCommit( l_err, HWPF_COMP_ID );
     }
+#endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_mpipl_service exit" );

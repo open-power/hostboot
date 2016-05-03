@@ -6904,10 +6904,16 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_VOLT</id>
-    <description>DRAM Voltage. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -6919,13 +6925,16 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>VPP_BASE</id>
+    <id>MSS_VOLT_VPP</id>  <!-- VPP_BASE -->
     <description>
-        DRAM VPP voltage domain base voltage in mV.  Managed by HWPs.
+          DRAM VPP Voltage, each voltage rail would need to have a value.
+          Computed in mss_volt C code - in millivolts.  0V - DDR3, 2.5V - DDR4
+          creator: mss_volt
+          consumer: mss_eff_cnfg, others
+          firmware notes: none
     </description>
     <simpleType>
         <uint32_t>
-            <default>0</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -6939,10 +6948,21 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_FREQ</id>
-    <description>Frequency of memory channel in MHz. Initialized and used by HWPs.</description>
+    <description>
+      Frequency of this memory channel in MT/s (Mega Transfers per second),
+      comprising of three DIMMs.
+      Computed in mss_freq
+      creator: mss_freq
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+      MT1866 = 1866,
+      MT2133 = 2133,
+      MT2400 = 2400,
+      MT2666 = 2666
+    </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -6955,7 +6975,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_DIMM_MFG_ID_CODE</id>
-    <description>DIMM Manufacturer ID Code. Initialized and used by HWPs.</description>
+    <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -6989,7 +7009,14 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_NUM_RANKS_PER_DIMM</id>
-    <description>Number of ranks per DIMM. Initialized and used by HWPs.</description>
+    <description>
+      Number of ranks in each DIMM.
+      Used in various locations and is computed in mss_eff_cnfg.
+      values are 0,1,2, 4 up to 32
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7005,27 +7032,20 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DIMM_TYPE</id>
-    <description>Type of DIMM. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_TYPE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_CUSTOM_DIMM</id>
-    <description>DIMM is a custom DIMM. Sometimes this is known as a CDIMM, but technically, we could support Custom DIMMs of different types than an UDIMM, such as RDIMM and LRDIMM.  Created in mss_eff_cnfg</description>
+    <description>
+      DIMM is a custom DIMM. This is commonly known as a CDIMM,
+      but technically, we could support Custom DIMMs of different types than an UDIMM,
+      such as RDIMM and LRDIMM.
+      Created in mss_eff_cnfg
+      Use this attribute if you need to know if the Centaur is on the DIMM instead of on a planar.
+      NO = 0, YES = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+<!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
+<!--     <array>2,2</array> -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -7038,10 +7058,18 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_WIDTH</id>
-    <description>DRAM Device Width. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Device Width: X4, X8, X16, X32.
+      Used in various locations and is computed in mss_eff_cnfg.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      X4 = 4, X8 = 8, X16 = 16, X32 = 32
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+    <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -7053,24 +7081,39 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_GEN</id>
-    <description>DRAM Generation. Initialized and used by HWPs.</description>
+    <id>EFF_DRAM_RANK_MIX</id>
+    <description>
+      DRAM Device Rank Mix
+      Used in various locations and is computed in mss_eff_cnfg.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      SYMMETRICAL = 0, ASYMMETICAL = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+    <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_GEN</id>
+        <id>ATTR_EFF_DRAM_RANK_MIX</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
+
 <attribute>
     <id>EFF_PRIMARY_RANK_GROUP0</id>
-    <description>Primary RankGroup0. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7087,7 +7130,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_PRIMARY_RANK_GROUP1</id>
-    <description>Primary RankGroup1. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7104,7 +7153,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_PRIMARY_RANK_GROUP2</id>
-    <description>Primary RankGroup2. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7121,7 +7176,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_PRIMARY_RANK_GROUP3</id>
-    <description>Primary RankGroup3. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7138,7 +7199,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SECONDARY_RANK_GROUP0</id>
-    <description>Secondary RankGroup0. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7155,7 +7222,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SECONDARY_RANK_GROUP1</id>
-    <description>Secondary RankGroup1. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7172,7 +7245,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SECONDARY_RANK_GROUP2</id>
-    <description>Secondary RankGroup2. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7189,7 +7268,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SECONDARY_RANK_GROUP3</id>
-    <description>Secondary RankGroup3. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7206,7 +7291,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_TERTIARY_RANK_GROUP0</id>
-    <description>Tertiary RankGroup0. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7223,7 +7314,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_TERTIARY_RANK_GROUP1</id>
-    <description>Tertiary RankGroup1. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7240,7 +7337,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_TERTIARY_RANK_GROUP2</id>
-    <description>Tertiary RankGroup2. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7257,7 +7360,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_TERTIARY_RANK_GROUP3</id>
-    <description>Tertiary RankGroup3. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7274,7 +7383,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_QUATERNARY_RANK_GROUP0</id>
-    <description>Quaternary RankGroup0. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7291,7 +7406,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_QUATERNARY_RANK_GROUP1</id>
-    <description>Quaternary RankGroup1. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7308,7 +7429,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_QUATERNARY_RANK_GROUP2</id>
-    <description>Quaternary RankGroup2. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7325,7 +7452,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_QUATERNARY_RANK_GROUP3</id>
-    <description>Quaternary RankGroup3. Initialized and used by HWPs.</description>
+    <description>
+      RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
+      creator: mss_eff_cnfg_rank_group
+      consumer: various
+      firmware notes: none
+      INVALID = 255
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7346,7 +7479,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_ODT_RD</id>
-    <description>Rank Read ODT. Initialized and used by HWPs.</description>
+    <description>
+      Read ODT.
+      Used in various locations and comes from the MT keyword of the VPD
+      creator: eff_config
+      consumer: various and initfiles
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7363,7 +7502,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_ODT_WR</id>
-    <description>Rank Write ODT. Initialized and used by HWPs.</description>
+    <description>
+      Write ODT.
+      Used in various locations and comes from the MT keyword of the VPD
+      Creator: mss_eff_config
+      consumer: various and initfile
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7380,7 +7525,11 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_RON</id>
-    <description>DRAM Ron. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Ron.
+      Used in various locations and comes from the MT keyword of the VPD
+      OHM48 is for DDR4.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7397,7 +7546,10 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_RTT_NOM</id>
-    <description>DRAM Rtt_Nom. Initialized and used by HWPs.</description>
+    <description>D
+      DRAM Rtt_Nom.
+      Used in various locations and comes from the MT keyword of the VPD
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7414,7 +7566,10 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_RTT_WR</id>
-    <description>DRAM Rtt_WR. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Rtt_WR.
+      Used in various locations and comes from the MT keyword of the VPD
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7430,8 +7585,68 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
+    <id>VPD_GPO</id>
+    <description>
+      This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
+      associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_GPO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>EFF_DRAM_WR_VREF</id>
-    <description>DRAM Write Vref. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Write Vref.
+      Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
+      creator: VPD(MT) or mss_eff_cnfg_termination
+      consumer: various.C and initfile
+      firmware notes: none
+      This is the nominal value
+      This is for DDR3
+      VDD420 = 420,
+      VDD425 = 425,
+      VDD430 = 430,
+      VDD435 = 435,
+      VDD440 = 440,
+      VDD445 = 445,
+      VDD450 = 450,
+      VDD455 = 455,
+      VDD460 = 460,
+      VDD465 = 465,
+      VDD470 = 470,
+      VDD475 = 475,
+      VDD480 = 480,
+      VDD485 = 485,
+      VDD490 = 490,
+      VDD495 = 495,
+      VDD500 = 500,
+      VDD505 = 505,
+      VDD510 = 510,
+      VDD515 = 515,
+      VDD520 = 520,
+      VDD525 = 525,
+      VDD530 = 530,
+      VDD535 = 535,
+      VDD540 = 540,
+      VDD545 = 545,
+      VDD550 = 550,
+      VDD555 = 555,
+      VDD560 = 560,
+      VDD565 = 565,
+      VDD570 = 570,
+      VDD575 = 575
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -7841,7 +8056,10 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_WR_VREF_SCHMOO</id>
-    <description>Enables for which VREF to use on the WR Schmoo. Initialized and used by HWPs.</description>
+    <description>
+      Enables for which VREF to use on the WR Schmoo.
+      The LSB corresponds to the highest WR Vref
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -7858,7 +8076,10 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
-    <description>Enables for which VREF to use on the WR Schmoo for DDR4. Initialized and used by HWPs.</description>
+    <description>
+      Enables for which VREF to use on the WR Schmoo.
+      The LSB corresponds to the highest WR Vref
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -7892,7 +8113,9 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DIMM_SIZE</id>
-    <description>DIMM Size. Initialized and used by HWPs.</description>
+    <description>
+      DIMM Size, in GB Used in various locations and is computed in mss_eff_cnfg.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -7956,38 +8179,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_DENSITY</id>
-    <description>DRAM Density. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_DENSITY</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRCD</id>
-    <description>DRAM RAS to CAS Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRCD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_DRAM_TRRD</id>
     <description>DRAM Row ACT to Row ACT Delay. Initialized and used by HWPs.</description>
     <simpleType>
@@ -8003,53 +8194,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>EFF_DRAM_TRP</id>
-    <description>DRAM Row Precharge Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRAS</id>
-    <description>DRAM ACT to Precharge Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRAS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRC</id>
-    <description>DRAM ACT to ACT/Refresh Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRC</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
 
 <attribute>
     <id>EFF_DRAM_TRFI</id>
@@ -8063,22 +8207,6 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TRFI</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRFC</id>
-    <description>DRAM Refresh Recovery Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRFC</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -8101,10 +8229,17 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_TRTP</id>
-    <description>DRAM Internal Read to Precharge Delay. Initialized and used by HWPs.</description>
+    <description>
+      Internal Read to Precharge Delay.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array> 2 </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8116,27 +8251,95 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_TFAW</id>
-    <description>DRAM Four ACT Window Delay. Initialized and used by HWPs.</description>
+    <id>EFF_DRAM_TRFC_DLR</id>
+    <description>
+      Minimum Refresh Recovery Delay Time
+      in nck (number of clock cyles).
+      Selected tRFC value (tRFC_dl1, tRFC_dl2, or tRFC_dl4)
+      depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+      For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array> 2 </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TFAW</id>
+        <id>ATTR_EFF_DRAM_TRFC_DLR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TFAW_DLR</id>
+    <description>
+      Minimum Four Activate Window Delay Time
+      in nck (number of clock cycles).
+      For 3DS, the tFAW time to different logical ranks are defined as tFAW_dlr
+      Each memory channel will have a value.
+      creator: eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array> 2 </array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TFAW_DLR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TXS</id>
+    <description>
+      Exit Self-Refresh to commands not requiring a locked DLL.
+      In nck (number of clock cycles).
+      Each memory channel will have a value.
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array> 2 </array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TXS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
     <id>EFF_DRAM_BL</id>
-    <description>DRAM Burst Length. Initialized and used by HWPs.</description>
+    <description>
+      Burst Length.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      BL8 = 0, OTF = 1, BC4 = 2
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+    <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8149,10 +8352,17 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_CL</id>
-    <description>DRAM CAS Latency. Initialized and used by HWPs.</description>
+    <description>
+      CAS Latency.
+      Each memory channel will have a value.
+      creator: mss_freq
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+    <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8165,10 +8375,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_AL</id>
-    <description>DRAM Additive Latency. Initialized and used by HWPs.</description>
+    <description>
+      Additive Latency.
+      Used in various locations and is computed in mss_eff_cnfg_timing.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+      consumer: various
+      firmware notes: none
+      DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+    <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8181,10 +8400,18 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_CWL</id>
-    <description>DRAM CAS Write Latency. Initialized and used by HWPs.</description>
+    <description>
+      CAS Write Latency.
+      Used in various locations and is computed in mss_eff_cnfg_timing.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8197,10 +8424,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_RBT</id>
-    <description>DRAM Read Burst Type. Initialized and used by HWPs.</description>
+    <description>
+      Read Burst Type.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      SEQUENTIAL = 0, INTERLEAVE = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8213,10 +8449,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_TM</id>
-    <description>DRAM Test Mode. Initialized and used by HWPs.</description>
+    <description>
+      Test Mode.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      NORMAL= 0, TEST = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8229,10 +8474,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_DLL_RESET</id>
-    <description>DRAM DLL Reset. Initialized and used by HWPs.</description>
+    <description>
+      DLL Reset.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      NO = 0, YES = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8261,10 +8515,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_DLL_PPD</id>
-    <description>DRAM DLL Precharge PD. Initialized and used by HWPs.</description>
+    <description>
+      DLL Precharge PD.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      SLOWEXIT = 0, FASTEXIT = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8277,10 +8540,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_DLL_ENABLE</id>
-    <description>DRAM DLL Enable. Initialized and used by HWPs.</description>
+    <description>
+      DLL Enable.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      ENABLE = 0, DISABLE = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8293,10 +8565,18 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_TDQS</id>
-    <description>DRAM TDQS. Initialized and used by HWPs.</description>
+    <description>
+      TDQS.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array> 2 </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8308,11 +8588,42 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_WR_LVL_ENABLE</id>
-    <description>DRAM Write Level Enable. Initialized and used by HWPs.</description>
+    <id>EFF_DRAM_TREFI</id>
+    <description>
+      Average Refresh Interval (tREFI) in nck (number of clock cycles).
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array> 2 </array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TREFI</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_WR_LVL_ENABLE</id>
+    <description>
+      Write Level Enable.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      DISABLE = 0, ENABLE = 1
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8325,10 +8636,20 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_OUTPUT_BUFFER</id>
-    <description>DRAM output buffer. Initialized and used by HWPs.</description>
+    <description>
+      DRAM Qoff.
+      Enables or disables DRAM output.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      ENABLE = 0, DISABLE = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8341,10 +8662,26 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_PASR</id>
-    <description>DRAM Partial Array Self-Refresh. Initialized and used by HWPs.</description>
+    <description>
+      Partial Array Self-Refresh.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      FULL = 0,
+      FIRST_HALF = 1,
+      FIRST_QUARTER = 2,
+      FIRST_EIGHTH = 3,
+      LAST_THREE_FOURTH = 4,
+      LAST_HALF = 5,
+      LAST_QUARTER = 6,
+      LAST_EIGHTH = 7
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8357,10 +8694,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_ASR</id>
-    <description>DRAM Auto Self-Refresh. Initialized and used by HWPs.</description>
+    <description>
+      Auto Self-Refresh.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      SRT = 0, ASR = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8373,10 +8719,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DRAM_SRT</id>
-    <description>DRAM Self-Refresh Temperature Range. Initialized and used by HWPs.</description>
+    <description>
+      Self-Refresh Temperature Range.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      NORMAL = 0, EXTEND = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8389,10 +8744,18 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_MPR_LOC</id>
-    <description>Multi Purpose Register Location. Initialized and used by HWPs.</description>
+    <description>
+      Multi Purpose Register Location.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8405,10 +8768,19 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_MPR_MODE</id>
-    <description>Multi Purpose Register Mode. Initialized and used by HWPs.</description>
+    <description>
+      Multi Purpose Register Mode.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      DISABLE = 0, ENABLE = 1
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8438,7 +8810,14 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DIMM_RCD_IBT</id>
-    <description>DIMM RCD IBT. Initialized and used by HWPs.</description>
+    <description>
+      RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: mss_dram_init
+      firmware notes: none
+      IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -8455,7 +8834,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_DIMM_RCD_MIRROR_MODE</id>
-    <description>DIMM RCD Mirror mode. Initialized and used by HWPs.</description>
+    <description>
+      RCD Mirroring. Used in mss_dram_init and is computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: mss_dram_init
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -8472,10 +8857,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SCHMOO_MODE</id>
-    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8488,10 +8876,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SCHMOO_ADDR_MODE</id>
-    <description>Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the schmoo mode to use during draminit_train_adv. Initialized and used by HWPs.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8504,10 +8895,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SCHMOO_TEST_VALID</id>
-    <description>Specifies the schmoo test to run during draminit_train_adv. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the schmoo test to run during draminit_train_adv. Initialized and used by HWPs.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8520,10 +8914,13 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_SCHMOO_PARAM_VALID</id>
-    <description>Specifies the schmoo parameters to use during draminit_train_adv. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the schmoo parameters to use during draminit_train_adv. Initialized and used by HWPs.
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8540,6 +8937,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8556,6 +8954,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8572,6 +8971,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8588,6 +8988,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8604,6 +9005,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8616,10 +9018,14 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_MEMCAL_INTERVAL</id>
-    <description>Specifies the memcal interval in clocks. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the memcal interval in clocks. Initialized and used by HWPs.
+    DISABLE = 0
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8632,10 +9038,14 @@ DEPRECATED!!!!
 
 <attribute>
     <id>EFF_ZQCAL_INTERVAL</id>
-    <description>Specifies the zqcal interval in clocks. Initialized and used by HWPs.</description>
+    <description>
+    Specifies the zqcal interval in clocks. Initialized and used by HWPs.
+    DISABLE = 0
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8669,6 +9079,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8726,6 +9137,85 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIM_DIE_COUNT</id>
+    <description>Specifies the number of DRAM dies per package. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_PRIM_DIE_COUNT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <description>
+     This is the throttled N commands per window
+    of M DRAM clocks setting for cfg_nm_n_per_port.
+    Initialized and used by HWPs.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_M_DRAM_CLOCKS</id>
+    <description>
+      This is the throttled M DRAM clocks setting for cfg_nm_m.
+      creator: mss_eff_cnfg
+      consumer: mc_config
+      firmware notes: none
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+    <description>
+      This is the throttle numerator setting for cfg_nm_n_per_slot
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -8797,10 +9287,18 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_MEM_WATT_TARGET</id>
-    <description>Channel total memory watts. Initialized and used by HWPs.</description>
+    <description>
+      Total memory power limit in cW for the dimms on the memory channel pair.
+      Used to compute the throttles on the channel and/or dimms.
+      creator: unknown.
+      consumer: mss_eff_config.
+      firmware notes: none.
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
+        <!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
+<!--         <array>2</array> -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8827,6 +9325,41 @@ DEPRECATED!!!!
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>MSS_MASTER_PWR_SLOPE</id>
+    <description>Master Power slope value for dimm. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MASTER_PWR_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_SUPPLIER_PWR_SLOPE</id>
+    <description>Supplier Power slope value for dimm. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_SUPPLIER_PWR_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 
 <attribute>
     <id>MSS_POWER_SLOPE2</id>
@@ -8858,6 +9391,46 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_POWER_INT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MASTER_PWR_INTERCEPT</id>
+    <description>
+    Master Power intercept value for dimm
+    Initialized and used by HWPs.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MASTER_PWR_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_SUPPLIER_PWR_INTERCEPT</id>
+    <description>
+    Supplier Power intercept value for dimm
+    Initialized and used by HWPs.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_SUPPLIER_PWR_INTERCEPT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -8949,7 +9522,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_DIMM_MAXBANDWIDTH_GBS</id>
-    <description>DIMM Max Bandwidth in GBs. Initialized and used by HWPs.</description>
+    <description>DIMM Max Bandwidth in GBs output from thermal procedures. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -8966,7 +9539,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_DIMM_MAXBANDWIDTH_MRS</id>
-    <description>DIMM Max Bandwidth in MRs. Initialized and used by HWPs.</description>
+    <description>DIMM Max Bandwidth in MRs output from thermal procedures Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -9000,7 +9573,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
-    <description>Channel Pair Max Bandwidth in GBs. Initialized and used by HWPs.</description>
+    <description>Pair Max Bandwidth in GBs output from thermal procedures. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -9034,7 +9607,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
-    <description>Channel Pair Max Bandwidth MRs. Initialized and used by HWPs.</description>
+    <description>Channel Pair Max Bandwidth MRs output from thermal procedures. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -9051,7 +9624,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_DIMM_MAXPOWER</id>
-    <description>DIMM Max Power output. Initialized and used by HWPs.</description>
+    <description>DIMM Max Power output from thermal procedures. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -9085,7 +9658,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_CHANNEL_PAIR_MAXPOWER</id>
-    <description>Channel Pair Max Power output. Initialized and used by HWPs.</description>
+    <description>Channel Pair Max Power output from thermal procedures. Initialized and used by HWPs.</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -9095,6 +9668,65 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <description>
+    Runtime throttled N commands per
+    M DRAM clocks setting for cfg_nm_n_per_port.
+    Initialized and used by HWPs.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id>
+    <description>
+      Runtime for M DRAM clocks setting for cfg_nm_m
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+    <description>
+      Runtime throttle numerator setting for cfg_nm_n_per_slot
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -9264,7 +9896,10 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_PREFETCH_ENABLE</id>
-    <description>Prefteching enable. 1 = enable, 0 = disable.</description>
+    <description>
+      Value of on or off.  Determines if prefetching enabled or not.
+      See chapter 7 of the Centaur Workbook.
+    </description>
     <simpleType>
         <uint8_t>
             <default>1</default>
@@ -9280,7 +9915,11 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_CLEANER_ENABLE</id>
-    <description>L4 cleaner enable. 1 = enable, 0 = disable.</description>
+    <description>
+      Value of on or off.
+      Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
+      enabled or not. See chapter 7 of the Centaur Workbook.
+    </description>
     <simpleType>
         <uint8_t>
             <default>1</default>
@@ -9349,11 +9988,20 @@ Measured in GB</description>
 
 <attribute>
     <id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
-    <description>A bit vector (per Dean's request) specifying if a DIMM is functional.  DIMM attributes, such as SIZE, are qualified by this bit vector.  The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.  0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.  A fully populated system would have the value of 0xCC. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
-This factors in functionality</description>
+    <description>
+      A bit vector (per Dean's request) specifying if a DIMM is functional.
+      DIMM attributes, such as SIZE, are qualified by this bit vector.
+      The attribute ANDed 0x80 means port 0, DIMM 0 is functional, 0x40 means port 0, DIMM 1 is functional.
+      0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.
+      A fully populated system would have the value of 0xCC.
+      Used in various locations and is computed in mss_eff_cnfg.
+      Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
+      This factors in functionality
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -9366,18 +10014,25 @@ This factors in functionality</description>
 
 <attribute>
     <id>MSS_CAL_STEP_ENABLE</id>
-    <description>A bit vector denoting valid cal steps to run during dram_init_train. [0] EXT_ZQCAL
-[1] WR_LEVEL
-[2] DQS_ALIGN
-[3] RDCLK_ALIGN
-[4] READ_CTR
-[5] WRITE_CTR
-[6] COARSE_WR
-[7] COARSE_RD
-bits6:7  will be consumed together to form COARSE_LVL. </description>
+    <description>
+    A bit vector denoting valid cal steps to run (0 is left most bit)
+    [0] EXT_ZQCAL
+    [1] WR_LEVEL
+    [2] DQS_ALIGN
+    [3] RDCLK_ALIGN
+    [4] READ_CTR
+    [5] READ_CTR_2D_VREF
+    [6] WRITE_CTR
+    [7] WRITE_CTR_2D_VREF
+    [8] COARSE_WR
+    [9] COARSE_RD
+    [10]:[15] Reserved for future use
+    COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
+    </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
+        <uint16_t>
+        </uint16_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -9406,7 +10061,13 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>MSS_SLEW_RATE_DATA</id>
-    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances</description>
+    <description>
+      The 4 bit result of running the slew calibration algorithm at various rates and impedances.
+      The first dimension is port, the second is the impedance of 24,30,34, and 40 Ohms.
+      The 3rd dimension is the rate: 3,4,5 or 6 V/ns.
+      Computed and sent to the correct data blocks in phy_reset.
+      Also used in advanced training
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -9423,7 +10084,13 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>MSS_SLEW_RATE_ADR</id>
-    <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances</description>
+    <description>
+      The 4 bit result of running the slew calibration algorithm at various rates and impedances.
+      The first dimension is the port.  The second is the impedance of 15, 20, 30 and 40 Ohms.
+      The 3rd dimension is the rate:3, 4,5 or 6 V/ns.
+      Computed and sent to the correct data blocks in phy_reset.
+      Also used in advanced training
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -9461,10 +10128,14 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>MSS_ALLOW_SINGLE_PORT</id>
-    <description>When this value is true, then mss_eff config will allow a single port to have one dimm and will allow ports to have different sizes.  Used in eff_config</description>
+    <description>
+      When this value is true, then mss_eff config will allow a single port to have one dimm
+      and will allow ports to have different sizes. Used in eff_config
+    </description>
     <simpleType>
         <uint8_t>
             <default>0</default>
+            <array>2</array>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -10251,14 +10922,14 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 
 <attribute>
     <id>MSS_DQS_SWIZZLE_TYPE</id>
-    <description>DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses. Type 0 is normal, type 1 is for systems with wiring like glacier 1.  Additional types maybe defined if new boards have even different DQS swizzle features
-
-        NORMAL_TYPE_0   = 0
-        GLACIER_TYPE_1  = 1
-        PALMETTO_TYPE_2 = 2
+    <description>
+      DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses.
+      Type 0 is normal, type 1 is for systems with wiring like glacier 1, type 2 is for Pallmeto.
+      Additional types maybe defined if new boards have even different DQS swizzle features
     </description>
     <simpleType>
         <uint8_t><default>0</default></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -10324,7 +10995,12 @@ Measured in GB</description>
 
 <attribute>
     <id>EFF_DIMM_SPARE</id>
-    <description>Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.   creator: mss_eff_cnfg consumer: various firmware notes: load from spd</description>
+    <description>
+      Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
+      creator: mss_eff_cnfg consumer: various firmware notes: load from spd
+      OBSOLETE: Use ATTR_VPD_DIMM_SPARE
+      NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3
+    </description>
     <simpleType>
         <uint8_t>
         </uint8_t>
@@ -10940,10 +11616,18 @@ Measured in GB</description>
 
 <attribute>
     <id>MSS_FREQ_OVERRIDE</id>
-    <description>FOR LAB USE ONLY: Frequency override of this memory channel in MHz, comprising of up to three DIMMs.  Set by config file or an attribute writing program.  Consumed by mss_freq.  The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.  Otherwise, this is the system frequency.
-firmware notes: Platforms should initialize this attribute to AUTO (0)</description>
+    <description>
+      FOR LAB USE ONLY: Frequency override of this memory channel in MT/s
+      comprising of up to three DIMMs.
+      Set by config file or an attribute writing program.
+      Consumed by mss_freq.
+      The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
+      Otherwise, this is the system frequency.
+      firmware notes: Platforms should initialize this attribute to AUTO (0)
+    </description>
     <simpleType>
         <uint32_t>
+        <default>0</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -11058,6 +11742,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11599,12 +12284,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_DRAM_LPASR</id>
-    <description> Low Power Auto Self-Refresh. This is for DDR4 MRS2.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Low Power Auto Self-Refresh.
+      This is for DDR4 MRS2.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11617,12 +12308,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_MPR_PAGE</id>
-    <description>MPR Page Selection This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      MPR Page Selection This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11635,12 +12331,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_GEARDOWN_MODE</id>
-    <description>Gear Down Mode. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Gear Down Mode.
+      This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11653,12 +12355,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_PER_DRAM_ACCESS</id>
-    <description>Per DRAM accessibility.  This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Per DRAM accessibility.
+      This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
       firmware notes: none</description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11671,12 +12378,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_TEMP_READOUT</id>
-    <description>Temperature sensor readout. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Temperature sensor readout.
+      This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11707,12 +12420,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CRC_WR_LATENCY</id>
-    <description>write latency for CRC and DM. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      write latency for CRC and DM. This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11725,12 +12443,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_MPR_RD_FORMAT</id>
-    <description>MPR READ FORMAT. This is for DDR4 MRS3.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      MPR READ FORMAT.
+      This is for DDR4 MRS3.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11743,12 +12467,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_MAX_POWERDOWN_MODE</id>
-    <description>Max Power down mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Max Power down mode.
+      This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11779,12 +12509,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_TEMP_REF_MODE</id>
-    <description>Temp controlled ref mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Temp controlled ref mode. This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11797,10 +12532,15 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_INT_VREF_MON</id>
-    <description>Internal Vref Monitor.. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Internal Vref Monitor.
+      This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
@@ -11815,12 +12555,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CS_CMD_LATENCY</id>
-    <description>CS to CMD/ADDR Latency. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      CS to CMD/ADDR Latency.
+      This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11833,12 +12579,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_SELF_REF_ABORT</id>
-    <description>Self Refresh Abort. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Self Refresh Abort.
+      This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11851,12 +12603,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_RD_PREAMBLE_TRAIN</id>
-    <description>Read Pre amble Training Mode. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Read Pre amble Training Mode. This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11869,12 +12625,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_RD_PREAMBLE</id>
-    <description>Read Pre amble. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Read Pre amble. This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11887,12 +12647,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_WR_PREAMBLE</id>
-    <description>Write Pre amble. This is for DDR4 MRS4.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Write Pre amble. This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11905,12 +12669,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CA_PARITY_LATENCY</id>
-    <description>C/A Parity Latency Mode. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      C/A Parity Latency Mode. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11923,12 +12691,18 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CRC_ERROR_CLEAR</id>
-    <description>CRC Error Clear. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none</description>
+    <description>
+    CRC Error Clear.
+    This is for DDR4 MRS5.
+    Computed in mss_eff_cnfg.
+    Each memory channel will have a value.
+    creator: mss_eff_cnfg
+    consumer: various
+    firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11941,12 +12715,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CA_PARITY_ERROR_STATUS</id>
-    <description>C/A Parity Error Status. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      C/A Parity Error Status. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11959,12 +12737,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_ODT_INPUT_BUFF</id>
-    <description>ODT Input Buffer during power down. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      ODT Input Buffer during power down. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -11977,10 +12759,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_RTT_PARK</id>
-    <description>RTT_Park value. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      RTT_Park value. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
         <array>2, 2, 4</array>
@@ -11996,12 +12781,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_CA_PARITY</id>
-    <description>CA Parity Persistance Error. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      CA Parity Persistance Error. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12014,12 +12803,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_DATA_MASK</id>
-    <description>Data Mask. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Data Mask. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12032,12 +12825,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_WRITE_DBI</id>
-    <description>Write DBI. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Write DBI. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12050,12 +12847,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_READ_DBI</id>
-    <description>Read DBI. This is for DDR4 MRS5.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+    <description>
+      Read DBI. This is for DDR4 MRS5.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
-      firmware notes: none</description>
+      firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12068,10 +12869,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_VREF_DQ_TRAIN_VALUE</id>
-    <description>vrefdq_train value. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none</description>
+    <description>
+      vrefdq_train value. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
         <array>2,2,4</array>
@@ -12087,10 +12891,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_VREF_DQ_TRAIN_RANGE</id>
-    <description>vrefdq_train range. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none</description>
+    <description>
+      vrefdq_train range. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
         <array>2,2,4</array>
@@ -12106,10 +12913,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_VREF_DQ_TRAIN_ENABLE</id>
-    <description>vrefdq_train enable. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none</description>
+    <description>
+      vrefdq_train enable. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
         <array>2,2,4</array>
@@ -12143,12 +12953,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_WRITE_CRC</id>
-    <description>Write CRC control for DDR4.  Set in mss_eff_cnfg.  Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none</description>
+    <description>
+      Write CRC control for DDR4 in MRS2.
+      Set in mss_eff_cnfg.
+      Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12458,6 +13273,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         get the desired frequency. The supported frequencies come from
         Tim Diemoz.
         Creator: platform set this to 0.  Users can set this to a valid value.
+        VALID Values: (TBD % to TBD %) (Tuleta) (TBD % to TBD %) (Glacier)
+        Set by: PLL settings written by Dave Cadigan
     </description>
     <simpleType>
         <uint32_t>
@@ -12859,11 +13676,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_BUFFER_LATENCY</id>
-    <description>Additional buffer latency in the case of RDIMMs and LRDIMMs.    It is expected that this value will come from the VPD</description>
+    <description>
+      Additional buffer latency in the case of RDIMMs and LRDIMMs.
+      It is expected that this value will come from the VPD
+    </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12876,11 +13696,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>LRDIMM_MR12_REG</id>
-    <description>LRDIMM MR1,2 register.
-     DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance for all ranks.  Eff config should set this up.</description>
+    <description>
+      LRDIMM MR1,2 register.
+      DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance for all ranks.
+      Eff config should set this up.
+    </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -12895,13 +13717,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>LRDIMM_ADDITIONAL_CNTL_WORDS</id>
-    <description>LRDIMM additional RCD control words as set by DIMM SPD:
-     F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10, F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,
-     F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
-     Eff config should set this up</description>
+    <description>
+      LRDIMM additional RCD control words as set by DIMM SPD:
+      F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10, F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,
+      F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
+      Eff config should set this up
+    </description>
     <simpleType>
         <uint64_t>
-            <default>0</default>
         </uint64_t>
         <array>2,2</array>
     </simpleType>
@@ -12916,12 +13739,14 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>LRDIMM_RANK_MULT_MODE</id>
-    <description>LRDIMM rank multiplication mode.
-     Will be set at an MBA level with one policy to be used</description>
+    <description>
+      LRDIMM rank multiplication mode.
+      Will be set at an MBA level with one policy to be used
+    </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
+         <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -13026,9 +13851,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
-    <description>RAS weight to use for memory throttle control</description>
+    <description>
+      RAS weight to use for memory throttle control
+      - set in thermal procedures
+      </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -13041,9 +13870,13 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
-    <description>CAS weight to use for memory throttle control</description>
+    <description>
+      CAS weight to use for memory throttle control
+      - set in thermal procedures
+    </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -13724,6 +14557,131 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+  <id>MSS_DATABUS_UTIL</id>
+  <description>
+    DRAM data bus utilization percent to use to determine ATTR_MSS_THROTTLED_N_COMMANDS
+    creator: f/w
+    consumer: mss_utils_to_throttle
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_DATABUS_UTIL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_THROTTLED_N_COMMANDS</id>
+  <description>
+    Throttled N commands (address operations) that are
+    allowed within a window of M DRAM clocks.
+    Nimbus workbook (Power and Thermal Controls).
+    creator: mss_utils_to_throttle
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>2,2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_THROTTLED_N_COMMANDS</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>ATTR_EFF_DRAM_MAC</id>
+  <description>
+    Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
+    creator: mss_eff_cnfg
+    consumer: various
+    firmware notes: none
+  </description>
+  <simpleType>
+      <uint16_t></uint16_t>
+      <array>2,2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_MAC</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>VPD_RLO</id>
+  <description>
+    This value comes from the VPD keyword MT byte 60 bits 4:7 for the Logical DIMM associated with port A.
+    Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_VPD_RLO</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>VPD_WLO</id>
+  <description>
+    This value comes from the VPD keyword MT byte 60 bits 0:3 for the Logical DIMM associated with port A.
+    Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_VPD_WLO</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>EFF_DRAM_MODULE_BUS_WIDTH</id>
+  <description>
+    Module Memory Bus Width.
+    Used in various locations and is evaluated in mss_eff_cnfg.
+    creator: mss_eff_cnfg
+    consumer: various
+    firmware notes: none
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_MODULE_BUS_WIDTH</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+
+
+<attribute>
   <id>MSS_UTIL_N_PER_MBA</id>
   <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
   <simpleType>
@@ -14035,6 +14993,7 @@ DEPRECATED!!!!
     </description>
     <simpleType>
         <uint32_t></uint32_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -14194,11 +15153,14 @@ DEPRECATED!!!!
 <attribute>
     <id>MSS_NEST_CAPABLE_FREQUENCIES</id>
     <description>
-        The NEST frequencies the memory chip can run at computed by the mss_freq.  The possibilities are ORed together.  The platform uses these value and the MRW to determine what frequency to boot the fabric (nest) if it can. There are two values: 8G and 9.6G
+      The NEST frequencies the memory chip can run at computed by the mss_freq.
+      The possibilities are ORed together.  The platform uses these value and
+      the MRW to determine what frequency to boot the fabric (nest) if it can.
+      There are two values: 8G and 9.6G
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -15003,11 +15965,8 @@ DEPRECATED!!!!
 <attribute>
     <id>MSS_VOLT_OVERRIDE</id>
     <description>
-        Voltage override for MSS_VOLT.  Used for membuf lab debug.
-
-        0x00 = None (default), no override
-        0x01 = 1.35V
-        0x02 = 1.20V
+      Possible DRAM voltage override.
+      Firmware notes: Default should be NONE (0x00).
     </description>
     <simpleType>
         <uint8_t>
@@ -15046,16 +16005,10 @@ DEPRECATED!!!!
 <attribute>
     <id>MSS_VDDR_OVERIDE_SPD</id>
     <description>
-        DIMM SPD voltage override for VDDR voltage calculations.
-        Used for lab debug.
-
-        0x00 = None (default), no override
-        0x01 = 1.35V
-        0x02 = 1.20V
+      Possible VDDR voltage override.
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -15296,10 +16249,11 @@ DEPRECATED!!!!
 
 <attribute>
     <id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
-    <description>version of algorithm used to calculate ISDIMM power curves
+    <description>
+      version of algorithm used to calculate ISDIMM power curves
     </description>
     <simpleType>
-        <uint32_t><default>0</default></uint32_t>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -16142,12 +17096,12 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id>
-    <description>Maximum number of installed DIMMs per VMEM regulator for all
+    <description>
+    Maximum number of installed DIMMs per VMEM regulator for all
     VMEM regulators in the system.
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -16994,38 +17948,19 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_TCCD_L</id>
-    <description>tccd_l. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
-                 Creator: mss_eff_cnfg
-                 Consumer:various
-                 Firmware notes: none
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TCCD_L</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_LRDIMM_WORD_X</id>
     <description>Additional buffer control word for LRDIMM building of the BCW</description>
     <simpleType>
         <uint64_t></uint64_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_LRDIMM_WORD_X</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -17097,38 +18032,6 @@ DEPRECATED!!!!
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TRRD_L</id>
-    <description>DRAM Row to Row Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TRRD_L</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_TWTR_L</id>
-    <description>DRAM Internal Write to Read Delay. Initialized and used by HWPs.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_TWTR_L</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -21783,44 +22686,2603 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_RANK_MIX</id>
+    <id>NHTM_TRACE_TYPE</id>
     <description>
-        DRAM Device Rank Mix
-        Used in various locations and is computed in mss_eff_cnfg.
-        creator: mss_eff_cnfg
-        consumer: various
-        firmware notes: none
+      The Nest HTM trace type desired to be collected.
+      - Platform is to default to DISABLE (0x0).
+      - User can change NHTM trace type (i.e. enable NHTM trace
+      collection) using Attribute Override.
+      DISABLE = 0x0, FABRIC = 0x1, EVENT = 0x2, OCC = 0x3
     </description>
     <simpleType>
-      <uint8_t></uint8_t>
-      <array>2,2</array>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
     </simpleType>
-    <writeable/>
     <persistency>volatile-zeroed</persistency>
+    <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_EFF_DRAM_RANK_MIX</id>
+      <id>ATTR_NHTM_TRACE_TYPE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>EFF_DRAM_MAC</id>
+    <id>CHTM_TRACE_TYPE</id>
     <description>
-        Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
-        creator: mss_eff_cnfg
-        consumer: various
-        firmware notes: none
+      The Core HTM trace type desired to be collected.
+      - Platform is to default to DISABLE (0x0)
+      - User can change CHTM trace type (i.e. enable CHTM trace
+        collection) using Attribute Override.
+        DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4
     </description>
     <simpleType>
-      <uint16_t></uint16_t>
-      <array>2,2</array>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
     </simpleType>
-    <writeable/>
     <persistency>volatile-zeroed</persistency>
+    <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_EFF_DRAM_MAC</id>
+      <id>ATTR_CHTM_TRACE_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_PAT</id>
+    <description>
+      Nest HTM: defines the TTYPE pattern to match in Fabric trace mode.
+      HTM Ttype Filter Control Register (1:7).
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TSIZEFILT_PAT</id>
+    <description>
+      Nest HTM: defines the TSIZE pattern to match in Fabric trace mode.
+      HTM Ttype Filter Control Register (8:15).
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TSIZEFILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_MASK</id>
+    <description>
+      Nest HTM: TTYPE pattern mask.
+      HTM Ttype Filter Control Register (17:23).
+      If set to 1, do not need to match w/ the pattern.
+      If all mask bits are set, no TTYPE pattern/masking is done
+      - Platform is to default to 0x7F
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TSIZEFILT_MASK</id>
+    <description>
+      Nest HTM: TSIZE pattern mask.
+      HTM Ttype Filter Control Register (24:31).
+      If set to 1, do not need to match w/ the Pattern.
+      If all mask bits are set, no TSIZE pattern/masking is done
+      - Platform is to default to 0xFF
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TSIZEFILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_INVERT</id>
+    <description>
+      Nest HTM: TTYPE/TSIZE Capture Invert.
+      HTM Ttype Filter Control Register (32).
+      0 : Capture record based on ttype/tsize pattern matching
+      1 : Capture record based on ttype/tsize pattern NOT matching
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_INVERT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CRESPFILT_INVERT</id>
+    <description>
+      Nest HTM: CRESP Filter Capture Invert.
+      HTM Ttype Filter Control Register (33).
+      0 : Capture record based on cresp filter pattern matching
+      1 : Capture record based on cresp filter pattern NOT matching
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CRESPFILT_INVERT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_PAT</id>
+    <description>
+      HTM Filter Control Register (0:22).
+      In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+      match in the RCMD and CRESP:
+          0:3   rcmd_ttag(0:2) Group ID Pattern for rcmd and cresp
+                filtering.
+          4:6   rcmd_ttag(3:5) Chip ID Pattern for rcmd and cresp
+                filtering.
+          7:16  rcmd_ttag(6:13) Unit ID Pattern for rcmd and cresp
+                (if from this chip) filtering.
+          17:19 rcmd_scope(0:2) Scope Pattern for rcmd and cresp
+                filtering.
+          20:21 rcmd_source(0:1) Source Pattern for rcmd filtering.
+          22    Powerbus PORT pattern for rcmd and cresp filtering.
+        In OCC trace mode, defines the occ_trace_data(0:22) pattern
+        to match:
+          0:22  occ_trace_data(0:22) pattern.
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_CRESP_PAT</id>
+    <description>
+      Nest HTM: defines the CRESP Filter pattern in FABRIC trace mode.
+      HTM Filter Control Register (27:31).
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_CRESP_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_MASK</id>
+    <description>
+      Nest HTM FABRIC: Pattern mask.
+      HTM Filter Control Register (32:54).
+      Bits set to 1 in this mask do not need to match w/ the Filter
+      pattern.
+      If all mask bits are set, No pattern matching is done.
+      - Platform is to default to 0x3FFFFF
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0x3FFFFF</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_CRESP_MASK</id>
+    <description>
+      Nest HTM FABRIC: CRESP Filter Mask.
+      HTM Filter Control Register (59:63).
+      Bits set to 1 in this mask do not need to match w/ the CRESP
+      Filter pattern.
+      If all mask bits are set, no pattern matching is done
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_CRESP_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_CONTENT_SEL</id>
+    <description>
+      Nest HTM: defines the NHTM trace mode.
+      HTM Collection Mode Register (1:2).
+      - Platform is to default to 0x0 (FABRIC)
+      - User can change the value using Attribute Override.
+      FABRIC = 0x0, EVENT = 0x1, OCC = 0x2
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_CONTENT_SEL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_CAPTURE</id>
+    <description>
+      Nest HTM: defines capture mode according to trace mode.
+      HTM Collection Mode Register (4:12).
+      When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
+        456789012
+        0xxxx0000 : Ignore HTM generated data writes
+        1xxxx0000 : Capture htm generated data writes
+        x0xxx0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
+        x1xxx0000 : Filtering applied on ttype = PMISC and ttype = report hang
+        xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
+        xx01x0000 : CRESP Mode: Reserved
+        xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
+        xx11x0000 : CRESP Mode: Ignore CRESP
+        xxxx00000 : Pre-Allocate maximum memory buffers (8)
+        xxxx10000 : Pre-Allocate fewer memory buffers (4)
+      When htm_mode_q(1 TO 2) == 01, i.e. OTHER
+        00000xxxx : Pre-Allocate maximum memory buffers (8)
+        00001xxxx : Pre-Allocate fewer memory buffers (4)
+        0000xmmmx : mmm for optional external mux control
+        0000xxxx0 : Both -other- trace buses to NHTM0
+        0000xxxx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
+      When htm_mode_q(1 TO 2) == 10, i.e. OCC
+        00000xxx0 : Pre-Allocate maximum memory buffers (8)
+        00001xxx0 : Pre-Allocate fewer memory buffers (4)
+        0000xmmm0 : mmm for optional external mux control
+      - Platform is to default to 0x040 (Precise CRESP, 0b001000000)
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0x040</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_CAPTURE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_WRAP</id>
+    <description>
+      Nest HTM: Trace Wrap mode.
+      HTM Collection Mode Register (13).
+      0 = Stop trace when top of Trace Memory is reached
+      1 = Wrap trace to beginning of Trace Memory
+      - Platform is to default to 0x1
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>1</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_WRAP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
+    <description>
+      Nest HTM: TimeStamp Writes option.
+      HTM Collection Mode Register (14).
+      0 = Write of timestamps enabled to indicate elapsed time
+          between records.
+      1 = Timestamps written only to indicate record loss
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_SINGLE_TSTAMP</id>
+    <description>
+      Nest HTM: Overflow Timestamps option.
+      HTM Collection Mode Register (15).
+      0 = Timestamp written to indicate elapsed time overflow.
+      1 = Only one timestamp is written between entries, overflow
+          indication is lost
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_MARKERS_ONLY</id>
+    <description>
+      Nest HTM: Stamp/Marker only mode.
+      HTM Collection Mode Register (17).
+      0 = Normal trace
+      1 = Ignore incoming trace data and save only markers caused
+          by HTM_TRIG writes,
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+    <description>
+      Nest HTM: Group scope option.
+      HTM Collection Mode Register (18).
+      This is a powerbus debug bit
+      0 = htm write ops sent with group scope
+      1 = htm write ops sent with Vg scope using programmed
+          target bits.
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override..
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_SYNC_STAMP_FORCE</id>
+    <description>
+      Nest HTM: Control the number of cycles to wait to force a
+      synchronization stamp or reset the timer.
+      HTM Collection Mode Register (19:21).
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_SYNC_STAMP_FORCE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_WRITETOIO</id>
+    <description>
+      Nest HTM: Use space option.
+      HTM Collection Mode Register (22).
+      0 = Use HTM_CL_Write op to target system memory.
+          Do pre-allocation sequence. (default)
+      1 = Use ci_pr_st op to target anywhere else.
+          Dont do pre-allocate sequence.
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_WRITETOIO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_VGTARGET</id>
+    <description>
+      Nest HTM: VG target mode.
+      HTM Collection Mode Register (24:39).
+      Vg Target bits should be configured if HTM_MEM[scope] is Vg
+      or if Disable Group Scope=1
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_VGTARGET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MEM_SCOPE</id>
+    <description>
+      Setting of memory scope for HTM collection.
+      HTM Memory Configuration Register (1:3)
+      - Platform is to default to 0x0 (LOCAL).
+      - User can change HTM scope using Attribute Override.
+      LOCAL = 0x0, NEARNODE = 0x1, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MEM_SCOPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MEM_PRIORITY</id>
+    <description>
+      Setting of memory priority for HTM collection.
+      HTM Memory Configuration Register (4)
+      - Platform is to default to LOW.
+      - User can change MEM_PRIORITY using Attribute Override.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MEM_PRIORITY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_TRIG</id>
+    <description>
+      Setting of Trigger control.
+      HTM Trigger Control Register (0:1)
+        00 local triggers are not forwarded to the PowerBus, it is
+            inserted into the trace when tracing.  Both local and
+            global triggers control the HTM
+        01 local triggers are not forwarded to the PowerBus, it is
+            inserted into the traCe when tracing.  Only local triggers
+            control the HTM
+        1x local triggers are forwarded to the PowerBus, it is not
+            inserted into the trace when tracing.  Only global
+            triggers control the HTM
+      - Platform is to default to 0x1.
+      - User can change MEM_PRIORITY using Attribute Override.
+      LOCAL_GLOBAL = 0x0, LOCAL = 0x1, GLOBAL = 0x2
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_TRIG</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_MARK</id>
+    <description>
+      Setting of Mark control.
+      HTM Trigger Control Register (4:5)
+      00 local markers are not forwarded to the PowerBus.  Both
+          local and global markers are inserted into the trace
+      01 local markers are not forwarded to the PowerBus.  Only
+          local markers are inserted into the trace
+      10 local markers are forwarded to the PowerBus.  Only global
+          markers are inserted into the trace
+      11 local markers are forwarded to the PowerBus.  Markers
+          are not inserted into the trace (Fabric Trace Mode)
+
+      - Platform is to default to 1.
+      - User can change MEM_PRIORITY using Attribute Override.
+      LOCAL_GLOBAL = 0x0, LOCAL_MARK = 0x1, GLOBAL_MARK = 0x2,
+      NO_MARK = 0x3
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_MARK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_DBG0_STOP</id>
+    <description>
+      Enable Stop on PB Chiplet Debug Trigger 0.
+      HTM Trigger Control Register (6)
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+      DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_DBG0_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_DBG1_STOP</id>
+    <description>
+      Enable Stop on PB Chiplet Debug Trigger 1.
+      HTM Trigger Control Register (7)
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+      DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_DBG1_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_RUN_STOP</id>
+    <description>
+      Enable trace stop on falling edge of PB chiplet trace run.
+      HTM Trigger Control Register (8)
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+      DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_RUN_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
+    <description>
+      Enable Stop using OCC Control.
+      HTM Trigger Control Register (9)
+      - Platform is to default to 0x0
+      - User can change the value using Attribute Override.
+      DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_XSTOP_STOP</id>
+    <description>
+      Enable Stop on chiplet XSTOP.
+      HTM Trigger Control Register (13)
+      - Platform is to default to 0x1
+      - User can change the value using Attribute Override.
+      DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_XSTOP_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_GEN</id>
+    <description>
+      DRAM Device Type.
+      Decodes SPD byte 2.
+      Generation of memory: DDR3, DDR4.
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+      EMPTY = 0, DDR3 = 1, DDR4 = 2
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+<!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
+<!--       <array>2,2</array> -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_GEN</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_TYPE</id>
+    <description>
+      Base Module Type.
+      Decodes SPD Byte 3 (bits 3~0).
+      Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDIC standard.
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+      EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_HYBRID_MEMORY_TYPE</id>
+    <description>
+      Hybrid Media.
+      Decodes SPD Byte 3 (bits 6~4)
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+      NONE = 0, NVDIMM = 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_HYBRID_MEMORY_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_HYBRID</id>
+    <description>
+      Hybrid.
+      Decodes SPD Byte 3 (bit 7)
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+      NOT_HYBRID = 0, IS_HYBRID= 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_HYBRID</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_DENSITY</id>
+    <description>
+      DRAM Density.
+      Decodes SPD Byte 4 (bits 3~0).
+      Total SDRAM capacity per die.
+      For multi-die stacks (DDP, QDP, or 3DS), this represents
+      the capacity of each DRAM die in the stack.
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_DENSITY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_BANK_BITS</id>
+    <description>
+      Number of DRAM bank address bits.
+      Actual number of banks is 2^N, where
+      N is the number of bank address bits.
+      Decodes SPD Byte 4 (bits 5~4).
+      creator: spd_decoder
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_BANK_BITS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_BANK_GROUP_BITS</id>
+    <description>
+      Bank Groups Bits.
+      Decoded SPD Byte 4 (bits 7~6).
+      Actual number of bank groups is 2^N,
+      where N is the number of bank address bits.
+      This value represents the number of bank groups
+      into which the memory array is divided.
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_BANK_GROUP_BITS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_COLUMN_BITS</id>
+    <description>
+      Column Address Bits.
+      Decoded SPD Byte 5 (bits 2~0).
+      Actual number of DRAM columns is 2^N,
+      where N is the number of column address bits
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_COLUMN_BITS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_ROW_BITS</id>
+    <description>
+      Row Address Bits.
+      Decodes Byte 5 (bits 5~3).
+      Number of DRAM column address bits.
+      Actual number of DRAM rows is 2^N,
+      where N is the number of row address bits
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_ROW_BITS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_PRIM_STACK_TYPE</id>
+    <description>
+      Primary SDRAM Package Type.
+      Decodes Byte 6.
+      This byte defines the primary set of SDRAMs.
+      Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
+      creator: mss_eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_PRIM_STACK_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_PPR</id>
+    <description>
+      Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      NOT_SUPPORTED = 0, SUPPORTED = 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_PPR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_SOFT_PPR</id>
+    <description>
+      Soft Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+      NOT_SUPPORTED = 0, SUPPORTED = 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_SOFT_PPR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRCD</id>
+    <description>
+      Minimum RAS to CAS Delay Time
+      in nck (number of clock cyles).
+      Decodes SPD byte 25 (7~0) and byte 112 (7~0).
+      Each memory channel will have a value.
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRCD</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRP</id>
+    <description>
+      SDRAM Row Precharge Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 26 (bits 7~0) and byte 121 (bits 7~0).
+      Each memory channel will have a value.
+      creator: eff_config
+      consumer: various
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRAS</id>
+    <description>
+      Minimum Active to Precharge Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 27 (bits 3~0) and byte 28 (7~0).
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRAS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRC</id>
+    <description>
+      Minimum Active to Active/Refresh Delay
+      in nck (number of clock cyles).
+      Decodes SPD byte 27 (bits 7~4), byte 29 (bits 7~0), and byte 120.
+      Each memory channel will have a value.
+      creator: eff_confg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRC</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRFC</id>
+    <description>
+      DDR4 Spec defined as Refresh Cycle Time (tRFC).
+      SPD Spec refers it to the Minimum Refresh Recovery Delay Time.
+      In nck (number of clock cyles).
+      Decodes SPD byte 31 (bits 15~8) and byte 30 (bits 7~0) for tRFC1.
+      Decodes SPD byte 33 (bits 15~8) and byte 32 (bits 7~0) for tRFC2.
+      Decodes SPD byte 35 (bits 15~8) and byte 34 (bits 7~0) for tRFC4.
+      Selected tRFC value depends on MRW attribute that selects refresh mode.
+      For 3DS, The tRFC time to the same logical rank is defined as tRFC_slr and is
+      specificed as the value as for a monolithic DDR4 SDRAM of equivalent density.
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRFC</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TFAW</id>
+    <description>
+      Minimum Four Activate Window Delay Time
+      in nck (number of clock cycles).
+      Decodes SPD byte 36 (bits 3~0) and byte 37 (bits 7~0).
+      For 3DS, tFAW time to the same logical rank is defined as
+      tFAW_slr_x4 or tFAW_slr_x8 (for x4 and x8 devices only) and
+      specificed as the value as for a monolithic DDR4 SDRAM
+      equivalent density.
+      Each memory channel will have a value.
+      creator: eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TFAW</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRRD_S</id>
+    <description>
+      Minimum Activate to Activate Delay Time, different bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 38 (bits 7~0).
+      For 3DS, The tRRD_S time to a different bank group in the
+      same logical rank is defined as tRRD_slr and is
+      specificed as the value as for a monolithic
+      DDR4 SDRAM of equivalent density.
+      Each memory channel will have a value.
+      creator: eff_confg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRRD_S</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TRRD_L</id>
+    <description>
+      Minimum Activate to Activate Delay Time, same bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 39 (bits 7~0).
+      For 3DS, The tRRD_L time to the same bank group in the
+      same logical rank is defined as tRRD_L_slr and is
+      specificed as the value as for a monolithic
+      DDR4 SDRAM of equivalent density.
+      Each memory channel will have a value.
+      creator: eff_confg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TRRD_L</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TCCD_L</id>
+    <description>
+      Minimum CAS to CAS Delay Time, same bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
+      This is for DDR4 MRS6.
+      Each memory channel will have a value.
+      Creator: eff_config
+      Consumer:various
+      Firmware notes: none
+      4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TCCD_L</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TWR</id>
+    <description>
+      Minimum Write Recovery Time.
+      Decodes SPD byte 41 (bits 3~0) and byte 42 (bits 7~0).
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg_timing
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TWR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TWTR_S</id>
+    <description>
+      Minimum Write to Read Time, different bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 43 (3~0) and byte 44 (bits 7~0).
+      Each memory channel will have a value.
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TWTR_S</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TWTR_L</id>
+    <description>
+      Minimum Write to Read Time, same bank group
+      in nck (number of clock cycles).
+      Decodes byte 43 (7~4) and byte 45 (bits 7~0).
+      Each memory channel will have a value.
+      creator: eff_config
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TWTR_L</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TMAW</id>
+    <description>
+      Maximum Activate Window
+      in nck (number of clock cycles).
+      Decodes SPD byte 7 (bits 5~4).
+      Depends on tREFI multiplier.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_TMAW</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC00</id>
+    <description>
+      F0BCW00 Host Interface DQ RTT_NOM Control
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC00</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC01</id>
+    <description>
+      F0BCW01 Host Interface DQ RTT_WR Control
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC01</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC02</id>
+    <description>
+      F0BCW02 Host Interface DQ RTT_PARK Control
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC02</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC03</id>
+    <description>
+      F0BCW03 Host Interface DQ Driver Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC03</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC04</id>
+    <description>
+      F0BCW04 DRAM Interface MDQ RTT Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC04</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC05</id>
+    <description>
+      F0BCW05 DRAM Interface MDQ Driver Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC05</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC06</id>
+    <description>
+      F0BCW06 Command Space Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC06</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC07</id>
+    <description>
+      F0BCW07 Rank Presence Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC07</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC08</id>
+    <description>
+      F0BCW08 RankSelection Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC08</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC09</id>
+    <description>
+      F0BCW09 Power Saving Settings Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC09</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0A</id>
+    <description>
+      F0BCW0A LRDIMM Operating Speed
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0A</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0B</id>
+    <description>
+      F0BCW0B Operating Voltage Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0B</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0C</id>
+    <description>
+      F0BCW0C Buffer Training Mode Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0C</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0D</id>
+    <description>
+      F0BCW0D Reserved for future use
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0D</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0E</id>
+    <description>
+      F0BCW0E Parity Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0E</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_BC0F</id>
+    <description>
+      F0BCW0F Error Status Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_BC0F</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F0BC1x</id>
+    <description>
+      F0BCW1x Buffer Configuration Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BC1x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC2x</id>
+    <description>
+      F30BCW2x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC2x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC3x</id>
+    <description>
+      F30BCW3x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC3x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC4x</id>
+    <description>
+      F30BCW4x Lower Nibble MDQS Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC4x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC5x</id>
+    <description>
+      F30BCW5x Upper Nibble MDQS Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC5x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR6_F0BC6x</id>
+    <description>
+      F0BCW6x Fine Granularity Frequency Operating Speed Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BC6x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F70BC7x</id>
+    <description>
+      F70BCW7x Function Space Selector Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F70BC7x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC8x</id>
+    <description>
+      F30BCW8x Lower Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC8x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BC9x</id>
+    <description>
+      F30BCW9x Upper Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BC9x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BCAx</id>
+    <description>
+      F30BCWAx Lower Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BCAx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F30BCBx</id>
+    <description>
+      F30BCWBx Upper Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F30BCBx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F0BCCx</id>
+    <description>
+      F0BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 0
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BCCx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F0BCDx</id>
+    <description>
+      F0BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BCDx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F0BCEx</id>
+    <description>
+      F0BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BCEx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F0BCFx</id>
+    <description>
+      F0BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 2
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F0BCFx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F1BCCx</id>
+    <description>
+      F1BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F1BCCx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F1BCDx</id>
+    <description>
+      F1BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F1BCDx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F1BCEx</id>
+    <description>
+      F1BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F1BCEx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F1BCFx</id>
+    <description>
+      F1BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F1BCFx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC0x</id>
+    <description>
+      F4BCW0x MRS0 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC0x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC1x</id>
+    <description>
+      F4BCW1x MRS1 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC1x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC2x</id>
+    <description>
+      F4BCW2x MRS2 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC2x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC3x</id>
+    <description>
+      F4BCW3x MRS3 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC3x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC4x</id>
+    <description>
+      F4BCW4x MRS4 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC4x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC5x</id>
+    <description>
+      F4BCW5x MRS5 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC5x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F4BC6x</id>
+    <description>
+      F4BCW6x MRS6 snooped settings
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F4BC6x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_DDR4_F5BC0x</id>
+    <description>
+      F5BCW0x Upper and Lower MPR bits[7:0] for U0
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC0x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F5BC1x</id>
+    <description>
+      F5BCW1x Upper and Lower MPR bits[15:8] for U1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC1x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F5BC2x</id>
+    <description>
+      F5BCW2x Upper and Lower MPR bits[23:16] for U2
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC2x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F5BC3x</id>
+    <description>
+      F5BCW3x Upper and Lower MPR bits[31:24] for U3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC3x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F5BC5x</id>
+    <description>
+      F5BCW5x Host Interface Vref Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC5x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F5BC6x</id>
+    <description>
+      F5BCW6x DRAM Interface Vref Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F5BC6x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC0x</id>
+    <description>
+      F6BCW0x Upper and Lower MPR bits[39:32] for U4
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC0x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC1x</id>
+    <description>
+      F6BCW1x Upper and Lower MPR bits[47:40] for U5
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC1x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC2x</id>
+    <description>
+      F6BCW2x Upper and Lower MPR bits[55:48] for U6
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC2x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC3x</id>
+    <description>
+      F6BCW3x Upper and Lower MPR bits[63:56] for U7
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC3x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC4x</id>
+    <description>
+      F6BCW4x Buffer Training Configuration Control Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC4x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F6BC5x</id>
+    <description>
+      F6BCW5x Buffer Training Status Word
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F6BC5x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_DDR4_F74BC8x</id>
+    <description>
+      F74BCW8x MDQ0/4 -Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BC8x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ATTR_EFF_DIMM_DDR4_F74BC9x</id>
+    <description>
+      F74BCW9x MDQ1/5 -Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BC9x</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCAx</id>
+    <description>
+      >F74BCWAx MDQ2/6 -Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCAx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCBx</id>
+    <description>
+      F74BCWBx MDQ3/7 -Read Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCBx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCCx</id>
+    <description>
+      F74BCWCx MDQ0/4-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCCx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCDx</id>
+    <description>
+      F74BCWDx MDQ1/5-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCDx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCEx</id>
+    <description>
+      F74BCWEx MDQ2/6-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCEx</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_F74BCFx</id>
+    <description>
+      F74BCWFx MDQ3/7-MDQS Write Delay Control Word for ranks 0 to 3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DIMM_DDR4_F74BCFx</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

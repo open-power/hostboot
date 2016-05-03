@@ -34,6 +34,14 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+#include <fapi2/target.H>
+
+
+//HWP Invoker
+#include    <fapi2/plat_hwp_invoker.H>
+
+#include    <p9_exit_cache_contained.H>
+
 
 #include <sys/mm.h>
 #include <arch/pirformat.H>
@@ -74,10 +82,12 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     targetService().getTopLevelTarget(l_sys);
     assert( l_sys != NULL );
 
-    //@TODO RTC:133831 Commenting out due to missing attributes
     errlHndl_t  l_errl  =   NULL;
     uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
     ATTR_PAYLOAD_BASE_type payloadBase = 0;
+
+    TARGETING::TargetHandleList l_procList;
+    getAllChips(l_procList, TYPE_PROC);
 
     if(!l_mpipl)
     {
@@ -116,15 +126,13 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
             // Verify there is memory at the mirrored location
             bool mirroredMemExists = false;
-            TARGETING::TargetHandleList l_procList;
-            getAllChips(l_procList, TYPE_PROC);
 
             for (TargetHandleList::const_iterator proc = l_procList.begin();
                  proc != l_procList.end() && !mirroredMemExists;
                  ++proc)
             {
-                uint64_t mirrorBase[4];
-                uint64_t mirrorSize[4];
+                uint64_t mirrorBase[sizeof(fapi2::ATTR_PROC_MIRROR_BASES_Type)/sizeof(uint64_t)];
+                uint64_t mirrorSize[sizeof(fapi2::ATTR_PROC_MIRROR_SIZES_Type)/sizeof(uint64_t)];
                 bool rc = (*proc)->
                     tryGetAttr<TARGETING::ATTR_PROC_MIRROR_BASES>(mirrorBase);
                 if(false == rc)
@@ -143,7 +151,9 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                     assert(0);
                 }
 
-                for(uint64_t i = 0; i < 4 && !mirroredMemExists; ++i)
+                for(uint64_t i = 0;
+                i < sizeof(fapi2::ATTR_PROC_MIRROR_BASES_Type) && !mirroredMemExists;
+                ++i)
                 {
                     if(mirrorSize[i] != 0 &&
                        l_mirrorBaseAddr >= mirrorBase[i] &&
@@ -208,25 +218,31 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             l_sys->setAttr<ATTR_PAYLOAD_BASE>(payloadBase);
         }
 
-        //@TODO RTC:133831  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP( l_errl,
-        //                 proc_exit_cache_contained
-        //               );
-
-
-
-        if ( l_errl )
+        for (const auto & l_procChip: l_procList)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : call_proc_exit_cache_contained, "
-                      "errorlog PLID=0x%x",
-                      l_errl->plid() );
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi_cpu_target(l_procChip);
+            // call p9_proc_exit_cache_contained.C HWP
+            FAPI_INVOKE_HWP( l_errl,
+                            p9_exit_cache_contained,
+                            l_procChip);
+
+            if(l_errl)
+            {
+                ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);
+                l_stepError.addErrorDetails( l_errl );
+                errlCommit( l_errl, HWPF_COMP_ID );
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_exit_cache_contained:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
+            }
         }
+
+
+
         // no errors so extend VMM.
-        else
+        if(!l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS : call_proc_exit_cache_contained" );
+                       "SUCCESS : call_proc_exit_cache_contained on all procs" );
 
             // @TODO RTC:134082 remove below block
 #if 1
