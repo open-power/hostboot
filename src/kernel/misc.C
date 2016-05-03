@@ -479,7 +479,7 @@ namespace KernelMisc
         }
 
         uint64_t startAddr = 512*KILOBYTE;
-        uint64_t endAddr = 1*MEGABYTE;
+        uint64_t endAddr = 4*MEGABYTE;
 
         size_t cache_columns = 0;
 
