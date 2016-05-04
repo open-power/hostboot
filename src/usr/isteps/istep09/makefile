@@ -48,9 +48,10 @@ VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 
 include ${ROOTPATH}/procedure.rules.mk
 
+#@TODO RTC:134079 Re-enable for l2 story
 # 9.1 fabric_erepair
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
+# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
+# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
 
 # 9.2 fabric_io_dccal
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
@@ -58,8 +59,9 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
 # 9.3 fabric_pre_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pre_trainadv.mk
 
+#//@TODO RTC:134079 Re-enable for l2 story
 # 9.4 fabric_io_run_training
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_linktrain.mk
+# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_linktrain.mk
 
 # 9.5 fabric_post_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_post_trainadv.mk

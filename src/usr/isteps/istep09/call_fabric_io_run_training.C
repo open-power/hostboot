@@ -229,12 +229,13 @@ uint8_t run_linktraining(
                  TARGETING::get_huid(i_slave_target),
                  l_connected_group );
 
-        FAPI_INVOKE_HWP(l_errl,
-                        p9_io_xbus_linktrain,
-                        i_master_target,
-                        l_this_group,
-                        i_slave_target,
-                        l_connected_group);
+//@TODO RTC:134079 Re-enable for l2 story
+//         FAPI_INVOKE_HWP(l_errl,
+//                         p9_io_xbus_linktrain,
+//                         i_master_target,
+//                         l_this_group,
+//                         i_slave_target,
+//                         l_connected_group);
 
         if (l_errl)
         {
