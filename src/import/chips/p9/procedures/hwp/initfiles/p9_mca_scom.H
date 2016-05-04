@@ -25,12 +25,14 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*p9_mca_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&);
+typedef fapi2::ReturnCode (*p9_mca_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&, const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0);
+    fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
+                                  const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2);
 
 }
 

@@ -46,10 +46,10 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
     FAPI_INF("Start MSS SCOM init");
     auto l_mca_targets = i_target.getChildren<TARGET_TYPE_MCA>();
 
-    for (auto l_mca_target : l_mca_targets)
+    for (auto l_mca_target : l_mca_targets )
     {
         fapi2::ReturnCode l_rc;
-        FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target);
+        FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target, i_target, l_mca_target.getParent<fapi2::TARGET_TYPE_MCS>() );
 
         if (l_rc)
         {
