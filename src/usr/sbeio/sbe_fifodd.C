@@ -244,14 +244,20 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
         // receive words until EOT, but do not exceed response buffer size
         do
         {
-            // EOT?
-            // Checking at top of the loop in case EOT is sent before any data.
-            uint32_t l_eotStatus = 0;
-            errl = readFsi(i_target,SBE_FIFO_DNFIFO_STATUS,&l_eotStatus);
-            if (errl) break;
-            if ( l_eotStatus & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
+            // Wait for data to be ready to receive (download) or if the EOT
+            // has been sent. If not EOT, then data ready to receive.
+            uint32_t l_status = 0;
+            errl = waitDnFifoReady(i_target,l_status);
+            if ( l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
             {
                 l_EOT = true;
+                // ignore EOT dummy word
+                if (l_recWords >= (sizeof(statusHeader)/sizeof(uint32_t)) )
+                {
+                    l_pReceived--;
+                    l_recWords--;
+                    l_last = o_pFifoResponse[l_recWords-1];
+                }
                 break;
             }
 
@@ -261,12 +267,8 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                 break; //ran out of receive buffer before EOT
             }
 
-            // check that a downstream word is ready to receive
-            errl = waitDnFifoReady(i_target);
-            if (errl) break;
-
             // read next word
-            errl = readFsi(i_target,SBE_FIFO_UPFIFO_DATA_IN,&l_last);
+            errl = readFsi(i_target,SBE_FIFO_DNFIFO_DATA_OUT,&l_last);
             if (errl) break;
 
             *l_pReceived = l_last; //copy to returned output buffer
@@ -279,6 +281,7 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
         // At this point,
         // l_recWords of words received.
         // l_pReceived points to 1 word past last word received.
+        // l_last has last word received, which is "distance" to status
 
         // EOT is expected before running out of response buffer
         if (!l_EOT)
@@ -425,8 +428,13 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
 
 /**
  * @brief wait for data in downstream fifo to receive
+ *        or hit EOT.
+ *
+ *        On return, either a valid word is ready to read,
+ *        or the EOT will be set in the returned doorbell status.
  */
-errlHndl_t waitDnFifoReady(TARGETING::Target * i_target)
+errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
+                           uint32_t          & o_status)
 {
     errlHndl_t errl = NULL;
 
@@ -434,15 +442,16 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target)
 
     uint64_t l_elapsed_time_ns = 0;
     uint64_t l_addr = SBE_FIFO_DNFIFO_STATUS;
-    uint32_t l_data = 0;
 
     do
     {
         // read dnstream status to see if data ready to be read
-        errl = readFsi(i_target,l_addr,&l_data);
+        // or if has hit the EOT
+        errl = readFsi(i_target,l_addr,&o_status);
         if (errl) break;
 
-        if ( !(l_data & DNFIFO_STATUS_FIFO_EMPTY) )
+        if ( !(o_status & DNFIFO_STATUS_FIFO_EMPTY) ||
+              (o_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) )
         {
             break;
         }
@@ -451,7 +460,7 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target)
         if (l_elapsed_time_ns >= MAX_UP_FIFO_TIMEOUT_NS )
         {
             SBE_TRACF(ERR_MRK "waitDnFifoReady: "
-                      "timeout waiting for upstream FIFO to be not full");
+                      "timeout waiting for downstream FIFO to be not full");
 
             //TODO RTC 149454 implement error recovery and ffdc
 

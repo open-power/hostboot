@@ -157,7 +157,9 @@ namespace SBEIO
     {
         statusHeader status;
         uint32_t     pcbpibStatus;    // only present on errors
-        uint32_t     status_distance; //will be last word received
+        // ffdc will go here on errors
+        uint32_t     status_distance; // distance to status
+        uint32_t     EOT;             // dummy EOT word to ignore
         fifoPutScomResponse() {}
     } PACKED;
 
@@ -172,7 +174,9 @@ namespace SBEIO
         uint64_t     data;          // Data (0..31) + (32..63)
         statusHeader status;
         uint32_t     pcbpibStatus;    // only present on errors
-        uint32_t     status_distance; //will be last word received
+        // ffdc will go here on errors
+        uint32_t     status_distance; // distance to status
+        uint32_t     EOT;             // dummy EOT word to ignore
         fifoGetScomResponse() {}
     } PACKED;
 
@@ -268,11 +272,14 @@ namespace SBEIO
 
     /**
      * @brief poll until downlift Fifo has a value to read
+     *             or has hit EOT.
      *
      * @param[in]  i_target         Target to access
+     * @param[out] o_status         Down load door bell status
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t waitDnFifoReady(TARGETING::Target * i_target);
+    errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
+                               uint32_t          & o_status);
 
     /**
      * @brief encapulate FSI read
