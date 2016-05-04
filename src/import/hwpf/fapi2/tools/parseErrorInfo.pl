@@ -1212,7 +1212,7 @@ foreach my $argnum (0 .. $#ARGV)
         # the default severity.
         print ECFILE "    void execute(fapi2::errlSeverity_t" .
                           " i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED," .
-                          "bool commit = true )\n";
+                          "bool commit = false )\n";
         if ($arg_empty_ffdc eq undef)
         {
             print ECFILE "    {\n";
@@ -1223,12 +1223,6 @@ foreach my $argnum (0 .. $#ARGV)
                                   "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)" .
                                   " ? iv_sev : i_sev);\n";
             print ECFILE "      }\n";
-            print ECFILE "      else\n";
-            print ECFILE "      {\n";
-            print ECFILE "        fapi2::createPlatLog(iv_rc, " .
-                                  "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)".
-                                  " ? iv_sev : i_sev);\n";
-            print ECFILE "      }\n\n";
             print ECFILE "    }\n";
 
         }
@@ -1236,6 +1230,7 @@ foreach my $argnum (0 .. $#ARGV)
         {
             print ECFILE "    {\n";
             print ECFILE "        static_cast<void>(i_sev);\n";
+            print ECFILE "        static_cast<void>(commit);\n";
             print ECFILE "    }\n\n";
         }
 
