@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/enable_if.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/type_add.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
-#include <util/impl/is_ptr.H>
-#include <util/impl/enable_if.H>
+#ifndef __UTIL_IMPL_ENABLE_IF_H
+#define __UTIL_IMPL_ENABLE_IF_H
+namespace std
+{
+    // If Cond is true, std::enable_if has a public member typedef type,
+    // equal to T; otherwise, there is no member typedef
+    template <bool Cond, class T = void>
+    struct enable_if {};
 
-/* vim: set filetype=cpp : */
+    template <class T>
+    struct enable_if<true, T> { typedef T type; };
+
+    // Helper type
+    template< bool Cond, class T = void >
+    using enable_if_t = typename enable_if<Cond,T>::type;
+}
+
+#endif
