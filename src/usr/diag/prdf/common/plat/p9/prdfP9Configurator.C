@@ -315,23 +315,28 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
                                            ScanFacility & i_scanFac,
                                            ResolutionFactory & i_resFac )
 {
-    // PROC PLL - only one per node as all fabs on node have same clock source.
-    uint32_t node = getNodePosition( i_trgt );
+    // TODO: RTC 136052 - The position used here should be based on clock
+    //       domains. In the past there happened to be one clock source for each
+    //       node. In which case, we just used the node position. Unfortunately,
+    //       that is not very maintainable code. Instead, we should be querying
+    //       clock domain attributes so that this code does not need to be
+    //       modified if the clock domains change.
+    uint32_t pos = 0;
 
-    if ( io_pllDmnMap.end() == io_pllDmnMap.find(node) )
+    if ( io_pllDmnMap.end() == io_pllDmnMap.find(pos) )
     {
         Resolution & clock = i_resFac.GetClockResolution( i_trgt, i_type );
 
         #ifdef __HOSTBOOT_MODULE
-        io_pllDmnMap[node] = new PllDomain( i_domainId, clock,
+        io_pllDmnMap[pos] = new PllDomain( i_domainId, clock,
                                         ThresholdResolution::cv_mnfgDefault );
         #else
-        io_pllDmnMap[node] = new PllDomain( i_domainId, clock, CONTENT_HW,
+        io_pllDmnMap[pos] = new PllDomain( i_domainId, clock, CONTENT_HW,
                                         ThresholdResolution::cv_mnfgDefault );
         #endif
     }
 
-    io_pllDmnMap[node]->AddChip( i_chip );
+    io_pllDmnMap[pos]->AddChip( i_chip );
 }
 
 //------------------------------------------------------------------------------

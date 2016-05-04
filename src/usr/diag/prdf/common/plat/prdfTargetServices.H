@@ -136,12 +136,6 @@ TARGETING::TYPE getTargetType( TARGETING::TargetHandle_t i_target );
 TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target );
 
 /**
- * @brief   Prints the HUID and dumps the entity path of the given target.
- * @param   i_target Any target.
- */
-void printTargetInfo( TARGETING::TargetHandle_t i_target );
-
-/**
  * @brief   Get the chip level (DD level) of this target.
  * @param   i_target Any chip or unit target.
  * @return  The chip level or 0 function failed.
@@ -264,14 +258,6 @@ TARGETING::TargetHandle_t getMasterProc();
  *          Can compare against enums in PositionBounds for validity.
  */
 uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target );
-
-/**
- * @brief   Returns the position of a node in which the given target is
- *          contained.
- * @param   i_target Any target.
- * @return  The position of the connected node.
- */
-uint32_t getNodePosition( TARGETING::TargetHandle_t i_target );
 
 /**
  * @brief   Returns Model associated with Proc.
