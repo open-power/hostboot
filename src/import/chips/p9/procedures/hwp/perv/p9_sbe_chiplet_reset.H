@@ -32,6 +32,7 @@
 ///     4) Similar way,  Reset sys.config and OPCG setting for Nest and MC chiplet in sync mode
 ///
 /// Done
+///
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V. Naga <srinivan@in.ibm.com>
@@ -61,7 +62,7 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     HANG_PULSE_0X10 = 0x10,
     HANG_PULSE_0X0F = 0x0F,
     HANG_PULSE_0X06 = 0x06,
-    HANG_PULSE_0X17 = 0x18,
+    HANG_PULSE_0X17 = 0x17,
     HANG_PULSE_0X18 = 0x18,
     HANG_PULSE_0X22 = 0x22,
     HANG_PULSE_0X13 = 0x13,
@@ -86,7 +87,9 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     SCAN_RATIO_0X0 = 0x0,
     SYNC_CONFIG_4TO1 = 0X0800000000000000,
     HW_NS_DELAY = 200000, // unit is nano seconds
-    SIM_CYCLE_DELAY = 10000 // unit is cycles
+    SIM_CYCLE_DELAY = 10000, // unit is cycles
+    HANG_PULSE_0X12 = 0x12,
+    HANG_PULSE_0X1C = 0x1C
 };
 }
 
@@ -116,8 +119,5 @@ extern "C"
     fapi2::ReturnCode p9_sbe_chiplet_reset(const
                                            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 }
-
-fapi2::ReturnCode p9_sbe_chiplet_reset_pcie_iop_logic_setup(
-    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip);
 
 #endif
