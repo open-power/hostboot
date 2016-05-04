@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,13 @@
 
 fapi2::ReturnCode p9_sbe_common_align_chiplets(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets);
+
+fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
+        i_regions,
+        const fapi2::buffer<uint64_t> i_clock_status,
+        const bool i_reg,
+        const fapi2::buffer<uint8_t> i_clock_cmd,
+        fapi2::buffer<uint64_t>& o_exp_clock_status);
 
 fapi2::ReturnCode p9_sbe_common_clock_start_allRegions(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_anychiplet);
