@@ -46,14 +46,19 @@
 
 ///
 /// @brief Assert a conditional is true.
-/// If it is not, the FFDC gathering function is called and the
-/// trace is output as a FAPI error trace. A platform error is
-/// created and commited.
+/// If it is not, the FFDC gathering function is called and
+/// the text in varargs is sent to the hostboot trace
+/// as a FAPI_ERR trace.
+/// fapi2::current_err will be set to a failing return code
+/// as determined by the __ffdc__ class passed in.
+///
+/// Note: see the generated file hwp_ffdc_classes.H for
+///       details on the __ffdc__ functions
+///
 /// @param[in] __conditional__ the condition to assert
 /// @param[in] __ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
 ///
-/// @note: Plat error is stored in RC object
 ///
 #define PLAT_FAPI_ASSERT( __conditional__, __ffdc__, ... )      \
     if (! (__conditional__))                                    \
@@ -65,22 +70,25 @@
 
 ///
 /// @brief Assert a conditional is true.
-/// If it is not, the FFDC gathering function is called and the
-/// trace is output as a FAPI error trace. A platform error is
-/// created but will not be committed.
+/// If it is not, the FFDC gathering function is called, A
+/// platform error is created and committed.
+/// fapi2::current_err will be set to fapi2::FAPI2_RC_SUCCESS
+/// and the text in varargs is sent to the hostboot trace as a
+/// FAPI_ERR trace.
+///
 /// @param[in] __conditional__ the condition to assert
 /// @param[in] __ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
 ///
-/// @note: Plat error, if supported, is stored in RC object. In
-///        addition, this assert does not cause a branch to the
-///        fapi_try_exit lable.
+/// @note: This assert does not cause a branch to the
+///        fapi_try_exit label.
 ///
 #define PLAT_FAPI_ASSERT_NOEXIT( __conditional__, __ffdc__, ... ) \
     if (! (__conditional__))                                    \
     {                                                           \
         __ffdc__.execute(                                       \
-                fapi2::FAPI2_ERRL_SEV_UNDEFINED, false);    \
+                fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);         \
+        fapi2::current_err =  fapi2::FAPI2_RC_SUCCESS;          \
         FAPI_ERR(__VA_ARGS__);                                  \
     }                                                           \
 
