@@ -80,6 +80,26 @@
         <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
         <default>6</default>
     </attribute>
+    <attribute>
+        <id>ATTR_PROC_EPS_READ_CYCLES_T0</id>
+        <default>0x00000FFF</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_EPS_READ_CYCLES_T1</id>
+        <default>0x00000FFF</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_EPS_READ_CYCLES_T2</id>
+        <default>0x00000FFF</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_EPS_WRITE_CYCLES_T1</id>
+        <default>0x00000FFF</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_EPS_WRITE_CYCLES_T2</id>
+        <default>0x00000FFF</default>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

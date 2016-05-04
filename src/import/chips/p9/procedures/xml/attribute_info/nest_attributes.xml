@@ -573,26 +573,52 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_EPS_READ_CYCLES</id>
+  <id>ATTR_PROC_EPS_READ_CYCLES_T0</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Calculated read epsilon protection count.
-    Counter tier is index.
+    Calculated read tier0 epsilon protection count.
   </description>
   <valueType>uint32</valueType>
-  <array>3</array>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_EPS_WRITE_CYCLES</id>
+  <id>ATTR_PROC_EPS_READ_CYCLES_T1</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Calculated write epsilon protection count.
-    Counter tier is index.
+    Calculated read tier1 epsilon protection count.
   </description>
   <valueType>uint32</valueType>
-  <array>2</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_READ_CYCLES_T2</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Calculated read tier2 epsilon protection count.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_WRITE_CYCLES_T1</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Calculated write tier1 epsilon protection count.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_WRITE_CYCLES_T2</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Calculated write tier2 epsilon protection count.
+  </description>
+  <valueType>uint32</valueType>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->

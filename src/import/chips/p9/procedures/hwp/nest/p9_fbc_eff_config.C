@@ -144,8 +144,8 @@ p9_fbc_eff_config_calc_epsilons(
     FAPI_DBG("Start");
 
     // epsilon output attributes
-    fapi2::ATTR_PROC_EPS_READ_CYCLES_Type l_eps_r;
-    fapi2::ATTR_PROC_EPS_WRITE_CYCLES_Type l_eps_w;
+    uint32_t l_eps_r[NUM_EPSILON_READ_TIERS];
+    uint32_t l_eps_w[NUM_EPSILON_WRITE_TIERS];
     fapi2::ATTR_PROC_EPS_GB_PERCENTAGE_Type l_eps_gb;
 
     // fetch epsilon table type/pump mode attributes
@@ -284,11 +284,17 @@ p9_fbc_eff_config_calc_epsilons(
     }
 
     // write attributes
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES, i_target, l_eps_r),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, i_target, l_eps_r[0]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T0)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, i_target, l_eps_r[1]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, i_target, l_eps_r[2]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_READ_CYCLES_T2)");
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES, i_target, l_eps_w),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, i_target, l_eps_w[0]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, i_target, l_eps_w[1]),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_EPS_WRITE_CYCLES_T2)");
 
 fapi_try_exit:
     FAPI_INF("End");
