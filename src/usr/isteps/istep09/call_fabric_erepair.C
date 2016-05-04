@@ -63,8 +63,9 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <errl/errlmanager.H>
 
+//@TODO RTC:134079 Re-enable for l2 story
 // HWP procedure
-#include <p9_io_xbus_restore_erepair.H>
+// #include <p9_io_xbus_restore_erepair.H>
 
 namespace   ISTEP_09
 {
@@ -354,14 +355,15 @@ uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
          * This procedure should update the
          * bad lane vector and power down the bad lanes.
          */
-        FAPI_INVOKE_HWP(l_errl,
-                        p9_io_xbus_restore_erepair,
-                        i_target,
-                        l_this_group,
-                        i_rx_bad_lanes,
-                        i_target,
-                        l_connected_group,
-                        i_tx_bad_lanes);
+//@TODO RTC:134079 Re-enable for l2 story
+//         FAPI_INVOKE_HWP(l_errl,
+//                         p9_io_xbus_restore_erepair,
+//                         i_target,
+//                         l_this_group,
+//                         i_rx_bad_lanes,
+//                         i_target,
+//                         l_connected_group,
+//                         i_tx_bad_lanes);
 
         if (l_errl)
         {
