@@ -39,7 +39,7 @@
 enum P9_MEM_PLL_SETUP_Private_Constants
 {
     NS_DELAY = 5000000, // unit is nano seconds
-    SIM_CYCLE_DELAY = 1000, // unit is sim cycles
+    SIM_CYCLE_DELAY = 100000, // unit is sim cycles
     OPCG_ALIGN_SCAN_RATIO = 0b00011
 };
 
@@ -89,7 +89,7 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             //Getting PLL_LOCK_REG register value
             FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_PLL_LOCK_REG,
                                     l_data64)); //l_read_reg = PERV.PLL_LOCK_REG
-            FAPI_ASSERT(l_data64.getBit<0>(),
+            FAPI_ASSERT(l_data64.getBit<0>() == 1,
                         fapi2::MEM_PLL_LOCK_ERR()
                         .set_MEM_PLL_READ(l_data64),
                         "ERROR:MEM PLL LOCK NOT SET");
