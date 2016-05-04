@@ -332,24 +332,6 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target )
 
 //------------------------------------------------------------------------------
 
-void printTargetInfo( TARGETING::TargetHandle_t i_target )
-{
-    EntityPath l_path ( EntityPath::PATH_PHYSICAL );
-    int32_t l_rc = getEntityPath( i_target, l_path );
-    if ( SUCCESS == l_rc )
-    {
-        PRDF_DTRAC( "PRDCONFIG: HUID=0x%08x path=", getHuid(i_target) );
-        l_path.dump();
-    }
-    else
-    {
-        PRDF_ERR( "[printTargetInfo] Failed: i_target=0x%08x",
-                  getHuid(i_target) );
-    }
-}
-
-//------------------------------------------------------------------------------
-
 uint8_t getChipLevel( TARGETING::TargetHandle_t i_target )
 {
     uint8_t o_chipLvl = 0;
@@ -1024,8 +1006,13 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
         }
 
         case CLASS_ENC:
-            o_pos = getNodePosition( i_target );
+        {
+            if ( !i_target->tryGetAttr<ATTR_ORDINAL_ID>(o_pos) )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to get ATTR_ORDINAL_ID" );
+            }
             break;
+        }
 
         default:
             PRDF_ERR( PRDF_FUNC "Unsupported class: %d", l_class );
@@ -1037,41 +1024,6 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
     }
 
     #undef PRDF_FUNC
-
-    return o_pos;
-}
-
-//------------------------------------------------------------------------------
-
-uint32_t getNodePosition( TARGETING::TargetHandle_t i_target )
-{
-    uint32_t o_pos = INVALID_POSITION_BOUND;
-
-    do
-    {
-        // Get the node handle.
-        TargetHandle_t node = getConnectedParent( i_target, TYPE_NODE );
-        if ( NULL == node )
-        {
-            PRDF_ERR( "[getNodePosition] Failed to get node target" );
-            break;
-        }
-
-        // FIXME: RTC 120711 will add NODE POSITION keyword
-        //        that we can use instead of ePath instance.
-        EntityPath l_path ( EntityPath::PATH_PHYSICAL );
-        int32_t l_rc = getEntityPath( node, l_path );
-        if ( SUCCESS != l_rc ) break;
-
-        o_pos = l_path[l_path.size()-1].instance;
-
-    } while (0);
-
-    if ( INVALID_POSITION_BOUND == o_pos )
-    {
-        PRDF_ERR( "[getNodePosition] Failed: target=0x%08x",
-                  getHuid(i_target) );
-    }
 
     return o_pos;
 }
