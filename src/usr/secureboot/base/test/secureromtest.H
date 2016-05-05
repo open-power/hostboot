@@ -36,6 +36,7 @@
 #include <secureboot/secure_reasoncodes.H>
 
 #include "../securerom.H"
+#include <secureboot/containerheader.H>
 
 extern trace_desc_t* g_trac_secure;
 
@@ -71,6 +72,21 @@ const uint64_t hw_hash_key[] =
     0xfb7085351d01d6d1
 };
 
+// secureboot_signed_container payload text size
+size_t payload_text_size = 0x200;
+
+// secureboot_signed_container payload text hash
+const uint64_t payload_text_hash[] =
+{
+    0xffc393b771c409d4,
+    0x4d8feffacfeb7a09,
+    0x117c753f62273470,
+    0xc2932404ead151d5,
+    0xbae52ebd49301061,
+    0xee537b7fd964ac84,
+    0x972164a3096c87c4,
+    0x653e8ecbfe8f4ac5
+};
 
 /**********************************************************************/
 /*  End of UTILITY FUNCTIONS                                          */
@@ -147,7 +163,7 @@ class SecureROMTest : public CxxTest::TestSuite
         }
 
         /*******************************************************************/
-        /* Unload "secureboot_signed_container" from memory                      */
+        /* Unload "secureboot_signed_container" from memory                */
         /*******************************************************************/
         if ( signedFile_pageAddr != NULL   )
         {
@@ -155,6 +171,80 @@ class SecureROMTest : public CxxTest::TestSuite
         }
 
         TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_verify");
+    };
+
+    /**
+     * @brief Secure ROM Test - Parse a Signed Container and check if the values
+     *                     match what's expected for secureboot_signed_container
+     */
+    void test_parse_container_header(void)
+    {
+        TRACFCOMP(g_trac_secure,ENTER_MRK"SecureROMTest::test_parse_container_header>");
+
+        errlHndl_t  l_errl  =   NULL;
+
+        /*******************************************************************/
+        /* Load "secureboot_signed_container" from PNOR to use for verification  */
+        /*******************************************************************/
+
+        // Signed file variables
+        const char * signedFile_name =   "secureboot_signed_container";
+        void *  signedFile_pageAddr  =   NULL;
+        size_t  signedFile_size      =   0;
+
+        do{
+
+        // Call utility function
+        l_errl = loadSignedFile( signedFile_name,
+                                 signedFile_pageAddr,
+                                 signedFile_size);
+
+        if (l_errl)
+        {
+            TS_FAIL("SecureROMTest::test_parse_container_header: loadSignedFile() Failed");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        TRACUCOMP(g_trac_secure, "SecureROMTest::test_parse_container_header: "
+                  "signedFile info: addr = %p, size=0x%x",
+                  signedFile_pageAddr, signedFile_size);
+
+        /*******************************************************************/
+        /* Parse Secure Container Header                                   */
+        /*******************************************************************/
+        SECUREBOOT::ContainerHeader l_conHdr(signedFile_pageAddr);
+
+        // Check if container header seems valid
+        if (!l_conHdr.iv_isValid)
+        {
+            TS_FAIL("SecureROMTest::test_parse_container_header: Header is not valid");
+            break;
+        }
+        // Check a few of the values that are parsed out.
+        if(l_conHdr.payloadTextSize() != payload_text_size)
+        {
+            TS_FAIL("SecureROMTest::test_parse_container_header: Incorrect payload text size");
+            break;
+        }
+
+        if (memcmp(l_conHdr.payloadTextHash(), payload_text_hash,
+                   sizeof(SHA512_t) != 0))
+        {
+            TS_FAIL("SecureROMTest::test_parse_container_header: Incorrect payload text hash");
+            break;
+        }
+
+        } while(0);
+        /*******************************************************************/
+        /* Unload "secureboot_signed_container" from memory                */
+        /*******************************************************************/
+        if ( signedFile_pageAddr != NULL   )
+        {
+            unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+
+        TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_parse_container_header");
     };
 };
 

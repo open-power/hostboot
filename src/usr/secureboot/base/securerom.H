@@ -26,96 +26,8 @@
 #ifndef __SECUREBOOT_SECUREROM_H
 #define __SECUREBOOT_SECUREROM_H
 
-/** @file SecureRom.H
- *
- *  @brief SecureROM class definition and miscellaneious defines
- *  needed to work with Secure ROM binary
- */
-
 #include <errl/errlentry.H>
-
-
-/******************************************************************/
-/*  Start of Chip Logic Secure ROM include section  */
-/******************************************************************/
-// These defines come from the following directory:
-// /afs/awd/projects/eclipz/c22/libs/tp/logic/p8m/head/trusted_boot_rom/src
-// and are needed to run functions in the SecureROM code stored in memory
-
-/* From hw_utils.h:  */
-#define ECID_SIZE 16
-
-
-/* From ecverify.h   */
-#define EC_COORDBYTES 66     /* P-521   */
-typedef uint8_t ecc_key_t[2*EC_COORDBYTES];
-
-/* From hw_utils.h */
-#define PIBMEM 0x00080000
-#define PIBMEM_HW_KEY_HASH (PIBMEM +0x0008)
-
-/* From sha512.h:  */
-typedef uint8_t  sha2_byte;     /* Exactly 1 byte */
-
-// This is the interface that call_rom_SHA512 calls into
-// void SHA512_Hash(const sha2_byte *data, size_t len, sha2_hash_t *result);
-
-
-/*  From ROM.h */
-typedef enum { ROM_DONE, ROM_FAILED, PHYP_PARTIAL } ROM_response;
-
-typedef struct {
-  uint32_t        magic_number;    // (17082011)
-  uint16_t        version;         // (1: see versions above)
-  uint64_t        container_size;  // filled by caller
-  uint64_t        target_hrmor;    // filled by caller
-  uint64_t        stack_pointer;   // filled by caller
-  //bottom of stack -> 128k added by rom code to get real stack pointer
-  ecc_key_t       hw_pkey_a;
-  ecc_key_t       hw_pkey_b;
-  ecc_key_t       hw_pkey_c;
-  uint64_t        prefix; // prefix header place holder
-  // followed by sw header (if not special prefix)
-  // followed by optional unprotected payload data
-}__attribute__((packed)) ROM_container_raw;
-
-
-typedef struct {
-  sha2_hash_t         hw_key_hash;
-  uint8_t             my_ecid[ECID_SIZE];
-  uint64_t            entry_point;
-  uint64_t            log;
-}__attribute__((packed)) ROM_hw_params;
-
-
-// Need this for the following definition
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-// Interfaces for Assembly Functions to call into Secure ROM
-// - 1st parameter is address of function offset into Secure ROM,
-//   followed by additional parameters as necssary
-
-ROM_response call_rom_verify(void*, ROM_container_raw*, ROM_hw_params*);
-void         call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);
-
-#ifdef __cplusplus
-}
-#endif
-
-
-/* Offsets needed to call functions in jump table at start of  */
-/* SecureROM code - see .../trusted_boot_rom/bootrom.dis       */
-#define SHA512_HASH_FUNCTION_OFFSET 0x20
-#define ROM_VERIFY_FUNCTION_OFFSET 0x30
-
-
-/******************************************************************/
-/*  End of Chip Logic Secure ROM include section  */
-/******************************************************************/
-
+#include <secureboot/rom.H>
 
 /** @class SecureROM
  *  @brief Class for loading and interacting with SecureROM in memory
@@ -131,7 +43,6 @@ class SecureROM
          * @return errlHndl_t  NULL on success
          */
         errlHndl_t initialize();
-
 
         /**
          * @brief Verify Container against system hash keys
@@ -165,7 +76,6 @@ class SecureROM
          */
         void getHwHashKeys(sha2_hash_t o_hash);
 
-
     protected:
 
         /**
@@ -195,7 +105,6 @@ class SecureROM
          */
         sha2_hash_t iv_hash_key;
 
-
         /********************************************
          * Private Functions
          ********************************************/
@@ -212,12 +121,10 @@ class SecureROM
          */
         static SecureROM& getInstance();
 
-
         /**
          * @brief Safely Frees Allocated Memory
          */
         void _cleanup();
-
 
         /********************************************
          * Friend(s)
@@ -226,9 +133,6 @@ class SecureROM
         // let my testcase poke around
         friend class SecureROMTest;
 
-
 }; // end of SecureROM class
-
-
 
 #endif
