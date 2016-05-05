@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -401,6 +401,37 @@
              <field><id>tpmEnabled</id><value>1</value></field>
              <field><id>i2cMasterPath</id>
                <value>physical:sys-0/node-0/proc-0</value></field>
+             <field><id>port</id><value>2</value></field>
+             <field><id>devAddrLocality0</id><value>0xAE</value></field>
+             <field><id>devAddrLocality4</id><value>0xFF</value></field>
+             <field><id>engine</id><value>1</value></field>
+             <field><id>byteAddrOffset</id><value>0x01</value></field>
+        </default>
+    </attribute>
+</targetInstance>
+
+<!-- TPMs for node 0 -->
+
+<targetInstance>
+    <id>sys0node0tpm0</id>
+    <type>chip-tpm-cectpm</type>
+    <attribute><id>POSITION</id><default>0</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>TPM_INFO</id>
+        <default>
+             <field><id>tpmEnabled</id><value>1</value></field>
+             <field>
+               <id>i2cMasterPath</id>
+               <value>physical:sys-0/node-0/proc-0</value>
+             </field>
              <field><id>port</id><value>2</value></field>
              <field><id>devAddrLocality0</id><value>0xAE</value></field>
              <field><id>devAddrLocality4</id><value>0xFF</value></field>

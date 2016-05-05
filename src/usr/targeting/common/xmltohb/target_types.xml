@@ -964,6 +964,20 @@
 </targetType>
 
 <targetType>
+    <id>chip-tpm-cectpm</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>TPM</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CECTPM</default>
+    </attribute>
+    <attribute><id>TPM_INFO</id></attribute>
+</targetType>
+
+<targetType>
     <id>unit-abus-power8</id>
     <parent>unit</parent>
     <attribute>
