@@ -6337,8 +6337,8 @@ sub addI2cBusSpeedArray
     my $tmp_offset = 0x0;
     my $tmp_ct eq "";
 
-    # bus_speed_arry[engine][port] is 2x3 array
-    my @speed_array = (0, 0, 0, 0, 0, 0);
+    # bus_speed_arry[engine][port] is 4x3 array
+    my @speed_array = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     # Loop through all i2c devices
     for my $i ( 0 .. $#I2Cdevices )
@@ -6431,21 +6431,11 @@ sub addI2cBusSpeedArray
         $tmp_port   = $I2Cdevices[$i]{i2c_port};
         $tmp_offset = ($tmp_engine * 3) + $tmp_port;
 
-        # @todo RTC 117430 - Default procs to 1MHZ speed until MRWs are updated
-        $tmp_ct = "$I2Cdevices[$i]{i2c_content_type}";
-        if ( ( ($tmp_ct eq "PRIMARY_SBE_VPD") ||
-               ($tmp_ct eq "REDUNDANT_SBE_VPD") ||
-               ($tmp_ct eq "PRIMARY_MODULE_VPD") ||
-               ($tmp_ct eq "PRIMARY_FRU_AND_MODULE_VPD") ||
-               ($tmp_ct eq "REDUNDANT_FRU_AND_MODULE_VPD") )
-             &&
-             ( $I2Cdevices[$i]{i2cm_name} eq "pu" ) )
-        {
-            $tmp_speed  = 1000;
-        }
-        else
-        {
-            $tmp_speed  = $I2Cdevices[$i]{i2c_speed};
+        # @todo RTC 153696 - Default everything off except TPM until MRW is correct and simics model is complete
+        if ($tmp_engine == 2 && $tmp_port == 0) {
+            $tmp_speed  = 400;
+        } else {
+            $tmp_speed = 0;
         }
 
         # use the slower speed if there is a previous entry
@@ -6465,7 +6455,13 @@ sub addI2cBusSpeedArray
     print "            $speed_array[2],\n";
     print "            $speed_array[3],\n";
     print "            $speed_array[4],\n";
-    print "            $speed_array[5]\n";
+    print "            $speed_array[5],\n";
+    print "            $speed_array[6],\n";
+    print "            $speed_array[7],\n";
+    print "            $speed_array[8],\n";
+    print "            $speed_array[9],\n";
+    print "            $speed_array[10],\n";
+    print "            $speed_array[11],\n";
     print "        </default>\n";
     print "    </attribute>\n";
 

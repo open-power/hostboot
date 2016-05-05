@@ -252,6 +252,15 @@
     <attribute><id>XSCOM_BASE_ADDRESS</id>
         <default>0x000603FC00000000</default>
     </attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>
+            0, 0, 0,
+            0, 0, 0,
+            400, 0, 0,
+            0, 0, 0
+        </default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 EQ units -->
@@ -4428,17 +4437,6 @@
             0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0
-        </default>
-    </attribute>
-     <attribute>
-        <id>I2C_BUS_SPEED_ARRAY</id>
-        <default>
-            1000,
-            1000,
-            0,
-            0,
-            0,
-            0
         </default>
     </attribute>
 
