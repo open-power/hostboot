@@ -850,6 +850,21 @@
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
 </targetType>
 
+<!-- chip-tpm-cectpm -->
+<targetType>
+    <id>chip-tpm-cectpm</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>TPM</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>CECTPM</default>
+    </attribute>
+    <attribute><id>TPM_INFO</id></attribute>
+</targetType>
+
 <!-- chip-processor-power9 -->
 <targetType>
     <id>chip-processor-power9</id>

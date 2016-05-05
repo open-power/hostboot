@@ -429,6 +429,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "SYSREFCLKENDPT";
         case TYPE_MFREFCLKENDPT:
             return "MFREFCLKENDPT";
+        case TYPE_TPM:
+            return "TPM";
         default:
             return "Unknown path type";
     }
