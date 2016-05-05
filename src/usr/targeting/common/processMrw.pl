@@ -574,6 +574,12 @@ sub processI2cSpeeds
     $bus_speeds[1][0] = $bus_speeds2[3];
     $bus_speeds[1][1] = $bus_speeds2[4];
     $bus_speeds[1][2] = $bus_speeds2[5];
+    $bus_speeds[2][0] = $bus_speeds2[6];
+    $bus_speeds[2][1] = $bus_speeds2[7];
+    $bus_speeds[2][2] = $bus_speeds2[8];
+    $bus_speeds[3][0] = $bus_speeds2[9];
+    $bus_speeds[3][1] = $bus_speeds2[10];
+    $bus_speeds[3][2] = $bus_speeds2[11];
 
     my $i2cs=$targetObj->findConnections($target,"I2C","");
     if ($i2cs ne "") {
@@ -600,7 +606,13 @@ sub processI2cSpeeds
                       $bus_speeds[0][2].",".
                       $bus_speeds[1][0].",".
                       $bus_speeds[1][1].",".
-                      $bus_speeds[1][2];
+                      $bus_speeds[1][2].",".
+                      $bus_speeds[2][0].",".
+                      $bus_speeds[2][1].",".
+                      $bus_speeds[2][2].",".
+                      $bus_speeds[3][0].",".
+                      $bus_speeds[3][1].",".
+                      $bus_speeds[3][2];
 
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);
 }

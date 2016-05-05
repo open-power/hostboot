@@ -78,6 +78,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define CENTAUR_MASTER_ENGINES 1   // Number of Engines in a Centaur
 #define MAX_NACK_RETRIES 3
 #define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
+#define P9_ENGINE_SCOM_OFFSET 0x1000
 
 // Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
 const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
@@ -1757,7 +1758,10 @@ bool i2cGetEngineMutex( TARGETING::Target * i_target,
                 i_engineLock = i_target->
                            getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_2>();
                 break;
-
+            case 3:
+                i_engineLock = i_target->
+                           getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_3>();
+                break;
             default:
                 TRACFCOMP( g_trac_i2c,
                            ERR_MRK"i2cGetEngineMutex: Invalid engine for getting Mutex! "
@@ -1790,17 +1794,18 @@ bool i2cGetPageMutex( TARGETING::Target * i_target,
                 i_pageLock = i_target->
                     getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_0>();
                 break;
-
             case 1:
                 i_pageLock = i_target->
                     getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_1>();
                 break;
-
             case 2:
                 i_pageLock = i_target->
                     getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_2>();
                 break;
-
+            case 3:
+                i_pageLock = i_target->
+                    getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_3>();
+                break;
             default:
                 TRACFCOMP( g_trac_i2c,
                         ERR_MRK"i2cGetPageMutex: Invalid engine for getting mutex!");
@@ -3427,13 +3432,10 @@ errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
                "i_functional=%d",
                i_resetType, i_functional );
 
-    // @todo RTC:123019- I2CM Changes for P9
-#if (0)
     err = i2cProcessActiveMasters (i_resetType,  // select engines
                                    I2C_OP_RESET, // reset engines
                                    I2C_BUS_SPEED_FROM_MRW,
                                    i_functional);
-#endif
 
     TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cResetActiveMasters(): err rc=0x%X, plid=0x%X",
@@ -3623,7 +3625,7 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
         if ( i_args.switches.useHostI2C == 1 )
         {
             op_addr = I2C_HOST_MASTER_BASE_ADDR + i_reg +
-                        (i_args.engine * 0x20); // engine reg offset
+                        (i_args.engine * P9_ENGINE_SCOM_OFFSET);
             op_size=8;
 
             err = DeviceFW::deviceOp( i_opType,

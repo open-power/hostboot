@@ -2144,7 +2144,7 @@
     <attribute><id>EEPROM_SBE_BACKUP_INFO</id></attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
-        <default>1000,1000,0,0,0,0</default>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
     </attribute>
 
     <!-- From PHYP Memory Map -->
