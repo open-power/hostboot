@@ -585,7 +585,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         }
         else
         {
-            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom, Ibscom, or FSISCOM is supported. i_target=0x%.8x", get_huid(i_target));
+            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom, SBESCOM, Ibscom, or FSISCOM is supported. i_target=0x%.8x", get_huid(i_target));
             break;
         }
 
