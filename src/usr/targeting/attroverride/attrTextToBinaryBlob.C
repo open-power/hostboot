@@ -49,7 +49,7 @@
 #include <arpa/inet.h>
 #include <endian.h>
 #include <unistd.h>
-#include <hwpf/fapi/fapiTarget.H>
+#include <target_types.H>
 #include <attributeenums.H>
 #include <pnor/ecc.H>
 
@@ -88,22 +88,51 @@ const char * const TARGET_POS_ALL_STR = "all";
 
 // Used to translate target strings in FAPI Attribute Info files to the value
 // in a FAPI or TARG Layer AttributeTanks
-const struct TargStrToType
+struct TargStrToType
 {
     const char * iv_pString;
     uint32_t iv_fapiType;
     uint32_t iv_targType;
-} TARG_STR_TO_TYPE [] = {
-    {"p8.ex",           fapi::TARGET_TYPE_EX_CHIPLET,   TARGETING::TYPE_EX},
-    {"centaur.mba",     fapi::TARGET_TYPE_MBA_CHIPLET,  TARGETING::TYPE_MBA},
-    {"p8.mcs",          fapi::TARGET_TYPE_MCS_CHIPLET,  TARGETING::TYPE_MCS},
-    {"p8.xbus",         fapi::TARGET_TYPE_XBUS_ENDPOINT,TARGETING::TYPE_XBUS},
-    {"p8.abus",         fapi::TARGET_TYPE_ABUS_ENDPOINT,TARGETING::TYPE_ABUS},
-    {"centaur",         fapi::TARGET_TYPE_MEMBUF_CHIP,  TARGETING::TYPE_MEMBUF},
-    {"p8",              fapi::TARGET_TYPE_PROC_CHIP,    TARGETING::TYPE_PROC},
-    {"dimm",            fapi::TARGET_TYPE_DIMM,         TARGETING::TYPE_DIMM},
-    {"pu",              fapi::TARGET_TYPE_PROC_CHIP,    TARGETING::TYPE_PROC}
 };
+
+
+TargStrToType CHIP_TYPE_TARG_STR_TO_TYPE [] =
+{
+    {"p9n"        , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"p9c"        , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"pu"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"centaur"    , fapi2::TARGET_TYPE_MEMBUF_CHIP , TARGETING::TYPE_MEMBUF},
+    {"dimm"       , fapi2::TARGET_TYPE_DIMM        , TARGETING::TYPE_DIMM},
+    {"p8"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"p9"         , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
+    {"LAST"       , 0                              , 0}
+
+};
+
+TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
+{
+    {"c"        , fapi2::TARGET_TYPE_CORE       , TARGETING::TYPE_CORE},
+    {"ex"       , fapi2::TARGET_TYPE_EX         , TARGETING::TYPE_EX},
+    {"eq"       , fapi2::TARGET_TYPE_EQ         , TARGETING::TYPE_EQ},
+    {"mcs"      , fapi2::TARGET_TYPE_MCS        , TARGETING::TYPE_MCS},
+    {"mca"      , fapi2::TARGET_TYPE_MCA        , TARGETING::TYPE_MCA},
+    {"mcbist"   , fapi2::TARGET_TYPE_MCBIST     , TARGETING::TYPE_MCBIST},
+    {"xbus"     , fapi2::TARGET_TYPE_XBUS       , TARGETING::TYPE_XBUS},
+    {"abus"     , fapi2::TARGET_TYPE_ABUS       , TARGETING::TYPE_ABUS},
+    {"obus"     , fapi2::TARGET_TYPE_OBUS       , TARGETING::TYPE_OBUS},
+    {"nv"       , fapi2::TARGET_TYPE_NV         , TARGETING::TYPE_NV},
+    {"sbe"      , fapi2::TARGET_TYPE_SBE        , TARGETING::TYPE_SBE},
+    {"ppe"      , fapi2::TARGET_TYPE_PPE        , TARGETING::TYPE_PPE},
+    {"perv"     , fapi2::TARGET_TYPE_PERV       , TARGETING::TYPE_PERV},
+    {"pec"      , fapi2::TARGET_TYPE_PEC        , TARGETING::TYPE_PEC},
+    {"phb"      , fapi2::TARGET_TYPE_PHB        , TARGETING::TYPE_PHB},
+    {"capp"     , fapi2::TARGET_TYPE_CAPP       , TARGETING::TYPE_CAPP},
+    {"mba"      , fapi2::TARGET_TYPE_MBA        , TARGETING::TYPE_MBA},
+    {"dmi"      , fapi2::TARGET_TYPE_DMI        , TARGETING::TYPE_DMI},
+    {"mi"       , fapi2::TARGET_TYPE_MI         , TARGETING::TYPE_MI},
+    {"LAST"     , 0                             , 0}
+};
+
 
 bool operator==(const TargStrToType& i, const std::string& v)
 {
@@ -461,7 +490,7 @@ bool AttrTextToBinaryBlob::attrFileAttrLineToFields(
 
 
 //******************************************************************************
-void AttrTextToBinaryBlob::attrFileTargetLineToData(
+bool AttrTextToBinaryBlob::attrFileTargetLineToData(
     const std::string & i_line,
     const AttributeTank::TankLayer i_tankLayer,
     uint32_t & o_targetType,
@@ -475,100 +504,44 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
      * - o_targetPos = 2
      * - o_targetUnitPos = 1
      */
-
+    bool l_err = false;
     // If the target string is not decoded into a non-system target and
     // explicit positions are not found then the caller will get these defaults
     bool l_sysTarget = true;
-    if (i_tankLayer == AttributeTank::TANK_LAYER_FAPI)
-    {
-        o_targetType = fapi::TARGET_TYPE_SYSTEM;
-    }
-    else
-    {
-        o_targetType = TARGETING::TYPE_SYS;
-    }
 
-    o_targetNode = AttributeTank:: ATTR_NODE_NA;
-    o_targetPos = AttributeTank:: ATTR_POS_NA;
-    o_targetUnitPos = AttributeTank::ATTR_UNIT_POS_NA;
-
-    // Find the node, target type, pos and unit-pos
-    int l_cageIndex = i_line.find(ATTR_CAGE_NUMBER);
-    if(l_cageIndex != std::string::npos )
+    do
     {
-        // Create a local string and remove the target header
-        std::string l_line =
-            i_line.substr(l_cageIndex + strlen(ATTR_CAGE_NUMBER));
-
-        // Figure out the node number
-        if (0 == l_line.find(TARGET_NODE_HEADER_STR))
+        if (i_tankLayer == AttributeTank::TANK_LAYER_FAPI)
         {
-            l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
+            o_targetType = fapi2::TARGET_TYPE_SYSTEM;
+        }
+        else
+        {
+            o_targetType = TARGETING::TYPE_SYS;
+        }
+        o_targetNode = AttributeTank:: ATTR_NODE_NA;
+        o_targetPos = AttributeTank:: ATTR_POS_NA;
+        o_targetUnitPos = AttributeTank::ATTR_UNIT_POS_NA;
+        // Find the node, target type, pos and unit-pos
+        int l_cageIndex = i_line.find(ATTR_CAGE_NUMBER);
+        if(l_cageIndex != std::string::npos )
+        {
+            // Create a local string and remove the target header
+            std::string l_line =
+                i_line.substr(l_cageIndex + strlen(ATTR_CAGE_NUMBER));
 
-            if (0 == l_line.find(TARGET_NODE_ALL_STR))
+            // Figure out the node number
+            if (0 == l_line.find(TARGET_NODE_HEADER_STR))
             {
-                l_line = l_line.substr(strlen(TARGET_NODE_ALL_STR));
-            }
-            else
-            {
-                o_targetNode = strtoul(l_line.c_str(), NULL, 10);
+                l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
 
-                size_t l_pos = l_line.find(':');
-
-                if (l_pos != std::string::npos)
+                if (0 == l_line.find(TARGET_NODE_ALL_STR))
                 {
-                    l_line = l_line.substr(l_pos);
+                    l_line = l_line.substr(strlen(TARGET_NODE_ALL_STR));
                 }
                 else
                 {
-                    l_line.clear();
-                }
-            }
-        }
-
-        if (0 == l_line.find(ATTR_FILE_TARGET_EXT_FOOTER_STR))
-        {
-            // Remove the target footer
-            l_line = l_line.substr(strlen(ATTR_FILE_TARGET_EXT_FOOTER_STR));
-        }
-
-        // Figure out the target type
-        const TargStrToType* last =
-          &TARG_STR_TO_TYPE[sizeof(TARG_STR_TO_TYPE)/sizeof(TargStrToType) -1];
-
-        //not sure how long the string representing the title will be
-        //therefore we must look up the next colon and take all chars up to
-        //the colon and assume that is the string representation of the target.
-        size_t nextColon = l_line.find(':');
-        std::string l_targetString = l_line.substr(0, nextColon);
-
-        const TargStrToType* item =
-            std::find(&TARG_STR_TO_TYPE[0], last, l_targetString);
-
-        if (item != last)
-        {
-            o_targetType = (i_tankLayer == AttributeTank::TANK_LAYER_TARG ?
-                            item->iv_targType : item->iv_fapiType);
-            l_line = l_line.substr(strlen(item->iv_pString));
-            l_sysTarget = false;
-        }
-
-
-        // For a non-system target, figure out the position and unit position
-        if (l_sysTarget == false)
-        {
-            // Figure out the target's position
-            if (0 == l_line.find(TARGET_POS_HEADER_STR))
-            {
-                l_line = l_line.substr(strlen(TARGET_POS_HEADER_STR));
-
-                if (0 == l_line.find(TARGET_POS_ALL_STR))
-                {
-                    l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
-                }
-                else
-                {
-                    o_targetPos = strtoul(l_line.c_str(), NULL, 10);
+                    o_targetNode = strtoul(l_line.c_str(), NULL, 10);
 
                     size_t l_pos = l_line.find(':');
 
@@ -583,29 +556,132 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
                 }
             }
 
-            // Figure out the target's unit position
-            if (0 == l_line.find(TARGET_UNIT_POS_HEADER_STR))
+            if (0 == l_line.find(ATTR_FILE_TARGET_EXT_FOOTER_STR))
             {
-                l_line = l_line.substr(strlen(TARGET_UNIT_POS_HEADER_STR));
+                // Remove the target footer
+                l_line = l_line.substr(strlen(ATTR_FILE_TARGET_EXT_FOOTER_STR));
+            }
 
-                if (0 == l_line.find(TARGET_POS_ALL_STR))
+            // Figure out the target type
+            // Remove the end of the target string (position and unitpos) before
+            // using the line to search for target types
+            auto l_pos = l_line.find(":");
+            std::string l_targetType;
+
+            TargStrToType* chip_type_first = NULL;
+            TargStrToType* chip_type_last = NULL;
+
+
+            TargStrToType* item = NULL;
+            if( l_pos != std::string::npos)
+            {
+                l_targetType = l_line.substr(0, l_pos);
+                auto l_dotIndex = l_targetType.find(".");
+
+                if(l_dotIndex != std::string::npos)
                 {
-                    l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
+                    // "." found, meaning both chip type and chip unit are specified
+                    // Isolate the chip unit type
+                    l_targetType = l_targetType.substr(l_dotIndex + 1);
+
+                    // Save range to search in correct target type array
+                    chip_type_first = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE[0];
+                    chip_type_last = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
+                    [(sizeof(CHIP_UNIT_TYPE_TARG_STR_TO_TYPE)/sizeof(TargStrToType))-1];
+
                 }
                 else
                 {
-                    o_targetUnitPos = strtoul(l_line.c_str(), NULL, 10);
+                    // Only chip type specified
+                    // Save range to search in correct target type array
+                    chip_type_first = &CHIP_TYPE_TARG_STR_TO_TYPE[0];
+                    chip_type_last = &CHIP_TYPE_TARG_STR_TO_TYPE
+                    [(sizeof(CHIP_TYPE_TARG_STR_TO_TYPE)/sizeof(TargStrToType))-1];
+
+                }
+
+                //Search for target type
+                item = std::find( chip_type_first,
+                                      chip_type_last, l_targetType.c_str());
+
+                if( item != chip_type_last )
+                {
+                    // Target type found
+                    // choose fapi2 or targeting type
+                    o_targetType = ( i_tankLayer == AttributeTank::TANK_LAYER_TARG ?
+                                     item->iv_targType : item->iv_fapiType);
+                    l_line = l_line.substr(l_targetType.length());
+                    l_sysTarget = false;
+                }
+                else
+                {
+                    printf("Error: Could not find matching target type for given target string(%s)\n",
+                            l_targetType.c_str());
+                    l_err = true;
+                    break;
                 }
             }
+            else
+            {
+                l_sysTarget = true;
+            }
+
+
+            // For a non-system target, figure out the position and unit position
+            if (l_sysTarget == false)
+            {
+                // Figure out the target's position
+                if (0 == l_line.find(TARGET_POS_HEADER_STR))
+                {
+                    l_line = l_line.substr(strlen(TARGET_POS_HEADER_STR));
+
+                    if (0 == l_line.find(TARGET_POS_ALL_STR))
+                    {
+                        l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
+                    }
+                    else
+                    {
+                        o_targetPos = strtoul(l_line.c_str(), NULL, 10);
+
+                        size_t l_pos = l_line.find(':');
+
+                        if (l_pos != std::string::npos)
+                        {
+                            l_line = l_line.substr(l_pos);
+                        }
+                        else
+                        {
+                            l_line.clear();
+                        }
+                    }
+                }
+
+                // Figure out the target's unit position
+                if (0 == l_line.find(TARGET_UNIT_POS_HEADER_STR))
+                {
+                    l_line = l_line.substr(strlen(TARGET_UNIT_POS_HEADER_STR));
+
+                    if (0 == l_line.find(TARGET_POS_ALL_STR))
+                    {
+                        l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
+                    }
+                    else
+                    {
+                        o_targetUnitPos = strtoul(l_line.c_str(), NULL, 10);
+                    }
+                }
+            }
+        } // else, the "k0" string was not found. Process as system target
+
+        // System targets must have an NA node
+        if (l_sysTarget)
+        {
+            o_targetNode = AttributeTank::ATTR_NODE_NA;
         }
-    } // else, the "k0" string was not found. Process as system target
 
-    // System targets must have an NA node
-    if (l_sysTarget)
-    {
-        o_targetNode = AttributeTank::ATTR_NODE_NA;
-    }
+    } while( 0 );
 
+    return l_err;
 }
 
 //******************************************************************************
@@ -877,14 +953,21 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
             l_pErr = attrFileAttrLinesToData(l_attrLines, l_attrId, l_valSize,
                 l_pVal, l_const, l_tankLayer);
 
+            if (l_pErr)
+            {
+                printf("attrTextToBinaryBlob:"
+                       " Error getting attribute data\n");
+                break;
+            }
+
             // Get the Target Data for this attribute
-            attrFileTargetLineToData(l_targetLine, l_tankLayer, l_targetType,
+            l_pErr = attrFileTargetLineToData(l_targetLine, l_tankLayer, l_targetType,
                 l_pos, l_unitPos, l_node);
 
             if (l_pErr)
             {
                 printf("attrTextToBinaryBlob:"
-                       " Error getting attribute data\n");
+                       " Error parsing target string\n");
                 break;
             }
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -65,8 +65,7 @@ OBJS += ${HOSTBOOT_SPECIFIC_OBJS}
 SUBDIRS += test.d
 SUBDIRS += xmltohb.d
 SUBDIRS += runtime.d
-#@TODO RTC:128106
-#SUBDIRS += attroverride.d
+SUBDIRS += attroverride.d
 
 include ${ROOTPATH}/config.mk
 
