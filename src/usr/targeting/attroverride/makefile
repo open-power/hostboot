@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/exttools/attroverride/makefile $
+# $Source: src/usr/targeting/attroverride/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -32,12 +32,13 @@ CODE_PASS_BODY += $(OUT_FILE)
 INC_DIRS += $(ROOTPATH)/src/usr/targeting/
 INC_DIRS += $(GENDIR)
 INC_DIRS += $(ROOTPATH)/src/include/usr
+INC_DIRS += $(ROOTPATH)/src/import/hwpf/fapi2/include
 VPATH += $(ROOTPATH)/src/usr/pnor
 
 
 C_FILES = attrTextToBinaryBlob.C ecc.C
-H_FILES = targAttrOverrideData.H fapiAttrOverrideData.H\
-		  fapiAttrOverrideEnums.H
+H_FILES = targAttrOverrideData.H fapi2AttrOverrideData.H\
+		  fapi2AttrOverrideEnums.H
 
 include $(ROOTPATH)/config.mk
 vpath %.C $(GENDIR)
@@ -45,6 +46,6 @@ vpath %.H $(GENDIR)
 
 $(OUT_FILE): $(C_FILES) $(H_FILES)
 	$(C2) "    CC         $(notdir $@)"
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g -o $(OUT_FILE)\
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -std=gnu++11 -O3 -g -o $(OUT_FILE)\
 			$(foreach dir,$(INC_DIRS), -I $(dir)) -iquote.\
 			$(foreach file,$^,$(if $(findstring .H,$(file)),,$(file)))

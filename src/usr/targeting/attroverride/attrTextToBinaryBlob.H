@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/exttools/attroverride/attrTextToBinaryBlob.H $            */
+/* $Source: src/usr/targeting/attroverride/attrTextToBinaryBlob.H $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,8 +168,10 @@ namespace AttrTextToBinaryBlob
      * @param[out] o_targetPos     Target Position (as stored in tank)
      * @param[out] o_targetUnitPos Target Unit Position (as stored in tank)
      * @param[out] o_targetNode    Target Node Number
+     *
+     * @return - true if the target line was successfully parse, false otherwise
      */
-    static void attrFileTargetLineToData(
+    static bool attrFileTargetLineToData(
         const std::string & i_line,
         const AttributeTank::TankLayer i_tankLayer,
         uint32_t & o_targetType,
@@ -284,6 +286,6 @@ struct AttributeEnum
     uint64_t iv_value;
 };
 #include <targAttrOverrideData.H>
-#include <fapiAttrOverrideData.H>
-#include <fapiAttrOverrideEnums.H>
+#include <fapi2AttrOverrideData.H>
+#include <fapi2AttrOverrideEnums.H>
 
