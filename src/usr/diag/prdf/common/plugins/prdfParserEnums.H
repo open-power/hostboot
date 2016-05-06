@@ -50,17 +50,37 @@ enum PositionBounds
 
     MAX_PROC_PER_NODE   = 8,
 
-    MAX_EX_PER_PROC     = 16,
-    MAX_CORE_PER_PROC   = MAX_EX_PER_PROC,
-    MAX_L2_PER_PROC     = MAX_EX_PER_PROC,
-    MAX_L3_PER_PROC     = MAX_EX_PER_PROC,
+    MAX_EQ_PER_PROC     = 6,
 
-    MAX_XBUS_PER_PROC   = 4,
-    MAX_ABUS_PER_PROC   = 3,
-    MAX_PHB_PER_PROC    = 4,
-    MAX_NV_PER_PROC     = 1,
+    MAX_EX_PER_EQ       = 2,
+    MAX_EX_PER_PROC     = MAX_EX_PER_EQ * MAX_EQ_PER_PROC,
 
-    MAX_MCS_PER_PROC    = 8,
+    MAX_EC_PER_EX       = 2,
+    MAX_EC_PER_EQ       = MAX_EC_PER_EX * MAX_EX_PER_EQ,
+    MAX_EC_PER_PROC     = MAX_EC_PER_EX * MAX_EX_PER_EQ * MAX_EQ_PER_PROC,
+
+    MAX_CAPP_PER_PROC   = 2,
+
+    MAX_PEC_PER_PROC    = 3,
+
+    MAX_PHB_PER_PEC0    = 1,
+    MAX_PHB_PER_PEC1    = 2,
+    MAX_PHB_PER_PEC2    = 3,
+    MAX_PHB_PER_PROC    = MAX_PHB_PER_PEC0 +
+                          MAX_PHB_PER_PEC1 +
+                          MAX_PHB_PER_PEC2,
+
+    MAX_OBUS_PER_PROC   = 4, // Nimbus 0 and 3, Cumulus 0, 1, 2, and 3
+
+    MAX_XBUS_PER_PROC   = 3, // Nimbus 1 and 2, Cumulus 0, 1, and 2
+
+    MAX_MCBIST_PER_PROC = 2,
+
+    MAX_MCS_PER_PROC    = 4,
+
+    MAX_MCA_PER_MCS     = 2,
+    MAX_MCA_PER_PROC    = MAX_MCA_PER_MCS * MAX_MCS_PER_PROC,
+
     MAX_MEMBUF_PER_PROC = MAX_MCS_PER_PROC,
 
     MAX_MBA_PER_MEMBUF  = 2,
@@ -68,15 +88,7 @@ enum PositionBounds
     MAX_DIMM_PER_PORT   = 2,
     MAX_L4_PER_MEMBUF   = 1,
 
-    MAX_PCIE_OSC_PER_NODE = 2,
-    MAX_TOD_OSC_PER_NODE  = 2,
-
-    MAX_TODCLK_ENDPT_PER_PROC  = 2,
-    MAX_TODCLK_ENDPT_PER_NODE  = 4,
-
-    MAX_PCICLK_ENDPT_PER_PROC  = 2,
-    MAX_PCICLK_ENDPT_PER_NODE  = 4,
-
+    MAX_PCIE_OSC_PER_NODE = 2, // TODO: RTC 136052 may need to be removed
     INVALID_POSITION_BOUND = 0xffffffff,
 };
 
