@@ -84,6 +84,10 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             INIT_CAL_ERROR_VREF = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_VREF,
             INIT_CAL_ERROR_RANK_PAIR = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR,
             INIT_CAL_ERROR_RANK_PAIR_LEN = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR_LEN,
+
+            // How many bits are in the field running from INIT_CAL_ERROR_WR_LEVEL to INIT_CAL_ERROR_VREF
+            // Needed to pull the entire field out of the register.
+            CAL_ERROR_FIELD_LEN = 11,
         };
 
 };

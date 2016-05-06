@@ -490,64 +490,22 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 {
     typedef pcTraits<TARGET_TYPE_MCA> TT;
 
-    static const uint64_t init_cal_err_mask = 0x7FF;
-    static const uint64_t init_cal_pc_err_mask = 0xF800;
-
     uint64_t l_errors = 0;
     uint64_t l_rank_pairs = 0;
 
-    fapi2::buffer<uint64_t> l_fir_data;
     fapi2::buffer<uint64_t> l_err_data;
 
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
-    FAPI_TRY( mss::apb::read_fir_err1(i_target, l_fir_data) );
-    FAPI_DBG("initial cal FIR: 0x%016llx", uint64_t(l_fir_data));
-
-    // If we have no errors, lets get out of here.
-    if (l_fir_data == 0)
-    {
-        return fapi2::current_err;
-    }
-
-    // We have bits to check ...
-
-    // If we have PC error status bits on, lets handle those.
-    if ((l_fir_data & init_cal_pc_err_mask) != 0)
-    {
-        FAPI_TRY( pc::read_error_status0(i_target, l_err_data) );
-        // Hm ... I don't see any explict error code for this - not sure if I should break
-        // out all the possible failures.
-        FAPI_ASSERT( l_err_data == 0,
-                     fapi2::MSS_DRAMINIT_TRAINING_PHY_CONTROL_ERROR()
-                     .set_PORT_POSITION(mss::fapi_pos(i_target))
-                     .set_TARGET_IN_ERROR(i_target),
-                     "PHY reported a control error during initial calibration port: %s, pc_error_status0 err: 0x%016llx",
-                     mss::c_str(i_target), uint64_t(l_err_data)
-                   );
-
-        // If we're here, odd things are happening. We saw an error in the FIR, but we don't see
-        // and error in the PC_ERROR_STATUS0 register. So note it and carry on.
-        FAPI_ERR("FIR lit after initial cal: 0x%016lx but nothing in PC_ERROR_STATUS0 (0x%016lx)", l_fir_data, l_err_data);
-    }
-
-    // If we have no init cal error bits, get out
-    if  ((l_fir_data & init_cal_err_mask) == 0)
-    {
-        return fapi2::current_err;
-    }
-
-    // If we're here, we have initial cal errors
     FAPI_TRY( pc::read_init_cal_error(i_target, l_err_data) );
 
-    l_err_data.extractToRight<TT::INIT_CAL_ERROR_WR_LEVEL, 11>(l_errors);
+    l_err_data.extractToRight<TT::INIT_CAL_ERROR_WR_LEVEL, TT::CAL_ERROR_FIELD_LEN>(l_errors);
     l_err_data.extractToRight<TT::INIT_CAL_ERROR_RANK_PAIR, TT::INIT_CAL_ERROR_RANK_PAIR_LEN>(l_rank_pairs);
     FAPI_DBG("initial cal err: 0x%016llx, rp: 0x%016llx (0x%016llx)", l_errors, l_rank_pairs, uint64_t(l_err_data));
 
     if ((l_rank_pairs == 0) || (l_errors == 0))
     {
-        FAPI_INF("Initial CAL FIR is 0x%016llx but missing info in the error register: 0x%016llx",
-                 l_fir_data, l_err_data);
+        FAPI_DBG("Initial cal - no errors reported");
         return fapi2::current_err;
     }
 
