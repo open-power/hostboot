@@ -27,11 +27,5 @@
 <!-- Halt codes for p9_sbe_tp_arrayinit -->
 
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
-    <description>SRAM abist done bit is not set</description>
-    <ffdc>READ_ABIST_DONE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+  
 </hwpErrors>
