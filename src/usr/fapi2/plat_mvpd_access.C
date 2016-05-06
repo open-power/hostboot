@@ -113,9 +113,38 @@ fapi2::ReturnCode MvpdRecordXlate(const fapi2::MvpdRecord i_fapiRecord,
 
     uint8_t l_index = static_cast<uint8_t>(i_fapiRecord);
 
-    if (l_index >= NUM_MVPD_RECORDS ||
-        mvpdFapiRecordToHbRecord[l_index].rec == MVPD::MVPD_INVALID_RECORD
-       )
+    if (l_index >= NUM_MVPD_RECORDS)
+    {
+        FAPI_ERR("MvpdRecordXlate: Index went out of bounds looking for record: 0x%x", i_fapiRecord);
+        /*@
+         * @errortype
+         * @moduleid         MOD_FAPI2_MVPD_ACCESS
+         * @reasoncode       RC_RECORD_OUT_OF_BOUNDS
+         * @userdata1        Record enumerator
+         * @userdata2[0:31]  Index
+         * @userdata2[32:63] Max Index
+         * @devdesc          Attempt to read an MVPD field using
+         *                   an invalid record
+         * @custdesc         Firmware error during IPL
+         */
+
+        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            fapi2::MOD_FAPI2_MVPD_ACCESS,
+            fapi2::RC_RECORD_OUT_OF_BOUNDS,
+            i_fapiRecord,
+            TWO_UINT32_TO_UINT64(l_index,
+            NUM_MVPD_RECORDS),
+            true);
+
+        //Set the record index to INVALID
+        //Don't set the data because we dont know anything about it
+        o_recordIndex  = MVPD_INVALID_CHIP_UNIT;
+
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else if(mvpdFapiRecordToHbRecord[l_index].rec == MVPD::MVPD_INVALID_RECORD)
     {
         FAPI_ERR("MvpdRecordXlate: Invalid MVPD Record: 0x%x", i_fapiRecord);
         /*@
@@ -127,23 +156,22 @@ fapi2::ReturnCode MvpdRecordXlate(const fapi2::MvpdRecord i_fapiRecord,
          * @custdesc     Firmware error during IPL
          */
 
-        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi2::MOD_FAPI2_MVPD_ACCESS,
             fapi2::RC_INVALID_RECORD,
-            i_fapiRecord, 0, hbSwError);
+            i_fapiRecord, 0, true);
+
+        //Set information that we found
+        o_hbRecord     = MVPD::MVPD_INVALID_RECORD;
+        o_recordIndex = mvpdFapiRecordToHbRecord[l_index].recIndex;
 
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
 
-    if ( l_index >= NUM_MVPD_RECORDS )
-    {
-        o_hbRecord     = MVPD::MVPD_INVALID_RECORD;
-        o_recordIndex  = MVPD_INVALID_CHIP_UNIT;
-    }
-    else
+
+    if(!l_rc)
     {
         o_hbRecord    = mvpdFapiRecordToHbRecord[l_index].rec;
         o_recordIndex = mvpdFapiRecordToHbRecord[l_index].recIndex;
@@ -163,8 +191,8 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
 {
     // Create a lookup table for converting a FAPI MVPD keyword enumerator to a
     // Hostboot MVPD keyword enumerator. This is a simple array and relies on
-    // the FAPI record enumerators starting at zero and incrementing.
-    //Structure to map fapi2::MVPD_RECORD to chiplet chip num position
+    // the FAPI keyword enumerators starting at zero and incrementing.
+    //Structure to map fapi2::MVPD_KEYWORD to chiplet chip num position
     struct mvpdKeywordToHb
     {
         MVPD::mvpdKeyword keyword;
@@ -225,36 +253,66 @@ fapi2::ReturnCode MvpdKeywordXlate(const fapi2::MvpdKeyword i_fapiKeyword,
 
     uint8_t l_index = static_cast<uint8_t>(i_fapiKeyword);
 
-    if (l_index >= NUM_MVPD_KEYWORDS ||
-       mvpdFapiKeywordToHbKeyword[l_index].keyword == MVPD::INVALID_MVPD_KEYWORD
-       )
+
+
+    if (l_index >= NUM_MVPD_KEYWORDS)
+    {
+        FAPI_ERR("MvpdKeywordXlate: Index went out of bounds looking for keyword: 0x%x", i_fapiKeyword);
+        /*@
+         * @errortype
+         * @moduleid         MOD_FAPI2_MVPD_ACCESS
+         * @reasoncode       RC_KEYWORD_OUT_OF_BOUNDS
+         * @userdata1        Keyword enumerator
+         * @userdata2[0:31]  Index
+         * @userdata2[32:63] Max Index
+         * @devdesc          Attempt to read an MVPD field using
+         *                   an invalid keyword
+         * @custdesc         Firmware error during IPL
+         */
+
+        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            fapi2::MOD_FAPI2_MVPD_ACCESS,
+            fapi2::RC_KEYWORD_OUT_OF_BOUNDS,
+            i_fapiKeyword,
+            TWO_UINT32_TO_UINT64(l_index,
+            NUM_MVPD_KEYWORDS),
+            true);
+
+        //Set the keyword index to INVALID
+        //Don't set the data because we dont know anything about it
+        o_keywordIndex  = MVPD_INVALID_CHIP_UNIT;
+
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else if(mvpdFapiKeywordToHbKeyword[l_index].keyword == MVPD::INVALID_MVPD_KEYWORD)
     {
         FAPI_ERR("MvpdKeywordXlate: Invalid MVPD Keyword: 0x%x", i_fapiKeyword);
         /*@
-         * @errortype
-         * @moduleid     MOD_FAPI2_MVPD_ACCESS
-         * @reasoncode   RC_INVALID_KEYWORD
-         * @userdata1    Keyword enumerator
-         * @devdesc      Attempt to read an MVPD field using an invalid keyword
-         */
+        * @errortype
+        * @moduleid     MOD_FAPI2_MVPD_ACCESS
+        * @reasoncode   RC_INVALID_KEYWORD
+        * @userdata1    Keyword enumerator
+        * @devdesc      Attempt to read an MVPD field using an invalid keyword
+        * @custdesc     Firmware error during IPL
+        */
 
-        const bool hbSwError = true;
         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             fapi2::MOD_FAPI2_MVPD_ACCESS,
             fapi2::RC_INVALID_KEYWORD,
-            i_fapiKeyword, 0, hbSwError);
+            i_fapiKeyword, 0, true);
+
+        //Set information that we found
+        o_hbKeyword     = MVPD::INVALID_MVPD_KEYWORD;
+        o_keywordIndex = mvpdFapiKeywordToHbKeyword[l_index].keywordIndex;
 
         // Add the error log pointer as data to the ReturnCode
         l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
 
-    if ( l_index >= NUM_MVPD_KEYWORDS )
-    {
-        o_hbKeyword    = MVPD::INVALID_MVPD_KEYWORD;
-        o_keywordIndex = MVPD_INVALID_CHIP_UNIT;
-    }
-    else
+    if(!l_rc)
     {
         o_hbKeyword    = mvpdFapiKeywordToHbKeyword[l_index].keyword;
         o_keywordIndex = mvpdFapiKeywordToHbKeyword[l_index].keywordIndex;

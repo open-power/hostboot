@@ -393,7 +393,7 @@ ReturnCode platGetFusedCoreMode(uint8_t & o_isFused)
 
 // ******************************************************************************
 // fapi2::platAttrSvc::platGetPoundVBucketData function
-// ******************************************************************************
+//******************************************************************************
 ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_EQ>& i_fapiTarget,
                              uint8_t * o_poundVData)
 {

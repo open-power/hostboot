@@ -71,6 +71,8 @@ namespace fapi2
         // MVPD generated errors
         RC_INVALID_RECORD              = HWPF_COMP_ID | 0x0D,
         RC_INVALID_KEYWORD             = HWPF_COMP_ID | 0x0E,
+        RC_RECORD_OUT_OF_BOUNDS        = HWPF_COMP_ID | 0x10,
+        RC_KEYWORD_OUT_OF_BOUNDS       = HWPF_COMP_ID | 0x11,
 
 
         //Platform generated errors
