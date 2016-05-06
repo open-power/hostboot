@@ -55,7 +55,7 @@ void* call_mem_startclocks (void *io_pArgs)
 
     IStepError l_StepError;
 
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"call_mem_startclocks entry" );
 
     // Get all Centaur targets
     TARGETING::TargetHandleList l_procTargetList;
@@ -98,7 +98,7 @@ void* call_mem_startclocks (void *io_pArgs)
         }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mem_startclocks exit" );
 
     return l_StepError.getErrorHandle();

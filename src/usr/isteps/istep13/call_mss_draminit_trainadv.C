@@ -49,7 +49,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
     errlHndl_t l_err = NULL;
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_draminit_trainingadv entry" );
 
     // Get all MCBIST targets
@@ -91,7 +91,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                "SUCCESS :  p9_mss_draminit_trainingadv HWP( )" );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                 "call_mss_draminit_trainingadv exit" );
 
     return l_stepError.getErrorHandle();

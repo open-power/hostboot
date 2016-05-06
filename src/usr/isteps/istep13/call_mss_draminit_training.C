@@ -54,7 +54,7 @@ void* call_mss_draminit_training (void *io_pArgs)
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_mss_draminit_training entry" );
 
     // Get all MCBIST targets
@@ -96,7 +96,7 @@ void* call_mss_draminit_training (void *io_pArgs)
 
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_draminit_training exit" );
 
     return l_stepError.getErrorHandle();
