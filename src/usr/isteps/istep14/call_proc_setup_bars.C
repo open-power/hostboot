@@ -75,11 +75,10 @@ void* call_proc_setup_bars (void *io_pArgs)
                 "p9_mss_setup_bars: proc "
                 "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
-
         //  call the HWP with all fapi2::Target
-//         FAPI_INVOKE_HWP(l_errl,
-//                         p9_mss_setup_bars,
-//                         l_fapi_cpu_target );
+         FAPI_INVOKE_HWP(l_errl,
+                         p9_mss_setup_bars,
+                         l_fapi_cpu_target );
         if ( l_errl )
         {
             // capture the target data in the elog
