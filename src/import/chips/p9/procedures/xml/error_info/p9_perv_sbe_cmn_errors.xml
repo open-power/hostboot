@@ -38,4 +38,16 @@
     <description>Polling for OPCG_DONE for arrayInit reached threshold , count expired.</description>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
+    <description>SRAM abist done bit is not set</description>
+    <ffdc>READ_ABIST_DONE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EDRAM_ABIST_DONE_BIT_ERR</rc>
+    <description>EDRAM abist done bit is not set</description>
+    <ffdc>READ_ABIST_DONE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
