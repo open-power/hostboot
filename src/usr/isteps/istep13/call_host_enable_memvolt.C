@@ -43,7 +43,7 @@ namespace ISTEP_13
 {
 void* call_host_enable_memvolt (void *io_pArgs)
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             ENTER_MRK"call_host_enable_memvolt" );
 
     errlHndl_t l_err = NULL;
@@ -67,7 +67,7 @@ void* call_host_enable_memvolt (void *io_pArgs)
         errlCommit( l_err, HWPF_COMP_ID );
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"call_host_enable_memvolt" );
 
     return l_StepError.getErrorHandle();

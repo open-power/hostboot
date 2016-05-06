@@ -36,8 +36,8 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
-// #include    <p9_mss_scominit.H>
+
+#include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
 
 using   namespace   ERRORLOG;
@@ -53,7 +53,7 @@ void* call_mss_scominit (void *io_pArgs)
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit entry" );
 
     do
     {
@@ -71,9 +71,9 @@ void* call_mss_scominit (void *io_pArgs)
 
             fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_target
                 (l_target);
-            //@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
+
             //  call the HWP with each fapi2::Target
-//             FAPI_INVOKE_HWP(l_err, p9_mss_scominit, l_fapi_target);
+            FAPI_INVOKE_HWP(l_err, p9_mss_scominit, l_fapi_target);
 
             if (l_err)
             {
@@ -116,9 +116,8 @@ void* call_mss_scominit (void *io_pArgs)
                    "Running p9_throttle_sync HWP on "
                    "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
-//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
             // Call proc_throttle_sync
-//             FAPI_INVOKE_HWP( l_err, p9_throttle_sync, l_fapi_cpu_target );
+            FAPI_INVOKE_HWP( l_err, p9_throttle_sync, l_fapi_cpu_target );
 
             if (l_err)
             {
@@ -145,7 +144,7 @@ void* call_mss_scominit (void *io_pArgs)
 
     } while (0);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
     return l_stepError.getErrorHandle();
 }
 

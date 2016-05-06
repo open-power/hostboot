@@ -37,7 +37,9 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+
 
 OBJS += call_host_disable_memvolt.o
 OBJS += call_mem_pll_reset.o
@@ -53,6 +55,8 @@ OBJS += call_mss_draminit_training.o
 OBJS += call_mss_draminit_trainadv.o
 OBJS += call_mss_draminit_mc.o
 
+
+
 OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o,hbVddrMsg.o)
 
 
@@ -60,13 +64,14 @@ include ${ROOTPATH}/procedure.rules.mk
 
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_initf.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_skewadjust.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mca_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
+include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
 
-#@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
-# include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
-# include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
+#TODO RTC:149115 New fapi2::Target::getChildren interface
 # include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
-# include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
-
+# include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
 
 #TODO RTC:152209 Implement std::enable_if in HB
 # include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
@@ -76,4 +81,4 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_mem_skewadjust.mk
 
 include ${ROOTPATH}/config.mk
 
-VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDURES_PATH}/hwp/perv
+VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDURES_PATH}/hwp/perv ${PROCEDURES_PATH}/hwp/initfiles/

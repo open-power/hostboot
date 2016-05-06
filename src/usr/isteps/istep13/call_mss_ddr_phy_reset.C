@@ -53,7 +53,7 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                           "call_mss_ddr_phy_reset entry" );
 
     // Get all MCBIST targets
@@ -94,7 +94,7 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
         }
     } // end l_mcbistNum loop
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_ddr_phy_reset exit" );
 
     return l_stepError.getErrorHandle();

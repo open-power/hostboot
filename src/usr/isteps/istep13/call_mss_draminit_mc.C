@@ -54,7 +54,7 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
     IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
 
     // Get all MCBIST
     TARGETING::TargetHandleList l_mcbistTargetList;
@@ -95,7 +95,7 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
     } // End; memBuf loop
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 
     return l_stepError.getErrorHandle();
 }

@@ -40,7 +40,7 @@ void* call_host_disable_memvolt (void *io_pArgs)
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               ENTER_MRK"call_host_disable_memvolt");
 
     // This function has Compile-time binding for desired platform
@@ -58,7 +58,7 @@ void* call_host_disable_memvolt (void *io_pArgs)
 
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"call_host_disable_memvolt");
 
     return l_StepError.getErrorHandle();
