@@ -541,4 +541,11 @@
   <writeable/>
 </attribute>
 
+<attribute>
+  <id>ATTR_SDISN_SETUP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Sdis_n set or clear : flushing LCBES condition woraround</description>
+  <valueType>uint8</valueType>
+</attribute>
+
 </attributes>

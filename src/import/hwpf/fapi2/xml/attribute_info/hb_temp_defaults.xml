@@ -100,6 +100,9 @@
         <id>ATTR_PROC_EPS_WRITE_CYCLES_T2</id>
         <default>0x00000FFF</default>
     </attribute>
+    <attribute>
+        <id>ATTR_SDISN_SETUP</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
