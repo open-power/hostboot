@@ -49,19 +49,22 @@ OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_host_mpipl_service.o
 
-
+#Object files from lib directories
+OBJS += memory_size.o
+OBJS += c_str.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
-# include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_memdiag.mk
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
 include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
-
 include ${ROOTPATH}/config.mk
 
 
 VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
