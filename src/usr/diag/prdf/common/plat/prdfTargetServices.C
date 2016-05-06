@@ -34,6 +34,7 @@
 
 #include <prdfTargetServices.H>
 
+#include <prdfAssert.h>
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
@@ -415,24 +416,22 @@ struct conn_t
         {
             case TYPE_SYS:          order =  0; break;
             case TYPE_NODE:         order =  1; break;
-            case TYPE_OSC:          order =  2; break;
-            case TYPE_OSCPCICLK:    order =  3; break;
-            case TYPE_PROC:         order =  4; break;
-            case TYPE_TODCLK:       order =  5; break;
-            case TYPE_PCICLKENDPT:  order =  6; break;
-            case TYPE_PORE:         order =  7; break;
-            case TYPE_NX:           order =  8; break;
-            case TYPE_OCC:          order =  9; break;
-            case TYPE_PSI:          order =  10; break;
-            case TYPE_EX:           order =  11; break;
-            case TYPE_XBUS:         order =  12; break;
-            case TYPE_ABUS:         order =  13; break;
-            case TYPE_PCI:          order =  14; break;
-            case TYPE_MCS:          order =  15; break;
-            case TYPE_MEMBUF:       order =  16; break;
-            case TYPE_L4:           order =  17; break;
-            case TYPE_MBA:          order =  18; break;
-            case TYPE_DIMM:         order =  19; break;
+            case TYPE_PROC:         order =  2; break;
+            case TYPE_EQ:           order =  3; break;
+            case TYPE_EX:           order =  4; break;
+            case TYPE_CORE:         order =  5; break;
+            case TYPE_CAPP:         order =  6; break;
+            case TYPE_PEC:          order =  7; break;
+            case TYPE_PHB:          order =  8; break;
+            case TYPE_OBUS:         order =  9; break;
+            case TYPE_XBUS:         order = 10; break;
+            case TYPE_NX:           order = 11; break;
+            case TYPE_OCC:          order = 12; break;
+            case TYPE_PSI:          order = 13; break;
+            case TYPE_MCBIST:       order = 14; break;
+            case TYPE_MCS:          order = 15; break;
+            case TYPE_MCA:          order = 16; break;
+            case TYPE_DIMM:         order = 17; break;
             default: ;
         }
 
@@ -463,113 +462,80 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
     static conn_t lookups[] =
     {
         // This table must be sorted based on the < operator of struct conn_t.
-        { TYPE_SYS,    TYPE_NODE,       TargetService::CHILD_BY_AFFINITY },
-        { TYPE_SYS,    TYPE_OSC,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_SYS,    TYPE_OSCPCICLK,  TargetService::CHILD_BY_AFFINITY },
+        { TYPE_SYS,    TYPE_NODE,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_NODE,   TYPE_SYS,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_OSC,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_OSCPCICLK,  TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_PROC,       TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_TODCLK,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_PCICLKENDPT,TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_EX,         TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_XBUS,       TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_ABUS,       TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_PCI,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_MCS,        TargetService::CHILD_BY_AFFINITY },
+        { TYPE_NODE,   TYPE_PROC,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_NODE,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_L4,         TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_MBA,        TargetService::CHILD_BY_AFFINITY },
-        { TYPE_NODE,   TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY },
-
-        { TYPE_OSC,    TYPE_SYS,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OSC,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OSC,    TYPE_TODCLK,     TargetService::CHILD_BY_AFFINITY },
-
-        { TYPE_OSCPCICLK, TYPE_SYS,         TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OSCPCICLK, TYPE_NODE,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_OSCPCICLK, TYPE_PCICLKENDPT, TargetService::CHILD_BY_AFFINITY },
 
         { TYPE_PROC,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PROC,   TYPE_TODCLK,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_PCICLKENDPT,TargetService::CHILD_BY_AFFINITY },
-        { TYPE_PROC,   TYPE_PORE,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_EQ,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_CAPP,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_PEC,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_PHB,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_OBUS,       TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_XBUS,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_NX,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_XBUS,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_ABUS,       TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_PCI,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MCBIST,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_PROC,   TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_TODCLK, TYPE_NODE,       TargetService::PARENT_BY_AFFINITY  },
-        { TYPE_TODCLK, TYPE_OSC,        TargetService::PARENT_BY_AFFINITY  },
-        { TYPE_TODCLK, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
+        { TYPE_EQ,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_EQ,     TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_EQ,     TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_PCICLKENDPT, TYPE_SYS,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PCICLKENDPT, TYPE_NODE,      TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PCICLKENDPT, TYPE_OSCPCICLK, TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PCICLKENDPT, TYPE_PROC,      TargetService::PARENT_BY_AFFINITY },
-
-        { TYPE_PORE,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
-
-        { TYPE_NX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
-
-        { TYPE_OCC,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY  },
-        { TYPE_OCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
-
-        { TYPE_PSI,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY  },
-        { TYPE_PSI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
-
-        { TYPE_EX,     TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_EX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_EX,     TYPE_EQ,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_EX,     TYPE_CORE,       TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_XBUS,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_CORE,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_CORE,   TYPE_EQ,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_CORE,   TYPE_EX,         TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_CAPP,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_PEC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PEC,    TYPE_PHB,        TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_PHB,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_OBUS,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
         { TYPE_XBUS,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_ABUS,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_ABUS,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_NX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_PCI,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_PCI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_OCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_MCS,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_PSI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
+        { TYPE_MCBIST, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+
         { TYPE_MCS,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCS,    TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MCS,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS,    TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS,    TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_MCA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCA,    TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MEMBUF, TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MEMBUF, TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_L4,     TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L4,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_L4,     TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_L4,     TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
 
-        { TYPE_MBA,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MBA,    TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MBA,    TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MBA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
-        { TYPE_DIMM,   TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM,   TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
-        { TYPE_DIMM,   TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DIMM,   TYPE_MCA,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_DIMM,   TYPE_MBA,        TargetService::PARENT_BY_AFFINITY },
 
     };
@@ -643,6 +609,8 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
 
 TargetHandleList getConnected( TargetHandle_t i_target, TYPE i_connType )
 {
+    PRDF_ASSERT( NULL != i_target );
+
     TargetHandleList o_list; // Default empty list
 
     do
@@ -670,16 +638,12 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedParent] "
 
+    PRDF_ASSERT( NULL != i_target );
+
     TargetHandle_t o_parent = NULL;
 
     do
     {
-        if ( i_connType == getTargetType(i_target) )
-        {
-            o_parent = i_target;
-            break;
-        }
-
         TargetService::ASSOCIATION_TYPE assocType;
         int32_t l_rc = getAssociationType( i_target, i_connType, assocType );
         if ( SUCCESS != l_rc ) break;
@@ -711,9 +675,11 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 //------------------------------------------------------------------------------
 
 TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
-                                  uint32_t i_position )
+                                  uint32_t i_connPos )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedChild] "
+
+    PRDF_ASSERT( NULL != i_target );
 
     TargetHandle_t o_child = NULL;
 
@@ -730,26 +696,110 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             break;
         }
 
-        // SPECIAL CASE: The MEMBUF position number is relative to the PROC,
-        //      not the MCS. This means the MEMBUF position number is the same
-        //      as the position number of the attached MCS. In many cases, we
-        //      want to get the MEMBUF connected to the MCS, but don't have
-        //      knowledge of the MCS's position number (espeically in the rule
-        //      code. So the following will change the desired position number
-        //      to the MCS position number for MCS->MEMBUF connections only.
-        if ( TYPE_MCS == getTargetType(i_target) && TYPE_MEMBUF == i_connType )
-            i_position = getTargetPosition(i_target);
-
+        // Get the list.
         TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
-        for ( TargetHandleList::iterator i = list.begin();
-              i != list.end(); ++i )
+        if ( list.empty() )
         {
-            if ( i_position == getTargetPosition(*i) )
-            {
-                o_child = *i;
-                break;
-            }
+            PRDF_ERR( PRDF_FUNC "The list is empty: i_target=0x%08x "
+                    "i_connType=%d", getHuid(i_target), i_connType );
+            break;
         }
+
+        // There are some special cases where we need something other than to
+        // match the unit positions. So check those first.
+
+        TargetHandleList::iterator itr = list.end();
+        TYPE     trgtType = getTargetType(    i_target );
+        uint32_t trgtPos  = getTargetPosition( i_target );
+
+        if ( TYPE_EQ == trgtType && TYPE_EX == i_connType )
+        {
+            // i_connPos is position relative to EQ (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t exPos = getTargetPosition(t);
+                        return (trgtPos   == (exPos / MAX_EX_PER_EQ)) &&
+                               (i_connPos == (exPos % MAX_EX_PER_EQ));
+                    } );
+        }
+        else if ( TYPE_EQ == trgtType && TYPE_CORE == i_connType )
+        {
+            // i_connPos is position relative to EQ (0-3)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t ecPos = getTargetPosition(t);
+                        return (trgtPos   == (ecPos / MAX_EC_PER_EQ)) &&
+                               (i_connPos == (ecPos % MAX_EC_PER_EQ));
+                    } );
+        }
+        else if ( TYPE_EX == trgtType && TYPE_CORE == i_connType )
+        {
+            // i_connPos is position relative to EX (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t ecPos = getTargetPosition(t);
+                        return (trgtPos   == (ecPos / MAX_EC_PER_EX)) &&
+                               (i_connPos == (ecPos % MAX_EC_PER_EX));
+                    } );
+        }
+        else if ( TYPE_PEC == trgtType && TYPE_PHB == i_connType )
+        {
+            // i_connPos is position relative to PEC (0, 0-1, or 0-2)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t relPec = 0;
+                        uint32_t relPhb = 0;
+                        switch ( getTargetPosition(t) )
+                        {
+                            case 0: relPec = 0; relPhb = 0; break;
+                            case 1: relPec = 1; relPhb = 0; break;
+                            case 2: relPec = 1; relPhb = 1; break;
+                            case 3: relPec = 2; relPhb = 0; break;
+                            case 4: relPec = 2; relPhb = 1; break;
+                            case 5: relPec = 2; relPhb = 2; break;
+                        }
+                        return (trgtPos == relPec) && (i_connPos == relPhb);
+                    } );
+        }
+        else if ( TYPE_MCS == trgtType && TYPE_MCA == i_connType )
+        {
+            // i_connPos is position relative to MCS (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mcaPos = getTargetPosition(t);
+                        return (trgtPos   == (mcaPos / MAX_EC_PER_EX)) &&
+                               (i_connPos == (mcaPos % MAX_EC_PER_EX));
+                    } );
+        }
+        else if ( TYPE_MCS == trgtType && TYPE_MEMBUF == i_connType )
+        {
+            // The MEMBUF position number is relative to the PROC, not the MCS.
+            // This means the MEMBUF position number is the same as the position
+            // number of the attached MCS. In many cases, we want to get the
+            // MEMBUF connected to the MCS, but don't have knowledge of the
+            // MCS's position number (especially in the rule code. So the
+            // following will change the desired position number to the MCS
+            // position number for MCS->MEMBUF connections only.
+            itr = std::find_if( list.begin(), list.end(),
+                                [&](const TargetHandle_t & t)
+                                { return trgtPos == getTargetPosition(t); } );
+        }
+        else
+        {
+            // default, i_connPos should match the unit position within the chip
+            itr = std::find_if( list.begin(), list.end(),
+                                [&](const TargetHandle_t & t)
+                                { return i_connPos == getTargetPosition(t); } );
+        }
+
+        // Get the target if found.
+        if ( list.end() != itr )
+            o_child = *itr;
 
     } while(0);
 
@@ -764,24 +814,19 @@ TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedPeerTarget] "
 
+    PRDF_ASSERT( NULL != i_target );
+
     TargetHandle_t o_target = NULL;
 
     do
     {
-        if ( NULL == i_target )
-        {
-            PRDF_ERR( PRDF_FUNC "Given target is NULL" );
-            break;
-        }
-
         TYPE type = getTargetType( i_target );
 
         switch( type )
         {
             case TYPE_XBUS:
-            case TYPE_ABUS:
+            case TYPE_OBUS:
             case TYPE_PSI:
-            case TYPE_PCICLKENDPT:
 
                 o_target = i_target->getAttr<ATTR_PEER_TARGET>();
                 break;
@@ -806,21 +851,15 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
 {
     #define PRDF_FUNC "[PlatServices::getConnectedPeerProc] "
 
+    PRDF_ASSERT( NULL != i_procTarget );
+    PRDF_ASSERT( TYPE_PROC == getTargetType(i_procTarget) );
+    PRDF_ASSERT( ((TYPE_XBUS == i_busType) && (MAX_XBUS_PER_PROC > i_busPos)) ||
+                 ((TYPE_OBUS == i_busType) && (MAX_OBUS_PER_PROC > i_busPos)) );
+
     TargetHandle_t o_target = NULL;
 
     do
     {
-        if ( NULL == i_procTarget || TYPE_PROC != getTargetType(i_procTarget) )
-        {
-            PRDF_ERR( PRDF_FUNC "Given target is not of TYPE_PROC: "
-                      "i_procTarget=0x%08x", getHuid(i_procTarget) );
-            break;
-        }
-
-        if ( !( ((TYPE_XBUS == i_busType) && (MAX_XBUS_PER_PROC > i_busPos)) ||
-                ((TYPE_ABUS == i_busType) && (MAX_ABUS_PER_PROC > i_busPos)) ) )
-            break;
-
         // Starting PROC -> starting XBUS/ABUS.
         TargetHandle_t busTarget = getConnectedChild( i_procTarget, i_busType,
                                                       i_busPos );
