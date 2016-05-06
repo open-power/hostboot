@@ -27,11 +27,5 @@
 <!-- Halt codes for p9_sbe_arrayinit -->
 
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_ABIST_DONE_ERR</rc>
-    <description>Abist Done bit not set after Array Init</description>
-    <ffdc>READ_ABIST_DONE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+ 
 </hwpErrors>
