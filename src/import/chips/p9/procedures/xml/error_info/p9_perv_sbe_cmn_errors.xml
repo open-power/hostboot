@@ -6,6 +6,7 @@
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
 <!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
@@ -35,6 +36,18 @@
   <hwpError>
     <rc>RC_SBE_ARRAYINIT_POLL_THRESHOLD_ERR</rc>
     <description>Polling for OPCG_DONE for arrayInit reached threshold , count expired.</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
+    <description>SRAM abist done bit is not set</description>
+    <ffdc>READ_ABIST_DONE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EDRAM_ABIST_DONE_BIT_ERR</rc>
+    <description>EDRAM abist done bit is not set</description>
+    <ffdc>READ_ABIST_DONE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
