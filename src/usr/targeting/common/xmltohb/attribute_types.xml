@@ -18011,6 +18011,7 @@ DEPRECATED!!!!
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
