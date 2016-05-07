@@ -11627,7 +11627,6 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint32_t>
-        <default>0</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -14598,7 +14597,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>ATTR_EFF_DRAM_MAC</id>
+  <id>EFF_DRAM_MAC</id>
   <description>
     Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
     creator: mss_eff_cnfg
@@ -15970,12 +15969,10 @@ DEPRECATED!!!!
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VOLT_OVERRIDE</id>
         <macro>DIRECT</macro>
@@ -16009,11 +16006,11 @@ DEPRECATED!!!!
     </description>
     <simpleType>
         <uint8_t>
+            <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VDDR_OVERIDE_SPD</id>
         <macro>DIRECT</macro>
@@ -16253,7 +16250,9 @@ DEPRECATED!!!!
       version of algorithm used to calculate ISDIMM power curves
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -24510,7 +24509,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_DIMM_DDR6_F0BC6x</id>
+    <id>EFF_DIMM_DDR4_F0BC6x</id>
     <description>
       F0BCW6x Fine Granularity Frequency Operating Speed Control Word
     </description>
@@ -24909,7 +24908,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_DIMM_DDR4_F5BC0x</id>
+    <id>EFF_DIMM_DDR4_F5BC0x</id>
     <description>
       F5BCW0x Upper and Lower MPR bits[7:0] for U0
     </description>
@@ -25137,7 +25136,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_DIMM_DDR4_F74BC8x</id>
+    <id>EFF_DIMM_DDR4_F74BC8x</id>
     <description>
       F74BCW8x MDQ0/4 -Read Delay Control Word for ranks 0 to 3
     </description>
@@ -25156,7 +25155,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>ATTR_EFF_DIMM_DDR4_F74BC9x</id>
+    <id>EFF_DIMM_DDR4_F74BC9x</id>
     <description>
       F74BCW9x MDQ1/5 -Read Delay Control Word for ranks 0 to 3
     </description>
