@@ -25464,5 +25464,827 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>VPD_MR_0_VERSION_LAYOUT</id>
+    <description>MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_0_VERSION_LAYOUT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_1_VERSION_DATA</id>
+    <description>MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_1_VERSION_DATA</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_2_SIGNATURE_FREQ_DROP</id>
+    <description>MR Keyword type, nibble 0 = freq bin (0 = 1600, 1 = 1866, 2 = 2133, 3 = 2400, 4 = 2667, 5 = 2933, 6 = 3200), nibble 1 = num dimms per port (1 = single drop, 2 = dual drop)</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_2_SIGNATURE_FREQ_DROP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_DRAM_2N_MODE</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_DRAM_2N_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A01</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A01</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A02</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A02</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A03</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A03</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A04</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A04</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A05</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A05</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A06</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A06</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A07</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A07</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A08</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A08</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A09</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A09</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A10</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A10</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A11</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A11</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A12</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A12</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A13</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A13</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_A17</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A17</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_BA0</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_BA1</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_BG0</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_BG1</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_C0</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_C1</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_ADDR_C2</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id>
+    <description>Place holder description</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CMD_ACTN</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ACTN</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CMD_PAR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_PAR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CKE0</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CKE1</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CKE2</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CKE3</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE3</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CSN0</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CSN1</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CSN2</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_CSN3</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN3</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_ODT2</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT2</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint16_t></uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_TSYS_ADR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_TSYS_ADR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MR_TSYS_DATA</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MR_TSYS_DATA</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
