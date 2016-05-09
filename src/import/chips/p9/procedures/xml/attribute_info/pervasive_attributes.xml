@@ -546,6 +546,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Sdis_n set or clear : flushing LCBES condition woraround</description>
   <valueType>uint8</valueType>
+  <platInit/>
 </attribute>
 
 </attributes>
