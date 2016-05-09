@@ -2090,6 +2090,9 @@
     <attribute><id>MRW_VDDR_OFFSET_DISABLE</id></attribute>
     <attribute><id>MRW_FINE_REFRESH_MODE</id></attribute>
     <attribute><id>MRW_TEMP_REF_RANGE</id></attribute>
+    <attribute><id>VPD_MR_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>VPD_MR_1_VERSION_DATA</id></attribute>
+    <attribute><id>VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2559,6 +2562,51 @@
     <attribute><id>EFF_DRAM_TRFC_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TFAW_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TXS</id></attribute>
+    <attribute><id>VPD_MR_DRAM_2N_MODE</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A00</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A01</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A02</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A03</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A04</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A05</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A06</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A07</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A08</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A09</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A10</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A11</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A12</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A13</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A17</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_BA0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_BA1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_BG0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C2</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_PAR</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CKE0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CKE1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CKE2</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CKE3</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CSN0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CSN1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CSN2</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_CSN3</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id></attribute>
+    <attribute><id>VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
+    <attribute><id>VPD_MR_TSYS_ADR</id></attribute>
+    <attribute><id>VPD_MR_TSYS_DATA</id></attribute>
 </targetType>
 
 <targetType>
