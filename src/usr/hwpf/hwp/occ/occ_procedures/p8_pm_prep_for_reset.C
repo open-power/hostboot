@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.31 2015/05/13 03:12:36 stillgs Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.32 2016/04/29 14:00:41 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -198,6 +198,112 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             FAPI_INF("Running on DCM");
         }
+        
+        // XB301316 - Start
+        // Moving OCC Heartbeat and OCC Halt here to stop WOF from modifying the 
+        //   PDEMR and keeping Special Wake-up from happening
+        
+        //  ******************************************************************
+        //  Disable PMC OCC HEARTBEAT before reset OCC
+        //  ******************************************************************
+        // Primary
+        rc = fapiGetScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        e_rc = data.clearBit(16);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on master during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+        rc = fapiGetScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+
+        e_rc = data.clearBit(16);
+        if (e_rc)
+        {
+            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on slave during reset");
+            rc.setEcmdError(e_rc);
+            break;
+        }
+
+        rc = fapiPutScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
+        if (rc)
+        {
+            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
+            break;
+        }
+        }
+
+        //  ******************************************************************
+        //  Put OCC PPC405 into reset safely
+        //  ******************************************************************
+        FAPI_INF("Put OCC PPC405 into reset safely");
+        FAPI_DBG("Executing: p8_occ_control.C");
+
+        FAPI_EXEC_HWP(rc, p8_occ_control, i_primary_chip_target, PPC405_RESET_SEQUENCE, 0);
+        if (rc)
+        {
+            FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+            FAPI_EXEC_HWP(rc, p8_occ_control, i_secondary_chip_target, PPC405_RESET_SEQUENCE, 0);
+            if (rc)
+            {
+              FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);
+              break;
+            }
+        }
+        
+        //  ******************************************************************
+        //  Issue reset to PORE General Purpose Engine
+        //  ******************************************************************
+        FAPI_INF("Issue reset to PORE General Purpose Engine");
+        FAPI_DBG("Executing: p8_poregpe_init.C");
+
+        // Primary
+        FAPI_EXEC_HWP(rc, p8_poregpe_init, i_primary_chip_target, PM_RESET, GPEALL );
+        if (rc)
+        {
+            FAPI_ERR("p8_poregpe_init: Failed to issue reset to PORE General Purpose Engine. With rc = 0x%x", (uint32_t)rc);
+            break;
+        }
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+            FAPI_EXEC_HWP(rc, p8_poregpe_init, i_secondary_chip_target, PM_RESET, GPEALL );
+            if (rc)
+            {
+                FAPI_ERR("p8_poregpe_init: Failed to issue reset to PORE General Purpose Engine. With rc = 0x%x", (uint32_t)rc);
+                break;
+            }
+        }
+
+        // XB301316   - End
 
         // ******************************************************************
         //  Clear the Deep Exit Masks to allow Special Wake-up to occur
@@ -318,81 +424,10 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             break;
         }
+        
+        // XB301316
+        // OCC heartbeat disable and OCC Halt was here
 
-        //  ******************************************************************
-        //  Disable PMC OCC HEARTBEAT before reset OCC
-        //  ******************************************************************
-        // Primary
-        rc = fapiGetScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
-        if (rc)
-        {
-            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
-            break;
-        }
-
-        e_rc = data.clearBit(16);
-        if (e_rc)
-        {
-            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on master during reset");
-            rc.setEcmdError(e_rc);
-            break;
-        }
-
-        rc = fapiPutScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
-        if (rc)
-        {
-            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
-            break;
-        }
-
-        // Secondary
-        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {
-        rc = fapiGetScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
-        if (rc)
-        {
-            FAPI_ERR("fapiGetScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
-            break;
-        }
-
-        e_rc = data.clearBit(16);
-        if (e_rc)
-        {
-            FAPI_ERR("ecmdDataBufferBase error setting up PMC_OCC_HEARTBEAT_REG_0x00062066 on slave during reset");
-            rc.setEcmdError(e_rc);
-            break;
-        }
-
-        rc = fapiPutScom(i_secondary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
-        if (rc)
-        {
-            FAPI_ERR("fapiPutScom(PMC_OCC_HEARTBEAT_REG_0x00062066) failed.");
-            break;
-        }
-        }
-
-        //  ******************************************************************
-        //  Put OCC PPC405 into reset safely
-        //  ******************************************************************
-        FAPI_INF("Put OCC PPC405 into reset safely");
-        FAPI_DBG("Executing: p8_occ_control.C");
-
-        FAPI_EXEC_HWP(rc, p8_occ_control, i_primary_chip_target, PPC405_RESET_SEQUENCE, 0);
-        if (rc)
-        {
-            FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);
-            break;
-        }
-
-        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {
-            FAPI_EXEC_HWP(rc, p8_occ_control, i_secondary_chip_target, PPC405_RESET_SEQUENCE, 0);
-            if (rc)
-            {
-              FAPI_ERR("p8_occ_control: Failed to prepare OCC for RESET. With rc = 0x%x", (uint32_t)rc);
-              break;
-            }
-        }
 
         //  ******************************************************************
         //  FSM trace
@@ -614,30 +649,8 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             }
         }
 
-        //  ******************************************************************
-        //  Issue reset to PORE General Purpose Engine
-        //  ******************************************************************
-        FAPI_INF("Issue reset to PORE General Purpose Engine");
-        FAPI_DBG("Executing: p8_poregpe_init.C");
-
-        // Primary
-        FAPI_EXEC_HWP(rc, p8_poregpe_init, i_primary_chip_target, PM_RESET, GPEALL );
-        if (rc)
-        {
-            FAPI_ERR("p8_poregpe_init: Failed to issue reset to PORE General Purpose Engine. With rc = 0x%x", (uint32_t)rc);
-            break;
-        }
-
-        // Secondary
-        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {
-            FAPI_EXEC_HWP(rc, p8_poregpe_init, i_secondary_chip_target, PM_RESET, GPEALL );
-            if (rc)
-            {
-                FAPI_ERR("p8_poregpe_init: Failed to issue reset to PORE General Purpose Engine. With rc = 0x%x", (uint32_t)rc);
-                break;
-            }
-        }
+        // SWxxxxxx
+        // PORE General Purpose Engine reset was here
 
         //  ******************************************************************
         //  Issue reset to PBA
