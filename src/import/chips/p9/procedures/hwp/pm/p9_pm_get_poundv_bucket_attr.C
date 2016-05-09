@@ -101,7 +101,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                i_target,
                                l_eqChipUnitPos));
-        fapi2::MvpdRecord lprRecord;
+        fapi2::MvpdRecord lprRecord = fapi2::MVPD_RECORD_LRP0;
 
         switch(l_eqChipUnitPos)
         {
@@ -131,7 +131,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
 
             default:
                 FAPI_ERR("No LRP record found for EQ with fapi pos = %d", l_eqChipUnitPos);
-                assert(0);
+                fapi2::Assert(0);
                 break;
         }
 

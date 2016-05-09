@@ -27,10 +27,14 @@
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
 #include <return_code_defs.H>
-#include <cassert>
 
 namespace fapi2
 {
+
+// forward fapi2::Assert()
+extern void Assert(bool);
+
+
 /// @brief Get a 32 bit mask quickly
 // This is one of the main reasons we static_assert in the ctor's
 // to ensure the unit_type is 32 bits.
@@ -377,7 +381,7 @@ class variable_buffer
 
             ReturnCodes rc;
             // make sure we stay within our container
-            assert((L > 0) && ((SB + L) <= this->iv_perceived_bit_length) );
+            fapi2::Assert((L > 0) && ((SB + L) <= this->iv_perceived_bit_length) );
 
             uint32_t mask   = 0;
 
@@ -494,7 +498,7 @@ class variable_buffer
         inline bool isBitSet( bits_type SB, bits_type L = 1 ) const
         {
             // make sure we stay within our container
-            assert( ((L > 0) && ((SB + L) <= this->iv_perceived_bit_length)) );
+            fapi2::Assert( ((L > 0) && ((SB + L) <= this->iv_perceived_bit_length)) );
 
             bool is_set     = false;
             uint32_t mask   = 0;
