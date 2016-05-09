@@ -52,6 +52,7 @@
 #include <arch/ppc.H>
 #include <arch/pirformat.H>
 #include <config.h>
+#include <p9_misc_scom_addresses.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
 
@@ -308,6 +309,14 @@ errlHndl_t IntrRp::resetIntUnit()
             break;
         }
 
+        l_err = enableVPCPullErr(procTarget);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error re-enabling VPC Pull Err");
+            break;
+        }
+
+
     } while (0);
 
     if (l_err)
@@ -344,8 +353,10 @@ errlHndl_t IntrRp::enableInterrupts()
         //Set bit to configure LSI mode for HB cec interrupts
         XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
           reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
-        this_ivpe_ptr->cams = XIVE_IVPE_QW3_LSI_ENABLE;
+        this_ivpe_ptr->cams_vt = XIVE_IVPE_QW3_LSI_ENABLE;
+        eieio();
 
+        TRACFCOMP(g_trac_intr, INFO_MRK"LSI Mode active (cams_vt)");
    } while (0);
 
     //TODO RTC 150260 - Determine if any error checking can be done above, if so
@@ -958,6 +969,14 @@ errlHndl_t IntrRp::setInterruptBARs(TARGETING::Target * i_target)
         if (l_err)
         {
             TRACFCOMP(g_trac_intr, "Error setting XIVE IC BAR");
+            break;
+        }
+
+        //Turn off VPC error when in LSI mode
+        l_err = disableVPCPullErr(i_target);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error masking VPC Pull Lsi Err");
             break;
         }
 
@@ -2705,7 +2724,78 @@ errlHndl_t IntrRp::setXiveIcBAR(TARGETING::Target * i_target)
         iv_xiveIcBarAddress =
                reinterpret_cast<uint64_t *>
                (mmio_dev_map(l_xiveIcBarAddress, 40*PAGE_SIZE));
+    } while(0);
 
+    return l_err;
+}
+
+errlHndl_t IntrRp::disableVPCPullErr(TARGETING::Target * i_target)
+{
+    errlHndl_t l_err = NULL;
+    size_t size;
+
+    do {
+        uint64_t l_vpcErrCnfg;
+        size = sizeof(l_vpcErrCnfg);
+        l_err = deviceRead(i_target,
+                            &l_vpcErrCnfg,
+                            size,
+                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to read VPC Err Cnfg");
+            break;
+        }
+
+        l_vpcErrCnfg &= ~XIVE_IC_VPC_PULL_ERR;
+        l_err = deviceWrite(i_target,
+                            &l_vpcErrCnfg,
+                            size,
+                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to write VPC Err Cnfg");
+            break;
+        }
+
+
+    } while(0);
+
+    return l_err;
+}
+
+errlHndl_t IntrRp::enableVPCPullErr(TARGETING::Target * i_target)
+{
+    errlHndl_t l_err = NULL;
+    size_t size;
+
+    do {
+        uint64_t l_vpcErrCnfg;
+        size = sizeof(l_vpcErrCnfg);
+        l_err = deviceRead(i_target,
+                            &l_vpcErrCnfg,
+                            size,
+                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to read VPC Err Cnfg");
+            break;
+        }
+
+        l_vpcErrCnfg |= XIVE_IC_VPC_PULL_ERR;
+        l_err = deviceWrite(i_target,
+                            &l_vpcErrCnfg,
+                            size,
+                            DEVICE_SCOM_ADDRESS(PU_INT_PC_VPC_ERR_CFG1));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to write VPC Err Cnfg");
+            break;
+        }
     } while(0);
 
     return l_err;

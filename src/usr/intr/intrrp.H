@@ -197,13 +197,14 @@ namespace INTR
                 XIVE_IC_ESB_EOI_OFFSET = 0x3000,
                 XIVE_IC_LSI_EOI_OFFSET =
                                         XIVE_IC_ESB_EOI_OFFSET/sizeof(uint64_t),
+                XIVE_IC_VPC_PULL_ERR = 0x0000000200000000,
 
                 //XIVE IVPE (Presentation Engine) Constants
                 XIVE_IVPE_TM_BAR1_SCOM_ADDR = 0x05013012,
                 XIVE_IVPE_TM_BAR1_MMIO_OFFSET = 0x0006020000000000ULL,
                 XIVE_IVPE_TM_BAR1_VALIDATE = 0x8000000000000000ULL,
                 XIVE_IVPE_QW3_OFFSET = 0x38,
-                XIVE_IVPE_QW3_LSI_ENABLE = 0x81000000,
+                XIVE_IVPE_QW3_LSI_ENABLE = 0x81,
 
                 PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR = 0x0501290E,
                 PSI_BRIDGE_INTP_STATUS_CTL_ENABLE = 0x8000000000000000ULL,
@@ -320,7 +321,10 @@ namespace INTR
                 uint8_t inc; //Age increment - 0x5
                 uint8_t age; //Thread age since last selected - 0x6
                 uint8_t pipr; //Pending Interrupt Priority Register - 0x7
-                uint32_t cams; //qw0/1/2/3 - 0x8
+                uint8_t cams_vt;   //qw0/1/2/3 - 0x8
+                uint8_t cams_rsv;  //qw0/1/2/3 - 0x9
+                uint8_t cams_rsv1; //qw0/1/2/3 - 0xA
+                uint8_t cams_prio; //qw0/1/2/3 - 0xB
             };
 
             #define PSIHB_SW_INTERFACES_SIZE (sizeof(PSIHB_SW_INTERFACES_t))
@@ -542,6 +546,24 @@ namespace INTR
              * @return Errorlog from DeviceWrite
              */
             errlHndl_t setXiveIcBAR(TARGETING::Target * i_target);
+
+            /**
+             * When in LSI mode the IC VPC flags and error, thus we
+             * need to disable while we use, and enable after we clean
+             * up
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t disableVPCPullErr(TARGETING::Target * i_target);
+
+            /**
+             * When in LSI mode the IC VPC flags and error, thus we
+             * need to disable while we use, and enable after we clean
+             * up
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t enableVPCPullErr(TARGETING::Target * i_target);
 
             /**
              * Reset Interrupt Unit (both the XIVE and PSIHB Interrupt Units)
