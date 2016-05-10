@@ -1512,9 +1512,9 @@ foreach my $i (@{$i2cHost->{'host-i2c-connection'}})
 #   ex  (one or more EX of pu before it)
 #   eq  (one or more EQ of pu before it)
 #   core (one or more CORE of pu before it)
+#   mcbist (one or more MCBIST of pu before it)
 #   mcs (one or more MCS of pu before it)
 #   mca (one or more MCA of pu before it)
-#   mcbist (one or more MCBIST of pu before it)
 #   pec (one or more PEC of pu before it)
 #   phb (one or more PHB of pu before it)
 #   obus (one or more OBUS of pu before it)
@@ -1562,7 +1562,7 @@ for my $i ( 0 .. $#SortedTargets )
         my $node = $SortedTargets[$i][NODE_FIELD];
         my $position = $SortedTargets[$i][POS_FIELD];
 
-        my @targetOrder = ("eq","ex","core","mcs","mca","mcbist","pec",
+        my @targetOrder = ("eq","ex","core","mcbist","mcs","mca","pec",
                 "phb","obus","xbus","ppe","perv","capp","sbe");
         for my $m (0 .. $#targetOrder)
         {
@@ -1729,9 +1729,9 @@ if($axBusesHuidInit == 0)
 my $ex_count = 0;
 my $ex_core_count = 0;
 my $eq_count = 0;
+my $mcbist_count = 0;
 my $mcs_count = 0;
 my $mca_count = 0;
-my $mcbist_count = 0;
 my $pec_count = 0;
 my $phb_count = 0;
 my $obus_count = 0;
@@ -2965,6 +2965,7 @@ sub calcAndAddFapiPos
         $typeToLimit{"membuf"} = ARCH_LIMIT_MEMBUF_PER_DMI;
         $typeToLimit{"ex"}     = ARCH_LIMIT_EX_PER_EQ;
         $typeToLimit{"mba"}    = ARCH_LIMIT_MBA_PER_MEMBUF;
+        $typeToLimit{"mcbist"} = ARCH_LIMIT_MCBIST_PER_PROC;
         $typeToLimit{"mcs"}    = ARCH_LIMIT_MCS_PER_PROC;
         $typeToLimit{"xbus"}   = ARCH_LIMIT_XBUS_PER_PROC;
         $typeToLimit{"abus"}   = ARCH_LIMIT_ABUS_PER_PROC;
@@ -2972,7 +2973,6 @@ sub calcAndAddFapiPos
         $typeToLimit{"core"}   = ARCH_LIMIT_CORE_PER_EX;
         $typeToLimit{"eq"}     = ARCH_LIMIT_EQ_PER_PROC;
         $typeToLimit{"mca"}    = ARCH_LIMIT_MCA_PER_MCS;
-        $typeToLimit{"mcbist"} = ARCH_LIMIT_MCBIST_PER_PROC;
         $typeToLimit{"mi"}     = ARCH_LIMIT_MI_PER_PROC;
         $typeToLimit{"capp"}   = ARCH_LIMIT_CAPP_PER_PROC;
         $typeToLimit{"dmi"}    = ARCH_LIMIT_DMI_PER_MI;
@@ -3941,6 +3941,9 @@ sub generate_mcs
     my ($proc, $mcs, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
+    my $mcs_orig = $mcs;
+    $mcs = $mcs%2;
+    my $mcbist = ($mcs_orig - ($mcs_orig%2))/2;
 
     my $lognode;
     my $logid;
@@ -3969,7 +3972,7 @@ sub generate_mcs
     {
         if (($dmi->[DBUS_MCS_NODE_INDEX] eq ${node} ) &&
             ( $dmi->[DBUS_MCS_PROC_INDEX] eq $proc  ) &&
-            ($dmi->[DBUS_MCS_UNIT_INDEX] eq  $mcs   ))
+            ($dmi->[DBUS_MCS_UNIT_INDEX] eq  $mcs_orig   ))
         {
             $lane_swap = $dmi->[DBUS_MCS_DOWNSTREAM_INDEX];
             $msb_swap = $dmi->[DBUS_MCS_TX_SWAP_INDEX];
@@ -3977,18 +3980,22 @@ sub generate_mcs
             last;
         }
     }
-    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs";
+    my $physicalPath = "physical:sys-$sys/node-$node/proc-$proc"
+                       . "/mcbist-$mcbist/mcs-$mcs";
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc"
+                       . "/mcbist-$mcbist/mcs-$mcs";
 
-    my $fapi_name = sprintf("pu.mcs:k0:n%d:s0:p%02d:c%d", $node, $proc, $mcs);
+    my $fapi_name =
+               sprintf("pu.mcs:k0:n%d:s0:p%02d:c%d", $node, $proc, $mcs_orig);
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
-    <type>unit-mcs-$CHIPNAME</type>
+    <id>sys${sys}node${node}proc${proc}mcbist${mcbist}mcs$mcs</id>
+    <type>unit-mcs-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
+        <default>$physicalPath</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -4008,7 +4015,7 @@ sub generate_mcs
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$mcs</default>
+        <default>$mcs_orig</default>
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
@@ -4020,9 +4027,9 @@ sub generate_mcs
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>";
 
-    addPervasiveParentLink($sys,$node,$proc,$mcs,"mcs");
+    addPervasiveParentLink($sys,$node,$proc,$mcs_orig,"mcs");
 
-    calcAndAddFapiPos("mcs",$affinityPath,$mcs,$fapiPosHr);
+    calcAndAddFapiPos("mcs",$affinityPath,$mcs_orig,$fapiPosHr);
 
     # call to do any fsp per-mcs attributes
     do_plugin('fsp_mcs', $proc, $mcs, $ordinalId );
@@ -4037,7 +4044,8 @@ sub generate_mca
     my ($proc, $mca, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X24%04X",${node},$proc*MAX_MCA_PER_PROC + $mca);
     my $mruData = get_mruid($ipath);
-    my $mcs = ($mca - ($mca%2))/2;
+    my $mcs = (($mca - ($mca%2))/2)%2;
+    my $mcbist = ($mca - ($mca%4))/4;
     my $mca_orig = $mca;
     $mca = $mca % 2;
 
@@ -4054,15 +4062,16 @@ sub generate_mca
     }
     my $fapi_name = sprintf("pu.mca:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $mca_orig);
-
     my $affinityPath =
-        "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca_orig";
+        "affinity:sys-$sys/node-$node/proc-$proc"
+        . "/mcbist-$mcbist/mcs-$mcs/mca-$mca";
     my $physicalPath =
-        "physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca_orig";
+        "physical:sys-$sys/node-$node/proc-$proc"
+         . "/mcbist-$mcbist/mcs-$mcs/mca-$mca";
 
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}mcs${mcs}mca$mca_orig</id>
+    <id>sys${sys}node${node}proc${proc}mcbist${mcbist}mcs${mcs}mca$mca</id>
     <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
@@ -4122,7 +4131,8 @@ sub generate_mcbist
     }
     my $fapi_name = sprintf("pu.mcbist:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $mcbist);
-    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
+    my $physicalPath="physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
+    my $affinityPath="affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
 
     print "
 <targetInstance>
@@ -4132,7 +4142,7 @@ sub generate_mcbist
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
+        <default>$physicalPath</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -5428,8 +5438,12 @@ sub generate_is_dimm
         my $fapi_name = sprintf("dimm:k0:n%d:s0:p%02d",
                                 $node, $dimm);
 
-        my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "mca-$mca/dimm-$dimm";
+        $mcs = (($mca - ($mca%2))/2)%2;
+        my $mcbist = ($mca - ($mca%4))/4;
+        $mca = $mca % 2;
+
+        my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc"
+            . "/mcbist-$mcbist/mcs-$mcs/mca-$mca/dimm-$dimm";
 
         print "\n<!-- DIMM n${node}:p${pos} -->\n";
         print "

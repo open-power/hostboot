@@ -1470,399 +1470,6 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0 MCS units -->
-<targetInstance>
-    <id>sys0node0proc0mcs0</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0100</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <default>0x0003E58000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs1</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0101</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <default>0x0003E5A000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs2</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0102</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <default>0x0003E5C000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs3</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0103</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <default>0x0003E5E000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<!-- Nimbus n0p0mcs0 MCA units -->
-<targetInstance>
-    <id>sys0node0proc0mcs0mca0</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240100</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mca-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs0mca1</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240101</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-0/mca-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-</targetInstance>
-
-<!-- Nimbus n0p0mcs1 MCA units -->
-<targetInstance>
-    <id>sys0node0proc0mcs1mca2</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240102</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-2</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-2</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs1mca3</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240103</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-3</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-3</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-</targetInstance>
-
-<!-- Nimbus n0p0mcs2 MCA units -->
-<targetInstance>
-    <id>sys0node0proc0mcs2mca4</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240104</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-4</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-4</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs2mca5</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240105</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-5</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-5</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-</targetInstance>
-
-<!-- Nimbus n0p0mcs3 MCA units -->
-<targetInstance>
-    <id>sys0node0proc0mcs3mca6</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240106</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-6</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-6</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcs3mca7</id>
-    <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x00240107</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-7</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-7</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-</targetInstance>
-
 <!-- Nimbus n0p0 MCBIST units -->
 <targetInstance>
     <id>sys0node0proc0mcbist0</id>
@@ -1917,6 +1524,399 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0 MCS units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs0</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0100</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E58000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs1</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0101</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5A000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs0</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0102</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5C000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs1</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0103</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5E000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs0 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs0mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240100</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs0mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240101</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs1 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs1mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240102</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist0mcs1mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240103</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs2 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs0mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240104</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs0mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240105</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs3 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs1mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240106</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1mcs1mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x00240107</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
