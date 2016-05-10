@@ -2093,6 +2093,9 @@
     <attribute><id>VPD_MR_0_VERSION_LAYOUT</id></attribute>
     <attribute><id>VPD_MR_1_VERSION_DATA</id></attribute>
     <attribute><id>VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
+    <attribute><id>VPD_MT_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>VPD_MT_1_VERSION_DATA</id></attribute>
+    <attribute><id>VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2607,6 +2610,33 @@
     <attribute><id>VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
     <attribute><id>VPD_MR_TSYS_ADR</id></attribute>
     <attribute><id>VPD_MR_TSYS_DATA</id></attribute>
+    <attribute><id>VPD_MT_CKE_PRI_MAP</id></attribute>
+    <attribute><id>VPD_MT_CKE_PWR_MAP</id></attribute>
+    <attribute><id>VPD_MT_DIMM_RCD_IBT</id></attribute>
+    <attribute><id>VPD_MT_DIMM_RCD_OUTPUT_TIMING</id></attribute>
+    <attribute><id>VPD_MT_DRAM_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>VPD_MT_DRAM_RTT_NOM</id></attribute>
+    <attribute><id>VPD_MT_DRAM_RTT_PARK</id></attribute>
+    <attribute><id>VPD_MT_DRAM_RTT_WR</id></attribute>
+    <attribute><id>VPD_MT_MC_DRV_IMP_ADDR</id></attribute>
+    <attribute><id>VPD_MT_MC_DRV_IMP_CLK</id></attribute>
+    <attribute><id>VPD_MT_MC_DRV_IMP_CNTL</id></attribute>
+    <attribute><id>VPD_MT_MC_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>VPD_MT_MC_DRV_IMP_SPCKE</id></attribute>
+    <attribute><id>VPD_MT_MC_RCV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>VPD_MT_MC_SLEW_RATE_ADDR</id></attribute>
+    <attribute><id>VPD_MT_MC_SLEW_RATE_CLK</id></attribute>
+    <attribute><id>VPD_MT_MC_SLEW_RATE_CNTL</id></attribute>
+    <attribute><id>VPD_MT_MC_SLEW_RATE_DQ_DQS</id></attribute>
+    <attribute><id>VPD_MT_MC_SLEW_RATE_SPCKE</id></attribute>
+    <attribute><id>VPD_MT_ODT_RD</id></attribute>
+    <attribute><id>VPD_MT_ODT_WR</id></attribute>
+    <attribute><id>VPD_MT_OFFSET_GPO</id></attribute>
+    <attribute><id>VPD_MT_OFFSET_RLO</id></attribute>
+    <attribute><id>VPD_MT_OFFSET_WLO</id></attribute>
+    <attribute><id>VPD_MT_VREF_DRAM_WR</id></attribute>
+    <attribute><id>VPD_MT_VREF_MC_RD</id></attribute>
+    <attribute><id>VPD_MT_WINDAGE_RD_CTR</id></attribute>
 </targetType>
 
 <targetType>
