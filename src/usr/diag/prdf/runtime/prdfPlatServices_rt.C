@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,7 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
         }
 
         int32_t rc = g_hostInterfaces->memory_error( i_startAddr,
-                                                     i_startAddr,
+                                                     i_endAddr,
                                                      MEMORY_ERROR_UE );
         if( SUCCESS != rc )
         {
