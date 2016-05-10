@@ -59,17 +59,21 @@ typedef struct
 } TorPpeBlock_t;
 
 
-#define MAX_CPLT_SBE                         13
-#define IMGBUILD_TGR_RING_FOUND               0
-#define IMGBUILD_TGR_RING_BLOCKS_FOUND        0
-#define IMGBUILD_TGR_RING_NOT_FOUND           1  // Ring is not found in HW image.
-#define IMGBUILD_TGR_INVALID_RING_ID          2  // Ring is invalid or mismatch.
-#define IMGBUILD_TGR_AMBIGUOUS_API_PARMS      3  // Ring search in HW iamge got ambiguous condition.
-#define IMGBUILD_TGR_SECTION_NOT_FOUND        4
-#define IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND    5
-#define IMGBUILD_TGR_OP_BUFFER_INVALID        6
-#define IMGBUILD_TGR_OP_BUFFER_SIZE_EXCEEDED  7
-#define IMGBUILD_INVALID_INSTANCEID           8
+#define MAX_CPLT_SBE                                  13
+#define IMGBUILD_TGR_RING_FOUND                        0
+#define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
+#define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image.
+#define IMGBUILD_TGR_INVALID_RING_ID                   2  // Ring is invalid or mismatch.
+#define IMGBUILD_TGR_AMBIGUOUS_API_PARMS               3  // Ring search in HW iamge got ambiguous condition.
+#define IMGBUILD_TGR_SECTION_NOT_FOUND                 4
+#define IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND             5
+#define IMGBUILD_TGR_OP_BUFFER_INVALID                 6
+#define IMGBUILD_TGR_OP_BUFFER_SIZE_EXCEEDED           7
+#define IMGBUILD_INVALID_INSTANCEID                    8
+#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_CME       10
+#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_SGPE      11
+#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
+#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
 
 #define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
 #define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
@@ -222,7 +226,6 @@ int tor_get_ring(  void*
                    RingVariant_t   i_RingVariant,    // Base, Cache etc
                    uint8_t&        io_instanceId,     // chiplet instance ID
                    RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
-                   //uint8_t         i_bBuffer,        // 0: No buffer, 1: Yes buffer.
                    void**          io_ringBlockPtr,  // Addr of ring buffer
                    uint32_t&       io_ringBlockSize, // size of ring data
                    char*           o_ringName        // Ring name
@@ -235,7 +238,7 @@ int tor_get_single_ring ( void*
                           PpeType_t     i_PpeType,           // ppe Type
                           RingVariant_t
                           i_RingVariant,       // Base, cache contained, Risk level, Override and Overlay
-                          uint8_t&      io_instanceId,       // Chiplet Instance ID
+                          uint8_t       i_instanceId,        // Chiplet Instance ID
                           void**        io_ringBlockPtr,     // Addr of ring buffer
                           uint32_t&     io_ringBlockSize );  // size of ring data
 
@@ -244,9 +247,9 @@ int tor_get_block_of_rings ( void*
                              i_ringSectionPt,  // Ring address Ptr any of .rings, .overrides and .overlays.
                              uint16_t      i_ddLevel,        // DD level
                              PpeType_t     i_PpeType,        // ppe Type
-                             RingType_t&    io_RingType,       // Common Or Instance
+                             RingType_t    i_RingType,       // Common Or Instance
                              RingVariant_t i_RingVariant,    // base,cache,etc
-                             uint8_t&      io_instanceId,     // Chiplet Instance ID
+                             uint8_t       i_instanceId,     // Chiplet Instance ID
                              void**        io_ringBlockPtr,  // Addr of ring buffer
                              uint32_t&     io_ringBlockSize  // size of ring data
                            );
