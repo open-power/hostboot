@@ -310,26 +310,15 @@ class variable_buffer
             static_assert( std::is_integral<OT>::value,
                            "Input must be an integral type" );
 
-            const uint32_t length = bufferTraits<bits_container>:: template size<OT>(iv_data);
             static const bits_type bits_in_value = parameterTraits<OT>::bit_length();
-            const bits_type bit_length = bufferTraits<bits_container>::bit_length(iv_data);
 
-            if ((i_offset + bits_in_value) > iv_perceived_bit_length)
+            if (((i_offset + 1 ) *  bits_in_value) > iv_perceived_bit_length)
             {
                 return FAPI2_RC_OVERFLOW;
             }
 
-            // Create mask if part of this byte is not in the valid part of the buffer,
-            // Shift it left by the amount of unused bits,
-            // Clear the unused bits (doesn't use fastmask as OT isn't always 32 bits)
-            if (((i_offset + 1) == length) && (bit_length % bits_in_value))
-            {
-                i_value &= parameterTraits<OT>::mask() << ((bits_in_value * length) - bit_length);
-            }
+            return insert<OT>( i_value, (i_offset * bits_in_value), bits_in_value, 0);
 
-            parameterTraits<OT>::template write_element<unit_type>(bufferTraits<bits_container>::get_address(iv_data), i_value,
-                    i_offset);
-            return FAPI2_RC_SUCCESS;
         }
 
         ///
@@ -341,7 +330,7 @@ class variable_buffer
         /// @note uint8_t b = get<uint8_t>(N) <- gets the N'th left byte from the buffer
         ///
         template< typename OT>
-        inline OT get(const bits_type i_offset = 0);
+        inline OT get(const bits_type i_offset = 0) const;
 
         /// @name Bit/Word Manipulation Functions
         ///@{
@@ -854,7 +843,7 @@ class variable_buffer
                                           bits_type i_start = 0,
                                           bits_type i_len = ~0) const
         {
-            // If thy didn't pass an i_len, assume they want all the data
+            // If they didn't pass an i_len, assume they want all the data
             // which will fit.
             if (i_len == static_cast<bits_type>(~0))
             {
@@ -1224,7 +1213,7 @@ inline fapi2::ReturnCodes variable_buffer::shiftRight(
 }
 
 template< typename OT>
-inline OT variable_buffer::get(const bits_type i_offset)
+inline OT variable_buffer::get(const bits_type i_offset) const
 {
     // Get is just an extract.
     OT l_tmp = OT(0);
