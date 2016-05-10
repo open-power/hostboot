@@ -35,7 +35,7 @@
 #ifndef __STOP_DATA_STRUCT_
 #define __STOP_DATA_STRUCT_
 
-#ifndef  __HOS_AIX__
+#ifndef  _AIX
     #include <endian.h>
 #endif
 
