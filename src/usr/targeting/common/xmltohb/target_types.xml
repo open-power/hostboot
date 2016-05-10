@@ -2642,6 +2642,8 @@
     <attribute><id>VPD_MT_VREF_DRAM_WR</id></attribute>
     <attribute><id>VPD_MT_VREF_MC_RD</id></attribute>
     <attribute><id>VPD_MT_WINDAGE_RD_CTR</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <targetType>
@@ -2651,8 +2653,6 @@
         <id>MODEL</id>
         <default>NIMBUS</default>
     </attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <!-- MCA

@@ -112,38 +112,7 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         }
     }
 
-    //Setup MCSs and MCAs
-    i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
-    for(int i = 0; i < NUM_MCS; i++)
-    {
-        l_epath.addLast(TARGETING::TYPE_MCS, i);
-        if(TARGETING::targetService().toTarget(l_epath) != NULL)
-        {
-            o_targetList[MY_MCS] =
-              TARGETING::targetService().toTarget(l_epath);
-            for(int j = 0; j < NUM_MCAS; j++)
-              {
-                  l_epath.addLast(TARGETING::TYPE_MCA,j);
-                  if(TARGETING::targetService().toTarget(l_epath) != NULL)
-                  {
-                    o_targetList[MY_MCA] =
-                      TARGETING::targetService().toTarget(l_epath);
-                    break;
-                  }
-                  else
-                  {
-                    l_epath.removeLast();
-                  }
-              }
-              break;
-        }
-        else
-        {
-          l_epath.removeLast();
-        }
-    }
-
-    //Setup MCBISTs
+    //Setup MCBISTs, MCSs, and MCAs
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
     for(int i = 0; i < NUM_MCBISTS; i++)
     {
@@ -152,6 +121,34 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         {
             o_targetList[MY_MCBIST] =
               TARGETING::targetService().toTarget(l_epath);
+            for(int j = 0; j < NUM_MCS; j++)
+            {
+                l_epath.addLast(TARGETING::TYPE_MCS, j);
+                if(TARGETING::targetService().toTarget(l_epath) != NULL)
+                {
+                    o_targetList[MY_MCS] =
+                      TARGETING::targetService().toTarget(l_epath);
+                    for(int k = 0; k < NUM_MCAS; k++)
+                    {
+                        l_epath.addLast(TARGETING::TYPE_MCA,k);
+                        if(TARGETING::targetService().toTarget(l_epath)!=NULL)
+                        {
+                            o_targetList[MY_MCA] =
+                              TARGETING::targetService().toTarget(l_epath);
+                            break;
+                        }
+                        else
+                        {
+                            l_epath.removeLast();
+                        }
+                    }
+                    break;
+                }
+                else
+                {
+                  l_epath.removeLast();
+                }
+            }
             break;
         }
         else
