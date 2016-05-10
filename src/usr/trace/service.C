@@ -322,13 +322,21 @@ namespace TRACE
             }
 
 #ifdef CONFIG_CONSOLE_TRACE_LITE
-            CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args);
+
+        #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
+            if (strcmp( i_td->iv_compName, "FAPI" ))
+        #endif
+            { CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args); }
 #else
             if (iv_traceLite)
             {
-                CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args);
+            #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
+                if (strcmp( i_td->iv_compName, "FAPI" ))
+            #endif
+                { CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args); }
             }
-#endif
+
+#endif //CONFIG_CONSOLE_TRACE_LITE
 
             // "Commit" entry to buffer.
             l_buffer->commitEntry(l_entry);
