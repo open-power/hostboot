@@ -341,37 +341,50 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             //Need to default TOD registers to reasonable value
             // aggregate scom data to write
             uint64_t l_tod_data[] = {
-                0x40001, 0x0008008007000000,
-                0x40002, 0x8000000000000000,
-                0x40003, 0x0008008000000000,
-                0x40004, 0x8000000000000000,
-                0x40005, 0x0800c30000000000,
-                0x40008, 0x03e6600000000000,
-                0x40010, 0x003f000000000000,
-                0x40013, 0x8000000000000000,
-                0x40000, 0x4083000000000000,
-                0x40007, 0x6920000000000000,
+                0x40000, 0x4083000000000000,0x4083000000000000,
+                0x40001, 0x0008008011000000,0x8000000000000000,
+                0x40002, 0x8000000000000000,0x0008008000000000,
+                0x40003, 0x0008008000000000,0x8000000011000000,
+                0x40004, 0x8000000000000000,0x00C3000000000000,
+                0x40005, 0x0800c30000000000,0x00C3000000000000,
+                0x40007, 0x6900000000000000,0x0B60000000000000,
+                0x40008, 0x06661D0C00000000,0x06C06CCC00000000,
+                0x40010, 0x003F000000000000,0x003F000000000000,
+                0x40013, 0x8000000000000000,0x0000000000000000,
             };
 
-            for(uint8_t i = 0;
-                i < (sizeof(l_tod_data) / sizeof(uint64_t));
-                i+=2)
-            {
-                l_errl = deviceWrite( l_masterProc,
-                                      &(l_tod_data[i+1]),
-                                      scom_size,
-                                      DEVICE_SCOM_ADDRESS(l_tod_data[i]) );
-                if( l_errl ) { break; }
-            }
+            // Per Dean, this workaround should be run against all
+            // processor chips.
+            TARGETING::TargetHandleList l_cpuTargetList;
+            getAllChips(l_cpuTargetList, TYPE_PROC);
 
-            if ( l_errl )
+            uint32_t l_proc_num = 0;
+            for (const auto & l_cpu_target: l_cpuTargetList)
             {
-                // Create IStep error log and cross reference to error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
+                assert((l_proc_num < 2),
+                       "TOD hack does not support more then 2 procs");
 
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
+                for(uint8_t i = 0;
+                    i < (sizeof(l_tod_data) / sizeof(uint64_t));
+                    i+=3)
+                {
+                    l_errl = deviceWrite( l_cpu_target,
+                                          &(l_tod_data[i+1+l_proc_num]),
+                                          scom_size,
+                                          DEVICE_SCOM_ADDRESS(l_tod_data[i]) );
+                    if( l_errl ) { break; }
+                }
+
+                if ( l_errl )
+                {
+                    // Create IStep error log and cross reference to error that
+                    // occurred
+                    l_stepError.addErrorDetails( l_errl );
+
+                    // Commit Error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                }
+                l_proc_num++;
             }
 
             printk("Fake TOD Initialized\n");
