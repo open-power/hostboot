@@ -25,7 +25,7 @@
 #ifndef __P9_STOP_UTIL_
 #define __P9_STOP_UTIL_
 
-#ifdef __HOS_AIX__
+#ifdef _AIX
     #define __BYTE_ORDER __BIG_ENDIAN
 #else
     #include <endian.h>
