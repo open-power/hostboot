@@ -23478,7 +23478,6 @@ DEPRECATED!!!!
       creator: mss_eff_config
       consumer: various
       firmware notes: none
-      EMPTY = 0, DDR3 = 1, DDR4 = 2
     </description>
     <simpleType>
       <uint8_t>
@@ -23504,7 +23503,6 @@ DEPRECATED!!!!
       creator: mss_eff_config
       consumer: various
       firmware notes: none
-      EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3
     </description>
     <simpleType>
       <uint8_t>
@@ -23528,7 +23526,6 @@ DEPRECATED!!!!
       creator: mss_eff_config
       consumer: various
       firmware notes: none
-      NONE = 0, NVDIMM = 1
     </description>
     <simpleType>
       <uint8_t>
@@ -23729,7 +23726,6 @@ DEPRECATED!!!!
       creator: mss_eff_cnfg
       consumer: various
       firmware notes: none
-      NOT_SUPPORTED = 0, SUPPORTED = 1
     </description>
     <simpleType>
       <uint8_t>
