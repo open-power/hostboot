@@ -26283,4 +26283,486 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+
+<attribute>
+    <id>VPD_MT_0_VERSION_LAYOUT</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_0_VERSION_LAYOUT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_1_VERSION_DATA</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_1_VERSION_DATA</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_CKE_PRI_MAP</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint16_t></uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_CKE_PRI_MAP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_CKE_PWR_MAP</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint32_t></uint32_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_CKE_PWR_MAP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_DIMM_RCD_IBT</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DIMM_RCD_IBT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_DIMM_RCD_OUTPUT_TIMING</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DIMM_RCD_OUTPUT_TIMING</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_DRAM_DRV_IMP_DQ_DQS</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_DRAM_RTT_NOM</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DRAM_RTT_NOM</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+ <attribute>
+    <id>VPD_MT_DRAM_RTT_PARK</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DRAM_RTT_PARK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_DRAM_RTT_WR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_DRAM_RTT_WR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_DRV_IMP_ADDR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_DRV_IMP_ADDR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_DRV_IMP_CLK</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_DRV_IMP_CLK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_DRV_IMP_CNTL</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_DRV_IMP_CNTL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_DRV_IMP_DQ_DQS</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_DRV_IMP_DQ_DQS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_DRV_IMP_SPCKE</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_DRV_IMP_SPCKE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_RCV_IMP_DQ_DQS</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_SLEW_RATE_ADDR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_SLEW_RATE_ADDR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_SLEW_RATE_CLK</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_SLEW_RATE_CLK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_SLEW_RATE_CNTL</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_SLEW_RATE_CNTL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_SLEW_RATE_DQ_DQS</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_SLEW_RATE_DQ_DQS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_MC_SLEW_RATE_SPCKE</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_MC_SLEW_RATE_SPCKE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_ODT_RD</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_ODT_RD</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_ODT_WR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_ODT_WR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_OFFSET_GPO</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_OFFSET_GPO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_OFFSET_RLO</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_OFFSET_RLO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_OFFSET_WLO</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_OFFSET_WLO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_VREF_DRAM_WR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_VREF_DRAM_WR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_VREF_MC_RD</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_VREF_MC_RD</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_MT_WINDAGE_RD_CTR</id>
+    <description>Place holder description</description>
+    <simpleType>
+      <uint16_t></uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VPD_MT_WINDAGE_RD_CTR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
