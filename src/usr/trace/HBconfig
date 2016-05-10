@@ -18,3 +18,8 @@ config CONSOLE_OUTPUT_TRACE_COMP_NAME
         Limits console output trace to a specific component by name.
         User needs to add to the config file:
         set CONSOLE_OUTPUT_TRACE_COMP_NAME "<component_string_name>"
+
+config NO_FAPI_IN_TRACE_LITE_OUTPUT
+    default y
+    help
+        Do not output FAPI traces when CONSOLE_TRACE_LITE is enabled.
