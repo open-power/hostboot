@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,14 +107,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // Initialize all modules.
     vfs_module_init();
 
-    // TODO RTC 134050  This is the ideal place for initialization calls.
-    // Opal has not initialized pnor or ipmi, so initialization
-    // was moved to attn enable as a short term measure.
-#if 0
     // apply temp overrides
     postInitCalls_t* rtPost = getPostInitCalls();
     rtPost->callApplyTempOverrides();
-#endif
 
     // Return our interface pointer structure.
     return rtInterfaces;
