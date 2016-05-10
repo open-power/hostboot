@@ -25287,4 +25287,182 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <description>
+      Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+    <description>
+      Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_MEM_M_DRAM_CLOCKS</id>
+    <description>
+      Machine Readable Workbook for the number of M DRAM clocks.
+      One approach to curbing DRAM power usage is by throttling
+      traffic through a programmable N commands over M window.
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_MEM_M_DRAM_CLOCKS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_AVDD_OFFSET_DISABLE</id>
+    <description>
+      Used for to determine whether to apply an offset to AVDD. Supplied by MRW.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_AVDD_OFFSET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_VDD_OFFSET_DISABLE</id>
+    <description>
+      Used for to determine whether to apply an offset to VDD. Supplied by MRW
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VDD_OFFSET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_VCS_OFFSET_DISABLE</id>
+    <description>
+      Used for to determine whether to apply an offset to VCS. Supplied by MRW.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VCS_OFFSET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_VPP_OFFSET_DISABLE</id>
+    <description>
+      Used for to determine whether to apply an offset to VPP. Supplied by MRW.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VPP_OFFSET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_VDDR_OFFSET_DISABLE</id>
+    <description>
+      Used for to determine whether to apply an offset to VDDR. Supplied by MRW.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VDDR_OFFSET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_FINE_REFRESH_MODE</id>
+    <description>
+      Fine refresh mode.
+      Should be defaulted to normal mode.
+      This is for DDR4 MRS3.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_FINE_REFRESH_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_TEMP_REF_RANGE</id>
+    <description>
+      Temp ref range.
+      Should be defaulted to extended range.
+      This is for DDR4 MRS4.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_TEMP_REF_RANGE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
 </attributes>
