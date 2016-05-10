@@ -307,33 +307,51 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
         if (i_sc.service_data->getPrimaryAttnType() == CHECK_STOP)
         {
             int32_t rc = SUCCESS;
+            uint32_t oscSwtchReg = 0;
 
             SCAN_COMM_REGISTER_CLASS * oscCerrReg =
             i_chip->getRegister("OSCERR");
 
             rc = oscCerrReg->Read();
+
+            // At runtime, PRD runs under the OPAL app and does not
+            // have access to drivers that read CFAM registers.
+            #ifndef __HOSTBOOT_RUNTIME
+            rc |= getCfam( i_chip, 0x00002819, oscSwtchReg );
+            #endif
+
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC "OSCERR read failed"
+                PRDF_ERR(PRDF_FUNC "Checking sys ref clk regs read failed"
                      "for chip: 0x%08x", i_chip->GetId());
             }
-            else if ( oscCerrReg->IsBitSet( 0 ) && oscCerrReg->IsBitSet( 1 ) )
+            else
             {
-                // Callout both ref clocks
+                // Osc0 has failed if OSCCERR[0] is set or 2819[10] is 0
+                bool osc0Fail = ( oscCerrReg->IsBitSet( 0 ) ||
+                                  !(oscSwtchReg & 0x00200000) );
+                // Osc1 has failed if OSCCERR[1] is set or 2819[11] is 0
+                bool osc1Fail = ( oscCerrReg->IsBitSet( 1 ) ||
+                                  !(oscSwtchReg & 0x00100000) );
 
-                TARGETING::TargetHandleList clkList =
-                    getFunctionalTargetList( TYPE_OSCREFCLK );
-
-                signature = PRDFSIG_SYS_REF_CLK_LOSS;
-
-                for ( TargetHandleList::const_iterator itr = clkList.begin();
-                      itr != clkList.end(); ++itr )
+                if (osc0Fail && osc1Fail)
                 {
-                    i_sc.service_data->SetCallout( *itr, MRU_HIGH );
-                }
+                    // Callout both ref clocks
 
-                // No other callouts from PCI OSC analysis
-                break;
+                    TARGETING::TargetHandleList clkList =
+                        getFunctionalTargetList( TYPE_OSCREFCLK );
+
+                    signature = PRDFSIG_SYS_REF_CLK_LOSS;
+
+                    for (TargetHandleList::const_iterator itr = clkList.begin();
+                         itr != clkList.end(); ++itr)
+                    {
+                        i_sc.service_data->SetCallout( *itr, MRU_HIGH );
+                    }
+
+                    // No other callouts from PCI OSC analysis
+                    break;
+                }
             }
         }
 
