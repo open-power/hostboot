@@ -49,16 +49,16 @@ namespace IPMIWATCHDOG
  * @TODO RTC:124499 revisit after performace improvments
  *
  */
-#ifndef CONFIG_BMC_IPMI_LONG_WATCHDOG
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120;
-#else
 // The config option CONFIG_BMC_IPMI_LONG_WATCHDOG allows a tester to use a
 // watchdog timer that is several times more than what a customer would desire
 // to aid in testing only. This option was initially envisioned for use with
 // tracelite enabled, which greatly lengthens IPL time causing the watchdog
 // timer to timeout. However this option could have other uses, so its name
 // is left generic so as not imply the limited use with tracelite alone.
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 500;
+#ifdef CONFIG_BMC_IPMI_LONG_WATCHDOG
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 2400;
+#else
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120;
 #endif
 
 /**
