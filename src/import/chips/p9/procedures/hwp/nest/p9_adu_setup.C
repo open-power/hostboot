@@ -94,6 +94,7 @@ extern "C"
                  "Error from p9_adu_coherent_setup_registers");
 
     fapi_try_exit:
+        fapi2::ReturnCode saveError = fapi2::current_err;
 
         //if an error has occurred, ADU is dirty, and instructed to clean up,
         //attempt to reset ADU and free lock (propogate rc of original fail)
@@ -104,7 +105,7 @@ extern "C"
         }
 
         FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        return saveError;
     }
 
 } // extern "C"
