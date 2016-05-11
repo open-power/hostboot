@@ -330,6 +330,7 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -340,6 +341,7 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
