@@ -22586,7 +22586,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -22608,6 +22608,42 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IO_XBUS_MASTER_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_XBUS_TX_MARGIN_RATIO</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Value to select amount of margin to be applied.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_XBUS_TX_MARGIN_RATIO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_XBUS_TX_FFE_PRECURSOR</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Value to select amount of tx ffe precusor to apply.
+    </description>
+    <simpleType>
+        <uint8_t>
+           <default>6</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
