@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ void* call_proc_enable_osclite(void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_enable_osclite" );
 
-    //@TODO RTC:134078
+    //@TODO RTC:144076
     //call p9_enable_osclite
     //Cumulus only
     //FAPI_INVOKE_HWP(l_errl,p9_enable_osclite);

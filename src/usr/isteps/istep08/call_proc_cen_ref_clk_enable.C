@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,15 +115,15 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
         if( l_membufsAttached )
         {
 
-            /* @TODO RTC:134078 use fapi2 targets
-            fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
-                                       *l_proc_iter );
-            */
+            // Cumulus only
+            // @TODO RTC:144076
+            //fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
+            //                           *l_proc_iter );
 
             // Invoke the HWP passing in the proc target and
             // a bit mask indicating connected centaurs
             // Cumulus only
-            //@TODO RTC:134078
+            //@TODO RTC:144076
             //FAPI_INVOKE_HWP(l_errl,
             //        p9_proc_cen_ref_clk_enable,
             //        l_fapiProcTarget, l_membufsAttached );
