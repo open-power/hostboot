@@ -93,18 +93,5 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
     fapi2::voltageBucketData_t& o_data);
 
-///
-/// @brief Read #V bucket data from LRP record based upon
-///        bucket ID read off of parent proc chip. This function
-///        will pass out array of bytes as they are read from the VPD
-///        NOTE: This might be incorrect endianness
-/// @param[in] i_target EQ chiplet target
-/// @param[in] o_data bytes read from #V keyword of an LRP record
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-    uint8_t* o_data);
-
 
 #endif // _P9_PM_GET_POUND_V_BUCKET_H_

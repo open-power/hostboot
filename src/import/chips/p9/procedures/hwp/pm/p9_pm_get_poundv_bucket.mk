@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_get_poundv_bucket
+libp9_pm_get_poundv_bucket_DEPLIBS += p9_pm_get_poundv_bucket_attr
 $(call BUILD_PROCEDURE)
