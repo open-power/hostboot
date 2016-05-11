@@ -47,13 +47,13 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE (ATTR_SBE_FFDC_ENABLE,         i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_SBE_INTERNAL_FFDC_ENABLE, i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_BOOT_FREQUENCY_VALID,    i_proc_target,   io_image);
-    MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,         i_proc_target,   io_image);
+    MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,         i_system_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_BOOT_FREQ_MULT,          i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_HWP_CONTROL_FLAGS_VALID, i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_SYSTEM_IPL_PHASE,        i_system_target, io_image);
-    MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,     i_proc_target,   io_image);
-    MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,              i_proc_target,   io_image);
-    MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,    i_proc_target,   io_image);
+    MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,     i_system_target,   io_image);
+    MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,              i_system_target,   io_image);
+    MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,    i_system_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_CHIP_SELECTION_VALID,    i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_CHIP_SELECTION,          i_proc_target,   io_image);
     MBOX_ATTR_WRITE (ATTR_NODE_POS,                i_proc_target,   io_image);
