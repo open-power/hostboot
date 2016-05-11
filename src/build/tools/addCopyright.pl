@@ -1100,23 +1100,21 @@ sub getFileContributors
     my $gitAuthors = `git log --follow --find-copies-harder -C85% -M85% --pretty="%aN <%aE>" -- $filename | sort | uniq`;
     my @gitAuthors = split('\n', $gitAuthors);
 
-    # Add current commiter.
+    # Get commit's author
     # If running copyright_check run 'git log' as a commit is not taking place
-    # Otherwise check using 'git config' as this is a pre-commit hook
-    my $curAuthorEmail = "";
-    if ($copyright_check)
+    # Else we currently have no way of getting the current author. Because
+    # this is a pre-commit hook, the commit staged to be committed does not
+    # show up in 'git log' until commit has completed. We cannot look up
+    # current user's info because the user pushing the commit may not be
+    # the author.
+
+    if($copyright_check)
     {
-        $curAuthorEmail = `git log -n1 --pretty=format:"%aN <%aE>"`;
+        my $curAuthorEmail = `git log -n1 --pretty=format:"%aN <%aE>"`;
         chomp($curAuthorEmail);
+        push(@gitAuthors, $curAuthorEmail);
     }
-    else
-    {
-        my $curAuthorName = `git config user.name`;
-        $curAuthorEmail = `git config user.email`;
-        chomp($curAuthorEmail);
-        $curAuthorEmail = "$curAuthorName <".$curAuthorEmail.">";
-    }
-    push(@gitAuthors, $curAuthorEmail);
+
     foreach my $contributor (@gitAuthors)
     {
         my $companyExists = 0;
