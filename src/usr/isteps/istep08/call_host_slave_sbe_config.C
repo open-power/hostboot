@@ -98,7 +98,7 @@ errlHndl_t set_proc_boot_voltage_vid()
                                     targetService().end(),
                                     &l_procs );
 
-        //@TODO: RTC:133836 add this get ATTR
+        //@TODO: RTC:153745 add this get ATTR
         /*
         ATTR_BOOT_FREQ_MHZ_type l_boot_freq_mhz =
                    l_pTopLevelTarget->getAttr<ATTR_BOOT_FREQ_MHZ>();
@@ -144,9 +144,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     IStepError  l_stepError;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_host_slave_sbe_config entry" );
-
-    //@TODO RTC:134078
-    // execute proc_read_nest_freq.C //NOTE: Is this needed?  Not documented
 
     // execute p9_setup_sbe_config.C for non-primary processor targets
     TARGETING::TargetHandleList l_cpuTargetList;
@@ -220,14 +217,14 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         targetService().getTopLevelTarget(l_sys);
         assert( l_sys != NULL );
 
-        //@TODO: RTC:133836 Add this set ATTR call
+        //@TODO: RTC:153745 Add this set ATTR call
         //TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Enabling SBE interrupt for OP systems");
         //l_sys->setAttr<ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE>(0);
     }
 
     // Resolve the side characteristics of the Processor SBE Seeproms
 #if 0
-    //@TODO-RTC:142091
+    //@TODO-RTC:138226
     errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
     if ( err )
     {

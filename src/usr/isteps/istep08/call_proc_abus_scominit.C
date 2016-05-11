@@ -136,7 +136,7 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 TARGETING::get_huid(l_thisAbusTarget),
                 TARGETING::get_huid(l_connectedAbusTarget));
 
-            //@TODO RTC:134078
+            //@TODO RTC:144076
             //FAPI_INVOKE_HWP(l_err, p9_io_abus_scominit,
             //                l_thisAbusFapi2Target,
             //                l_connectedAbusFapi2Target);
