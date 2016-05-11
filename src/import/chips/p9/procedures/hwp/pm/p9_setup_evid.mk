@@ -17,7 +17,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_setup_evid
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
-#$(call ADD_PROCEDURE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
-libp9_setup_evid_DEPLIBS += p9_avsbus_lib
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
+OBJS+=p9_avsbus_lib.o
 $(call BUILD_PROCEDURE)
