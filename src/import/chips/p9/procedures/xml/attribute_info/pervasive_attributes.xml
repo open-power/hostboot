@@ -42,7 +42,7 @@
   <id>ATTR_I2C_BUS_DIV_REF</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
-  <valueType>uint32</valueType>
+  <valueType>uint16</valueType>
   <persistRuntime/>
   <platInit/>
   <writeable/>
@@ -165,7 +165,7 @@
 
 <attribute>
   <id>ATTR_NEST_PLL_BUCKET</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
@@ -196,24 +196,26 @@
 
 <attribute>
   <id>ATTR_RISK_LEVEL</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
       HWPs</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
   <id>ATTR_DISABLE_HBBL_VECTORS</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>BootLoader HWP flag to not place 12K exception vectors.
   This flag is only applicable when security is disabled.</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
@@ -290,7 +292,7 @@
 
 <attribute>
   <id>ATTR_BOOT_FLAGS</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Switch to using a flag to indicate SEEPROM side SBE</description>
   <valueType>uint32</valueType>
   <persistRuntime/>
@@ -437,6 +439,7 @@
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
   <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
@@ -509,13 +512,14 @@
 
 <attribute>
   <id>ATTR_SYS_FORCE_ALL_CORES</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Indicate that p9_sbe_select_ex should force selection to ALL good
     EX chiplets having good cores even if only a single EX chiplet mode is executed.
   </description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
@@ -547,6 +551,25 @@
   <description>Sdis_n set or clear : flushing LCBES condition woraround</description>
   <valueType>uint8</valueType>
   <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SECURITY_ENABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Holds the state of Security Access Bit (SAB)</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <writeable/>
+</attribute> 
+
+<attribute>
+  <id>ATTR_SECURITY_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>If SBE image has ATTR_SECURITY_MODE == 0b1, then leave SAB bit as is
+  Else ATTR_SECURITY_MODE == 0b0, then clear the SAB bit</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <writeable/>
 </attribute>
 
 </attributes>

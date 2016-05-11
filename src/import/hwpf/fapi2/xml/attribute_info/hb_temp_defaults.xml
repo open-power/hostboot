@@ -127,6 +127,12 @@
     <attribute>
         <id>ATTR_SPD_OVERRIDE_ENABLE</id>
     </attribute>
+    <attribute>
+         <id>ATTR_SECURITY_ENABLE</id>
+     </attribute>
+     <attribute>
+         <id>ATTR_SECURITY_MODE</id>
+     </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
