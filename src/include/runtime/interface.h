@@ -51,21 +51,26 @@ enum MemoryError_t
 {
     /** Hardware has reported a solid memory CE that is correctable, but
      *  continues to report errors on subsequent reads. A second CE on that
-     *  cache line will result in memory UE. Therefore, it is advised to migrate
-     *  off of the address range as soon as possible. */
+     *  cache line will result in memory UE. Therefore, it is advised to
+     *  migrate off of the address range as soon as possible. */
     MEMORY_ERROR_CE,
 
     /** Hardware has reported an uncorrectable error in memory (memory UE,
-     *  channel failure, etc). The hypervisor should migrate any partitions off
-     *  this address range as soon as possible. Note that these kind of errors
-     *  will most likely result in partition failures. It is advised that the
-     *  hypervisor waits some time for PRD to handle hardware attentions so that
-     *  the hypervisor will know all areas of memory that are impacted by the
+     *  channel failure, etc). The hypervisor should migrate any partitions
+     *  off this address range as soon as possible. Note that these kind of
+     *  errors will most likely result in persistent partition failures. It
+     *  is advised that the hypervisor gives firmware some time after
+     *  partition failures to handle the hardware attentions so that the
+     *  hypervisor will know all areas of memory that are impacted by the
      *  failure. */
     MEMORY_ERROR_UE,
+
+    /** Firmware has predictively requested service on a part in the memory
+     *  subsystem. The partitions may not have been affected, but it is
+     *  advised to migrate off of the address range as soon as possible to
+     *  avoid potential partition outages. */
+    MEMORY_ERROR_PREDICTIVE,
 };
-
-
 
 /**
  * I2C Master Description: chip, engine and port packed into
@@ -340,28 +345,32 @@ typedef struct hostInterfaces
                     void *rx_buf, size_t *rx_size);
 
     /**
-     *  @brief Hardware has reported a memory error. This function requests
-     *         the hypervisor to remove the all addresses within the address
-     *         range given (including endpoints) from the available memory
-     *         space.
+     * @brief Hardware has reported a memory error. This function requests the
+     *        hypervisor to dynamically remove all pages within the address
+     *        range given (including endpoints) from the available memory space.
      *
-     *  @note It is understood that the hypervisor may not be able to
-     *        immediately deallocate the memory because it may be in use
-     *        by a partition. Therefore, the hypervisor should cache all
-     *        requests and deallocate the memory once it has been freed.
+     * It is understood that the hypervisor may not be able to immediately
+     * deallocate the memory because it is in use by a partition. Therefore, the
+     * hypervisor should cache all requests and deallocate the memory once it
+     * has been freed.
      *
-     *  @param  i_startAddr The beginning address of the range.
-     *  @param  i_endAddr   The end address of the range.
-     *  @param  i_errorType See enum MemoryError_t.
+     * Firmware does not know page boundaries so the addresses given could be
+     * any address within a page. In some cases, the start and end address may
+     * be the same address, indicating that only one page needs to be
+     * deallocated.
      *
-     *  @return 0 if the request is successfully received. Any value other
-     *          than 0 on failure. The hypervisor should cache the request
-     *          and return immediately. It should not wait for the request
-     *          to be applied. See note above.
-     *  @platform FSP, OpenPOWER
+     * @param  i_startAddr The beginning address of the range.
+     * @param  i_endAddr   The end address of the range.
+     * @param  i_errorType See enum MemoryError_t.
+     *
+     * @return 0 if the request is successfully received. Any value other than 0
+     *         on failure. The hypervisor should cache the request and return
+     *         immediately. It should not wait for the request to be applied.
+     *         See note above.
+     * @platform FSP, OpenPOWER
      */
-    int32_t (*memory_error)(uint64_t i_startAddr, uint64_t i_endAddr,
-                            MemoryError_t i_errorType);
+    int (*memory_error)( uint64_t i_startAddr, uint64_t i_endAddr,
+                         enum MemoryError_t i_errorType );
 
     /**
      *  @brief Modify the SCOM restore section of the HCODE image with the
