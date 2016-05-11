@@ -22,6 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+//------------------------------------------------------------------------------
+/// @file  p9_setup_sbe_config.H
+///
+/// @brief proc setup sbe config
+//------------------------------------------------------------------------------
+// *HWP HW Owner        : Anusha Reddy Rangareddygari <anusrang@in.ibm.com>
+// *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
+// *HWP FW Owner        : Brian Silver <bsilver@us.ibm.com>
+// *HWP Team            : Perv
+// *HWP Level           : 2
+// *HWP Consumed by     : SBE
+//------------------------------------------------------------------------------
+
+
 #ifndef _P9_SETUP_SBE_CONFIG_H_
 #define _P9_SETUP_SBE_CONFIG_H_
 
