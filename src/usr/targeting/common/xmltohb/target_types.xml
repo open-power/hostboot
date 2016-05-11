@@ -3015,6 +3015,8 @@
     <attribute><id>IO_XBUS_DCCAL_FLAGS</id></attribute>
     <attribute><id>IO_X_DEBUG</id></attribute>
     <attribute><id>IO_XBUS_MASTER_MODE</id></attribute>
+    <attribute><id>IO_XBUS_TX_MARGIN_RATIO</id></attribute>
+    <attribute><id>IO_XBUS_TX_FFE_PRECURSOR</id></attribute>
 </targetType>
 
 <targetType>
