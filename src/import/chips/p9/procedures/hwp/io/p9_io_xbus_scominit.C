@@ -108,7 +108,6 @@ fapi2::ReturnCode p9_io_xbus_scominit(
 {
     // mark HWP entry
     FAPI_INF("p9_io_xbus_scominit: Entering ...");
-    const uint8_t     GROUP_00 = 0;
     const uint8_t     LANE_00  = 0;
     fapi2::ReturnCode rc       = fapi2::FAPI2_RC_SUCCESS;
 
@@ -119,10 +118,27 @@ fapi2::ReturnCode p9_io_xbus_scominit(
     // assert IO reset to power-up bus endpoint logic
     // read-modify-write, set single reset bit (HW auto-clears)
     // on writeback
-    FAPI_TRY( io::rmw( EDIP_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, 1 ),
+    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
-    FAPI_TRY( io::rmw( EDIP_IORESET_HARD_BUS0, i_connected_target, GROUP_00, LANE_00, 1 ),
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_target, i_group, LANE_00, 1 ),
+              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
+    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_connected_target, i_group, LANE_00, 1 ),
               "I/O Xbus Scominit: Connected Set Reset Hard Failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_connected_target, i_group, LANE_00, 1 ),
+              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
+
+    // Delay 1ns, 1 Million cycles -- Needed in sim, may not be needed in hw.
+    FAPI_TRY( fapi2::delay( 1, 1000000 ) );
+
+    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_target, i_group, LANE_00, 0 ),
+              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_target, i_group, LANE_00, 0 ),
+              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
+    FAPI_TRY( io::rmw( EDIP_RX_IORESET, i_connected_target, i_group, LANE_00, 0 ),
+              "I/O Xbus Scominit: Connected Set Reset Hard Failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_IORESET, i_connected_target, i_group, LANE_00, 0 ),
+              "I/O Xbus Scominit: Primary Set Reset Hard Failed." );
+
 
     // Set rx master/slave attribute prior to calling the scominit procedures.
     // The scominit procedure will reference the attribute to set the register field.
@@ -175,11 +191,11 @@ fapi2::ReturnCode set_rx_master_mode(
     uint32_t l_connected_id       = 0;
     uint8_t  l_connected_attr     = 0;
 
-    FAPI_TRY( p9_get_proc_fabric_group_id( i_target, l_primary_group_id   ) );
-    FAPI_TRY( p9_get_proc_fabric_group_id( i_target, l_connected_group_id ) );
+    FAPI_TRY( p9_get_proc_fabric_group_id( i_target,  l_primary_group_id   ) );
+    FAPI_TRY( p9_get_proc_fabric_group_id( i_ctarget, l_connected_group_id ) );
 
-    FAPI_TRY( p9_get_proc_fabric_chip_id( i_target, l_primary_chip_id   ) );
-    FAPI_TRY( p9_get_proc_fabric_chip_id( i_target, l_connected_chip_id ) );
+    FAPI_TRY( p9_get_proc_fabric_chip_id( i_target,  l_primary_chip_id   ) );
+    FAPI_TRY( p9_get_proc_fabric_chip_id( i_ctarget, l_connected_chip_id ) );
 
     l_primary_id   = ( (uint32_t)l_primary_group_id   << 8 ) + (uint32_t)l_primary_chip_id;
     l_connected_id = ( (uint32_t)l_connected_group_id << 8 ) + (uint32_t)l_connected_chip_id;

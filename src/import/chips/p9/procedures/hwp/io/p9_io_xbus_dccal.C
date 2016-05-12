@@ -281,6 +281,7 @@ fapi2::ReturnCode tx_zcal_run_sm(
     }
     else
     {
+        FAPI_DBG( "tx_zcal_run_sm: Tx Impedance Calibration Successful." );
         FAPI_DBG( "tx_zcal_run_sm: Using zCal Results." );
 
         FAPI_TRY( io::read( EDIP_TX_ZCAL_P, i_target, GROUP_00, LANE_00, l_data ),
@@ -638,6 +639,8 @@ fapi2::ReturnCode rx_dccal_poll(
                  fapi2::IO_XBUS_RX_DCCAL_TIMEOUT().set_TARGET( i_target ).set_GROUP( i_group ),
                  "rx_dc_cal_poll: Rx Dccal Timeout: Loops(%d) delay(%d ns, %d cycles)",
                  l_poll_count, DLY_10MS, DLY_50MIL_CYCLES );
+
+    FAPI_DBG( "rx_dc_cal_poll: I/O EDI+ Xbus Rx Dccal Successful." );
 
 fapi_try_exit:
     FAPI_IMP( "rx_dc_cal_poll: I/O EDI+ Xbus Exiting" );

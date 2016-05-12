@@ -82,7 +82,7 @@ inline uint64_t get(
 {
     const uint8_t REGISTER_WIDTH = 64;
     const uint8_t SHIFT          = REGISTER_WIDTH - i_start - i_width;
-    const uint64_t MASK          = ( ( 0x1 << i_width ) - 1 ) << SHIFT;
+    const uint64_t MASK          = ( ( (uint64_t)0x1 << i_width ) - 1 ) << SHIFT;
     return ( ( i_register_data & MASK ) >> SHIFT );
 }
 
@@ -105,7 +105,7 @@ inline void set(
 {
     const uint8_t REGISTER_WIDTH = 64;
     const uint8_t SHIFT          = REGISTER_WIDTH - i_start - i_width;
-    const uint64_t MASK          = ( ( 0x1 << i_width ) - 1 ) << SHIFT;
+    const uint64_t MASK          = ( ( (uint64_t)0x1 << i_width ) - 1 ) << SHIFT;
     io_register_data = ( ( io_register_data & ~MASK ) | ( ( i_data << SHIFT ) & MASK ) );
     return;
 }
