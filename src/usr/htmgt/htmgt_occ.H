@@ -266,6 +266,15 @@ namespace HTMGT
              */
             void updateOccPresentBits(uint8_t i_slavePresent);
 
+
+            /**
+             * @brief Add channel 1 (circular buffer) SCOM data to elog
+             *
+             * @param[in,out]  i_err  Error log to add data to
+             */
+            void collectCheckpointScomData(errlHndl_t i_err);
+
+
         private:   // functions
 
             /**
@@ -477,8 +486,13 @@ namespace HTMGT
              *        communicate and start handling commands.  This
              *        function will wait up to 10 seconds for all OCCs
              *        before returning to the caller.
+             *
+             * @return NULL on success, or error handle for the first OCC
+             *         that did not reach its checkpoint.  If additional OCCs
+             *         do not reach their checkpoint an elog will be committed
+             *         for each.
              */
-            static void waitForOccCheckpoint();
+            static errlHndl_t waitForOccCheckpoint();
 
 
             /**
@@ -668,7 +682,8 @@ namespace HTMGT
             /* See setOccState() above */
             errlHndl_t _setOccState(const occStateId i_state);
 
-            void _waitForOccCheckpoint();
+            /* See waitForOccCheckpoint() above */
+            errlHndl_t _waitForOccCheckpoint();
 
             /* See resetOccs() above */
             errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget,

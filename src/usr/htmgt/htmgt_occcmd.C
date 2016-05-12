@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -868,6 +868,10 @@ namespace HTMGT
                                                (uint32_t)MAX_FFDC),
                                       1,  // version
                                       exceptionType); // subsection
+                    if (0xE1 == exceptionType)
+                    {
+                        iv_Occ->collectCheckpointScomData(l_excErr);
+                    }
                     ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
 
                     // Save exception so we don't log it again
@@ -918,7 +922,8 @@ namespace HTMGT
         {
             TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer,"
                      " rc=0x%04X", l_err->reasonCode());
-
+            iv_Occ->collectCheckpointScomData(l_err);
+            l_err->collectTrace("HTMGT");
             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
         }
 #endif
