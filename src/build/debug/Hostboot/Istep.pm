@@ -79,10 +79,10 @@ use constant    MAX_ISTEPS                  =>  256;
 use constant    MAX_SUBSTEPS                =>  25;
 
 ##  Mailbox Scratchpad regs
-use constant    MBOX_SCRATCH0               =>  0x00050038;     ## contTrace
-use constant    MBOX_SCRATCH1               =>  0x00050039;     ## sts LO
-use constant    MBOX_SCRATCH2               =>  0x0005003a;     ## sts HI
-use constant    MBOX_SCRATCH3               =>  0x0005003b;     ## cmd reg
+use constant    MBOX_SCRATCH1               =>  0x00050038;     ## conTrace addr
+use constant    MBOX_SCRATCH2               =>  0x00050039;     ## conTrace len
+use constant    MBOX_SCRATCH3               =>  0x0005003a;     ## Not used
+use constant    MBOX_SCRATCH4               =>  0x0005003b;     ## cmd reg
 
 ##  extra parm for ::executeInstrCycles
 use constant    NOSHOW                      =>  1;
@@ -599,7 +599,7 @@ sub sendCommand( $ )
     ## Hostboot expects a key to be set to trigger the command
     ## when doing via scom we simply need to read, modify write
     ## the reg
-    $read_bindata = ::readScom( MBOX_SCRATCH3, 8 );
+    $read_bindata = ::readScom( MBOX_SCRATCH4, 8 );
     my $key = (($read_bindata) & 0x1F00000000000000);
 
     ## convert to binary before sending to writescom
@@ -610,13 +610,13 @@ sub sendCommand( $ )
     $bindata = (($bindata) | ($key));
 
     ## now write the data
-    ::writeScom( MBOX_SCRATCH3, 8, $bindata );
+    ::writeScom( MBOX_SCRATCH4, 8, $bindata );
 
     if ( $opt_debug )
     {
         ## sanity check
         ::executeInstrCycles( 10, NOSHOW );
-        my $readback    =   ::readScom( MBOX_SCRATCH3, 8 );
+        my $readback    =   ::readScom( MBOX_SCRATCH4, 8 );
         ::userDisplay   "=== sendCommand readback: $readback\n";
     }
 
@@ -640,7 +640,7 @@ sub getStatus()
     my  $statusHi   =   "";
     my  $statusLo   =   "";
 
-    $statusHi   =   ::readScom( MBOX_SCRATCH3, 8 );
+    $statusHi   =   ::readScom( MBOX_SCRATCH4, 8 );
     if ( $opt_debug )   {   ::userDisplay   "===  statusHi: $statusHi \n";  }
 
     $statusLo   =   0;

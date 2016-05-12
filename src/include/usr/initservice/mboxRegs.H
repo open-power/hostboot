@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,10 +29,10 @@ namespace INITSERVICE
 {
 namespace SPLESS
 {
-    const   uint32_t    MBOX_SCRATCH_REG0               =   0x00050038;
-    const   uint32_t    MBOX_SCRATCH_REG1               =   0x00050039;
-    const   uint32_t    MBOX_SCRATCH_REG2               =   0x0005003a;
-    const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003b;
+    const   uint32_t    MBOX_SCRATCH_REG1               =   0x00050038;
+    const   uint32_t    MBOX_SCRATCH_REG2               =   0x00050039;
+    const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003a;
+    const   uint32_t    MBOX_SCRATCH_REG4               =   0x0005003b;
 };
 };
 #endif

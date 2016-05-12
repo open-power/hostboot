@@ -242,18 +242,16 @@ static void initializeAttributes(TargetService& i_targetService)
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
 
-#if 0 //@fixme RTC 127337
+#if 0 //@fixme RTC 134431
             errlHndl_t l_errl = NULL;
             size_t l_size = sizeof(uint64_t);
             uint64_t l_data;
 
-            // Scratch register 2 is defined as 0x00050039.. accessing
-            // directly to avoid confusion as the Literals set have
-            // 0x00050039 mapped to MBOX_SCRATCH1 which is confusing.
+            // Scratch register 2 is defined as 0x00050039..
             l_errl = DeviceFW::deviceRead(l_pMasterProcChip,
                                           &(l_data),
                                           l_size,
-                                          DEVICE_SCOM_ADDRESS(0x00050039));
+                                          DEVICE_SCOM_ADDRESS(MBOX_SCRATCH2));
 
             if(l_errl)
             {
@@ -268,7 +266,7 @@ static void initializeAttributes(TargetService& i_targetService)
                     l_isMpipl = true;
                 }
             }
-#endif //@fixme RTC 127337
+#endif //@fixme RTC 134431
         }
 
 
