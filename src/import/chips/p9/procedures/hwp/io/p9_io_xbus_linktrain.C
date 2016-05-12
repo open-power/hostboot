@@ -593,7 +593,7 @@ fapi2::ReturnCode linktrain_poll(
     FAPI_IMP( "linktrain_poll: P9 I/O EDI+ Xbus Entering" );
 
     const uint8_t  MAXLOOPS         = 100;
-    const uint64_t DELAY_NS         = 200;
+    const uint64_t DELAY_1MS        = 1000000;
     const uint64_t DELAY_SIM_CYCLES = 20000000;
     const uint8_t  LANE_00          = 0;
     uint8_t        l_loops          = 0;
@@ -604,6 +604,8 @@ fapi2::ReturnCode linktrain_poll(
 
     // In the P9 EDI+ Xbus unit model, polling finishes in
     //   17 loops @ 20 million cycles = 340 million cycles
+    // For hardware timeout, we used what was used in p8, 1ms @ 100 cycles for
+    //   a max of 100ms to complete training.
     while( ++l_loops < MAXLOOPS )
     {
         // Get Done/Failed WDERF Status
@@ -623,7 +625,7 @@ fapi2::ReturnCode linktrain_poll(
             break;
         }
 
-        FAPI_TRY( fapi2::delay( DELAY_NS, DELAY_SIM_CYCLES ) );
+        FAPI_TRY( fapi2::delay( DELAY_1MS, DELAY_SIM_CYCLES ) );
     }
 
     // Check the error conditions.
@@ -681,17 +683,27 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     ////////////////////////////////////////////////////////////////////////////
     // Master
     ///////////////////////////////////////////////////////////////////////////
-    l_rc = io::read( EDIP_RX_CTL_STAT1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_CNTL1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
         ffdc.set_M_WDERF_START ( io::get( EDIP_RX_START_WDERF_ALIAS,  l_data ) );
+    }
+    else
+    {
+        ffdc.set_M_WDERF_START ( INVALID_FFDC );
+        l_rc = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    l_rc = io::read( EDIP_RX_CTL_STAT1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+
+    if( l_rc == fapi2::FAPI2_RC_SUCCESS )
+    {
         ffdc.set_M_WDERF_DONE  ( io::get( EDIP_RX_WDERF_DONE_ALIAS,   l_data ) );
         ffdc.set_M_WDERF_FAILED( io::get( EDIP_RX_WDERF_FAILED_ALIAS, l_data ) );
     }
     else
     {
-        ffdc.set_M_WDERF_START ( INVALID_FFDC );
         ffdc.set_M_WDERF_DONE  ( INVALID_FFDC );
         ffdc.set_M_WDERF_FAILED( INVALID_FFDC );
         l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -878,23 +890,33 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     ///////////////////////////////////////////////////////////////////////////
     // Slave
     ///////////////////////////////////////////////////////////////////////////
-    l_rc = io::read( EDIP_RX_CTL_STAT1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_CNTL1_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
         ffdc.set_S_WDERF_START ( io::get( EDIP_RX_START_WDERF_ALIAS,  l_data ) );
+    }
+    else
+    {
+        ffdc.set_S_WDERF_START ( INVALID_FFDC );
+        l_rc = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    l_rc = io::read( EDIP_RX_CTL_STAT1_E_PG, i_starget, i_sgroup, LANE_00, l_data );
+
+    if( l_rc == fapi2::FAPI2_RC_SUCCESS )
+    {
         ffdc.set_S_WDERF_DONE  ( io::get( EDIP_RX_WDERF_DONE_ALIAS,   l_data ) );
         ffdc.set_S_WDERF_FAILED( io::get( EDIP_RX_WDERF_FAILED_ALIAS, l_data ) );
     }
     else
     {
-        ffdc.set_S_WDERF_START ( INVALID_FFDC );
         ffdc.set_S_WDERF_DONE  ( INVALID_FFDC );
         ffdc.set_S_WDERF_FAILED( INVALID_FFDC );
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_CTL_STAT2_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_STAT2_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -907,7 +929,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     }
 
 
-    l_rc = io::read( EDIP_RX_CTL_STAT4_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_STAT4_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -919,7 +941,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_CTL_MODE11_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_MODE11_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -931,7 +953,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_CTL_MODE12_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_MODE12_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -943,7 +965,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_GLBSM_STAT1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_GLBSM_STAT1_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -956,7 +978,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     }
 
     // Wiretest
-    l_rc = io::read( EDIP_RX_GLBSM_STAT1_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_GLBSM_STAT1_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -970,7 +992,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_CTL_STAT3_EO_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_STAT3_EO_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -982,7 +1004,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_GLBSM_STAT2_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_GLBSM_STAT2_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -994,7 +1016,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc =  io::read( EDIP_RX_CTL_STAT5_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc =  io::read( EDIP_RX_CTL_STAT5_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -1011,7 +1033,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     // Deskew
 
     // Eye Opt
-    l_rc = io::read( EDIP_RX_GLBSM_STAT1_EO_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_GLBSM_STAT1_EO_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -1023,7 +1045,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_CTL_CNTL13_EO_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_CTL_CNTL13_EO_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -1040,7 +1062,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
     }
 
     // Repair
-    l_rc =  io::read( EDIP_RX_GLBSM_STAT4_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc =  io::read( EDIP_RX_GLBSM_STAT4_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -1052,7 +1074,7 @@ fapi2::ReturnCode add_linktrain_failed_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_rc = io::read( EDIP_RX_GLBSM_STAT9_E_PG, i_mtarget, i_mgroup, LANE_00, l_data );
+    l_rc = io::read( EDIP_RX_GLBSM_STAT9_E_PG, i_starget, i_sgroup, LANE_00, l_data );
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
