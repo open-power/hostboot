@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ void    readCmdSts( SPLessCmd   &io_rcmd )
               g_SPLess_pMasterProcChip,
               &(op),
               op_size,
-              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG3 )  );
+              DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG4 )  );
 
     io_rcmd.word = (op >>32);
 #endif
@@ -169,7 +169,7 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
                g_SPLess_pMasterProcChip,
                &(op),
                op_size,
-               DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG3 )  );
+               DEVICE_SCOM_ADDRESS( MBOX_SCRATCH_REG4 )  );
 #endif
 
 #ifdef  SPLESS_DEBUG

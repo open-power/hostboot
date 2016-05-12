@@ -72,7 +72,7 @@ void PNOR::findPhysicalOffset(ffs_hdr* i_tocAddress,
 }
 
 /*
- * @brief used to translate mmio offset stored in mbox scratch 2
+ * @brief used to translate mmio offset stored in mbox scratch 3
  *        to physical offset of HBB Image
  */
 errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
@@ -86,9 +86,9 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
         TARGETING::Target* l_masterProc =
             TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-        //MBOX_SCRATCH_REG2 = 0x5003A
+        //MBOX_SCRATCH_REG3 = 0x5003A
         l_err = DeviceFW::deviceRead(l_masterProc, &l_hbbMMIO,l_size,
-                   DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MBOX_SCRATCH_REG2));
+                   DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MBOX_SCRATCH_REG3));
         if (l_err)
         {
             TRACFCOMP(g_trac_pnor,"PNOR::mmioToPhysicalOffset: Failed to read"
