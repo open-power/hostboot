@@ -194,7 +194,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode ranks( const fapi2::Target<TARGET_TYPE_DIMM>& i_target, std::vector< uint64_t >& o_ranks )
 {
-    uint8_t l_ranks;
+    uint8_t l_ranks = 0;
     FAPI_TRY( eff_num_ranks_per_dimm(i_target, l_ranks) );
 
     o_ranks = single_dimm_ranks[mss::index(i_target)][l_ranks];
