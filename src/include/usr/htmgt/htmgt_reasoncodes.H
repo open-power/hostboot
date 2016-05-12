@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@ namespace HTMGT
         HTMGT_MOD_BUILD_OCCS            = 0x08,
         HTMGT_MOD_PASS_THRU             = 0x09,
         HTMGT_MOD_CFG_FREQ_POINTS       = 0x0A,
+        HTMGT_MOD_WAIT_FOR_CHECKPOINT   = 0x0B,
         HTMGT_MOD_OCC_POLL              = 0x76,
         HTMGT_MOD_BAD_FRU_CALLOUTS      = 0x7D,
         HTMGT_MOD_MISMATCHING_SEVERITY  = 0x7F,

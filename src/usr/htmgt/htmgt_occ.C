@@ -39,9 +39,9 @@
 #include <sys/time.h>
 #include <ecmdDataBufferBase.H>
 #include <hwpf/hwp/occ/occAccess.H>
-
 #include <hwpf/hwp/occ/occ.H>
 #include <hwpf/hwp/occ/occ_common.H>
+#include <errl/errludlogregister.H>
 
 namespace HTMGT
 {
@@ -241,6 +241,37 @@ namespace HTMGT
     }
 
 
+    // Add channel 1 (circular buffer) SCOM data to elog
+    void Occ::collectCheckpointScomData(errlHndl_t i_err)
+    {
+        if (i_err)
+        {
+            TARGETING::ConstTargetHandle_t procTarget =
+                TARGETING::getParentChip(iv_target);
+            ERRORLOG::ErrlUserDetailsLogRegister l_scom_data(procTarget);
+            // Grab circular buffer scom data: (channel 1)
+            //0006B031  OCBCSR1 (Control/Status [1]  Register)
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6B031));
+            //0006A211  OCBSLCS1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A211));
+            //0006A214  OCBSHCS1
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A214));
+            //0006A216  OCBSES1 (Indicates error that occur in an indirect ch)
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A216));
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A210));
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A213));
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6A217));
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6B034));
+            l_scom_data.addToLog(i_err);
+        }
+        else
+        {
+            TMGT_ERR("collectCheckpointScomData: No error "
+                     "handle supplied for OCC%d", iv_instance);
+        }
+    } // end Occ::collectCheckpointScomData()
+
+
 
     /////////////////////////////////////////////////////////////////
 
@@ -380,13 +411,17 @@ namespace HTMGT
                          * @errortype
                          * @moduleid HTMGT_MOD_BUILD_OCCS
                          * @reasoncode HTMGT_RC_OCC_CRIT_FAILURE
+                         * @userdata1  OCC Instance
+                         * @userdata2  homer virtual address
                          * @devdesc Homer pointer is NULL, unable to communicate
                          *          with the OCCs.  Leaving system in safe mode.
                          */
                         bldErrLog(err,
                                   HTMGT_MOD_BUILD_OCCS,
                                   HTMGT_RC_OCC_CRIT_FAILURE,
-                                  0, 0, 0, 0,
+                                  0, instance,
+                                  (uint64_t)homer>>32,
+                                  (uint64_t)homer&0xFFFFFFFF,
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     }
                 }
@@ -871,12 +906,13 @@ namespace HTMGT
 
 
     // Wait for all OCCs to reach communications checkpoint
-    void OccManager::_waitForOccCheckpoint()
+    errlHndl_t OccManager::_waitForOccCheckpoint()
     {
+        errlHndl_t checkpointElog = NULL;
 #ifdef CONFIG_HTMGT
-        // Wait up to 10 seconds for all OCCs to be ready (100 * 100ms = 10s)
+        // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
-        const size_t READ_RETRY_LIMIT = 100;
+        const size_t READ_RETRY_LIMIT = 150;
 
         if (iv_occArray.size() > 0)
         {
@@ -888,9 +924,12 @@ namespace HTMGT
                  pOcc++)
             {
                 bool occReady = false;
+                uint16_t lastCheckpoint = 0x0000;
 
                 while ((!occReady) && (retryCount++ < READ_RETRY_LIMIT))
                 {
+                    nanosleep(0, NS_BETWEEN_READ);
+
                     // Read SRAM response buffer to check for OCC checkpoint
                      errlHndl_t l_err = NULL;
                     const uint16_t l_length = 8;
@@ -900,11 +939,18 @@ namespace HTMGT
                                             l_buffer);
                     if (NULL == l_err)
                     {
-                        // Check response status for checkpoint
-                        if ((0x0E == l_buffer.getByte(6)) &&
-                            (0xFF == l_buffer.getByte(7)))
+                        // Check response status for checkpoint (byte 6-7)
+                        const uint16_t checkpoint = l_buffer.getHalfWord(3);
+                        if (checkpoint != lastCheckpoint)
                         {
-                            TMGT_INF("waitForOccCheckpoint OCC%d ready!",
+                            TMGT_INF("_waitForOccCheckpoint: OCC%d Checkpoint "
+                                     "0x%04X",
+                                     (*pOcc)->getInstance(), checkpoint);
+                            lastCheckpoint = checkpoint;
+                        }
+                        if (0x0EFF == checkpoint)
+                        {
+                            TMGT_INF("_waitForOccCheckpoint OCC%d ready!",
                                      (*pOcc)->getInstance());
 
                             occReady = true;
@@ -916,7 +962,7 @@ namespace HTMGT
                         if (false == throttleErrors)
                         {
                             throttleErrors = true;
-                            TMGT_ERR("waitForOccCheckpoint: error trying to "
+                            TMGT_ERR("_waitForOccCheckpoint: error trying to "
                                      "read OCC%d SRAM (rc=0x%04X)",
                                      (*pOcc)->getInstance(),
                                      l_err->reasonCode());
@@ -928,18 +974,47 @@ namespace HTMGT
                             l_err = NULL;
                         }
                     }
-
-                    nanosleep(0, NS_BETWEEN_READ);
                 }
 
                 if (!occReady)
                 {
-                    TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
-                             (*pOcc)->getInstance());
+                    TMGT_CONSOLE("Final OCC%d Checkpoint NOT reached (0x%04X)",
+                                 (*pOcc)->getInstance(), lastCheckpoint);
+                    TMGT_ERR("_waitForOccCheckpoint OCC%d still NOT ready! "
+                             "(last checkpoint=0x%04X)",
+                             (*pOcc)->getInstance(), lastCheckpoint);
+                    errlHndl_t l_err = NULL;
+                    /*@
+                     * @errortype
+                     * @moduleid HTMGT_MOD_WAIT_FOR_CHECKPOINT
+                     * @reasoncode HTMGT_RC_OCC_NOT_READY
+                     * @userdata1 OCC instance
+                     * @userdata2 last OCC checkpoint
+                     * @devdesc Set of OCC state failed
+                     */
+                    bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_CHECKPOINT,
+                              HTMGT_RC_OCC_NOT_READY,
+                              0, (*pOcc)->getInstance(), 0, lastCheckpoint,
+                              ERRORLOG::ERRL_SEV_PREDICTIVE);
+
+                    (*pOcc)->collectCheckpointScomData(l_err);
+                    if (NULL == checkpointElog)
+                    {
+                        // return the first elog
+                        checkpointElog = l_err;
+                        l_err = NULL;
+                    }
+                    else
+                    {
+                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    }
+
+                    (*pOcc)->failed(true);
                 }
             }
         }
 #endif
+        return checkpointElog;
     }
 
 
@@ -1217,9 +1292,9 @@ namespace HTMGT
     }
 
 
-    void OccManager::waitForOccCheckpoint()
+    errlHndl_t OccManager::waitForOccCheckpoint()
     {
-        Singleton<OccManager>::instance()._waitForOccCheckpoint();
+        return Singleton<OccManager>::instance()._waitForOccCheckpoint();
     }
 
     void OccManager::updateSafeModeReason(uint32_t i_src,
