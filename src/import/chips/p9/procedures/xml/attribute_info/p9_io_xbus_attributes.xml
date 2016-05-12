@@ -78,7 +78,7 @@
     Value to select amount of tx ffe precusor to apply.
   </description>
   <valueType>uint8</valueType>
-  <platinit/>
+  <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
