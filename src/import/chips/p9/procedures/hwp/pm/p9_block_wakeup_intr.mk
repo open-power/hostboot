@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_block_wakeup_intr
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
 $(call BUILD_PROCEDURE)

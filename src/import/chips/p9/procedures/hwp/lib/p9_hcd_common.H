@@ -114,7 +114,7 @@ enum P9_HCD_TIMEOUT_CONSTANTS
     INSTS_PER_POLL_LOOP = 8       //
 };
 
-// Constants to work with fapi2target
+// Constants to work with fapi2 target
 enum P9_HCD_TARGET_CONSTANTS
 {
     PERV_TO_EQ_POS_OFFSET   = 0x10,

@@ -22,7 +22,7 @@
 ///          with an EX chiplet
 ///
 //  *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-//  *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>
+//  *HWP FW Owner: Prem Jha <premjha1@in.ibm.com>
 //  *HWP Team: PM
 //  *HWP Level: 2
 //  *HWP Consumed by: FSP:HS
@@ -44,6 +44,7 @@
 // ----------------------------------------------------------------------
 
 #include <p9_block_wakeup_intr.H>
+#include <p9_hcd_common.H>
 
 
 
@@ -73,10 +74,15 @@ p9_block_wakeup_intr(
 
     // Get the core number
     uint8_t l_attr_chip_unit_pos = 0;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PERV> l_perv =
+        i_core_target.getParent<fapi2::TARGET_TYPE_PERV>();
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                           i_core_target,
+                           l_perv,
                            l_attr_chip_unit_pos),
              "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_CORE_POS_OFFSET;
 
     // Read for trace
     {
