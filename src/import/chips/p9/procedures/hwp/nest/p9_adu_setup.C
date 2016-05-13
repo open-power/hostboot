@@ -66,7 +66,7 @@ extern "C"
         bool adu_leave_dirty = i_flags & FLAG_LEAVE_DIRTY;
 
         //check arguments
-        FAPI_TRY(p9_adu_coherent_utils_check_args(i_target, i_address),
+        FAPI_TRY(p9_adu_coherent_utils_check_args(i_target, i_address, i_flags),
                  "Error from p9_adu_coherent_utils_check_args");
 
         //ensure fabric is running
