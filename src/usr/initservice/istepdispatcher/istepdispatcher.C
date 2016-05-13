@@ -132,10 +132,6 @@ IStepDispatcher::IStepDispatcher() :
     TARGETING::Target* l_pSys = NULL;
     TARGETING::targetService().getTopLevelTarget(l_pSys);
 
-    // Get tracelite setting from top level target attributes
-    uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
-    TRACE::setTraceLite(l_tlEnabled);
-
     iv_mpiplMode = l_pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
     TRACFCOMP(g_trac_initsvc, "IStepDispatcher: MPIPL Mode: %d", iv_mpiplMode);
     iv_spBaseServicesEnabled = spBaseServicesEnabled();
@@ -252,7 +248,11 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         iv_istepMode = l_pTopLevelTarget->getAttr<TARGETING::ATTR_ISTEP_MODE>();
 
         TRACFCOMP(g_trac_initsvc, "IStepDispatcher: IStep Mode: %d", iv_istepMode);
-
+        // Get tracelite setting from top level target attributes
+        TARGETING::Target* l_pSys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_pSys);
+        uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
+        TRACE::setTraceLite(l_tlEnabled);
 
         if(iv_mailboxEnabled)
         {
