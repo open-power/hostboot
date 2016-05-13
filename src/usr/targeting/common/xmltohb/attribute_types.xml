@@ -8596,8 +8596,8 @@ DEPRECATED!!!!
       firmware notes: none
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
+        <uint16_t>
+        </uint16_t>
         <array> 2 </array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -12529,6 +12529,30 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+
+<attribute>
+    <id>EFF_TEMP_REFRESH_MODE</id>
+    <description>
+      Temp controlled ref mode. This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_TEMP_REFRESH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
     <id>EFF_INT_VREF_MON</id>
     <description>
@@ -12548,6 +12572,29 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_INT_VREF_MON</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_INTERNAL_VREF_MONITOR</id>
+    <description>
+      Internal Vref Monitor.
+      This is for DDR4 MRS4.
+      Computed in mss_eff_cnfg.
+      Each memory channel will have a value.
+      creator: mss_eff_cnfg
+      consumer: various
+      firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_INTERNAL_VREF_MONITOR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -12883,13 +12930,58 @@ Measured in GB</description>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_VALUE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
+    <id>VREF_DQ_TRAIN_VALUE</id>
+    <description>
+      vrefdq_train value. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
     <id>EFF_VREF_DQ_TRAIN_RANGE</id>
+    <description>
+      vrefdq_train range. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_RANGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VREF_DQ_TRAIN_RANGE</id>
     <description>
       vrefdq_train range. This is for DDR4 MRS6.
       Computed in mss_eff_cnfg. Each memory channel will have a value.
@@ -12912,6 +13004,28 @@ Measured in GB</description>
 
 <attribute>
     <id>EFF_VREF_DQ_TRAIN_ENABLE</id>
+    <description>
+      vrefdq_train enable. This is for DDR4 MRS6.
+      Computed in mss_eff_cnfg. Each memory channel will have a value.
+      Creator: mss_eff_cnfg
+      Consumer:various
+      Firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2,2,4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VREF_DQ_TRAIN_ENABLE</id>
     <description>
       vrefdq_train enable. This is for DDR4 MRS6.
       Computed in mss_eff_cnfg. Each memory channel will have a value.
@@ -15973,6 +16087,7 @@ DEPRECATED!!!!
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VOLT_OVERRIDE</id>
         <macro>DIRECT</macro>
@@ -16009,8 +16124,9 @@ DEPRECATED!!!!
             <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VDDR_OVERIDE_SPD</id>
         <macro>DIRECT</macro>
@@ -25460,6 +25576,26 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+
+<attribute>
+    <id>MRW_TEMP_REFRESH_RANGE</id>
+    <description>
+      Temp ref range.
+      Should be defaulted to extended range.
+      This is for DDR4 MRS4.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_TEMP_REFRESH_RANGE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
     <id>VPD_MR_0_VERSION_LAYOUT</id>
     <description>MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
@@ -26764,5 +26900,53 @@ DEPRECATED!!!!
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>MRW_DRAMINIT_RESET_DISABLE</id>
+    <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_DRAMINIT_RESET_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_PREFETCH_ENABLE</id>
+    <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_PREFETCH_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>MRW_CLEANER_ENABLE</id>
+    <description>
+      Value of on or off.
+      Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
+      enabled or not. See chapter 7 of the Centaur Workbook.
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MRW_CLEANER_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>
