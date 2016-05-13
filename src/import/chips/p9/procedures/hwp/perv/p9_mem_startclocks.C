@@ -63,31 +63,37 @@ static fapi2::ReturnCode p9_mem_startclocks_flushmode(
 fapi2::ReturnCode p9_mem_startclocks(const
                                      fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
+    uint8_t l_sync_mode = 0;
+
     FAPI_DBG("Entering ...");
 
-    FAPI_INF("Switch MC meshs to Nest mesh");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_sync_mode),
+             "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
 
-    for (auto l_trgt_chplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-         (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
+    if (!l_sync_mode)
     {
+        for (auto l_trgt_chplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
+             (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
+        {
 
-        FAPI_INF("Call p9_mem_startclocks_cplt_ctrl_action_function for Mc chiplets");
-        FAPI_TRY(p9_mem_startclocks_cplt_ctrl_action_function(l_trgt_chplt));
+            FAPI_INF("Call p9_mem_startclocks_cplt_ctrl_action_function for Mc chiplets");
+            FAPI_TRY(p9_mem_startclocks_cplt_ctrl_action_function(l_trgt_chplt));
 
-        FAPI_INF("Call module align chiplets for Mc chiplets");
-        FAPI_TRY(p9_sbe_common_align_chiplets(l_trgt_chplt));
+            FAPI_INF("Call module align chiplets for Mc chiplets");
+            FAPI_TRY(p9_sbe_common_align_chiplets(l_trgt_chplt));
 
-        FAPI_INF("Call module clock start stop for MC01, MC23.");
-        FAPI_TRY(p9_sbe_common_clock_start_stop(l_trgt_chplt, CLOCK_CMD,
-                                                DONT_STARTSLAVE, DONT_STARTMASTER, REGIONS_ALL_EXCEPT_VITAL_NESTPLL,
-                                                CLOCK_TYPES));
+            FAPI_INF("Call module clock start stop for MC01, MC23.");
+            FAPI_TRY(p9_sbe_common_clock_start_stop(l_trgt_chplt, CLOCK_CMD,
+                                                    DONT_STARTSLAVE, DONT_STARTMASTER, REGIONS_ALL_EXCEPT_VITAL_NESTPLL,
+                                                    CLOCK_TYPES));
 
-        FAPI_INF("Call p9_mem_startclocks_check_checkstop_function for Mc chiplets ");
-        FAPI_TRY(p9_mem_startclocks_check_checkstop_function(l_trgt_chplt));
+            FAPI_INF("Call p9_mem_startclocks_check_checkstop_function for Mc chiplets ");
+            FAPI_TRY(p9_mem_startclocks_check_checkstop_function(l_trgt_chplt));
 
-        FAPI_INF("Call p9_mem_startclocks_flushmode for Mc chiplets");
-        FAPI_TRY(p9_mem_startclocks_flushmode(l_trgt_chplt));
+            FAPI_INF("Call p9_mem_startclocks_flushmode for Mc chiplets");
+            FAPI_TRY(p9_mem_startclocks_flushmode(l_trgt_chplt));
 
+        }
     }
 
     FAPI_DBG("Exiting ...");
