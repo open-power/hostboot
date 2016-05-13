@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -471,6 +473,13 @@ class STLTest : public CxxTest::TestSuite
                 }
             }
 
+        }
+
+        void testInitListCompile()
+        {
+            // Code wont compile if this doesn't work
+            std::vector< std::vector<int> > v = { {},{1},{1,2,3} };
+            std::list< std::list<int> > l = { {},{1},{1,2,3} };
         }
 
 };

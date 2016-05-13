@@ -79,7 +79,7 @@ namespace std
                  * @post     The vector is created with no elements. size() == 0, capacity() == 0
                  */
                 __attribute__ ((always_inline))
-                explicit vector(void)
+                vector(void)
                    :
                         iv_start(NULL),
                         iv_finish(NULL),
