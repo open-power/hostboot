@@ -144,10 +144,12 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               ENTER_MRK"load_pnor_section()");
+
     // Get the section info from PNOR.
     PNOR::SectionInfo_t pnorSectionInfo;
     errlHndl_t err = PNOR::getSectionInfo( i_section,
-                                           pnorSectionInfo );
+                                           pnorSectionInfo);
+
     if( err != NULL )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -156,8 +158,24 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         return err;
     }
 
-    uint32_t uncompressedPayloadSize = pnorSectionInfo.xzCompressed ?
-            pnorSectionInfo.xzSize : pnorSectionInfo.size;
+    // XZ repository: http://git.tukaani.org/xz.git
+    // Header specifics can be found in xz/doc/xz-file-format.txt
+    const uint8_t HEADER_MAGIC[]= { 0xFD, '7', 'z', 'X', 'Z', 0x00 };
+    uint8_t* l_pnor_header = reinterpret_cast<uint8_t *>(pnorSectionInfo.vaddr);
+
+    bool l_pnor_is_XZ_compressed = (0 == memcmp(l_pnor_header,
+                                    HEADER_MAGIC, sizeof(HEADER_MAGIC)));
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "load_pnor_section: is XZ_compressed: %d",
+             l_pnor_is_XZ_compressed);
+
+    // This assumes that the maximum decompression ratio will always be less
+    // than 1:16 (compressed:uncompressed).  This works because XZ compression
+    // is usually 14.1%, the decompressor does not need the exact size, and
+    // we have all of mainstorm memory at this point.
+    uint32_t uncompressedPayloadSize = l_pnor_is_XZ_compressed ?
+            (pnorSectionInfo.size * 16) : pnorSectionInfo.size;
 
     const uint32_t originalPayloadSize = pnorSectionInfo.size;
 
@@ -174,7 +192,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
     if ( Util::isSimicsRunning()  )
     {
         //TODO RTC 143500
-        if(pnorSectionInfo.xzCompressed)
+        if(l_pnor_is_XZ_compressed)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                   "If you are running simics, and have xz compressed ",
@@ -202,7 +220,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         printk( "\r" );
 #endif
 
-        if(!pnorSectionInfo.xzCompressed)
+        if(!(l_pnor_is_XZ_compressed))
         {
             // Load the data block by block and update the progress bar.
             const uint32_t BLOCK_SIZE = 4096;
@@ -226,7 +244,8 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         }
     }
 
-    if(pnorSectionInfo.xzCompressed)
+
+    if(l_pnor_is_XZ_compressed)
     {
         struct xz_buf b;
         struct xz_dec *s;
@@ -259,6 +278,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                      "load_pnor_section: The %s section was decompressed.",
                       pnorSectionInfo.name);
+
         }else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
