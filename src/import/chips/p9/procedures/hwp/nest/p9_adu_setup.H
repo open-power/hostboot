@@ -82,18 +82,8 @@ extern "C" {
 /// @param[in] i_target       => P9 chip target
 /// @param[in] i_address      => base real address for read/write operation (expected to be 8B aligned)
 /// @param[in] i_rnw          => if the operation is read not write (1 for read, 0 for write)
-/// @param[in] i_flags        => other information that is needed - the flags are:
-///                               -bit 0-cache inhibited - use cache-inhibited ttype?
-///                                     (true = ci, false = dma partial)
-///                               -bit 1-autoinc - utilize ADU HW auto-increment function
-///                               -bit 2-lock pick - pick ADU lock (if required)
-///                               -bit 3-leave dirty - in the case of a fail with lock held,
-///                                      do not reset ADU & do not release lock
-///                               -bit 4-fastmode - check status only at the end of read/write stream
-///                               -bit 5-itag - collect itag with each 8B read/write
-///                               -bit 6:13-size - transaction size
-///                               -bit 14:32-lock tries - number of ADU lock acquisitions to attempt
-///                                      before giving up or attempting lock pick
+/// @param[in] i_flags        => other information that is needed - see the p9_adu_constants adu_flags enums for bit definitions
+///                              Note: To construct the flag you can use p9_ADU_oper_flag class
 /// @param[out] o_numGranules  => number of 8B granules that can be read/written before setup needs to be called again
 //
 /// @return FAPI_RC_SUCCESS if the setup completes successfully,
