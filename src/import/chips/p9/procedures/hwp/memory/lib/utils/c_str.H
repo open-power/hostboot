@@ -36,7 +36,12 @@ namespace mss
 {
 
 // Thread local storage for the string we're going to create.
-extern thread_local char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+//TODO RTC:153924 Remove the else case when issue is resolved
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+    extern thread_local char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+#else
+    extern char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+#endif
 
 template< fapi2::TargetType T >
 const char* c_str( const fapi2::template Target<T>& i_target )
