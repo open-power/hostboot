@@ -85,7 +85,8 @@ extern "C" {
 /// @param[in] i_target       => P9 chip target
 /// @param[in] i_address      => base real address for read/write operation (expected to be 8B aligned)
 /// @param[in] i_rnw          => if the operation is a read not write (1 for read, 0 for write)
-/// @param[in] i_flags        => other information that is needed - the flags are:
+/// @param[in] i_flags        => other information that is needed - see the p9_adu_constants adu_flags enums for bit definitions
+//                               Note: To construct the flag you can use p9_ADU_oper_flag class
 /// @param[in] i_lastGranule  => if this is the last 8B of data that we are collecting (true = last granule, false = not last granule)
 /// @param[in] i_firstGranule => if this is the first 8B of data that we are collecting (true = first granule, false = not first granule)
 /// @param[in, out] io_data   => The data is read/written
