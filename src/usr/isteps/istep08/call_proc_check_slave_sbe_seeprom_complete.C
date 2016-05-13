@@ -195,13 +195,13 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
             l_errl->collectTrace( "ISTEPS_TRACE", 256);
 
-            // TODO-RTC:152203
-            //l_errl->addHwCallout( l_cpu_target,
-            //                      HWAS::SRCI_PRIORITY_HIGH,
-            //                      HWAS::DECONFIG,
-            //                      HWAS::GARD_NULL );
+            l_errl->addHwCallout( l_cpu_target,
+                                  HWAS::SRCI_PRIORITY_HIGH,
+                                  HWAS::DECONFIG,
+                                  HWAS::GARD_NULL );
+
             // Create IStep error log and cross reference to error that occurred
-            //l_stepError.addErrorDetails( l_errl );
+            l_stepError.addErrorDetails( l_errl );
 
             // Commit error and continue, this is not terminating since
             // we can still at least boot with master proc
