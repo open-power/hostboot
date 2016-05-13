@@ -76,7 +76,7 @@ extern"C"
                 CACHE_INHIBIT = 0,
                 DMA_PARTIAL   = 1,
                 PB_OPER       = 2,
-                PMISC_OPER    = 3,
+                PMISC_OPER    = 3
             };
 
             // Transaction size
@@ -85,7 +85,7 @@ extern"C"
                 TSIZE_1 = 1,
                 TSIZE_2 = 2,
                 TSIZE_4 = 4,
-                TSIZE_8 = 8,
+                TSIZE_8 = 8
             };
 
             // Constructor
@@ -550,7 +550,8 @@ extern"C"
 /// @return FAPI_RC_SUCCESS if arguments are valid
     fapi2::ReturnCode p9_adu_coherent_utils_check_args(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const uint64_t i_address);
+        const uint64_t i_address,
+        const uint32_t i_flags);
 
 /// @brief ensure that fabric is initialized and stop control is not set
 ///           (by checkstop/mode switch), which if set would prohibit fabric

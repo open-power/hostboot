@@ -165,12 +165,36 @@ extern "C"
     //---------------------------------------------------------------------------------
     fapi2::ReturnCode p9_adu_coherent_utils_check_args(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const uint64_t i_address)
+        const uint64_t i_address,
+        const uint32_t i_flags)
     {
         FAPI_DBG("Start");
 
+        p9_ADU_oper_flag l_myAduFlag;
+        p9_ADU_oper_flag::Transaction_size_t l_transSize;
+        uint32_t l_actualTransSize;
+
+        l_transSize = l_myAduFlag.getTransactionSize();
+
+        if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
+        {
+            l_actualTransSize = 1;
+        }
+        else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
+        {
+            l_actualTransSize = 2;
+        }
+        else if ( l_transSize == p9_ADU_oper_flag::TSIZE_4 )
+        {
+            l_actualTransSize = 4;
+        }
+        else
+        {
+            l_actualTransSize = 8;
+        }
+
         //Check the address alignment
-        FAPI_ASSERT(!(i_address & P9_FBC_UTILS_CACHELINE_MASK),
+        FAPI_ASSERT(!(i_address & (l_actualTransSize - 1)),
                     fapi2::P9_ADU_COHERENT_UTILS_INVALID_ARGS().set_TARGET(i_target).set_ADDRESS(
                         i_address),
                     "Address is not cacheline aligned");
@@ -665,7 +689,7 @@ extern "C"
 
         if (l_eccMode)
         {
-            o_read_data[eccIndex] = (force_ecc_reg_data >> ALTD_DATA_TX_ECC_END_BIT) & ALTD_DATA_ECC_MASK;
+            o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
         }
 
         FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, altd_status_reg_data),
@@ -680,6 +704,7 @@ extern "C"
             o_read_data[i] = (altd_data_reg_data >> (56 - (i * 8))) & 0xFFull;
         }
 
+        FAPI_DBG("o_read_data[8] = %8X", o_read_data[8]);
         //o_read_data[0] = altd_data_reg_data;
         FAPI_DBG("altd_data_reg_data = %lu\n", altd_data_reg_data);
 
