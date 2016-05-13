@@ -45,16 +45,6 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_MEM_IN_SYNCH_MODE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Run the memory clocks in synchronous mode with the nest clocks.
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -68,6 +58,22 @@
     </description>
     <valueType>uint32</valueType>
     <array>4</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_REQUIRED_SYNCH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Specify the system policy to enforce synchronous mode between memory and
+      nest. This drives the value of ATTR_MEM_IN_SYNCH_MODE.
+         UNDETERMINED : Run synchronously if the dimm and nest freq matches
+         ALWAYS : Require matching frequencies and deconfigure memory that
+                  does not match the nest
+         NEVER : Do not run synchronously, even if the frequencies match
+    </description>
+    <valueType>uint8</valueType>
+    <enum>UNDETERMINED=0, ALWAYS=1, NEVER=2</enum>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

@@ -394,7 +394,7 @@
   <description>MC mesh to use Nest mesh or not</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
-  <platInit/>
+  <writeable/>
 </attribute>
 
 <attribute>
