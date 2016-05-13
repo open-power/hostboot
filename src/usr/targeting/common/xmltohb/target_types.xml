@@ -109,8 +109,6 @@
     <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
     <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
-    <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
-    <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
     <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
     <attribute><id>FREQ_PCIE</id></attribute>
@@ -1357,7 +1355,7 @@
     <attribute><id>EFF_MAX_POWERDOWN_MODE</id></attribute>
     <attribute><id>EFF_TEMP_REF_RANGE</id></attribute>
     <attribute><id>EFF_TEMP_REF_MODE</id></attribute>
-    <attribute><id>EFF_INT_VREF_MON</id></attribute>
+    <attribute><id>EFF_INTERNAL_VREF_MONITOR</id></attribute>
     <attribute><id>EFF_CS_CMD_LATENCY</id></attribute>
     <attribute><id>EFF_SELF_REF_ABORT</id></attribute>
     <attribute><id>EFF_RD_PREAMBLE_TRAIN</id></attribute>
@@ -2067,11 +2065,10 @@
     <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
     <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
     <attribute><id>PIB_I2C_NEST_PLL</id></attribute>
-    <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
-    <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
-    <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
+    <attribute><id>MRW_PREFETCH_ENABLE</id></attribute>
+    <attribute><id>MRW_CLEANER_ENABLE</id></attribute>
+    <attribute><id>MRW_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
-    <attribute><id>ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id></attribute>
     <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
@@ -2089,7 +2086,7 @@
     <attribute><id>MRW_VPP_OFFSET_DISABLE</id></attribute>
     <attribute><id>MRW_VDDR_OFFSET_DISABLE</id></attribute>
     <attribute><id>MRW_FINE_REFRESH_MODE</id></attribute>
-    <attribute><id>MRW_TEMP_REF_RANGE</id></attribute>
+    <attribute><id>MRW_TEMP_REFRESH_RANGE</id></attribute>
     <attribute><id>VPD_MR_0_VERSION_LAYOUT</id></attribute>
     <attribute><id>VPD_MR_1_VERSION_DATA</id></attribute>
     <attribute><id>VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
@@ -2341,29 +2338,11 @@
     <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
-    <attribute><id>MSS_ALLOW_SINGLE_PORT</id></attribute>
-    <attribute><id>MSS_DQS_SWIZZLE_TYPE</id></attribute>
     <attribute><id>MSS_DIMM_MFG_ID_CODE</id></attribute>
     <attribute><id>EFF_NUM_RANKS_PER_DIMM</id></attribute>
     <attribute><id>EFF_CUSTOM_DIMM</id></attribute>
     <attribute><id>EFF_DRAM_WIDTH</id></attribute>
     <attribute><id>EFF_DRAM_RANK_MIX</id></attribute>
-    <attribute><id>EFF_PRIMARY_RANK_GROUP0</id></attribute>
-    <attribute><id>EFF_PRIMARY_RANK_GROUP1</id></attribute>
-    <attribute><id>EFF_PRIMARY_RANK_GROUP2</id></attribute>
-    <attribute><id>EFF_PRIMARY_RANK_GROUP3</id></attribute>
-    <attribute><id>EFF_SECONDARY_RANK_GROUP0</id></attribute>
-    <attribute><id>EFF_SECONDARY_RANK_GROUP1</id></attribute>
-    <attribute><id>EFF_SECONDARY_RANK_GROUP2</id></attribute>
-    <attribute><id>EFF_SECONDARY_RANK_GROUP3</id></attribute>
-    <attribute><id>EFF_TERTIARY_RANK_GROUP0</id></attribute>
-    <attribute><id>EFF_TERTIARY_RANK_GROUP1</id></attribute>
-    <attribute><id>EFF_TERTIARY_RANK_GROUP2</id></attribute>
-    <attribute><id>EFF_TERTIARY_RANK_GROUP3</id></attribute>
-    <attribute><id>EFF_QUATERNARY_RANK_GROUP0</id></attribute>
-    <attribute><id>EFF_QUATERNARY_RANK_GROUP1</id></attribute>
-    <attribute><id>EFF_QUATERNARY_RANK_GROUP2</id></attribute>
-    <attribute><id>EFF_QUATERNARY_RANK_GROUP3</id></attribute>
     <attribute><id>EFF_DIMM_SPARE</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF</id></attribute>
     <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
@@ -2444,8 +2423,6 @@
     <attribute><id>MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id></attribute>
     <attribute><id>MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id></attribute>
     <attribute><id>MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id></attribute>
-    <attribute><id>MSS_PREFETCH_ENABLE</id></attribute>
-    <attribute><id>MSS_CLEANER_ENABLE</id></attribute>
     <attribute><id>MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id></attribute>
     <attribute><id>EFF_DRAM_LPASR</id></attribute>
     <attribute><id>EFF_MPR_PAGE</id></attribute>
@@ -2455,8 +2432,8 @@
     <attribute><id>EFF_CRC_WR_LATENCY</id></attribute>
     <attribute><id>EFF_MPR_RD_FORMAT</id></attribute>
     <attribute><id>EFF_MAX_POWERDOWN_MODE</id></attribute>
-    <attribute><id>EFF_TEMP_REF_MODE</id></attribute>
-    <attribute><id>EFF_INT_VREF_MON</id></attribute>
+    <attribute><id>EFF_TEMP_REFRESH_MODE</id></attribute>
+    <attribute><id>EFF_INTERNAL_VREF_MONITOR</id></attribute>
     <attribute><id>EFF_CS_CMD_LATENCY</id></attribute>
     <attribute><id>EFF_SELF_REF_ABORT</id></attribute>
     <attribute><id>EFF_RD_PREAMBLE_TRAIN</id></attribute>
@@ -2476,11 +2453,8 @@
     <attribute><id>EFF_VREF_DQ_TRAIN_ENABLE</id></attribute>
     <attribute><id>EFF_WRITE_CRC</id></attribute>
     <attribute><id>MSS_CAL_STEP_ENABLE</id></attribute>
-    <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>MSS_SLEW_RATE_DATA</id></attribute>
     <attribute><id>MSS_SLEW_RATE_ADR</id></attribute>
-    <attribute><id>MSS_ALLOW_SINGLE_PORT</id></attribute>
-    <attribute><id>MSS_DQS_SWIZZLE_TYPE</id></attribute>
     <attribute><id>SCHMOO_MULTIPLE_SETUP_CALL</id></attribute>
     <attribute><id>EFF_BUFFER_LATENCY</id></attribute>
     <attribute><id>EFF_LRDIMM_WORD_X</id></attribute>
