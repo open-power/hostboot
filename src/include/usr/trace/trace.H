@@ -181,6 +181,19 @@ namespace TRACE
      */
     void flushBuffers();
 
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     *  @brief  Enable Continuous trace mode
+     *          no-op for runtime
+     */
+    void enableContinousTrace();
+
+    /**
+     *  @brief  Disable Continuous trace mode
+     *          no-op for runtime
+     */
+    void disableContinousTrace();
+#endif
     /**
      *  @brief Return if debug trace is enabled for input trace descriptor
      *

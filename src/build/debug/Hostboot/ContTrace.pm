@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +28,6 @@ use strict;
 package Hostboot::ContTrace;
 use Exporter;
 our @EXPORT_OK = ('main');
-
-use constant CONT_TRACE_ENABLE_FLAG_OFFSET => 0;
-use constant CONT_TRACE_BUFFER_SIZE => CONT_TRACE_ENABLE_FLAG_OFFSET + 2;
-use constant CONT_TRACE_BUFFER_ADDR => CONT_TRACE_BUFFER_SIZE + 6;
 
 use File::Temp ('tempfile');
 
@@ -56,42 +54,19 @@ sub main
         $fsptrace_options = $fsptrace_options."-f ";
     }
 
-    my $symAddr = 0;
-    my $symSize = 0;
-
-    ($symAddr, $symSize) = ::findSymbolAddress("TRACE::g_debugSettings");
-    if (not defined $symAddr)
-    {
-        ::userDisplay "Cannot find symbol: TRACE::g_debugSettings.\n"; die;
-    }
 
     if (defined $args->{"enable-cont-trace"})
     {
-        my $new_enable = $args->{"enable-cont-trace"};
-        $new_enable = $new_enable ? 2 : 1;
-
-        my $enable = ::read8($symAddr + CONT_TRACE_ENABLE_FLAG_OFFSET);
-        if ($dbgMsg)
-        {
-            ::userDisplay("current Cont Trace Enable Flag = $enable\n");
-        }
-        if (($enable < 2) && ($new_enable == 2))
-        {
-            # truncate tracMERG to 0
-            system( "cp /dev/null tracMERG" );
-        }
-
-        ::write8($symAddr + CONT_TRACE_ENABLE_FLAG_OFFSET, $new_enable);
-        if ($dbgMsg)
-        {
-            $new_enable = ::read8($symAddr+CONT_TRACE_ENABLE_FLAG_OFFSET);
-            ::userDisplay("new Cont Trace Enable Flag = $new_enable\n");
-        }
+        ::userDisplay("enable-cont-trace not supported anymore\n")
+        ::userDisplay("Use istep control with istep 255.0 to disable\n"
+        ::userDisplay("Use istep control with istep 255.1 to enable\n"
 
         return;
     }
 
-    my $trigger = ::readScom(0x00050038);
+    #HB will place the trace buffer address in MBOX_SCRATCH1 (0x50038) when
+    #there is a buf to be extracted.  Trigger off of this
+    my $trigger = ::readScom(0x00050038, 8);
     if ($dbgMsg)
     {
         ::userDisplay("$trigger...\n");
@@ -116,8 +91,9 @@ sub main
     ($fh,$fname) = tempfile();
     binmode($fh);
 
-    my $buffAddr = ::read64($symAddr + CONT_TRACE_BUFFER_ADDR);
-    my $buffSize = ::read16($symAddr + CONT_TRACE_BUFFER_SIZE);
+    #Trigger has the buffer, address MBOX_SCRATCH2 has size
+    my $buffAddr = $trigger >> 32;
+    my $buffSize = ::readScom(0x00050039, 8) >> 32;
 
     print $fh (::readData($buffAddr, $buffSize));
 
@@ -129,7 +105,9 @@ sub main
         ::userDisplay("$cycles\n");
     }
 
-    ::writeScom(0x00050038, 0x0);
+    #Write MBOX_SCRATCH1 to zero to indicate to HB that we have
+    #extracted the buffer and it can continue on its way
+    ::writeScom(0x00050038, 8, 0x0);
 
     open TRACE, ($args->{"fsp-trace"}." -s ".::getImgPath().
                 "hbotStringFile $fsptrace_options $fname |") || die;
@@ -156,7 +134,6 @@ sub helpInfo
                     "fsp-trace=<path>" => ["Path to non-default fsp-trace utility."],
                     "with-file-names" => ["Trace statements will include file name of place the",
                                           "trace was defined."],
-                    "enable-cont-trace=<1|0>" => ["Turn on|off continuous trace"],
                     "debug" => ["Turn on debug messages"],
                    }
     );

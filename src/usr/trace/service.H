@@ -155,6 +155,15 @@ namespace TRACE
              */
             uint8_t getTraceLite();
 
+#ifndef __HOSTBOOT_RUNTIME
+            /** @brief Enable Continous Trace mode (for FSPless)
+             */
+            void enableContinous();
+
+            /** @brief Disable Continous Trace mode (for FSPless)
+             */
+            void disableContinous();
+#endif
             friend class TRACEDAEMON::Daemon;
 
         private:

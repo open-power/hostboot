@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,6 +65,13 @@ namespace TRACE
              *                          request.
              */
             void signal(bool i_blocking = false);
+
+            /** Allows the client to turn on/off continous mode.
+             *
+             *  @param[in] i_enable - Indicates if this function should enable
+             *                        or disable continous mode
+             */
+            void continousMode(bool i_enable);
 
             friend class BufferTest;
             friend class TRACEDAEMON::Daemon;

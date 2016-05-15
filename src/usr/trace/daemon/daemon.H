@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,9 +96,11 @@ namespace TRACEDAEMON
             /** Locklessly move a trace entry from one location to another. */
             void replaceEntry(TRACE::Entry* from, TRACE::Entry* to);
 
-            /** Write mailbox scratch register to a value. */
-            void writeScratchReg(uint64_t i_value);
-            /** Read mailbox scratch register. */
+            /** Write mailbox scratch 1 & 2 registers to a values.
+             *  scratch 1 contains the trace buffer address
+             *  scratch 2 contains the trace buffer size */
+            void writeScratchReg(uint64_t i_value1, uint64_t i_value2);
+            /** Read mailbox scratch 1 register. */
             uint64_t readScratchReg();
 
                 /** Client-service object. */
@@ -124,6 +126,7 @@ namespace TRACEDAEMON
 
                 /** Address of scratch register. */
             static const uint32_t MB_SCRATCH_REGISTER_1 = 0x00050038;
+            static const uint32_t MB_SCRATCH_REGISTER_2 = 0x00050039;
 
     };
 

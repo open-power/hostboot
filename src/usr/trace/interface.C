@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,18 @@ namespace TRACE
     {
         Singleton<Service>::instance().flushBuffers();
     }
+
+#ifndef __HOSTBOOT_RUNTIME
+    void enableContinousTrace()
+    {
+        Singleton<Service>::instance().enableContinous();
+    }
+
+    void disableContinousTrace()
+    {
+        Singleton<Service>::instance().disableContinous();
+    }
+#endif
 
     bool isDebugEnabled(ComponentDesc * i_td)
     {

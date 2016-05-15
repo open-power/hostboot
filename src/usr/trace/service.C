@@ -498,6 +498,16 @@ namespace TRACE
         iv_daemon->signal(true);
     }
 
+    void Service::enableContinous()
+    {
+        iv_daemon->continousMode(true);
+    }
+
+    void Service::disableContinous()
+    {
+        iv_daemon->continousMode(false);
+    }
+
     Service* Service::getGlobalInstance()
     {
         return &(Singleton<Service>::instance());

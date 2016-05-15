@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -115,7 +115,7 @@ namespace TRACEDAEMON
                                            INITSERVICE::LOWEST_PRIORITY);
 
         // Clear scratch register.
-        writeScratchReg(0);
+        writeScratchReg(0, 0);
 
         // Loop handling messages.
         while (msg_t* msg = iv_service->iv_daemon->wait())
@@ -429,8 +429,6 @@ namespace TRACEDAEMON
         // Write debug structure with buffer information.
         g_debugSettings.bufferSize = i_size;
         g_debugSettings.bufferPage = i_buffer;
-        // Write scratch register indicating continuous trace is available.
-        writeScratchReg(1ull << 32);
 
         // Signal for simics.
         asm volatile("mr 4, %0; mr 5, %1" ::
@@ -477,6 +475,10 @@ namespace TRACEDAEMON
             }
             else
             {
+                // Write scratch register indicating is available.
+                writeScratchReg(reinterpret_cast<uint64_t>(i_buffer) << 32,
+                                i_size << 32);
+
                 // Wait for tools to extract the buffer.
                 while(0 != readScratchReg())
                 {
@@ -775,14 +777,24 @@ namespace TRACEDAEMON
 
     }
 
-    void Daemon::writeScratchReg(uint64_t i_value)
+    void Daemon::writeScratchReg(uint64_t i_value1, uint64_t i_value2)
     {
         size_t l_size = sizeof(uint64_t);
 
         errlHndl_t l_errl =
             deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                        &i_value, l_size,
+                        &i_value1, l_size,
                         DEVICE_SCOM_ADDRESS(MB_SCRATCH_REGISTER_1));
+
+        if (l_errl)
+        {
+            errlCommit(l_errl, TRACE_COMP_ID);
+        }
+
+        l_errl =
+            deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                        &i_value2, l_size,
+                        DEVICE_SCOM_ADDRESS(MB_SCRATCH_REGISTER_2));
 
         if (l_errl)
         {
