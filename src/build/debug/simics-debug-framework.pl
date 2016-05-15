@@ -367,11 +367,4 @@ parseToolOpts($toolOpts);
 callToolModule($tool);
 
 
-##
-##  Dummy function to match continuous trace call in VPO
-##
-sub checkContTrace
-{
-
-}
 

@@ -881,32 +881,6 @@ sub writeScom
     return;
 }
 
-##
-##  Special case:  only used in VPO
-##  Check the continuous trace Scom reg to see if we need to dump
-##  trace.
-##  This has to be executed as an external procedure so that it goes to the
-##  proper output file.
-##
-sub checkContTrace()
-{
-    my  $SCRATCH_MBOX1  =   0x00050038;
-    my  $contTrace      =   "";
-
-    $contTrace  =   ::readScom( $SCRATCH_MBOX1 );
-    if ( $contTrace != 0  )
-    {
-        ##  activate continuous trace
-        system ("$hbToolsDir/hb-ContTrace --mute > /dev/null" );
-        system ("cat hb-ContTrace.output >> tracMERG");
-
-        ## ContTrace might leave instructions stopped, turn them
-        ## back on here to make sure.
-        ::startInstructions("0");
-    }
-
-}
-
 # @sub getHRMOR
 #
 # Returns the HRMOR (0 for VPO).

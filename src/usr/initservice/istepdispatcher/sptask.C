@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 
 
 #include    <trace/interface.H>             //  trace support
+#include    <trace/trace.H>                 //  trace support
 #include    <errl/errlentry.H>              //  errlHndl_t
 
 #include    <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
@@ -55,9 +56,10 @@
 #include    <console/consoleif.H>
 #include    <config.h>
 
+#include    <isteps/spless_255list.H>       // Non istep commands
+
 #include    "istepdispatcher.H"
 #include    "splesscommon.H"
-#include    "istep_mbox_msgs.H"
 
 
 namespace   INITSERVICE
@@ -81,7 +83,119 @@ const   uint64_t    SINGLESTEP_PAUSE_S     =   0;
 const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
 
 /**
- * @brief  userConsoleComm
+ * @brief  handle "control" istep messages
+ *
+ * Handle control messages (aka non istep) to do other
+ * thing than communicate with the istep dispatcher task
+ * message Q.  Examples include trace enable/disable, etc
+ *
+ * @param[in,out]  -  Message to handle, status returned
+ *
+ * @return none
+ */
+void handleControlCmd( SPLessCmd & io_cmd )
+{
+    //switch on the control command
+    switch(io_cmd.substep)
+    {
+    case CTL_CONT_TRACE_DISABLE:
+        TRACE::disableContinousTrace();
+        break;
+
+    case CTL_CONT_TRACE_ENABLE:
+        TRACE::enableContinousTrace();
+        break;
+
+    case FLUSH_TRACE_BUFS:
+        TRAC_FLUSH_BUFFERS();
+        break;
+
+    default:
+#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+    CONSOLE::displayf(NULL, "Unknown control command %02x", io_cmd.substep);
+    CONSOLE::flush();
+#endif
+    TRACFCOMP( g_trac_initsvc, "splessComm: UNKNOWN control cmd %02x",
+               io_cmd.substep);
+    break;
+    }
+}
+
+/**
+ * @brief  handle istep commands
+ *
+ * Handle istep messages (aka non istep) that go
+ * directly to the istep dispatcher task message Q.
+ *
+ * @param[in,out]  -  Message to handle, status returned
+ * @param[in] -- SEND Istep message Q
+ *
+ * @return none
+ */
+void handleIstep( SPLessCmd & io_cmd, msg_q_t i_sendQ,
+                       msg_q_t i_rcvQ)
+{
+    int                     l_sr_rc         =   0;
+    msg_t  *l_pMsg         =   msg_allocate();
+
+    // pass the command on to IstepDisp, block until reply
+    l_pMsg->type     = ISTEP_MSG_TYPE;
+    l_pMsg->data[0]  =
+      ( ( static_cast<uint64_t>(io_cmd.istep & 0xFF) << 32) |
+        ( static_cast<uint64_t>(io_cmd.substep & 0xFF ) ) );
+    l_pMsg->data[1]     =   0;
+    l_pMsg->extra_data  =   NULL;
+
+#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
+    CONSOLE::displayf(NULL, "ISTEP %2d.%2d", io_cmd.istep, io_cmd.substep);
+    CONSOLE::flush();
+#endif
+    TRACFCOMP( g_trac_initsvc,
+               "splessComm: sendmsg type=0x%08x, d0=0x%016llx,"
+               " d1=0x%016llx, x=%p",
+               l_pMsg->type,
+               l_pMsg->data[0],
+               l_pMsg->data[1],
+               l_pMsg->extra_data );
+    //
+    //  msg_sendrecv_noblk  effectively splits the "channel" into
+    //  a send Q and a receive Q
+    //
+    l_sr_rc =   msg_sendrecv_noblk( i_sendQ, l_pMsg, i_rcvQ );
+    //  should never happen.
+    assert( l_sr_rc == 0 );
+
+    //  This should unblock on any message sent on the Q,
+    l_pMsg  =   msg_wait( i_rcvQ );
+
+    TRACFCOMP( g_trac_initsvc,
+               "splessComm: rcvmsg type=0x%08x, d0=0x%016llx"
+               ", d1=0x%016llx, x=%p",
+               l_pMsg->type,
+               l_pMsg->data[0],
+               l_pMsg->data[1],
+               l_pMsg->extra_data );
+
+    if ( l_pMsg->type   == BREAKPOINT )
+    {
+        io_cmd.sts    =   SPLESS_AT_BREAK_POINT;
+    }
+
+    //  istep status is the hi word in the returned data 0
+    //  this should be either 0 or a plid from a returned errorlog
+    //  Don't have enough space to store entire, PLID... just check
+    //  If non zero
+    else if(static_cast<uint32_t>( l_pMsg->data[0] >> 32 ) !=0x0)
+    {
+        io_cmd.sts = SPLESS_ISTEP_FAIL;
+    }
+
+    //  free the message struct
+    msg_free( l_pMsg  );
+}
+
+/**
+ * @brief  splessComm
  *
  * Communicate with User Console on VPO or Simics.
  * Forwards commands to HostBoot (IStep Dispatcher) via a message Q.
@@ -94,19 +208,16 @@ const   uint64_t    SINGLESTEP_PAUSE_NS    =   10000000;
  *
  * @return none
  */
-void    userConsoleComm( void *  io_msgQ )
+void    splessComm( void *  io_msgQ )
 {
     SPLessCmd               l_cmd;
     SPLessCmd               l_trigger;
     l_trigger.cmd.key = 0x15;           //Random starting value
-    int                     l_sr_rc         =   0;
     msg_q_t                 l_SendMsgQ      =   static_cast<msg_q_t>( io_msgQ );
-    msg_t                   *l_pMsg         =   msg_allocate();
     msg_q_t                 l_RecvMsgQ      =   msg_q_create();
-    msg_t                   *l_pCurrentMsg  =  NULL;
 
     TRACFCOMP( g_trac_initsvc,
-            "userConsoleComm entry, args=%p",
+            "splessComm entry, args=%p",
             io_msgQ  );
 
     // initialize command status reg
@@ -116,7 +227,7 @@ void    userConsoleComm( void *  io_msgQ )
     writeCmdSts( l_cmd );
 
     TRACFCOMP( g_trac_initsvc,
-            "userConsoleComm : readybit set." );
+            "splessComm : readybit set." );
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
 #ifdef CONFIG_BMC_AST2400
@@ -128,9 +239,6 @@ void    userConsoleComm( void *  io_msgQ )
     CONSOLE::flush();
 #endif
 
-
-    //  set Current to our message on entry
-    l_pCurrentMsg   =   l_pMsg;
     //
     //  Start the polling loop.
     //
@@ -152,69 +260,28 @@ void    userConsoleComm( void *  io_msgQ )
 
             // write the intermediate value back to the console.
             TRACFCOMP( g_trac_initsvc,
-                    "userConsoleComm Write status (running) istep %d.%d",
+                    "splessComm Write status (running) istep %d.%d",
                     l_cmd.istep, l_cmd.substep );
 
             writeCmdSts( l_cmd );
 
-            // pass the command on to IstepDisp, block until reply
+            //Handle two types of commands -- istep and control
+            //Control is a major istep of 0xFF
+            if( l_cmd.istep != CONTROL_ISTEP)
+            {
+                handleIstep(l_cmd, l_SendMsgQ, l_RecvMsgQ);
+            }
+            else
+            {
+                handleControlCmd(l_cmd);
 
-            l_pCurrentMsg->type     = ISTEP_MSG_TYPE;
-            l_pCurrentMsg->data[0]  =
-                ( ( static_cast<uint64_t>(l_cmd.istep & 0xFF) << 32) |
-                  ( static_cast<uint64_t>(l_cmd.substep & 0xFF ) ) );
-            l_pCurrentMsg->data[1]     =   0;
-            l_pCurrentMsg->extra_data  =   NULL;
-
-#ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-            CONSOLE::displayf(NULL, "ISTEP %2d.%2d", l_cmd.istep, l_cmd.substep);
-            CONSOLE::flush();
-#endif
-            TRACFCOMP( g_trac_initsvc,
-            "userConsoleComm: sendmsg type=0x%08x, d0=0x%016llx,"
-                       " d1=0x%016llx, x=%p",
-                       l_pCurrentMsg->type,
-                       l_pCurrentMsg->data[0],
-                       l_pCurrentMsg->data[1],
-                       l_pCurrentMsg->extra_data );
-            //
-            //  msg_sendrecv_noblk  effectively splits the "channel" into
-            //  a send Q and a receive Q
-            //
-            l_sr_rc =   msg_sendrecv_noblk( l_SendMsgQ, l_pCurrentMsg, l_RecvMsgQ );
-            //  should never happen.
-            assert( l_sr_rc == 0 );
-
-            //  This should unblock on any message sent on the Q,
-            l_pCurrentMsg  =   msg_wait( l_RecvMsgQ );
+            }
 
             // Update command/status reg when the command is done
             l_cmd.cmd.key           =   ++l_trigger.cmd.key;
             l_cmd.cmd.runningbit    =   false;
             l_cmd.cmd.readybit      =   true;
             l_cmd.cmd.gobit         =   false;
-
-            TRACFCOMP( g_trac_initsvc,
-                       "userConsoleComm: rcvmsg type=0x%08x, d0=0x%016llx"
-                       ", d1=0x%016llx, x=%p",
-                       l_pCurrentMsg->type,
-                       l_pCurrentMsg->data[0],
-                       l_pCurrentMsg->data[1],
-                       l_pCurrentMsg->extra_data );
-
-            if ( l_pCurrentMsg->type   == BREAKPOINT )
-            {
-                l_cmd.sts    =   SPLESS_AT_BREAK_POINT;
-            }
-
-            //  istep status is the hi word in the returned data 0
-            //  this should be either 0 or a plid from a returned errorlog
-            //  Don't have enough space to store entire, PLID... just check
-            //  If non zero
-            else if(static_cast<uint32_t>( l_pCurrentMsg->data[0] >> 32 ) !=0x0)
-            {
-                l_cmd.sts = SPLESS_ISTEP_FAIL;
-            }
 
             writeCmdSts( l_cmd );
         }   //  endif   gobit
@@ -242,10 +309,7 @@ void    userConsoleComm( void *  io_msgQ )
     writeCmdSts( l_cmd );
 
     TRACFCOMP( g_trac_initsvc,
-            "userConsoleComm exit" );
-
-    //  free the message struct
-    msg_free( l_pMsg  );
+            "splessComm exit" );
 
     // return to main to end task
 }
@@ -261,7 +325,7 @@ void* spTask( void    *io_pArgs )
     task_detach();
 
     //  Start talking to VPO / Simics User console.
-    userConsoleComm( io_pArgs );
+    splessComm( io_pArgs );
 
     TRACFCOMP( g_trac_initsvc,
             "spTask exit." );

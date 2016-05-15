@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,6 +64,15 @@ namespace TRACE
                 msg_send(iv_queue, msg); // async message request.
             }
         }
+    }
+
+    void DaemonIf::continousMode(bool i_enable)
+    {
+        msg_t* msg = msg_allocate();
+        msg->type = TRACE_CONT_TRACE_STATE;
+        msg->data[0] = i_enable ? 0x1 : 0x0; //needs to be a zero/one
+        msg_sendrecv(iv_queue, msg);
+        msg_free(msg);
     }
 
 }

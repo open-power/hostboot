@@ -64,6 +64,7 @@ no  warnings    'portable';
 package Hostboot::Istep;
 use Exporter;
 our @EXPORT_OK = ('main');
+use File::Temp ('tempfile');
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -74,7 +75,7 @@ use constant    SPLESS_SINGLE_ISTEP_CMD     =>  0x00;
 use constant    SPLESS_RESUME_ISTEP_CMD     =>  0x01;
 use constant    SPLESS_CLEAR_TRACE_CMD      =>  0x02;
 
-use constant    MAX_ISTEPS                  =>  25;
+use constant    MAX_ISTEPS                  =>  256;
 use constant    MAX_SUBSTEPS                =>  25;
 
 ##  Mailbox Scratchpad regs
@@ -361,6 +362,48 @@ sub showHelp
     exit 0;
 }
 
+##  ---------------------------------------------------------------------------
+##  Check to see if there are trace buffers avail
+##  if so, extract and write them out
+##  ---------------------------------------------------------------------------
+sub checkContTrace
+{
+    my  $SCRATCH_MBOX1  =   0x00050038;
+    my  $SCRATCH_MBOX2  =   0x00050039;
+    my  $contTrace      =   "";
+    my  $ctName         =   "tracMERG.cont";
+
+    $contTrace  =   ::readScom( $SCRATCH_MBOX1, 8 );
+    if ( $contTrace != 0  )
+    {
+        my $fh;
+        my $fname;
+        my  $contFile;
+        ($fh,$fname) = tempfile();
+        open ($contFile, '>>', $ctName) or die "Can't open '$ctName' $!";
+        binmode($fh);
+
+        #contTrace has the buffer, address MBOX_SCRATCH2 has size
+        #MBOX Scratch regs are only valid from 0:31, shift to give a num
+        my $buffAddr = $contTrace >> 32;
+        my $buffSize = ::readScom($SCRATCH_MBOX2, 8) >> 32;
+
+        print $fh (::readData($buffAddr, $buffSize));
+
+        #Write 0 to let HB know we extracted buf and it can continue
+        ::writeScom($SCRATCH_MBOX1, 8, 0x0);
+
+        open TRACE, ("fsp-trace -s ".::getImgPath().
+          "hbotStringFile $fname |") || die;
+        while (my $line = <TRACE>)
+        {
+            ::userDisplay $line;
+            print $contFile $line;
+        }
+
+        unlink $fname;
+    }
+}
 
 ##  ---------------------------------------------------------------------------
 ##  Dump environment variable specified.
@@ -634,7 +677,7 @@ sub getSyncStatus( )
 
 
         ##  check to see if we need to dump trace - no-op in simics
-        ##::checkContTrace();
+        checkContTrace();
 
         $result     = getStatus();
         $running    =   ( ( $result & 0x2000000000000000 ) >> 61 );
@@ -682,13 +725,13 @@ sub runIStep( $$ )
 
     sendCommand( $cmd );
 
-
     $result  =   getSyncStatus();
 
     ## if result is -1 we have a timeout
     if ( $result == -1 )
     {
         ::userDisplay   "-----------------------------------------------------------------\n";
+        exit;
     }
     else
     {
@@ -899,7 +942,7 @@ sub setMode( $ )
 
         if ( $opt_debug )   {   ::userDisplay   "=== checkContTrace\n";   }
         ## check to see if it's time to dump trace - no-op in simics
-        ::checkContTrace();
+        checkContTrace();
 
         if ( $opt_debug )   {   ::userDisplay   "=== isShutDown\n";       }
         ## check for system crash

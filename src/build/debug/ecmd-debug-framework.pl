@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -358,14 +358,6 @@ sub extImageFile
     }
 
     return $extImage;
-}
-
-##
-##  Dummy function to match continuous trace call in VPO
-##
-sub checkContTrace
-{
-
 }
 
 # @sub determinMemMode
