@@ -137,6 +137,8 @@ void ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
     assert(io_hdr != NULL);
     assert(iv_pHdrStart != NULL);
 
+    TRACFCOMP(g_trac_secure,"dest: 0x%X src: 0x%X size: 0x%X",i_dest, io_hdr, i_size);
+
     // Determine if the memcpy is within the bounds of the container header
     iv_hdrBytesRead = io_hdr - iv_pHdrStart;
     assert( (iv_hdrBytesRead + i_size) <= MAX_SECURE_HEADER_SIZE);

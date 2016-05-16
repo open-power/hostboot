@@ -24,6 +24,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include "pnorrp.H"
+#include "spnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
 #include <sys/msg.h>
@@ -175,16 +176,21 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::init> " );
     uint64_t rc = 0;
+    uint64_t rcs = 0; // spnorrp return code
     errlHndl_t  l_errl  =   NULL;
 
-    if( Singleton<PnorRP>::instance().didStartupFail(rc) )
+    if( Singleton<PnorRP>::instance().didStartupFail(rc)
+#ifdef CONFIG_SECUREBOOT
+        || Singleton<SPnorRP>::instance().didStartupFail(rcs)
+#endif
+      )
     {
         /*@
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       PNOR::MOD_PNORRP_DIDSTARTUPFAIL
          *  @reasoncode     PNOR::RC_BAD_STARTUP_RC
-         *  @userdata1      return code
-         *  @userdata2      0
+         *  @userdata1      return code pnorrp
+         *  @userdata2      return code spnorrp
          *
          *  @devdesc        PNOR startup task returned an error.
          * @custdesc    A problem occurred while accessing the boot flash.
@@ -194,7 +200,7 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
                                 PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
-                                0,
+                                rcs,
                                 true /*Add HB SW Callout*/ );
 
         l_errl->collectTrace(PNOR_COMP_NAME);
@@ -339,8 +345,8 @@ void PnorRP::initDaemon()
 
 // Not supporting PNOR error in VPO
 #ifndef CONFIG_VPO_COMPILE
-    // call ErrlManager function - tell him that PNOR is ready!
-    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::PNOR);
+        // call ErrlManager function - tell him that PNOR is ready!
+        ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::PNOR);
 #endif
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::initDaemon" );
@@ -454,7 +460,26 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         // copy my data into the external format
         o_info.id = iv_TOC[id].id;
         o_info.name = cv_EYECATCHER[id];
-        o_info.vaddr = iv_TOC[id].virtAddr;
+
+#ifdef CONFIG_SECUREBOOT
+        // handle HB_EXT_CODE in SPnorRP's address space
+        if (o_info.id == HB_EXT_CODE)
+        {
+            // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
+            // address into a secure pnor address, since pnor, temp, and spnor
+            // spaces are equidistant.
+            // See comments in SPnorRP::verifySections() method in spnorrp.C
+            // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
+            // for specifics.
+            o_info.vaddr = iv_TOC[id].virtAddr + VMM_VADDR_SPNOR_DELTA
+                                               + VMM_VADDR_SPNOR_DELTA;
+        }
+        else
+#endif
+        {
+            o_info.vaddr = iv_TOC[id].virtAddr;
+        }
+
         o_info.flashAddr = iv_TOC[id].flashAddr;
         o_info.size = iv_TOC[id].size;
         o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)

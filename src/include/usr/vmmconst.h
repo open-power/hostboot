@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,17 @@
 
 /** PNOR Resource Provider is at 2GB */
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
+
+/** Temp PNOR Resource Provider space is at 5GB */
+#define VMM_VADDR_SPNOR_TEMP (5 * GIGABYTE)
+
+/** The delta between PNOR RP and temp space and
+ *  the delta between temp space and Secure PNOR RP space is 3GB
+ */
+#define VMM_VADDR_SPNOR_DELTA (VMM_VADDR_SPNOR_TEMP - VMM_VADDR_PNOR_RP)
+
+/** Secure PNOR Resource Provider is at 8GB */
+#define VMM_VADDR_SPNOR_RP (VMM_VADDR_SPNOR_TEMP + VMM_VADDR_SPNOR_DELTA)
 
 /** SBE Update process is at 3GB, uses 256KB */
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)

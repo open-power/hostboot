@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,6 +47,7 @@ namespace PNOR
         MOD_PNORRP_FINDTOC              = 0x0C, /**< PnorRP::findTOC */
         MOD_PNORRP_GETSIDEINFO          = 0x0D, /**< PnorRP::getSideInfo */
         MOD_PNORRP_SETSIDEINFO          = 0x0E, /**< PnorRP::setSideInfo */
+
 
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
@@ -96,6 +97,13 @@ namespace PNOR
 
         // pnor_common.C
         MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
+
+        // spnorrp.C
+        MOD_SPNORRP_DIDSTARTUPFAIL      = 0xD1, /**< didSecureStartupFail(rc) */
+        MOD_SPNORRP_ALLOCATE_BLOCK      = 0xD2, /**< SPnorRP::initDaemon */
+        MOD_SPNORRP_WAITFORMESSAGE      = 0xD3, /**< SPnorRP::waitForMessage */
+        MOD_SPNORRP_VERIFYSECTIONS      = 0xD4, /**< SPnorRP::verifySections */
+        MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
     };
 
     enum PNORReasonCode
@@ -153,6 +161,7 @@ namespace PNOR
         RC_INVALID_WORKING_TOC       = PNOR_COMP_ID | 0x28,
         RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
+        RC_GETSECTIONINFO_FAILED     = PNOR_COMP_ID | 0x2B,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

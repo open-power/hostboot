@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -27,6 +27,7 @@ ROOTPATH = ../../..
 MODULE = pnor
 
 OBJS += pnorrp.o
+OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += pnordd.o
 OBJS += pnor_common.o
 OBJS += pnorvalid.o
