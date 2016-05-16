@@ -52,7 +52,7 @@ OBJS += call_host_mpipl_service.o
 
 
 include ${ROOTPATH}/procedure.rules.mk
-# include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
+include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk

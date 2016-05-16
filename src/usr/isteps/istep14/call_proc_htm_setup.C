@@ -39,7 +39,7 @@
 #include    <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
-// #include    <p9_htm_setup.H>
+#include    <p9_htm_setup.H>
 
 //Namespaces
 using namespace ERRORLOG;
@@ -63,9 +63,9 @@ void* call_proc_htm_setup (void *io_pArgs)
             const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapi_cpu_target(l_procChip);
             // call p9_htm_setup.C HWP
-//             FAPI_INVOKE_HWP( l_errl,
-//                              p9_htm_setup,
-//                              l_fapi_cpu_target);
+             FAPI_INVOKE_HWP( l_errl,
+                              p9_htm_setup,
+                              l_fapi_cpu_target);
 
             if(l_errl)
             {
