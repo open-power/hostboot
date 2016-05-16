@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,11 @@ class STLSharedPtrTest : public CxxTest::TestSuite
             if (!p3.unique())
             {
                 TS_FAIL("p3 is not unique.");
+            }
+
+            if (!(p1 == p2))
+            {
+                TS_FAIL("p1 and p2 should be equal");
             }
 
             shared_ptr<T1> p4 = static_pointer_cast<T1>(p3);
