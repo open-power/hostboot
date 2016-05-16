@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,7 @@
 #include <functional>
 #include <new>
 #include <stdint.h>
+#include <utility>
 
 namespace Util
 {
@@ -113,12 +114,41 @@ namespace Util
             {
             }
 
+
+            /** Variadic copy constructor from a Node.
+             *
+             *  Initializes the node-links and copies the data storage area
+             *  from the copied nodes.
+             *
+             */
+            template <typename... Args> explicit Node(Args&&... args)
+            {
+               parent = child[LEFT] = child[RIGHT] = NULL;
+               new (&data) T(std::forward<Args>(args)...);
+            }
+
+            /** Copy constructor from a Node.
+             *
+             *  Initializes the node-links and copies the data storage area
+             *  from the copied node.
+             *
+             *  non-const form - needed for variadic arguments form above
+             */
+            explicit Node(Node<T>&r)
+            {
+                // Don't want to copy the links out of the other node because
+                // they're from a different tree.
+                parent = child[LEFT] = child[RIGHT] = NULL;
+
+                new (&data) T(r.data);
+            };
+
             /** Copy constructor from a Node.
              *
              *  Initializes the node-links and copies the data storage area
              *  from the copied node.
              */
-            explicit Node(const Node<T>& r)
+            explicit Node(const Node<T>&r)
             {
                 // Don't want to copy the links out of the other node because
                 // they're from a different tree.
@@ -138,6 +168,8 @@ namespace Util
 
                 new (&data) T(v);
             };
+
+
 
             /** Access the data storage area as a T&. */
             T& data_T()

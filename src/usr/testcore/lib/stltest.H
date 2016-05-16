@@ -482,5 +482,80 @@ class STLTest : public CxxTest::TestSuite
             std::list< std::list<int> > l = { {},{1},{1,2,3} };
         }
 
+        void testEmplace()
+        {
+            std::map<int, char> m;
+
+            // uses pair's move constructor
+            m.emplace(std::make_pair(1, 'c'));
+            if (m.size() != 1)
+            {
+                TS_FAIL("testEmplace(): Expected map size 1, found size %d", m.size());
+            }
+
+            // add another pair
+            m.emplace(std::make_pair(2, 'a'));
+            if (m.size() != 2)
+            {
+                TS_FAIL("testEmplace(): Expected map size 2, found size %d", m.size());
+            }
+
+            // 3.1 -> 3
+            // 65 = ascii 'A'
+            m.emplace(std::make_pair(3.1, 65));
+            if (m.size() != 3)
+            {
+                TS_FAIL("testEmplace(): Expected map size 3, found size %d", m.size());
+            }
+
+            m.emplace(4, 'W');
+            if (m.size() != 4)
+            {
+                TS_FAIL("testEmplace(): Expected map size 4, found size %d", m.size());
+            }
+
+            for (const auto &p : m) {
+                if (p.first == 1)
+                {
+                    if (p.second != 'c')
+                    {
+                        TS_FAIL("Expected {1 => c} pair");
+                    }
+                }
+                else if (p.first == 2)
+                {
+                    if (p.second != 'a')
+                    {
+                        TS_FAIL("Expected {2 => a} pair");
+                    }
+                }
+                else if (p.first == 3)
+                {
+                    if (p.second != 'A')
+                    {
+                        TS_FAIL("Unexpected pair {%d => %c}", p.first, p.second);
+                    }
+                }
+                else if (p.first == 4)
+                {
+                    if (p.second != 'W')
+                    {
+                        TS_FAIL("Unexpected pair {%d => %c}", p.first, p.second);
+                    }
+                }
+            }
+
+            std::map<int, int> mi;
+            for (size_t i = 0; i < 10; ++i)
+            if (!mi.emplace(i,i).second)
+            {
+                TS_FAIL("Emplace did not insert %d", i);
+            }
+            if (mi.emplace(5,100).second)
+            {
+                TS_FAIL("Emplace did an insert of an already existing key");
+            }
+        }
+
 };
 #endif

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +39,7 @@
 #include <utility>
 #include <util/traits/remove_const.H>
 #include <algorithm>
+
 
 #ifndef __UTIL_SPLAYTREE_NS
 #define __UTIL_SPLAYTREE_NS ::Util::__Util_SplayTree_Impl
@@ -327,6 +330,28 @@ namespace Util
                 {
                     std::pair<iterator,bool> result = insert(value_type(k,T()));
                     return (result.first)->second;
+                }
+
+                template <class... Args>
+                std::pair <iterator,bool> emplace ( Args&&... args )
+                {
+                    _Node *p = new _Node(std::forward<Args>(args)...);
+
+                    _Tree::node * hint_node = nullptr;
+
+                    bool rc = iv_tree.find_hint((_Tree::node*)p, hint_node);
+                    if (!rc)
+                    {
+                        // node not found, so insert new one
+                        iv_tree.insert((_Tree::node*)p);
+                        return make_pair(iterator(_TreeItr(&iv_tree, (_Tree::node*)p)), true);
+                    }
+                    else
+                    {
+                        // node already exists, delete new one
+                        delete p;
+                        return make_pair(iterator(_TreeItr(&iv_tree, (_Tree::node*)hint_node)), false);
+                    }
                 }
 
                 std::pair<iterator,bool> insert(const value_type& x)
