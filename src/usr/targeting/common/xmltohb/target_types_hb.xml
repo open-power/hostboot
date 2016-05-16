@@ -213,9 +213,6 @@
 
 <targetTypeExtension>
     <id>unit-ex-power9</id>
-    <attribute>
-        <id>HB_PM_SPWUP_OHA_FLAG</id>
-    </attribute>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
 

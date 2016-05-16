@@ -399,22 +399,6 @@
 </attribute>
 
 <attribute>
-    <id>HB_PM_SPWUP_OHA_FLAG</id>
-    <description>Flag storage to break the recursive calling loop for when accessing the OHA address space from the Special Wakeup procedure.</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_SPWUP_OHA_FLAG</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
     <id>GPIO_INFO</id>
     <description>Information needed to address GPIO device</description>
     <complexType>
@@ -1482,23 +1466,6 @@ ID for the sensor number returned with the elog. -->
         <uint32_t>
             <default>0</default>
         </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>SBE_MASTER_INTR_SERVICE_ENABLED</id>
-    <description>
-       Indicator whether the SBE interupt service is anabled.
-       0=Not Enabled
-       1=Enabled
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
