@@ -29,6 +29,7 @@ PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
