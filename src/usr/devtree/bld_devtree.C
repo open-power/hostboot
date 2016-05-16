@@ -587,7 +587,6 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     const char* xscomNodeName = "xscom";
     const char* todNodeName = "chiptod";
     const char* pciNodeName = "pbcq";
-    const char* sbeTmrNodeName = "sbe-timer";
 
     // Grab a system object to work with
     TARGETING::Target* sys = NULL;
@@ -617,25 +616,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     uint64_t xscom_prop[2] = { l_xscomAddr,  THIRTYTWO_GB};
     i_dt->addPropertyCells64(xscomNode, "reg", xscom_prop, 2);
 
-    // Add SBE interrupt timer (if enabled) for the master processor
-    TARGETING::Target* l_pMasterProc = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProc);
-    if ( (sys->getAttr<TARGETING::ATTR_SBE_MASTER_INTR_SERVICE_ENABLED>()) &&
-         (i_pProc == l_pMasterProc)    )
-    {
-        dtOffset_t sbeTmrNode = i_dt->addNode(xscomNode, sbeTmrNodeName,
-                                         0xE000A);
-        uint32_t sbeTmr_prop[6] = {0xE000A, 1,
-                                   0xE0006, 1,
-                                   0x5003A, 1};
-        i_dt->addPropertyCells32(sbeTmrNode, "reg", sbeTmr_prop, 6);
-        const char* sbeTmr_compatStrs[] = {"ibm,power8-sbe-timer",NULL};
-        i_dt->addPropertyStrings(sbeTmrNode, "compatible", sbeTmr_compatStrs);
-        ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US_type l_us =
-               sys->getAttr<TARGETING::ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US>();
-        i_dt->addPropertyCell32(sbeTmrNode, "tick-time-us", l_us);
-    }
-    // Only add SBE interrupt timer for small tree
+    // Do not need anything else for small tree
     if (i_smallTree)
     {
         return;
