@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/exttools/attroverride/attrTextToBinaryBlob.C $            */
+/* $Source: src/usr/targeting/attroverride/attrTextToBinaryBlob.C $       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,7 @@ const size_t ATTRIBUTE_HEADER_SIZE = 16;
 //******************************************************************************
 const char * const ATTR_FILE_ATTR_START_STR = "ATTR_";
 const char * const ATTR_FILE_TARGET_HEADER_STR = "target";
-const char * const ATTR_FILE_TARGET_EXT_HEADER_STR = "target = k0";
+const char * const ATTR_CAGE_NUMBER = "k0";
 const char * const ATTR_FILE_TARGET_EXT_FOOTER_STR = ":s0:";
 const char * const ATTR_CONST = "CONST";
 const char * const TARGET_NODE_HEADER_STR = ":n";
@@ -493,11 +493,12 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
     o_targetUnitPos = AttributeTank::ATTR_UNIT_POS_NA;
 
     // Find the node, target type, pos and unit-pos
-    if (0 == i_line.find(ATTR_FILE_TARGET_EXT_HEADER_STR))
+    int l_cageIndex = i_line.find(ATTR_CAGE_NUMBER);
+    if(l_cageIndex != std::string::npos )
     {
         // Create a local string and remove the target header
         std::string l_line =
-            i_line.substr(strlen(ATTR_FILE_TARGET_EXT_HEADER_STR));
+            i_line.substr(l_cageIndex + strlen(ATTR_CAGE_NUMBER));
 
         // Figure out the node number
         if (0 == l_line.find(TARGET_NODE_HEADER_STR))
@@ -597,7 +598,7 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
                 }
             }
         }
-    }
+    } // else, the "k0" string was not found. Process as system target
 
     // System targets must have an NA node
     if (l_sysTarget)
