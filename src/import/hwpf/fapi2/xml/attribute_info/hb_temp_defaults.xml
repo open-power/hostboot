@@ -214,6 +214,21 @@
     <attribute>
         <id>ATTR_ECID</id>
     </attribute>
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

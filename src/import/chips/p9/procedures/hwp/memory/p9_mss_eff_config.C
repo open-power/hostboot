@@ -157,8 +157,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
         {
-            uint16_t l_vpd_mt_windage_rd_ctr[mss::PORTS_PER_MCS] = {0xDEAD, 0xBEEF};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_VPD_MT_WINDAGE_RD_CTR, i_target, l_vpd_mt_windage_rd_ctr) );
+            uint16_t l_mss_vpd_mt_windage_rd_ctr[mss::PORTS_PER_MCS] = {0xDEAD, 0xBEEF};
+            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_VPD_MT_WINDAGE_RD_CTR, i_target, l_mss_vpd_mt_windage_rd_ctr) );
         }
 
         {
