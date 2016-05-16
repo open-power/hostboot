@@ -66,6 +66,7 @@ enum MvpdRecord
     MVPD_RECORD_VWML = 0x21,
     MVPD_RECORD_MER0 = 0x22,
     MVPD_RECORD_LAST, //useful for testcases
+    MVPD_RECORD_FIRST = MVPD_RECORD_CRP0, //useful for testcases
 };
 
 enum MvpdKeyword
@@ -107,6 +108,7 @@ enum MvpdKeyword
     MVPD_KEYWORD_CH  = 0x22,
     MVPD_KEYWORD_IQ  = 0x23,
     MVPD_KEYWORD_LAST, //useful for testcases
+    MVPD_KEYWORD_FIRST = MVPD_KEYWORD_VD, //useful for testcases
 };
 }
 
