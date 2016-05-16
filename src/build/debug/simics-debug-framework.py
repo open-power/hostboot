@@ -485,9 +485,6 @@ except:
 # See src/include/arch/ppc.H for the definitions of the magic args.
 # Hostboot magic args should range 7000..7999.
 def magic_instruction_callback(user_arg, cpu, arg):
-    if arg == 7008:
-        cpu.r3 = random.randint(1, 0xffffffffffffffffL)
-
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print "KernelMisc::shutdown() called."
@@ -498,6 +495,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7007:   # MAGIC_BREAK
         # Stop the simulation, much like a hard-coded breakpoint
         SIM_break_simulation( "Simulation stopped. (hap 7007)"  )
+
+    if arg == 7008:
+        cpu.r3 = random.randint(1, 0xffffffffffffffffL)
 
     if arg == 7009:   # MAGIC_MEMORYLEAK_FUNCTION
         magic_memoryleak_function(cpu)
@@ -551,6 +551,11 @@ def magic_instruction_callback(user_arg, cpu, arg):
         enable7 =  "system_cmp0.cpu0_0_01_3.enable"
         enableCore1 = "%s; %s; %s; %s"%(enable4,enable5,enable6,enable7)
         SIM_run_alone(run_command, enableCore1 )
+
+    if arg == 7018:   # MAGIC_BREAK_ON_ERROR
+        # Stop the simulation if an env var is set
+        if( os.environ.has_key('HB_BREAK_ON_ERROR') ):
+            SIM_break_simulation( "Stopping sim on HB error. (hap 7018)"  )
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
