@@ -2099,6 +2099,8 @@
     <attribute><id>RISK_LEVEL</id></attribute>
     <attribute><id>SYS_FORCE_ALL_CORES</id></attribute>
     <attribute><id>DISABLE_HBBL_VECTORS</id></attribute>
+    <attribute><id>SECURITY_ENABLE</id></attribute>
+    <attribute><id>SECURITY_MODE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2220,6 +2222,7 @@
     <attribute><id>CLOCK_PLL_MUX</id></attribute>
     <attribute><id>CLOCK_PLL_MUX0</id></attribute>
     <attribute><id>BOOT_FREQ_MULT</id></attribute>
+    <attribute><id>PFET_OFF_CONTROLS</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->

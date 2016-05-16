@@ -20189,8 +20189,8 @@ DEPRECATED!!!!
       Ref clock I2C bus divider consumed by code running out of OTPROM
   </description>
   <simpleType>
-      <uint32_t>
-      </uint32_t>
+      <uint16_t>
+      </uint16_t>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -26936,6 +26936,21 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
+    <id>SECURITY_ENABLE</id>
+    <description>Holds the state of Security Access Bit (SAB)</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SECURITY_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MRW_PREFETCH_ENABLE</id>
     <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
     <simpleType>
@@ -26948,7 +26963,6 @@ DEPRECATED!!!!
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
-
 
 <attribute>
     <id>MRW_CLEANER_ENABLE</id>
@@ -26968,5 +26982,38 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>SECURITY_MODE</id>
+    <description>
+        If SBE image has ATTR_SECURITY_MODE == 0b1, then leave SAB bit as is,
+        else ATTR_SECURITY_MODE == 0b0, then clear SAB bit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SECURITY_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PFET_OFF_CONTROLS</id>
+    <description>
+        To disable force pfet off control from fuse status
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_OFF_CONTROLS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
