@@ -32,14 +32,17 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
 
 OBJS += call_host_disable_memvolt.o
@@ -54,6 +57,19 @@ OBJS += call_mss_draminit.o
 OBJS += call_mss_draminit_training.o
 OBJS += call_mss_draminit_trainadv.o
 OBJS += call_mss_draminit_mc.o
+
+OBJS += rank.o
+OBJS += c_str.o
+OBJS += ccs.o
+OBJS += rcd_load.o
+OBJS += mrs_load.o
+OBJS += mrs_load_ddr4.o
+OBJS += rcd_load_ddr4.o
+OBJS += ddr_phy.o
+OBJS += dp16.o
+OBJS += xlate.o
+OBJS += port.o
+
 
 
 
@@ -74,12 +90,15 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcbist_scom.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
 
-#TODO RTC:152209 Implement std::enable_if in HB
-# include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
-# include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
-# include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
-# include ${PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
+
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
 
 include ${ROOTPATH}/config.mk
 
 VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDURES_PATH}/hwp/perv ${PROCEDURES_PATH}/hwp/initfiles/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/ ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ ${PROCEDURES_PATH}/hwp/memory/lib/utils/ ${PROCEDURES_PATH}/hwp/memory/lib/phy/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
+

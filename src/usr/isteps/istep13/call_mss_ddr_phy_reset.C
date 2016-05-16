@@ -37,8 +37,7 @@
 #include "istep13consts.H"
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
-//TODO RTC:152209 Implement std::enable_if in HB
-// #include <p9_mss_ddr_phy_reset.H>
+#include <p9_mss_ddr_phy_reset.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -75,8 +74,8 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
 
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
-//TODO RTC:152209 Implement std::enable_if in HB
-//         FAPI_INVOKE_HWP(l_err, p9_mss_ddr_phy_reset, l_fapi_mcbist_target);
+
+         FAPI_INVOKE_HWP(l_err, p9_mss_ddr_phy_reset, l_fapi_mcbist_target);
 
         if (l_err)
         {
