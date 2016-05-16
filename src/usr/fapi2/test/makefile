@@ -51,7 +51,7 @@ TESTS += fapi2GetChildrenTest.H
 TESTS += fapi2BasicTryTest.H
 TESTS += fapi2GetOtherEndTest.H
 TESTS += fapi2SpdTestCxx.H
-# TESTS += fapi2MvpdTestCxx.H
+TESTS += fapi2MvpdTestCxx.H
 
 include ${ROOTPATH}/config.mk
 

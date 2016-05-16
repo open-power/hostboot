@@ -52,7 +52,7 @@
 #include <devicefw/driverif.H>
 #include <plat_attr_override_sync.H>
 #include <vpd/spdenums.H>
-#include <p9_pm_get_poundv_bucket.H>
+#include <p9_pm_get_poundv_bucket_attr.H>
 #include <errl/errlmanager.H>
 
 #include <targeting/common/targetservice.H>
@@ -391,38 +391,38 @@ ReturnCode platGetFusedCoreMode(uint8_t & o_isFused)
     return fapi2::ReturnCode();
 }
 
-//******************************************************************************
+// ******************************************************************************
 // fapi2::platAttrSvc::platGetPoundVBucketData function
-//******************************************************************************
-// ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_EQ>& i_fapiTarget,
-//                              uint8_t * o_poundVData)
-// {
-//     fapi2::ReturnCode rc;
-//     if(i_fapiTarget.getType() != TARGET_TYPE_EQ)
-//     {
-//         /*@
-//         * @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-//         * @moduleid          fapi2::MOD_FAPI2_MVPD_ACCESS
-//         * @reasoncode        RC_INCORRECT_TARGET
-//         * @userdata1         Actual Target Type
-//         * @userdata2         Expected Target Type
-//         * @devdesc           Attempted to read attribute from wrong target type
-//         * @custdesc          Firmware Error
-//         */
-//         errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-//                                               MOD_FAPI2_MVPD_ACCESS,
-//                                               RC_INCORRECT_TARGET,
-//                                               i_fapiTarget.getType(),
-//                                               TARGET_TYPE_EQ,
-//                                               true);
-//         rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-//     }
-//     else
-//     {
-//         rc = p9_pm_get_poundv_bucket_attr(i_fapiTarget,o_poundVData);
-//     }
-//     return rc;
-// }
+// ******************************************************************************
+ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_EQ>& i_fapiTarget,
+                             uint8_t * o_poundVData)
+{
+    fapi2::ReturnCode rc;
+    if(i_fapiTarget.getType() != TARGET_TYPE_EQ)
+    {
+        /*@
+        * @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid          fapi2::MOD_FAPI2_MVPD_ACCESS
+        * @reasoncode        RC_INCORRECT_TARGET
+        * @userdata1         Actual Target Type
+        * @userdata2         Expected Target Type
+        * @devdesc           Attempted to read attribute from wrong target type
+        * @custdesc          Firmware Error
+        */
+        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              MOD_FAPI2_MVPD_ACCESS,
+                                              RC_INCORRECT_TARGET,
+                                              i_fapiTarget.getType(),
+                                              TARGET_TYPE_EQ,
+                                              true);
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        rc = p9_pm_get_poundv_bucket_attr(i_fapiTarget,o_poundVData);
+    }
+    return rc;
+}
 
 
 
