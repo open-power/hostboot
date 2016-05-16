@@ -80,7 +80,24 @@
     </deconfigure>
   </hwpError>
 
-  <!-- Original Source for RC_MSS_UNSUPPORTED_FREQ_CALCULATED memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_FREQ_NOT_EQUAL_NEST_FREQ</rc>
+    <description>
+      Case when mss_freq speeds are different and sync mode is required,
+      and mss_freq is not equal to nest freq.
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>NEST_FREQ</ffdc>
+    <callout>
+      <target>MCS_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <!-- TK - Should this be FFDC or just return FAPI2_RC_FALSE? - AAM -->
   <hwpError>
     <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
     <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
