@@ -2096,6 +2096,12 @@
     <attribute><id>VPD_MT_0_VERSION_LAYOUT</id></attribute>
     <attribute><id>VPD_MT_1_VERSION_DATA</id></attribute>
     <attribute><id>VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id></attribute>
+    <!-- attributes for sbe_start -->
+    <attribute><id>BOOT_FLAGS</id></attribute>
+    <attribute><id>NEST_PLL_BUCKET</id></attribute>
+    <attribute><id>RISK_LEVEL</id></attribute>
+    <attribute><id>SYS_FORCE_ALL_CORES</id></attribute>
+    <attribute><id>DISABLE_HBBL_VECTORS</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2209,15 +2215,14 @@
     <attribute><id>EQ_GARD</id></attribute>
     <attribute><id>EC_GARD</id></attribute>
     <attribute><id>I2C_BUS_DIV_REF</id></attribute>
-    <attribute><id>BOOT_FLAGS</id></attribute>
     <attribute><id>NODE_POS</id></attribute>
     <attribute><id>BOOT_FREQ</id></attribute>
-    <attribute><id>NEST_PLL_BUCKET</id></attribute>
     <attribute><id>VCS_BOOT_VOLTAGE</id></attribute>
     <attribute><id>VDD_BOOT_VOLTAGE</id></attribute>
     <attribute><id>CHIP_POS</id></attribute>
     <attribute><id>CLOCK_PLL_MUX</id></attribute>
     <attribute><id>CLOCK_PLL_MUX0</id></attribute>
+    <attribute><id>BOOT_FREQ_MULT</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
