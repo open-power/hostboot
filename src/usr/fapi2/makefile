@@ -48,7 +48,8 @@ include ${ROOTPATH}/src/import/tools/build/common.dir/script.rules.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseErrorInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseAttributeInfo.mk
 include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
-# include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
+include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
+include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
 
 include ${ROOTPATH}/config.mk
 
