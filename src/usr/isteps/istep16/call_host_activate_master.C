@@ -75,17 +75,17 @@ void* call_host_activate_master (void *io_pArgs)
         const TARGETING::Target*  l_masterCore  = getMasterCore( );
         assert( l_masterCore != NULL );
 
-        TARGETING::Target* l_core_target = const_cast<TARGETING::Target *>
+        TARGETING::Target* l_proc_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
         // Cast OUR type of target to a FAPI2 type of target.
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
-                                const_cast<TARGETING::Target*> (l_core_target));
+                                const_cast<TARGETING::Target*> (l_masterCore));
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: About to start deadman loop... "
                    "Target HUID %.8X",
-                    TARGETING::get_huid(l_fapi2_coreTarget));
+                    TARGETING::get_huid(l_proc_target));
 
          //In the future possibly move default "waitTime" value to SBEIO code
          uint64_t waitTime = 10000;
@@ -98,7 +98,7 @@ void* call_host_activate_master (void *io_pArgs)
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
             break;
         }
@@ -148,7 +148,7 @@ void* call_host_activate_master (void *io_pArgs)
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
 
             break;
         }
@@ -176,7 +176,7 @@ void* call_host_activate_master (void *io_pArgs)
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
 
             break;
         }
@@ -237,7 +237,7 @@ void* call_host_activate_master (void *io_pArgs)
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Call proc_stop_deadman_timer. Target %.8X",
-                    TARGETING::get_huid(l_core_target) );
+                    TARGETING::get_huid(l_proc_target) );
 
         l_errl = SBEIO::stopDeadmanLoop();
 
@@ -249,7 +249,7 @@ void* call_host_activate_master (void *io_pArgs)
                        l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
             break;
         }
@@ -278,7 +278,7 @@ void* call_host_activate_master (void *io_pArgs)
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
 
             break;
         }
