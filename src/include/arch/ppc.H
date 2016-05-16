@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -466,6 +466,8 @@ enum
     MAGIC_WAKE_MASTER_THREAD  =  7015, // Wake master thread
     MAGIC_WAKE_OTHER_THREADS  =  7016, // Wake other threads on initial CORE
     MAGIC_WAKE_FUSED_THREADS  =  7017, // Wake up fused core threads
+    MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
+                                       //  env var HB_BREAK_ON_ERROR
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };

@@ -63,6 +63,7 @@ void kernel_execute_prog_ex()
     if (!handled)
     {
         printk("Program exception, killing task %d\n", t->tid);
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
@@ -102,6 +103,7 @@ void kernel_execute_data_storage()
     {
         printk("Data Storage exception on %d: %lx, %lx @ %p\n",
                t->tid, getDAR(), getDSISR(), t->context.nip);
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
@@ -112,6 +114,7 @@ void kernel_execute_data_segment()
     task_t* t = TaskManager::getCurrentTask();
     printk("Data Segment exception on %d: %lx @ %p\n",
            t->tid, getDAR(), t->context.nip);
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
@@ -135,6 +138,7 @@ void kernel_execute_inst_storage()
     {
         printk("Inst Storage exception on %d: %lx, %lx\n",
                t->tid, getSRR0(), getSRR1());
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
@@ -144,6 +148,7 @@ void kernel_execute_inst_segment()
 {
     task_t* t = TaskManager::getCurrentTask();
     printk("Inst Segment exception on %d: %p\n", t->tid, t->context.nip);
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
@@ -152,6 +157,7 @@ void kernel_execute_alignment()
 {
     task_t* t = TaskManager::getCurrentTask();
     printk("Alignment exception, killing task %d\n", t->tid);
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
@@ -161,6 +167,7 @@ void kernel_execute_hype_emu_assist()
     task_t* t = TaskManager::getCurrentTask();
     printk("HypeEmu: Illegal instruction in task %d\n"
            "\tHSSR0 = %lx, HEIR = %lx\n", t->tid, getHSRR0(), getHEIR());
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
     TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
 }
 
@@ -311,6 +318,7 @@ void kernel_execute_machine_check()
                "\tDSISR = %lx, DAR = %lx\n",
                t->tid, getPIR(),
                getSRR0(), getSRR1(), getDSISR(), getDAR());
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         kassert(false);
     }
 
@@ -366,6 +374,7 @@ void kernel_execute_machine_check()
                 "\tDSISR = %lx, DAR = %lx\n",
                 t->tid, getPIR(),
                 getSRR0(), getSRR1(), getDSISR(), getDAR());
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
@@ -388,6 +397,7 @@ void kernel_execute_unhandled_exception()
 
     printk("Unhandled exception %lx by task %d @ %p\n",
            exception, t->tid, t->context.nip);
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
 
     termWriteSRC(TI_UNHANDLED_EX, RC_UNHANDLED_EX, exception);
     terminateExecuteTI();
