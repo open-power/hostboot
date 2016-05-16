@@ -37,8 +37,7 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-//TODO RTC:152209 Implement std::enable_if in HB
-// #include    <p9_mss_draminit_training.H>
+#include    <p9_mss_draminit_training.H>
 
 
 using   namespace   ERRORLOG;
@@ -70,8 +69,7 @@ void* call_mss_draminit_training (void *io_pArgs)
 
         fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
-//TODO RTC:152209 Implement std::enable_if in HB
-//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training, l_fapi_mcbist_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training, l_fapi_mcbist_target);
 
         if (l_err)
         {

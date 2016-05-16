@@ -37,8 +37,7 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-//TODO RTC:152209 Implement std::enable_if in HB
-// #include    <p9_mss_draminit_mc.H>
+#include    <p9_mss_draminit_mc.H>
 
 
 using   namespace   ERRORLOG;
@@ -53,6 +52,12 @@ void* call_mss_draminit_mc (void *io_pArgs)
     errlHndl_t l_err = NULL;
 
     IStepError l_stepError;
+
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+
+//  TODO: RTC 155373 Need to remove hack that is setting IS_SIMULATION to 1 for this substep
+    sys->setAttr<TARGETING::ATTR_IS_SIMULATION>(1);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"call_mss_draminit_mc entry" );
 
@@ -69,8 +74,7 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
-//TODO RTC:152209 Implement std::enable_if in HB
-//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_mc, l_fapi_mcbist_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_draminit_mc, l_fapi_mcbist_target);
 
         if (l_err)
         {
@@ -94,6 +98,9 @@ void* call_mss_draminit_mc (void *io_pArgs)
         }
 
     } // End; memBuf loop
+
+    //  TODO: RTC 155373 Need to remove hack that is setting IS_SIMULATION to 1 for this substep
+    sys->setAttr<TARGETING::ATTR_IS_SIMULATION>(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit_mc exit" );
 

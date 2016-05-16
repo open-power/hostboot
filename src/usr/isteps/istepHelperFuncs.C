@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "set_eff_config_attrs_helper: setting _EFF_CONFIG attributes "
                "enter: i_base=%d", i_base);
-/* @TODO: RTC:133830 Uncomment this once the attribute support is in place
+
     o_post_dram_inits_found = false;
 
     // Local Variables ('pdi_' means 'post dram init')
@@ -262,6 +262,6 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "set_eff_config_attrs_helper: setting _EFF_CONFIG "
                "attributes exit");
-*/
+
 }
 

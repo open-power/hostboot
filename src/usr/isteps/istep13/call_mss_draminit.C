@@ -26,6 +26,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <isteps/hwpisteperror.H>
+#include <istepHelperFuncs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <plat_trace.H>
@@ -39,8 +40,7 @@
 
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-//TODO RTC:152209 Implement std::enable_if in HB
-// #include    <p9_mss_draminit.H>
+#include    <p9_mss_draminit.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -62,7 +62,7 @@ void   mss_post_draminit( IStepError & l_stepError )
     //@TODO RTC: 134081. The helper function is currently commented out because
     //some of the attributes don't exist. uncomment it once attribute support is
     //in place
-//    set_eff_config_attrs_helper(ISTEP_07::POST_DRAM_INIT, rerun_vddr);
+    set_eff_config_attrs_helper(DEFAULT, rerun_vddr);
 
     if ( rerun_vddr == false )
     {
@@ -73,12 +73,12 @@ void   mss_post_draminit( IStepError & l_stepError )
 
     // Call mss_volt_vddr_offset to recalculate VDDR voltage
     // @TODO RTC: 152294 Uncomment once attribute support is in place
-    /*
-    l_err = ISTEP_07::setMemoryVoltageDomainOffsetVoltage<
-        TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
-        TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
-        TARGETING::ATTR_VMEM_ID>();
-        */
+
+//     l_err = ISTEP_07::setMemoryVoltageDomainOffsetVoltage<
+//         TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
+//         TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
+//         TARGETING::ATTR_VMEM_ID>();
+
     if(l_err)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
@@ -141,8 +141,7 @@ void* call_mss_draminit (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
 
-//TODO RTC:152209 Implement std::enable_if in HB
-//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
+         FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
 
         if (l_err)
         {
