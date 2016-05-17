@@ -78,7 +78,6 @@ extern "C"
     const uint32_t ALTD_CMD_TSIZE_START_BIT = 32;
     const uint32_t ALTD_CMD_TSIZE_END_BIT = 39;
 
-
     const uint32_t ALTD_CMD_SCOPE_NUM_BITS = (ALTD_CMD_SCOPE_END_BIT -
             ALTD_CMD_SCOPE_START_BIT) + 1;
     const uint32_t ALTD_CMD_TTYPE_NUM_BITS = (ALTD_CMD_TTYPE_END_BIT -
@@ -108,10 +107,13 @@ extern "C"
     //I think that the secondary encoding should always be 0 for cl_dma_rd
     const uint32_t ALTD_CMD_DMAR_TSIZE = 0;
 
-    // Values for PB/SWITCH operations
+    // Values for PB operations
     const uint32_t ALTD_CMD_PB_OPERATION_TSIZE  = 0b00001000;
-    const uint32_t ALTD_CMD_SWITCH_ACTION_TSIZE = 0b00000010;
     const uint32_t ALTD_CMD_SCOPE_SYSTEM        = 0b00000101;
+
+    // Values for PMISC operations
+    const uint32_t ALTD_CMD_PMISC_TSIZE_1  = 0b00000010;    // PMISC SWITCH
+    const uint32_t ALTD_CMD_PMISC_TSIZE_2  = 0b01000000;    // PMISC HTM
 
     // OPTION reg values for SWITCH operation
     const uint32_t QUIESCE_SWITCH_WAIT_COUNT = 128;
@@ -347,17 +349,17 @@ extern "C"
                 }
 
                 // Set TSIZE
-                if ( l_transSize == FLAG_SIZE_TSIZE_1 )
+                if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
                 {
                     altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                       ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_1);
                 }
-                else if ( l_transSize == FLAG_SIZE_TSIZE_2 )
+                else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                 {
                     altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                       ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_2);
                 }
-                else if ( l_transSize == FLAG_SIZE_TSIZE_4 )
+                else if ( l_transSize == p9_ADU_oper_flag::TSIZE_4 )
                 {
                     altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                       ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_4);
@@ -392,17 +394,17 @@ extern "C"
                                                       ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_DMA_PR_WR);
 
                     // Set TSIZE
-                    if ( l_transSize == FLAG_SIZE_TSIZE_1 )
+                    if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
                     {
                         altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                           ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_1);
                     }
-                    else if ( l_transSize == FLAG_SIZE_TSIZE_2 )
+                    else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                     {
                         altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                           ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_2);
                     }
-                    else if ( l_transSize == FLAG_SIZE_TSIZE_4 )
+                    else if ( l_transSize == p9_ADU_oper_flag::TSIZE_4 )
                     {
                         altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
                                                           ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_4);
@@ -474,9 +476,17 @@ extern "C"
                 altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT,
                                                   ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_PMISC_OPER);
 
-                // TSIZE for PMISC operation is fixed value: 0b00000010
-                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_SWITCH_ACTION_TSIZE);
+                // Set TSIZE
+                if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
+                {
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                      ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PMISC_TSIZE_1);
+                }
+                else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
+                {
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                      ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_PMISC_TSIZE_2);
+                }
 
                 // Set quiesce and init around a switch operation in option reg
                 FAPI_TRY(setQuiesceInit(i_target), "setQuiesceInit() returns error");

@@ -508,8 +508,26 @@ extern"C"
         iv_eccItagOverwrite = (i_flag & FLAG_OVERWRITE_ECC);
 
         // Transaction size
-        iv_transSize = static_cast<Transaction_size_t>
-                       ( (i_flag & FLAG_SIZE) >> FLAG_ADU_SIZE_SHIFT );
+        if ( (i_flag & FLAG_SIZE) == FLAG_SIZE_TSIZE_1 )
+        {
+            iv_transSize = TSIZE_1;
+        }
+        else if ( (i_flag & FLAG_SIZE) == FLAG_SIZE_TSIZE_2 )
+        {
+            iv_transSize = TSIZE_2;
+        }
+        else if ( (i_flag & FLAG_SIZE) == FLAG_SIZE_TSIZE_4 )
+        {
+            iv_transSize = TSIZE_4;
+        }
+        else if ( (i_flag & FLAG_SIZE) == FLAG_SIZE_TSIZE_8 )
+        {
+            iv_transSize = TSIZE_8;
+        }
+        else
+        {
+            FAPI_ERR("Invalid transaction size: iv_transSize %d",  iv_transSize);
+        }
 
         // Debug trace
         FAPI_DBG("p9_ADU_oper_flag::getFlag() - Flag value 0x%.8X", i_flag);

@@ -37,7 +37,6 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 
-
 //------------------------------------------------------------------------------
 // Constants
 //------------------------------------------------------------------------------
@@ -48,10 +47,8 @@ const uint32_t P9_BUILD_SMP_MAX_STATUS_POLLS = 100;
 // ADU lock
 const uint32_t P9_BUILD_SMP_PHASE1_ADU_LOCK_ATTEMPTS = 1;
 const bool P9_BUILD_SMP_PHASE1_ADU_PICK_LOCK = false;
-
 const uint32_t P9_BUILD_SMP_PHASE2_ADU_LOCK_ATTEMPTS = 5;
 const bool P9_BUILD_SMP_PHASE2_ADU_PICK_LOCK = true;
-
 
 // FFDC logging on ADU switch fails
 const uint8_t P9_BUILD_SMP_FFDC_NUM_REGS = 15;
@@ -305,6 +302,7 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
         case SWITCH_AB:
         case SWITCH_CD:
             l_adu_oper_flag.setOperationType(p9_ADU_oper_flag::PMISC_OPER);
+            l_adu_oper_flag.setTransactionSize(p9_ADU_oper_flag::TSIZE_1);
             break;
 
         case QUIESCE:
