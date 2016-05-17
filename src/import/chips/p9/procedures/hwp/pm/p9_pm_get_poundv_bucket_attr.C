@@ -43,7 +43,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     uint8_t* l_fullVpdData = NULL;
     uint8_t l_overridePresent = 0;
     uint32_t l_vpdSize = 0;
-    uint32_t l_eqFapiPos = 0;
+    uint8_t l_eqChipUnitPos = 0;
     uint8_t l_bucketId;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
@@ -104,12 +104,12 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         //Need to determine which LRP record to read from depending on which
         //bucket we are getting the power management data from. FapiPos will
         //tell us which LRP record to use.
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                i_target,
-                               l_eqFapiPos));
+                               l_eqChipUnitPos));
         fapi2::MvpdRecord lprRecord;
 
-        switch(l_eqFapiPos)
+        switch(l_eqChipUnitPos)
         {
             case 0:
                 lprRecord = fapi2::MVPD_RECORD_LRP0;
@@ -136,7 +136,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                 break;
 
             default:
-                FAPI_ERR("No LRP record found for EQ with fapi pos = %d", l_eqFapiPos);
+                FAPI_ERR("No LRP record found for EQ with fapi pos = %d", l_eqChipUnitPos);
                 assert(0);
                 break;
         }
@@ -153,7 +153,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
 
         if(l_rc)
         {
-            FAPI_ERR("p9_pm_get_poundv_bucket_attr:: Error reading PDV keyword size from LRP%d record", l_eqFapiPos);
+            FAPI_ERR("p9_pm_get_poundv_bucket_attr:: Error reading PDV keyword size from LRP%d record", l_eqChipUnitPos);
             break;
         }
 
@@ -175,7 +175,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
 
         if(l_rc)
         {
-            FAPI_ERR("p9_pm_get_poundv_bucket_attr:: Error reading PDV keyword from LRP%d record", l_eqFapiPos);
+            FAPI_ERR("p9_pm_get_poundv_bucket_attr:: Error reading PDV keyword from LRP%d record", l_eqChipUnitPos);
             break;
         }
 
