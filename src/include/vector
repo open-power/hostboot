@@ -424,6 +424,15 @@ namespace std
                     return *(iv_finish-1);
                 }
 
+                /*
+                 * direct access to the underlying array
+                 * (C++11)
+                 */
+                T * data()
+                {
+                    return iv_start;
+                }
+
                 // -- Modifiers -----------------------------
 
                 /*
