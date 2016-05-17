@@ -113,7 +113,6 @@ struct PIR_t
     };
 
     // Some handy functions
-    // TODO RTC 154162 Add testcases for the below functions
     inline static uint32_t groupFromPir( uint32_t i_pir ) {
         return (static_cast<PIR_t>(i_pir)).groupId;
     }
@@ -127,6 +126,26 @@ struct PIR_t
         return (static_cast<PIR_t>(i_pir)).threadId;
     }
 
+    // Below is the right-justified portion of the PIR laid out in bits
+    //     (normal core mode) along with chipId/coreId pictures
+    //
+    //   - - - -   - - - -   - - - -   - - - -
+    //    |    ^    |  ^   | ^|     ^     | ^
+    //         |       |     |      |       |
+    //      group    chip    |    core     thread
+    //                  reserved    |
+    //    |                |        }
+    //    |                |        |
+    //    |     chipId     |        }
+    //    __________________        |
+    //    |                         |
+    //    |         coreId          |
+    //    |_________________________|
+    //
+    // A chipId contains just the group + chip bits. It is right justified.
+    //
+    // A coreId contains the group, chip, reserved, and core bits.
+    //   It is also right justified.
     inline static uint32_t groupFromChipId( uint32_t i_chipId ) {
         return (i_chipId >> BITS_IN_CHIP);
     }
@@ -135,14 +154,15 @@ struct PIR_t
                             (BITS_AFTER_CHIP)));
     }
 
-    inline static uint32_t groupFromCoreId( uint32_t i_chipId ) {
-        return (i_chipId >> (BITS_AFTER_GROUP));
+    inline static uint32_t groupFromCoreId( uint32_t i_coreId ) {
+        return (i_coreId >> (BITS_IN_CHIP + BITS_IN_RESERVED1 + BITS_IN_CORE));
     }
-    inline static uint32_t chipFromCoreId( uint32_t i_chipId ) {
-        return (i_chipId >> BITS_AFTER_CHIP);
+    inline static uint32_t chipFromCoreId( uint32_t i_coreId ) {
+        return ((i_coreId & (CHIP_MASK >> BITS_IN_THREAD))
+                                       >> (BITS_IN_CORE + BITS_IN_RESERVED1));
     }
-    inline static uint32_t coreFromCoreId( uint32_t i_chipId ) {
-        return (i_chipId & (CORE_MASK >> BITS_IN_THREAD));
+    inline static uint32_t coreFromCoreId( uint32_t i_coreId ) {
+        return (i_coreId & (CORE_MASK >> BITS_AFTER_CORE));
     }
 
     inline static uint32_t createChipId( uint32_t i_groupId,

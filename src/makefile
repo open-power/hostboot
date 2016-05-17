@@ -204,6 +204,7 @@ TESTCASE_MODULES += testmemoize
 TESTCASE_MODULES += testprdf
 TESTCASE_MODULES += testattn
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
+TESTCASE_MODULES += testpirformat
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
