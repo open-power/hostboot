@@ -44,9 +44,7 @@
 /// @warn compiler doesn't like the use of vector method size() for the second param
 ///
 #define UINT8_VECTOR_TO_1D_ARRAY(X, Y)\
-    {\
-        reinterpret_cast<uint8_t(&)[Y]>(*X.data())\
-    }
+    reinterpret_cast<uint8_t(&)[Y]>(*X.data())
 
 ///
 /// @brief Dereferences pointer of the vector's underlying data
@@ -56,9 +54,7 @@
 /// @warn compiler doesn't like the use of vector method size() for the second param
 ///
 #define UINT16_VECTOR_TO_1D_ARRAY(X, Y)\
-    {\
-        reinterpret_cast<uint16_t(&)[Y]>(*X.data())\
-    }
+    reinterpret_cast<uint16_t(&)[Y]>(*X.data())
 
 ///
 /// @brief Dereferences pointer of the vector's underlying data
@@ -68,9 +64,8 @@
 /// @warn compiler doesn't like the use of vector method size() for the second param
 ///
 #define UINT32_VECTOR_TO_1D_ARRAY(X, Y)\
-    {\
-        reinterpret_cast<uint32_t(&)[Y]>(*X.data())\
-    }
+    reinterpret_cast<uint32_t(&)[Y]>(*X.data())
+
 
 // Mutiplication factor to go from clocks to simcycles.
 // Is this just 2400 speed or does this hold for all? BRS
