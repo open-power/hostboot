@@ -23,15 +23,42 @@
 
 typedef fapi2::ReturnCode (*p9_xip_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_system_target,
-    void* io_image);
+    void*     i_image,
+    uint32_t& io_imageSize,
+    uint8_t   i_sysPhase,
+    void*     i_vpdUncompressedRings,
+    uint32_t  i_vpdRingsSize,
+    void*     i_overlaysUncompressedRings,
+    uint32_t  i_overlayRingsSize);
 
 extern "C"
 {
+/// @brief p9_xip_customize used to customize the SBE/SEEPROM image with
+///        mailbox attributes and vpd rings
+/// @param[in] i_proc_target            => P9 proc chip target
+/// @param[in] i_image                  => Pointer to the in-memory SBE/SEEPROM image
+/// @param[in/out] io_imageSize         => Size of the sbe/seeprom image
+/// @param[in] i_sysPhase               => 0: SBE_IPL, 1: HB IPL
+/// @param[in] i_vpdUncompressedRings   => Pointer to in-memory buffer that can
+///                                        be used to keep uncompressed rings in
+/// @param[in] i_vpdRingsSize           => Size of the vpd rings buffer
+/// @param[in] i_overlaysUncompressedRings => Pointer to in-memory buffer for
+///                                           uncompressed overlay rings
+/// @param[in] i_overlayRingsSize       => Size of the overlay ring buffer
+//
+/// @note: the content of the image pointers will be changed upon return
+///
+/// @return FAPI_RC_SUCCESS if the customization was successful
+///
     fapi2::ReturnCode p9_xip_customize (
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_system_target,
-        void* io_image);
+        void*     i_image,
+        uint32_t& io_imageSize,
+        uint8_t   i_sysPhase,
+        void*     i_vpdUncompressedRings,
+        uint32_t  i_vpdRingsSize,
+        void*     i_overlaysUncompressedRings,
+        uint32_t  i_overlayRingsSize);
 
 }
 #endif
