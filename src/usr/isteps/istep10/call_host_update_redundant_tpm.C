@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@ namespace ISTEP_10
 void* call_host_update_redundant_tpm (void *io_pArgs)
 {
     errlHndl_t l_err = NULL;
-    //@TODO RTC:133830 call p9_update_security_ctrl.C HWP
+    //@TODO RTC:153891 call p9_update_security_ctrl.C HWP
     return l_err;
 }
 
