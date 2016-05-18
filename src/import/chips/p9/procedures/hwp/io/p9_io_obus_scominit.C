@@ -64,15 +64,24 @@ fapi2::ReturnCode p9_io_obus_scominit(
 {
     // mark HWP entry
     FAPI_INF("p9_io_obus_scominit: Entering...");
+    const uint8_t GROUP_00 = 0;
+    const uint8_t LANE_00  = 0;
+    const uint8_t SET_RESET = 1;
+    const uint8_t CLEAR_RESET = 0;
     fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
 
     // get system target
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_system_target;
 
     // assert IO reset to power-up bus endpoint logic
-    // read-modify-write, set single reset bit (HW auto-clears)
-    // on writeback
-    FAPI_TRY(io::rmw(OPT_IORESET_HARD_BUS0, i_target, 0, 0, 1));
+    FAPI_TRY( io::rmw( OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, SET_RESET ) );
+
+    // Bus Reset is relatively fast, only needing < a hundred cycles to allow the signal to propogate.
+    FAPI_TRY( fapi2::delay( 10, 1000 ) );
+
+    FAPI_TRY( io::rmw( OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, CLEAR_RESET ) );
+
+
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
 //TODO:
