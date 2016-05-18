@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ namespace std
      * range, the function copy should be used instead.
      */
     template <class BidirectionalIterator1, class BidirectionalIterator2>
-    inline BidirectionalIterator2 
+    inline BidirectionalIterator2
     copy_backward (  BidirectionalIterator1 first,
                      BidirectionalIterator1 last,
                      BidirectionalIterator2 result )
@@ -83,8 +83,8 @@ namespace std
      * @param[in] b reference to an object to be swaped with a
      * @note this function may not be an efficient way to swap large objects.
      */
-    template <class T> 
-        inline void 
+    template <class T>
+        inline void
         swap(T& a, T&b )
     {
         T c(a);
@@ -151,7 +151,7 @@ namespace std
      * @return reference to te lesser object
      */
     template <class T>
-    inline const T& 
+    inline const T&
     min(const T& a, const T& b)
     {
         if( b < a) return b;
@@ -163,7 +163,7 @@ namespace std
      * @param[in] a object reference
      * @param[in] b object reference
      * @return reference to te greater object
-     */    
+     */
     template <class T>
     inline const T&
     max(const T& a, const T& b)
@@ -248,7 +248,7 @@ namespace std
         FwdIterator e = first++;
         while(first != last)
         {
-            if ((*first) < (*e)) 
+            if ((*first) < (*e))
             {
                 e = first;
             }
@@ -272,7 +272,7 @@ namespace std
      *
      */
     template <typename FwdIterator, typename BinaryPredicate>
-    inline FwdIterator min_element(FwdIterator first, FwdIterator last, 
+    inline FwdIterator min_element(FwdIterator first, FwdIterator last,
                                    BinaryPredicate comp)
     {
         if (first == last) return last;
@@ -308,7 +308,7 @@ namespace std
         FwdIterator e = first++;
         while(first != last)
         {
-            if ((*e) < (*first)) 
+            if ((*e) < (*first))
             {
                 e = first;
             }
@@ -332,7 +332,7 @@ namespace std
      *
      */
     template <typename FwdIterator, typename BinaryPredicate>
-    inline FwdIterator max_element(FwdIterator first, FwdIterator last, 
+    inline FwdIterator max_element(FwdIterator first, FwdIterator last,
                                    BinaryPredicate comp)
     {
         if (first == last) return last;
@@ -366,9 +366,8 @@ namespace std
                   const LessThanComparable& value )
     {
         ForwardIterator it;
-        int num = 0x0;
-        int range = std::distance<ForwardIterator>( first,
-                                                    last );
+        auto range = std::distance<ForwardIterator>( first, last );
+        auto num = decltype(range)();
 
         while( range > 0 )
         {
@@ -409,9 +408,8 @@ namespace std
                   StrictWeakOrdering comp )
     {
         ForwardIterator it;
-        int num = 0x0;
-        int range = std::distance<ForwardIterator>( first,
-                                                    last );
+        auto range = std::distance<ForwardIterator>( first, last );
+        auto num = decltype(range)();
 
         while( range > 0 )
         {
@@ -431,6 +429,130 @@ namespace std
         }
 
         return first;
+    }
+
+    /**
+     * Find the element value in an ordered range [first, last].  Specifically,
+     * it returns the first position where value could be inserted without
+     * violating the ordering.
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     */
+
+    template <class ForwardIterator, class GreaterThanComparable>
+    inline ForwardIterator
+    upper_bound ( ForwardIterator first,
+                  ForwardIterator last,
+                  const GreaterThanComparable& value )
+    {
+        ForwardIterator it;
+
+        auto range = std::distance<ForwardIterator>( first, last );
+        auto num = decltype(range)();
+
+        while( range > 0 )
+        {
+            it = first;
+            num = range / 2;
+            std::advance( it, num );
+
+            if( !(value < *it))
+            {
+                first = ++it;
+                range = (range - (num+1));
+            }
+            else
+            {
+                range = num;
+            }
+        }
+
+        return first;
+    }
+
+    /**
+     * Find the element value in an ordered range [first, last].  Specifically,
+     * it returns the first position where value could be inserted without
+     * violating the ordering.  This is done using the comparison function
+     * parameter that is passed in.
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     * @param[in] comp  Function to do the comparison
+     */
+    template <class ForwardIterator, class T, class StrictWeakOrdering>
+    inline ForwardIterator
+    upper_bound ( ForwardIterator first,
+                  ForwardIterator last,
+                  const T& value,
+                  StrictWeakOrdering comp )
+    {
+        ForwardIterator it;
+        auto range = std::distance<ForwardIterator>( first, last );
+        auto num = decltype(range)();
+
+        while( range > 0 )
+        {
+            it = first;
+            num = range / 2;
+            std::advance( it, num );
+
+            if( !comp( (*it), value ) )
+            {
+                first = ++it;
+                range = (range - (num+1));
+            }
+            else
+            {
+                range = num;
+            }
+        }
+
+        return first;
+    }
+
+    /**
+     * Test if value exists in sorted sequence
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     *
+     * @return true if any element in the range [first,last) is
+    *               equivalent to value
+     *         false otherwise
+     */
+    template<class ForwardIterator, class T>
+    bool binary_search(ForwardIterator first,
+                       ForwardIterator last, const T& value)
+    {
+        first = std::lower_bound(first, last, value);
+        return (!(first == last) && !(value < *first));
+    }
+
+    /**
+     * Test if value exists in sorted sequence using comparison function
+     *
+     * @param[in] first ForwardIterator to the first position in the range.
+     * @param[in] last  ForwardIterator to the last position in the range.
+     * @param[in] value Value to use for comparison.
+     * @param[in] comp  Function to do the comparison
+     *
+     * @return true if any element in the range [first,last) is
+     *              equivalent to value
+     *         false otherwise
+     */
+    template<class ForwardIterator, class T,  class StrictWeakOrdering>
+    bool binary_search(ForwardIterator first,
+                       ForwardIterator last,
+                       const T& value,
+                       StrictWeakOrdering comp)
+    {
+        first = std::lower_bound(first, last, value);
+        return (!(first == last) && !(comp(value,*first)));
     }
 
     /**
@@ -580,7 +702,7 @@ namespace std
         // the end of the original range.  'first' is kept to be the item
         // being compared.
 
-        // Point 'prev' at the first element of the range since first item is 
+        // Point 'prev' at the first element of the range since first item is
         // a keeper.
         ForwardIterator prev = first;
         ++first;
@@ -605,7 +727,7 @@ namespace std
             ++first;
         }
 
-        // 'prev' points to the last item to be kept.  Increment it to make 
+        // 'prev' points to the last item to be kept.  Increment it to make
         // it point to the one past.
         ++prev;
         return prev;
@@ -615,8 +737,8 @@ namespace std
      * Removes consecutive duplicate entries from a range by predicate.
      *
      * Removes all instances where pred(*i,*(i-1)) is true in the
-     * range [first, last) and returns an iterator to the end of the new 
-     * range [first, new_last) where nothing in the new range is a 
+     * range [first, last) and returns an iterator to the end of the new
+     * range [first, new_last) where nothing in the new range is a
      * consecutive duplicate.
      *
      * Unique does not decrease the size of the container.
@@ -640,7 +762,7 @@ namespace std
         // the end of the original range.  'first' is kept to be the item
         // being compared.
 
-        // Point 'prev' at the first element of the range since first item is 
+        // Point 'prev' at the first element of the range since first item is
         // a keeper.
         ForwardIterator prev = first;
         ++first;
@@ -665,7 +787,7 @@ namespace std
             ++first;
         }
 
-        // 'prev' points to the last item to be kept.  Increment it to make 
+        // 'prev' points to the last item to be kept.  Increment it to make
         // it point to the one past.
         ++prev;
         return prev;
@@ -687,7 +809,7 @@ namespace std
 
     /** Sort a range using a predicate
      *
-     *  Sorts all the elements in [first, last) using such that 
+     *  Sorts all the elements in [first, last) using such that
      *  pred(*i, *(i+1)) is true for all items in the range.
      *
      *  @param[in] first - The beginning of the range.
@@ -701,7 +823,7 @@ namespace std
         Util::__Util_QSort_Impl::sort(first, last, pred);
     }
 
-    /** Transform one sequence into another. 
+    /** Transform one sequence into another.
      *
      *  Executes an operator against all elements in [first, last) and writes
      *  the result to another sequence.
@@ -711,7 +833,7 @@ namespace std
      *  @param result - Beginning of the output range.
      *  @param op - The transformation operator.
      */
-    template <typename InputIterator, typename OutputIterator, 
+    template <typename InputIterator, typename OutputIterator,
               typename UnaryFunction>
     OutputIterator transform(InputIterator first, InputIterator last,
                              OutputIterator result, UnaryFunction op)
@@ -725,10 +847,10 @@ namespace std
         return result;
     }
 
-    /** Transform two sequences into another. 
+    /** Transform two sequences into another.
      *
      *  Executes an operator against all elements in [first1, last1) along
-     *  with the peer from [first2, ...) and writes the result to 
+     *  with the peer from [first2, ...) and writes the result to
      *  another sequence.
      *
      *  @param first1 - Beginning of the first input range.
@@ -740,7 +862,7 @@ namespace std
     template <typename InputIterator1, typename InputIterator2,
               typename OutputIterator, typename BinaryFunction>
     OutputIterator transform(InputIterator1 first1, InputIterator1 last1,
-                             InputIterator2 first2, OutputIterator result, 
+                             InputIterator2 first2, OutputIterator result,
                              BinaryFunction op)
     {
         while (first1 != last1)
