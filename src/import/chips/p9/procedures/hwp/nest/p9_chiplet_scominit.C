@@ -39,6 +39,14 @@
 #include <p9_fbc_ioe_dl_scom.H>
 #include <p9_fbc_ioo_tl_scom.H>
 #include <p9_fbc_ioo_dl_scom.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+const uint8_t MCEPS_JITTER_EPSILON = 0x1;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -50,8 +58,39 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_XBUS>> l_xbus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>> l_mca_targets;
     fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_fbc_optics_cfg_mode = { fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP };
+    fapi2::buffer<uint64_t> l_mceps;
+    fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_eps_read_cycles_t0;
+    fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_eps_read_cycles_t1;
+    fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_eps_read_cycles_t2;
     FAPI_DBG("Start");
+
+
+    // apply MC epsilons
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, FAPI_SYSTEM, l_eps_read_cycles_t0),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T0)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, FAPI_SYSTEM, l_eps_read_cycles_t1),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, FAPI_SYSTEM, l_eps_read_cycles_t2),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T2)");
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_JITTER_EPSILON, MCS_PORT02_MCEPSQ_JITTER_EPSILON_LEN>(MCEPS_JITTER_EPSILON);
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_LOCAL_NODE_EPSILON, MCS_PORT02_MCEPSQ_LOCAL_NODE_EPSILON_LEN>
+    (l_eps_read_cycles_t0 / 4);
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_NEAR_NODAL_EPSILON, MCS_PORT02_MCEPSQ_NEAR_NODAL_EPSILON_LEN>
+    (l_eps_read_cycles_t1 / 4);
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_REMOTE_NODAL_EPSILON, MCS_PORT02_MCEPSQ_REMOTE_NODAL_EPSILON_LEN>
+    (l_eps_read_cycles_t2 / 4);
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_GROUP_EPSILON, MCS_PORT02_MCEPSQ_GROUP_EPSILON_LEN>(l_eps_read_cycles_t1 / 4);
+    l_mceps.insertFromRight<MCS_PORT02_MCEPSQ_VECTOR_GROUP_EPSILON, MCS_PORT02_MCEPSQ_VECTOR_GROUP_EPSILON_LEN>
+    (l_eps_read_cycles_t2 / 4);
+    l_mca_targets = i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+
+    for (auto l_mca_target : l_mca_targets)
+    {
+        FAPI_TRY(fapi2::putScom(l_mca_target, MCS_PORT02_MCEPSQ, l_mceps),
+                 "Error from putScom (MCS_PORT02_MCEPSQ)");
+    }
 
     // apply FBC non-hotplug initfile
     FAPI_DBG("Invoking p9.fbc.no_hp.scom.initfile...");

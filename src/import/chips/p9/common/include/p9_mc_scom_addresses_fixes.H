@@ -32,6 +32,11 @@
 #ifndef __P9_MC_SCOM_ADDRESSES_FIXES_H
 #define __P9_MC_SCOM_ADDRESSES_FIXES_H
 
+// More of an addition than a fix.
+REG64( MCA_MBA_MCP0XLT0                                     , RULL(0x05010820), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_MBA_MCP0XLT1                                     , RULL(0x05010821), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_MBA_MCP0XLT2                                     , RULL(0x05010822), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+
 // FIXREG64( MCBIST_MCBIST_CCSARRERRINJQ                                    , RULL(0x07010FDE),  SH_UNT_MCBIST   ,
 //           SH_ACS_SCOM_RW   , RULL(0x0701219E) );
 // FIXREG64( MCBIST_MCBIST_0_CCSARRERRINJQ                                  , RULL(0x07010FDE),  SH_UNT_MCBIST_0 ,

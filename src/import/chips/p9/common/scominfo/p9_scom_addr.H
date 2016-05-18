@@ -275,6 +275,27 @@ extern "C"
         MC_DIR_SAT_ID_ECC64_3 = 0xb,
     } p9_mc_dir0_sat_id_t;
 
+    //These are for registers that reside in the MCS chiplet, but
+    //are used for MCA registers and should be targetted with MCA
+    //target type.  There is no way to identify them other than by
+    //register offset value.  All registers know of this type are
+    //listed bellow, but a range is used for checking
+    typedef enum
+    {
+        MC_MCS_MCA_OFFSET_MCP0XLT0  = 0x20,
+        MC_MCS_MCA_OFFSET_MCP0XLT1  = 0x21,
+        MC_MCS_MCA_OFFSET_MCP0XLT2  = 0x22,
+        MC_MCS_MCA_OFFSET_MCPERF0  = 0x23,
+        MC_MCS_MCA_OFFSET_MCPERF2  = 0x24,
+        MC_MCS_MCA_OFFSET_MCAMOC  = 0x25,
+        MC_MCS_MCA_OFFSET_MCEPSQ  = 0x26,
+        MC_MCS_MCA_OFFSET_MCBUSYQ  = 0x27,
+        MC_MCS_MCA_OFFSET_MCERRINJ  = 0x28,
+        MC_MCS_MCA_OFFSET_MCEBUSCL  = 0x29,
+        MC_MCS_MCA_OFFSET_MCWAT  = 0x2A,
+        MC_MCS_MCA_OFFSET_MCPERF3  = 0x2B
+    } p9_mcs_mca_offset_t;
+
     typedef enum
     {
         MC_DIR_SAT_ID_MCBIST = 0xC

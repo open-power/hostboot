@@ -56,7 +56,7 @@ class mcTraits;
 /// @brief a collection of traits associated with the Centaur controller
 ///
 template<>
-class mcTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+class mcTraits<fapi2::TARGET_TYPE_MBA>
 {
 };
 
@@ -65,14 +65,9 @@ class mcTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
 /// @brief a collection of traits associated with the Nimbus controller
 ///
 template<>
-class mcTraits<fapi2::TARGET_TYPE_MCS>
+class mcTraits<fapi2::TARGET_TYPE_MCA>
 {
     public:
-        // Array of registers indexed by MCA position
-        static const uint64_t xlate0_reg[2];
-        static const uint64_t xlate1_reg[2];
-        static const uint64_t xlate2_reg[2];
-
         enum
         {
             SLOT0_VALID = MCS_PORT02_MCP0XLT0_SLOT0_VALID,
