@@ -2618,6 +2618,31 @@
     <attribute><id>VPD_MT_WINDAGE_RD_CTR</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
+    <attribute><id>EFF_DRAM_GEN</id></attribute>
+    <attribute><id>EFF_DIMM_TYPE</id></attribute>
+    <attribute><id>EFF_HYBRID_MEMORY_TYPE</id></attribute>
+    <attribute><id>EFF_HYBRID</id></attribute>
+    <attribute><id>EFF_DRAM_DENSITY</id></attribute>
+    <attribute><id>EFF_DRAM_BANK_BITS</id></attribute>
+    <attribute><id>EFF_DRAM_BANK_GROUP_BITS</id></attribute>
+    <attribute><id>EFF_DRAM_COLUMN_BITS</id></attribute>
+    <attribute><id>EFF_DRAM_ROW_BITS</id></attribute>
+    <attribute><id>EFF_PRIM_STACK_TYPE</id></attribute>
+    <attribute><id>EFF_DRAM_PPR</id></attribute>
+    <attribute><id>EFF_DRAM_SOFT_PPR</id></attribute>
+    <attribute><id>EFF_DRAM_TRCD</id></attribute>
+    <attribute><id>EFF_DRAM_TRP</id></attribute>
+    <attribute><id>EFF_DRAM_TRAS</id></attribute>
+    <attribute><id>EFF_DRAM_TRC</id></attribute>
+    <attribute><id>EFF_DRAM_TRFC</id></attribute>
+    <attribute><id>EFF_DRAM_TFAW</id></attribute>
+    <attribute><id>EFF_DRAM_TRRD_S</id></attribute>
+    <attribute><id>EFF_DRAM_TRRD_L</id></attribute>
+    <attribute><id>EFF_DRAM_TCCD_L</id></attribute>
+    <attribute><id>EFF_DRAM_TWR</id></attribute>
+    <attribute><id>EFF_DRAM_TWTR_S</id></attribute>
+    <attribute><id>EFF_DRAM_TWTR_L</id></attribute>
+    <attribute><id>EFF_DRAM_TMAW</id></attribute>
 </targetType>
 
 <targetType>
