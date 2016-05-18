@@ -38,6 +38,8 @@ enum sizes
 {
     PORTS_PER_MCS = 2,
     PORTS_PER_MCBIST = 4,
+    MC_PER_MODULE = 2,
+    MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM

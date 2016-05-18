@@ -53,8 +53,6 @@
 #include <lib/ccs/ccs.H>
 #include <lib/mcbist/mcbist.H>
 
-#include <lib/port/port.H>
-
 #include <lib/dimm/rcd_load.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/dimm/rank.H>
@@ -66,8 +64,7 @@
 #include <lib/phy/write_cntrl.H>
 #include <lib/phy/read_cntrl.H>
 
-#include <lib/utils/dump_regs.H>
-
 #include <lib/mc/mc.H>
+#include <lib/mc/port.H>
 
 #endif

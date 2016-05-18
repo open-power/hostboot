@@ -2691,7 +2691,13 @@ fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<fapi2::TARGET_T
 
     FAPI_TRY( eff_zqcal_interval(l_mcs, l_attrs_zqcal_interval.data()) );
 
-    l_attrs_zqcal_interval[l_port_num] = 0x00;
+
+    // Calculate ZQCAL Interval based on the following equation from Ken:
+    //               0.5
+    // ------------------------------ = 13.333ms
+    //     (1.5 * 10) + (0.15 * 150)
+    //  (13333 * ATTR_MSS_FREQ) / 2
+    l_attrs_zqcal_interval[l_port_num] = 0xF42270;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_ZQCAL_INTERVAL,
                             l_mcs,
@@ -2721,7 +2727,9 @@ fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<fapi2::TARGET_
 
     FAPI_TRY( eff_memcal_interval(l_mcs, l_attrs_memcal_interval.data()) );
 
-    l_attrs_memcal_interval[l_port_num] = 0x00;
+    // Calculate MEMCAL Interval based on 1sec interval across all bits per DP16
+    // (62500 * ATTR_MSS_FREQ) / 2
+    l_attrs_memcal_interval[l_port_num] = 0x47868C0;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MEMCAL_INTERVAL,
                             l_mcs,

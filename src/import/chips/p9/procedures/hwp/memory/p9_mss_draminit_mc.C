@@ -86,6 +86,11 @@ extern "C"
             // Re-enable port fails. Turned off in draminit_training
             FAPI_TRY( mss::change_port_fail_disable(p, mss::OFF ) );
 
+            // MC work around for OE bug (seen in periodics + PHY)
+#ifndef REMOVE_FOR_DD2
+            // Turn on output-enable always on. Shelton tells me they'll fix for DD2
+            FAPI_TRY( mss::change_oe_always_on(p, mss::ON ) );
+#endif
             // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
             // Step Two.2: Enable address inversion on each MBA for ALL CARDS
 

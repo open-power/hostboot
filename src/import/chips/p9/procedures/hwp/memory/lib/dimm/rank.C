@@ -150,6 +150,7 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         FAPI_TRY( mss::eff_num_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
+    FAPI_DBG("ranks: %d, %d", l_rank_count[0], l_rank_count[1]);
     o_rps = primary_rank_pairs[l_rank_count[1]][l_rank_count[0]];
 
 fapi_try_exit:
