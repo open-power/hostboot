@@ -18784,6 +18784,7 @@ DEPRECATED!!!!
     <writeable/>
 </attribute>-->
 
+<!--TODO RTC:154288 Remove MEM_IN_SYNC_MODE after it is removed from fapi2 xml-->
 <attribute>
     <id>MEM_IN_SYNCH_MODE</id>
     <description>
@@ -18800,6 +18801,24 @@ DEPRECATED!!!!
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>REQUIRED_SYNCH_MODE</id>
+    <description>
+      Specify the system policy to enforce synchronous mode between memory and
+      nest. This drives the value of ATTR_MEM_IN_SYNCH_MODE.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_REQUIRED_SYNCH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 <attribute>
@@ -20723,6 +20742,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_MC_SYNC_MODE</id>
     <macro>DIRECT</macro>
