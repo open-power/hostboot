@@ -311,6 +311,14 @@ class Target
         getOtherEnd(Target<T>& o_target, const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
+        /// @brief Is the target functional?
+        /// @return true if target is functional, false if non-functional
+        ///
+
+        inline bool
+        isFunctional(void) const;
+
+        ///
         /// @brief Copy from a Target<O> to a Target<K>
         /// @tparam O the target type of the other
         ///
