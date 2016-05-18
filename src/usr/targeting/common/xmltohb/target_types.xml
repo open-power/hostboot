@@ -2228,6 +2228,8 @@
     <attribute><id>BOOT_FREQ_MULT</id></attribute>
     <attribute><id>PFET_OFF_CONTROLS</id></attribute>
     <attribute><id>MC_SYNC_MODE</id></attribute>
+    <attribute><id>NHTM_TRACE_TYPE</id></attribute>
+    <attribute><id>CHTM_TRACE_TYPE</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->

@@ -52,32 +52,31 @@ void* call_proc_revert_sbe_mcs_setup( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call p9_revert_sbe_mcs_setup entry" );
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-    TARGETING::getAllChips(l_cpuTargetList, TARGETING::TYPE_PROC);
+    TARGETING::Target * l_masterProc;
+    TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
-    for (const auto & l_target : l_cpuTargetList)
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Running p9_revert_sbe_mcs_setup on "
+              "target HUID %.8X",
+              TARGETING::get_huid(l_masterProc));
+
+    // cast the target to a fapi2 target
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_master_proc( l_masterProc );
+
+    //Invode p9_revert_sbe_mcs_setup
+    FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup, l_fapi_master_proc );
+
+    if (l_err)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Running p9_revert_sbe_mcs_setup on "
-                  "target HUID %.8X",
-                  TARGETING::get_huid(l_target));
-
-        //TODO RTC 133836 call p9_revert_sbe_mcs_setup
-        //fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_target(l_target);
-        //FAPI_INVOKE_HWP(l_err, p9_revert_sbe_mcs_setup,l_fapi_target);
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: p9_revert_sbe_mcs_setup",
-                      l_err->reasonCode());
-            // Create IStep error log and cross reference error
-            l_stepError.addErrorDetails(l_err);
-            // Commit error
-            errlCommit(l_err,SBE_COMP_ID);
-        }
-
+                  "ERROR 0x%.8X: p9_revert_sbe_mcs_setup",
+                  l_err->reasonCode());
+        // Create IStep error log and cross reference error
+        l_stepError.addErrorDetails(l_err);
+        // Commit error
+        errlCommit(l_err,SBE_COMP_ID);
     }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call p9_revert_sbe_mcs_setup exit" );
