@@ -1745,9 +1745,8 @@ typedef enum
     P9_XIP_SECTION_HW_PGPE      = P9_XIP_SECTIONS_PLUS(3),
     P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(4),
     P9_XIP_SECTION_HW_FPPE      = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTION_HW_OVERRIDES = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTION_HW_RINGS     = P9_XIP_SECTIONS_PLUS(7),
-    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
+    P9_XIP_SECTION_HW_RINGS     = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(7) // # sections
 } p9_xip_section_hw_t;
 
 #define P9_XIP_SECTION_NAMES_HW(var)      \
@@ -1758,7 +1757,6 @@ typedef enum
                          ".pgpe",         \
                          ".ioppe",        \
                          ".fppe",         \
-                         ".overrides",    \
                          ".rings")
 
 /**************************************************************************/
