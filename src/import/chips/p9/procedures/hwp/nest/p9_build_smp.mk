@@ -23,4 +23,5 @@ OBJS+=p9_build_smp_fbc_ab.o
 OBJS+=p9_build_smp_fbc_cd.o
 OBJS+=p9_build_smp_adu.o
 OBJS+=p9_adu_coherent_utils.o
+OBJS+=p9_fbc_utils.o
 $(call BUILD_PROCEDURE)
