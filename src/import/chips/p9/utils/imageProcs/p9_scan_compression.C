@@ -125,7 +125,7 @@
 #include "p9_scan_compression.H"
 
 // Diagnostic aids for debugging
-#ifdef DEBUG_P8_SCAN_COMPRESSION
+#ifdef DEBUG_P9_SCAN_COMPRESSION
 
 #include <stdio.h>
 
@@ -144,12 +144,12 @@
         (rc);                                   \
     })
 
-#else // DEBUG_P8_SCAN_COMPRESSION
+#else // DEBUG_P9_SCAN_COMPRESSION
 
 #define BUG(rc) (rc)
 #define BUGX(rc, ...) (rc)
 
-#endif  // DEBUG_P8_SCAN_COMPRESSION
+#endif  // DEBUG_P9_SCAN_COMPRESSION
 
 // Note: PHYP requires that all subroutines, _even static subroutines_, have
 // unique names to support concurrent update.  Most routines defined here have
@@ -307,7 +307,8 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
 
 static uint32_t
 __rs4_compress(CompressedScanData* o_data,
-               const uint8_t* i_string,
+               const uint8_t* i_data_str,
+               const uint8_t* i_care_str,
                const uint32_t i_length)
 {
     int state;                  /* 0 : Rotate, 1 : Scan */
@@ -315,9 +316,11 @@ __rs4_compress(CompressedScanData* o_data,
     uint32_t r;                 /* Number of reminaing bits in i_data */
     uint32_t i;                 /* Nibble index in i_string */
     uint32_t j;                 /* Nibble index in data */
-    uint32_t k;                 /* Location to place scan count */
+    uint32_t k;                 /* Location to place <scan_count(N)> */
     uint32_t count;             /* Counts rotate/scan nibbles */
     uint8_t* data;              /* The compressed scan data area */
+    int care_nibble;
+    int data_nibble;
 
     n = i_length / 4;
     r = i_length % 4;
@@ -325,6 +328,8 @@ __rs4_compress(CompressedScanData* o_data,
     j = 0;
     k = 0;                      /* Makes GCC happy */
     data = (uint8_t*)o_data + sizeof(CompressedScanData);
+    care_nibble = 0;
+    data_nibble = 0;
     count = 0;
     state = 0;
 
@@ -333,9 +338,21 @@ __rs4_compress(CompressedScanData* o_data,
 
     while (i < n)
     {
-        if (state == 0)
+        care_nibble = rs4_get_nibble(i_care_str, i);
+        data_nibble = rs4_get_nibble(i_data_str, i);
+
+        if (~care_nibble & data_nibble)
         {
-            if (rs4_get_nibble(i_string, i) == 0)
+            printf("__rs4_compress(): Data error in nibble[%d]: We can't have '1' in data where care has '0'\n", i);
+            exit(1);
+        }
+
+        if (state == 0)
+            //----------------//
+            // Rotate section //
+            //----------------//
+        {
+            if (care_nibble == 0)
             {
                 count++;
                 i++;
@@ -346,43 +363,85 @@ __rs4_compress(CompressedScanData* o_data,
                 count = 0;
                 k = j;
                 j++;
-                state = 1;
-            }
-        }
-        else
-        {
-            if (rs4_get_nibble(i_string, i) == 0)
-            {
-                if (((i + 1) < n) && (rs4_get_nibble(i_string, i + 1) == 0))
+
+                if ((care_nibble ^ data_nibble) == 0)
                 {
-                    rs4_set_nibble(data, k, count);
-                    count = 0;
-                    state = 0;
+                    // Only one-data in nibble.
+                    state = 1;
                 }
                 else
                 {
+                    // There is zero-data in nibble.
+                    state = 2;
+                }
+            }
+        }
+        else if (state == 1)
+            //------------------//
+            // One-data section //
+            //------------------//
+        {
+            if (care_nibble == 0)
+            {
+                if (((i + 1) < n) && (rs4_get_nibble(i_care_str, i + 1) == 0))
+                {
+                    // Set the <scan_count(N)> in nibble k since no more data in
+                    //   current AND next nibble (or next nibble might be last).
+                    rs4_set_nibble(data, k, count);
+                    count = 0;
+                    state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+                }
+                else
+                {
+                    // Whether next nibble is last nibble or contains data, lets include the
+                    //   current empty nibble in the scan_data(N) count because its
+                    //   more efficient than inserting rotate go+stop nibbles.
                     rs4_set_nibble(data, j, 0);
                     count++;
                     i++;
                     j++;
                 }
             }
-            else
+            else if ((care_nibble ^ data_nibble) == 0)
             {
-                rs4_set_nibble(data, j, rs4_get_nibble(i_string, i));
+                // Only one-data in nibble. Continue pilling on one-data nibbles.
+                rs4_set_nibble(data, j, data_nibble);
                 count++;
                 i++;
                 j++;
             }
-
-            if ((state == 1) && (count == 15))
+            else
             {
-                rs4_set_nibble(data, k, 15);
-                state = 0;
+                // There is zero-data in nibble.
+                // First set the <scan_count(N)> in nibble k to end current
+                //   sequence of one-data nibbles.
+                rs4_set_nibble(data, k, count);
                 count = 0;
+                state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+            }
+
+            if ((state == 1) && (count == 14))
+            {
+                rs4_set_nibble(data, k, 14);
+                count = 0;
+                state = 0; // Lets go to rotate section to insert a zero rotate + stop.
             }
         }
-    }
+        else // state==2
+            //-------------------//
+            // Zero-data section //
+            //-------------------//
+        {
+            rs4_set_nibble(data, k, 15);
+            rs4_set_nibble(data, j, care_nibble);
+            j++;
+            rs4_set_nibble(data, j, data_nibble);
+            i++;
+            j++;
+            count = 0;
+            state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+        }
+    } // End of while (i<n)
 
     // Finish the current state and insert the terminate code (scan 0).  If we
     // finish on a scan we must insert a null rotate first.
@@ -391,29 +450,60 @@ __rs4_compress(CompressedScanData* o_data,
     {
         j += rs4_stop_encode(count, data, j);
     }
-    else
+    else if (state == 1)
     {
         rs4_set_nibble(data, k, count);
         j += rs4_stop_encode(0, data, j);
     }
+    else
+    {
+        printf("__rs4_compress(): Code error: state==2 not allowed at this point\n");
+        exit(1);
+    }
 
+    // Indicate termination start
     rs4_set_nibble(data, j, 0);
     j++;
 
-    // Insert the remainder count nibble, and if non-0, the remainder data
-    // nibble.
-
-    rs4_set_nibble(data, j, r);
-    j++;
-
-    if (r != 0)
+    // Insert the remainder count nibble, and if r>0, the remainder data
+    // nibble. Note that here we indicate the number of bits (0<=r<4).
+    if (r == 0)
     {
-        rs4_set_nibble(data, j, rs4_get_nibble(i_string, n));
+        rs4_set_nibble(data, j, r);
         j++;
+    }
+    else
+    {
+        care_nibble = rs4_get_nibble(i_care_str, n) & ((0xf >> (4 - r)) << (4 - r)); // Make excess bits zero
+        data_nibble = rs4_get_nibble(i_data_str, n) & ((0xf >> (4 - r)) << (4 - r)); // Make excess bits zero
+
+        if (~care_nibble & data_nibble)
+        {
+            printf("__rs4_compress(): Data error in nibble[%d]: We can't have '1' in data where care has '0'\n", n);
+            exit(1);
+        }
+
+        if ((care_nibble ^ data_nibble) == 0)
+        {
+            // Only one-data in rem nibble.
+            rs4_set_nibble(data, j, r);
+            j++;
+            rs4_set_nibble(data, j, data_nibble);
+            j++;
+        }
+        else
+        {
+            // Zero-data in rem nibble.
+            rs4_set_nibble(data, j, r + 8);
+            j++;
+            rs4_set_nibble(data, j, care_nibble);
+            j++;
+            rs4_set_nibble(data, j, data_nibble);
+            j++;
+        }
     }
 
     // Return the number of nibbles in the compressed string.
-
     return j;
 }
 
@@ -428,7 +518,8 @@ int
 _rs4_compress(CompressedScanData* io_data,
               uint32_t i_dataSize,
               uint32_t* o_imageSize,
-              const uint8_t* i_string,
+              const uint8_t* i_data_str,
+              const uint8_t* i_care_str,
               const uint32_t i_length,
               const uint64_t i_scanSelect,
               const uint8_t i_ringId,
@@ -453,7 +544,7 @@ _rs4_compress(CompressedScanData* io_data,
 
         memset(io_data, 0, bytes);
 
-        nibbles = __rs4_compress(io_data, i_string, i_length);
+        nibbles = __rs4_compress(io_data, i_data_str, i_care_str, i_length);
         bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
         bytes = ((bytes + 7) / 8) * 8;
 
@@ -488,7 +579,8 @@ _rs4_compress(CompressedScanData* io_data,
 int
 rs4_compress(CompressedScanData** o_data,
              uint32_t* o_size,
-             const uint8_t* i_string,
+             const uint8_t* i_data_str,
+             const uint8_t* i_care_str,
              const uint32_t i_length,
              const uint64_t i_scanSelect,
              const uint8_t i_ringId,
@@ -501,6 +593,7 @@ rs4_compress(CompressedScanData** o_data,
     nibbles = (((((i_length + 3) / 4) + 14) / 15) * 17) + 2;
     bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
     bytes = ((bytes + 7) / 8) * 8;
+    printf(" Byte %d Nibble %d \n", bytes, nibbles);
     *o_data = (CompressedScanData*)malloc(bytes);
 
     if (*o_data == 0)
@@ -509,9 +602,9 @@ rs4_compress(CompressedScanData** o_data,
     }
     else
     {
-        rc = _rs4_compress(*o_data, bytes, o_size, i_string, i_length,
-                           i_scanSelect,  i_ringId, i_chipletId,
-                           i_flushOptimization);
+        rc = _rs4_compress(*o_data, bytes, o_size, i_data_str,
+                           i_care_str, i_length, i_scanSelect,
+                           i_ringId, i_chipletId, i_flushOptimization);
     }
 
     return rc;
@@ -525,7 +618,7 @@ rs4_compress(CompressedScanData** o_data,
 
 static int
 __rs4_decompress(uint8_t* o_string,
-                 const uint8_t* i_string,
+                 const uint8_t* i_data_str,
                  const uint32_t i_length)
 {
     int rc;
@@ -550,7 +643,7 @@ __rs4_decompress(uint8_t* o_string,
     {
         if (state == 0)
         {
-            nibbles = stop_decode(&count, i_string, i);
+            nibbles = stop_decode(&count, i_data_str, i);
 
             if ((bits + (4 * count)) > i_length)
             {
@@ -571,7 +664,7 @@ __rs4_decompress(uint8_t* o_string,
         }
         else
         {
-            nibbles = rs4_get_nibble(i_string, i);
+            nibbles = rs4_get_nibble(i_data_str, i);
             i++;
 
             if (nibbles == 0)
@@ -589,7 +682,7 @@ __rs4_decompress(uint8_t* o_string,
 
             for (k = 0; k < nibbles; k++)
             {
-                rs4_set_nibble(o_string, j, rs4_get_nibble(i_string, i));
+                rs4_set_nibble(o_string, j, rs4_get_nibble(i_data_str, i));
                 i++;
                 j++;
             }
@@ -603,7 +696,7 @@ __rs4_decompress(uint8_t* o_string,
 
     if (!rc)
     {
-        r = rs4_get_nibble(i_string, i);
+        r = rs4_get_nibble(i_data_str, i);
         i++;
 
         if (r != 0)
@@ -615,7 +708,7 @@ __rs4_decompress(uint8_t* o_string,
             else
             {
                 bits += r;
-                rs4_set_nibble(o_string, j, rs4_get_nibble(i_string, i));
+                rs4_set_nibble(o_string, j, rs4_get_nibble(i_data_str, i));
             }
         }
     }
