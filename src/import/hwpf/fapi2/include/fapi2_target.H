@@ -286,17 +286,6 @@ class Target
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
-        /// @brief Get the target at the other end of a bus - dimm included
-        /// @tparam T The type of the parent
-        /// @param[in] i_state The desired TargetState of the children
-        /// @return Target<T> a target representing the thing on the other end
-        /// @note Can be easily changed to a vector if needed
-        ///
-        template<TargetType T>
-        inline Target<T>
-        getOtherEnd(const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
-
-        ///
         /// @brief Get the target at the other end of a bus
         /// @tparam T The type of the target on the other end
         /// @param[out] o_target A target representing the thing on the other end
