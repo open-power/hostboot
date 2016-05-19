@@ -487,7 +487,7 @@ inline Target<T> Target<K, V>::getParent(void) const
             TARGETING::UTIL_FILTER_ALL);
     }
 
-    assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x , \
+    assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x ,\
           looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
 
     TARGETING::Target * l_parentTarget = l_parentList[0];
@@ -842,6 +842,18 @@ Target<K, V>::getOtherEnd(fapi2::Target<T>& o_target,
     o_target = fapi2_peerTarget;
 
     return l_rc;
+}
+
+
+///
+/// @brief Determine whether the target is functional or not
+/// @return true if the target is functional, false otherwise
+///
+template< TargetType K, typename V >
+inline bool Target< K, V >::isFunctional(void) const
+{
+    TARGETING::PredicateIsFunctional l_functional;
+    return l_functional(static_cast<TARGETING::Target*>(this->get()));
 }
 
 
