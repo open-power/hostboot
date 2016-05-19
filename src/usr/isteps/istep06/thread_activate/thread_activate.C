@@ -37,7 +37,6 @@
 #include    <stdint.h>
 
 #include    <initservice/taskargs.H>
-#include    <initservice/initserviceif.H> // @TODO RTC:149103
 #include    <errl/errlentry.H>
 
 #include    <devicefw/userif.H>
@@ -82,7 +81,6 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
 
     //CH Keyword in LPRx Record of MVPD contains the Cache Deconfig State
     //the x in LPRx is the core number.
-
     errlHndl_t  l_errl  =   NULL;
     bool cacheDeconfig = true;
     uint64_t theRecord = 0x0;
@@ -148,27 +146,6 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                           DEVICE_MVPD_ADDRESS( theRecord,
                                                theKeyword ) );
 
-        // @TODO RTC:149103 Special case to work around MVPD with LPR1 to LPR6
-        uint64_t workAroundRecord = theRecord;
-        while( l_errl && (0x0 == i_masterCoreId) &&
-               (++workAroundRecord <= MVPD::LRP5) )
-        {
-            TRACFCOMP( g_fapiImpTd,
-                       "getCacheDeconfig: Use LPR work around for core 0x%.8X, "
-                       "substitute LRP%ld for LRP%ld",
-                       i_masterCoreId, workAroundRecord - MVPD::LRP0,
-                       theRecord - MVPD::LRP0);
-            delete l_errl;
-            l_errl = deviceRead(l_procTarget,
-                                NULL,
-                                theSize,
-                                DEVICE_MVPD_ADDRESS( workAroundRecord,
-                                                     theKeyword ) );
-            if( l_errl == NULL ) { theRecord = workAroundRecord; }
-        }
-
-        if( l_errl ) { break; }
-
         if(theSize != 1)
         {
             /*@
@@ -182,6 +159,10 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
              * @custdesc     A problem occurred during the IPL
              *               of the system.
              */
+            TRACFCOMP( g_fapiImpTd,
+                       ERR_MRK, "getCacheDeconfig: CH Keyword Size != 1."
+                       " Size is instead: 0x%x for record 0x%x",
+                       theSize, theRecord );
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              ISTEP::MOD_GET_CACHE_DECONFIG,
                                              ISTEP::RC_INCORRECT_KEWORD_SIZE,
@@ -190,9 +171,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
             break;
         }
 
-        theData = static_cast<uint8_t*>(malloc( theSize ));
-
         //2nd call is to get the actual data.
+        theData = static_cast<uint8_t*>(malloc( theSize ));
         l_errl = deviceRead(l_procTarget,
                           theData,
                           theSize,
@@ -441,9 +421,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         // Reclaim remainder of L3 cache if available.
         if ((!PNOR::usingL3Cache()) &&
-             // Special case as hwsv doesn't load needed MVPD on FSP
-            ((INITSERVICE::spBaseServicesEnabled()) // @TODO RTC:149103
-             || (!getCacheDeconfig(l_masterCoreID))))
+            (!getCacheDeconfig(l_masterCoreID)))
         {
             TRACFCOMP( g_fapiTd,
                        "activate_threads: Extending cache to 8MB" );
