@@ -147,8 +147,11 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 /// data structure (header + compressed data) created in \a io_data, in bytes.
 /// This value will always be a multiple of 8.
 ///
-/// \param[in] i_string The string to compress.  Scan data to compress is
+/// \param[in] i_data_str The string to compress.  Scan data to compress is
 /// left-justified in this input string.
+///
+/// \param[in] i_care_str The care mask that identifies which bits in the
+/// i_data_str that need to be scanned (written). String is left-justified.
 ///
 /// \param[in] i_length The length of the input string in \e bits.  It is
 /// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
@@ -185,7 +188,8 @@ int
 _rs4_compress(CompressedScanData* io_data,
               uint32_t i_dataSize,
               uint32_t* o_imageSize,
-              const uint8_t* i_string,
+              const uint8_t* i_data_str,
+              const uint8_t* i_care_str,
               const uint32_t i_length,
               const uint64_t i_scanSelect,
               const uint8_t i_ringId,
@@ -207,8 +211,11 @@ _rs4_compress(CompressedScanData* io_data,
 /// structure (header + compressed data) pointed to by \a o_data, in bytes.
 /// This value will always be a multiple of 8.
 ///
-/// \param[in] i_string The string to compress.  Scan data to compress is
+/// \param[in] i_data_str The string to compress.  Scan data to compress is
 /// left-justified in this input string.
+///
+/// \param[in] i_care_str The care mask that identifies which bits in the
+/// i_data_str that need to be scanned (written). String is left-justified.
 ///
 /// \param[in] i_length The length of the input string in \e bits.  It is
 /// assumed the \a i_string contains at least (\a i_length + 7) / 8 bytes.
@@ -233,7 +240,8 @@ _rs4_compress(CompressedScanData* io_data,
 int
 rs4_compress(CompressedScanData** o_data,
              uint32_t* o_size,
-             const uint8_t* i_string,
+             const uint8_t* i_data_str,
+             const uint8_t* i_care_str,
              const uint32_t i_length,
              const uint64_t i_scanSelect,
              const uint8_t i_ringId,
