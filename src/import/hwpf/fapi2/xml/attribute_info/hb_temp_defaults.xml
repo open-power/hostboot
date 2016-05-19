@@ -151,6 +151,9 @@
     <attribute>
         <id>ATTR_CME_LOCAL_FIRMASK</id>
     </attribute>
+     <attribute>
+        <id>ATTR_PFET_OFF_CONTROLS</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

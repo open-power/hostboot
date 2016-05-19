@@ -572,4 +572,12 @@
   <writeable/>
 </attribute>
 
+<attribute>
+  <id>ATTR_PFET_OFF_CONTROLS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>To disable force pfet off control from fuse status</description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+
 </attributes>
