@@ -205,7 +205,14 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip,
                                l_read_1));
 
-        l_read_scratch_reg.writeBit<24>(l_read_1.getBit<7>());
+        if ( l_read_1 )
+        {
+            l_read_scratch_reg.clearBit<24>();
+        }
+        else
+        {
+            l_read_scratch_reg.setBit<24>();
+        }
 
         FAPI_DBG("Reading ATTR_PROC_FABRIC_GROUP and CHIP_ID");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target_chip,
