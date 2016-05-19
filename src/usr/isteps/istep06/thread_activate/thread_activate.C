@@ -37,7 +37,7 @@
 #include    <stdint.h>
 
 #include    <initservice/taskargs.H>
-#include    <initservice/initserviceif.H> // @TODO RTC:149103 @TODO RTC:134077
+#include    <initservice/initserviceif.H> // @TODO RTC:149103
 #include    <errl/errlentry.H>
 
 #include    <devicefw/userif.H>
@@ -354,13 +354,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                    max_threads, en_threads );
 
         uint8_t thread_bitset = 0;
-        // @TODO RTC:134077 Should not need to handle zero case when
-        //                  attribute is set by intrrp
-        if( en_threads )
-        {
-            TRACFCOMP( g_fapiTd,
-                       "Handling special enable threads attribute case" );
-        }
         for( uint64_t thread = 0; thread < max_threads; thread++ )
         {
             // Skip the thread that we're running on
@@ -373,9 +366,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             }
 
             // Skip threads that we shouldn't be starting
-            // @TODO RTC:134077 Should not need to handle zero case when
-            //                  attribute is set by intrrp
-            if( en_threads && !(en_threads & (0x8000000000000000>>thread)) )
+            if(!(en_threads & (0x8000000000000000>>thread)))
             {
                 TRACDCOMP( g_fapiTd,
                            "activate_threads skipping thread=%d", thread );
@@ -410,25 +401,26 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         //             o_state        => N/A - Output state not used for
         //                               PTC_CMD_SRESET command
         //
-        //TODO RTC 134077 Revisit use of status and threadState
-        fapi2::buffer<uint64_t> l_status = 0;
+        fapi2::buffer<uint64_t> l_rasStatus = 0;
         uint64_t l_threadState = 0;
         FAPI_INVOKE_HWP( l_errl, p9_thread_control,
                          l_fapiCore,      //i_target
                          thread_bitset,   //i_threads
                          PTC_CMD_SRESET,  //i_command
                          false,           //i_warncheck
-                         l_status,        //o_rasStatusReg
+                         l_rasStatus,     //o_rasStatusReg
                          l_threadState);  //o_state
 
         if ( l_errl != NULL )
         {
             TRACFCOMP( g_fapiImpTd,
                        "ERROR: 0x%.8X :  proc_thread_control HWP"
-                       "( cpu %d, thread_bitset 0x%02X )",
+                       "( cpu %d, thread_bitset 0x%02X, "
+                       "l_rasStatus 0x%lx )",
                        l_errl->reasonCode(),
                        l_masterCoreID,
-                       thread_bitset );
+                       thread_bitset,
+                       l_rasStatus );
 
             l_errl->collectTrace(FAPI_TRACE_NAME,256);
             l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
