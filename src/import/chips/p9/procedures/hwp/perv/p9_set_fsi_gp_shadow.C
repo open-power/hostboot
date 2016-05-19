@@ -32,72 +32,129 @@
 
 //## auto_generated
 #include "p9_set_fsi_gp_shadow.H"
+//## auto_generated
+#include "p9_const_common.H"
 
-#include "p9_perv_scom_addresses.H"
+#include <p9_perv_scom_addresses.H>
 
 
 fapi2::ReturnCode p9_set_fsi_gp_shadow(const
                                        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-    FAPI_DBG("Entering ...");
+    fapi2::buffer<uint32_t> l_read_attr = 0;
+    FAPI_INF("Entering ...");
 
-    FAPI_INF("Setting flush values for root_ctrl_copy and perv_ctrl_copy registers");
+    FAPI_DBG("Reading ATTR_ROOT_CTRL0_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL0_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL0_COPY Reg");
     //Setting ROOT_CTRL0_COPY register value
-    //CFAM.ROOT_CTRL0_COPY = p9SetFsiGpShadow::ROOT_CTRL0_FLUSHVALUE
+    //CFAM.ROOT_CTRL0_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL0_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL0_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL1_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL1_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL1_COPY Reg");
     //Setting ROOT_CTRL1_COPY register value
-    //CFAM.ROOT_CTRL1_COPY = p9SetFsiGpShadow::ROOT_CTRL1_FLUSHVALUE
+    //CFAM.ROOT_CTRL1_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL1_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL1_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL2_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL2_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL2_COPY Reg");
     //Setting ROOT_CTRL2_COPY register value
-    //CFAM.ROOT_CTRL2_COPY = p9SetFsiGpShadow::ROOT_CTRL2_FLUSHVALUE
+    //CFAM.ROOT_CTRL2_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL2_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL2_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL3_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL3_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL3_COPY Reg");
     //Setting ROOT_CTRL3_COPY register value
-    //CFAM.ROOT_CTRL3_COPY = p9SetFsiGpShadow::ROOT_CTRL3_FLUSHVALUE
+    //CFAM.ROOT_CTRL3_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL3_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL3_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL4_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL4_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL4_COPY Reg");
     //Setting ROOT_CTRL4_COPY register value
-    //CFAM.ROOT_CTRL4_COPY = p9SetFsiGpShadow::ROOT_CTRL4_FLUSHVALUE
+    //CFAM.ROOT_CTRL4_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL4_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL4_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL5_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL5_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL5_COPY Reg");
     //Setting ROOT_CTRL5_COPY register value
-    //CFAM.ROOT_CTRL5_COPY = p9SetFsiGpShadow::ROOT_CTRL5_FLUSHVALUE
+    //CFAM.ROOT_CTRL5_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL5_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL5_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL6_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL6_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL6_COPY Reg");
     //Setting ROOT_CTRL6_COPY register value
-    //CFAM.ROOT_CTRL6_COPY = p9SetFsiGpShadow::ROOT_CTRL6_FLUSHVALUE
+    //CFAM.ROOT_CTRL6_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL6_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL6_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL7_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL7_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL7_COPY Reg");
     //Setting ROOT_CTRL7_COPY register value
-    //CFAM.ROOT_CTRL7_COPY = p9SetFsiGpShadow::ROOT_CTRL7_FLUSHVALUE
+    //CFAM.ROOT_CTRL7_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL7_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL7_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_ROOT_CTRL8_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ROOT_CTRL8_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting ROOT_CTRL8_COPY Reg");
     //Setting ROOT_CTRL8_COPY register value
-    //CFAM.ROOT_CTRL8_COPY = p9SetFsiGpShadow::ROOT_CTRL8_FLUSHVALUE
+    //CFAM.ROOT_CTRL8_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL8_COPY_FSI,
-                                    p9SetFsiGpShadow::ROOT_CTRL8_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_PERV_CTRL0_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PERV_CTRL0_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting PERV_CTRL0_COPY Reg");
     //Setting PERV_CTRL0_COPY register value
-    //CFAM.PERV_CTRL0_COPY = p9SetFsiGpShadow::PERV_CTRL0_FLUSHVALUE
+    //CFAM.PERV_CTRL0_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_PERV_CTRL0_COPY_FSI,
-                                    p9SetFsiGpShadow::PERV_CTRL0_FLUSHVALUE));
+                                    l_read_attr));
 
+    FAPI_DBG("Reading ATTR_PERV_CTRL1_SHADOW");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PERV_CTRL1_SHADOW, i_target_chip,
+                           l_read_attr));
+
+    FAPI_DBG("Setting PERV_CTRL1_COPY Reg");
     //Setting PERV_CTRL1_COPY register value
-    //CFAM.PERV_CTRL1_COPY = p9SetFsiGpShadow::PERV_CTRL1_FLUSHVALUE
+    //CFAM.PERV_CTRL1_COPY = l_read_attr
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_PERV_CTRL1_COPY_FSI,
-                                    p9SetFsiGpShadow::PERV_CTRL1_FLUSHVALUE));
+                                    l_read_attr));
 
-    FAPI_DBG("Exiting ...");
+    FAPI_INF("Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;

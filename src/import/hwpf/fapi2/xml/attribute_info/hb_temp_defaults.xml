@@ -154,6 +154,39 @@
      <attribute>
         <id>ATTR_PFET_OFF_CONTROLS</id>
     </attribute>
+    <attribute>
+        <id>ATTR_PERV_CTRL0_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PERV_CTRL1_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL0_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL1_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL2_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL3_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL4_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL5_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL6_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL7_SHADOW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_ROOT_CTRL8_SHADOW</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
