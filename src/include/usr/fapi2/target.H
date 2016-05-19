@@ -726,6 +726,80 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 
 
 ///
+/// @brief Get this target's children, filtered
+/// @tparam T The type of the parent
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
+/// @param[in] i_filter The desired chiplet filter
+/// @param[in] i_state The desired TargetState of the children
+/// @return std::vector<Target<T> > a vector of present/functional
+/// children
+///
+template<TargetType K, typename V>
+template< TargetType T>
+inline std::vector<Target<T> >
+    Target<K, V>::getChildren(const TargetFilter i_filter,
+                              const TargetState i_state) const
+{
+    std::vector<Target<T>> l_children;
+
+    l_children = this->getChildren<T>(i_state);
+
+    FAPI_DBG("getChildrenFilter: Tgt=0x%.8X, i_filter=0x%.16X,"
+             "K-Type=0x%.8X, T-Type=0x%.8X, sizeA=%d",
+             TARGETING::get_huid(this->get()), i_filter, K, T, l_children.size());
+
+    // Limit to getting Pervasive children from proc_chip parent for now
+    //@TODO RTC:155755 to track possible additional support
+    static_assert(((T == fapi2::TARGET_TYPE_PERV) &&
+                   (K == fapi2::TARGET_TYPE_PROC_CHIP)),
+                   "fapi2::getChildren-Filter only supports getting fapi2::TARGET_TYPE_PERV children on a fapi2::TARGET_TYPE_PROC_CHIP");
+
+    for ( auto childIter =  l_children.begin();
+               childIter != l_children.end();
+               // ++childIter incremented below
+        )
+    {
+        const TARGETING::Target * l_platTarget =
+                         static_cast<const TARGETING::Target*>(childIter->get());
+        uint8_t  l_chiplet_num = 0;
+        uint32_t l_fapi2_type = childIter->getType();
+        uint64_t l_bitMask = 0x0;
+
+        // ATTR_CHIP_UNIT represents the Pervasive Chiplet numbering and is
+        // needed to create the l_bitMask to use against i_filter
+        if(!l_platTarget->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_chiplet_num))
+        {
+            FAPI_ERR("ERROR: getChildrenFilter: Can not read CHIP_UNIT attribute"
+                     "Keeping Target 0x%lx for 0x%x", l_platTarget, T);
+            l_bitMask = 0xFFFFFFFFFFFFFFFF;
+        }
+        else
+        {
+            l_bitMask = 0x8000000000000000 >> l_chiplet_num;
+        }
+
+        if (i_filter & l_bitMask) // keep child
+        {
+          FAPI_DBG("getChildrenFilter: keep child=0x%.8X, type=0x%.8X, l_bitMask=0x%.16X, num=0x%.2X",
+                   TARGETING::get_huid(l_platTarget), l_fapi2_type, l_bitMask, l_chiplet_num );
+
+          ++childIter;
+        }
+        else // remove child
+        {
+          childIter = l_children.erase(childIter); // this increments childIter
+
+          FAPI_DBG("getChildrenFilter: removed child=0x%.8X, type=0x%.8X, l_bitMask=0x%.16X, num=0x%.2X",
+                   TARGETING::get_huid(l_platTarget), l_fapi2_type, l_bitMask, l_chiplet_num );
+        }
+    }
+
+    // Return filtered fapi2::Targets to the caller
+    return l_children;
+}
+
+///
 /// @brief Get the target at the other end of a bus
 /// @tparam T The type of the target on the other end
 /// @param[out] o_target A target representing the thing on the other end

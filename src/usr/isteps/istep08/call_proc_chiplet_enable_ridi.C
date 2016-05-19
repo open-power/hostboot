@@ -53,12 +53,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-#include <config.h>
-
+#include <p9_chiplet_enable_ridi.H>
 
 
 namespace   ISTEP_08
@@ -95,8 +90,7 @@ void* call_proc_chiplet_enable_ridi( void *io_pArgs )
           "Running p9_chiplet_enable_ridi HWP on processor target %.8X",
           TARGETING::get_huid(l_cpu_target) );
 
-      // @TODO RTC:149115
-      //FAPI_INVOKE_HWP(l_err, p9_chiplet_enable_ridi, l_fapi2_proc_target);
+      FAPI_INVOKE_HWP(l_err, p9_chiplet_enable_ridi, l_fapi2_proc_target);
       if(l_err)
       {
           TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

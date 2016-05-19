@@ -62,62 +62,61 @@ VPATH += ${PROCEDURES_PATH}/hwp/sbe/
 
 
 include ${ROOTPATH}/procedure.rules.mk
-# 8.1 host_slave_sbe_config
+# host_slave_sbe_config
 include ${PROCEDURES_PATH}/hwp/perv/p9_setup_sbe_config.mk
 
-# 8.2 host_setup_sbe
+# host_setup_sbe
 include ${PROCEDURES_PATH}/hwp/perv/p9_set_fsi_gp_shadow.mk
 
-# 8.3 host_cbs_start
+# host_cbs_start
 include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
 
-# 8.4 proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
+# proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
 include ${PROCEDURES_PATH}/hwp/perv/p9_check_slave_sbe_seeprom_complete.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_extract_sbe_rc.mk
 include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
 
-# 8.5 proc_cen_ref_clk_enable
+# proc_cen_ref_clk_enable
 # Cummulus only -- p9_cen_ref_clk_enable.mk not defined yet
 
-# 8.6 proc_attr_update: Proc ATTR Update
+# proc_attr_update: Proc ATTR Update
 include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk
 
-# 8.7 proc_enable_osclite
+# proc_enable_osclite
 # Cummulus only -- p9_enable_osclite.mk not defined yet
 
-# 8.8 proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
+# proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
 #TODO-RTC:149687 - HWP requires p9_fbc_scom.H
 #include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
 #include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_psi_scom.mk
 
-# 8.9 proc_xbus_scominit : Apply scom inits to Xbus
+# proc_xbus_scominit : Apply scom inits to Xbus
 # TODO-RTC:149687
 # Now missing p9_io_regs.H, p9_xbus_g0_scom.H and p9_xbus_g1_scom.H
 #include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk
 
-# 8.10 proc_abus_scominit : Apply scom inits to Abus
+# proc_abus_scominit : Apply scom inits to Abus
 # HWP not found - p9_abus_scominit.mk not defined
 
-# 8.11 proc_obus_scominit : Apply scom inits to Obus
+# proc_obus_scominit : Apply scom inits to Obus
 # TODO-RTC:149687 - Missing p9_io_regs.H
 #include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
 
-# 8.12 proc_npu_scominit : Apply scom inits to NPU bus
+# proc_npu_scominit : Apply scom inits to NPU bus
 include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
 
-# 8.13 proc_pcie_scominit : Apply scom inits to PCIe chiplets
+# proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
 
-# 8.14 proc_scomoverride_chiplets : Apply sequenced scom inits
+# proc_scomoverride_chiplets : Apply sequenced scom inits
 include ${PROCEDURES_PATH}/hwp/nest/p9_scomoverride_chiplets.mk
 
-# 8.15 proc_chiplet_enable_ridi : Apply RI/DI chip wide
-# TODO-RTC:149115 - missing parameter in fapi2::getChildren()
-#include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
+# proc_chiplet_enable_ridi : Apply RI/DI chip wide
+include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 
-# 8.16 host_rng_bist : Trigger Built In Self Test
+# host_rng_bist : Trigger Built In Self Test
 # HWP not ready - p9_trigger_rng_bist.mk
 
 include ${ROOTPATH}/config.mk
