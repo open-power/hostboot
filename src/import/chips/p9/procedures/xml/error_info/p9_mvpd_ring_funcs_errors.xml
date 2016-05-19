@@ -1,0 +1,70 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_mvpd_ring_funcs_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_mvpd_ring_funcs procedure -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
+    <description>MVPD ring function parameter is not valid</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_NOT_FOUND</rc>
+    <description>Specified MVPD ring for this target was not found</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>RING_MODIFIER</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>CHIP_TARGET</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_REPAIR_RING_INVALID_SIZE</rc>
+    <description>Data does not fit into record</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE</rc>
+    <description>Data does not fit into output buffer</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INVALID_RECORD</rc>
+    <description>MVPD ring function record is not valid</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
