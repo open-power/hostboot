@@ -51,6 +51,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_OTHER_END_TEST           = 0x08,
         MOD_FAPI2_PLAT_GET_OTHER_END                = 0x09,
         MOD_FAPI2_MVPD_ACCESS                       = 0x0A,
+        MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST     = 0x0B,
     };
 
     /**

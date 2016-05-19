@@ -42,7 +42,7 @@ class Fapi2GetChildrenTest : public CxxTest::TestSuite
 {
 public:
 //******************************************************************************
-// test_fapi2GetParent
+// test_fapi2GetChildren
 //******************************************************************************
 void test_fapi2GetChildren()
 {
@@ -448,6 +448,158 @@ void test_fapi2GetChildren()
 }
 
 
+//******************************************************************************
+// test_fapi2GetChildrenFilter
+//******************************************************************************
+void test_fapi2GetChildrenFilter()
+{
+    int numTests = 0;
+    int numFails = 0;
+    uint32_t l_targetHuid = 0xFFFFFFFF;
+    uint32_t l_actualSize = 0;
+    uint32_t l_expectedSize = 0;
+    errlHndl_t l_err = NULL;
+    TARGETING::Target * l_nimbusProc = NULL;
+    do
+    {
+        FAPI_DBG("start of test_fapi2GetChildrenFilter()");
+
+        // Create a vector of TARGETING::Target pointers
+        TARGETING::TargetHandleList l_chipList;
+
+        // Get a list of all of the proc chips
+        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+        //Take the first NIMBUS proc and use it
+        for(uint32_t i = 0; i < l_chipList.size(); i++)
+        {
+            if(TARGETING::MODEL_NIMBUS ==
+            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+            {
+              l_nimbusProc = l_chipList[i];
+              break;
+            }
+        }
+        numTests++;
+
+        if(l_nimbusProc == NULL)
+        {
+            // Send an errorlog because we cannot find any NIMBUS procs.
+            FAPI_ERR("FAPI2_GETCHILDREN:: could not find Nimbus proc, skipping tests");
+            numFails++;
+            TS_FAIL("test_fapi2GetChildrenFilter Fail: could not find Nimbus proc, skipping tests");
+            break;
+        }
+
+        TARGETING::Target* targeting_targets[NUM_TARGETS];
+        generateTargets(l_nimbusProc, targeting_targets);
+
+        numTests++;
+        for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+        {
+            if(targeting_targets[x] == NULL)
+            {
+              FAPI_ERR("Unable to find target for item %d in targeting_targets", x);
+              numFails++;
+              TS_FAIL("test_fapi2GetChildrenFilter Fail: Unable to find target for item %d in targeting_targets", x);
+              break;
+            }
+        }
+
+        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
+                l_nimbusProc);
+
+        std::vector<Target<fapi2::TARGET_TYPE_PERV> > l_childPERVs;
+
+        // Start of the Tests
+
+        // PERV - TARGET_FILTER_ALL_CORES
+        l_expectedSize = 24;
+        l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                                             TARGET_FILTER_ALL_CORES,
+                                                             TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
+        l_actualSize = l_childPERVs.size();
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            numFails++;
+            break;
+        }
+
+        // PERV - TARGET_FILTER_CORE1
+        l_expectedSize = 1;
+        l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                                             TARGET_FILTER_CORE1,
+                                                             TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
+        l_actualSize = l_childPERVs.size();
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            numFails++;
+            break;
+        }
+
+        // PERV - TARGET_FILTER_ALL_MC
+        l_expectedSize = 2;
+        l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                                             TARGET_FILTER_ALL_MC,
+                                                             TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
+        l_actualSize = l_childPERVs.size();
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            numFails++;
+            break;
+        }
+
+        // PERV - SYNC_MODE_ALL_IO_EXCEPT_NEST
+        // NOTE:  2 of 4 OBUS are Cumulus only, so expect 8 instead of 10 returned
+        l_expectedSize = 8;
+        l_childPERVs = fapi2_procTarget.getChildren<fapi2::TARGET_TYPE_PERV>(
+                                                             TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST,
+                                                             TARGET_STATE_PRESENT);
+        l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
+        l_actualSize = l_childPERVs.size();
+        numTests++;
+        if(l_actualSize != l_expectedSize)
+        {
+            numFails++;
+            break;
+        }
+
+    }while(0);
+
+    if(l_actualSize != l_expectedSize)
+    {
+        /*@
+        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST
+        * @reasoncode         fapi2::RC_INVALID_CHILD_COUNT
+        * @userdata1[0:31]    Expected Child Count
+        * @userdata1[32:63]   Actual Child Count
+        * @userdata2          Parent HUID
+        * @devdesc            Invalid amount of child cores found
+        *                     on a proc
+        */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_FILTER_TEST,
+                                        fapi2::RC_INVALID_CHILD_COUNT,
+                                        TWO_UINT32_TO_UINT64(
+                                        TO_UINT32(
+                                        l_expectedSize),
+                                        TO_UINT32(
+                                        l_actualSize)),
+                                        l_targetHuid,
+                                        true/*SW Error*/);
+        errlCommit(l_err,HWPF_COMP_ID);
+        TS_FAIL("test_fapi2GetChildrenFilter Fail, for HUID: 0x%X , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
+    }
+
+    FAPI_INF("test_fapi2GetChildrenFilter: Test Complete. %d/%d fails",  numFails , numTests);
+}
 
 
 };
