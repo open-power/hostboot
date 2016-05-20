@@ -1929,6 +1929,8 @@
     <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK_KHZ</id></attribute>
     <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>
+    <attribute><id>MAX_ALLOWED_DIMM_FREQ</id></attribute>
+    <attribute><id>REQUIRED_SYNCH_MODE</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
     <attribute><id>FREQ_A</id></attribute>
     <attribute><id>FREQ_PB</id></attribute>
@@ -2223,6 +2225,7 @@
     <attribute><id>CLOCK_PLL_MUX0</id></attribute>
     <attribute><id>BOOT_FREQ_MULT</id></attribute>
     <attribute><id>PFET_OFF_CONTROLS</id></attribute>
+    <attribute><id>MC_SYNC_MODE</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
