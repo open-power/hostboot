@@ -18818,6 +18818,10 @@ DEPRECATED!!!!
     <description>
       Specify the system policy to enforce synchronous mode between memory and
       nest. This drives the value of ATTR_MEM_IN_SYNCH_MODE.
+        0 = UNDETERMINED : Run synchronously if the dimm and nest freq matches
+        1 = ALWAYS : Require matching frequencies and deconfigure memory that
+                     does not match the nest
+        2 = NEVER : Do not run synchronously, even if the frequencies match
     </description>
     <simpleType>
         <uint8_t>
@@ -18845,15 +18849,14 @@ DEPRECATED!!!!
     <simpleType>
         <uint32_t>
         </uint32_t>
-        <array>0,1, 2, 3</array>
+        <array>4</array>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <!--<attribute>
