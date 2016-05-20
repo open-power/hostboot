@@ -332,6 +332,10 @@ extern "C"
                                  PERV_TOD_S_PATH_CTRL_REG_0_STEP_CHECK_VALIDITY_COUNT_LEN>(STEP_CHECK_VALIDITY_COUNT_8);
         }
 
+        //In either case set the S_PATH_REMOTE_SYNC_MISS_COUNT_MAX to 1
+        data.insertFromRight<PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX, PERV_TOD_S_PATH_CTRL_REG_REMOTE_SYNC_MISS_COUNT_MAX_LEN>
+        (S_PATH_REMOTE_SYNC_MISS_COUNT_1);
+
         FAPI_TRY(fapi2::putScom(*target, PERV_TOD_S_PATH_CTRL_REG, data),
                  "fapiPutScom error for PERV_TOD_S_PATH_CTRL_REG SCOM.");
 
@@ -827,35 +831,69 @@ extern "C"
         else // slave node
         {
             uint32_t bus_mode_addr = 0;
-            //uint32_t bus_mode_sel = 0;
+            uint32_t bus_mode_sel = 0;
             uint32_t bus_freq = 0;
-            uint8_t  bus_delay = 0;
+            uint32_t  bus_delay = 0;
+
+            data.flush<0>();
 
             switch (i_tod_node->i_bus_rx)
             {
                 case(XBUS0):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X0_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_0>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR0_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS1):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X1_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_1>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR1_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS2):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X2_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_2>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR2_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS3):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X3_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_3>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR3_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS4):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X4_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_4>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS5):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X5_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS6):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X6_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    break;
 
                 case(XBUS7):
-                    bus_freq = i_freq_x; /*bus_mode_addr = PB_X_MODE_0x04010C0A; bus_mode_sel = PB_X_MODE_LINK_X7_ROUND_TRIP_DELAY;*/ break;
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
+                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
+                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    break;
 
                 case(NONE):
                     FAPI_ASSERT((i_tod_node->i_bus_rx != NONE),
@@ -863,9 +901,15 @@ extern "C"
                     break;
             }
 
+            FAPI_TRY(fapi2::putScom(*target, PU_PB_ELINK_RT_DELAY_CTL_REG, data),
+                     "Error setting the Electrical Link Control register!");
+
             FAPI_TRY(fapi2::getScom(*target, bus_mode_addr, data),
                      "Error from fapiGetScom when retrieving bus_mode_addr!");
-            //TODO Figure out where LINK_ROUND_TRIP_DELAY_LEN is coming from data.extract(&bus_delay, bus_mode_sel, LINK_ROUND_TRIP_DELAY_LEN);
+            FAPI_TRY(data.extractToRight(bus_delay, bus_mode_sel, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
+                     "Error trying to extract delay");
+
+            //FAPI_ASSERT(!data.getBit<bus_mode_sel>(), fapi2::P9_TOD_LINK_DELAY_NOT_VALID.set_TARGET(target).set_ADDR(bus_mode_addr).set_DATA(data), "the TOD delay first bit is set to 1 so it is not valid");
 
             // By default, the TOD grid runs at 400ps; TOD counts its delay based on this
             // Example: Bus round trip delay is 35 cycles and the bus is running at 4800MHz

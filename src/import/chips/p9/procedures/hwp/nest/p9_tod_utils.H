@@ -228,6 +228,26 @@ const uint32_t TFMR_STATE_TB_RUNNING = 8;
 const uint32_t TFMR_LOAD_TOD_MOD_TB = 16;
 const uint32_t TFMR_MOVE_CHIP_TOD_TO_TB = 18;
 
+//PB_ELINK_DLY register bits
+const uint32_t PB_ELINK_DLY_FMR0_LINK_DELAY_START_BIT = 4;
+const uint32_t PB_ELINK_DLY_FMR1_LINK_DELAY_START_BIT = 20;
+const uint32_t PB_ELINK_DLY_FMR2_LINK_DELAY_START_BIT = 36;
+const uint32_t PB_ELINK_DLY_FMR3_LINK_DELAY_START_BIT = 52;
+const uint32_t PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT = 4;
+const uint32_t PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT = 20;
+const uint32_t PB_ELINK_DLY_FMR_LINK_DELAY_LEN = 12;
+
+//PB_ELINK_RT_DELAY register bits
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_0 = 0;
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_1 = 1;
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_2 = 2;
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_3 = 3;
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_4 = 4;
+const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_5 = 5;
+
+//The number of syncs that we are ok with the slave path missing (this must be set to at least 1 or there will be a fail)
+const uint32_t S_PATH_REMOTE_SYNC_MISS_COUNT_1 = 1;
+
 //I don't see this one listed in the P9 documentation
 const uint32_t TOD_CHIP_CTRL_REG_LOW_ORDER_STEP_VAL_3F  = 0x3F;
 
