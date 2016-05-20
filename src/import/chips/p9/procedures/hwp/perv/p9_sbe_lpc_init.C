@@ -40,16 +40,13 @@
 #include "p9_sbe_lpc_init.H"
 
 #include "p9_perv_scom_addresses.H"
-
+#include "p9_perv_scom_addresses_fld.H"
 
 fapi2::ReturnCode p9_sbe_lpc_init(const
                                   fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     fapi2::buffer<uint64_t> l_data64;
     FAPI_DBG("Entering ...");
-
-    //activate LPCM reset input
-    //TODO: ADU register address TBD
 
     // set LPC clock mux select to internal clock
     //Setting CPLT_CTRL0 register value
@@ -63,8 +60,10 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
     l_data64.setBit<1>();  //PERV.CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 0
     FAPI_TRY(fapi2::putScom(i_target_chip, PERV_TP_CPLT_CTRL0_CLEAR, l_data64));
 
-    //de-activate LPCM reset input
-    //TODO: ADU register address TBD
+    //Settting registers to do an LPC functional reset
+    l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
+    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_OR, l_data64));
+    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_CLEAR, l_data64));
 
     FAPI_DBG("Exiting ...");
 
