@@ -4180,7 +4180,7 @@ sub generate_mcbist
 sub generate_pec
 {
     my ($proc, $pec, $ordinalId, $ipath,$fapiPosHr) = @_;
-    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PEC_PER_PROC + $pec);
+    my $uidstr = sprintf("0x%02X2D%04X",${node},$proc*MAX_PEC_PER_PROC + $pec);
     my $mruData = get_mruid($ipath);
 
     my $lognode;
@@ -4245,7 +4245,7 @@ sub generate_phb_chiplet
 {
     my ($proc, $phb, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $phb_orig = $phb;
-    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PHB_PER_PROC + $phb);
+    my $uidstr = sprintf("0x%02X2E%04X",${node},$proc*MAX_PHB_PER_PROC + $phb);
     my $mruData = get_mruid($ipath);
     my $pec = 0;
     my $phbChipUnit = $phb;
@@ -4323,7 +4323,7 @@ sub generate_phb_chiplet
 sub generate_ppe
 {
     my ($proc, $ppe, $ordinalId, $ipath,$fapiPosHr) = @_;
-    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PPE_PER_PROC + $ppe);
+    my $uidstr = sprintf("0x%02X2B%04X",${node},$proc*MAX_PPE_PER_PROC + $ppe);
     my $mruData = get_mruid($ipath);
 
     my $lognode;
