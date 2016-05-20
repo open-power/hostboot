@@ -139,26 +139,7 @@ extern "C"
         data.setBit<TFMR_MOVE_CHIP_TOD_TO_TB>();
         FAPI_TRY(p9_tod_utils_set_tfmr_reg(coreTarget, i_thread_num, data), "Could not write TFMR to mvoe chip_tod_to_tb");
 
-        tod_init_pending_count = 0;
-
-        while(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT)
-        {
-            FAPI_TRY(fapi2::delay(P9_TOD_UTILS_HW_NS_DELAY, P9_TOD_UTILS_SIM_CYCLE_DELAY), "fapiDelay error");
-            FAPI_TRY(p9_tod_utils_get_tfmr_reg(coreTarget, i_thread_num, data), "Could not read TFMR register for polling");
-            data.extract(tfmr_state, TFMR_STATE_START_BIT, TFMR_STATE_NUM_BITS, 60);
-
-            if (tfmr_state == TFMR_STATE_TB_SYNC_WAIT)
-            {
-                FAPI_DBG("TFMR in TB_SYNC_WAIT state");
-                break;
-            }
-
-            ++tod_init_pending_count;
-        }
-
-        FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
-                    fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
-                    "TFMR state machine did not go to sync wait in time!");
+        //We don't check for TB_SYNC_WAIT since that state is fleeting
 
         tod_init_pending_count = 0;
 
@@ -205,7 +186,7 @@ extern "C"
 
             if (tfmr_state == TFMR_STATE_TB_RUNNING)
             {
-                FAPI_DBG("TFMR in TB_RESET state");
+                FAPI_DBG("TFMR in TB_RUNNING state");
                 break;
             }
 
@@ -236,6 +217,16 @@ extern "C"
         FAPI_ASSERT(tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT,
                     fapi2::P9_TOD_INIT_TIMEOUT().set_TARGET(target).set_COUNT(tod_init_pending_count),
                     "TFMR_MOVE_CHIP_TOD_TO_TB did not clear in time!");
+
+        // Finish configuring downstream nodes
+        for (std::list<tod_topology_node*>::const_iterator child = (i_tod_node->i_children).begin();
+             child != (i_tod_node->i_children).end();
+             ++child)
+        {
+            tod_topology_node* tod_node = *child;
+            FAPI_TRY(p9_tod_move_tod_to_tb(tod_node, i_thread_num, i_failingTodProc), "Failure configuring downstream node!");
+        }
+
 
     fapi_try_exit:
         FAPI_DBG("Exiting...");

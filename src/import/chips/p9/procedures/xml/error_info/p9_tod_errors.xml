@@ -106,5 +106,16 @@
     <ffdc>THREADNUMBER</ffdc>
     </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_LINK_DELAY_NOT_VALID</rc>
+    <description>
+      Procedure: p9_tod_setup
+      The link delay value is not valid 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDR</ffdc>
+    <ffdc>DATA</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** --> 
 </hwpErrors>
 
