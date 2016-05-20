@@ -200,6 +200,27 @@ ReturnCode getTargetingAttr(
             FAPI_ERR("getTargetingAttr: Error from getTargetingAttrHelper "
                      "for target 0x%.8X and attribute 0x%x",
                      TARGETING::get_huid(l_pTargTarget), i_targAttrId);
+
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_GET_TARGETING_ATTR
+             * @reasoncode        RC_INVALID_ATTRIBUTE
+             * @userdata1[0:31]   FAPI2 Target Type
+             * @userdata1[32:63]  HB Target HUID
+             * @userdata2         Requested attribute ID
+             * @devdesc           Invalid attribute read request
+             * @custdesc          Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             MOD_FAPI2_GET_TARGETING_ATTR,
+                                             RC_INVALID_ATTRIBUTE,
+                                             TWO_UINT32_TO_UINT64(
+                                              i_pFapiTarget.getType(),
+                                              TARGETING::get_huid(l_pTargTarget)
+                                             ),
+                                             i_targAttrId);
+
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
         }
     }
     return l_rc;
@@ -252,6 +273,27 @@ ReturnCode setTargetingAttr(
             FAPI_ERR("setTargetingAttr: Error from setTargetingAttrHelper "
                      "for target 0x%.8X and attribute 0x%x",
                      TARGETING::get_huid(l_pTargTarget), i_targAttrId);
+
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_SET_TARGETING_ATTR
+             * @reasoncode        RC_INVALID_ATTRIBUTE
+             * @userdata1[0:31]   FAPI2 Target Type
+             * @userdata1[32:63]  HB Target HUID
+             * @userdata2         Requested attribute ID
+             * @devdesc           Invalid attribute write request
+             * @custdesc          Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             MOD_FAPI2_SET_TARGETING_ATTR,
+                                             RC_INVALID_ATTRIBUTE,
+                                             TWO_UINT32_TO_UINT64(
+                                              i_pFapiTarget.getType(),
+                                              TARGETING::get_huid(l_pTargTarget)
+                                             ),
+                                             i_targAttrId);
+
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
         }
     }
     return l_rc;

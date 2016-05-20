@@ -21487,21 +21487,6 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-  <id>FABRIC_SYSTEM_ID</id>
-  <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
-  <simpleType>
-    <uint8_t>
-    </uint8_t>
-  </simpleType>
-  <persistency>volatile-zeroed</persistency>
-  <readable/>
-  <hwpfToHbAttrMap>
-    <id>ATTR_FABRIC_SYSTEM_ID</id>
-    <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
-</attribute>
-
 <!-- name changed in ekb, need to have both to push interim commits through -->
 <attribute>
   <id>PROC_FABRIC_SYSTEM_ID</id>
