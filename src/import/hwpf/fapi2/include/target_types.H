@@ -24,6 +24,11 @@
 #ifndef __FAPI2_TARGET_TYPES__
 #define __FAPI2_TARGET_TYPES__
 #include <stdint.h>
+
+// File that plat uses to assign values to TargetFilter enum
+#include "plat_target_filter.H"
+
+
 /// FAPI namespace
 namespace fapi2
 {
@@ -100,54 +105,56 @@ enum TargetType
 
 ///
 /// @brief Enumeration of chiplet filters
+/// @note plat_target_filter.H assigns enum value using PlatTargetFilter namespace
 ///
-enum TargetFilter
+
+enum TargetFilter : uint64_t
 {
-    TARGET_FILTER_TP          = 0x8000000000000000,  // Pervasive 1
-    TARGET_FILTER_NEST_NORTH  = 0x4000000000000000,  // Pervasive 2
-    TARGET_FILTER_NEST_SOUTH  = 0x2000000000000000,  // Pervasive 3
-    TARGET_FILTER_NEST_EAST   = 0x1000000000000000,  // Pervasive 4
-    TARGET_FILTER_NEST_WEST   = 0x0800000000000000,  // Pervasive 5
-    TARGET_FILTER_XBUS        = 0x0400000000000000,  // Pervasive 6
-    TARGET_FILTER_MC_WEST     = 0x0200000000000000,  // Pervasive 7
-    TARGET_FILTER_MC_EAST     = 0x0100000000000000,  // Pervasive 8
-    TARGET_FILTER_OBUS0       = 0x0080000000000000,  // Pervasive 9
-    TARGET_FILTER_OBUS1       = 0x0040000000000000,  // Pervasive 10
-    TARGET_FILTER_OBUS2       = 0x0020000000000000,  // Pervasive 11
-    TARGET_FILTER_OBUS3       = 0x0010000000000000,  // Pervasive 12
-    TARGET_FILTER_PCI0        = 0x0008000000000000,  // Pervasive 13
-    TARGET_FILTER_PCI1        = 0x0004000000000000,  // Pervasive 14
-    TARGET_FILTER_PCI2        = 0x0002000000000000,  // Pervasive 15
-    TARGET_FILTER_CACHE0      = 0x0001000000000000,  // Pervasive 16
-    TARGET_FILTER_CACHE1      = 0x0000800000000000,  // Pervasive 17
-    TARGET_FILTER_CACHE2      = 0x0000400000000000,  // Pervasive 18
-    TARGET_FILTER_CACHE3      = 0x0000200000000000,  // Pervasive 19
-    TARGET_FILTER_CACHE4      = 0x0000100000000000,  // Pervasive 20
-    TARGET_FILTER_CACHE5      = 0x0000080000000000,  // Pervasive 21
-    TARGET_FILTER_CORE0       = 0x0000040000000000,  // Pervasive 32
-    TARGET_FILTER_CORE1       = 0x0000020000000000,  // Pervasive 33
-    TARGET_FILTER_CORE2       = 0x0000010000000000,  // Pervasive 34
-    TARGET_FILTER_CORE3       = 0x0000008000000000,  // Pervasive 35
-    TARGET_FILTER_CORE4       = 0x0000004000000000,  // Pervasive 36
-    TARGET_FILTER_CORE5       = 0x0000002000000000,  // Pervasive 37
-    TARGET_FILTER_CORE6       = 0x0000001000000000,  // Pervasive 38
-    TARGET_FILTER_CORE7       = 0x0000000800000000,  // Pervasive 39
-    TARGET_FILTER_CORE8       = 0x0000000400000000,  // Pervasive 40
-    TARGET_FILTER_CORE9       = 0x0000000200000000,  // Pervasive 41
-    TARGET_FILTER_CORE10      = 0x0000000100000000,  // Pervasive 42
-    TARGET_FILTER_CORE11      = 0x0000000080000000,  // Pervasive 43
-    TARGET_FILTER_CORE12      = 0x0000000040000000,  // Pervasive 44
-    TARGET_FILTER_CORE13      = 0x0000000020000000,  // Pervasive 45
-    TARGET_FILTER_CORE14      = 0x0000000010000000,  // Pervasive 46
-    TARGET_FILTER_CORE15      = 0x0000000008000000,  // Pervasive 47
-    TARGET_FILTER_CORE16      = 0x0000000004000000,  // Pervasive 48
-    TARGET_FILTER_CORE17      = 0x0000000002000000,  // Pervasive 49
-    TARGET_FILTER_CORE18      = 0x0000000001000000,  // Pervasive 50
-    TARGET_FILTER_CORE19      = 0x0000000000800000,  // Pervasive 51
-    TARGET_FILTER_CORE20      = 0x0000000000400000,  // Pervasive 52
-    TARGET_FILTER_CORE21      = 0x0000000000200000,  // Pervasive 53
-    TARGET_FILTER_CORE22      = 0x0000000000100000,  // Pervasive 54
-    TARGET_FILTER_CORE23      = 0x0000000000080000,  // Pervasive 55
+    TARGET_FILTER_TP         = PlatTargetFilter::PLAT_TARGET_FILTER_TP,         // Pervasive 1
+    TARGET_FILTER_NEST_NORTH = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_NORTH, // Pervasive 2
+    TARGET_FILTER_NEST_EAST  = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_EAST,  // Pervasive 3
+    TARGET_FILTER_NEST_SOUTH = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_SOUTH, // Pervasive 4
+    TARGET_FILTER_NEST_WEST  = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_WEST,  // Pervasive 5
+    TARGET_FILTER_XBUS       = PlatTargetFilter::PLAT_TARGET_FILTER_XBUS,       // Pervasive 6
+    TARGET_FILTER_MC_WEST    = PlatTargetFilter::PLAT_TARGET_FILTER_MC_WEST,    // Pervasive 7
+    TARGET_FILTER_MC_EAST    = PlatTargetFilter::PLAT_TARGET_FILTER_MC_EAST,    // Pervasive 8
+    TARGET_FILTER_OBUS0      = PlatTargetFilter::PLAT_TARGET_FILTER_OBUS0,      // Pervasive 9
+    TARGET_FILTER_OBUS1      = PlatTargetFilter::PLAT_TARGET_FILTER_OBUS1,      // Pervasive 10
+    TARGET_FILTER_OBUS2      = PlatTargetFilter::PLAT_TARGET_FILTER_OBUS2,      // Pervasive 11
+    TARGET_FILTER_OBUS3      = PlatTargetFilter::PLAT_TARGET_FILTER_OBUS3,      // Pervasive 12
+    TARGET_FILTER_PCI0       = PlatTargetFilter::PLAT_TARGET_FILTER_PCI0,       // Pervasive 13
+    TARGET_FILTER_PCI1       = PlatTargetFilter::PLAT_TARGET_FILTER_PCI1,       // Pervasive 14
+    TARGET_FILTER_PCI2       = PlatTargetFilter::PLAT_TARGET_FILTER_PCI2,       // Pervasive 15
+    TARGET_FILTER_CACHE0     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE0,     // Pervasive 16
+    TARGET_FILTER_CACHE1     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE1,     // Pervasive 17
+    TARGET_FILTER_CACHE2     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE2,     // Pervasive 18
+    TARGET_FILTER_CACHE3     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE3,     // Pervasive 19
+    TARGET_FILTER_CACHE4     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE4,     // Pervasive 20
+    TARGET_FILTER_CACHE5     = PlatTargetFilter::PLAT_TARGET_FILTER_CACHE5,     // Pervasive 21
+    TARGET_FILTER_CORE0      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE0,      // Pervasive 32
+    TARGET_FILTER_CORE1      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE1,      // Pervasive 33
+    TARGET_FILTER_CORE2      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE2,      // Pervasive 34
+    TARGET_FILTER_CORE3      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE3,      // Pervasive 35
+    TARGET_FILTER_CORE4      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE4,      // Pervasive 36
+    TARGET_FILTER_CORE5      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE5,      // Pervasive 37
+    TARGET_FILTER_CORE6      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE6,      // Pervasive 38
+    TARGET_FILTER_CORE7      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE7,      // Pervasive 39
+    TARGET_FILTER_CORE8      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE8,      // Pervasive 20
+    TARGET_FILTER_CORE9      = PlatTargetFilter::PLAT_TARGET_FILTER_CORE9,      // Pervasive 41
+    TARGET_FILTER_CORE10     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE10,     // Pervasive 42
+    TARGET_FILTER_CORE11     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE11,     // Pervasive 43
+    TARGET_FILTER_CORE12     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE12,     // Pervasive 44
+    TARGET_FILTER_CORE13     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE13,     // Pervasive 45
+    TARGET_FILTER_CORE14     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE14,     // Pervasive 46
+    TARGET_FILTER_CORE15     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE15,     // Pervasive 47
+    TARGET_FILTER_CORE16     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE16,     // Pervasive 48
+    TARGET_FILTER_CORE17     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE17,     // Pervasive 49
+    TARGET_FILTER_CORE18     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE18,     // Pervasive 50
+    TARGET_FILTER_CORE19     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE19,     // Pervasive 51
+    TARGET_FILTER_CORE20     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE20,     // Pervasive 52
+    TARGET_FILTER_CORE21     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE21,     // Pervasive 53
+    TARGET_FILTER_CORE22     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE22,     // Pervasive 54
+    TARGET_FILTER_CORE23     = PlatTargetFilter::PLAT_TARGET_FILTER_CORE23,     // Pervasive 55
 
     // Composite filters follow
 
