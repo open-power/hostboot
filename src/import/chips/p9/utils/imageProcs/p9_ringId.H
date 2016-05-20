@@ -236,36 +236,31 @@ enum RingID
     eq_ana_func = 165,
     eq_ana_gptr = 166,
     eq_dpll_func = 167,
-    eq_dpll_func_bucket_1 = 168,
-    eq_dpll_func_bucket_2 = 169,
-    eq_dpll_func_bucket_3 = 170,
-    eq_dpll_func_bucket_4 = 171,
-    eq_dpll_func_bucket_5 = 172,
-    eq_dpll_gptr = 173,
-    eq_dpll_other = 174,
+    eq_dpll_gptr = 168,
+    eq_dpll_other = 169,
 
     // Quad Chiplet Rings
     // EQ0 - EQ5 instance specific Rings
-    eq_repr = 175,
-    ex_l3_repr = 176,
-    ex_l2_repr = 177,
-    ex_l3_refr_repr = 178,
+    eq_repr = 170,
+    ex_l3_repr = 171,
+    ex_l2_repr = 172,
+    ex_l3_refr_repr = 173,
 
     // Quad Chiplet Rings
     // Common - apply to all Quad instances
-    eq_ana_bndy = 179,
-    // values 180-181 unused
+    eq_ana_bndy = 174,
+    // values 175-176 unused
 
     // Core Chiplet Rings
     // Common - apply to all Core instances
-    ec_func = 182,
-    ec_gptr = 183,
-    ec_time = 184,
-    ec_mode = 185,
+    ec_func = 177,
+    ec_gptr = 178,
+    ec_time = 179,
+    ec_mode = 180,
 
     // Core Chiplet Rings
     // EC0 - EC23 instance specific Ring
-    ec_repr = 186,
+    ec_repr = 181,
     //***************************
     // Rings needed for SBE - End
     //***************************
@@ -692,14 +687,9 @@ enum RingOffset
     eq_ana_func     = 12,
     eq_ana_gptr     = 13,
     eq_dpll_func    = 14,
-    eq_dpll_func_bucket_1 = 14,
-    eq_dpll_func_bucket_2 = 15,
-    eq_dpll_func_bucket_3 = 16,
-    eq_dpll_func_bucket_4 = 17,
-    eq_dpll_func_bucket_5 = 18,
-    eq_dpll_gptr    = 19,
-    eq_dpll_other   = 20,
-    eq_ana_bndy     = 21,
+    eq_dpll_gptr    = 15,
+    eq_dpll_other   = 16,
+    eq_ana_bndy     = 17,
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ex_l3_repr      = (1 | INSTANCE_RING_MARK),
@@ -710,7 +700,7 @@ enum RingOffset
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    22, // 22 common rings for Quad chiplet
+    18, // 18 common rings for Quad chiplet
     4,  // 4 instance specific rings for each EQ chiplet
 };
 }; // end of namespace EQ
@@ -738,7 +728,7 @@ enum RingOffset
 static const CHIPLET_DATA g_ecData =
 {
     32, // Core Chiplet ID range is 32-55. The base ID is 32.
-    4,  // 3 common rings for Core chiplet
+    4,  // 4 common rings for Core chiplet
     1   // 1 instance specific ring for each Core chiplet
 };
 }; // end of namespace EC
@@ -944,26 +934,21 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {EQ::eq_ana_func,     "eq_ana_func"},     // 165
     {EQ::eq_ana_gptr,     "eq_ana_gptr"},     // 166
     {EQ::eq_dpll_func,    "eq_dpll_func"},    // 167
-    {EQ::eq_dpll_func_bucket_1, "eq_dpll_func_bucket_1"},    // 168
-    {EQ::eq_dpll_func_bucket_2, "eq_dpll_func_bucket_2"},    // 169
-    {EQ::eq_dpll_func_bucket_3, "eq_dpll_func_bucket_3"},    // 170
-    {EQ::eq_dpll_func_bucket_4, "eq_dpll_func_bucket_4"},    // 171
-    {EQ::eq_dpll_func_bucket_5, "eq_dpll_func_bucket_5"},    // 172
-    {EQ::eq_dpll_gptr,    "eq_dpll_gptr"},    // 173
-    {EQ::eq_dpll_other,   "eq_dpll_other"},   // 174
-    {EQ::eq_repr,         "eq_repr"},    // 175
-    {EQ::ex_l3_repr,      "ex_l3_repr"}, // 176
-    {EQ::ex_l2_repr,      "ex_l2_repr"}, // 177
-    {EQ::ex_l3_refr_repr, "ex_l3_refr_repr"}, // 178
-    {EQ::eq_ana_bndy,     "eq_ana_bndy"}, // 179
-    {INVALID_RING,        ""}, // 180 // for future.
-    {INVALID_RING,        ""}, // 181 // for future.
+    {EQ::eq_dpll_gptr,    "eq_dpll_gptr"},    // 168
+    {EQ::eq_dpll_other,   "eq_dpll_other"},   // 169
+    {EQ::eq_repr,         "eq_repr"},    // 170
+    {EQ::ex_l3_repr,      "ex_l3_repr"}, // 171
+    {EQ::ex_l2_repr,      "ex_l2_repr"}, // 172
+    {EQ::ex_l3_refr_repr, "ex_l3_refr_repr"}, // 173
+    {EQ::eq_ana_bndy,     "eq_ana_bndy"}, // 174
+    {INVALID_RING,        ""}, // 175 // for future.
+    {INVALID_RING,        ""}, // 176 // for future.
 
     // Core Ring
-    {EC::ec_func,         "ec_func"}, // 182
-    {EC::ec_gptr,         "ec_gptr"}, // 183
-    {EC::ec_time,         "ec_time"}, // 184
-    {EC::ec_mode,         "ec_mode"}, // 185
-    {EC::ec_repr,         "ec_repr"}  // 186
+    {EC::ec_func,         "ec_func"}, // 177
+    {EC::ec_gptr,         "ec_gptr"}, // 178
+    {EC::ec_time,         "ec_time"}, // 179
+    {EC::ec_mode,         "ec_mode"}, // 180
+    {EC::ec_repr,         "ec_repr"}  // 181
 };
 #endif
