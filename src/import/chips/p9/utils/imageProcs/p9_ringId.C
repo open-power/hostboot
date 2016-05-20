@@ -261,11 +261,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"ex_l3_refr_time"           , 0x0B, 0x10, 0x10, "ex_l3_refr_time_ring"      , NON_VPD_RING, 0,  0x0008000000000100},
     {"eq_ana_func"               , 0x0C, 0x10, 0x10, "eq_ana_func_ring"          , NON_VPD_RING, 0,  0x002000000000C000},
     {"eq_ana_gptr"               , 0x0D, 0x10, 0x10, "eq_ana_gptr_ring"          , NON_VPD_RING, 0,  0x0020000000002000},
-    {"eq_dpll_func_bucket_1"     , 0x0E, 0x10, 0x10, "eq_dpll_func_bucket_1"     , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"eq_dpll_func_bucket_2"     , 0x0F, 0x10, 0x10, "eq_dpll_func_bucket_2"     , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"eq_dpll_func_bucket_3"     , 0x10, 0x10, 0x10, "eq_dpll_func_bucket_3"     , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"eq_dpll_func_bucket_4"     , 0x11, 0x10, 0x10, "eq_dpll_func_bucket_4"     , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"eq_dpll_func_bucket_5"     , 0x12, 0x10, 0x10, "eq_dpll_func_bucket_5"     , NON_VPD_PLL_RING, 0,  0x0002000000000080},
+    {"eq_dpll_func"              , 0x0E, 0x10, 0x10, "eq_dpll_func_ring"         , NON_VPD_PLL_RING, 0,  0x0002000000000080},
     {"eq_dpll_gptr"              , 0x13, 0x10, 0x10, "eq_dpll_gptr_ring"         , NON_VPD_PLL_RING, 0,  0x0002000000002000},
     {"eq_dpll_other"             , 0x14, 0x10, 0x10, "eq_dpll_other_ring"        , NON_VPD_PLL_RING, 0,  0x0002000000005F70},
     {"eq_ana_bndy"               , 0x15, 0x10, 0x10, "eq_ana_bndy_ring"          , NON_VPD_PLL_RING, 0,  0x0002000000000080},
@@ -294,11 +290,3 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     { "ec_repr"         , 0x04, 0x20, 0x37, "ec_repr_ring",              NON_VPD_RING, 0,  0x0E00000000000200},
 };
 };
-
-
-
-
-
-
-
-
