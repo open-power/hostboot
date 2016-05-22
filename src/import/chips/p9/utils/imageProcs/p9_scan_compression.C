@@ -155,56 +155,6 @@
 // unique names to support concurrent update.  Most routines defined here have
 // some variant of 'rs4' in their names; others should be inherently unique.
 
-// Note: For maximum flexibility we provide private versions of
-// endian-conversion routines rather than counting on a system-specific header
-// to provide these.
-
-// Byte-reverse a 32/64-bit integer if on a little-endian machine
-// CMO comment 20160414: Investigate the use of myRev{32,64} functions from
-// infrastruct_help.H after the merge
-
-static uint32_t
-rs4_revle32(const uint32_t i_x)
-{
-    uint32_t rx;
-
-#ifndef _BIG_ENDIAN
-    uint8_t* pix = (uint8_t*)(&i_x);
-    uint8_t* prx = (uint8_t*)(&rx);
-
-    prx[0] = pix[3];
-    prx[1] = pix[2];
-    prx[2] = pix[1];
-    prx[3] = pix[0];
-#else
-    rx = i_x;
-#endif
-    return rx;
-}
-
-static uint64_t
-rs4_revle64(const uint64_t i_x)
-{
-    uint64_t rx;
-
-#ifndef _BIG_ENDIAN
-    uint8_t* pix = (uint8_t*)(&i_x);
-    uint8_t* prx = (uint8_t*)(&rx);
-
-    prx[0] = pix[7];
-    prx[1] = pix[6];
-    prx[2] = pix[5];
-    prx[3] = pix[4];
-    prx[4] = pix[3];
-    prx[5] = pix[2];
-    prx[6] = pix[1];
-    prx[7] = pix[0];
-#else
-    rx = i_x;
-#endif
-    return rx;
-}
-
 #if COMPRESSED_SCAN_DATA_VERSION != 1
     #error This code assumes CompressedScanData structure version 1 layout
 #endif
@@ -213,11 +163,11 @@ void
 compressed_scan_data_translate(CompressedScanData* o_data,
                                CompressedScanData* i_data)
 {
-    o_data->iv_magic             = rs4_revle32(i_data->iv_magic);
-    o_data->iv_size              = rs4_revle32(i_data->iv_size);
-    o_data->iv_algorithmReserved = rs4_revle32(i_data->iv_algorithmReserved);
-    o_data->iv_length            = rs4_revle32(i_data->iv_length);
-    o_data->iv_scanSelect        = rs4_revle64(i_data->iv_scanSelect);
+    o_data->iv_magic             = htobe32(i_data->iv_magic);
+    o_data->iv_size              = htobe32(i_data->iv_size);
+    o_data->iv_algorithmReserved = htobe32(i_data->iv_algorithmReserved);
+    o_data->iv_length            = htobe32(i_data->iv_length);
+    o_data->iv_scanSelect        = htobe64(i_data->iv_scanSelect);
     o_data->iv_headerVersion     = i_data->iv_headerVersion;
     o_data->iv_flushOptimization = i_data->iv_flushOptimization;
     o_data->iv_ringId            = i_data->iv_ringId;
@@ -507,11 +457,11 @@ _rs4_compress(CompressedScanData* io_data,
         bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
         bytes = ((bytes + 7) / 8) * 8;
 
-        io_data->iv_magic             = rs4_revle32(RS4_MAGIC);
-        io_data->iv_size              = rs4_revle32(bytes);
-        io_data->iv_algorithmReserved = rs4_revle32(nibbles);
-        io_data->iv_scanSelect        = rs4_revle64(i_scanSelect);
-        io_data->iv_length            = rs4_revle32(i_length);
+        io_data->iv_magic             = htobe32(RS4_MAGIC);
+        io_data->iv_size              = htobe32(bytes);
+        io_data->iv_algorithmReserved = htobe32(nibbles);
+        io_data->iv_scanSelect        = htobe64(i_scanSelect);
+        io_data->iv_length            = htobe32(i_length);
         io_data->iv_headerVersion     = COMPRESSED_SCAN_DATA_VERSION;
         io_data->iv_flushOptimization = i_flushOptimization;
         io_data->iv_ringId            = i_ringId;
@@ -697,13 +647,13 @@ _rs4_decompress(uint8_t* io_string,
 
     do
     {
-        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC)
+        if (htobe32(i_data->iv_magic) != RS4_MAGIC)
         {
             rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
             break;
         }
 
-        *o_length = rs4_revle32(i_data->iv_length);
+        *o_length = htobe32(i_data->iv_length);
         bytes = (*o_length + 7) / 8;
 
         if (i_stringSize < bytes)
@@ -734,13 +684,13 @@ rs4_decompress(uint8_t** o_string,
 
     do
     {
-        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC)
+        if (htobe32(i_data->iv_magic) != RS4_MAGIC)
         {
             rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
             break;
         }
 
-        length = rs4_revle32(i_data->iv_length);
+        length = htobe32(i_data->iv_length);
         bytes = (length + 7) / 8;
         *o_string = (uint8_t*)malloc(bytes);
 
@@ -770,14 +720,14 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
     {
         *o_redundant = 0;
 
-        if (rs4_revle32(i_data->iv_magic) != RS4_MAGIC)
+        if (htobe32(i_data->iv_magic) != RS4_MAGIC)
         {
             rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
             break;
         }
 
         data = (uint8_t*)i_data + sizeof(CompressedScanData);
-        stringLength = rs4_revle32(i_data->iv_length);
+        stringLength = htobe32(i_data->iv_length);
 
         // A compressed scan string is redundant if the initial rotate is
         // followed by the end-of-string marker, and any remaining mod-4 bits
