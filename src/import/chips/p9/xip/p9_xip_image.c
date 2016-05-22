@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <endian.h>
 #include "p9_xip_image.h"
 
 
@@ -100,8 +101,6 @@ XIP_STATIC P9_XIP_ERROR_STRINGS(p9_xip_error_strings);
 
 #if 0
 
-XIP_STATIC uint32_t xipRevLe32(const uint32_t i_x);
-
 XIP_STATIC P9_XIP_TYPE_STRINGS(type_strings);
 
 XIP_STATIC void
@@ -114,8 +113,8 @@ dumpToc(int index, P9XipToc* toc)
            "    iv_section  = 0x%02x\n"
            "    iv_elements = %d\n",
            index, toc,
-           xipRevLe32(toc->iv_id),
-           xipRevLe32(toc->iv_data),
+           htobe32(toc->iv_id),
+           htobe32(toc->iv_data),
            P9_XIP_TYPE_STRING(type_strings, toc->iv_type),
            toc->iv_section,
            toc->iv_elements);
@@ -185,87 +184,10 @@ dumpSectionTable(const void* i_image)
 #endif
 
 
-// Note: For maximum flexibility we provide private versions of
-// endian-conversion routines rather than counting on a system-specific header
-// to provide these.
-
-/// Byte-reverse a 16-bit integer if on a little-endian machine
-
-XIP_STATIC uint16_t
-xipRevLe16(const uint16_t i_x)
-{
-    uint16_t rx;
-
-#ifndef _BIG_ENDIAN
-    uint8_t* pix = (uint8_t*)(&i_x);
-    uint8_t* prx = (uint8_t*)(&rx);
-
-    prx[0] = pix[1];
-    prx[1] = pix[0];
-#else
-    rx = i_x;
-#endif
-
-    return rx;
-}
-
-
-/// Byte-reverse a 32-bit integer if on a little-endian machine
-
-XIP_STATIC uint32_t
-xipRevLe32(const uint32_t i_x)
-{
-    uint32_t rx;
-
-#ifndef _BIG_ENDIAN
-    uint8_t* pix = (uint8_t*)(&i_x);
-    uint8_t* prx = (uint8_t*)(&rx);
-
-    prx[0] = pix[3];
-    prx[1] = pix[2];
-    prx[2] = pix[1];
-    prx[3] = pix[0];
-#else
-    rx = i_x;
-#endif
-
-    return rx;
-}
-
-
-/// Byte-reverse a 64-bit integer if on a little-endian machine
-
-XIP_STATIC uint64_t
-xipRevLe64(const uint64_t i_x)
-{
-    uint64_t rx;
-
-#ifndef _BIG_ENDIAN
-    uint8_t* pix = (uint8_t*)(&i_x);
-    uint8_t* prx = (uint8_t*)(&rx);
-
-    prx[0] = pix[7];
-    prx[1] = pix[6];
-    prx[2] = pix[5];
-    prx[3] = pix[4];
-    prx[4] = pix[3];
-    prx[5] = pix[2];
-    prx[6] = pix[1];
-    prx[7] = pix[0];
-#else
-    rx = i_x;
-#endif
-
-    return rx;
-}
-
-
-/// What is the image link address?
-
 XIP_STATIC uint64_t
 xipLinkAddress(const void* i_image)
 {
-    return xipRevLe64(((P9XipHeader*)i_image)->iv_linkAddress);
+    return htobe64(((P9XipHeader*)i_image)->iv_linkAddress);
 }
 
 
@@ -274,7 +196,7 @@ xipLinkAddress(const void* i_image)
 XIP_STATIC uint32_t
 xipImageSize(const void* i_image)
 {
-    return xipRevLe32(((P9XipHeader*)i_image)->iv_imageSize);
+    return htobe32(((P9XipHeader*)i_image)->iv_imageSize);
 }
 
 
@@ -283,7 +205,7 @@ xipImageSize(const void* i_image)
 XIP_STATIC void
 xipSetImageSize(void* io_image, const size_t i_size)
 {
-    ((P9XipHeader*)io_image)->iv_imageSize = xipRevLe32(i_size);
+    ((P9XipHeader*)io_image)->iv_imageSize = htobe32(i_size);
 }
 
 
@@ -361,7 +283,7 @@ xipValidateImageAddress(const void* i_image,
 XIP_STATIC uint64_t
 xipMagic(const void* i_image)
 {
-    return xipRevLe64(((P9XipHeader*)i_image)->iv_magic);
+    return htobe64(((P9XipHeader*)i_image)->iv_magic);
 }
 
 
@@ -463,8 +385,8 @@ xipTranslateSection(P9XipSection* o_dest, const P9XipSection* i_src)
 #error This code assumes the P9-XIP header version 9 layout
 #endif
 
-    o_dest->iv_offset = xipRevLe32(i_src->iv_offset);
-    o_dest->iv_size = xipRevLe32(i_src->iv_size);
+    o_dest->iv_offset = htobe32(i_src->iv_offset);
+    o_dest->iv_size = htobe32(i_src->iv_size);
     o_dest->iv_alignment = i_src->iv_alignment;
     o_dest->iv_reserved8[0] = 0;
     o_dest->iv_reserved8[1] = 0;
@@ -491,8 +413,8 @@ xipTranslateToc(P9XipToc* o_dest, P9XipToc* i_src)
 #error This code assumes the P9-XIP header version 9 layout
 #endif
 
-    o_dest->iv_id = xipRevLe32(i_src->iv_id);
-    o_dest->iv_data = xipRevLe32(i_src->iv_data);
+    o_dest->iv_id = htobe32(i_src->iv_id);
+    o_dest->iv_data = htobe32(i_src->iv_data);
     o_dest->iv_type = i_src->iv_type;
     o_dest->iv_section = i_src->iv_section;
     o_dest->iv_elements = i_src->iv_elements;
@@ -605,7 +527,7 @@ xipSetSectionOffset(void* io_image, const int i_section,
 
     if (!rc)
     {
-        section->iv_offset = xipRevLe32(i_offset);
+        section->iv_offset = htobe32(i_offset);
     }
 
     return rc;
@@ -624,7 +546,7 @@ xipSetSectionSize(void* io_image, const int i_section, const uint32_t i_size)
 
     if (!rc)
     {
-        section->iv_size = xipRevLe32(i_size);
+        section->iv_size = htobe32(i_size);
     }
 
     return rc;
@@ -775,8 +697,8 @@ XIP_STATIC int
 xipCompareToc(const P9XipToc* i_a, const P9XipToc* i_b,
               const char* i_strings)
 {
-    return strcmp(i_strings + xipRevLe32(i_a->iv_id),
-                  i_strings + xipRevLe32(i_b->iv_id));
+    return strcmp(i_strings + htobe32(i_a->iv_id),
+                  i_strings + htobe32(i_b->iv_id));
 }
 
 
@@ -919,7 +841,7 @@ xipBinarySearch(void* i_image, const char* i_id, P9XipToc** o_entry)
         while (left <= right)
         {
             next = (left + right) / 2;
-            sort = strcmp(i_id, strings + xipRevLe32(imageToc[next].iv_id));
+            sort = strcmp(i_id, strings + htobe32(imageToc[next].iv_id));
 
             if (sort == 0)
             {
@@ -1097,8 +1019,8 @@ xipNormalizeToc(void* io_image, P9XipToc* io_imageToc,
                 break;
             }
 
-            (*io_fixedTocEntry)->iv_hash = xipRevLe32(xipHash32(hostString));
-            (*io_fixedTocEntry)->iv_offset = xipRevLe16(hostToc.iv_data);
+            (*io_fixedTocEntry)->iv_hash = htobe32(xipHash32(hostString));
+            (*io_fixedTocEntry)->iv_offset = htobe16(hostToc.iv_data);
             (*io_fixedTocEntry)->iv_type = hostToc.iv_type;
             (*io_fixedTocEntry)->iv_elements = hostToc.iv_elements;
 
@@ -1358,7 +1280,7 @@ xipFixedFind(void* i_image, const char* i_id, P9XipItem* o_item)
             break;
         }
 
-        for (hash = xipRevLe32(xipHash32(i_id)); entries != 0; entries--, toc++)
+        for (hash = htobe32(xipHash32(i_id)); entries != 0; entries--, toc++)
         {
             if (toc->iv_hash == hash)
             {
@@ -1406,7 +1328,7 @@ xipFixedFind(void* i_image, const char* i_id, P9XipItem* o_item)
             break;
         }
 
-        offset = fixedSection.iv_offset + xipRevLe16(toc->iv_offset);
+        offset = fixedSection.iv_offset + htobe16(toc->iv_offset);
 
         o_item->iv_imageData = (void*)((uint8_t*)i_image + offset);
         o_item->iv_address = xipLinkAddress(i_image) + offset;
@@ -2104,15 +2026,15 @@ p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
                 break;
 
             case P9_XIP_UINT16:
-                *o_data = xipRevLe16(*((uint16_t*)(item.iv_imageData)));
+                *o_data = htobe16(*((uint16_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_UINT32:
-                *o_data = xipRevLe32(*((uint32_t*)(item.iv_imageData)));
+                *o_data = htobe32(*((uint32_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_UINT64:
-                *o_data = xipRevLe64(*((uint64_t*)(item.iv_imageData)));
+                *o_data = htobe64(*((uint64_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_INT8:
@@ -2120,15 +2042,15 @@ p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
                 break;
 
             case P9_XIP_INT16:
-                *o_data = xipRevLe16(*((int16_t*)(item.iv_imageData)));
+                *o_data = htobe16(*((int16_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_INT32:
-                *o_data = xipRevLe32(*((int32_t*)(item.iv_imageData)));
+                *o_data = htobe32(*((int32_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_INT64:
-                *o_data = xipRevLe64(*((int64_t*)(item.iv_imageData)));
+                *o_data = htobe64(*((int64_t*)(item.iv_imageData)));
                 break;
 
             case P9_XIP_ADDRESS:
@@ -2176,15 +2098,15 @@ p9_xip_get_element(void* i_image,
                 break;
 
             case P9_XIP_UINT16:
-                *o_data = xipRevLe16(((uint16_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe16(((uint16_t*)(item.iv_imageData))[i_index]);
                 break;
 
             case P9_XIP_UINT32:
-                *o_data = xipRevLe32(((uint32_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe32(((uint32_t*)(item.iv_imageData))[i_index]);
                 break;
 
             case P9_XIP_UINT64:
-                *o_data = xipRevLe64(((uint64_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe64(((uint64_t*)(item.iv_imageData))[i_index]);
                 break;
 
             case P9_XIP_INT8:
@@ -2192,15 +2114,15 @@ p9_xip_get_element(void* i_image,
                 break;
 
             case P9_XIP_INT16:
-                *o_data = xipRevLe16(((int16_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe16(((int16_t*)(item.iv_imageData))[i_index]);
                 break;
 
             case P9_XIP_INT32:
-                *o_data = xipRevLe32(((int32_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe32(((int32_t*)(item.iv_imageData))[i_index]);
                 break;
 
             case P9_XIP_INT64:
-                *o_data = xipRevLe64(((int64_t*)(item.iv_imageData))[i_index]);
+                *o_data = htobe64(((int64_t*)(item.iv_imageData))[i_index]);
                 break;
 
             default:
@@ -2276,7 +2198,7 @@ p9_xip_read_uint64(const void* i_image,
         }
 
         *o_data =
-            xipRevLe64(*((uint64_t*)xipImage2Host(i_image, i_imageAddress)));
+            htobe64(*((uint64_t*)xipImage2Host(i_image, i_imageAddress)));
 
     }
     while(0);
@@ -2302,15 +2224,15 @@ p9_xip_set_scalar(void* io_image, const char* i_id, const uint64_t i_data)
                 break;
 
             case P9_XIP_UINT16:
-                *((uint16_t*)(item.iv_imageData)) = xipRevLe16((uint16_t)i_data);
+                *((uint16_t*)(item.iv_imageData)) = htobe16((uint16_t)i_data);
                 break;
 
             case P9_XIP_UINT32:
-                *((uint32_t*)(item.iv_imageData)) = xipRevLe32((uint32_t)i_data);
+                *((uint32_t*)(item.iv_imageData)) = htobe32((uint32_t)i_data);
                 break;
 
             case P9_XIP_UINT64:
-                *((uint64_t*)(item.iv_imageData)) = xipRevLe64((uint64_t)i_data);
+                *((uint64_t*)(item.iv_imageData)) = htobe64((uint64_t)i_data);
                 break;
 
             case P9_XIP_INT8:
@@ -2318,15 +2240,15 @@ p9_xip_set_scalar(void* io_image, const char* i_id, const uint64_t i_data)
                 break;
 
             case P9_XIP_INT16:
-                *((int16_t*)(item.iv_imageData)) = xipRevLe16((int16_t)i_data);
+                *((int16_t*)(item.iv_imageData)) = htobe16((int16_t)i_data);
                 break;
 
             case P9_XIP_INT32:
-                *((int32_t*)(item.iv_imageData)) = xipRevLe32((int32_t)i_data);
+                *((int32_t*)(item.iv_imageData)) = htobe32((int32_t)i_data);
                 break;
 
             case P9_XIP_INT64:
-                *((int64_t*)(item.iv_imageData)) = xipRevLe64((int64_t)i_data);
+                *((int64_t*)(item.iv_imageData)) = htobe64((int64_t)i_data);
                 break;
 
             default:
@@ -2371,17 +2293,17 @@ p9_xip_set_element(void* i_image,
 
             case P9_XIP_UINT16:
                 ((uint16_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe16((uint16_t)i_data);
+                    htobe16((uint16_t)i_data);
                 break;
 
             case P9_XIP_UINT32:
                 ((uint32_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe32((uint32_t)i_data);
+                    htobe32((uint32_t)i_data);
                 break;
 
             case P9_XIP_UINT64:
                 ((uint64_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe64((uint64_t)i_data);
+                    htobe64((uint64_t)i_data);
                 break;
 
             case P9_XIP_INT8:
@@ -2390,17 +2312,17 @@ p9_xip_set_element(void* i_image,
 
             case P9_XIP_INT16:
                 ((int16_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe16((uint16_t)i_data);
+                    htobe16((uint16_t)i_data);
                 break;
 
             case P9_XIP_INT32:
                 ((int32_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe32((uint32_t)i_data);
+                    htobe32((uint32_t)i_data);
                 break;
 
             case P9_XIP_INT64:
                 ((int64_t*)(item.iv_imageData))[i_index] =
-                    xipRevLe64((uint64_t)i_data);
+                    htobe64((uint64_t)i_data);
                 break;
 
             default:
@@ -2487,7 +2409,7 @@ p9_xip_write_uint64(void* io_image,
         }
 
         *((uint64_t*)xipImage2Host(io_image, i_imageAddress)) =
-            xipRevLe64(i_data);
+            htobe64(i_data);
 
     }
     while(0);
@@ -2974,11 +2896,11 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
 #error This code assumes the P9-XIP header version 9 layout
 #endif
 
-    o_dest->iv_magic = xipRevLe64(i_src->iv_magic);
-    o_dest->iv_L1LoaderAddr = xipRevLe64(i_src->iv_L1LoaderAddr);
-    o_dest->iv_L2LoaderAddr = xipRevLe64(i_src->iv_L2LoaderAddr);
-    o_dest->iv_kernelAddr   = xipRevLe64(i_src->iv_kernelAddr);
-    o_dest->iv_linkAddress = xipRevLe64(i_src->iv_linkAddress);
+    o_dest->iv_magic = htobe64(i_src->iv_magic);
+    o_dest->iv_L1LoaderAddr = htobe64(i_src->iv_L1LoaderAddr);
+    o_dest->iv_L2LoaderAddr = htobe64(i_src->iv_L2LoaderAddr);
+    o_dest->iv_kernelAddr   = htobe64(i_src->iv_kernelAddr);
+    o_dest->iv_linkAddress = htobe64(i_src->iv_linkAddress);
 
     for (i = 0; i < 3; i++)
     {
@@ -2993,9 +2915,9 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
         xipTranslateSection(destSection, srcSection);
     }
 
-    o_dest->iv_imageSize = xipRevLe32(i_src->iv_imageSize);
-    o_dest->iv_buildDate = xipRevLe32(i_src->iv_buildDate);
-    o_dest->iv_buildTime = xipRevLe32(i_src->iv_buildTime);
+    o_dest->iv_imageSize = htobe32(i_src->iv_imageSize);
+    o_dest->iv_buildDate = htobe32(i_src->iv_buildDate);
+    o_dest->iv_buildTime = htobe32(i_src->iv_buildTime);
 
     for (i = 0; i < 5; i++)
     {
