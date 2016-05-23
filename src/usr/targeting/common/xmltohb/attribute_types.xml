@@ -2473,10 +2473,15 @@
         System attribute.
         The lowest frequency that a core can be set to in MHz.
         This is the same for all cores in the system.
-        Provided by the MRW.
+        Data is provided by MVPD #V.
     </description>
-    <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>non-volatile</persistency>
+    <simpleType>
+        <uint32_t>
+<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
+            <default>4800</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -3674,10 +3679,15 @@
     <description>
       The nominal core frequency in MHz.
       This is the same for all cores in the system.
-      Provided by the Machine Readable Workbook.
+      Data is provided by MVPD #V.
     </description>
-    <simpleType><uint32_t></uint32_t></simpleType>
-    <persistency>non-volatile</persistency>
+    <simpleType>
+        <uint32_t>
+<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
+            <default>4800</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -21134,13 +21144,17 @@ DEPRECATED!!!!
   <description>
     The maximum core frequency in MHz.
     This is the same for all cores in the system.
-    Provided by the MRW.
+    Data is provided by MVPD #V.
   </description>
   <simpleType>
-    <uint32_t></uint32_t>
+    <uint32_t>
+<!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
+      <default>4800</default>
+    </uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
         <id>ATTR_FREQ_CORE_CEILING</id>
         <macro>DIRECT</macro>
