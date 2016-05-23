@@ -123,9 +123,9 @@ void* call_host_activate_master (void *io_pArgs)
                        "call_host_activate_master ERROR : MBOX::suspend");
             break;
         }
-           //@TODO RTC:137564 Support for thread-specific interrupts
-//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
-//         INTR::drainQueue();
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
+        INTR::drainQueue();
 
 
         // Call p9_block_wakeup_intr to prevent stray interrupts from
