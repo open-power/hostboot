@@ -725,28 +725,6 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 }
 
 
-
-///
-/// @brief Get the target at the other end of a bus - dimm included
-/// @tparam T The type of the the other end
-/// @tparam K The type of target of which this is called
-/// @tparam V the type of the target's Value
-/// @param[in] i_state The desired TargetState of the other end
-/// @return Target<T> a target representing the thing on the other end
-/// @note Can be easily changed to a vector if needed
-///
-template<TargetType K, typename V>
-template<TargetType T>
-inline Target<T>
-Target<K, V>::getOtherEnd(const TargetState i_state) const
-{
-    fapi2::Target<T> l_target;
-    this->getOtherEnd<T>( l_target, i_state);
-
-    return l_target;
-
-}
-
 ///
 /// @brief Get the target at the other end of a bus
 /// @tparam T The type of the target on the other end

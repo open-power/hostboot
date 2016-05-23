@@ -98,41 +98,6 @@ void test_fapi2GetOtherEnd()
             }
         }
 
-
-        for(uint32_t i = 0; i < chipListNonFunct.size(); i++)
-        {
-            chipListNonFunct[i]->
-            tryGetAttr<TARGETING::ATTR_PEER_TARGET>(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                            fapi2_xbusTargetPeerPlatform(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                            fapi2_xbusTarget(chipListNonFunct[i]);
-            if(l_peerTarget && l_peerTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().present)
-            {
-                numTests++;
-                fapi2_xbusTargetPeer = fapi2_xbusTarget.getOtherEnd<TARGET_TYPE_XBUS>(TARGET_STATE_PRESENT);
-                if(fapi2_xbusTargetPeer)
-                {
-                    if(fapi2_xbusTargetPeerPlatform != fapi2_xbusTargetPeer)
-                    {
-                        TS_FAIL("fapiGetOtherEnd::test 2 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(static_cast<TARGETING::Target*>(fapi2_xbusTargetPeer)));
-                        numFails++;
-                        break;
-                    }
-                }
-                else
-                {
-                    TS_FAIL("fapiGetOtherEnd::test 2 getOtherEnd returned failed to return a target although it should have returned %x", TARGETING::get_huid(l_peerTarget));
-                    numFails++;
-                    break;
-                }
-            }
-            else
-            {
-              FAPI_ERR("fapiGetOtherEnd::test 2 WARNING ! Target with HUID: %x has an unreachable peer target", chipListNonFunct[i]);
-            }
-        }
-
         // Create a vector of TARGETING::Target pointers
         TARGETING::TargetHandleList chipListFunct;
 
@@ -178,40 +143,6 @@ void test_fapi2GetOtherEnd()
             else
             {
               FAPI_ERR("fapiGetOtherEnd::test 3 WARNING ! Target with HUID: %x has an unreachable or non-functional peer target", TARGETING::get_huid(chipListFunct[i]));
-            }
-        }
-
-        for(uint32_t i = 0; i < chipListFunct.size(); i++)
-        {
-            chipListFunct[i]->tryGetAttr<TARGETING::ATTR_PEER_TARGET>(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                    fapi2_xbusTargetPeerPlatform(l_peerTarget);
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                    fapi2_xbusTarget(chipListFunct[i]);
-
-            if(l_peerTarget && l_peerTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-            {
-                numTests++;
-                fapi2_xbusTargetPeer = fapi2_xbusTarget.getOtherEnd<TARGET_TYPE_XBUS>(TARGET_STATE_FUNCTIONAL);
-                if(fapi2_xbusTargetPeer)
-                {
-                    if(fapi2_xbusTargetPeerPlatform != fapi2_xbusTargetPeer)
-                    {
-                        TS_FAIL("fapiGetOtherEnd::test 4 getOtherEnd returned the incorrect target! expected %x, instead got %x ", TARGETING::get_huid(l_peerTarget),  TARGETING::get_huid(static_cast<TARGETING::Target*>(fapi2_xbusTargetPeer)));
-                        numFails++;
-                        break;
-                    }
-                }
-                else
-                {
-                    TS_FAIL("fapiGetOtherEnd::test 4 getOtherEnd returned failed to return a target although it should have returned %x", TARGETING::get_huid(l_peerTarget));
-                    numFails++;
-                    break;
-                }
-            }
-            else
-            {
-              FAPI_ERR("fapiGetOtherEnd:: test 4 WARNING ! Target with HUID: %x has an unreachable or non-functional peer target", TARGETING::get_huid(chipListFunct[i]));
             }
         }
 
