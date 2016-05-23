@@ -2089,12 +2089,14 @@
     <attribute><id>MRW_VDDR_OFFSET_DISABLE</id></attribute>
     <attribute><id>MRW_FINE_REFRESH_MODE</id></attribute>
     <attribute><id>MRW_TEMP_REFRESH_RANGE</id></attribute>
-    <attribute><id>VPD_MR_0_VERSION_LAYOUT</id></attribute>
-    <attribute><id>VPD_MR_1_VERSION_DATA</id></attribute>
-    <attribute><id>VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
-    <attribute><id>VPD_MT_0_VERSION_LAYOUT</id></attribute>
-    <attribute><id>VPD_MT_1_VERSION_DATA</id></attribute>
-    <attribute><id>VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id></attribute>
+    <attribute><id>MSS_VPD_MR_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>MSS_VPD_MR_1_VERSION_DATA</id></attribute>
+    <attribute><id>MSS_VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
+    <attribute><id>MSS_VPD_MR_2_SIGNATURE_HASH</id></attribute>
+    <attribute><id>MSS_VPD_MT_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>MSS_VPD_MT_1_VERSION_DATA</id></attribute>
+    <attribute><id>MSS_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id></attribute>
+    <attribute><id>MSS_VPD_MT_2_SIGNATURE_HASH</id></attribute>
     <!-- attributes for sbe_start -->
     <attribute><id>BOOT_FLAGS</id></attribute>
     <attribute><id>NEST_PLL_BUCKET</id></attribute>
@@ -2550,6 +2552,49 @@
     <attribute><id>EFF_DRAM_TRFC_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TFAW_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TXS</id></attribute>
+    <attribute><id>MSS_VPD_MR_DRAM_2N_MODE</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A00</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A01</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A02</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A03</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A04</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A05</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A06</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A07</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A08</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A09</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A10</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A11</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A12</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A13</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A17</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C2</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_PAR</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CKE0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CKE1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CKE0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CKE1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CSN0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CSN1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CSN0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CSN1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_ODT0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_ODT1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_ODT0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_ODT1</id></attribute>
     <attribute><id>VPD_MR_DRAM_2N_MODE</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A00</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_A01</id></attribute>
@@ -2572,11 +2617,14 @@
     <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C0</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C1</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_ADDR_C2</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_D0_CLK0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_D0_CLK1</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_D1_CLK0</id></attribute>
+    <attribute><id>VPD_MR_MC_PHASE_ROT_D1_CLK1</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id></attribute>
-    <attribute><id>VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id></attribute>
@@ -2592,9 +2640,40 @@
     <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id></attribute>
     <attribute><id>VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_2N_MODE_AUTOSET</id></attribute>
+    <attribute><id>MSS_VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
+    <attribute><id>MSS_VPD_MR_TSYS_ADR</id></attribute>
+    <attribute><id>MSS_VPD_MR_TSYS_DATA</id></attribute>
     <attribute><id>VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
     <attribute><id>VPD_MR_TSYS_ADR</id></attribute>
     <attribute><id>VPD_MR_TSYS_DATA</id></attribute>
+    <attribute><id>MSS_VPD_MT_CKE_PRI_MAP</id></attribute>
+    <attribute><id>MSS_VPD_MT_CKE_PWR_MAP</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_OUTPUT_TIMING</id></attribute>
+    <attribute><id>MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>MSS_VPD_MT_DRAM_RTT_NOM</id></attribute>
+    <attribute><id>MSS_VPD_MT_DRAM_RTT_PARK</id></attribute>
+    <attribute><id>MSS_VPD_MT_DRAM_RTT_WR</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_ADDR</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CLK</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CNTL</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_SPCKE</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_ADDR</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_CLK</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_CNTL</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_DQ_DQS</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_SPCKE</id></attribute>
+    <attribute><id>MSS_VPD_MT_ODT_RD</id></attribute>
+    <attribute><id>MSS_VPD_MT_ODT_WR</id></attribute>
+    <attribute><id>MSS_VPD_MT_OFFSET_GPO</id></attribute>
+    <attribute><id>MSS_VPD_MT_OFFSET_RLO</id></attribute>
+    <attribute><id>MSS_VPD_MT_OFFSET_WLO</id></attribute>
+    <attribute><id>MSS_VPD_MT_VREF_DRAM_WR</id></attribute>
+    <attribute><id>MSS_VPD_MT_VREF_MC_RD</id></attribute>
+    <attribute><id>MSS_VPD_MT_WINDAGE_RD_CTR</id></attribute>
     <attribute><id>VPD_MT_CKE_PRI_MAP</id></attribute>
     <attribute><id>VPD_MT_CKE_PWR_MAP</id></attribute>
     <attribute><id>VPD_MT_DIMM_RCD_IBT</id></attribute>
