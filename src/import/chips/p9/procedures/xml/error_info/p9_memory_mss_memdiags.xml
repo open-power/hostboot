@@ -39,5 +39,66 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_INDEX</rc>
+    <description>An invalid pattern index was passed to the pattern loader</description>
+    <ffdc>INDEX</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_SIZE</rc>
+    <description>An invalid pattern (incorrect size) was passed to the pattern loader</description>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
+    <description>The MCBIST engine failed to start its program</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_PORT_NOT_FUNCTIONAL</rc>
+    <description>The port used in an MCBIST program is not functional</description>
+    <ffdc>RELATIVE_PORT_POSITION</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
+    <description>A superfast read operation failed initialization</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
+    <description>A superfast init operation failed initialization</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
 

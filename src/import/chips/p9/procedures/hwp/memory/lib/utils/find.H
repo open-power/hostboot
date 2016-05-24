@@ -34,6 +34,8 @@
 #include <map>
 #include <vector>
 
+#include <lib/utils/pos.H>
+
 namespace mss
 {
 
@@ -163,6 +165,30 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets( const
 }
 
 ///
+/// @brief find all the MCA connected to an MCBIST
+/// @param[in] i_target a fapi2::Target MCBIST
+/// @return a vector of fapi2::TARGET_TYPE_MCA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets( const
+        fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+}
+
+///
+/// @brief find all the DIMM connected to an MCA
+/// @param[in] i_target a fapi2::Target MCA
+/// @return a vector of fapi2::TARGET_TYPE_DIMM
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
+        fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
+}
+
+///
 /// @brief find the MCS given a DIMM
 /// @param[in] i_target the fapi2 target DIMM
 /// @return a MCS target.
@@ -220,6 +246,30 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     return true;
 
 }// find_value_from_key
+
+///
+/// @brief Determine if a thing is functional
+/// @tparam P, the type of the parent which holds the things of interest
+/// @tparam I, the type of the item we want to check for
+/// @param[in] i_target the parent containing the thing we're looking for
+/// @param[in] i_rel_pos the relative position of the item of interest.
+/// @return bool true iff the thing at i_rel_pos is noted as functional
+///
+template< fapi2::TargetType I, fapi2::TargetType P >
+bool is_functional( const fapi2::Target<P>& i_target, const uint64_t i_rel_pos )
+{
+    // Not sure of a good way to do this ... we get all the functional
+    // children of the parent and look for our relative position ...
+    for (const auto& i : i_target.template getChildren<I>(fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+        if (mss::template relative_pos<P>(i) == i_rel_pos)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 }// mss
 

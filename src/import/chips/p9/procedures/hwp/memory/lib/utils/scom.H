@@ -31,7 +31,7 @@
 #define _MSS_SCOM_H_
 
 #include <fapi2.H>
-#include <utils/c_str.H>
+#include <lib/utils/c_str.H>
 
 //
 // Wrapping scom operations: We wrap fapi2::get/putScom for two reasons. The

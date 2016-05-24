@@ -22,7 +22,7 @@
 /// @brief Run and manage the MCBIST engine
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Craig Hamilton <cchamilt@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -38,6 +38,8 @@
 #include <lib/utils/poll.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
+#include <lib/mcbist/patterns.H>
+#include <lib/mcbist/settings.H>
 
 namespace mss
 {
@@ -72,29 +74,36 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
 {
     public:
         /// MCBIST "memory registers" - config for subtests.
-        static const uint64_t MCBMR0_REG = MCBIST_MCBMR0Q;
-        static const uint64_t CFGQ_REG = MCBIST_MCBCFGQ;
-        static const uint64_t CNTLQ_REG = MCBIST_MCB_CNTLQ;
-        static const uint64_t STATQ_REG = MCBIST_MCB_CNTLSTATQ;
-        static const uint64_t MCBSTATQ_REG = MCBIST_MCBSTATQ;
-        static const uint64_t MCBPARMQ_REG = MCBIST_MCBPARMQ;
-        static const uint64_t MCBAGRAQ_REG = MCBIST_MCBAGRAQ;
-        static const uint64_t SRERR_REG = MCBIST_MBSEC1Q;
+        static constexpr uint64_t MCBMR0_REG = MCBIST_MCBMR0Q;
+        static constexpr uint64_t CFGQ_REG = MCBIST_MCBCFGQ;
+        static constexpr uint64_t CNTLQ_REG = MCBIST_MCB_CNTLQ;
+        static constexpr uint64_t STATQ_REG = MCBIST_MCB_CNTLSTATQ;
+        static constexpr uint64_t MCBSTATQ_REG = MCBIST_MCBSTATQ;
+        static constexpr uint64_t MCBPARMQ_REG = MCBIST_MCBPARMQ;
+        static constexpr uint64_t MCBAGRAQ_REG = MCBIST_MCBAGRAQ;
+        static constexpr uint64_t SRERR_REG = MCBIST_MBSEC1Q;
+        static constexpr uint64_t THRESHOLD_REG = MCBIST_MBSTRQ;
+        static constexpr uint64_t FIRQ_REG = MCBIST_MCBISTFIRQ;
 
-        static const uint64_t MCBAMR0A0Q_REG = MCBIST_MCBAMR0A0Q;
-        static const uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
-        static const uint64_t MCBAMR2A0Q_REG = MCBIST_MCBAMR2A0Q;
-        static const uint64_t MCBAMR3A0Q_REG = MCBIST_MCBAMR3A0Q;
+        static constexpr uint64_t MCBAMR0A0Q_REG = MCBIST_MCBAMR0A0Q;
+        static constexpr uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
+        static constexpr uint64_t MCBAMR2A0Q_REG = MCBIST_MCBAMR2A0Q;
+        static constexpr uint64_t MCBAMR3A0Q_REG = MCBIST_MCBAMR3A0Q;
 
-        static const uint64_t START_ADDRESS_0 = MCBIST_MCBSA0Q;
-        static const uint64_t START_ADDRESS_1 = MCBIST_MCBSA1Q;
-        static const uint64_t START_ADDRESS_2 = MCBIST_MCBSA2Q;
-        static const uint64_t START_ADDRESS_3 = MCBIST_MCBSA3Q;
+        // All of the pattern registers are calculated off of this base
+        static constexpr uint64_t PATTERN0_REG = MCBIST_MCBFD0Q;
 
-        static const uint64_t END_ADDRESS_0 = MCBIST_MCBEA0Q;
-        static const uint64_t END_ADDRESS_1 = MCBIST_MCBEA1Q;
-        static const uint64_t END_ADDRESS_2 = MCBIST_MCBEA2Q;
-        static const uint64_t END_ADDRESS_3 = MCBIST_MCBEA3Q;
+        static constexpr uint64_t START_ADDRESS_0 = MCBIST_MCBSA0Q;
+        static constexpr uint64_t START_ADDRESS_1 = MCBIST_MCBSA1Q;
+        static constexpr uint64_t START_ADDRESS_2 = MCBIST_MCBSA2Q;
+        static constexpr uint64_t START_ADDRESS_3 = MCBIST_MCBSA3Q;
+
+        static constexpr uint64_t END_ADDRESS_0 = MCBIST_MCBEA0Q;
+        static constexpr uint64_t END_ADDRESS_1 = MCBIST_MCBEA1Q;
+        static constexpr uint64_t END_ADDRESS_2 = MCBIST_MCBEA2Q;
+        static constexpr uint64_t END_ADDRESS_3 = MCBIST_MCBEA3Q;
+
+        static constexpr uint64_t PATTERN_COUNT = 4;
 
         // Sometimes we want to access the start/end address registers based off
         // of an index, like master rank. This allows us to do that.
@@ -177,6 +186,7 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST = MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST,
             CFG_ENABLE_SPEC_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_SPEC_ATTN,
             CFG_ENABLE_HOST_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_HOST_ATTN,
+            MCBIST_CFG_PAUSE_AFTER_RANK = MCBIST_MCBCFGQ_CFG_MCBIST_CFG_FORCE_PAUSE_AFTER_RANK,
 
             LOGGED_ERROR_ON_PORT_INDICATOR = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR,
             LOGGED_ERROR_ON_PORT_INDICATOR_LEN = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR_LEN,
@@ -421,6 +431,19 @@ inline subtest_t<T> read_subtest()
 }
 
 ///
+/// @brief Return an init subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> init_subtest()
+{
+    return write_subtest<T>();
+}
+
+///
 /// @brief A class representing a series of MCBIST subtests, and the
 /// MCBIST engine parameters associated with running the subtests
 /// @tparam T fapi2::TargetType representing the fapi2 target which
@@ -477,7 +500,8 @@ class program
             iv_addr_map2(0),
             iv_addr_map3(0),
             iv_config(0),
-            iv_control(0)
+            iv_control(0),
+            iv_async(false)
         {
             // Enable the maintenance mode addressing
             change_maint_address_mode(mss::ON);
@@ -499,6 +523,22 @@ class program
         {
             iv_config.writeBit<TT::CFG_MCB_LEN64>(i_state);
             return;
+        }
+
+        ///
+        /// @brief Change MCBIST Stop conditions
+        /// @param[in] i_stops the stop conditions
+        /// @return FAPI2_RC_SUCCSS iff ok
+        /// @note if the user askes for stop-on-error we stop after the operation on the failed address has completed
+        ///
+        inline void change_stops( const stop_conditions i_stops )
+        {
+            if (i_stops != DONT_CHANGE)
+            {
+                iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_stops);
+            }
+
+            FAPI_INF("load MCBIST stops: 0x%016lx (0x%016lx)", i_stops, iv_config);
         }
 
         ///
@@ -730,44 +770,30 @@ class program
         }
 
         ///
+        /// @brief Enable or disable async mode
+        /// @param[in] i_program the program in question
+        /// @param[in] i_mode mss::ON to enable, programs will run async
+        /// @return void
+        ///
+        inline void change_async( const bool i_mode )
+        {
+            iv_async = i_mode;
+            return;
+        }
+
+        ///
         /// @brief Select the port(s) to be used by the MCBIST
         /// @param[in] i_ports uint64_t representing the ports. Multiple bits set imply broadcast
         /// i_ports is a right-aligned uint64_t, of which only the right-most 4 bits are used. The register
         /// field is defined such that the left-most bit in the field represents port 0, the right most
         /// bit in the field represents port 3. So, to run on port 0, i_ports should be 0b1000. 0b0001
         /// (or 0x1) is port 3 - not port 0
-        /// @param[in] i_wait_time representing the sync wait time for broadcast operations (optional)
         /// @return void
-        /// @note If multiple bits are set, the MCBIST will be configured for broadcast mode.
-        /// This implies all subtests are individual reads/writes. Uses i_wait parameter.
-        /// @note i_wait is the number of 1024 2:1 cycle timebases to wait starting up MCBIST for SRQ's to get
-        /// synchornized for broadcast mode (ranges 0-127).
         ///
-        inline void select_ports( const uint64_t i_ports, const uint64_t i_wait = 0)
+        inline void select_ports( const uint64_t i_ports )
         {
-            fapi2::buffer<uint64_t> l_data;
-            fapi2::buffer<uint64_t> l_ports;
-
-            if (0 == i_ports)
-            {
-                FAPI_DBG("no ports selected for mcbist");
-                return;
-            }
-
-            if (1 != mss::bit_count(i_ports))
-            {
-                // We're in broadcast mode, so setup the broadcast inforamtion registers
-                iv_config.setBit<TT::SYNC_EN>();
-                iv_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_wait);
-                FAPI_INF("mcbist select ports seeing broadcast requested: ports 0x%x, config 0x%016lx",
-                         i_ports, iv_config);
-
-
-                // Should we check for maint mode and set the MCBAGRAQ_CFG_MAINT_BROADCAST_MODE_EN? BRS
-            }
-
             iv_control.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(i_ports);
-            FAPI_DBG("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
+            FAPI_INF("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
 
             return;
         }
@@ -822,6 +848,23 @@ class program
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Clear mcbist errors
+        /// @param[in] i_target fapi2::Target<T> of the MCBIST
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        ///
+        inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target ) const
+        {
+            // TK: Clear the more detailed errors checked above
+            FAPI_INF("Clear MCBIST error state");
+            FAPI_TRY( mss::putScom(i_target, TT::MCBSTATQ_REG, 0) );
+            FAPI_TRY( mss::putScom(i_target, TT::SRERR_REG, 0) );
+            FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, 0) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         // Vector of subtests. Note the MCBIST subtests are spread across
         // 8 registers - 4 subtests fit in one 64b register
@@ -855,6 +898,9 @@ class program
 
         // Control register
         fapi2::buffer<uint64_t>     iv_control;
+
+        // True iff we want to run in asynchronous mode
+        bool                        iv_async;
 };
 
 ///
@@ -868,7 +914,7 @@ class program
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    FAPI_DBG("loading MCBIST Config 0x%016lx", i_program.iv_config);
+    FAPI_INF("loading MCBIST Config 0x%016lx", i_program.iv_config);
     return mss::putScom(i_target, TT::CFGQ_REG, i_program.iv_config);
 }
 
@@ -884,7 +930,7 @@ inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mc
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    FAPI_DBG("loading MCBIST Control 0x%016lx", i_program.iv_control);
+    FAPI_INF("loading MCBIST Control 0x%016lx", i_program.iv_control);
     return mss::putScom(i_target, TT::CNTLQ_REG, i_program.iv_control);
 }
 
@@ -900,7 +946,7 @@ inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const m
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    FAPI_DBG("loading MCBIST Address Generation 0x%016lx", i_program.iv_addr_gen);
+    FAPI_INF("loading MCBIST Address Generation 0x%016lx", i_program.iv_addr_gen);
     return mss::putScom(i_target, TT::MCBAGRAQ_REG, i_program.iv_addr_gen);
 }
 
@@ -920,7 +966,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target, const uint64_t i_start,
         const uint64_t i_end, const uint64_t i_index )
 {
-    FAPI_DBG("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+    FAPI_INF("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
              i_index, i_start, (i_start << 26), i_end, (i_end << 26));
     FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].first, i_start << 26) );
     FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].second, i_end << 26) );
@@ -1027,6 +1073,26 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Return whether or not the MCBIST engine has an operation in progress
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the target to effect
+/// @param[out] i_in_progress - false if no operation is in progress
+/// @return FAPI2_RC_SUCCESS if getScom succeeded
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode in_progress( const fapi2::Target<T>& i_target, bool o_in_progress )
+{
+    fapi2::buffer<uint64_t> l_buf;
+
+    FAPI_TRY(mss::getScom(i_target, TT::STATQ_REG, l_buf));
+    o_in_progress = l_buf.getBit<TT::MCBIST_IN_PROGRESS>();
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Execute the mcbist program
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the target to effect
@@ -1060,16 +1126,16 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
     // Vector? Can decide when we fully understand the methods to twiddle the maps themselves. BRS
-    FAPI_DBG("load MCBIST address map register 0: 0x%016lx", i_program.iv_addr_map0);
+    FAPI_INF("load MCBIST address map register 0: 0x%016lx", i_program.iv_addr_map0);
     FAPI_TRY( mss::putScom(i_target, TT::MCBAMR0A0Q_REG, i_program.iv_addr_map0) );
 
-    FAPI_DBG("load MCBIST address map register 1: 0x%016lx", i_program.iv_addr_map1);
+    FAPI_INF("load MCBIST address map register 1: 0x%016lx", i_program.iv_addr_map1);
     FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
 
-    FAPI_DBG("load MCBIST address map register 2: 0x%016lx", i_program.iv_addr_map2);
+    FAPI_INF("load MCBIST address map register 2: 0x%016lx", i_program.iv_addr_map2);
     FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map2) );
 
-    FAPI_DBG("load MCBIST address map register 3: 0x%016lx", i_program.iv_addr_map3);
+    FAPI_INF("load MCBIST address map register 3: 0x%016lx", i_program.iv_addr_map3);
     FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map3) );
 
 fapi_try_exit:
@@ -1088,8 +1154,98 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    FAPI_DBG("load MCBIST parameter register: 0x%016lx", i_program.iv_parameters);
+    FAPI_INF("load MCBIST parameter register: 0x%016lx", i_program.iv_parameters);
     return mss::putScom(i_target, TT::MCBPARMQ_REG, i_program.iv_parameters);
+}
+
+///
+/// @brief Load MCBIST pattern given a pattern
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
+{
+    uint64_t l_address = TT::PATTERN0_REG;
+
+    // Sanity check the pattern as the user can pass in anything they like
+    FAPI_ASSERT( i_pattern.size() == TT::PATTERN_COUNT,
+                 fapi2::MSS_MEMDIAGS_INVALID_PATTERN_SIZE().set_SIZE(i_pattern.size()).set_TARGET(i_target),
+                 "Attempting to load a pattern which is not %d elements (%d)", TT::PATTERN_COUNT, i_pattern.size() );
+
+    // Loop over the cache lines in the pattern. We write one half of the cache line
+    // to the even register and half to the odd.
+    for (const auto& l_cache_line : i_pattern)
+    {
+        fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
+        fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
+        FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx", l_value_first, l_value_second);
+        FAPI_TRY( mss::putScom(i_target, l_address, l_value_first) );
+        FAPI_TRY( mss::putScom(i_target, ++l_address, l_value_second) );
+        ++l_address;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST pattern given an index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_index an index representing the pattern you'd like
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, uint64_t i_index )
+{
+    if (NO_PATTERN != i_index)
+    {
+        bool l_invert = false;
+
+        FAPI_INF("%s load MCBIST pattern index %d", mss::c_str(i_target), i_index);
+
+        // Sanity check the pattern since they're just numbers.
+        FAPI_ASSERT( i_index <= mcbist::LAST_PATTERN,
+                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_index).set_TARGET(i_target),
+                     "Attempting to load a pattern which does not exist %d", i_index );
+
+        // The indexes are split in to even and odd where the odd indexes don't really exist.
+        // They're just indicating that we want to grab the even index and invert it. So calculate
+        // the proper vector index and acknowledge the inversion if necessary.
+        if ((i_index % 2) != 0)
+        {
+            l_invert = true;
+            i_index -= 1;
+        }
+
+        return load_pattern(i_target, patterns[i_index / 2], l_invert);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST Threshold Register
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_thresholds the thresholds
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const uint64_t i_thresholds )
+{
+    FAPI_INF("load MCBIST threshold register: 0x%016lx", i_thresholds );
+    return mss::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
 }
 
 } // namespace

@@ -65,7 +65,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     // Leave if there are no subtests.
     if (0 == i_program.iv_subtests.size())
     {
-        FAPI_DBG("no subtests, noting to do");
+        FAPI_INF("no subtests, nothing to do");
         return fapi2::current_err;
     }
 
@@ -132,51 +132,27 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Execute the mcbist program
+/// @brief Poll the mcbist engine and check for errors
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_program, the mcbist program to execute
+/// @param[in] i_program, the mcbist program which is executing
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template<>
-fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                           const program<TARGET_TYPE_MCBIST>& i_program )
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<T>& i_program )
 {
-    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+    fapi2::buffer<uint64_t> l_status;
 
     static const uint64_t l_done = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_DONE>();
     static const uint64_t l_fail = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_FAIL>();
     static const uint64_t l_in_progress = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_IN_PROGRESS>();
-
-    fapi2::buffer<uint64_t> l_status;
 
     // A small vector of addresses to poll during the polling loop
     static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
     {
         {i_target, "mcbist current address", MCBIST_MCBMCATQ},
     };
-
-    // Slam the subtests in to the mcbist registers
-    FAPI_TRY( load_mcbmr(i_target, i_program) );
-
-    // Slam the parameters in to the mcbist parameter register
-    FAPI_TRY( load_mcbparm(i_target, i_program) );
-
-    // Slam the address generator config
-    FAPI_TRY( load_addr_gen(i_target, i_program) );
-
-    // Slam the configured address maps down
-    FAPI_TRY( load_mcbamr( i_target, i_program) );
-
-    // Slam the config register down
-    FAPI_TRY( load_config( i_target, i_program) );
-
-    // Slam the control register down
-    FAPI_TRY( load_control( i_target, i_program) );
-
-    // Start the engine, and then poll for completion
-    // Note: We need to have a bit in the program for 'async' mode where an attention
-    // bit is set and we can fire-and-forget BRS
-    FAPI_TRY(start_stop(i_target, mss::START));
 
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -216,6 +192,71 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                 .set_TARGET_IN_ERROR(i_target)
                 .set_STATUS_REGISTER(l_status),
                 "MCBIST executed <shrug>. Something's not good 0x%016llx", l_status );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Execute the mcbist program
+/// @param[in] i_target the target to effect
+/// @param[in] i_program, the mcbist program to execute
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
+///
+template<>
+fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                           const program<TARGET_TYPE_MCBIST>& i_program )
+{
+    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+
+    fapi2::buffer<uint64_t> l_status;
+    bool l_poll_result = false;
+    poll_parameters l_poll_parameters;
+
+    FAPI_TRY( i_program.clear_errors(i_target) );
+
+    // Slam the subtests in to the mcbist registers
+    FAPI_TRY( load_mcbmr(i_target, i_program) );
+
+    // Slam the parameters in to the mcbist parameter register
+    FAPI_TRY( load_mcbparm(i_target, i_program) );
+
+    // Slam the address generator config
+    FAPI_TRY( load_addr_gen(i_target, i_program) );
+
+    // Slam the configured address maps down
+    FAPI_TRY( load_mcbamr( i_target, i_program) );
+
+    // Slam the config register down
+    FAPI_TRY( load_config( i_target, i_program) );
+
+    // Slam the control register down
+    FAPI_TRY( load_control( i_target, i_program) );
+
+    // Start the engine, and then poll for completion
+    FAPI_TRY(start_stop(i_target, mss::START));
+
+    // Verify that the in-progress bit has been set, so we know we started
+    // Don't use the program's poll as it could be a very long time. Use the default poll.
+    l_poll_result = mss::poll(i_target, TT::STATQ_REG, l_poll_parameters,
+                              [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_DBG("looking for mcbist start, mcbist statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        l_status = stat_reg;
+        // We're done polling when either we see we're in progress or we see we're done.
+        return (l_status.getBit<TT::MCBIST_IN_PROGRESS>() == true) || (l_status.getBit<TT::MCBIST_DONE>() == true);
+    });
+
+    // So we've either run/are running or we timed out waiting for the start.
+    FAPI_ASSERT( l_poll_result == true,
+                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_START().set_TARGET(i_target),
+                 "The MCBIST engine failed to start its program" );
+
+    // If the user asked for async mode, we can leave. Otherwise, poll and check for errors
+    if (!i_program.iv_async)
+    {
+        return mcbist::poll(i_target, i_program);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

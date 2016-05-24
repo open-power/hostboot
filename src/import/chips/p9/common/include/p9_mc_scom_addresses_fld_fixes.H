@@ -52,4 +52,7 @@ REG64_FLD( MCA_DDRPHY_WC_RTT_WL_SWAP_ENABLE_P0                     , 48  , SH_UN
 REG64_FLD( MCA_DDRPHY_WC_RTT_WR_CTL_SWAP_ENABLE_P0                 , 49  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
            0 );
 
+REG64_FLD( MCBIST_MCBCFGQ_CFG_MCBIST_CFG_FORCE_PAUSE_AFTER_RANK    , 34  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
+           0 );
+
 #endif

@@ -33,7 +33,9 @@
 #include <lib/dimm/rank.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/mcbist.H>
-#include <lib/dimm/kind.H>
+#include <lib/mcbist/patterns.H>
+#include <lib/mcbist/memdiags.H>
+#include <lib/mcbist/sim.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -53,102 +55,19 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     uint8_t is_sim = 0;
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    if (is_sim)
     {
-        std::vector<uint64_t> l_pr;
-        mss::mcbist::program<TARGET_TYPE_MCBIST> l_program;
-
-        mss::mcbist::address l_start;
-        mss::mcbist::address l_end;
-
-        size_t l_rank_address_pair = 0;
-
-        // In sim we know a few things ...
-        // Get the primary ranks for this port. We know there can only be 4, and we know we only trained the primary
-        // ranks. Therefore, we only need to clean up the primary ranks. And because there's 4 max, we can do it
-        // all using the 4 address range registers of tne MCBIST (broadcast currently not considered.)
-        // So we can write 0's to those to get their ECC fixed up.
-        FAPI_TRY( mss::primary_ranks(p, l_pr) );
-        fapi2::Assert( l_pr.size() <= mss::MAX_RANK_PER_DIMM);
-
-        for (auto r = l_pr.begin(); r != l_pr.end(); ++l_rank_address_pair, ++r)
-        {
-            // Setup l_start to represent this rank, and then make the end address from that.
-            l_start.set_master_rank(*r);
-
-            // l_end starts like as the max as we want to scrub the entire thing. If we're in sim,
-            // we'll wratchet that back.
-            l_start.get_range<mss::mcbist::address::MRANK>(l_end);
-
-            if (is_sim)
-            {
-                l_start.get_range<mss::mcbist::address::COL>(l_end);
-                // Set C3 bit to get an entire cache line
-                l_end.set_field<mss::mcbist::address::COL>(0b1000000);
-            }
-
-            // By default we're in maint address mode, not address counting mode. So we give it a start and end, and ignore
-            // anything invalid - that's what maint address mode is all about
-            mss::mcbist::config_address_range(i_target, l_start, l_end, l_rank_address_pair);
-
-            // Write
-            {
-                // Run in ECC mode, 64B writes (superfast mode)
-
-                mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fw_subtest =
-                    mss::mcbist::write_subtest<TARGET_TYPE_MCBIST>();
-
-                l_fw_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
-                l_fw_subtest.change_addr_sel(l_rank_address_pair);
-                l_fw_subtest.enable_dimm(mss::get_dimm_from_rank(*r));
-                l_program.iv_subtests.push_back(l_fw_subtest);
-                FAPI_DBG("adding superfast write for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::get_dimm_from_rank(*r));
-            }
-
-            // Read
-            {
-                // Run in ECC mode, 64B writes (superfast mode)
-                mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fr_subtest =
-                    mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>();
-
-                l_fr_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
-                l_fr_subtest.change_addr_sel(l_rank_address_pair);
-                l_fr_subtest.enable_dimm(mss::get_dimm_from_rank(*r));
-                l_program.iv_subtests.push_back(l_fr_subtest);
-                FAPI_DBG("adding superfast read for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::get_dimm_from_rank(*r));
-            }
-        }
-
-        // Write pattern
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD0Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD1Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD2Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD3Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD4Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD5Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD6Q, 0x1234567890ABCDEF) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD7Q, 0x1234567890ABCDEF) );
-
-        // Setup the sim polling based on a heuristic <cough>guess</cough>
-        // Looks like ~400ck per address for a write/read program on the sim-dimm, and add a long number of polls
-        // On real hardware wait 100ms and then start polling for another 5s
-        l_program.iv_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(((l_end - l_start) * l_pr.size()) * 800);
-        l_program.iv_poll.iv_initial_delay = 100 * mss::DELAY_1MS;
-        l_program.iv_poll.iv_sim_delay = 100000;
-        l_program.iv_poll.iv_delay = 10 * mss::DELAY_1MS;
-        l_program.iv_poll.iv_poll_count = 500;
-
-        // Just one port for now. Per Shelton we need to set this in maint address mode
-        // even tho we specify the port/dimm in the subtest.
-        fapi2::buffer<uint8_t> l_port;
-        l_port.setBit(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
-        l_program.select_ports(l_port >> 4);
-
-        // Kick it off, wait for a result
-        FAPI_TRY( mss::mcbist::execute(i_target, l_program) );
+        // Use some sort of pattern in sim in case the verification folks need to look for something
+        // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
+        // have a good pattern for verification defined.
+        FAPI_INF("running mss sim init in place of scrub");
+        return mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_2);
     }
 
+    // TK do we want these to be arguments to the wrapper?
+    return memdiags::scrub(i_target, mss::mcbist::stop_conditions::NO_STOP_ON_ERROR, mss::mcbist::thresholds(),
+                           mss::mcbist::speed::LUDICROUS, mss::mcbist::address());
+
 fapi_try_exit:
-    FAPI_INF("End mss scrub");
     return fapi2::current_err;
 }
