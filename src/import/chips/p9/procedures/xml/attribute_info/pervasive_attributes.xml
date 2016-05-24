@@ -679,4 +679,20 @@
   <writeable/>
 </attribute>
 
+<attribute>
+    <id>ATTR_VITL_CLK_SETUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Nimbus DD1</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_HANG_COUNTER6_SETUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Hang counter 6 setup</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
 </attributes>
