@@ -33,6 +33,6 @@ $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_LAB_SDK_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CATCH_UNIT_TESTS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(SQLITE3_INCLUDE_DIR))
-$(WRAPPER)_DEPLIBS+=mss mss_lab_tools p9_mss_ddr_phy_reset p9_mss_draminit p9_mss_draminit_training p9_mss_draminit_mc p9_mss_scrub p9_mss_freq p9_mss_eff_config
+$(WRAPPER)_DEPLIBS+=mss mss_lab_tools p9_mss_ddr_phy_reset p9_mss_draminit p9_mss_draminit_training p9_mss_draminit_mc p9_mss_scrub p9_mss_freq p9_mss_eff_config p9_mss_memdiag
 $(WRAPPER)_LDFLAGS+= -Wl,-rpath=$(SQLITE3_LIB_DIR) -L$(SQLITE3_LIB_DIR) -lsqlite3 -lrt
 $(call BUILD_WRAPPER)
