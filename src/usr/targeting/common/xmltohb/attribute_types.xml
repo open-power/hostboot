@@ -18794,30 +18794,11 @@ DEPRECATED!!!!
     <writeable/>
 </attribute>-->
 
-<!--TODO RTC:154288 Remove MEM_IN_SYNC_MODE after it is removed from fapi2 xml-->
-<attribute>
-    <id>MEM_IN_SYNCH_MODE</id>
-    <description>
-      Run the memory clocks in synchronous mode with the nest clocks.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MEM_IN_SYNCH_MODE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
 <attribute>
     <id>REQUIRED_SYNCH_MODE</id>
     <description>
       Specify the system policy to enforce synchronous mode between memory and
-      nest. This drives the value of ATTR_MEM_IN_SYNCH_MODE.
+      nest. This drives the value of ATTR_MC_SYNC_MODE.
         0 = UNDETERMINED : Run synchronously if the dimm and nest freq matches
         1 = ALWAYS : Require matching frequencies and deconfigure memory that
                      does not match the nest
