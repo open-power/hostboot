@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,11 @@ namespace HTMGT
  * @return error log handle on error, otherwise NULL
  */
 errlHndl_t genPstateTables(bool i_normalTables);
+
+bool getPstateTable(const bool      i_normalTables,
+                    const uint8_t   i_proc,
+                    uint16_t      & o_dataLen,
+                    uint8_t       * o_dataPtr);
 
 };
 #endif

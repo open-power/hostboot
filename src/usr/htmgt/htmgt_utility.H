@@ -101,6 +101,20 @@ namespace HTMGT
     };
     extern uint32_t G_debug_trace;
 
+    enum internalFlagTypes
+    {
+        FLAG_HALT_ON_OCC_SRC       = 0x00800000, // Prevent resets after SRC
+        FLAG_HALT_ON_RESET_FAIL    = 0x00000100, // Stop additional resets
+        FLAG_EXT_RESET_DISABLED    = 0x00000080, // Ignore opal-prd/BMC resets
+        FLAG_DISABLE_MEM_THROTTLE  = 0x00000040,
+        FLAG_IGNORE_OCC_STATE      = 0x00000020,
+        FLAG_HOLD_OCCS_IN_RESET    = 0x00000010, // Ignore load/start status
+        FLAG_LOAD_REQUEST_DISABLED = 0x00000008,
+        FLAG_TERMINATE_ON_ERROR    = 0x00000004,
+        FLAG_RESET_DISABLED        = 0x00000002, // Ignore any OCC reset
+        FLAG_EXTERNAL_OVERRIDE     = 0x00000001
+    };
+
     enum tmgtElogSubsecTypes
     {
         // Values selected to be common with FSP from tmgt_elog_parser.H
@@ -123,11 +137,20 @@ namespace HTMGT
     enum htmgtPassThruCmds
     {
         PASSTHRU_OCC_STATUS             = 0x01,
+        PASSTHRU_INTERNAL_FLAG          = 0x02, // get or set internal flags
         PASSTHRU_SEND_OCC_COMMAND       = 0x03, // send raw OCC command
         PASSTHRU_CLEAR_RESET_COUNTS     = 0x04,
         PASSTHRU_EXIT_SAFE_MODE         = 0x05,
         PASSTHRU_GENERATE_MFG_PSTATE    = 0x81,
-        PASSTHRU_LOAD_PSTATE            = 0x82
+        PASSTHRU_LOAD_PSTATE            = 0x82,
+        PASSTHRU_DUMP_ATTRIBUTE         = 0x83
+    };
+
+    enum htmgtAttrName
+    {
+        ATTR_PSTATE         = 0x01,
+        ATTR_PSTATE_MFG     = 0x02,
+        ATTR_RAW            = 0xFF
     };
 
     /**
@@ -185,6 +208,32 @@ namespace HTMGT
      * @return text string description of state
      */
     const char *state_string(const uint8_t i_state);
+
+
+    /**
+     * @brief Retrieve the internal flag (attribute) value
+     *
+     * @return the flag value (on error will return 0)
+     */
+     uint32_t get_int_flags();
+
+
+     /**
+      * @brief Update internal flags to specified value
+      *
+      * @param[in] i_value - new value for internal flags
+      */
+     void set_int_flags(const uint32_t i_value);
+
+
+     /**
+      * @brief Query if specified internal flag(s) are set
+      *
+      * @param[in] i_mask - bits to query the internalFlags
+      *
+      * @return true if all of the bits of i_mask are set in internalFlags
+      */
+     bool int_flags_set(const uint32_t i_mask);
 
 
 } // end namespace

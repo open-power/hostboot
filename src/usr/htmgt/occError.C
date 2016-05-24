@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,6 +253,18 @@ namespace HTMGT
                           i_id, severity, 0, 0,
                           ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+            }
+
+            if (int_flags_set(FLAG_HALT_ON_OCC_SRC))
+            {
+                // Check if OCC SRC matches our trigger SRC
+                if ((l_occSrc & 0xFF) == (get_int_flags() >> 24))
+                {
+                    TMGT_ERR("occProcessElog: OCC%d reported 0x%04X and "
+                             "HALT_ON_SRC is set.  Resets will be disabled",
+                             iv_instance, l_occSrc);
+                    set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
+                }
             }
 
             // Add full OCC error log data as a User Details section
