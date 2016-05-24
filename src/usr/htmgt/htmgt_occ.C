@@ -730,138 +730,154 @@ namespace HTMGT
         err = _buildOccs(); // if not a already built.
         if (NULL == err)
         {
-            err = setOccActiveSensors(false); // Set OCC sensor to inactive
-            if( err )
+            if (false == int_flags_set(FLAG_RESET_DISABLED))
             {
-                TMGT_ERR("_resetOccs: Set OCC sensors to inactive failed.");
-                // log and continue
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-
-            if (false == i_skipComm)
-            {
-                // Send poll cmd to all OCCs to establish comm
-                err = _sendOccPoll(false,NULL);
-                if (err)
+                err = setOccActiveSensors(false); // Set OCC sensor to inactive
+                if( err )
                 {
-                    TMGT_ERR("_resetOccs: Poll OCCs failed.");
-                    // Proceed with reset even if failed
+                    TMGT_ERR("_resetOccs: Set OCC sensors to inactive failed.");
+                    // log and continue
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
-            }
-
-            for(occList_t::const_iterator occ = iv_occArray.begin();
-                occ != iv_occArray.end();
-                ++occ)
-            {
-                if((*occ)->getTarget() == i_failedOccTarget)
-                {
-                    (*occ)->failed(true);
-                }
-
 
                 if (false == i_skipComm)
                 {
-                    // Send reset prep cmd to all OCCs
-                    if((*occ)->resetPrep())
+                    // Send poll cmd to all OCCs to establish comm
+                    err = _sendOccPoll(false,NULL);
+                    if (err)
                     {
-                        atThreshold = true;
+                        TMGT_ERR("_resetOccs: Poll OCCs failed.");
+                        // Proceed with reset even if failed
+                        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                     }
                 }
-            }
 
-            if ((false == i_skipCountIncrement) && (false == _occFailed()))
-            {
-                // No OCC has been marked failed, increment sys reset count
-                ++iv_resetCount;
-
-                TMGT_INF("_resetOCCs: Incrementing system OCC reset count"
-                         " to %d", iv_resetCount);
-
-                if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
-                {
-                    atThreshold = true;
-                }
-            }
-            // else failed OCC reset count will be incremented automatically
-
-            // Update OCC states to RESET
-            for(occList_t::const_iterator occ = iv_occArray.begin();
-                occ != iv_occArray.end();
-                ++occ)
-            {
-                (*occ)->iv_state = OCC_STATE_RESET;
-            }
-
-            uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
-            while(retryCount)
-            {
-                // Reset all OCCs
-                TMGT_INF("_resetOccs: Calling HBOCC::stopAllOCCs");
-                err = HBOCC::stopAllOCCs();
-                if(!err)
-                {
-                    break;
-                }
-                --retryCount;
-
-                if(retryCount)
-                {
-                    // log if not last retry
-                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-                }
-                else
-                {
-                    TMGT_ERR("_resetOCCs: stopAllOCCs failed. "
-                             "Leaving OCCs in reset state");
-                    // pass err handle back
-                    err->collectTrace("HTMGT");
-                }
-            }
-
-            if(!atThreshold && !err)
-            {
                 for(occList_t::const_iterator occ = iv_occArray.begin();
                     occ != iv_occArray.end();
                     ++occ)
                 {
-                    // After OCCs have been reset, clear flags
-                    (*occ)->postResetClear();
+                    if((*occ)->getTarget() == i_failedOccTarget)
+                    {
+                        (*occ)->failed(true);
+                    }
+
+                    if (false == i_skipComm)
+                    {
+                        // Send reset prep cmd to all OCCs
+                        if((*occ)->resetPrep())
+                        {
+                            atThreshold = true;
+                        }
+                    }
                 }
 
-                TMGT_INF("_resetOccs: Calling HBOCC::activateOCCs");
-                err = HBOCC::activateOCCs();
+                if ((false == i_skipCountIncrement) && (false == _occFailed()))
+                {
+                    // No OCC has been marked failed, increment sys reset count
+                    ++iv_resetCount;
+
+                    TMGT_INF("_resetOCCs: Incrementing system OCC reset count"
+                             " to %d", iv_resetCount);
+
+                    if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
+                    {
+                        atThreshold = true;
+                    }
+                }
+                // else failed OCC reset count will be incremented automatically
+
+                // Update OCC states to RESET
+                for(occList_t::const_iterator occ = iv_occArray.begin();
+                    occ != iv_occArray.end();
+                    ++occ)
+                {
+                    (*occ)->iv_state = OCC_STATE_RESET;
+                }
+
+                uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
+                while(retryCount)
+                {
+                    // Reset all OCCs
+                    TMGT_INF("_resetOccs: Calling HBOCC::stopAllOCCs");
+                    err = HBOCC::stopAllOCCs();
+                    if(!err)
+                    {
+                        break;
+                    }
+                    --retryCount;
+
+                    if (int_flags_set(FLAG_HALT_ON_RESET_FAIL))
+                    {
+                        TMGT_ERR("_resetOCCs: stopAllOCCs failed with 0x%04X "
+                                 "and HALT_ON_RESET_FAIL is set.  Resets will "
+                                 "be disabled", err->reasonCode());
+                        set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
+                        break;
+                    }
+
+                    if(retryCount)
+                    {
+                        // log if not last retry
+                        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                    }
+                    else
+                    {
+                        TMGT_ERR("_resetOCCs: stopAllOCCs failed. "
+                                 "Leaving OCCs in reset state");
+                        // pass err handle back
+                        err->collectTrace("HTMGT");
+                    }
+                }
+
+                if(!atThreshold && !err)
+                {
+                    for(occList_t::const_iterator occ = iv_occArray.begin();
+                        occ != iv_occArray.end();
+                        ++occ)
+                    {
+                        // After OCCs have been reset, clear flags
+                        (*occ)->postResetClear();
+                    }
+
+                    TMGT_INF("_resetOccs: Calling HBOCC::activateOCCs");
+                    err = HBOCC::activateOCCs();
+                    if(err)
+                    {
+                        TMGT_ERR("_resetOCCs: activateOCCs failed. ");
+                        err->collectTrace("HTMGT");
+                    }
+                }
+                else if (!err) // Reset Threshold reached and no other err
+                {
+                    // Create threshold error
+                    TMGT_ERR("_resetOCCs: Retry Threshold reached. "
+                             "Leaving OCCs in reset state");
+                    /*@
+                     * @errortype
+                     * @moduleid HTMGT_MOD_OCC_RESET
+                     * @reasoncode HTMGT_RC_OCC_RESET_THREHOLD
+                     * @userdata1  return code triggering safe mode
+                     * @userdata2  OCC instance
+                     * @devdesc OCC reset threshold reached.
+                     *          Leaving OCCs in reset state
+                     */
+                    bldErrLog(err,
+                              HTMGT_MOD_OCC_RESET,
+                              HTMGT_RC_OCC_CRIT_FAILURE,
+                              0, cv_safeReturnCode, 0, cv_safeOccInstance,
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
+
+                // Any error at this point means OCCs were not reactivated
                 if(err)
                 {
-                    TMGT_ERR("_resetOCCs: activateOCCs failed. ");
-                    err->collectTrace("HTMGT");
+                    updateForSafeMode(err);
                 }
             }
-            else if (!err) // Reset Threshold reached and no other err
+            else
             {
-                // Create threshold error
-                TMGT_ERR("_resetOCCs: Retry Threshold reached. "
-                         "Leaving OCCs in reset state");
-                /*@
-                 * @errortype
-                 * @moduleid HTMGT_MOD_OCC_RESET
-                 * @reasoncode HTMGT_RC_OCC_RESET_THREHOLD
-                 * @userdata1  return code triggering safe mode
-                 * @userdata2  OCC instance
-                 * @devdesc OCC reset threshold reached.
-                 *          Leaving OCCs in reset state
-                 */
-                bldErrLog(err,
-                          HTMGT_MOD_OCC_RESET,
-                          HTMGT_RC_OCC_CRIT_FAILURE,
-                          0, cv_safeReturnCode, 0, cv_safeOccInstance,
-                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            }
-
-            // Any error at this point means OCCs were not reactivated
-            if(err)
-            {
-                updateForSafeMode(err);
+                TMGT_INF("_resetOccs: Skipping OCC reset due to "
+                         "internal flags 0x%08X", get_int_flags());
             }
         }
 
@@ -1008,8 +1024,8 @@ namespace HTMGT
                     {
                         ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                     }
-
-                    (*pOcc)->failed(true);
+                    TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
+                             (*pOcc)->getInstance());
                 }
             }
         }
@@ -1168,6 +1184,7 @@ namespace HTMGT
         return err;
     }
 
+
     // Consolidate all OCC states
     void OccManager::_syncOccStates()
     {
@@ -1230,6 +1247,7 @@ namespace HTMGT
                 }
             }
         }
+
         if (iv_resetCount != 0)
         {
             TMGT_INF("_clearResetCounts: Clearing system reset count "

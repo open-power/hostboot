@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,5 +178,45 @@ namespace HTMGT
         return ((mbaUnit << 2) | (mbaPort << 1) | mbaDIMM);
     }
 
+
+    // Retrieve the internalFlags
+    uint32_t get_int_flags()
+    {
+        uint32_t flags = 0;
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        if (sys)
+        {
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_INTERNAL_FLAGS>(flags);
+        }
+        return flags;
+    }
+
+
+    // Set the internal flags value
+    void set_int_flags(const uint32_t i_value)
+    {
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        if (sys)
+        {
+            sys->trySetAttr<TARGETING::ATTR_HTMGT_INTERNAL_FLAGS>(i_value);
+        }
+    }
+
+
+    // Query if specified internal flag(s) are set
+    bool int_flags_set(const uint32_t i_mask)
+    {
+        bool flags_are_set = false;
+
+        const uint32_t flags = get_int_flags();
+        if ((flags & i_mask) == i_mask)
+        {
+            flags_are_set = true;
+        }
+
+        return flags_are_set;
+    }
 
 } // end namespace

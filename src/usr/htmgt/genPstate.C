@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,4 +120,69 @@ errlHndl_t genPstateTables(bool i_normalTables)
     }
     return err;
 }
+
+
+bool getPstateTable(const bool      i_normalTables,
+                    const uint8_t   i_proc,
+                    uint16_t      & o_dataLen,
+                    uint8_t       * o_dataPtr)
+{
+    bool copied = false;
+
+    TargetHandleList processors;
+    getChipResources(processors,
+                     TYPE_PROC,
+                     UTIL_FILTER_FUNCTIONAL);
+    for(TargetHandleList::const_iterator
+        procItr = processors.begin();
+        procItr != processors.end();
+        ++procItr)
+    {
+        Target * procTarget = *procItr;
+        const uint8_t procInstance =
+            procTarget->getAttr<TARGETING::ATTR_POSITION>();
+        if (i_proc == procInstance)
+        {
+            const uint8_t l_occ = 0;
+            TargetHandleList occs;
+            getChildChiplets(occs,
+                             procTarget,
+                             TYPE_OCC,
+                             true);
+            Target * occTarget = occs[l_occ];
+            ATTR_HUID_type huid = occTarget->getAttr<ATTR_HUID>();
+            // Read data from attribute for specified occ
+            if (i_normalTables)
+            {
+                TMGT_INF("Dumping PStateTable for Proc%d OCC%d (HUID 0x%08X)",
+                         i_proc, l_occ, huid);
+                ATTR_PSTATE_TABLE_type * pstateDataPtr =
+                    reinterpret_cast<ATTR_PSTATE_TABLE_type*>(o_dataPtr);
+
+                occTarget->tryGetAttr<ATTR_PSTATE_TABLE>(*pstateDataPtr);
+                o_dataLen = sizeof(ATTR_PSTATE_TABLE_type);
+                copied = true;
+            }
+            else
+            {
+                TMGT_INF("Dumping MFG PStateTable for Proc%d OCC%d"
+                         " (HUID 0x%08X)", i_proc, l_occ, huid);
+                ATTR_PSTATE_TABLE_MFG_type * pstateDataPtr =
+                    reinterpret_cast<ATTR_PSTATE_TABLE_MFG_type*>(o_dataPtr);
+
+                occTarget->tryGetAttr<ATTR_PSTATE_TABLE_MFG>(*pstateDataPtr);
+                o_dataLen = sizeof(ATTR_PSTATE_TABLE_MFG_type);
+                copied = true;
+            }
+
+            // Just dump for first OCC
+            break;
+        }
+    }
+
+    return copied;
+
+} // end getPstateTable()
+
+
 }; // end namespace

@@ -835,6 +835,20 @@
 </attribute>
 
 <attribute>
+    <id>HTMGT_INTERNAL_FLAGS</id>
+    <description>HTMGT internal flags
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>OT_MIN_N_PER_MBA</id>
     <description>
         Lowest per MBA numerator ever allowed when OCC is
