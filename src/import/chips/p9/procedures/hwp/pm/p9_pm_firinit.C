@@ -56,7 +56,7 @@
 #include <p9_pm_occ_firinit.H>
 #include <p9_pm_pba_firinit.H>
 #include <p9_pm_ppm_firinit.H>
-//#include <p9_pm_cme_firinit.H>
+#include <p9_pm_cme_firinit.H>
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -108,8 +108,8 @@ fapi2::ReturnCode p9_pm_firinit(
 
     // Handle CME FIRs, Masks and actions
     FAPI_DBG("Calling CME firinit ...");
-    //FAPI_EXEC_HWP(l_rc, p9_pm_cme_firinit, i_target, i_mode);
-    //FAPI_TRY(l_rc);
+    FAPI_EXEC_HWP(l_rc, p9_pm_cme_firinit, i_target, i_mode);
+    FAPI_TRY(l_rc);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG, i_target,
                            l_pm_firinit_flag),
