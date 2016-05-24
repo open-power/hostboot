@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1158,6 +1158,11 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                 break;
         }
 
+        if (NULL != err)
+        {
+            break;
+        }
+
         // Check if Attribute Data was found
         if( fail_reading_attribute == true )
         {
@@ -1528,7 +1533,8 @@ errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo)
     {
         err = tpmReadSTSReg(i_tpmInfo,
                             stsReg);
-        if (NULL == err && stsReg.isCommandReady)
+        if ((NULL == err && stsReg.isCommandReady) ||
+            (NULL != err))
         {
             break;
         }
@@ -1552,7 +1558,8 @@ errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo)
             {
                 err = tpmReadSTSReg(i_tpmInfo,
                                     stsReg);
-                if (NULL == err && stsReg.isCommandReady)
+                if ((NULL == err && stsReg.isCommandReady) ||
+                    (NULL != err))
                 {
                     break;
                 }
@@ -1644,7 +1651,8 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
     {
         err = tpmReadSTSRegValid(i_tpmInfo,
                                  stsReg);
-        if (NULL == err && stsReg.dataAvail)
+        if ((NULL == err && stsReg.dataAvail) ||
+            (NULL != err))
         {
             break;
         }
@@ -1904,7 +1912,8 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
     }
 
 
-    if (delay >= TPMDD::TPM_TIMEOUT_D)
+    if (NULL == err &&
+        delay >= TPMDD::TPM_TIMEOUT_D)
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmWriteFifo(): Timeout! "
