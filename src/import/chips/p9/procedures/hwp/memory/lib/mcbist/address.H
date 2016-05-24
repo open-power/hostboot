@@ -122,7 +122,7 @@ class address
         /// @return right-aligned uint64_t representing the value
         ///
         template< const field& F >
-        inline uint64_t get_field()
+        inline uint64_t get_field() const
         {
             uint64_t l_value = 0;
             iv_address.extractToRight<F.first, F.second>(l_value);
@@ -213,7 +213,7 @@ class address
         /// @brief Get the port value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_port()
+        inline uint64_t get_port() const
         {
             return get_field<PORT>();
         }
@@ -233,7 +233,7 @@ class address
         /// @brief Get the DIMM value for an address
         /// @return right-aligned uint64_t representing the vaule
         ///
-        inline uint64_t get_dimm()
+        inline uint64_t get_dimm() const
         {
             return (get_field<DIMM>() == true ? 1 : 0);
         }
@@ -252,7 +252,7 @@ class address
         /// @brief Get the master rank value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_master_rank()
+        inline uint64_t get_master_rank() const
         {
             return get_field<MRANK>();
         }
@@ -271,7 +271,7 @@ class address
         /// @brief Get the slave rank value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_slave_rank()
+        inline uint64_t get_slave_rank() const
         {
             return get_field<SRANK>();
         }
@@ -291,7 +291,7 @@ class address
         /// @brief Get the row value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_row()
+        inline uint64_t get_row() const
         {
             return get_field<ROW>();
         }
@@ -311,7 +311,7 @@ class address
         /// @brief Get the column value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_column()
+        inline uint64_t get_column() const
         {
             return get_field<COL>();
         }
@@ -331,7 +331,7 @@ class address
         /// @brief Get the bank value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_bank()
+        inline uint64_t get_bank() const
         {
             return get_field<BANK>();
         }
@@ -350,7 +350,7 @@ class address
         /// @brief Get the bank group value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_bank_group()
+        inline uint64_t get_bank_group() const
         {
             return get_field<BANK_GROUP>();
         }
