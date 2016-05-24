@@ -17,3 +17,4 @@ errlparser
 *.dat
 *.prf
 test_signed_container
+secureboot_signed_container
