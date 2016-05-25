@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <map>
+#include <vector>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -44,8 +45,107 @@
 #include <hwas/hwasPlat.H>
 #include <vpd/vpd_if.H>
 
+#ifdef CONFIG_PRINT_SYSTEM_INFO
+#include <stdio.h>
+#include <attributetraits.H>
+#endif
+
 namespace ISTEP_06
 {
+
+#ifdef CONFIG_PRINT_SYSTEM_INFO
+
+//Loop through list of targets and print out HUID and other key attributes if the target has it
+void print_target_list(TARGETING::TargetHandleList i_targetList)
+{
+
+
+
+    for(auto & l_targ : i_targetList)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "%s", l_targ->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+
+        //Every target has a HUID so it is safe to assume this will return okay from getAttr
+        uint32_t l_huid =  get_huid(l_targ );
+
+        //if output says DEAD then the attribute is not defined
+        uint32_t l_isFunc = 0xDEAD;
+        uint32_t l_isPres = 0xDEAD;
+        uint32_t l_pos = 0xDEAD;
+        uint32_t l_fapi_pos = 0xDEAD;
+        uint32_t l_chip_unit = 0xDEAD;
+
+        //The rest of these attributes may or may not exist on the target, so only add them to the
+        //string if the attribute exists
+        TARGETING::AttributeTraits<TARGETING::ATTR_HWAS_STATE>::Type hwasState;
+        if(l_targ->tryGetAttr<TARGETING::ATTR_HWAS_STATE>(hwasState))
+        {
+            l_isFunc = hwasState.functional;
+            l_isPres = hwasState.present;
+        }
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_POSITION>::Type position;
+        if(l_targ->tryGetAttr<TARGETING::ATTR_POSITION>(position))
+        {
+            l_pos = position;
+        }
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_FAPI_POS>::Type fapi_position;
+        if(l_targ->tryGetAttr<TARGETING::ATTR_FAPI_POS>(fapi_position))
+        {
+            l_fapi_pos = fapi_position;
+        }
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_CHIP_UNIT>::Type chip_unit;
+        if(l_targ->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(chip_unit))
+        {
+            l_chip_unit = chip_unit;
+        }
+
+        //Trace out the string
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"HUID:0x%x   Functional: 0x%x   Present: 0x%x      Position: 0x%x     FAPI_POS: 0x%x     Chip Unit: 0x%x",
+                                                     l_huid,      l_isFunc,          l_isPres,          l_pos,             l_fapi_pos,        l_chip_unit);
+
+    }
+}
+
+//Debugging tool used to print out target information early on in IPL
+void print_system_info(void)
+{
+    //Vector of target types you want to print out
+    std::vector<TARGETING::AttributeTraits<TARGETING::ATTR_TYPE>::Type> types_to_print;
+
+    //Add all the target types that you want to see in the output to this vector
+    types_to_print.push_back(TARGETING::TYPE_PROC);
+    types_to_print.push_back(TARGETING::TYPE_MCS);
+    types_to_print.push_back(TARGETING::TYPE_MCA);
+    types_to_print.push_back(TARGETING::TYPE_MCBIST);
+    types_to_print.push_back(TARGETING::TYPE_DIMM);
+
+    //Loop through each type to get a list of targets then print it out
+    for(auto l_type : types_to_print)
+    {
+        TARGETING::PredicateCTM l_CtmFilter(TARGETING::CLASS_NA,
+                                            l_type,
+                                            TARGETING::MODEL_NA);
+
+        // Apply the filter through all targets
+        TARGETING::TargetRangeFilter l_targetList(TARGETING::targetService().begin(),
+                                                  TARGETING::targetService().end(),
+                                                  &l_CtmFilter);
+
+        TARGETING::TargetHandleList l_allTargets;
+
+        for ( ; l_targetList; ++l_targetList)
+        {
+            l_allTargets.push_back(*l_targetList);
+        }
+
+        print_target_list(l_allTargets);
+    }
+
+}
+#endif
 
 void* host_discover_targets( void *io_pArgs )
 {
@@ -142,6 +242,10 @@ void* host_discover_targets( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "host_discover_targets exit" );
+
+#ifdef CONFIG_PRINT_SYSTEM_INFO
+    print_system_info();
+#endif
 
     return l_stepError.getErrorHandle();
 }
