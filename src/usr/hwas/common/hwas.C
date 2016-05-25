@@ -881,43 +881,24 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PERV)
     {
-        // Loop through PG entries from PRV entry to last used entry
-        for (uint8_t l_pgDataIndex =
-               VPD_CP00_PG_PERVASIVE_INDEX;
-             l_pgDataIndex <= VPD_CP00_PG_MAX_USED_INDEX;
-             ++l_pgDataIndex)
-        {
-            // Skip reserved entries between EP5 entry and EC00 entry
-            if ((l_pgDataIndex > VPD_CP00_PG_EP5_INDEX) &&
-                (l_pgDataIndex < VPD_CP00_PG_EC00_INDEX))
-            {
-                continue;
-            }
+        // The chip unit number of the perv target
+        // is the index into the PG data
+         ATTR_CHIP_UNIT_type indexPERV =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
 
-            // Skip OB1 and OB2 entries on NIMBUS (region doesn't exist)
-            if ((i_desc->getAttr<ATTR_MODEL>() ==
-                 MODEL_NIMBUS) &&
-                (l_pgDataIndex > VPD_CP00_PG_OB0_INDEX) &&
-                (l_pgDataIndex < VPD_CP00_PG_OB3_INDEX))
-            {
-                continue;
-            }
-
-            // Check PERV bit in the entry
-            if ((i_pgData[l_pgDataIndex]
-                 & VPD_CP00_PG_xxx_PERV) != 0)
-            {
-                HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
-                         "actual 0x%04X, expected 0x%04X - bad",
-                         i_desc->getAttr<ATTR_HUID>(),
-                         l_pgDataIndex,
-                         i_pgData[l_pgDataIndex],
-                         (i_pgData[l_pgDataIndex] &
-                          ~VPD_CP00_PG_xxx_PERV));
-                l_descFunctional = false;
-                break;
-            }
-        }
+         // Check PERV bit in the entry
+         if ((i_pgData[indexPERV]
+              & VPD_CP00_PG_xxx_PERV) != 0)
+         {
+             HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
+                      "actual 0x%04X, expected 0x%04X - bad",
+                      i_desc->getAttr<ATTR_HUID>(),
+                      indexPERV,
+                      i_pgData[indexPERV],
+                      (i_pgData[indexPERV] &
+                       ~VPD_CP00_PG_xxx_PERV));
+             l_descFunctional = false;
+         }
     }
 
     return l_descFunctional;
