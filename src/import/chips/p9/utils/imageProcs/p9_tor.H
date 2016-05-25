@@ -22,7 +22,6 @@
 #include "p9_ring_identification.H"
 #include "p9_ringId.H"
 #include "p9_infrastruct_help.H"
-#include "p9_xip_image.h"
 
 #define NUM_RING_IDS              P9_NUM_RINGS
 

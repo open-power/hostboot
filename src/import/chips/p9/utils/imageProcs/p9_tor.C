@@ -29,6 +29,7 @@
 // it is used pass by value
 //
 #include "p9_tor.H"
+#include "p9_xip_image.h"
 
 //
 // PPE type names:
