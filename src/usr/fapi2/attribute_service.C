@@ -375,7 +375,8 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     }
     else
     {
-        uint16_t l_pos = l_pTarget->getAttr<TARGETING::ATTR_POSITION>();
+      //RTC: 154950 Add MCA_PORT attribute to DIMM target
+        uint16_t l_pos = l_pTarget->getAttr<TARGETING::ATTR_FAPI_POS>();
         o_pos = l_pos;
     }
 
