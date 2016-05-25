@@ -2481,7 +2481,7 @@
             <default>4800</default>
         </uint32_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -3687,7 +3687,7 @@
             <default>4800</default>
         </uint32_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -21155,7 +21155,7 @@ DEPRECATED!!!!
       <default>4800</default>
     </uint32_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>volatile</persistency>
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
