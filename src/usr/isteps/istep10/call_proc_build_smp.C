@@ -33,6 +33,9 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
+//@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
+#include <devicefw/userif.H>
+
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
 using   namespace   TARGETING;
@@ -45,6 +48,83 @@ void* call_proc_build_smp (void *io_pArgs)
 {
 
     IStepError l_StepError;
+
+
+    //@TODO RTC:133830 - This should be relocated to the below TODO as it
+    //                 will do a similar loop
+    //@TODO RTC:150562 - Long term the INTRRP will set the BARs. This will
+    //                 be signaled via the INTRP::enablePsiIntr() function call
+    //                 and the INTRP will set this BAR like all the others
+    errlHndl_t  l_errl  =   NULL;
+    uint64_t l_psihbBarAddr = 0x0501290A;
+    TARGETING::TargetHandleList procChips;
+    getAllChips(procChips, TYPE_PROC);
+    TARGETING::TargetHandleList::iterator curproc = procChips.begin();
+
+    // Get the master proc
+    TARGETING::Target * l_masterProc =   NULL;
+    (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+
+    // Loop through all proc chips
+    while(curproc != procChips.end())
+    {
+        TARGETING::Target*  l_proc_target = *curproc;
+        if (l_proc_target != l_masterProc)
+        {
+            uint64_t l_baseBarValue =
+                 l_proc_target->getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
+
+            do {
+                //Get base BAR Value from attribute
+                uint64_t l_barValue = l_baseBarValue;
+                uint64_t size = sizeof(l_barValue);
+                l_errl = deviceWrite(l_proc_target,
+                              &l_barValue,
+                              size,
+                              DEVICE_SCOM_ADDRESS(l_psihbBarAddr));
+
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                              "Unable to set PSI BRIDGE BAR Address");
+                    break;
+                }
+
+                //Now set the enable bit
+                l_barValue += 0x0000000000000001ULL; //PSI BRIDGE BAR ENABLE Bit
+                size = sizeof(l_barValue);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Setting PSI BRIDGE Bar enable value for Target with "
+                          "huid: 0x%x, PSI BRIDGE BAR value: 0x%016lx",
+                          TARGETING::get_huid(l_proc_target),l_barValue);
+
+                l_errl = deviceWrite(l_proc_target,
+                                 &l_barValue,
+                                 size,
+                                 DEVICE_SCOM_ADDRESS(l_psihbBarAddr));
+
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"Error enabling PSIHB BAR");
+                    break;
+                }
+
+            } while(0);
+
+
+            if(l_errl)
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+                break;
+            }
+        }
+        ++curproc;
+    }
+
+
     //@TODO RTC:133830
 /*    errlHndl_t  l_errl  =   NULL;
 
