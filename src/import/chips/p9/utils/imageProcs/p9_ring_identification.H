@@ -147,9 +147,7 @@ typedef struct
     uint8_t      ringId;
     uint8_t      instanceIdMin;    // the min instanceId
     uint8_t      instanceIdMax;    // the max instanceId
-    const char*  ringNameImg; // Ring name in image: ringName + "_ring"
     uint8_t      vpdKeyword;
-    uint8_t      bWcSpace;     // 0: fitted  1: worst-case space (3 x ring length)
 } RingIdList;
 
 
@@ -170,7 +168,6 @@ extern const uint32_t    RING_ID_LIST_CHIP_SIZE, RING_ID_LIST_CORE_SIZE,
 //       mvpdKeyword to getMvpdRing();
 enum VpdKeyword
 {
-
     VPD_KEYWORD_PDG = 0,
     VPD_KEYWORD_PDR = 1,
     NUM_OF_VPD_TYPES = 2,
