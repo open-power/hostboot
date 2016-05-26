@@ -1,0 +1,102 @@
+#  Joe's initfile reference page:
+#  https://w3-connections.ibm.com/wikis/home?lang=en-us#!/wiki/W9dc674bd1c19_432e_9f66_0e8b6ce7195f/page/P9%20Initfile%20Strategy%20%26%20Execution
+#  http://ausxgsatm2.austin.ibm.com/gsa/home/j/m/jmcgill/web/public/p8/initfiles/mba_def.initfile
+
+#--******************************************************************************
+#-- ISSUES TO RESOVLE
+#--******************************************************************************
+#
+#--******************************************************************************
+#-- REFERENCES FOR FILE
+#--******************************************************************************
+# Files used to check what target type attributes are
+#      MCS 
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
+#      PROC (apparently from grep)
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/nest_attributes.xml   (properties)
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/p9_sbe_attributes.xml (values)
+#      Example:
+#           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
+#           <targetType>TARGET_TYPE_MCS</targetType>
+# File used to see if attribute is 1D or 2D array
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/output/gen/attribute_ids.H
+#      Example:
+#           typedef uint8_t ATTR_EFF_DIMM_TYPE_Type[2][2];
+# File for finding correct spydef name
+#      1st find the spydef file this ekb build is looking at by finding SPYDEF_FILE_LOCATION in file below
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/tools/ifCompiler/scan_procedures.mk
+#      2nd open *.spydef in that dir and search for spy names
+#           /afs/awd.austin.ibm.com/projects/eclipz/lab/p9/vbu_models/n10_e9050_tp046_ec150u01a_soa_sc_u138_01/edc/*.spydef
+#      (File comes from actually building a vbu file and looking at the spydef)
+#      Example:
+#           idial MCP.PORT1.SRQ.PC.MBAREF0Q_CFG_TRFC {
+# Wrapper file calling this (TODO, need to actually make this file call this file)
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/nest/p9_chiplet_scominit.C
+# Output file generated
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/initfiles/p9_mcs_scom.C
+
+
+
+
+## Syntax Notes
+# Compiler expects spys to be all caps
+
+ 
+#--******************************************************************************
+#-- Required keywords/variables
+#--******************************************************************************
+
+SyntaxVersion = 3
+
+target_type 0 TARGET_TYPE_MCS;
+
+
+
+#--******************************************************************************
+#-- Systems Config
+#--******************************************************************************
+
+#--******************************************************************************
+#-- Effective Attributes
+#--******************************************************************************
+
+
+
+#--******************************************************************************
+#-- Dial Assignments
+#--******************************************************************************
+
+
+
+
+##########################
+# MC TEAM DICTATED INITS #
+##########################
+
+espy  MC01.PBI01.SCOMFIR.MCMODE1_DISABLE_FP_M_BIT [when=S] {
+  spyv;
+  ON;
+}
+
+# HW376110
+ispy  MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S] {
+  spyv;
+  0b0111;
+}
+
+# MOVED MC01.PORT... TO MCA PER BEN GASS'S DLL OVERRIDE
+#
+#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_SQ_LFSR_CNTL [when=S] {
+#  spyv;
+#  0b0100;
+#
+#espy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_EN_ALT_CR [when=S] {
+#  spyv;
+#  OFF;
+#}
+#
+#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=S] {
+#  spyv;
+#  0b000000;
+#}
