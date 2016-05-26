@@ -129,6 +129,24 @@ void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 void* call_proc_cen_ref_clk_enable(void *io_pArgs);
 
 /**
+ * @brief   host_p9_fbc_eff_config
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* call_host_p9_fbc_eff_config (void * io_pArgs);
+
+/**
+ * @brief   host_p9_fbc_eff_config_links
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* call_host_p9_fbc_eff_config_links (void * io_pArgs);
+
+/**
  *  @brief  call_proc_attr_update
  *
  *           Stub to enable platforms to override attributes
@@ -300,14 +318,14 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(08,08,"host_p9_fbc_eff_config"),  // @TODO-RTC:154376
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(08,08,"host_p9_fbc_eff_config"),
+                ISTEP_08::call_host_p9_fbc_eff_config,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,09,"host_p9_eff_config_links"),// @TODO-RTC:154376
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(08,09,"host_p9_eff_config_links"),
+                ISTEP_08::call_host_p9_fbc_eff_config_links,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(08,10,"proc_attr_update"),

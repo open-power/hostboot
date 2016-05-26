@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -614,10 +614,7 @@ namespace TARGETING
             //sys-sys-power9 - base
             TARGETING::Target* l_pTopLevel = NULL;
             TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-            //l_pTopLevel->getAttr<ATTR_FREQ_A>(); //defaulted in attribute_types.xml
             l_pTopLevel->setAttr<ATTR_FREQ_X>(0xfa0);
-            //l_pTopLevel->setAttr<ATTR_MAX_MCS_PER_SYSTEM>(4); //defaulted in attribute_types.xml
-            l_pTopLevel->setAttr<ATTR_NOMINAL_FREQ_MHZ>(0xf75);
 
             //chip-base
             PredicateCTM predEnc(CLASS_ENC);

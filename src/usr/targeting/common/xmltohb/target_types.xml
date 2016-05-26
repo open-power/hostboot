@@ -165,10 +165,6 @@
     <attribute><id>SYNC_BETWEEN_STEPS</id></attribute>
     <attribute><id>SBE_IMAGE_MINIMUM_VALID_EXS</id></attribute>
     <!-- End sbe_config_update attributes    -->
-    <!--    proc_select_boot_master attributes  -->
-    <attribute><id>PROC_SELECT_BOOT_MASTER</id></attribute>
-    <attribute><id>PROC_SELECT_SEEPROM_IMAGE</id></attribute>
-    <!-- End proc_select_boot_master attributes  -->
     <!-- Start erepair_thresholds.xml -->
     <attribute><id>X_EREPAIR_THRESHOLD_FIELD</id></attribute>
     <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id></attribute>
@@ -585,6 +581,9 @@
     <attribute><id>POUNDV_BUCKET_NUM</id><default>0</default></attribute>
     <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>UNIT_TEST_MCA_MEMORY_SIZES</id></attribute>
+    <attribute><id>PROC_FABRIC_OPTICS_CONFIG_MODE</id></attribute>
+    <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
+    <attribute><id>PROC_FABRIC_X_AGGREGATE</id></attribute>
 
 </targetType>
 
@@ -2061,8 +2060,6 @@
     <attribute><id>PROC_FABRIC_SMP_OPTICS_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_CAPI_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_ADDR_BAR_MODE</id></attribute>
-    <attribute><id>PROC_EPS_READ_CYCLES</id></attribute>
-    <attribute><id>PROC_EPS_WRITE_CYCLES</id></attribute>
     <!-- HDAT Hostboot Runtime Data Info -->
     <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
     <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
@@ -2109,6 +2106,16 @@
     <attribute><id>PIBMEM_REPAIR0</id></attribute>
     <attribute><id>PIBMEM_REPAIR1</id></attribute>
     <attribute><id>PIBMEM_REPAIR2</id></attribute>
+    <!-- proc_fbc_eff_config -->
+    <attribute><id>PROC_FABRIC_CORE_FLOOR_RATIO</id></attribute>
+    <attribute><id>PROC_FABRIC_CORE_CEILING_RATIO</id></attribute>
+    <attribute><id>PROC_EPS_GB_PERCENTAGE</id></attribute>
+    <attribute><id>PROC_EPS_READ_CYCLES_T0</id></attribute>
+    <attribute><id>PROC_EPS_READ_CYCLES_T1</id></attribute>
+    <attribute><id>PROC_EPS_READ_CYCLES_T2</id></attribute>
+    <attribute><id>PROC_EPS_WRITE_CYCLES_T1</id></attribute>
+    <attribute><id>PROC_EPS_WRITE_CYCLES_T2</id></attribute>
+    <!-- End proc_fbc_eff_config -->
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2235,6 +2242,18 @@
     <attribute><id>NHTM_TRACE_TYPE</id></attribute>
     <attribute><id>CHTM_TRACE_TYPE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+    <!-- proc_fbc_eff_config_links -->
+    <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ATTACHED_LINK_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ATTACHED_CHIP_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_X_LINK_DELAY</id></attribute>
+    <attribute><id>PROC_FABRIC_X_ADDR_DIS</id></attribute>
+    <attribute><id>PROC_FABRIC_X_AGGREGATE</id></attribute>
+    <attribute><id>PROC_FABRIC_A_LINK_DELAY</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
+    <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
+    <!-- End proc_fbc_eff_config_links -->
 </targetType>
 
 <!-- chip-processor-nimbus -->
