@@ -131,6 +131,8 @@ CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_FAPI_XML}
 CLEAN_TARGETS += ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
 CLEAN_TARGETS += ${GENDIR}/errl/errludattribute.H
 CLEAN_TARGETS += ${GENDIR}/errl/errludtarget.H
+CLEAN_TARGETS += ${GENDIR}/targAttrInfo.csv
+CLEAN_TARGETS += ${GENDIR}/targAttrOverrideData.H
 
 GENDIR_ERRL = $(ROOTPATH)/obj/genfiles/errl
 

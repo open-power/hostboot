@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -96,10 +96,14 @@ ${IMGDIR}/errlparser: ${OBJDIR}/errlparser.o
 clean:
 	rm -f ${ERRLPARSE_TARGETS}
 	rm -f ${GENDIR}/plugins/hbfwSrcParse*.C
+	rm -f ${GENDIR}/plugins/errludattribute.H
+	rm -f ${GENDIR}/plugins/errludtarget.H
 	rm -f ${GENDIR}/comps.C
 	rm -f ${IMGDIR}/errlparser
 	rm -fr ${OBJDIR}
 	rm -f ${GENDIR}/errldisplaydata.C
+	rm -f ${GENDIR}/srcListing
+	rm -f ${GENDIR}/hbfw_term_rc.H
 
 debug:
 	ls -l 	${GENDIR}

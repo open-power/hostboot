@@ -41,6 +41,10 @@ C_FILES = attrTextToBinaryBlob.C ecc.C
 H_FILES = targAttrOverrideData.H fapi2AttrOverrideData.H\
 		  fapi2AttrOverrideEnums.H
 
+CLEAN_TARGETS += $(GENDIR)/targAttrOverrideData.H
+CLEAN_TARGETS += $(GENDIR)/fapiAttrOverrideData.H
+CLEAN_TARGETS += $(GENDIR)/fapiAttrOverrideEnums.H
+
 include $(ROOTPATH)/config.mk
 vpath %.C $(GENDIR)
 vpath %.H $(GENDIR)

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +34,7 @@ SKIP_CONFIG_FILE_LOAD = 1
 
 IMAGE_PASS_POST += $(GENDIR)/hwp_id.html
 CLEAN_TARGETS   += $(GENDIR)/hwp_id.html
+
 ifndef BUILD_MINIMAL
 IMAGE_PASS_POST += cscope ctags
 endif
