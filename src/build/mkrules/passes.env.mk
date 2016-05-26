@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,3 +81,7 @@ CLEAN_PASS_BODY += $(addprefix _BUILD/CLEAN/,$(wildcard $(CLEAN_TARGETS)))
 .PHONY: clean
 clean: CLEAN_PASS
 
+.PHONY: clobber
+clobber: clean
+	rm -rf obj/modules/* obj/core/* img/* obj/genfiles/* obj/cscope/* \
+               obj/beam/* obj/doxygen/*
