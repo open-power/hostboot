@@ -614,7 +614,7 @@ namespace TARGETING
             //sys-sys-power9 - base
             TARGETING::Target* l_pTopLevel = NULL;
             TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-            l_pTopLevel->setAttr<ATTR_FREQ_X>(0xfa0);
+            l_pTopLevel->setAttr<ATTR_FREQ_X_MHZ>(0xfa0);
 
             //chip-base
             PredicateCTM predEnc(CLASS_ENC);

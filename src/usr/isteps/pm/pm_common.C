@@ -145,7 +145,7 @@ namespace HBPM
         tS.getTopLevelTarget( sysTarget );
         assert( sysTarget != NULL );
 
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
+        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
 
         config_data->version = HBPM::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;

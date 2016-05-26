@@ -175,7 +175,7 @@ namespace HBOCC
 
             // Save Nest Frequency;
             ATTR_NEST_FREQ_MHZ_type l_nestFreq =
-                                     sysTarget->getAttr<ATTR_FREQ_PB>();
+                                     sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
 
 
             size_t l_length = 0; // length of this section
@@ -278,7 +278,7 @@ namespace HBOCC
         tS.getTopLevelTarget( sysTarget );
         assert( sysTarget != NULL );
 
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
+        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
 
         config_data->version = HBOCC::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;
@@ -351,7 +351,7 @@ namespace HBOCC
         tS.getTopLevelTarget( sysTarget );
         assert( sysTarget != NULL );
 
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
+        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
 
 
 

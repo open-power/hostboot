@@ -97,9 +97,9 @@
     <attribute><id>FREQ_PROC_REFCLOCK</id></attribute>
     <attribute><id>FREQ_PROC_REFCLOCK_KHZ</id></attribute>
     <attribute><id>FREQ_MEM_REFCLOCK</id></attribute>
-    <attribute><id>FREQ_PB</id></attribute>
-    <attribute><id>FREQ_A</id></attribute>
-    <attribute><id>FREQ_X</id></attribute>
+    <attribute><id>FREQ_PB_MHZ</id></attribute>
+    <attribute><id>FREQ_A_MHZ</id></attribute>
+    <attribute><id>FREQ_X_MHZ</id></attribute>
     <attribute><id>SP_FUNCTIONS</id></attribute>
     <attribute><id>HB_SETTINGS</id></attribute>
     <attribute><id>CEC_IPL_TYPE</id></attribute>
@@ -111,7 +111,7 @@
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
     <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
-    <attribute><id>FREQ_PCIE</id></attribute>
+    <attribute><id>FREQ_PCIE_MHZ</id></attribute>
     <attribute><id>L2_R_T0_EPS</id></attribute>
     <attribute><id>L2_R_T1_EPS</id></attribute>
     <attribute><id>L2_R_T2_EPS</id></attribute>
@@ -310,6 +310,17 @@
     <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
     <!-- AVP override for fused cores or normal cores -->
     <attribute><id>FUSED_CORE_OPTION</id></attribute>
+
+<!--- TODO: RTC 155880
+      The attributes in this block have their names changed from ATTR_x to ATTR_x_MHZ.
+      The old definitions are left in this block in order to avoid build break in FSP.
+      They are to be removed when code in FSP are  updated to use the new names. -->
+    <attribute><id>FREQ_PCIE</id></attribute>
+    <attribute><id>FREQ_A</id></attribute>
+    <attribute><id>FREQ_PB</id></attribute>
+    <attribute><id>FREQ_X</id></attribute>
+<!-- End TODO -->
+
 </targetType>
 
 <targetType>
@@ -1932,11 +1943,11 @@
     <attribute><id>MAX_ALLOWED_DIMM_FREQ</id></attribute>
     <attribute><id>REQUIRED_SYNCH_MODE</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
-    <attribute><id>FREQ_A</id></attribute>
-    <attribute><id>FREQ_PB</id></attribute>
+    <attribute><id>FREQ_A_MHZ</id></attribute>
+    <attribute><id>FREQ_PB_MHZ</id></attribute>
     <attribute><id>NEST_FREQ_MHZ</id></attribute>
-    <attribute><id>FREQ_PCIE</id></attribute>
-    <attribute><id>FREQ_X</id></attribute>
+    <attribute><id>FREQ_PCIE_MHZ</id></attribute>
+    <attribute><id>FREQ_X_MHZ</id></attribute>
     <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
     <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
     <attribute><id>PROC_EPS_TABLE_TYPE</id></attribute>
@@ -2130,6 +2141,17 @@
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id></attribute>
     <attribute><id>MSS_VOLT_VPP_SLOPE</id></attribute>
     <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
+
+<!--- TODO: RTC 155880
+      The attributes in this block have their names changed from ATTR_x to ATTR_x_MHZ.
+      The old definitions are left in this block in order to avoid build break in FSP.
+      They are to be removed when code in FSP are  updated to use the new names. -->
+    <attribute><id>FREQ_PCIE</id></attribute>
+    <attribute><id>FREQ_A</id></attribute>
+    <attribute><id>FREQ_PB</id></attribute>
+    <attribute><id>FREQ_X</id></attribute>
+<!-- End TODO -->
+
 </targetType>
 
 <!-- enc-node-power9 -->

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2348,10 +2348,10 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
     // determine nest frequency
     uint32_t freq_pb;
-    rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, freq_pb);
+    rc = FAPI_ATTR_GET(ATTR_FREQ_PB_MHZ, NULL, freq_pb);
     if (!rc.ok())
     {
-        FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_FREQ_PB)");
+        FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_FREQ_PB_MHZ)");
         return rc;
     }
 

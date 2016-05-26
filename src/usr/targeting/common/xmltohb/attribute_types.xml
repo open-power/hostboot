@@ -2485,13 +2485,13 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_CORE_FLOOR</id>
+        <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>FREQ_PB</id>
+    <id>FREQ_PB_MHZ</id>
     <description>
         System attribute.
         The frequency of a processor's PB chiplet in MHz.
@@ -2503,13 +2503,13 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_PB</id>
+        <id>ATTR_FREQ_PB_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>FREQ_A</id>
+    <id>FREQ_A_MHZ</id>
     <description>
         System attribute.
         The frequency of a processor's A-bus chiplet in MHz.
@@ -2522,13 +2522,13 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_A</id>
+        <id>ATTR_FREQ_A_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>FREQ_X</id>
+    <id>FREQ_X_MHZ</id>
     <description>
         System attribute.
         The frequency of a processor's X-bus chiplet in MHz.
@@ -2540,7 +2540,7 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_X</id>
+        <id>ATTR_FREQ_X_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -3659,7 +3659,7 @@
 </attribute>
 
 <attribute>
-  <id>FREQ_PCIE</id>
+  <id>FREQ_PCIE_MHZ</id>
   <description>
     The frequency of a processor's PCI-e bus in MHz.
     This is the same for all PCI-e busses in the system.
@@ -3669,7 +3669,7 @@
   <persistency>non-volatile</persistency>
   <readable/>
   <hwpfToHbAttrMap>
-      <id>ATTR_FREQ_PCIE</id>
+      <id>ATTR_FREQ_PCIE_MHZ</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
@@ -3691,7 +3691,7 @@
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_CORE_NOMINAL</id>
+        <id>ATTR_FREQ_CORE_NOMINAL_MHZ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -21140,7 +21140,7 @@ DEPRECATED!!!!
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
-        <id>ATTR_FREQ_CORE_CEILING</id>
+        <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
         <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
@@ -21584,7 +21584,7 @@ DEPRECATED!!!!
     <array>2</array>
   </simpleType>
   <writeable/>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_PROC_HTM_BAR_SIZES</id>
@@ -28697,5 +28697,104 @@ DEPRECATED!!!!
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!--- TODO: RTC 155880
+ The attributes in this block have their names changed from ATTR_x to ATTR_x_MHZ.
+ The old definitions are left in this block in order to avoid build break in FSP.
+ They are to be removed when code in FSP are  updated to use the new names.
+-->
+<attribute>
+    <id>FREQ_PB</id>
+    <description>
+        System attribute.
+        The frequency of a processor's PB chiplet in MHz.
+        This is the same for all PB chiplets in the system.
+        Provided by the MRW.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_PB</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_A</id>
+    <description>
+        System attribute.
+        The frequency of a processor's A-bus chiplet in MHz.
+        This is the same for all A-bus chiplets in the system.
+        Provided by the MRW.
+    </description>
+    <simpleType><uint32_t>
+        <default>0x1900</default>
+    </uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_A</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_X</id>
+    <description>
+        System attribute.
+        The frequency of a processor's X-bus chiplet in MHz.
+        This is the same for all X-bus chiplets in the system.
+        Provided by the MRW.
+    </description>
+    <simpleType><uint32_t></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_X</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>FREQ_CORE_CEILING</id>
+  <description>
+    The maximum core frequency in MHz.
+    This is the same for all cores in the system.
+    Data is provided by MVPD #V.
+  </description>
+  <simpleType>
+    <uint32_t>
+      <default>4800</default>
+    </uint32_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_CORE_CEILING</id>
+        <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>FREQ_PCIE</id>
+  <description>
+    The frequency of a processor's PCI-e bus in MHz.
+    This is the same for all PCI-e busses in the system.
+    Provided by the MRW.
+  </description>
+  <simpleType><uint32_t></uint32_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_FREQ_PCIE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<!--- TODO: End RTC 155880 workaround -->
 
 </attributes>

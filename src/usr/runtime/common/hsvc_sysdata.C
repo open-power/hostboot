@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,15 +30,15 @@
 // -- Input: ../../xml/attribute_info/common_attributes.xml --
 // No attributes found
 // -- Input: ../../xml/attribute_info/freq_attributes.xml --
-HSVC_LOAD_ATTR( ATTR_FREQ_A );
-HSVC_LOAD_ATTR( ATTR_FREQ_CORE_FLOOR );
-HSVC_LOAD_ATTR( ATTR_FREQ_CORE_NOMINAL );
+HSVC_LOAD_ATTR( ATTR_FREQ_A_MHZ );
+HSVC_LOAD_ATTR( ATTR_FREQ_CORE_FLOOR_MHZ );
+HSVC_LOAD_ATTR( ATTR_FREQ_CORE_NOMINAL_MHZ );
 HSVC_LOAD_ATTR( ATTR_FREQ_MEM_REFCLOCK );
-HSVC_LOAD_ATTR( ATTR_FREQ_PB );
-HSVC_LOAD_ATTR( ATTR_FREQ_PCIE );
+HSVC_LOAD_ATTR( ATTR_FREQ_PB_MHZ );
+HSVC_LOAD_ATTR( ATTR_FREQ_PCIE_MHZ );
 HSVC_LOAD_ATTR( ATTR_FREQ_PROC_REFCLOCK );
 HSVC_LOAD_ATTR( ATTR_FREQ_PROC_REFCLOCK_KHZ );
-HSVC_LOAD_ATTR( ATTR_FREQ_X );
+HSVC_LOAD_ATTR( ATTR_FREQ_X_MHZ );
 // -- Input: ../../xml/attribute_info/L2_L3_attributes.xml --
 HSVC_LOAD_ATTR( ATTR_L2_FORCE_R_T2_EPS );
 HSVC_LOAD_ATTR( ATTR_L2_R_T0_EPS );
