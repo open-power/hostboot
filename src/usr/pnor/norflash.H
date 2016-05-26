@@ -48,8 +48,8 @@ enum NorChipIDs
     MICRON_NOR_ID     = 0x20ba2000, /**< Micron NOR */
 
     MACRONIX_MFG_ID   = 0xC2000000, /**< Macronix Mfg ID */
-    MACRONIX32_NOR_ID = 0xC2201A00, /**< Macronix NOR MXxxL51235F */
-    MACRONIX64_NOR_ID = 0xC2201900, /**< Macronix NOR MXxxL25635F */
+    MACRONIX64_NOR_ID = 0xC2201A00, /**< Macronix NOR MXxxL51235F */
+    MACRONIX32_NOR_ID = 0xC2201900, /**< Macronix NOR MXxxL25635F */
 
     /* Note: Simics currently models Micron NOR  */
     VPO_NOR_ID        = 0x20201800, /**< VPO NOR chip ID */
@@ -87,6 +87,7 @@ enum SpiConfigInfo
     SPI_JEDEC_WRITE_ENABLE   = 0x06, //WREN
     SPI_JEDEC_FAST_READ      = 0x0B, //FAST_READ
     SPI_JEDEC_SECTOR_ERASE   = 0x20, //SE
+    SPI_JEDEC_DUAL_READ      = 0x3B, //DREAD
     SPI_JEDEC_READ_SFDP      = 0x5A, //RDSFDP
     SPI_JEDEC_CHIPID         = 0x9F, //RDID
     SPI_JEDEC_BLOCK_ERASE    = 0xD8, //BE

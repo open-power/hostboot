@@ -139,6 +139,11 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
         l_hbbMMIO    = (l_hbbMMIO >> 32) & PNOR::LPC_TOP_OF_FLASH_OFFSET;
         o_hbbAddress = ((9*l_hbbMMIO) - (9*PNOR::LPC_SFC_MMIO_OFFSET)
                                  - PNOR::PNOR_SIZE) /8;
+#ifdef CONFIG_PNOR_INIT_FOUR_BYTE_ADDR
+        // If the PNOR came up in 3-byte mode, then make sure to mask off
+        // the address appropriately.
+        o_hbbAddress &= 0x00ffffffu;
+#endif
     } while (0);
     return l_err;
 }
