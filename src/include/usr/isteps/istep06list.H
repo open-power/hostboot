@@ -154,7 +154,6 @@ void* host_start_occ_xstop_handler (void * io_pArgs);
  */
 void* call_host_voltage_config (void * io_pArgs);
 
-
 };
 
 

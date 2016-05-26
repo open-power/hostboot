@@ -44,6 +44,8 @@ OBJS += call_host_setup_sbe.o
 OBJS += call_host_cbs_start.o
 OBJS += call_proc_check_slave_sbe_seeprom_complete.o
 OBJS += call_proc_cen_ref_clk_enable.o
+OBJS += call_host_p9_fbc_eff_config.o
+OBJS += call_host_p9_fbc_eff_config_links.o
 OBJS += call_proc_attr_update.o
 OBJS += call_proc_enable_osclite.o
 OBJS += call_proc_chiplet_scominit.o
@@ -78,6 +80,12 @@ include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
 
 # proc_cen_ref_clk_enable
 # Cummulus only -- p9_cen_ref_clk_enable.mk not defined yet
+
+# host_p9_fbc_eff_config
+include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config.mk
+
+# host_p9_fbc_eff_config_links
+include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk
 
 # proc_attr_update: Proc ATTR Update
 include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk

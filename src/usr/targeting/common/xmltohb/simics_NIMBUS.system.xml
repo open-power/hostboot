@@ -118,6 +118,10 @@
         <id>TPM_REQUIRED</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PROC_EPS_TABLE_TYPE</id>
+        <default>EPS_TYPE_LE</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
