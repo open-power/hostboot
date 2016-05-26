@@ -744,9 +744,9 @@ extern "C"
 
         FAPI_DBG("Start");
         // retrieve X-bus and A-bus frequencies
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X, FAPI_SYSTEM, freq_x),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, FAPI_SYSTEM, freq_x),
                  "Failure reading XBUS frequency attribute!");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A, FAPI_SYSTEM, freq_a),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, FAPI_SYSTEM, freq_a),
                  "Failure reading ABUS frequency attribute!");
 
         // Bus frequencies are global for the system (i.e. A0 and A1 will always run with the same frequency)
