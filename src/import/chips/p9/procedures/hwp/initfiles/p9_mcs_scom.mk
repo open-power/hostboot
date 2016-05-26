@@ -16,3 +16,5 @@
 # deposited with the U.S. Copyright Office.
 #
 # IBM_PROLOG_END_TAG
+PROCEDURE=p9_mcs_scom
+$(call BUILD_PROCEDURE)

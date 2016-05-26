@@ -16,3 +16,22 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef _INIT_P9_MCS_SCOM_PROCEDURE_H_
+#define _INIT_P9_MCS_SCOM_PROCEDURE_H_
+
+
+#include <stddef.h>
+#include <stdint.h>
+#include <fapi2.H>
+
+
+typedef fapi2::ReturnCode (*p9_mcs_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+
+extern "C"
+{
+
+    fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0);
+
+}
+
+#endif

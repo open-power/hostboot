@@ -5,18 +5,17 @@
 #--******************************************************************************
 #-- ISSUES TO RESOVLE
 #--******************************************************************************
-# ANDRE missing attributes
-#      ATTR_EFF_TCCD_S disappeared (temp commented to 4 for now)
+#
 #--******************************************************************************
 #-- IMPORTANT SUPPORT NOTES AS OF 4/21/2016
 #--******************************************************************************
 # Currently only supports DIMMS where CL=TRCD=TRP (ie 16-16-16)
 #      Steve Powell says he's seen DIMMs that don't match
 #      What needs to be done to support other DIMMs
-#           Replace def_MEM_TYPE_1866_13_13_13 variables with freq+CL variables 
+#           Replace def_MEM_TYPE_1866_13_13_13 variables with freq+CL variables
 #                Because TRCD and TRP don't really matter for the equations that this variable is being used for
 #                So we should rewrite these equations in terms of just freq+CL
-# Here we assume WL = ATTR_EFF_DRAM_CWL (which is true if no Additive Latency / Posted CAS). 
+# Here we assume WL = ATTR_EFF_DRAM_CWL (which is true if no Additive Latency / Posted CAS).
 #      So no support for Posted CAS / Additive latency
 # Only supports Burst Length 8 (CODE AND LOGIC STATEMENT)
 #      Initfile is hardcoded assuming BL=8 and BL/2=4
@@ -24,36 +23,50 @@
 #           If other burst lengths are to be supported, a logic change would be required
 # Only supports RDIMM with RDIMM and LRDIMM with LRDIMM, no mixing (CODE AND LOGIC STATEMENT)
 #      Logic would have to support different wr data delays to differen DIMMs. It does NOT.
+#
+#--******************************************************************************
+#-- FUTURE ENHANCEMENTS
+#--******************************************************************************
 # Enhancements to be done later: ATTR_EFF_RDTAG_DLY and ATTR_EFF_WRDATA_DLY attributes
 #      What needs to be done to support other DIMMs
 #           ATTR_EFF_RDTAG_DLY and ATTR_EFF_WRDATA_DLY attributes (better to calculate in code than init file)
 #           MBA_DSM0Q_CFG_RDTAG_DLY to use ATTR_EFF_RDTAG_DLY
 #           MBA_DSM0Q_CFG_WRDATA_DLY to use ATTR_EFF_WRDATA_DLY
+# ATTR_EFF_TCCD_S attribute (hardcoded to 4 for now)
 
 
-## References for file
-#      /gsa/ausgsa-h3/15/sleung/ekb/
+#--******************************************************************************
+#-- REFERENCES FOR FILE
+#--******************************************************************************
 # Files used to check what target type attributes are
-#      ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
-#      ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
 #      Example:
 #           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
 #           <targetType>TARGET_TYPE_MCS</targetType>
 # File used to see if attribute is 1D or 2D array
-#      ekb/output/gen/attribute_ids.H
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/output/gen/attribute_ids.H
 #      Example:
 #           typedef uint8_t ATTR_EFF_DIMM_TYPE_Type[2][2];
 # File for finding correct spydef name
-#      /afs/awd.austin.ibm.com/projects/eclipz/lab/p9/vbu_models/n10_e9035_tp035_ec138u51a_soa_sc_u073_01/edc/*.spydef
+#      1st find the spydef file this ekb build is looking at by finding SPYDEF_FILE_LOCATION in file below
+#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/tools/ifCompiler/scan_procedures.mk
+#      2nd open *.spydef in that dir and search for spy names
+#           /afs/awd/projects/eclipz/lab/p9/vbu_models/n10_e9050_tp046_ec150u01a_soa_sc_u138_01/edc/*.spydef
 #      (File comes from actually building a vbu file and looking at the spydef)
 #      Example:
 #           idial MCP.PORT1.SRQ.PC.MBAREF0Q_CFG_TRFC {
 # Wrapper file calling this
-#      ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
 # Output file generated
-#      ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
+#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
+#
+# COMMON DEBUG
+#      -debug5.16.i6.d
+#      If complaining unsupported attribute, try commenting out of attribute in attribute file
+#      If complaining memory fault, maybe wrong integer length in attribute file
 
- 
+
 #--******************************************************************************
 #-- Required keywords/variables
 #--******************************************************************************
@@ -63,9 +76,12 @@ SyntaxVersion = 3
 target_type 0 TARGET_TYPE_MCA;
 target_type 1 TARGET_TYPE_MCBIST;
 target_type 2 TARGET_TYPE_MCS;
+target_type 3 TARGET_TYPE_SYSTEM;
+
 
 define MCBIST = TGT1; # If referencing Attr from mcbist, add "MCBIST." in front
 define MCS = TGT2; # If referencing Attr from mcs, add "MCS." in front
+define SYS = TGT3; # If referencing Attr from system, add "SYS." in front
 
 #--******************************************************************************
 #-- Systems Config
@@ -80,7 +96,7 @@ define def_POSITION       =   ATTR_CHIP_UNIT_POS;
 define def_PORT_INDEX     =   def_POSITION % 2;
 
 # define frequency range for potential support of sync mode
-define def_MSS_FREQ_EQ_1866     =   (                                  (MCBIST.ATTR_MSS_FREQ<1867));   
+define def_MSS_FREQ_EQ_1866     =   (                                  (MCBIST.ATTR_MSS_FREQ<1867));
 define def_MSS_FREQ_EQ_2133     =   ((MCBIST.ATTR_MSS_FREQ>=1867)  &&  (MCBIST.ATTR_MSS_FREQ<2134));
 define def_MSS_FREQ_EQ_2400     =   ((MCBIST.ATTR_MSS_FREQ>=2134)  &&  (MCBIST.ATTR_MSS_FREQ<2401));
 define def_MSS_FREQ_EQ_2667     =   ((MCBIST.ATTR_MSS_FREQ>=2667)                                 );
@@ -96,7 +112,7 @@ define def_MEM_TYPE_2667_18_18_18   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_E
 define def_MEM_TYPE_2667_19_19_19   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 19 ) && ( MCS.ATTR_EFF_DRAM_TRCD[def_PORT_INDEX] == 19 ) && ( MCS.ATTR_EFF_DRAM_TRP[def_PORT_INDEX] == 19 );
 define def_MEM_TYPE_2667_20_20_20   =   def_MSS_FREQ_EQ_2667    &&  ( MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] == 20 ) && ( MCS.ATTR_EFF_DRAM_TRCD[def_PORT_INDEX] == 20 ) && ( MCS.ATTR_EFF_DRAM_TRP[def_PORT_INDEX] == 20 );
 
-define def_NUM_RANKS            = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][0] 
+define def_NUM_RANKS            = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][0]
                                     + MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_INDEX][1] );
 define def_REFRESH_INTERVAL     =   ((MCS.ATTR_EFF_DRAM_TREFI[def_PORT_INDEX])/(8*def_NUM_RANKS));
 define def_RANK_SWITCH_TCK      =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2667: 7
@@ -106,45 +122,41 @@ define def_BUS_TURNAROUND_TCK   =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);      
 #-- Dial Assignments
 #--******************************************************************************
 
-#   TMR0 SCOM REGISTER   #         
+#   TMR0 SCOM REGISTER   #
 # DRAM TIMING PARAMETERS #
- 
+
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  4 + def_RANK_SWITCH_TCK;    
+  4 + def_RANK_SWITCH_TCK;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
   spyv;
-  # ATTR_EFF_TCCD_S;
   4;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RRSMDR_DLY [when=S] {    # tccd_s
   spyv;
-  # ATTR_EFF_TCCD_S;
   4;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RROP_DLY [when=S] {      # tccd_l
   spyv;
-  MCS.ATTR_EFF_DRAM_TCCD_L[def_PORT_INDEX];      
+  MCS.ATTR_EFF_DRAM_TCCD_L[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WWDM_DLY [when=S] {      # BL/2+rank_switch
   spyv;
-  4 + def_RANK_SWITCH_TCK;      
+  4 + def_RANK_SWITCH_TCK;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WWSMSR_DLY [when=S] {    # tccd_s
   spyv;
-  # ATTR_EFF_TCCD_S;
   4;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WWSMDR_DLY [when=S] {    # tccd_s
   spyv;
-  # ATTR_EFF_TCCD_S;
   4;
 }
 
@@ -155,22 +167,22 @@ ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
   spyv;
-  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];      
+  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
   spyv;
-  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];    
+  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_RWSMDR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
   spyv;
-  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];    
+  MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WRDM_DLY [when=S] {      # (WL+BL/2+turn_around)-RL
   spyv;
-  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX];      
+  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 4 + def_BUS_TURNAROUND_TCK - MCS.ATTR_EFF_DRAM_CL[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WRSMSR_DLY [when=S] {    # WL+BL/2+(Twtr_s/clock period)
@@ -184,37 +196,37 @@ ispy  MCP.PORT0.SRQ.MBA_TMR0Q_WRSMDR_DLY [when=S] {    # WL+BL/2+Twtr_s
 }
 
 
-#   TMR1 SCOM REGISTER   #         
+#   TMR1 SCOM REGISTER   #
 # DRAM TIMING PARAMETERS #
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_RRSBG_DLY [when=S] {     # tCCDL
   spyv;
-  MCS.ATTR_EFF_DRAM_TCCD_L[def_PORT_INDEX];    
+  MCS.ATTR_EFF_DRAM_TCCD_L[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_WRSBG_DLY [when=S] {     # WL+BL/2+Twtr_l
   spyv;
-  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 4 + MCS.ATTR_EFF_DRAM_TWTR_L[def_PORT_INDEX];    
+  MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 4 + MCS.ATTR_EFF_DRAM_TWTR_L[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_TFAW [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TFAW[def_PORT_INDEX];    
+  MCS.ATTR_EFF_DRAM_TFAW[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_TRCD [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TRCD[def_PORT_INDEX];     
+  MCS.ATTR_EFF_DRAM_TRCD[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_TRP [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TRP[def_PORT_INDEX];      
+  MCS.ATTR_EFF_DRAM_TRP[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_TRAS [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TRAS[def_PORT_INDEX];     
+  MCS.ATTR_EFF_DRAM_TRAS[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_WR2PRE [when=S] {        # CWL+BL/2+Twr
@@ -222,14 +234,14 @@ ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_WR2PRE [when=S] {        # CWL+BL/2+Twr
   MCS.ATTR_EFF_DRAM_CWL[def_PORT_INDEX] + 4 + MCS.ATTR_EFF_DRAM_TWR[def_PORT_INDEX];
 }
 
-ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_RD2PRE [when=S] {        
+ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_RD2PRE [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TRTP[def_PORT_INDEX];   
+  MCS.ATTR_EFF_DRAM_TRTP[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_TRRD [when=S] {
   spyv;
-  MCS.ATTR_EFF_DRAM_TRRD_S[def_PORT_INDEX];         
+  MCS.ATTR_EFF_DRAM_TRRD_S[def_PORT_INDEX];
 }
 
 ispy  MCP.PORT0.SRQ.MBA_TMR1Q_TRRD_SBG [when=S] {
@@ -246,7 +258,7 @@ ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
 }
 
 
-#   DSM0 SCOM REGISTER   #         
+#   DSM0 SCOM REGISTER   #
 # DRAM TIMING PARAMETERS #
 
 # TODO ANDRE will make ATTR_EFF_RDTAG_DLY a precalculated attribute
@@ -265,7 +277,7 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
   19,                                ((def_MEM_TYPE_2667_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
   20,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
   21,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-                                       
+
   16,                                ((def_MEM_TYPE_1866_13_13_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
   17,                                ((def_MEM_TYPE_1866_14_14_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
   18,                                ((def_MEM_TYPE_2133_15_15_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
@@ -277,7 +289,7 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_T
   22,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
   23,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
 }
-     
+
 # TODO ANDRE will make ATTR_EFF_WRDATA_DLY a precalculated attribute
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
 # spyv;
@@ -287,7 +299,7 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
   4,                                 ((def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
   5,                                 ((def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
   6,                                 ((def_MSS_FREQ_EQ_2667==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-                                       
+
   2,                                 ((def_MSS_FREQ_EQ_1866==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
   3,                                 ((def_MSS_FREQ_EQ_2133==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
   4,                                 ((def_MSS_FREQ_EQ_2400==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
@@ -296,7 +308,7 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDATA_DLY [when=S] {
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WRDONE_DLY [when=S] {
   spyv;
-  24;    
+  24;
 }
 
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
@@ -337,16 +349,16 @@ ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_WODT_END_DLY [when=S] {
    6;
 }
 
-#  FARB0 SCOM REGISTER   #         
+#  FARB0 SCOM REGISTER   #
 
 espy  MCP.PORT0.SRQ.MBA_FARB0Q_CFG_PARITY_AFTER_CMD [when=S] {
   spyv;
   ON;
 }
 
-#  REF0 SCOM REGISTER    #         
+#  REF0 SCOM REGISTER    #
 
-#gdial std_size 4gbx4 (8GB rank)          
+#gdial std_size 4gbx4 (8GB rank)
 
 ispy  MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFRESH_INTERVAL [when=S] {
   spyv;
@@ -363,7 +375,7 @@ ispy  MCP.PORT0.SRQ.PC.MBAREF0Q_CFG_REFR_TSV_STACK [when=S] {
   MCS.ATTR_EFF_DRAM_TRFC_DLR[def_PORT_INDEX];
 }
 
-#  RPC0 SCOM REGISTER    #         
+#  RPC0 SCOM REGISTER    #
 
 ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_PDN [when=S] {         # tCKE
   spyv, expr;
@@ -389,7 +401,7 @@ ispy  MCP.PORT0.SRQ.PC.MBARPC0Q_CFG_PUP_AVAIL [when=S] {       # tXP
   9,                                 (def_MSS_FREQ_EQ_2667==1);
 }
 
-#  STR0 SCOM REGISTER    #         
+#  STR0 SCOM REGISTER    #
 
 ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TCKSRE [when=S] {
   spyv, expr;
@@ -421,3 +433,67 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
 }
 
 
+####################################################
+# Force clock enable high DD1 Periodics Issue
+####################################################
+
+espy  MCP.PORT0.SRQ.MBA_FARB0Q_CFG_OE_ALWAYS_ON [when=S]{
+  spyv;
+  ON;
+}
+
+
+
+####################################################
+# MCS SCOMS MOVED HERE (USING BEN GASS DLL OVERRIDE)
+####################################################
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_JITTER_EPSILON [when=S] {
+  spyv;
+  0x1;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_LOCAL_NODE_EPSILON [when=S] {
+  spyv;
+  SYS.ATTR_PROC_EPS_READ_CYCLES_T0 / 4;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_NEAR_NODAL_EPSILON [when=S] {
+  spyv;
+  SYS.ATTR_PROC_EPS_READ_CYCLES_T1 / 4;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_REMOTE_NODAL_EPSILON [when=S] {
+  spyv;
+  SYS.ATTR_PROC_EPS_READ_CYCLES_T2 / 4;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_GROUP_EPSILON [when=S] {
+  spyv;
+  SYS.ATTR_PROC_EPS_READ_CYCLES_T1 / 4;
+}
+
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
+  spyv;
+  SYS.ATTR_PROC_EPS_READ_CYCLES_T2 / 4;
+}
+
+# MC TEAM DICTATED INITS #
+
+# HW366164
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_SQ_LFSR_CNTL [when=S] {
+  spyv;
+  0b0100;
+}
+
+
+espy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_EN_ALT_CR [when=S] {
+  spyv;
+  OFF;
+}
+
+# HW366248
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=S] {
+  spyv;
+  0b000000;
+}

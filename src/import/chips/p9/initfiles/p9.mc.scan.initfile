@@ -1,0 +1,36 @@
+SyntaxVersion = 3
+
+target_type 0 TARGET_TYPE_MCBIST;
+
+# RELIC FROM sample.mc.scan.initfile
+# unconditional idial, test binary data input
+## TODO: test when side eCMD release available (supporting putspy to mcbist target type)
+# ispy MCP.PORT0.WRITE.ASYNC_INJ [when=L] {
+#   spyv;
+#   0b101;
+# }
+
+##########################
+# MC TEAM DICTATED INITS #
+##########################
+
+# FOR DD1 Prefetch Limit needs to be scan init to 0 because SCOM is broken (HW366248)
+#      Always OR-ed with previous value. Essentially we can only set bits, not clear. So we want to scan init to 0.
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+
+

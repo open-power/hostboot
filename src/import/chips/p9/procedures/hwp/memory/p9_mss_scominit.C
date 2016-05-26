@@ -30,6 +30,7 @@
 #include <fapi2.H>
 #include <p9_mss_scominit.H>
 #include <p9_mca_scom.H>
+#include <p9_mcbist_scom.H>
 #include <p9_ddrphy_scom.H>
 
 using fapi2::TARGET_TYPE_MCA;
@@ -46,10 +47,13 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
     FAPI_INF("Start MSS SCOM init");
     auto l_mca_targets = i_target.getChildren<TARGET_TYPE_MCA>();
 
+    fapi2::ReturnCode l_rc;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
     for (auto l_mca_target : l_mca_targets )
     {
-        fapi2::ReturnCode l_rc;
-        FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target, i_target, l_mca_target.getParent<fapi2::TARGET_TYPE_MCS>() );
+        FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target, i_target, l_mca_target.getParent<fapi2::TARGET_TYPE_MCS>(),
+                      FAPI_SYSTEM );
 
         if (l_rc)
         {
@@ -67,6 +71,16 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
             goto fapi_try_exit;
         }
     }
+
+    FAPI_EXEC_HWP(l_rc, p9_mcbist_scom, i_target );
+
+    if (l_rc)
+    {
+        FAPI_ERR("Error from p9.mcbist.scom.initfile");
+        fapi2::current_err = l_rc;
+        goto fapi_try_exit;
+    }
+
 
 fapi_try_exit:
     FAPI_INF("End MSS SCOM init");

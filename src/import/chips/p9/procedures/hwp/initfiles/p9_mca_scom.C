@@ -23,6 +23,10 @@
 
 using namespace fapi2;
 
+constexpr auto literal_0b000000 = 0b000000;
+constexpr auto literal_0b0100 = 0b0100;
+constexpr auto literal_0x1 = 0x1;
+constexpr auto literal_4 = 4;
 constexpr auto literal_1 = 1;
 constexpr auto literal_2 = 2;
 constexpr auto literal_0 = 0;
@@ -42,7 +46,6 @@ constexpr auto literal_21 = 21;
 constexpr auto literal_3 = 3;
 constexpr auto literal_22 = 22;
 constexpr auto literal_23 = 23;
-constexpr auto literal_4 = 4;
 constexpr auto literal_5 = 5;
 constexpr auto literal_6 = 6;
 constexpr auto literal_24 = 24;
@@ -59,13 +62,130 @@ constexpr auto literal_768 = 768;
 constexpr auto literal_939 = 939;
 
 fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
-                              const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2)
+                              const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2,
+                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3)
 {
     fapi2::ReturnCode l_rc = 0;
 
     do
     {
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5010823ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5010823ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b000000, 28, 6, 58 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5010823ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5010823ull)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5010824ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5010824ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b0100, 28, 4, 60 );
+            }
+
+            {
+                constexpr auto l_scom_buffer_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 62, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5010824ull)");
+                break;
+            }
+        }
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T0, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T0)");
+            break;
+        }
+
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T1_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T1, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T1)");
+            break;
+        }
+
+        fapi2::ATTR_PROC_EPS_READ_CYCLES_T2_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT3, l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_PROC_EPS_READ_CYCLES_T2)");
+            break;
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5010826ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5010826ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x1, 0, 8, 56 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0 / literal_4), 8, 8, 56 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 / literal_4), 16, 8, 56 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4), 32, 8, 56 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T1 / literal_4), 24, 8, 56 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> ((l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T2 / literal_4), 40, 8, 56 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5010826ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5010826ull)");
+                break;
+            }
+        }
+
         fapi2::ATTR_EFF_DIMM_TYPE_Type l_TGT2_ATTR_EFF_DIMM_TYPE;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_TYPE, TGT2, l_TGT2_ATTR_EFF_DIMM_TYPE);
 
@@ -689,6 +809,11 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             {
                 constexpr auto l_scom_buffer_ON = 0x1;
                 l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 38, 1, 63 );
+            }
+
+            {
+                constexpr auto l_scom_buffer_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer);
