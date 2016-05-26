@@ -88,30 +88,30 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 break;
             }
         }
-        fapi2::ATTR_FREQ_PB_Type l_TGT1_ATTR_FREQ_PB;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB, TGT1, l_TGT1_ATTR_FREQ_PB);
+        fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ);
 
         if (l_rc)
         {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_FREQ_PB)");
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_FREQ_PB_MHZ)");
             break;
         }
 
-        fapi2::ATTR_FREQ_X_Type l_TGT1_ATTR_FREQ_X;
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_FREQ_X, TGT1, l_TGT1_ATTR_FREQ_X);
+        fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, TGT1, l_TGT1_ATTR_FREQ_X_MHZ);
 
         if (l_rc)
         {
-            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_FREQ_X)");
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_FREQ_X_MHZ)");
             break;
         }
 
-        auto l_def_X_RATIO_12_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X) >= (literal_12 * l_TGT1_ATTR_FREQ_PB));
-        auto l_def_X_RATIO_11_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X) >= (literal_11 * l_TGT1_ATTR_FREQ_PB));
-        auto l_def_X_RATIO_10_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X) >= (literal_10 * l_TGT1_ATTR_FREQ_PB));
-        auto l_def_X_RATIO_10_11 = ((literal_11 * l_TGT1_ATTR_FREQ_X) >= (literal_10 * l_TGT1_ATTR_FREQ_PB));
-        auto l_def_X_RATIO_10_12 = ((literal_12 * l_TGT1_ATTR_FREQ_X) >= (literal_10 * l_TGT1_ATTR_FREQ_PB));
-        auto l_def_X_RATIO_10_13 = ((literal_13 * l_TGT1_ATTR_FREQ_X) >= (literal_10 * l_TGT1_ATTR_FREQ_PB));
+        auto l_def_X_RATIO_12_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        auto l_def_X_RATIO_11_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_11 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        auto l_def_X_RATIO_10_10 = ((literal_10 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        auto l_def_X_RATIO_10_11 = ((literal_11 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        auto l_def_X_RATIO_10_12 = ((literal_12 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        auto l_def_X_RATIO_10_13 = ((literal_13 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
         {
             l_rc = fapi2::getScom( TGT0, 0x501340aull, l_scom_buffer );
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,56 +98,56 @@ fapi::ReturnCode proc_build_smp_process_system(
 
         // get PB frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying PB frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_PB,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_PB_MHZ,
                            NULL,
                            io_smp.freq_pb);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_PB");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_PB_MHZ");
             break;
         }
 
         // get A bus frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying A bus frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_A,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_A_MHZ,
                            NULL,
                            io_smp.freq_a);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_A");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_A_MHZ");
             break;
         }
 
         // get X bus frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying X bus frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_X,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_X_MHZ,
                            NULL,
                            io_smp.freq_x);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_X");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_X_MHZ");
             break;
         }
 
         // get core floor frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying core floor frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_FLOOR,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_FLOOR_MHZ,
                            NULL,
                            io_smp.freq_core_floor);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR)");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR_MHZ)");
             break;
         }
 
         // get core nominal frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying core nominal frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_NOMINAL,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_CORE_NOMINAL_MHZ,
                            NULL,
                            io_smp.freq_core_nom);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL)");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL_MHZ)");
             break;
         }
 
@@ -175,12 +175,12 @@ fapi::ReturnCode proc_build_smp_process_system(
 
         // get PCIe frequency attribute
         FAPI_DBG("proc_build_smp_process_system: Querying PCIe frequency attribute");
-        rc = FAPI_ATTR_GET(ATTR_FREQ_PCIE,
+        rc = FAPI_ATTR_GET(ATTR_FREQ_PCIE_MHZ,
                            NULL,
                            io_smp.freq_pcie);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_PCIE");
+            FAPI_ERR("proc_build_smp_process_system: Error from FAPI_ATTR_GET (ATTR_FREQ_PCIE_MHZ");
             break;
         }
 

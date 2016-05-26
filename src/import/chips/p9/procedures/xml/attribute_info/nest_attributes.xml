@@ -20,7 +20,7 @@
 <attributes>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_PB</id>
+  <id>ATTR_FREQ_PB_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The frequency of a processor's nest mesh clock, in MHz.
@@ -32,7 +32,7 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_A</id>
+  <id>ATTR_FREQ_A_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The frequency of a processor's A link clocks, in MHz.
@@ -44,7 +44,7 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_X</id>
+  <id>ATTR_FREQ_X_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The frequency of a processor's X link clocks, in MHz.
@@ -56,7 +56,7 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_CORE_FLOOR</id>
+  <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The lowest frequency that a core can be set to in MHz.
@@ -68,31 +68,31 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_CORE_NOMINAL</id>
+  <id>ATTR_FREQ_CORE_NOMINAL_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The nominal core frequency in MHz.
     This is the same for all cores in the system.
-    Provided by the MRW.
+    Provided by the #V bucket of module VPD.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_CORE_CEILING</id>
+  <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The maximum core frequency in MHz.
     This is the same for all cores in the system.
-    Provided by the MRW.
+    Provided by the #V bucket of module VPD.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_FREQ_PCIE</id>
+  <id>ATTR_FREQ_PCIE_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     The frequency of a processor's PCI-e bus in MHz.
@@ -101,7 +101,7 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
-</attribute>
+ </attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_FABRIC_ASYNC_SAFE_MODE</id>
@@ -320,10 +320,14 @@
   <id>ATTR_PROC_FABRIC_GROUP_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Logical fabric group ID associated with this chip.Provided by the MRW.
+    Logical fabric group ID associated with this chip.
+    Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -331,10 +335,14 @@
   <id>ATTR_PROC_FABRIC_CHIP_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
-    Logical fabric chip ID associated with this chip.Provided by the MRW.
+    Logical fabric chip ID associated with this chip.
+    Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -553,6 +561,7 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     Guardband percentage to apply to baseline epsilon calculations
+    Set by p9_fbc_eff_config.
   </description>
   <valueType>int8</valueType>
   <writeable/>
@@ -638,10 +647,14 @@
   <id>ATTR_SYSTEM_IPL_PHASE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Define context for current phase of system IPL.
-  Provided by the platform. </description>
+  </description>
   <valueType>uint8</valueType>
   <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4, CHIP_CONTAINED = 0x8</enum>
   <persistRuntime/>
+  <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -657,6 +670,9 @@
     TRUE = 0x1
   </enum>
   <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       sberegaccess.C -->
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -678,7 +694,7 @@
                NORMAL = non-mirrored start: 0, mirrored start: 1024TB
                FLIPPED = mirrored start: 0, non-mirrored start: 512TB
                Set by platform.
-               Used by mss_eff_grouping
+               Used by mss_eff_grouping.
   </description>
   <valueType>uint8</valueType>
   <enum>
@@ -707,10 +723,11 @@
 <attribute>
   <id>ATTR_PROC_MEM_BASES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The non-mirrored memory base addresses of the groups formed
-                by the memory grouping process.
+  <description> The address where each memory group starts in the non-mirrored
+                memory groups stack.  This address is determined by the memory
+                grouping process based on the sizes of the memory groups formed
+                in each processor.
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars and platforms (dev tree).
   </description>
   <valueType>uint64</valueType>
   <array>8</array>
@@ -721,11 +738,11 @@
 <attribute>
   <id>ATTR_PROC_MEM_SIZES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The non-mirrored memory sizes of the groups formed by the memory
-                grouping process.  These values reflect the usable amount of
-                memory covered by the group.
+  <description> The memory size of each non-mirrored memory group in the
+                non-mirrored memory groups stack.  This size is determined by
+                the memory grouping process based on the amount of memory
+                behind the ports that are grouped together.
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars and platforms (dev tree, build winkle img)
   </description>
   <valueType>uint64</valueType>
   <array>8</array>
@@ -751,10 +768,11 @@
 <attribute>
   <id>ATTR_PROC_MIRROR_BASES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The mirrored memory base addresses of the groups formed
-                by the memory grouping process.
+  <description> The address where each memory group starts in the mirrored
+                memory groups stack.  This address is determined by
+                the memory grouping process based on the sizes of the memory
+                groups formed in each processor.
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
   <array>4</array>
@@ -765,11 +783,11 @@
 <attribute>
   <id>ATTR_PROC_MIRROR_SIZES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The mirrored memory sizes of the groups formed by the memory
-                grouping process.  These values reflect the usable amount of
-                mirrored memory covered by the group.
+  <description> The memory size of each memory group in the mirrored memory
+                groups stack.  This size is determined by the memory grouping
+                process based on the amount of memory behind the ports that are
+                grouped together.
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars and platforms (dev tree, build winkle img)
   </description>
   <valueType>uint64</valueType>
   <array>4</array>
@@ -779,7 +797,7 @@
 <!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
       Used in the setting of groups.  It is a bit vector.  If the value
       BITWISE_AND  0x01 = 0x01 then groups of 1 are enabled,
@@ -789,7 +807,8 @@
       if the value BITWISE_AND 0x20 = 0x20, then groups of 6 are possible,
       if the value BITWISE_AND 0x80 = 0x80, then groups of 8 are possible.
       If no groups can formed according to this input, then an error will
-      be thrown. Provided by the MRW
+      be thrown.
+      Provided by the MRW
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -801,12 +820,15 @@
     <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Creator :- mss_setup_bars
-      consumer :- platform
-      A 8 bit vector that would be a designation of which MC are involved in
-      the group. So the bits would represent MC0,MC1,MC2,MC3,MC4,MC5,MC6,MC7
-      -what is grouped into the first would go into [0], the 2nd group into
-       entry [1] and so on.
+      An 8 bit vector that would be a designation of which MC (Nimbus MCS or
+      Cumulus MI) are involved in the group.
+      So the bits would represent
+                  Nimbus   Cumulus
+        Bit 0     MCS0     MI0
+        Bit 1     MCS1     MI1
+        .....
+        Bit 7     MCS7     MI7
+      Set by p9_mss_eff_grouping
     </description>
     <valueType>uint8</valueType>
     <writeable/>
@@ -829,7 +851,7 @@
                                          12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
                                          14-- Alt Group size (0); 15-- Alt Group size(1);
                                          16-- Alt Base address (0); 17-- Alt Base address (1);
-                                         
+
                                          13-- Alternate Group Size; 14-- Alternate Base address
        Mirroring     array[8-15] [0:17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
                                           3-- Base address; 4-11-- PortID number;
@@ -882,14 +904,12 @@
                 calculated based on the HTM trace sizes requested by users.
                 There are two different HTM trace areas, thus two different
                 base addresses.
-                Platform is to initialize this attribute to 0 (default).
                 Set by p9_mss_eff_grouping.
                 Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
   <array>2</array>
   <writeable/>
-  <platInit/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -899,7 +919,6 @@
   <description> The amount of memory a user can reserve to store HTM traces.
                 There are two different HTM trace areas, thus two different
                 sizes (For example, one to store NHTM0 and one forNHTM1).
-                Platform is to initialize this attribute to 0 (default).
                 Set by user via attribute override.
                 Used by p9_mss_eff_grouping.
   </description>
@@ -924,7 +943,6 @@
   </enum>
   <array>2</array>
   <writeable/>
-  <platInit/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -933,13 +951,10 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> The base address where the OCC sandbox starts.  It is
                 calculated based on the OCC sandbox size requested by users.
-                Platform is to initialize this attribute to 0 (default).
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
   <writeable/>
-  <platInit/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -971,7 +986,6 @@
      16_MB = 0x0000000001000000,
       ZERO = 0x0000000000000000
   </enum>
-  <writeable/>
   <platInit/>
   <persistRuntime/>
 </attribute>

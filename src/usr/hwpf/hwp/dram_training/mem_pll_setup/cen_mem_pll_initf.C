@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -339,11 +339,11 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             FAPI_ERR("Failed to get attribute: ATTR_MSS_FREQ.");
             break;
         }
-        // ATTR_FREQ_PB is a "system" attribute, so use NULL as the target.
-        rc = FAPI_ATTR_GET( ATTR_FREQ_PB, NULL, nest_freq);
+        // ATTR_FREQ_PB_MHZ is a "system" attribute, so use NULL as the target.
+        rc = FAPI_ATTR_GET( ATTR_FREQ_PB_MHZ, NULL, nest_freq);
         if (rc)
         {
-            FAPI_ERR("Failed to get attribute: ATTR_FREQ_PB.");
+            FAPI_ERR("Failed to get attribute: ATTR_FREQ_PB_MHZ.");
             break;
         }
 

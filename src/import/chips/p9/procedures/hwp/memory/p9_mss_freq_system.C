@@ -68,7 +68,7 @@ extern "C"
         // Get nest freq && F/W attr that tells me if sync mode is required
         // or if I have to figure that out
         FAPI_TRY( mss::required_synch_mode(l_required_sync_mode) );
-        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_FREQ_PB, fapi2::Target<TARGET_TYPE_SYSTEM>(), l_nest_freq) );
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_FREQ_PB_MHZ, fapi2::Target<TARGET_TYPE_SYSTEM>(), l_nest_freq) );
 
         FAPI_INF("Retrieved req'd sync mode: %d and nest freq %d", l_required_sync_mode, l_nest_freq);
 

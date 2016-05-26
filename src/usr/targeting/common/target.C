@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -664,19 +664,19 @@ void setFrequencyAttributes(Target * i_sys, uint32_t i_newNestFreq)
             l_oldNestFreq,
             i_newNestFreq );
 
-    //FREQ_X
+    //FREQ_X_MHZ
     uint32_t l_freqX = i_newNestFreq * 2;
-    i_sys->setAttr<TARGETING::ATTR_FREQ_X>(l_freqX);
+    i_sys->setAttr<TARGETING::ATTR_FREQ_X_MHZ>(l_freqX);
     TRACFCOMP(g_trac_targeting,
-            "ATTR_FREQ_X getting set to from %d to %d",
+            "ATTR_FREQ_X_MHZ getting set to from %d to %d",
             l_oldNestFreq*2,
             l_freqX );
 
-    //FREQ_PB
+    //FREQ_PB_MHZ
     uint32_t l_freqPb = i_newNestFreq;
-    i_sys->setAttr<TARGETING::ATTR_FREQ_PB>(l_freqPb);
+    i_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(l_freqPb);
     TRACFCOMP(g_trac_targeting,
-            "ATTR_FREQ_PB getting set from %d to %d",
+            "ATTR_FREQ_PB_MHZ getting set from %d to %d",
             l_oldNestFreq,
             l_freqPb );
 

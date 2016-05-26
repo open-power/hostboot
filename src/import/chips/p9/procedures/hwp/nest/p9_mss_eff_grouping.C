@@ -102,7 +102,7 @@ struct EffGroupingSysAttrs
     uint8_t iv_selectiveMode = 0;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
     uint8_t iv_enhancedNoMirrorMode = 0; // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING
     uint8_t iv_fabricAddrBarMode = 0;    // ATTR_PROC_FABRIC_ADDR_BAR_MODE
-
+    uint8_t iv_groupsAllowed = 0;        // ATTR_MSS_INTERLEAVE_ENABLE
 };
 
 // See doxygen in struct definition.
@@ -131,11 +131,18 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
              "Error getting ATTR_PROC_FABRIC_ADDR_BAR_MODE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
+    // Get interleave option
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_ENABLE, FAPI_SYSTEM,
+                           iv_groupsAllowed),
+             "Error getting ATTR_MSS_INTERLEAVE_ENABLE, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
     // Display attribute values
     FAPI_INF("EffGroupingSysAttrs: ");
     FAPI_INF("   ATTR_MEM_MIRROR_PLACEMENT_POLICY 0x%.8X", iv_selectiveMode);
     FAPI_INF("   ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING 0x%.8X", iv_enhancedNoMirrorMode);
     FAPI_INF("   ATTR_PROC_FABRIC_ADDR_BAR_MODE 0x%.8X", iv_fabricAddrBarMode);
+    FAPI_INF("   ATTR_MSS_INTERLEAVE_ENABLE 0x%.8X", iv_groupsAllowed);
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingSysAttrs::getAttrs");
@@ -182,7 +189,6 @@ struct EffGroupingProcAttrs
         const EffGroupingSysAttrs i_sysAttrs);
 
     // Public data
-    uint8_t  iv_groupsAllowed = 0;  // ATTR_MSS_INTERLEAVE_ENABLE
     uint64_t iv_memBaseAddr = 0;    // ATTR_PROC_MEM_BASE
     uint64_t iv_mirrorBaseAddr = 0; // ATTR_PROC_MIRROR_BASE
     uint64_t iv_htmBarSizes[NUM_OF_HTM_REGIONS] = {0, 0}; // ATTR_PROC_HTM_BAR_SIZES
@@ -232,12 +238,6 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     FAPI_DBG("Entering EffGroupingProcAttrs::getAttrs");
     fapi2::ReturnCode l_rc;
 
-    // Get interleave option
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_INTERLEAVE_ENABLE, i_target,
-                           iv_groupsAllowed),
-             "Error getting ATTR_MSS_INTERLEAVE_ENABLE, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
     // Get Hardware Trace Macro (HTM) bar size
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_HTM_BAR_SIZES, i_target, iv_htmBarSizes),
              "Error getting ATTR_PROC_HTM_BAR_SIZES, l_rc 0x%.8X",
@@ -275,7 +275,6 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
 
     // Display attribute values
     FAPI_INF("EffGroupingProcAttrs::getAttrs: ");
-    FAPI_INF("  ATTR_MSS_INTERLEAVE_ENABLE 0x%.8X", iv_groupsAllowed);
     FAPI_INF("  ATTR_PROC_HTM_BAR_SIZES[0] 0x%.16llX", iv_htmBarSizes[0]);
     FAPI_INF("  ATTR_PROC_HTM_BAR_SIZES[1] 0x%.16llX", iv_htmBarSizes[1]);
     FAPI_INF("  ATTR_PROC_OCC_SANDBOX_SIZE 0x%.16llX", iv_occSandboxSize);
@@ -1209,9 +1208,9 @@ fapi2::ReturnCode grouping_checkValidAttributes(
 
     // There must be at least one type of grouping allowed
     // Unused bits are don't care (i.e.: 0x10, 040)
-    FAPI_ASSERT( ((i_procAttrs.iv_groupsAllowed & ALL_GROUPS) != 0),
+    FAPI_ASSERT( ((i_sysAttrs.iv_groupsAllowed & ALL_GROUPS) != 0),
                  fapi2::MSS_EFF_GROUPING_NO_GROUP_ALLOWED()
-                 .set_MSS_INTERLEAVE_ENABLE_VALUE(i_procAttrs.iv_groupsAllowed)
+                 .set_MSS_INTERLEAVE_ENABLE_VALUE(i_sysAttrs.iv_groupsAllowed)
                  .set_CHIP(i_target),
                  "grouping_checkValidAttributes: No valid group type allowed" );
 
@@ -2464,32 +2463,32 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     FAPI_INF("Attempt memory grouping");
 
     // Group MCs
-    if (l_procAttrs.iv_groupsAllowed & GROUP_8)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_8)
     {
         grouping_group8PortsPerGroup(l_memInfo, l_groupData);
     }
 
-    if (l_procAttrs.iv_groupsAllowed & GROUP_6)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_6)
     {
         grouping_group6PortsPerGroup(l_memInfo, l_groupData);
     }
 
-    if (l_procAttrs.iv_groupsAllowed & GROUP_4)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_4)
     {
         grouping_group4PortsPerGroup(l_memInfo, l_groupData);
     }
 
-    if (l_procAttrs.iv_groupsAllowed & GROUP_3)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_3)
     {
         grouping_group3PortsPerGroup(l_memInfo, l_groupData);
     }
 
-    if (l_procAttrs.iv_groupsAllowed & GROUP_2)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_2)
     {
         grouping_group2PortsPerGroup(l_memInfo, l_groupData);
     }
 
-    if (l_procAttrs.iv_groupsAllowed & GROUP_1)
+    if (l_sysAttrs.iv_groupsAllowed & GROUP_1)
     {
         grouping_group1PortsPerGroup(l_memInfo, l_groupData);
     }

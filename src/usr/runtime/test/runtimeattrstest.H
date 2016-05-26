@@ -82,11 +82,11 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         //Grab a couple of arbitrary attributes
         ReturnCode l_rc;
 
-        fapi::ATTR_FREQ_PB_Type freq = 0;
-        l_rc = FAPI_ATTR_GET(ATTR_FREQ_PB,NULL,freq);
+        fapi::ATTR_FREQ_PB_MHZ_Type freq = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_FREQ_PB_MHZ,NULL,freq);
         if( l_rc )
         {
-            TS_FAIL("Error getting fapi::ATTR_FREQ_PB");
+            TS_FAIL("Error getting fapi::ATTR_FREQ_PB_MHZ");
         }
         bool freq_found = false;
 
@@ -102,24 +102,24 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         uint64_t attr = 0;
         while( headers[attr].id != hsvc_attr_header_t::NO_ATTRIBUTE )
         {
-            if( headers[attr].id == fapi::ATTR_FREQ_PB )
+            if( headers[attr].id == fapi::ATTR_FREQ_PB_MHZ )
             {
                 freq_found = true;
                 if( headers[attr].sizeBytes !=
-                    sizeof(fapi::ATTR_FREQ_PB_Type) )
+                    sizeof(fapi::ATTR_FREQ_PB_MHZ_Type) )
                 {
                     TRACFCOMP( g_trac_runtime, "size=%.16X", headers[attr].sizeBytes );
-                    TS_FAIL("Size of fapi::ATTR_FREQ_PB data is wrong");
+                    TS_FAIL("Size of fapi::ATTR_FREQ_PB_MHZ data is wrong");
                 }
                 else
                 {
-                    fapi::ATTR_FREQ_PB_Type* freq_act =
-                      reinterpret_cast<fapi::ATTR_FREQ_PB_Type*>
+                    fapi::ATTR_FREQ_PB_MHZ_Type* freq_act =
+                      reinterpret_cast<fapi::ATTR_FREQ_PB_MHZ_Type*>
                       (beginning+headers[attr].offset);
                     if( *freq_act != freq )
                     {
                         TRACFCOMP( g_trac_runtime, "Expected=%X, Actual=%X", freq, *freq_act );
-                        TS_FAIL("fapi::ATTR_FREQ_PB data is wrong");
+                        TS_FAIL("fapi::ATTR_FREQ_PB_MHZ data is wrong");
                     }
                 }
             }
@@ -159,7 +159,7 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
 
         if( !freq_found )
         {
-            TS_FAIL("Never found FREQ_PB in system attributes");
+            TS_FAIL("Never found FREQ_PB_MHZ in system attributes");
         }
         if( !vpdMinLevel_found )
         {

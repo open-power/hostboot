@@ -138,8 +138,8 @@ p9_fbc_eff_config_calc_epsilons(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
     fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type i_core_floor_ratio,
     fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type i_core_ceiling_ratio,
-    fapi2::ATTR_FREQ_PB_Type i_freq_fbc,
-    fapi2::ATTR_FREQ_CORE_CEILING_Type i_freq_core_ceiling)
+    fapi2::ATTR_FREQ_PB_MHZ_Type i_freq_fbc,
+    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type i_freq_core_ceiling)
 {
     FAPI_DBG("Start");
 
@@ -319,22 +319,22 @@ p9_fbc_eff_config_process_freq_attributes(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
     fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type& io_core_floor_ratio,
     fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type& io_core_ceiling_ratio,
-    fapi2::ATTR_FREQ_PB_Type& io_freq_fbc,
-    fapi2::ATTR_FREQ_CORE_CEILING_Type& io_freq_core_ceiling)
+    fapi2::ATTR_FREQ_PB_MHZ_Type& io_freq_fbc,
+    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type& io_freq_core_ceiling)
 {
     FAPI_DBG("Start");
     uint32_t l_freq_core_floor;
     uint32_t l_freq_core_nom;
 
     // get core floor/nominal/ceiling frequency attributes
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR, i_target, l_freq_core_floor),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, i_target, l_freq_core_floor),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_FLOOR_MHZ)");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_NOMINAL, i_target, l_freq_core_nom),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_NOMINAL_MHZ, i_target, l_freq_core_nom),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_NOMINAL_MHZ)");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING, i_target, io_freq_core_ceiling),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, i_target, io_freq_core_ceiling),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_CORE_CEILING_MHZ)");
 
     // verify the floor/nominal/ceiling frequencies
     // expect ceiling >= nominal, nominal >= floor
@@ -348,8 +348,8 @@ p9_fbc_eff_config_process_freq_attributes(
                 l_freq_core_floor, l_freq_core_nom, io_freq_core_ceiling);
 
     // calculate fabric/core frequency ratio attributes
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB, i_target, io_freq_fbc),
-             "Error from FAPI_ATTR_GET (ATTR_FREQ_PB)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, i_target, io_freq_fbc),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_PB_MHZ)");
 
     // determine table index based on fabric/core floor frequency ratio
     // breakpoint ratio: core floor 4.0, pb 2.0 (cache floor :: pb = 8/8)
@@ -457,8 +457,8 @@ p9_fbc_eff_config()
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_PROC_FABRIC_CORE_FLOOR_RATIO_Type l_core_floor_ratio;
     fapi2::ATTR_PROC_FABRIC_CORE_CEILING_RATIO_Type l_core_ceiling_ratio;
-    fapi2::ATTR_FREQ_PB_Type l_freq_fbc;
-    fapi2::ATTR_FREQ_CORE_CEILING_Type l_freq_core_ceiling;
+    fapi2::ATTR_FREQ_PB_MHZ_Type l_freq_fbc;
+    fapi2::ATTR_FREQ_CORE_CEILING_MHZ_Type l_freq_core_ceiling;
 
     FAPI_TRY(p9_fbc_eff_config_process_freq_attributes(
                  FAPI_SYSTEM,
