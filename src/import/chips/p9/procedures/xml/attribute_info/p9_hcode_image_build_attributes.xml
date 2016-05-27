@@ -28,6 +28,7 @@
     else zero. It needs to be populated during ipl but before istep 15.
   </description>
   <valueType>uint8</valueType>
+  <enum> CORE_UNFUSED = 0x0, CORE_FUSED = 0x1 </enum>
   <platInit/>
 </attribute>
 </attributes>

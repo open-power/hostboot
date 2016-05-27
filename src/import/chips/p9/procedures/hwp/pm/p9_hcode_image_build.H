@@ -117,26 +117,40 @@ extern "C"
 
     typedef fapi2::ReturnCode( *p9_hcode_image_build_FP_t )
     ( CONST_FAPI2_PROC& i_procTgt,
-      void* const i_pImageIn,
-      void* o_pImageOut,
-      SysPhase_t i_phase,
+      void* const   i_pImageIn,
+      void*         i_pHomerImage,
+      void* const   i_pRingOverride,
+      SysPhase_t    i_phase,
       ImageType_t i_imgType,
-      void* i_pBuf );
+      void*  const    i_pBuf1,
+      const  uint32_t i_sizeBuf1,
+      void*  const    i_pBuf2,
+      const  uint32_t  i_sizeBuf2 );
 
     /**
     * @brief   builds a STOP image using a refrence image as input.
-    * @param   i_procTgt    fapi2 target for processor chip.
-    * @param   i_pImageIn   points to memory mapped refrence image in PNOR.
-    * @param   o_pImageOut  pointer to the beginning of the HOMER image buffer.
-    * @param   i_phase      phase of the system i.e. IPL or Hypervisor/rebuild mode.
-    * @param   i_pBuf       buffer of size >= HW_IMG_RING_SIZE for handling ring.
+    * @param   i_procTgt        fapi2 target for processor chip.
+    * @param   i_pImageIn       points to memory mapped refrence image in PNOR.
+    * @param   i_pHomerImage    pointer to the beginning of the HOMER image buffer.
+    * @param   i_pRingOverride  pointer to the location of override ring. NULL means override not available.
+    * @param   i_phase          phase of the system i.e. IPL or Hypervisor/rebuild mode.
+    * @param   i_imgType        image type to be built.
+    * @param   i_pBuf1          pointer to a work buffer1.
+    * @param   i_sizeBuf1       size of work buffer1. Minimum size expected HW_IMG_RING_SIZE.
+    * @param   i_pBuf2          pointer to a work buffer2. Minimum size expected HW_IMG_RING_SIZE.
+    * @param   i_sizeBuf2       size of work buffer2
     * @note    needs attribute ATTR_EC
     */
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
-                                            void* const i_pImageIn,
-                                            void* o_pImageOut,
-                                            SysPhase_t i_phase,
-                                            ImageType_t i_imgType,
-                                            void*     i_pBuf );
+                                            void* const     i_pImageIn,
+                                            void*           i_pHomerImage,
+                                            void* const     i_pRingOverride,
+                                            SysPhase_t      i_phase,
+                                            ImageType_t     i_imgType,
+                                            void*  const    i_pBuf1,
+                                            const  uint32_t i_sizeBuf1,
+                                            void* const    i_pBuf2,
+                                            const uint32_t  i_sizeBuf2
+                                          );
 } // extern C
 #endif //__HCODE_IMG_BUILD_H_

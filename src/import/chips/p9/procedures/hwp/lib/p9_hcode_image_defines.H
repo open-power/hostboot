@@ -16,9 +16,6 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __HW_IMG_DEFINE
-#define __HW_IMG_DEFINE
-
 ///
 /// @file   p9_hcode_image_defines.H
 /// @brief  defines constants associated with hcode image build.
@@ -28,6 +25,12 @@
 // *HWP Team:           PM
 // *HWP Level:          2
 // *HWP Consumed by:    Hostboot: Phyp
+
+#ifndef __HW_IMG_DEFINE
+#define __HW_IMG_DEFINE
+
+
+#include <p9_hcd_header_defs.H>
 //--------------------------------------------------------------------------
 // local structs and constants
 // -------------------------------------------------------------------------
@@ -47,64 +50,74 @@ enum
     ONE_MB                      = 1024 * 1024,
     HARDWARE_IMG_SIZE           = ONE_MB,
     OCC_HOST_AREA_SIZE          = ONE_MB,
+    HOMER_OCC_REGION_NUM        = 0,
+    HOMER_QPMR_REGION_NUM       = 1,
+    HOMER_CMPR_REGION_NUM       = 2,
+    HOMER_PPMR_REGION_NUM       = 3,
     MAX_CORES_PER_CHIP          = 24,
+    MAX_CME_PER_CHIP            = 12,
+    CORE0_CHIPLET_ID            = 0x20,
     PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
     PPE_RESERVE_AREA            = 0x200,
-    QPMR_HEADER_SIZE            = 0x00000200,
+    FUSE_STATE                  =  0xAA,
+    UNFUSE_STATE                =  0xBB,
+
+    // QPMR
+    QPMR_OFFSET                 = HOMER_QPMR_REGION_NUM * ONE_MB,
     SGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
     SGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
     SGPE_INT_VECT               = 384,
     SGPE_IMG_HEADER             = 64,
-    SGPE_DBG_PTR_AREA_SIZE      = 64,
-    CME_HCODE_REL_OFFSET        = (SGPE_INT_VECT +
-                                   SGPE_IMG_HEADER +
-                                   SGPE_DBG_PTR_AREA_SIZE),
-    SGPE_HCODE_SIZE             = 30 * ONE_KB,
+    SGPE_DBG_PTR_AREA_SIZE      = 36,
+    SGPE_HCODE_SIZE             = 40 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
     SGPE_COMMON_RING            = 2  * ONE_KB,
     CACHE_SCOM_RESTORE_SIZE     = 6  * ONE_KB,
     CACHE_INST_SPECIFIC_SIZE    = 4  * ONE_KB,
     MAX_CACHE_CHIPLET           = 6,
+    CACH0_CHIPLET_ID            = 0x10,
+
     SGPE_MAX_AREA_SIZE          = 64 * ONE_KB,
-    CPMR_HEADER_SIZE            = 256,
+    SGPE_RESV_CMN_RING          = 8,
+
+    // CPMR
+    CPMR_OFFSET                 = HOMER_CMPR_REGION_NUM * ONE_MB,
     THREAD_LAUNCHER_SIZE        = 256,
     CORE_INT_AREA               = 8 * ONE_KB,
     SELF_REST_SIZE              = CORE_INT_AREA + THREAD_LAUNCHER_SIZE,
     CORE_RESTORE_SIZE           = 192 * ONE_KB,
+    CORE_SCOM_START             = (256 * ONE_KB),
     CORE_SCOM_RES_SIZE          = 6 * ONE_KB,
-    CME_INT_VECTOR              = 384,
-    CME_IMG_HEADER              = 64,
-    CME_DBG_PTR_AREA_SIZE       = 64,
-    CME_HCODE_SIZE              = 20 * ONE_KB,
+    CME_INT_VECTOR_SIZE         = 384,
+    CME_IMG_HEADER_SIZE         = 64,
+    CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_HCODE_SIZE              = 32 * ONE_KB,  ////FIXME RTC 155018 Revisit after Hcode size optimization
     CORE_COMMON_RING_SIZE       = 6  * ONE_KB,
-    QUAD_PSTATE_SIZE            = 2  * ONE_KB,
     CORE_SPECIFIC_RING          = 2  * ONE_KB,
-    CORE_SCOM_START             = 256 * ONE_KB,
+    CME_SRAM_HCODE_OFFSET       = 0x00,
+    QUAD_PSTATE_SIZE            = 2  * ONE_KB,
     CORE_RESERVE_SIZE           =
-        CORE_SCOM_START - ( CORE_RESTORE_SIZE + CORE_INT_AREA +
-                            CME_HCODE_SIZE + CORE_COMMON_RING_SIZE +
-                            QUAD_PSTATE_SIZE + CME_IMG_HEADER ),
+        CORE_SCOM_START - ( CORE_RESTORE_SIZE + CME_HCODE_SIZE + CORE_COMMON_RING_SIZE + QUAD_PSTATE_SIZE  ),
 
-    CME_REGION_START            =  CORE_SCOM_START + CORE_SCOM_RES_SIZE,
-    CME_INST_SPEC_RING_START    =  (300 * ONE_KB ) ,    // offset from CPMR
+    CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_INST_SPEC_RING_START    =  (360 * ONE_KB ) ,    //FIXME RTC 155018 Revisit after Hcode size optimization
     RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
-                                     PPE_RESERVE_AREA +
                                      CME_HCODE_SIZE +
                                      CORE_COMMON_RING_SIZE +
                                      QUAD_PSTATE_SIZE)),
+    CME_BLOCK_READ_LEN          =  32,
+    CME_BLK_SIZE_SHIFT          =  0x05,
+    CACHE_SCOM_START            =  128 * ONE_KB,
 
+    // PPMR
+    PPMR_OFFSET                 = HOMER_PPMR_REGION_NUM * ONE_MB,
     PGPE_LVL_1_BOOT_LOAD_SIZE   =  ONE_KB,
     PGPE_LVL_2_BOOT_LOAD_SIZE   =  ONE_KB,
     PGPE_IMG_HEADER             =  64,   // need to get confirmation on this
-    PGPE_HCODE_INT_VECT         =  384,
+    PGPE_INT_VECTOR             =  384,
     PGPE_HCODE_SIZE             =  16 * ONE_KB,
     PGPE_PARAM_BLOCK_SIZE       =  8 * ONE_KB,
     PSTATE_OUTPUT_TABLE         =  8 * ONE_KB,
-    FUSE_STATE                  =  0xAA,
-    UNFUSE_STATE                =  0xBB,
-    CME_BLOCK_READ_LEN          =  32,
-    CACHE_SCOM_START            =  128 * ONE_KB,
-    CPMR_MAGIC_WORD             =  0x484F4D4552312E30ll,
-    CME_BLK_SIZE_SHIFT          =  0x05,
+    IGNORE_CHIPLET_INSTANCE     = 0xFF,
 };
 
 /**
@@ -125,196 +138,361 @@ enum ImgBldRetCode_t
     BUILD_FAIL_SGPE_HCODE       =   10,
     BUILD_FAIL_SGPE_CMN_RINGS   =   11,
     BUILD_FAIL_SGPE_SPEC_RINGS  =   12,
-    BUILD_FAIL_P9_CPMR_HDR      =   13,
-    BUILD_FAIL_P9_SRESET_HNDLR  =   14,
-    BUILD_FAIL_P9_THRD_LAUNCHER =   15,
-    BUILD_FAIL_P9_SPR_RESTORE   =   16,
-    BUILD_FAIL_P9_SCOM_RESTORE  =   17,
+    BUILD_FAIL_CPMR_HDR         =   13,
+    BUILD_FAIL_SRESET_HNDLR     =   14,
+    BUILD_FAIL_THRD_LAUNCHER    =   15,
+    BUILD_FAIL_SPR_RESTORE      =   16,
+    BUILD_FAIL_SCOM_RESTORE     =   17,
     BUILD_FAIL_CME_IMG_HDR      =   18,
     BUILD_FAIL_CME_HCODE        =   19,
-    BUILD_FAIL_CME_CMN_RINGS    =   20,
+    BUILD_FAIL_CMN_RINGS        =   20,
     BUILD_FAIL_CME_QUAD_PSTATE  =   21,
-    BUILD_FAIL_CME_SPEC_RINGS   =   22,
-    BUILD_FAIL_CME_INT_VECT     =   23,
+    BUILD_FAIL_SPEC_RINGS       =   22,
+    BUILD_FAIL_INT_VECT         =   23,
+    BUILD_FAIL_PGPE_BL1         =   24,
+    BUILD_FAIL_PGPE_BL2         =   25,
+    BUILD_FAIL_PGPE_HCODE       =   26,
+    BUILD_FAIL_OVERRIDE         =   27,
 };
 
-/**
- * @brief   models image section of SGPE in HOMER.
- */
-typedef struct
-{
-    uint8_t qpmrHeader[QPMR_HEADER_SIZE];
-    uint8_t l1BootLoader[SGPE_LVL_1_BOOT_LOAD_SIZE];
-    uint8_t l2BootLoader[SGPE_LVL_2_BOOT_LOAD_SIZE];
-    uint8_t hcodeIntVect[SGPE_INT_VECT];
-    uint8_t imgHeader[SGPE_IMG_HEADER];
-    uint8_t debugPtrArea[SGPE_DBG_PTR_AREA_SIZE];
-    uint8_t hcode[SGPE_HCODE_SIZE];
-    uint8_t commonRings[SGPE_COMMON_RING];
-    uint8_t cacheSpecificRing[MAX_CACHE_CHIPLET][CACHE_INST_SPECIFIC_SIZE];
-} SgpeLayout_t;
+#endif  // __ASSEMBLER__
 
-/**
- * @brief   models image section associated with core self restore in HOMER.
- */
-typedef struct
-{
-    uint8_t  selfRestoreArea[SELF_REST_SIZE];
-    uint8_t  coreSelfRestore[CORE_RESTORE_SIZE];
-    uint8_t  reserve[CORE_SCOM_START - (SELF_REST_SIZE + CORE_RESTORE_SIZE)];
-    uint8_t  coreScom[CORE_SCOM_RES_SIZE];
-} SelfRestoreLayout_t;
+// Constants used in both C++ and Assembler/Linker code
+CONST_UINT32_T(CPMR_HEADER_SIZE, 256);
+CONST_UINT32_T(QPMR_HEADER_SIZE, 512);
 
-typedef struct
-{
-    uint8_t  cmeIntVector[CME_INT_VECTOR];
-    uint8_t  imgHeader[CME_IMG_HEADER];
-    uint8_t  debugPtrArea[CME_DBG_PTR_AREA_SIZE];
-    uint8_t  hcode[CME_HCODE_SIZE];
-    uint8_t  commonRings[CORE_COMMON_RING_SIZE];
-    uint8_t  quadPstateArea[QUAD_PSTATE_SIZE];
-    uint8_t  resvRingArea[RESERVE_CME_RING_AREA];
-    uint8_t  instSpecificRing[MAX_CORES_PER_CHIP][CORE_SPECIFIC_RING]; // 300KB offset from CPMR
-} CmeRegionLayout_t;
+//#pragma message (STR(CPMR_HEADER_SIZE))
 
-/**
- * @brief   models image section associated with core self restore in HOMER.
- */
-typedef struct
-{
-    uint8_t l1BootLoader[PGPE_LVL_1_BOOT_LOAD_SIZE];
-    uint8_t l2BootLoader[PGPE_LVL_2_BOOT_LOAD_SIZE];
-    uint8_t pgpeIntVector[PGPE_HCODE_INT_VECT];
-    uint8_t imgHeader[PGPE_IMG_HEADER];
-    uint8_t hcode[PGPE_HCODE_SIZE];
-    uint8_t paramBlock[PGPE_PARAM_BLOCK_SIZE];
-    uint8_t pstateOutputTable[PSTATE_OUTPUT_TABLE];
-} PgpeLayout_t;
+// Define the Magic Numbers for the various images
+HCD_MAGIC_NUMBER(CPMR_MAGIC_NUMBER, ULL(0x43504d525f312e30));  // CPMR_1.0
+HCD_MAGIC_NUMBER(QPMR_MAGIC_NUMBER, ULL(0x51504d525f312e30));  // QPMR_1.0
+HCD_MAGIC_NUMBER(CME_MAGIC_NUMBER , ULL(0x434d455f5f312e30));  // CME__1.0
+HCD_MAGIC_NUMBER(PGPE_MAGIC_NUMBER , ULL(0x504750455F312E30)); // PGPE_1.0
 
-/**
- * @brief   models CME image header in HOMER.
- */
-typedef struct
-{
-    uint64_t magicNumber;
-    uint32_t buildDate;
-    uint32_t buildVer;
-    uint32_t hcodeOffset;
-    uint32_t hcodeLength;
-    uint32_t commonRingOffset;
-    uint32_t commonRingLength;
-    uint32_t pStateOffset;
-    uint32_t pStateLength;
-    uint32_t coreSpecificRingOffset;;
-    uint32_t coreSpecificRingLength;
-    uint32_t cmeMode;
-    uint8_t  reserve[12];
-} CmeImageHeader_t;
-
-/**
- * @brief   models SGPE image header in HOMER.
- */
-struct SgpeImageHeader_t
-{
-    uint64_t magicNumber;
-    uint32_t sysResetAddr;
-    uint32_t reserve1;
-    uint32_t ivprAddress;
-    uint32_t reserve2;
-    uint32_t buildDate;
-    uint32_t buildVer;
-    uint64_t reserveFlag;
-    uint32_t quadCmnRingOccOffset;
-    uint32_t quadSpecRingOccOffset;
-    uint32_t quadCommonScomOccOffset;
-    uint8_t  reserve3[12];
-};
-
-
-/**
- * @brief   models layout of HOMER.
- */
-struct Homerlayout_t
-{
-    uint8_t occHostArea[OCC_HOST_AREA_SIZE];
-    SgpeLayout_t sgpeRegion;
-    uint8_t sgpeReserve1[CACHE_SCOM_START - sizeof(SgpeLayout_t)];
-    uint8_t cacheScomRegion[CACHE_SCOM_RESTORE_SIZE];
-    uint8_t sgpeReserve2[ONE_MB - (CACHE_SCOM_START + CACHE_SCOM_RESTORE_SIZE )];
-    SelfRestoreLayout_t selfRestoreRegion;
-    CmeRegionLayout_t cmeRegion;
-    uint8_t cmeReserve[ONE_MB - (sizeof( CmeRegionLayout_t ) + sizeof( SelfRestoreLayout_t ))];
-    PgpeLayout_t pgpeRegion;
-    uint8_t pgpeReserve[ONE_MB - sizeof( PgpeLayout_t )];
-};
-
-#ifndef __PPE_PLAT
-}// namespace p9_hcodeImageBuild ends
-#endif //__PPE_PLAT
-
-#endif //__ASSEMBLER__
 
 /**
  * @brief models QPMR header in HOMER
  */
 
 #ifdef __ASSEMBLER__
-#define DEF_MEM_QPMR_UINT64( member )\
-    member: \
-    .quad 0
-#else
-#define DEF_MEM_QPMR_UINT64( member ) uint64_t member;
-#endif
-
-#ifdef __ASSEMBLER__
-#define DEF_MEM_QPMR_UINT32( member )\
-    member: \
-    .long 0
-#else
-#define DEF_MEM_QPMR_UINT32( member ) uint32_t member;
-#endif
-
-
-#ifdef __ASSEMBLER__
+.macro .qpmr_header
 .section ".qpmr" , "aw"
 .balign 8
 #else
-
-#ifndef __PPE_PLAT
-namespace p9_hcodeImageBuild
+typedef struct
 {
-#endif //__PPE_PLAT
+#endif  // __ASSEMBLER__
 
-struct QpmrHeaderLayout_t
+HCD_HDR_UINT64( magic_number, QPMR_MAGIC_NUMBER);  // QPMR_1.0
+HCD_HDR_UINT32( bootCopierOffset, 0);  // level 1 boot loader
+HCD_HDR_UINT32( reserve1, 0);
+HCD_HDR_UINT32( bootLoaderOffset, 0);  // level 2 boot loader
+HCD_HDR_UINT32( bootLoaderLength, 0);
+HCD_HDR_UINT32( buildDate, 0);
+HCD_HDR_UINT32( buildVersion, 0);
+HCD_HDR_UINT64( reservedFlags, 0);
+HCD_HDR_UINT32( sgpeImgOffset, 0);
+HCD_HDR_UINT32( sgpeImgLength, 0);
+HCD_HDR_UINT32( quadCommonRingOffset, 0);
+HCD_HDR_UINT32( quadCommonRingLength, 0);
+HCD_HDR_UINT32( quadSpecRingOffset, 0);
+HCD_HDR_UINT32( quadSpecRingLength, 0);
+HCD_HDR_UINT32( quadSpecScomOffset, 0);
+HCD_HDR_UINT32( quadSpecScomLength, 0);
+HCD_HDR_UINT32( quadCmnRingOccOffset, 0);
+HCD_HDR_UINT32( quadSpecRingOccOffset, 0);
+HCD_HDR_UINT32( quadCmnScomOccOffset, 0);
+HCD_HDR_PAD(512);
+//HCD_HDR_PAD(QPMR_HEADER_SIZE);
+#ifdef __ASSEMBLER__
+.endm
+#else
+}  __attribute__((packed, aligned(512))) QpmrHeaderLayout_t;
+//} __attribute__((packed, aligned(QPMR_HEADER_SIZE))) QpmrHeaderLayout_t;
+#endif
+// @todo Get around the above hardcoding.
+
+
+/**
+ * CPMR Header
+ *
+ *  This header is only consumed by Hcode Image Build and
+ *  lab tools, not by PPE code.  It is generated with assembler
+ *  primitives during CME build and placed in HOMER by
+ *  Hcode Image Build.
+ */
+
+#ifdef __ASSEMBLER__
+.macro  .cpmr_header
+.section ".cpmr" , "aw"
+.balign    8
+#else
+typedef struct
 {
 #endif
-DEF_MEM_QPMR_UINT64( magicNumber )
-DEF_MEM_QPMR_UINT32( bootCopierOffset )  // level 1 boot loader
-DEF_MEM_QPMR_UINT32( reserve1 )
-DEF_MEM_QPMR_UINT32( bootLoaderOffset ) // level 2 boot loader
-DEF_MEM_QPMR_UINT32( bootLoaderLength )
-DEF_MEM_QPMR_UINT32( buildDate )
-DEF_MEM_QPMR_UINT32( buildVersion )
-DEF_MEM_QPMR_UINT64( reservedFlags )
-DEF_MEM_QPMR_UINT32( sgpeImgOffset )
-DEF_MEM_QPMR_UINT32( sgpeImgLength )
-DEF_MEM_QPMR_UINT32( quadCmnRingOffset )
-DEF_MEM_QPMR_UINT32( quadCmnRingLength )
-DEF_MEM_QPMR_UINT32( quadSpecRingOffset )
-DEF_MEM_QPMR_UINT32( quadSpecRingLength )
-DEF_MEM_QPMR_UINT32( quadSpecScomOffset )
-DEF_MEM_QPMR_UINT32( quadSpecScomLength )
-DEF_MEM_QPMR_UINT32( quadCmnRingOccOffset )
-DEF_MEM_QPMR_UINT32( quadSpecRingOccOffset )
-DEF_MEM_QPMR_UINT32( quadCmnScomOccOffset )
+HCD_HDR_ATTN  ( attnOpcodes, 2);
+HCD_HDR_UINT64( magic_number, CPMR_MAGIC_NUMBER);  // CPMR_1.0
+HCD_HDR_UINT32( cpmrbuildDate, 0);
+HCD_HDR_UINT32( cpmrVersion, 0);
+HCD_HDR_UINT8_VEC (cpmrReserveFlags, 7, 0);
+HCD_HDR_UINT8 ( fuseModeStatus, 0);
+HCD_HDR_UINT32( cmeImgOffset, 0);
+HCD_HDR_UINT32( cmeImgLength, 0);
+HCD_HDR_UINT32( cmeCommonRingOffset, 0);
+HCD_HDR_UINT32( cmeCommonRingLength, 0);
+HCD_HDR_UINT32( cmePstateOffset, 0);
+HCD_HDR_UINT32( cmePstateLength, 0);
+HCD_HDR_UINT32( coreSpecRingOffset, 0);
+HCD_HDR_UINT32( coreSpecRingLength, 0);
+HCD_HDR_UINT32( coreScomOffset, 0);
+HCD_HDR_UINT32( coreScomLength, 0);
+HCD_HDR_PAD(256);
+//HCD_HDR_PAD(CPMR_HEADER_SIZE);
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(256))) cpmrHeader_t;
+//} __attribute__((packed, aligned(CPMR_HEADER_SIZE))) cpmrHeader_t;
+#endif
+
+// @todo Get around the above hardcoding.
+
+/**
+ * SGPE Header
+ *
+ * The SGPE header is loaded in the OCC SRAM.  Structure member names are
+ * preceded with "g_" as these becoming global variables in the SGPE Hcode.
+ *
+ * The Linker script maps this header to an SRAM address range after interrupt
+ * vector area. Some fields will be populated during Hcode image build activity.
+ * Build date, version, Hcode offset and position are populated during SGPE
+ * Image build process.
+ */
+
+#ifdef __ASSEMBLER__
+.macro .sgpe_header
+.section ".sgpe_image_header" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64(g_sgpe_magic_number, P9_XIP_MAGIC_SGPE);   //XIP SGPE
+HCD_HDR_UINT32(g_sgpe_reset_address, 0);
+HCD_HDR_UINT32(g_sgpe_reserve1, 0);
+HCD_HDR_UINT32(g_sgpe_ivpr_address, 0);
+HCD_HDR_UINT32(g_sgpe_reserve2, 0);
+HCD_HDR_UINT32(g_sgpe_build_date, 0);
+HCD_HDR_UINT32(g_sgpe_build_ver, 0);
+HCD_HDR_UINT64(g_sgpe_reserve_flags, 0);
+HCD_HDR_UINT32(g_sgpe_cmn_ring_occ_offset, 0);
+HCD_HDR_UINT32(g_sgpe_cmn_ring_ovrd_occ_offset, 0);
+HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);
+HCD_HDR_UINT32(g_sgpe_spec_ring_ovrd_occ_offset, 0);
+HCD_HDR_UINT32(g_sgpe_reserve3, 0);
+HCD_HDR_UINT32(g_sgpe_cmn_scom_offset, 0);
+HCD_HDR_PAD(64);
+#ifdef __ASSEMBLER__
+.endm
+#else
+//FIXME RTC 155018
+//Eventually SGPE Img header has been defined to be of size 96B. Next 36B would be for
+//debug pointer.Aligning SGPE image header to 64B boundary.
+} __attribute__((packed, aligned(64))) sgpeHeader_t;
+#endif
+
+
+/**
+ * CME Header
+ *
+ * The CME header is loaded in the CME SRAM so it is "tight" (little extra space)
+ * Thus, this "structure" is NOT padded to a specific size and is limited to
+ * 64B.  Also, structure member names are preceded with "g_" as these becoming
+ * global variables in the CME Hcode.
+ */
+#ifdef __ASSEMBLER__
+.macro  .cme_header
+.section ".cme_image_header" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64(g_cme_magic_number, CME_MAGIC_NUMBER);  // CME__1.0
+HCD_HDR_UINT32(g_cme_build_date, 0);
+HCD_HDR_UINT32(g_cme_build_ver, 0);
+HCD_HDR_UINT32(g_cme_hcode_offset, 0);
+HCD_HDR_UINT32(g_cme_hcode_length, 0);
+HCD_HDR_UINT32(g_cme_common_ring_offset, 0);
+HCD_HDR_UINT32(g_cme_cmn_ring_ovrd_offset, 0);
+HCD_HDR_UINT32(g_cme_common_ring_length, 0);
+HCD_HDR_UINT32(g_cme_pstate_region_offset, 0);
+HCD_HDR_UINT32(g_cme_pstate_region_length, 0);
+HCD_HDR_UINT32(g_cme_core_spec_ring_offset, 0);
+HCD_HDR_UINT32(g_cme_core_spec_ring_ovrd_offset, 0);
+HCD_HDR_UINT32(g_cme_max_spec_ring_length, 0);
+HCD_HDR_UINT32(g_cme_mode_flags, 0);
+HCD_HDR_UINT32(g_cme_reserved1, 0);
+HCD_HDR_UINT64(g_cme_reserved2, 0);
+HCD_HDR_PAD(64);
+#ifdef __ASSEMBLER__
+.endm
+#else
+//FIXME RTC 155018
+//Eventually CME Img header might be of size 96B. Next 36B would be for
+//debug pointer.Aligning CME image header to 64B boundary.
+} __attribute__((packed, aligned(64))) cmeHeader_t;
+#endif
+
 #ifndef __ASSEMBLER__
-};
+
+typedef struct CMEImageFlags
+{
+    uint32_t fused_mode     : 1;
+    uint32_t reserved0      : 31;
+} CMEImageFlags_t;
+
+/**
+ * PGPE Header
+ *
+ * The PGPE header is loaded in the OCC SRAM so it is "tight" (little extra space)
+ * Thus, this "structure" is NOT padded to a specific size and is limited to
+ * 64B.  Also, structure member names are preceded with "g_" as these becoming
+ * global variables in the CME Hcode.
+ */
+#ifdef __ASSEMBLER__
+.macro  .pgpe_header
+.section ".pgpe_header" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+HCD_HDR_UINT64(g_pgpe_magic_number, PGPE_MAGIC_NUMBER);  // PGPE_1.0
+HCD_HDR_UINT32(g_pgpe_build_date, 0);
+HCD_HDR_UINT32(g_pgpe_build_ver, 0);
+HCD_HDR_UINT32(g_pgpe_hcode_offset, 0);
+HCD_HDR_UINT32(g_pgpe_hcode_length, 0);
+HCD_HDR_PAD(64);
+//FIXME Need to get info on other fields
+#ifdef __ASSEMBLER__
+.endm
+#else
+//FIXME RTC 155018
+//Eventually PGPE Img header has been defined to be of size 96B. Next 36B would be for
+//debug pointer.Aligning PGPE image header to 64B boundary.
+} __attribute__((packed, aligned(64))) PgpeHeader_t;
+#endif
+
+/**
+ * @brief   models image section of SGPE in HOMER.
+ */
+typedef struct
+{
+    uint8_t qpmrHeader[sizeof(QpmrHeaderLayout_t)];
+    uint8_t l1BootLoader[SGPE_LVL_1_BOOT_LOAD_SIZE];
+    uint8_t l2BootLoader[SGPE_LVL_2_BOOT_LOAD_SIZE];
+    uint8_t hcodeIntVect[SGPE_INT_VECT];
+    uint8_t imgHeader[sizeof(sgpeHeader_t)];
+    uint8_t hcode[SGPE_HCODE_SIZE];
+    uint8_t commonRings[SGPE_COMMON_RING];
+    uint8_t cacheSpecificRing[MAX_CACHE_CHIPLET * CACHE_INST_SPECIFIC_SIZE];
+} SgpeLayout_t;
+
+typedef union CPMRSelfRestoreLayout
+{
+    uint8_t region[SELF_REST_SIZE];
+    struct
+    {
+        cpmrHeader_t CPMRHeader;
+        uint8_t      exe[SELF_REST_SIZE - sizeof(cpmrHeader_t)];
+    } elements;
+} CPMRSelfRestoreLayout_t;
+
+/**
+ * @brief   models image section associated with core self restore in HOMER.
+ */
+typedef struct
+{
+    CPMRSelfRestoreLayout_t CPMR_SR;
+    uint8_t                 coreSelfRestore[CORE_RESTORE_SIZE];
+    uint8_t                 reserve[CORE_SCOM_START - (SELF_REST_SIZE + CORE_RESTORE_SIZE)];
+    uint8_t                 coreScom[CORE_SCOM_RES_SIZE];
+} SelfRestoreLayout_t;
+
+typedef union CmeHcodeLayout
+{
+    uint8_t hcode[CME_HCODE_SIZE];
+    struct
+    {
+        uint8_t     cmeIntVector[CME_INT_VECTOR_SIZE];
+        cmeHeader_t imgHeader;
+        uint8_t     exe[CME_HCODE_SIZE - CME_INT_VECTOR_SIZE - sizeof(cmeHeader_t)];
+    } elements;
+} CmeHcodeLayout_t;
+
+
+typedef struct
+{
+    SelfRestoreLayout_t  selfRestoreRegion;
+    CmeHcodeLayout_t     cmeBin;
+    uint8_t              commonRings[CORE_COMMON_RING_SIZE];
+    uint8_t              quadPstateArea[QUAD_PSTATE_SIZE];
+    uint8_t              resvRingArea[RESERVE_CME_RING_AREA];
+    uint8_t              instSpecificRing[MAX_CORES_PER_CHIP * CORE_SPECIFIC_RING];
+} CPMRLayout_t;
+
+/**
+ * @brief   models image section associated with PGPE in HOMER.
+ */
+typedef union PgpeHcodeLayout
+{
+    uint8_t hcode[PGPE_HCODE_SIZE];
+    struct
+    {
+        uint8_t pgpeIntVector[PGPE_INT_VECTOR];
+        PgpeHeader_t imgHeader;
+        uint8_t exe[PGPE_HCODE_SIZE - PGPE_INT_VECTOR - sizeof(PgpeHeader_t)];
+    } elements;
+} PgpeHcodeLayout_t;
+
+typedef struct
+{
+    uint8_t l1BootLoader[PGPE_LVL_1_BOOT_LOAD_SIZE];
+    uint8_t l2BootLoader[PGPE_LVL_2_BOOT_LOAD_SIZE];
+    PgpeHcodeLayout_t pgpeBin;
+    uint8_t paramBlock[PGPE_PARAM_BLOCK_SIZE];
+    uint8_t pstateOutputTable[PSTATE_OUTPUT_TABLE];
+} PPMRLayout_t;
+
+/**
+ * @brief   models QPMR in HOMER.
+ */
+typedef struct
+{
+    SgpeLayout_t        sgpeRegion;
+    uint8_t             qpmrReserve1[CACHE_SCOM_START - sizeof(SgpeLayout_t)];
+    uint8_t             cacheScomRegion[CACHE_SCOM_RESTORE_SIZE];
+} QPMRLayout_t;
+
+
+/**
+ * @brief   models layout of HOMER.
+ */
+typedef struct
+{
+    uint8_t occHostArea[OCC_HOST_AREA_SIZE];
+    QPMRLayout_t qpmrRegion;
+    uint8_t      qpmrReserve[ONE_MB - sizeof( QPMRLayout_t )];
+    CPMRLayout_t cpmrRegion;
+    uint8_t      cppmReserve[ONE_MB - sizeof( CPMRLayout_t )];
+    PPMRLayout_t ppmrRegion;
+    uint8_t      pgpeReserve[ONE_MB - sizeof( PPMRLayout_t )];
+} Homerlayout_t;
 
 #ifndef __PPE_PLAT
-} // p9_hcodeImageBuild ends
+}// namespace p9_hcodeImageBuild ends
 #endif //__PPE_PLAT
 
-#endif
-
-
-#endif
+#endif //__ASSEMBLER__
+#endif //__HW_IMG_DEFINE

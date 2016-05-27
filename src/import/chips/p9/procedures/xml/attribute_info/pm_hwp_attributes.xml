@@ -32,6 +32,7 @@
       will be Sreset after this value is established.  
       </description>
       <valueType>uint32</valueType>
+      <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -44,6 +45,7 @@
       will be Sreset after this value is established
       </description>
       <valueType>uint32</valueType>
+      <writeable/>
   </attribute> 
   <!-- ********************************************************************* -->
   <attribute>

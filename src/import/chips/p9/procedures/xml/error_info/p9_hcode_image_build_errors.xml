@@ -21,7 +21,7 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_IMG_PTR_ERROR</rc>
+    <rc>RC_IMG_PTR_ERROR</rc>
     <description>Image pointers passed are either bad or point to same location.</description>
     <ffdc>HW_IMG_BUF_PTR</ffdc>
     <ffdc>HOMER_IMG_BUF_PTR</ffdc>
@@ -32,7 +32,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_HW_IMAGE_INVALID_SIZE</rc>
+    <rc>RC_HW_IMAGE_INVALID_SIZE</rc>
     <description>Hardware Image size is not in expected range </description>
     <ffdc>HW_IMG_SIZE</ffdc>
     <ffdc>MAX_HW_IMG_SIZE</ffdc>
@@ -43,7 +43,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_HCODE_INVALID_PHASE</rc>
+    <rc>RC_HCODE_INVALID_PHASE</rc>
     <description>System phase is neither IPL nor Hypervisor</description>
     <ffdc>SYS_PHASE</ffdc>
     <callout>
@@ -53,7 +53,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_HCODE_INVALID_TEMP_BUF</rc>
+    <rc>RC_HCODE_INVALID_TEMP_BUF</rc>
     <description>Temporary buffer is invalid.</description>
     <ffdc>TEMP_BUF_PTR</ffdc>
     <ffdc>TEMP_BUF_SIZE</ffdc>
@@ -64,7 +64,18 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_HCODE_INVALID_IMG_TYPE</rc>
+    <rc>RC_HCODE_TEMP_BUF_SIZE</rc>
+    <description>Temporary buffer size invalid</description>
+    <ffdc>TEMP_BUF1_SIZE</ffdc>
+    <ffdc>TEMP_BUF2_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_HCODE_INVALID_IMG_TYPE</rc>
     <description>Invalid image type passed for hcode image build.</description>
     <callout>
       <procedure>CODE</procedure>
@@ -73,8 +84,8 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_SGPE_BUILD_FAIL</rc>
-    <description>hcode image build procedure failed to add sgpe image</description>
+    <rc>RC_SGPE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add SGPE image</description>
     <ffdc>SGPE_FAIL_SECTN</ffdc>
     <callout>
       <procedure>CODE</procedure>
@@ -83,7 +94,7 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_SELF_RESTORE_BUILD_FAIL</rc>
+    <rc>RC_SELF_RESTORE_BUILD_FAIL</rc>
     <description>hcode image build procedure failed to add core self restore image</description>
     <ffdc>SELF_RESTORE_FAIL_SECTN</ffdc>
     <callout>
@@ -93,9 +104,29 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_P9_CME_BUILD_FAIL</rc>
+    <rc>RC_CME_BUILD_FAIL</rc>
     <description>hcode image build procedure failed to add CME image</description>
     <ffdc>CME_FAIL_SECTN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PGPE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add PGPE image</description>
+    <ffdc>PGPE_FAIL_SECTN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SCAN_RING_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add PGPE image</description>
+    <ffdc>RING_FAIL_RC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
