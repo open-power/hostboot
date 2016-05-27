@@ -695,19 +695,34 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_ADU_XSCOM_BAR_BASE_ADDR</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Defines XSCOM base address on each processor level.
-        address provided by the MRW </description>
+  <id>ATTR_PROC_XSCOM_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>XSCOM BAR base address offset
+    creator: platform
+    consumer: p9_sbe_scominit
+    firmware notes:
+      Defines 16GB range (size implied) mapped for XSCOM usage
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 22:29
+      (excludes system/memory select/group/chip fields)
+  </description>
   <valueType>uint64</valueType>
   <persistRuntime/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_LPC_BASE_ADDR</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Defines LPC base address on each processor level.</description>
+  <id>ATTR_PROC_LPC_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>LPC BAR base address offset
+    creator: platform
+    consumer: p9_sbe_scominit
+    firmware notes:
+      Defines 4GB range (size implied) mapped for LPC usage
+      Attribute holds offset (relative to chip MMIO origin) to program into
+      chip address range field of BAR -- RA bits 22:31
+      (excludes system/memory select/group/chip fields)
+  </description>
   <valueType>uint64</valueType>
   <persistRuntime/>
   <platInit/>
