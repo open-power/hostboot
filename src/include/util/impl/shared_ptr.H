@@ -83,6 +83,11 @@ namespace std
                 return (pointer == r.pointer);
             }
 
+            bool operator!=(const shared_ptr &r) const
+            {
+                return (pointer != r.pointer);
+            }
+
             shared_ptr& operator=(const shared_ptr& r)
             {
                 _cleanup();
