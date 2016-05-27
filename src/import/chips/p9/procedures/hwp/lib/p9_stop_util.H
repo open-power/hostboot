@@ -117,13 +117,14 @@ enum
  * @brief   returns core id and thread id by parsing a given PIR.
  * @param   i_pStopImage    points to STOP image associated with a proc chip.
  * @param   i_pir           PIR associated with a core's thread.
- * @param   o_coreId        core id obtained from PIR.
- * @param   o_threadId      thread id obtained from PIR.
+ * @param   o_coreId        points to core id value obtained from PIR.
+ * @param   o_threadId      points to thread id value obtained from PIR.
  * @return  SUCCESS if function suceeds, error code otherwise.
  */
 StopReturnCode_t getCoreAndThread( void* const i_pStopImage,
                                    const uint64_t i_pir,
-                                   uint32_t& o_coreId, uint32_t& o_threadId );
+                                   uint32_t* o_coreId,
+                                   uint32_t* o_threadId );
 
 } // namespace stopImageSection ends
 

@@ -30,8 +30,10 @@
 #ifndef _STOP_SECTION_DEFINES_H
 #define _STOP_SECTION_DEFINES_H
 
+#ifdef __cplusplus
 namespace stopImageSection
 {
+#endif
 
 //basic constants
 enum
@@ -90,7 +92,9 @@ enum
 //size in byte ends
 };
 
+#ifdef __cplusplus
 }//stopImageSection ends
+#endif //__cplusplus
 
 #endif
 

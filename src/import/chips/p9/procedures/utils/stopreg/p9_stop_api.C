@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,13 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
 
 namespace stopImageSection
 {
+#endif
+// a true in the table below means register is of scope thread
+// whereas a false meanse register is of scope core.
+
 const StopSprReg_t g_sprRegister[] =
 {
     { P9_STOP_SPR_HSPRG0,    true  },
@@ -67,9 +70,8 @@ const uint32_t MAX_SPR_SUPPORTED =
  * @param[in]       i_pImage    pointer to beginning of chip's HOMER image.
  * @param[in]       i_regId             SPR register id
  * @param[in]       i_coreId            core id
- * @param[in|out]   io_threadId         thread id
- * @param[in|out]   io_threadLevelReg   true if register is of thread scope, false if of
- *                                      core scope.
+ * @param[in|out]   i_pThreadId         points to thread id
+ * @param[in|out]   i_pThreadLevelReg   points to scope information of SPR
  * @return  STOP_SAVE_SUCCESS if arguments found valid, error code otherwise.
  * @note    for register of scope core, function shall force io_threadId to
  *          zero.
@@ -77,12 +79,12 @@ const uint32_t MAX_SPR_SUPPORTED =
 StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
         const CpuReg_t i_regId,
         const uint32_t  i_coreId,
-        uint32_t&    io_threadId,
-        bool& io_threadLevelReg )
+        uint32_t*     i_pThreadId,
+        bool* i_pThreadLevelReg )
 {
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
     bool sprSupported = false;
-    io_threadLevelReg = false;
+    *i_pThreadLevelReg = false;
 
     do
     {
@@ -111,7 +113,7 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
             break;
         }
 
-        if( MAX_THREAD_ID_SUPPORTED < io_threadId )
+        if( MAX_THREAD_ID_SUPPORTED < *i_pThreadId )
         {
             //Error: invalid core thread. Given core thread exceeds maximum
             //threads supported in a core.
@@ -125,14 +127,16 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
             break;
         }
 
-        for( uint32_t index = 0; index < MAX_SPR_SUPPORTED; ++index )
+        uint32_t index = 0;
+
+        for( index = 0; index < MAX_SPR_SUPPORTED; ++index )
         {
-            if( i_regId == g_sprRegister[index].sprId )
+            if( i_regId == (CpuReg_t )g_sprRegister[index].sprId )
             {
                 // given register is in the list of register supported
                 sprSupported = true;
-                io_threadLevelReg = g_sprRegister[index].isThreadScope;
-                io_threadId = io_threadLevelReg ? io_threadId : 0;
+                *i_pThreadLevelReg = g_sprRegister[index].isThreadScope;
+                *i_pThreadId = *i_pThreadLevelReg ? *i_pThreadId : 0;
                 break;
             }
         }
@@ -154,7 +158,7 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
     {
         MY_ERR( "image 0x%08x, regId %08d, coreId %d, "
                 "threadId %d return code 0x%08x", i_pImage, i_regId,
-                i_coreId, io_threadId, l_rc  );
+                i_coreId, *i_pThreadId, l_rc  );
     }
 
     return l_rc;
@@ -165,7 +169,7 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
 /**
  * @brief generates ori instruction code.
  * @param[in]   i_Rs    Source register number
- * @param[in]   i_Ra    destination regiser number
+ * @param[in]   i_Ra    destination register number
  * @param[in]   i_data  16 bit immediate data
  * @return  returns 32 bit instruction representing ori instruction.
  */
@@ -176,7 +180,7 @@ uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
     oriInstOpcode = 0;
     oriInstOpcode = ORI_OPCODE << 26;
     oriInstOpcode |= i_Rs << 21;
-    oriInstOpcode |= i_Rs << 16;
+    oriInstOpcode |= i_Ra << 16;
     oriInstOpcode |= i_data;
 
     return SWIZZLE_4_BYTE(oriInstOpcode);
@@ -208,7 +212,7 @@ uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
     xorRegInstOpcode = XOR_CONST << 1;
     xorRegInstOpcode |= OPCODE_31 << 26;
     xorRegInstOpcode |= i_Rs << 21;
-    xorRegInstOpcode |= i_Rs << 16;
+    xorRegInstOpcode |= i_Ra << 16;
     xorRegInstOpcode |= i_Rb << 11;
 
     return SWIZZLE_4_BYTE(xorRegInstOpcode);
@@ -247,6 +251,7 @@ uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
 {
     uint32_t mtsprInstOpcode = 0;
     uint32_t temp = (( i_Spr & 0x03FF ) << 11);
+    mtsprInstOpcode = (uint8_t)i_Rs << 21;
     mtsprInstOpcode = ( temp  & 0x0000F800 ) << 5;
     mtsprInstOpcode |= ( temp & 0x001F0000 ) >> 5;
     mtsprInstOpcode |= MTSPR_BASE_OPCODE;
@@ -311,13 +316,13 @@ uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
 StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
                                    const uint32_t i_lookUpKey,
                                    const bool i_isCoreReg,
-                                   void*& io_pSprEntryLoc )
+                                   void** io_pSprEntryLoc )
 {
     StopReturnCode_t l_rc = STOP_SAVE_FAIL;
     uint32_t temp = i_isCoreReg ? CORE_SPR_SECTN_SIZE : THREAD_SECTN_SIZE;
     uint32_t* i_threadSectEnd = i_pThreadSectLoc + temp;
     uint32_t bctr_inst = SWIZZLE_4_BYTE(BLR_INST);
-    io_pSprEntryLoc = NULL;
+    *io_pSprEntryLoc = NULL;
 
     do
     {
@@ -335,7 +340,7 @@ StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc,
 
             if( ( temp == i_lookUpKey ) || ( temp == bctr_inst ) )
             {
-                io_pSprEntryLoc = i_pThreadSectLoc;
+                *io_pSprEntryLoc = i_pThreadSectLoc;
                 l_rc = STOP_SAVE_SUCCESS;
                 break;
             }
@@ -364,11 +369,8 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
 {
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
     uint32_t tempInst = 0;
-    typedef  union
-    {
-        uint64_t regData;
-        uint16_t dataBit[4];
-    } RegData;
+    uint64_t tempRegData = 0;
+    bool newEntry = true;
 
     do
     {
@@ -379,10 +381,13 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
             break;
         }
 
-        RegData regValue;
-        regValue.regData = i_regData;
-
         tempInst = genKeyForSprLookup( i_regId );
+
+        if( *i_pSprEntryLocation == tempInst )
+        {
+            newEntry = false;
+        }
+
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
@@ -390,11 +395,13 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = getOrisInstruction( 0, 0, regValue.dataBit[0] );
+        tempRegData = i_regData >> 48;
+        tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = getOriInstruction( 0, 0, regValue.dataBit[1] );
+        tempRegData = ((i_regData >> 32) & 0x0000FFFF );
+        tempInst = getOriInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
@@ -402,11 +409,13 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = getOrisInstruction( 0, 0, regValue.dataBit[2] );
+        tempRegData = ((i_regData >> 16) & 0x000000FFFF );
+        tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = getOriInstruction( 0, 0, regValue.dataBit[3] );
+        tempRegData = (uint16_t)i_regData;
+        tempInst = getOriInstruction( 0, 0, (uint16_t)i_regData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
@@ -425,11 +434,13 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
         }
 
         *i_pSprEntryLocation = tempInst;
-        i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = SWIZZLE_4_BYTE(BLR_INST);
-        *i_pSprEntryLocation = tempInst;
-
+        if( newEntry )
+        {
+            i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
+            tempInst = SWIZZLE_4_BYTE(BLR_INST);
+            *i_pSprEntryLocation = tempInst;
+        }
     }
     while(0);
 
@@ -455,16 +466,18 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
         void* pThreadLocation = NULL;
         bool threadScopeReg = false;
 
-        l_rc = getCoreAndThread( i_pImage, i_pir, coreId, threadId );
+        l_rc = getCoreAndThread( i_pImage, i_pir, &coreId, &threadId );
+
         MY_INF( " PIR 0x%016llx coreId %d threadid %d "
                 " registerId %d", i_pir, coreId,
                 threadId, i_regId );
+
         // First of all let us validate all input arguments.
         l_rc =  validateSprImageInputs( i_pImage,
                                         i_regId,
                                         coreId,
-                                        threadId,
-                                        threadScopeReg );
+                                        &threadId,
+                                        &threadScopeReg );
 
         if( l_rc )
         {
@@ -500,9 +513,8 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
             l_rc = lookUpSprInImage( (uint32_t*)pThreadLocation,
                                      lookUpKey,
                                      threadScopeReg,
-                                     pSprEntryLocation );
+                                     &pSprEntryLocation );
         }
-
 
         if( l_rc )
         {
@@ -665,14 +677,14 @@ StopReturnCode_t editScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
             case P9_STOP_SCOM_NOOP:
                 {
                     uint32_t nopInst = getOriInstruction( 0, 0, 0 );
-                    i_pEntryLocation->scomEntryHeader = SCOM_ENTRY_START;
+                    i_pEntryLocation->scomEntryHeader = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
                     i_pEntryLocation->scomEntryData = nopInst;
                     i_pEntryLocation->scomEntryAddress = nopInst;
                 }
                 break;
 
             case P9_STOP_SCOM_APPEND:
-                i_pEntryLocation->scomEntryHeader = SCOM_ENTRY_START;
+                i_pEntryLocation->scomEntryHeader = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
                 i_pEntryLocation->scomEntryData = i_scomData;
                 i_pEntryLocation->scomEntryAddress = i_scomAddr;
                 break;
@@ -710,7 +722,7 @@ StopReturnCode_t updateScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
             break;
         }
 
-        i_scomEntry->scomEntryHeader = SCOM_ENTRY_START; // done for now
+        i_scomEntry->scomEntryHeader = SWIZZLE_4_BYTE(SCOM_ENTRY_START); // done for now
         i_scomEntry->scomEntryAddress = i_scomAddr;
         i_scomEntry->scomEntryData = i_scomData;
 
@@ -824,25 +836,27 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
         uint32_t swizzleAddr = SWIZZLE_4_BYTE(i_scomAddress);
         uint64_t swizzleData = SWIZZLE_8_BYTE(i_scomData);
         uint32_t swizzleAttn = SWIZZLE_4_BYTE(ATTN_OPCODE);
+        uint32_t swizzleEntry = SWIZZLE_4_BYTE(SCOM_ENTRY_START);
         uint32_t index = 0;
 
         for( index = 0; index < entryLimit; ++index )
         {
-            if( ( swizzleAddr == pScomEntry[index].scomEntryAddress ) &&
-                ( !pEntryLocation ) )
+            uint32_t entrySwzAddress = pScomEntry[index].scomEntryAddress;
+
+            if( ( swizzleAddr == entrySwzAddress ) && ( !pEntryLocation ) )
 
             {
                 pEntryLocation = &pScomEntry[index];
             }
 
-            if( (( nopInst == pScomEntry[index].scomEntryAddress ) ||
-                 ( swizzleAttn == pScomEntry[index].scomEntryAddress )) &&
+            if( (( nopInst == entrySwzAddress ) ||
+                 ( swizzleAttn == entrySwzAddress )) &&
                 ( !pNopLocation ) )
             {
                 pNopLocation = &pScomEntry[index];
             }
 
-            if( SCOM_ENTRY_START == pScomEntry[index].scomEntryHeader )
+            if( swizzleEntry == pScomEntry[index].scomEntryHeader )
             {
                 continue;
             }
@@ -975,8 +989,8 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
 }
 
 
+#ifdef __cplusplus
 } //namespace stopImageSection ends
 
-#ifdef __cplusplus
 }  //extern "C"
 #endif

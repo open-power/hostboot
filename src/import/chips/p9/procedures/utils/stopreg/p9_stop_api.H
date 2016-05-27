@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,10 @@
 // *HWP Level       :  2
 // *HWP Consumed by :  HB:HYP
 
+#ifdef __cplusplus
 namespace stopImageSection
 {
+#endif
 
 /**
  * @brief   all SPRs and MSR for which register restore is to be supported.
@@ -143,8 +145,7 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
 
 #ifdef __cplusplus
 } // extern "C"
-#endif
 };  // namespace stopImageSection ends
-
+#endif //__cplusplus
 
 #endif //__P9_STOP_IMAGE_API_
