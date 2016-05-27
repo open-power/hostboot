@@ -24,4 +24,29 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Halt codes for p9_sbe_scominit -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SBE_SCOMINIT_XSCOM_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_sbe_scominit
+      Invalid XSCOM BAR attribute configuration
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>XSCOM_BAR</ffdc>
+    <ffdc>XSCOM_BAR_OFFSET</ffdc>
+    <ffdc>BASE_ADDR_MMIO</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SBE_SCOMINIT_LPC_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_sbe_scominit
+      Invalid LPC BAR attribute configuration
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>LPC_BAR</ffdc>
+    <ffdc>LPC_BAR_OFFSET</ffdc>
+    <ffdc>BASE_ADDR_MMIO</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
