@@ -132,6 +132,177 @@ fapi_try_exit:
 
 }
 
+/// @brief To do check on Clock controller status for chiplets
+///
+/// @param[in]     i_target        Reference to TARGET_TYPE_PERV target Reference to TARGET_TYPE_PERV target
+/// @param[in]     i_clock_cmd     Issue clock controller command (START/STOP)
+/// @param[in]     i_regions       Enable required REGIONS
+/// @param[in]     i_clock_types   Clock Types to be selected (SL/NSL/ARY)
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target,
+    const fapi2::buffer<uint8_t> i_clock_cmd,
+    const fapi2::buffer<uint16_t> i_regions,
+    const fapi2::buffer<uint8_t> i_clock_types)
+{
+    bool l_reg_sl = false;
+    bool l_reg_nsl = false;
+    bool l_reg_ary = false;
+    fapi2::buffer<uint64_t> l_sl_clock_status;
+    fapi2::buffer<uint64_t> l_nsl_clock_status;
+    fapi2::buffer<uint64_t> l_ary_clock_status;
+    fapi2::buffer<uint16_t> l_sl_clkregion_status;
+    fapi2::buffer<uint16_t> l_nsl_clkregion_status;
+    fapi2::buffer<uint16_t> l_ary_clkregion_status;
+    fapi2::buffer<uint16_t> l_regions;
+    FAPI_INF("Entering ...");
+
+    l_reg_sl = i_clock_types.getBit<5>();
+    l_reg_nsl = i_clock_types.getBit<6>();
+    l_reg_ary = i_clock_types.getBit<7>();
+    i_regions.extractToRight<5, 11>(l_regions);
+
+    if ( l_reg_sl )
+    {
+        FAPI_DBG("Check for Clocks running SL");
+        //Getting CLOCK_STAT_SL register value
+        FAPI_TRY(fapi2::getScom(i_target, PERV_CLOCK_STAT_SL,
+                                l_sl_clock_status)); //l_sl_clock_status = CLOCK_STAT_SL
+        FAPI_DBG("SL Clock status register is %#018lX", l_sl_clock_status);
+
+        if ( i_clock_cmd == 0b01 )
+        {
+            FAPI_DBG("Checking for clock start command");
+            l_sl_clkregion_status.flush<1>();
+            l_sl_clock_status.extractToRight<4, 11>(l_sl_clkregion_status);
+            l_sl_clkregion_status.invert();
+            l_sl_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_sl_clkregion_status == l_regions,
+                        fapi2::NEST_SL_ERR()
+                        .set_READ_CLK_SL(l_sl_clock_status),
+                        "Clock running for sl type not matching with expected values");
+        }
+
+        if ( i_clock_cmd == 0b10 )
+        {
+            FAPI_DBG("Checking for clock stop command");
+            l_sl_clkregion_status.flush<0>();
+            l_sl_clock_status.extractToRight<4, 11>(l_sl_clkregion_status);
+            l_sl_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_sl_clkregion_status == l_regions,
+                        fapi2::NEST_SL_ERR()
+                        .set_READ_CLK_SL(l_sl_clock_status),
+                        "Clock running for sl type not matching with expected values");
+        }
+    }
+
+    if ( l_reg_nsl )
+    {
+        FAPI_DBG("Check for clocks running NSL");
+        //Getting CLOCK_STAT_NSL register value
+        FAPI_TRY(fapi2::getScom(i_target, PERV_CLOCK_STAT_NSL,
+                                l_nsl_clock_status)); //l_nsl_clock_status = CLOCK_STAT_NSL
+        FAPI_DBG("NSL Clock status register is %#018lX", l_nsl_clock_status);
+
+        if ( i_clock_cmd == 0b01 )
+        {
+            FAPI_DBG("Checking for clock start command");
+            l_nsl_clkregion_status.flush<1>();
+            l_nsl_clock_status.extractToRight<4, 11>(l_nsl_clkregion_status);
+            l_nsl_clkregion_status.invert();
+            l_nsl_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
+                        fapi2::NEST_NSL_ERR()
+                        .set_READ_CLK_NSL(l_nsl_clock_status),
+                        "Clock running for nsl type not matching with expected values");
+        }
+
+        if ( i_clock_cmd == 0b10 )
+        {
+            FAPI_DBG("Checking for clock stop command");
+            l_nsl_clkregion_status.flush<0>();
+            l_nsl_clock_status.extractToRight<4, 11>(l_nsl_clkregion_status);
+            l_nsl_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
+                        fapi2::NEST_NSL_ERR()
+                        .set_READ_CLK_NSL(l_nsl_clock_status),
+                        "Clock running for nsl type not matching with expected values");
+        }
+    }
+
+    if ( l_reg_ary )
+    {
+        FAPI_DBG("Check for clocks running ARY");
+        //Getting CLOCK_STAT_ARY register value
+        FAPI_TRY(fapi2::getScom(i_target, PERV_CLOCK_STAT_ARY,
+                                l_ary_clock_status)); //l_ary_clock_status = CLOCK_STAT_ARY
+        FAPI_DBG("ARY Clock status register is %#018lX", l_ary_clock_status);
+
+        if ( i_clock_cmd == 0b01 )
+        {
+            FAPI_DBG("Checking for clock start command");
+            l_ary_clkregion_status.flush<1>();
+            l_ary_clock_status.extractToRight<4, 11>(l_ary_clkregion_status);
+            l_ary_clkregion_status.invert();
+            l_ary_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_ary_clkregion_status == l_regions,
+                        fapi2::NEST_ARY_ERR()
+                        .set_READ_CLK_ARY(l_ary_clock_status),
+                        "Clock running for ary type not matching with expected values");
+        }
+
+        if ( i_clock_cmd == 0b10 )
+        {
+            FAPI_DBG("Checking for clock stop command");
+            l_ary_clkregion_status.flush<0>();
+            l_ary_clock_status.extractToRight<4, 11>(l_ary_clkregion_status);
+            l_ary_clkregion_status &= l_regions;
+
+            FAPI_ASSERT(l_ary_clkregion_status == l_regions,
+                        fapi2::NEST_ARY_ERR()
+                        .set_READ_CLK_ARY(l_ary_clock_status),
+                        "Clock running for ary type not matching with expected values");
+        }
+    }
+
+    FAPI_INF("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief --check checkstop register
+/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
+{
+    fapi2::buffer<uint64_t> l_read_reg;
+    FAPI_INF("Entering ...");
+
+    FAPI_DBG("Check checkstop register");
+    //Getting XFIR register value
+    FAPI_TRY(fapi2::getScom(i_target_chiplet, PERV_XFIR,
+                            l_read_reg)); //l_read_reg = XFIR
+
+    FAPI_ASSERT(l_read_reg == 0,
+                fapi2::READ_ALL_CHECKSTOP_ERR()
+                .set_READ_ALL_CHECKSTOP(l_read_reg),
+                "ERROR: COMBINE ALL CHECKSTOP ERROR");
+
+    FAPI_INF("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
 /// @brief check clocks status
 ///
 /// @param[in]     i_regions            regions from upper level input
@@ -354,6 +525,124 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
                     fapi2::ARY_ERR()
                     .set_READ_CLK_ARY(l_ary_clock_status),
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR ARRAY TYPE");
+    }
+
+    FAPI_INF("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief --drop vital fence
+/// --reset abstclk muxsel,syncclk_muxsel
+///
+/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
+/// @param[in]     i_attr_pg          ATTR_PG for the corresponding chiplet
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+    const fapi2::buffer<uint32_t> i_attr_pg)
+{
+    // Local variable and constant definition
+    fapi2::buffer <uint16_t> l_cplt_ctrl_init;
+    fapi2::buffer<uint32_t> l_attr_pg;
+    fapi2::buffer<uint64_t> l_data64;
+    FAPI_INF("Entering ...");
+
+    l_attr_pg = i_attr_pg;
+    l_attr_pg.invert();
+    l_attr_pg.extractToRight<20, 11>(l_cplt_ctrl_init);
+
+    // Not needed as have only nest chiplet (no dual clock controller) Bit 62 ->0
+    //
+    FAPI_DBG("Drop partial good fences");
+    //Setting CPLT_CTRL1 register value
+    l_data64.flush<0>();
+    l_data64.writeBit<PERV_1_CPLT_CTRL1_TC_VITL_REGION_FENCE>
+    (l_attr_pg.getBit<19>());  //CPLT_CTRL1.TC_VITL_REGION_FENCE = l_attr_pg.getBit<19>()
+    //CPLT_CTRL1.TC_ALL_REGIONS_FENCE = l_cplt_ctrl_init
+    l_data64.insertFromRight<4, 11>(l_cplt_ctrl_init);
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL1_CLEAR, l_data64));
+
+    FAPI_DBG("reset abistclk_muxsel and syncclk_muxsel");
+    //Setting CPLT_CTRL0 register value
+    l_data64.flush<0>();
+    //CPLT_CTRL0.CTRL_CC_ABSTCLK_MUXSEL_DC = 1
+    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_ABSTCLK_MUXSEL_DC>();
+    //CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 1
+    l_data64.setBit<PERV_1_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC>();
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL0_CLEAR, l_data64));
+
+    FAPI_INF("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief will force all chiplets out of flush
+///
+/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_flushmode(const
+        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
+{
+    fapi2::buffer<uint64_t> l_data64;
+    FAPI_INF("Entering ...");
+
+    FAPI_DBG("Clear flush_inhibit to go in to flush mode");
+    //Setting CPLT_CTRL0 register value
+    l_data64.flush<0>();
+    //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 0
+    l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL0_CLEAR, l_data64));
+
+    FAPI_INF("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief get children for all chiplets : Perv, Nest
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PERV target
+/// @param[out]    o_pg_vector     vector of targets
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
+        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip,
+        fapi2::buffer<uint64_t>& o_pg_vector)
+{
+    fapi2::buffer<uint8_t> l_read_attrunitpos;
+    FAPI_INF("Entering ...");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chip,
+                           l_read_attrunitpos));
+
+    if (    l_read_attrunitpos == 0x01 )
+    {
+        o_pg_vector.setBit<0>();
+    }
+
+    if ( l_read_attrunitpos == 0x02 )
+    {
+        o_pg_vector.setBit<1>();
+    }
+
+    if (    l_read_attrunitpos == 0x03 )
+    {
+        o_pg_vector.setBit<2>();
+    }
+
+    if (    l_read_attrunitpos == 0x04 )
+    {
+        o_pg_vector.setBit<3>();
+    }
+
+    if (    l_read_attrunitpos == 0x05 )
+    {
+        o_pg_vector.setBit<4>();
     }
 
     FAPI_INF("Exiting ...");

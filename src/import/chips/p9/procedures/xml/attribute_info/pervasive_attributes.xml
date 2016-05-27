@@ -695,4 +695,12 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>ATTR_OBUS_RATIO_VALUE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Holds Obus ratio value</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+</attribute>
+
 </attributes>

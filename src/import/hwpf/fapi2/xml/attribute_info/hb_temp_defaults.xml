@@ -199,6 +199,9 @@
     <attribute>
         <id>ATTR_VITL_CLK_SETUP</id>
     </attribute>
+    <attribute>
+        <id>ATTR_OBUS_RATIO_VALUE</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

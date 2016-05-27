@@ -40,6 +40,15 @@
 fapi2::ReturnCode p9_sbe_common_align_chiplets(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets);
 
+fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target,
+    const fapi2::buffer<uint8_t> i_clock_cmd,
+    const fapi2::buffer<uint16_t> i_regions,
+    const fapi2::buffer<uint8_t> i_clock_types);
+
+fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
+
 fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
         i_regions,
         const fapi2::buffer<uint64_t> i_clock_status,
@@ -57,6 +66,17 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
         const bool i_startmaster,
         const fapi2::buffer<uint64_t> i_regions,
         const fapi2::buffer<uint8_t> i_clock_types);
+
+fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+    const fapi2::buffer<uint32_t> i_attr_pg);
+
+fapi2::ReturnCode p9_sbe_common_flushmode(const
+        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
+
+fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
+        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip,
+        fapi2::buffer<uint64_t>& o_pg_vector);
 
 fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets);

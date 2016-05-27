@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -21,29 +21,5 @@
 <!-- Halt codes for p9_sbe_nest_startclocks -->
 
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_READ_ALL_CHECKSTOP_ERR</rc>
-    <description>Read and or all Checkstop error</description>
-    <ffdc>READ_ALL_CHECKSTOP</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_NEST_SL_ERR</rc>
-    <description>sl_thold status not matching the expected value in clock start stop sequence</description>
-    <ffdc>READ_CLK_SL</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_NEST_NSL_ERR</rc>
-    <description>nsl_thold status not matching the expected value in clock start stop sequence</description>
-    <ffdc>READ_CLK_NSL</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_NEST_ARY_ERR</rc>
-    <description>ary_thold status not matching the expected value in clock start stop sequence</description>
-    <ffdc>READ_CLK_ARY</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+  
 </hwpErrors>
