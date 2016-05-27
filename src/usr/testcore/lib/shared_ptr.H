@@ -74,12 +74,16 @@ class STLSharedPtrTest : public CxxTest::TestSuite
                 TS_FAIL("p3 is not unique.");
             }
 
-            if (!(p1 == p2))
+            if (p1 == p2)
             {
-                TS_FAIL("p1 and p2 should be equal");
+                TS_FAIL("p1 and p2 should not be equal pointers");
             }
 
             shared_ptr<T1> p4 = static_pointer_cast<T1>(p3);
+            if (p3 != p4)
+            {
+                TS_FAIL("p3 and p4 should be equal pointers");
+            }
             if (p3.use_count() != 2)
             {
                 TS_FAIL("p3 is not shared now.");
