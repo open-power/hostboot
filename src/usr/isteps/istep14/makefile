@@ -39,7 +39,6 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/xml/error_info/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
 
-OBJS += call_host_startprd_dram.o
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
 OBJS += call_proc_pcie_config.o

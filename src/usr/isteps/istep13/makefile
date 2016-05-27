@@ -45,7 +45,6 @@ OBJS += call_host_disable_memvolt.o
 OBJS += call_mem_pll_reset.o
 OBJS += call_mem_pll_initf.o
 OBJS += call_mem_pll_setup.o
-OBJS += call_proc_mcs_skewadjust.o
 OBJS += call_mem_startclocks.o
 OBJS += call_host_enable_memvolt.o
 OBJS += call_mss_scominit.o
@@ -63,7 +62,6 @@ OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o,hbVddrMsg.o)
 include ${ROOTPATH}/procedure.rules.mk
 
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_initf.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_mem_skewadjust.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mca_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk

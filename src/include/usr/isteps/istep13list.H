@@ -31,7 +31,7 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13
- *  IPL FLow Doc        v0.93 (04/04/16)
+ *  IPL FLow Doc        v0.95
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -92,16 +92,6 @@ void*    call_mem_pll_initf( void    *io_pArgs );
  *
  */
 void*    call_mem_pll_setup( void    *io_pArgs );
-
-/**
- *  @brief   proc_mcs_skewadjust
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_proc_mcs_skewadjust( void    *io_pArgs );
 
 
 /**
@@ -221,8 +211,8 @@ const   TaskInfo    g_istep13[]  =   {
         },
         {
                 ISTEPNAME(13,05,"proc_mcs_skewadjust"),
-                ISTEP_13::call_proc_mcs_skewadjust,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(13,06,"mem_startclocks"),

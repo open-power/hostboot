@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
  * @file    istep08list.H
  *
  *  IStep 08        Nest Chiplets
- *  IPL FLow Doc    v0.67 (11/02/15)
+ *  IPL FLow Doc    v0.95
  *
  *    08.01    host_slave_sbe_config
  *           : Configure host slave sbe
@@ -39,29 +39,37 @@
  *           : Start cbs
  *    08.04    proc_check_slave_sbe_seeprom_complete
  *           : Check Slave SBE Complete
- *    08.05    proc_cen_ref_clk_enable
+ *    08.05    host_attnlisten_proc
+ *           : Start attention poll for all P9(s)
+ *    08.06    proc_cen_ref_clk_enable
  *           : Setup centaur ref clocks
- *    08.06    proc_attr_update
+ *    08.07    host_set_voltages
+ *           : Set correct chip voltages
+ *    08.08    host_p9_fbc_eff_config
+ *           : Determine powerbus config
+ *    08.09    host_p9_eff_config_links
+ *           : Powerbus link config
+ *    08.10    proc_attr_update
  *           : Proc ATTR Update
- *    08.07    proc_enable_osclite
+ *    08.11    proc_enable_osclite
  *           : Enable Osclite
- *    08.08    proc_chiplet_scominit
+ *    08.12    proc_chiplet_scominit
  *           : Scom inits to all chiplets (sans Quad)
- *    08.09    proc_xbus_scominit
+ *    08.13    proc_xbus_scominit
  *           : Apply scom inits to Xbus
- *    08.10    proc_abus_scominit
+ *    08.14    proc_abus_scominit
  *           : Apply scom inits to Abus
- *    08.11    proc_obus_scominit
+ *    08.15    proc_obus_scominit
  *           : Apply scom inits to Obus
- *    08.12    proc_npu_scominit
+ *    08.16    proc_npu_scominit
  *           : Apply scom inits to Npu
- *    08.13    proc_pcie_scominit
+ *    08.17    proc_pcie_scominit
  *           : Apply scom inits to PCIechiplets
- *    08.14    proc_scomoverride_chiplets
+ *    08.18    proc_scomoverride_chiplets
  *           : Apply sequenced scom inits
- *    08.15    proc_chiplet_enable_ridi
+ *    08.19    proc_chiplet_enable_ridi
  *           : Enable RI/DI chip wide
- *    08.16    host_rng_bist
+ *    08.20    host_rng_bist
  *           : Trigger Built In Self Test for RNG
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -277,62 +285,82 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(08,05,"proc_cen_ref_clk_enable"),
+                ISTEPNAME(08,05,"host_attnlisten_proc"),    // @TODO-RTC:154658
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(08,06,"proc_cen_ref_clk_enable"),
                 ISTEP_08::call_proc_cen_ref_clk_enable,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,06,"proc_attr_update"),
+                ISTEPNAME(08,07,"host_set_voltages"),       // @TODO-RTC:144620
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(08,08,"host_p9_fbc_eff_config"),  // @TODO-RTC:154376
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(08,09,"host_p9_eff_config_links"),// @TODO-RTC:154376
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(08,10,"proc_attr_update"),
                 ISTEP_08::call_proc_attr_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,07,"proc_enable_osclite"),
+                ISTEPNAME(08,11,"proc_enable_osclite"),
                 ISTEP_08::call_proc_enable_osclite,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,08,"proc_chiplet_scominit"),
+                ISTEPNAME(08,12,"proc_chiplet_scominit"),
                 ISTEP_08::call_proc_chiplet_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,09,"proc_xbus_scominit"),
+                ISTEPNAME(08,13,"proc_xbus_scominit"),
                 ISTEP_08::call_proc_xbus_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,10,"proc_abus_scominit"),
+                ISTEPNAME(08,14,"proc_abus_scominit"),
                 ISTEP_08::call_proc_abus_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,11,"proc_obus_scominit"),
+                ISTEPNAME(08,15,"proc_obus_scominit"),
                 ISTEP_08::call_proc_obus_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,12,"proc_npu_scominit"),
+                ISTEPNAME(08,16,"proc_npu_scominit"),
                 ISTEP_08::call_proc_npu_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,13,"proc_pcie_scominit"),
+                ISTEPNAME(08,17,"proc_pcie_scominit"),
                 ISTEP_08::call_proc_pcie_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,14,"proc_scomoverride_chiplets"),
+                ISTEPNAME(08,18,"proc_scomoverride_chiplets"),
                 ISTEP_08::call_proc_scomoverride_chiplets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,15,"proc_chiplet_enable_ridi"),
+                ISTEPNAME(08,19,"proc_chiplet_enable_ridi"),
                 ISTEP_08::call_proc_chiplet_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,16,"host_rng_bist"),
+                ISTEPNAME(08,20,"host_rng_bist"),
                 ISTEP_08::call_host_rng_bist,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
