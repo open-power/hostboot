@@ -26,36 +26,6 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>PSI Bridge BAR enable
-      creator: platform
-      consumer: p9_setup_bars
-      firmware notes: none
-    </description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>PSI Bridge BAR base address value
-      creator: platform
-      consumer: p9_setup_bars
-      firmware notes:
-        64-bit address representing BAR RA
-        NOTE: BAR register covers RA 8:43
-        NOTE: Implied size of 1MB
-    </description>
-    <valueType>uint64</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_PROC_FSP_BAR_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>FSP BAR enable
@@ -70,14 +40,15 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_FSP_BAR_BASE_ADDR</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>FSP BAR base address value
+    <id>ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>FSP BAR
       creator: platform
       consumer: p9_setup_bars
       firmware notes:
-        64-bit address representing BAR RA
-        NOTE: BAR register covers RA 8:43
+        Defines range mapped for FSP MMIO
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:43
     </description>
     <valueType>uint64</valueType>
     <platInit/>
@@ -86,7 +57,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_FSP_BAR_SIZE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>FSP BAR size value
       creator: platform
       consumer: p9_setup_bars
@@ -94,19 +65,19 @@
     </description>
     <valueType>uint64</valueType>
     <enum>
-        4_GB = 0x0000000100000000,
-        2_GB = 0x0000000080000000,
-        1_GB = 0x0000000040000000,
-      512_MB = 0x0000000020000000,
-      256_MB = 0x0000000010000000,
-      128_MB = 0x0000000008000000,
-       64_MB = 0x0000000004000000,
-       32_MB = 0x0000000002000000,
-       16_MB = 0x0000000001000000,
-        8_MB = 0x0000000000800000,
-        4_MB = 0x0000000000400000,
-        2_MB = 0x0000000000200000,
-        1_MB = 0x0000000000100000
+        4_GB = 0xFFFFFC00FFFFFFFF,
+        2_GB = 0xFFFFFC007FFFFFFF,
+        1_GB = 0xFFFFFC003FFFFFFF,
+      512_MB = 0xFFFFFC001FFFFFFF,
+      256_MB = 0xFFFFFC000FFFFFFF,
+      128_MB = 0xFFFFFC0007FFFFFF,
+       64_MB = 0xFFFFFC0003FFFFFF,
+       32_MB = 0xFFFFFC0001FFFFFF,
+       16_MB = 0xFFFFFC0000FFFFFF,
+        8_MB = 0xFFFFFC00007FFFFF,
+        4_MB = 0xFFFFFC00003FFFFF,
+        2_MB = 0xFFFFFC00001FFFFF,
+        1_MB = 0xFFFFFC00000FFFFF
     </enum>
     <platInit/>
     <persistRuntime/>
@@ -114,7 +85,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_FSP_MMIO_MASK_SIZE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>FSP MMIO mask size value
       creator: platform
       consumer: p9_setup_bars
@@ -124,16 +95,227 @@
     </description>
     <valueType>uint64</valueType>
     <enum>
-        4_GB = 0x0000000100000000,
-        2_GB = 0x0000000080000000,
-        1_GB = 0x0000000040000000,
-      512_MB = 0x0000000020000000,
-      256_MB = 0x0000000010000000
+        4_GB = 0x00F0000000000000,
+        2_GB = 0x0070000000000000,
+        1_GB = 0x0030000000000000,
+      512_MB = 0x0010000000000000,
+      256_MB = 0x0000000000000000
     </enum>
     <platInit/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
-  <!-- TODO: add remaining nest MMIO BAR attributes required for IPL         -->
+  <attribute>
+    <id>ATTR_PROC_NPU_PHY0_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU PHY0 (stack0) BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU PHY0 (stack0) BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 2MB range (size implied) mapped to PHY0 registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:42
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_PHY1_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU PHY1 (stack1) BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU PHY1 (stack1) BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 2MB range (size implied) mapped to PHY1 registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:42
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NPU MMIO (stack2) BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 16MB range mapped to all NPU registers
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:39
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+   <attribute>
+    <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NPU MMIO (stack2) BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Bridge BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* --> 
+  <attribute>
+    <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>PSI Bridge BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 1MB range (size implied) mapped for PSI host-bridge
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:43
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>NX RNG BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************** -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>NX RNG BAR
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Defines 8KB range (size implied) mapped for NX RNG function
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 22:51
+        (excludes system/memory select/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_FAILED_INT_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Enable optional post of interrupt when both NX RNG noise
+                sources have failed
+      creator: platform
+      consumer: p9_rng_init_phase2
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_FAILED_INT_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Address used to post interrupt when both NX RNG noise
+                 sources have failed
+      creator: platform
+      consumer: p9_rng_init_phase2
+      firmware notes:
+        64-bit address representing RA
+        NOTE: register covers RA 8:51
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_BIST_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Enable NX RNG BIST
+      creator: platform
+      consumer: p9_rng_init_phase1
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_NX_RNG_BIST_THRESHOLD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>BIST threshold attribute
+      creator: platform
+      consumer: p9_rng_init_phase1
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
   <!-- ********************************************************************* -->
 </attributes>
