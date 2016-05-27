@@ -23,4 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_setup_bars
+OBJS+=p9_fbc_utils.o
+OBJS+=p9_fbc_smp_utils.o
 $(call BUILD_PROCEDURE)
