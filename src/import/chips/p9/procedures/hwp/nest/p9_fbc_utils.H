@@ -88,17 +88,21 @@ fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 ///
-/// @brief Return base address origin (non-mirrored/mirrored) for this chip
+/// @brief Return base address origin (non-mirrored/mirrored/MMIO) for this chip
 ///
-/// @param[in]  i_target           Reference to processor chip target
-/// @param[out] o_base_address_nm  Non-mirrored base address for this chip
-/// @param[out] o_base_address_m   Mirrored base address for this chip
+/// @param[in] i_target Reference to processor chip target
+/// @param[out] o_base_address_nm0 Non-mirrored base address (range 0) for this chip
+/// @param[out] o_base_address_nm1 Non-mirrored base address (range 1) for this chip
+/// @param[out] o_base_address_m Mirrored base address for this chip
+/// @param[out] o_base_address_mmio MMIO base address for this chip
 /// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    uint64_t& o_base_address_nm,
-    uint64_t& o_base_address_m);
+    uint64_t& o_base_address_nm0,
+    uint64_t& o_base_address_nm1,
+    uint64_t& o_base_address_m,
+    uint64_t& o_base_address_mmio);
 
 
 #endif // _P9_FBC_UTILS_H_
