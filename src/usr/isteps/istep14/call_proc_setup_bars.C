@@ -56,8 +56,6 @@ void* call_proc_setup_bars (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars entry" );
 
-
-    // @@@@@    CUSTOM BLOCK:   @@@@@
     // Get all Centaur targets
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TARGETING::TYPE_PROC );
@@ -108,32 +106,41 @@ void* call_proc_setup_bars (void *io_pArgs)
         //----------------------------------------------------------------------
         //  run proc_setup_bars on all CPUs
         //----------------------------------------------------------------------
-        std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_proc_chips;
-
-        for(uint8_t i = 0; i < l_cpuTargetList.size(); i++)
+        for (auto l_procChip : l_cpuTargetList)
         {
-          l_proc_chips.push_back(l_cpuTargetList[i]);
-        }
-
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call p9_setup_bars");
+                       "call p9_setup_bars: Target HUID  %.8X",
+                       TARGETING::get_huid(l_procChip) );
 
-            //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP( l_errl, p9_setup_bars, l_proc_chips, BAR_SETUP_PHASE1 );
+            // Call the HWP with each fapi::Target
+            FAPI_INVOKE_HWP( l_errl, p9_setup_bars, l_procChip );
 
             if ( l_errl )
             {
+                // Capture the target data in the elog
+                ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "ERROR : p9_setup_bars" );
+
+                // break and return with error
+                break;
+
             }
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "SUCCESS : p9_setup_bars" );
             }
-    }   // end if !l_errl
+        }
 
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
+    }   // end if !l_errl
 
     if ( l_errl )
     {

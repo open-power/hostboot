@@ -52,16 +52,31 @@ OBJS += call_proc_exit_cache_contained.o
 OBJS += call_host_mpipl_service.o
 
 include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
-include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
-include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
+
+# TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
+# same *.o file in their *.mk files
+# ---- Workaround: Compile the HWP directly below
+OBJS += p9_htm_setup.o
+OBJS += p9_htm_start.o
+OBJS += p9_htm_reset.o
+OBJS += p9_htm_adu_ctrl.o
+OBJS += p9_adu_coherent_utils.o
+OBJS += p9_pcie_config.o
+OBJS += p9_setup_bars.o
+OBJS += p9_fbc_utils.o
+OBJS += p9_fbc_smp_utils.o
+
+#include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
+#include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
+#include ${PROCEDURE_PATH}/hwp/nest/p9_setup_bars.mk
+# ---- End workaround
+
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_memdiag.mk
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
 include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
 include ${ROOTPATH}/config.mk
-
 
 VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/

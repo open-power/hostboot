@@ -29,28 +29,12 @@
 /// Program nest unit BAR registers, driven by attributes representing system
 /// memory map (including MMIO).
 ///
-/// Platform Notes:
-///     This HWP has multiple IPL use cases. In all cases the HWP input
-///     is expected to contain an entry for each chip in the SMP at the
-///     time/scope of the invocation:
-///
-///         1. HB (drawer scope):
-///            All local chip/local node resources should be initialized
-///            at this time (HWP boolean flag controlling this function
-///            set to true).
-///
-///         2. FSP (drawer integration):
-///            All local chip/local node resources should already have
-///            been initialized in each drawer, so the HWP boolean flag
-///            controlling this function should be set to false.
-///
-///
 
 // *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
-// *HWP Consumed by: HB,FSP
+// *HWP Level: 2
+// *HWP Consumed by: HB
 
 #ifndef _P9_SETUP_BARS_H_
 #define _P9_SETUP_BARS_H_
@@ -66,22 +50,9 @@
 // Structure definitions
 //-----------------------------------------------------------------------------------
 
-// HWP argument, define supported execution modes
-enum p9_setup_bars_operation
-{
-    // call from HB (init resources inside drawer boundary)
-    BAR_SETUP_PHASE1 = 1,
-    // call from FSP (init resources which cross drawer boundaries)
-    BAR_SETUP_PHASE2 = 2
-};
-
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_setup_bars_FP_t) (std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>&,
-        const p9_setup_bars_operation);
+typedef fapi2::ReturnCode (*p9_setup_bars_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
 
 extern "C" {
 
@@ -89,14 +60,15 @@ extern "C" {
 // Function prototype
 //-----------------------------------------------------------------------------------
 
+///
 /// @brief Program nest unit BAR registers, driven by attributes representing
-//  system memory map (including MMIO)
-/// @param[in] i_proc_chips => Vector of processor chip targets
-/// @param[in] i_op => Enumerated type representing BAR setup phase (HB or FSP)
-/// @return FAPI_RC_SUCCESS if the setup completes successfully,
+///        system memory map (including MMIO)
+///
+/// @param[in] i_target => Processor chip target
+///
+/// @return FAPI_RC_SUCCESS if the setup completes successfully, else error
 //
-    fapi2::ReturnCode p9_setup_bars(std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_proc_chips,
-                                    const p9_setup_bars_operation i_op);
+    fapi2::ReturnCode p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } //extern"C"
 

@@ -814,6 +814,22 @@
     <attribute><id>MSS_VPP_PROGRAM</id></attribute>
     <attribute><id>MSS_VDDR_PROGRAM</id></attribute>
 
+<!-- p9_setup_bars - Begin -->
+    <attribute><id>PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_XSCOM_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_LPC_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_BAR_SIZE</id></attribute>
+    <attribute><id>PROC_FSP_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_FSP_MMIO_MASK_SIZE</id></attribute>
+<!-- p9_setup_bars - End -->
+
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -881,12 +897,10 @@
     </attribute>
 
     <!-- From PHYP Memory Map -->
-    <attribute><id>NPU_MMIO_BAR_ENABLE</id></attribute>
     <attribute><id>NPU_MMIO_BAR_BASE_ADDR</id></attribute>
     <attribute><id>NPU_MMIO_BAR_SIZE</id></attribute>
     <attribute><id>FSP_BASE_ADDR</id></attribute>
     <attribute><id>FSP_BAR_SIZE</id></attribute>
-    <attribute><id>FSP_MMIO_MASK_SIZE</id></attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id></attribute>
     <attribute><id>INTP_BASE_ADDR</id></attribute>
     <attribute><id>PHB_BASE_ADDRS</id></attribute>
@@ -1121,6 +1135,21 @@
 
     <attribute><id>LPC_BASE_ADDR</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
+
+<!-- p9_setup_bars - Begin -->
+    <attribute><id>PROC_NPU_PHY0_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_NPU_PHY1_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_NPU_MMIO_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_NX_RNG_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_FSP_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_PSI_BRIDGE_BAR_ENABLE</id></attribute>
+<!-- p9_setup_bars - End -->
+
+    <attribute><id>PROC_NX_RNG_FAILED_INT_ENABLE</id></attribute>
+    <attribute><id>PROC_NX_RNG_FAILED_INT_ADDR</id></attribute>
+    <attribute><id>PROC_NX_RNG_BIST_ENABLE</id></attribute>
+    <attribute><id>PROC_NX_RNG_BIST_THRESHOLD</id></attribute>
+
 
 </targetType>
 

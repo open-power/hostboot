@@ -30,22 +30,580 @@
 // *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB,FSP
 
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
 #include <p9_setup_bars.H>
+#include <p9_setup_bars_defs.H>
+#include <p9_fbc_utils.H>
+#include <p9_fbc_smp_utils.H>
+#include <p9_mss_eff_grouping.H>
+
+
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+const std::map<uint64_t, uint64_t> p9_setup_bars_mcd_grp_size::xlate_map =
+    p9_setup_bars_mcd_grp_size::create_map();
 
 
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
-fapi2::ReturnCode p9_setup_bars(std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& i_proc_chips,
-                                const p9_setup_bars_operation i_op)
+
+
+/// @brief Query chip level attributes describing base address of each region
+///        of address space (non-mirrored, mirrored, MMIO) on this chip
+///        system memory map (including MMIO)
+///
+/// @param[in]  i_target Processor chip target
+/// @param[out] io_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_build_chip_info(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              p9_setup_bars_chip_info& io_chip_info)
+{
+    FAPI_DBG("Start");
+
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             io_chip_info.base_address_nm[0],
+             io_chip_info.base_address_nm[1],
+             io_chip_info.base_address_m,
+             io_chip_info.base_address_mmio),
+             "Error from p9_fbc_utils_get_chip_base_address");
+
+    FAPI_TRY(p9_fbc_utils_get_group_id_attr(i_target,
+                                            io_chip_info.fbc_group_id),
+             "Error from p9_fbc_utils_get_group_id_attr");
+
+    FAPI_TRY(p9_fbc_utils_get_chip_id_attr(i_target,
+                                           io_chip_info.fbc_chip_id),
+             "Error from p9_fbc_utils_get_chip_id_attr");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Program MCD units 0/1 to track region of real address space
+///        in grouped configuration.  SCOM addresses provided should represent
+///        the two instances of the same configuration register in MCD0/1.
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_addr_range Structure defining region of address space to cover
+/// @param[in] i_mcd0_reg_addr SCOM address of MCD0 cfg register (TOP/STR/BOT/CHA)
+/// @param[in] i_mcd1_reg_addr SCOM address of MCD1 cfg register (TOP/STR/BOT/CHA)
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_mcd_track_range(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              const p9_setup_bars_addr_range& i_addr_range,
+                              const uint64_t i_mcd0_reg_addr,
+                              const uint64_t i_mcd1_reg_addr)
+{
+    FAPI_DBG("Start");
+
+    if (i_addr_range.enabled)
+    {
+        fapi2::buffer<uint64_t> l_mcd_reg;
+        std::map<uint64_t, uint64_t>::const_iterator l_iter = p9_setup_bars_mcd_grp_size::xlate_map.find(i_addr_range.size);
+        FAPI_ASSERT(l_iter != p9_setup_bars_mcd_grp_size::xlate_map.end(),
+                    fapi2::P9_SETUP_BARS_INVALID_MCD_GROUP_SIZE_ERR().
+                    set_TARGET(i_target).
+                    set_RANGE_SIZE(i_addr_range.size),
+                    "Invalid MCD group size!");
+
+        // form content for MCD0 & write
+        l_mcd_reg.setBit<PU_BANK0_MCD_STR_VALID>()
+        .setBit<PU_BANK0_MCD_STR_CPG>()
+        .insertFromRight<PU_BANK0_MCD_STR_GRP_SIZE, PU_BANK0_MCD_STR_GRP_SIZE_LEN>(l_iter->second)
+        .insertFromRight<PU_BANK0_MCD_STR_GRP_BASE, PU_BANK0_MCD_STR_GRP_BASE_LEN>(i_addr_range.base_addr >>
+                P9_SETUP_BARS_MCD_BASE_ADDR_SHIFT);
+        FAPI_TRY(fapi2::putScom(i_target, i_mcd0_reg_addr, l_mcd_reg),
+                 "Error from putScom (0x%08X)", i_mcd0_reg_addr);
+
+        // change group member ID for MCD1 & write
+        l_mcd_reg.setBit<PU_BANK0_MCD_STR_GRP_MBR_ID>();
+        FAPI_TRY(fapi2::putScom(i_target, i_mcd1_reg_addr, l_mcd_reg),
+                 "Error from putScom (0x%08X)", i_mcd1_reg_addr);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Program MCD units 0/1 to track non-mirrored and mirrored regions
+///        of real address space on this chip
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                  const p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+    p9_setup_bars_addr_range l_nm_range[2];
+    p9_setup_bars_addr_range l_m_range;
+    bool l_enable_mcd = false;
+    fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING_Type l_mirror_ctl;
+
+    // determine range of NM memory which MCD needs to cover on this chip
+    {
+        fapi2::ATTR_PROC_MEM_BASES_ACK_Type l_nm_bases;
+        fapi2::ATTR_PROC_MEM_SIZES_ACK_Type l_nm_sizes;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEM_BASES_ACK, i_target, l_nm_bases),
+                 "Error fram FAPI_ATTR_GET (ATTR_PROC_MEM_BASES_ACK)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEM_SIZES_ACK, i_target, l_nm_sizes),
+                 "Error fram FAPI_ATTR_GET (ATTR_PROC_MEM_SIZES_ACK)");
+
+        // add each valid NM range to its associated NM chip range
+        for (uint8_t ll = 0; ll < NUM_NON_MIRROR_REGIONS; ll++)
+        {
+            p9_setup_bars_addr_range l_range(l_nm_bases[ll],
+                                             l_nm_sizes[ll]);
+
+            if (l_range.enabled)
+            {
+                l_enable_mcd = true;
+
+                // determine which NM range (0/1) this range is associated with
+                if (l_range.base_addr < i_chip_info.base_address_nm[1])
+                {
+                    l_nm_range[0].merge(l_range);
+                }
+                else
+                {
+                    l_nm_range[1].merge(l_range);
+                }
+            }
+        }
+
+        // process each NM chip range
+        for (uint8_t l_nm_range_idx = 0; l_nm_range_idx < 2; l_nm_range_idx++)
+        {
+            if (l_nm_range[l_nm_range_idx].enabled)
+            {
+                // ensure power of two alignment
+                if (!l_nm_range[l_nm_range_idx].is_power_of_2())
+                {
+                    l_nm_range[l_nm_range_idx].round_next_power_of_2();
+                }
+
+                // verify that base lines up with chip info struct
+                FAPI_ASSERT(l_nm_range[l_nm_range_idx].base_addr == i_chip_info.base_address_nm[l_nm_range_idx],
+                            fapi2::P9_SETUP_BARS_INVALID_MCD_NM_RANGE_ERR().
+                            set_TARGET(i_target).
+                            set_NM_RANGE_IDX(l_nm_range_idx).
+                            set_NM_RANGE_BASE_ADDR(l_nm_range[l_nm_range_idx].base_addr).
+                            set_NM_RANGE_SIZE(l_nm_range[l_nm_range_idx].size).
+                            set_NM_CHIP_BASE(i_chip_info.base_address_nm[l_nm_range_idx]),
+                            "Invalid configuration for MCD NM range!");
+
+                // configure MCD to track this range
+                //   range 0 = MCD_BOT, range 1 = MCD_STR
+                FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
+                                                       l_nm_range[l_nm_range_idx],
+                                                       ((l_nm_range_idx == 0) ? (PU_BANK0_MCD_BOT) : (PU_BANK0_MCD_STR)),
+                                                       ((l_nm_range_idx == 0) ? (PU_MCD1_BANK0_MCD_BOT) : (PU_MCD1_BANK0_MCD_STR))),
+                         "Error from p9_setup_bars_mcd_track_range (NM%d)", l_nm_range_idx);
+            }
+        }
+    }
+
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, i_target_sys, l_mirror_ctl),
+             "Error from FAPI_ATTR_GET (ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING)");
+
+    if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING_FALSE)
+        // determine range of M memory which MCD needs to cover on this chip
+    {
+
+        fapi2::ATTR_PROC_MIRROR_BASES_ACK_Type l_m_bases;
+        fapi2::ATTR_PROC_MIRROR_SIZES_ACK_Type l_m_sizes;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_BASES_ACK, i_target, l_m_bases),
+                 "Error fram FAPI_ATTR_GET (ATTR_PROC_MIRROR_BASES_ACK)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_SIZES_ACK, i_target, l_m_sizes),
+                 "Error fram FAPI_ATTR_GET (ATTR_PROC_MIRROR_SIZES_ACK)");
+
+        // add each valid M range to the M chip range
+        for (uint8_t ll = 0; ll < NUM_MIRROR_REGIONS; ll++)
+        {
+            p9_setup_bars_addr_range l_range(l_m_bases[ll],
+                                             l_m_sizes[ll]);
+
+            if (l_range.enabled)
+            {
+                l_enable_mcd = true;
+                l_m_range.merge(l_range);
+            }
+        }
+
+        // process M chip range
+        if (l_m_range.enabled)
+        {
+            // ensure power of two alignment
+            if (!l_m_range.is_power_of_2())
+            {
+                l_m_range.round_next_power_of_2();
+            }
+
+            // verify that base lines up with chip info struct
+            FAPI_ASSERT(l_m_range.base_addr == i_chip_info.base_address_m,
+                        fapi2::P9_SETUP_BARS_INVALID_MCD_M_RANGE_ERR().
+                        set_TARGET(i_target).
+                        set_M_RANGE_BASE_ADDR(l_m_range.base_addr).
+                        set_M_RANGE_SIZE(l_m_range.size).
+                        set_M_CHIP_BASE(i_chip_info.base_address_m),
+                        "Invalid configuration for MCD M range!");
+
+            // configure MCD to track this range (MCD_TOP)
+            FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
+                                                   l_m_range,
+                                                   PU_BANK0_MCD_TOP,
+                                                   PU_MCD1_BANK0_MCD_TOP),
+                     "Error from p9_setup_bars_mcd_track_range (M");
+        }
+    }
+
+    if (l_enable_mcd)
+    {
+        fapi2::buffer<uint64_t> l_fir_data = 0;
+        fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
+        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_ENABLE>();
+
+        // configure FIR
+        // clear FIR
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCC_FIR_REG, l_fir_data),
+                 "Error from putScom (PU_MCC_FIR_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCC_FIR_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCC_FIR_REG)");
+        // set action
+        l_fir_data = MCD_FIR_ACTION0;
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION0_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION0_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION0_REG)");
+        l_fir_data = MCD_FIR_ACTION1;
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION1_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION1_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION1_REG)");
+        // set mask
+        l_fir_data = MCD_FIR_MASK;
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_MASK_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_MASK_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_MASK_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_MASK_REG)");
+
+        // enable MCD probes
+        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_BANK0_MCD_REC, l_mcd_rec_data, l_mcd_rec_data),
+                 "Error from putScomUnderMask (PU_BANK0_MCD_REC)");
+        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_MCD1_BANK0_MCD_REC, l_mcd_rec_data, l_mcd_rec_data),
+                 "Error from putScomUnderMask (PU_MCD1_BANK0_MCD_REC)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure FSP MMIO access
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_fsp(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                  const p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_FSP_BAR_ENABLE_Type l_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FSP_BAR_ENABLE, i_target, l_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FSP_BAR_ENABLE)");
+
+    if (l_bar_enable == fapi2::ENUM_ATTR_PROC_FSP_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::ATTR_PROC_FSP_BAR_SIZE_Type l_bar_offset_mask;
+        fapi2::ATTR_PROC_FSP_MMIO_MASK_SIZE_Type l_mmio_mask_size;
+        fapi2::buffer<uint64_t> l_fsp_bar = i_chip_info.base_address_mmio;
+        fapi2::buffer<uint64_t> l_fsp_mmr;
+        fapi2::buffer<uint64_t> l_fsp_mmr_mask;
+        fapi2::buffer<uint64_t> l_status_ctl;
+        fapi2::buffer<uint64_t> l_status_ctl_mask;
+
+        // retrieve BAR offset/size
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FSP_BAR_SIZE, i_target_sys, l_bar_offset_mask),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FSP_BAR_SIZE)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FSP_MMIO_MASK_SIZE, i_target_sys, l_mmio_mask_size),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FSP_MMIO_MASK_SIZE)");
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset & l_bar_offset_mask) == 0,
+                    fapi2::P9_SETUP_BARS_FSP_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(l_bar_offset_mask)
+                    .set_BAR_OVERLAP(l_bar_offset & l_bar_offset_mask),
+                    "FSP BAR attributes are not aligned to HW implementation");
+
+        // form FSP BAR SCOM register format
+        l_fsp_bar += l_bar_offset;
+
+        // form FSP BAR mask SCOM register format
+        l_fsp_mmr = l_bar_offset_mask;
+        l_fsp_mmr.invert();
+        l_fsp_mmr_mask.setBit<PU_PSI_FSP_MMR_REG_MMR, PU_PSI_FSP_MMR_REG_MMR_LEN>();
+
+        // form PSI Host Bridge Control/Status SCOM register format
+        l_status_ctl = l_mmio_mask_size;
+        l_status_ctl.setBit<PU_PSIHB_STATUS_CTL_REG_FSP_MMIO_ENABLE>();
+
+        l_status_ctl_mask.setBit<PU_PSIHB_STATUS_CTL_REG_FSP_MMIO_MASK, PU_PSIHB_STATUS_CTL_REG_FSP_MMIO_MASK_LEN>()
+        .setBit<PU_PSIHB_STATUS_CTL_REG_FSP_MMIO_ENABLE>();
+
+        // write to registers
+        FAPI_TRY(fapi2::putScom(i_target, PU_PSI_BRIDGE_FSP_BAR_REG, l_fsp_bar),
+                 "Error from putScom (PU_PSI_BRIDGE_FSP_BAR_REG)");
+
+        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_PSI_FSP_MMR_REG, l_fsp_mmr, l_fsp_mmr_mask),
+                 "Error from putScomUnderMak (PU_PSI_FSP_MMR_REG)");
+
+        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_PSIHB_STATUS_CTL_REG_SCOM, l_status_ctl, l_status_ctl_mask),
+                 "Error from putScomUnderMak (PU_PSIHB_STATUS_CTL_REG_SCOM)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure PSI MMIO access
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_psi(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                  const p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_Type l_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PSI_BRIDGE_BAR_ENABLE, i_target, l_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_PSI_BRIDGE_BAR_ENABLE)");
+
+    if (l_bar_enable == fapi2::ENUM_ATTR_PROC_PSI_BRIDGE_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::buffer<uint64_t> l_bar = i_chip_info.base_address_mmio;
+
+        // retrieve BAR offset
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET)");
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset & P9_SETUP_BARS_OFFSET_MASK_1_MB) == 0,
+                    fapi2::P9_SETUP_BARS_PSI_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_1_MB)
+                    .set_BAR_OVERLAP(l_bar_offset & P9_SETUP_BARS_OFFSET_MASK_1_MB),
+                    "PSI BAR attributes are not aligned to HW implementation");
+
+        // form PSI BAR SCOM register format
+        l_bar += l_bar_offset;
+        l_bar.setBit<PU_PSI_BRIDGE_BAR_REG_EN>();
+
+        // write to register
+        FAPI_TRY(fapi2::putScom(i_target, PU_PSI_BRIDGE_BAR_REG, l_bar),
+                 "Error from putScom (PU_PSI_BRIDGE_BAR_REG)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Configure NPU MMIO access
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                  const p9_setup_bars_chip_info& i_chip_info)
+
+{
+    FAPI_DBG("Start");
+
+    // PHY0
+    {
+        fapi2::ATTR_PROC_NPU_PHY0_BAR_ENABLE_Type l_phy0_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_PHY0_BAR_ENABLE, i_target, l_phy0_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_PHY0_BAR_ENABLE)");
+
+        if (l_phy0_enable == fapi2::ENUM_ATTR_PROC_NPU_PHY0_BAR_ENABLE_ENABLE)
+        {
+            fapi2::buffer<uint64_t> l_phy0_bar = i_chip_info.base_address_mmio;
+            fapi2::ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET_Type l_phy0_offset;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET, i_target_sys, l_phy0_offset),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET)");
+
+            FAPI_ASSERT((l_phy0_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB) == 0,
+                        fapi2::P9_SETUP_BARS_NPU_PHY0_BAR_ATTR_ERR()
+                        .set_TARGET(i_target)
+                        .set_BAR_OFFSET(l_phy0_offset)
+                        .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_2_MB)
+                        .set_BAR_OVERLAP(l_phy0_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB),
+                        "NPU PHY0 BAR offset attribute is not aligned to HW implementation");
+
+            l_phy0_bar &= NPU_BAR_BASE_ADDR_MASK;
+            l_phy0_bar += l_phy0_offset;
+            l_phy0_bar = l_phy0_bar << NPU_BAR_ADDR_SHIFT;
+            l_phy0_bar.setBit<PU_NPU0_SM0_PHY_BAR_CONFIG_ENABLE>();
+
+            for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
+            {
+                FAPI_TRY(fapi2::putScom(i_target, NPU_PHY0_BAR_REGS[ll], l_phy0_bar),
+                         "Error from putScom (0x08X)", NPU_PHY0_BAR_REGS[ll]);
+            }
+        }
+    }
+
+    // PHY1
+    {
+        fapi2::ATTR_PROC_NPU_PHY1_BAR_ENABLE_Type l_phy1_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_PHY1_BAR_ENABLE, i_target, l_phy1_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_PHY1_BAR_ENABLE)");
+
+        if (l_phy1_enable == fapi2::ENUM_ATTR_PROC_NPU_PHY1_BAR_ENABLE_ENABLE)
+        {
+            fapi2::buffer<uint64_t> l_phy1_bar = i_chip_info.base_address_mmio;
+            fapi2::ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET_Type l_phy1_offset;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET, i_target_sys, l_phy1_offset),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET)");
+
+            FAPI_ASSERT((l_phy1_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB) == 0,
+                        fapi2::P9_SETUP_BARS_NPU_PHY1_BAR_ATTR_ERR()
+                        .set_TARGET(i_target)
+                        .set_BAR_OFFSET(l_phy1_offset)
+                        .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_2_MB)
+                        .set_BAR_OVERLAP(l_phy1_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB),
+                        "NPU PHY1 BAR offset attribute is not aligned to HW implementation");
+
+            l_phy1_bar &= NPU_BAR_BASE_ADDR_MASK;
+            l_phy1_bar += l_phy1_offset;
+            l_phy1_bar = l_phy1_bar << NPU_BAR_ADDR_SHIFT;
+            l_phy1_bar.setBit<PU_NPU0_SM0_PHY_BAR_CONFIG_ENABLE>();
+
+            for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
+            {
+                FAPI_TRY(fapi2::putScom(i_target, NPU_PHY1_BAR_REGS[ll], l_phy1_bar),
+                         "Error from putScom (0x08X)", NPU_PHY1_BAR_REGS[ll]);
+            }
+        }
+    }
+
+    // MMIO
+    {
+        fapi2::ATTR_PROC_NPU_MMIO_BAR_ENABLE_Type l_mmio_enable;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_MMIO_BAR_ENABLE, i_target, l_mmio_enable),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_MMIO_BAR_ENABLE)");
+
+        if (l_mmio_enable == fapi2::ENUM_ATTR_PROC_NPU_MMIO_BAR_ENABLE_ENABLE)
+        {
+            fapi2::buffer<uint64_t> l_mmio_bar = i_chip_info.base_address_mmio;
+            fapi2::ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET_Type l_mmio_offset;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET, i_target_sys, l_mmio_offset),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET)");
+
+            FAPI_ASSERT((l_mmio_offset & P9_SETUP_BARS_OFFSET_MASK_16_MB) == 0,
+                        fapi2::P9_SETUP_BARS_NPU_MMIO_BAR_ATTR_ERR()
+                        .set_TARGET(i_target)
+                        .set_BAR_OFFSET(l_mmio_offset)
+                        .set_BAR_OFFSET_MASK(P9_SETUP_BARS_OFFSET_MASK_16_MB)
+                        .set_BAR_OVERLAP(l_mmio_offset & P9_SETUP_BARS_OFFSET_MASK_2_MB),
+                        "NPU MMIO BAR offset attribute is not aligned to HW implementation");
+
+            l_mmio_bar &= NPU_BAR_BASE_ADDR_MASK;
+            l_mmio_bar += l_mmio_offset;
+            l_mmio_bar = l_mmio_bar << NPU_BAR_ADDR_SHIFT;
+            l_mmio_bar.setBit<PU_NPU0_SM0_PHY_BAR_CONFIG_ENABLE>();
+
+            for (uint8_t ll = 0; ll < NPU_NUM_BAR_SHADOWS; ll++)
+            {
+                FAPI_TRY(fapi2::putScom(i_target, NPU_MMIO_BAR_REGS[ll], l_mmio_bar),
+                         "Error from putScom (0x08X)", NPU_MMIO_BAR_REGS[ll]);
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+// description in header
+fapi2::ReturnCode
+p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_INF("Start");
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    p9_setup_bars_chip_info l_chip_info;
+
+    // process chip information
+    FAPI_TRY(p9_setup_bars_build_chip_info(i_target,
+                                           l_chip_info),
+             "Error from p9_setup_bars_build_chip_info");
+
+    // setup unit BARS
+    // FSP
+    FAPI_TRY(p9_setup_bars_fsp(i_target, FAPI_SYSTEM, l_chip_info),
+             "Error from p9_setup_bars_fsp");
+    // PSI
+    FAPI_TRY(p9_setup_bars_psi(i_target, FAPI_SYSTEM, l_chip_info),
+             "Error from p9_setup_bars_psi");
+    // NPU
+    FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
+             "Error from p9_setup_bars_npu");
+
+    // MCD
+    FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
+             "Error from p9_setup_bars_mcd");
+
+fapi_try_exit:
     FAPI_INF("End");
     return fapi2::current_err;
 }
+

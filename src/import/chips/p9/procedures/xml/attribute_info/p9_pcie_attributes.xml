@@ -313,102 +313,133 @@
     <description>
       PCIE MMIO BAR enable
       creator: platform
-      consumer: p9_setup_bars
+      consumer: p9_pcie_config
       firmware notes:
         Array index: BAR number (0:2)
-        index 0~1 for BAR0/1
-        index 2 for PHB
-        index 3 for interrupt
+        index 0~1 for MMIO BAR0/1
+        index 2 for PHB register space
     </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-    <array>4</array>
+    <array>3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PROC_PCIE_BAR_BASE_ADDR</id>
-    <targetType>TARGET_TYPE_PHB</targetType>
+    <id>ATTR_PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      PCIE MMIO BAR base address value
+      PCIE MMIO0 BAR base address offset
       creator: platform
       consumer: p9_setup_bars
       firmware notes:
-        64-bit address representing BAR RA
-        Array index: BAR number (0:2)
-        NOTE: BAR0/1 registers cover RA 8:47
-        NOTE: BAR2 registers covers RA 8:49
-        index 0~1 for BAR0/1
-        index 2 for PHB
-        index 3 for interrupt
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 8:47
+        (excludes system/memory select/group/chip fields)
+        Array index: PHB number (0:5)
     </description>
     <valueType>uint64</valueType>
-    <array>4</array>
+    <array>6</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      PCIE MMIO1 BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 8:47
+        (excludes system/memory select/group/chip fields)
+        Array index: PHB number (0:5)
+    </description>
+    <valueType>uint64</valueType>
+    <array>6</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      PCIE PHB register space BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR -- RA bits 8:49
+        (excludes system/memory select/group/chip fields)
+        Array index: PHB number (0:5)
+    </description>
+    <valueType>uint64</valueType>
+    <array>6</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_PCIE_BAR_SIZE</id>
-    <targetType>TARGET_TYPE_PHB</targetType>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      PCIE MMIO BAR size value
+      PCIE MMIO BAR size values
       creator: platform
-      consumer: p9_setup_bars
+      consumer: p9_pcie_config
       firmware notes:
         Array index: BAR number (0:2)
-        NOTE: supported BAR0/1 sizes are from 64KB-32PB
-        NOTE: only supported BAR2 size is 16KB
-        index 0~1 for BAR0/1
-        index 2 for PHB, actually not used
-        index 3 for interrupt, actually not used
+        NOTE: supported MMIO BAR0/1 sizes are from 64KB-32PB
+        NOTE: only supported PHB register size is 16KB
     </description>
     <valueType>uint64</valueType>
     <enum>
-       32_PB = 0x0000008000000000,
-       16_PB = 0x000000C000000000,
-        8_PB = 0x000000E000000000,
-        4_PB = 0x000000F000000000,
-        2_PB = 0x000000F800000000,
-        1_PB = 0x000000FC00000000,
-      512_TB = 0x000000FE00000000,
-      256_TB = 0x000000FF00000000,
-      128_TB = 0x000000FF80000000,
-       64_TB = 0x000000FFC0000000,
-       32_TB = 0x000000FFE0000000,
-       16_TB = 0x000000FFF0000000,
-        8_TB = 0x000000FFF8000000,
-        4_TB = 0x000000FFFC000000,
-        2_TB = 0x000000FFFE000000,
-        1_TB = 0x000000FFFF000000,
-      512_GB = 0x000000FFFF800000,
-      256_GB = 0x000000FFFFC00000,
-      128_GB = 0x000000FFFFE00000,
-       64_GB = 0x000000FFFFF00000,
-       32_GB = 0x000000FFFFF80000,
-       16_GB = 0x000000FFFFFC0000,
-        8_GB = 0x000000FFFFFE0000,
-        4_GB = 0x000000FFFFFF0000,
-        2_GB = 0x000000FFFFFF8000,
-        1_GB = 0x000000FFFFFFC000,
-      512_MB = 0x000000FFFFFFE000,
-      256_MB = 0x000000FFFFFFF000,
-      128_MB = 0x000000FFFFFFF800,
-       64_MB = 0x000000FFFFFFFC00,
-       32_MB = 0x000000FFFFFFFE00,
-       16_MB = 0x000000FFFFFFFF00,
-        8_MB = 0x000000FFFFFFFF80,
-        4_MB = 0x000000FFFFFFFFC0,
-        2_MB = 0x000000FFFFFFFFE0,
-        1_MB = 0x000000FFFFFFFFF0,
-      512_KB = 0x000000FFFFFFFFF8,
-      256_KB = 0x000000FFFFFFFFFC,
-      128_KB = 0x000000FFFFFFFFFE,
-       64_KB = 0x000000FFFFFFFFFF,
+       32_PB = 0x8000000000000000,
+       16_PB = 0xC000000000000000,
+        8_PB = 0xE000000000000000,
+        4_PB = 0xF000000000000000,
+        2_PB = 0xF800000000000000,
+        1_PB = 0xFC00000000000000,
+      512_TB = 0xFE00000000000000,
+      256_TB = 0xFF00000000000000,
+      128_TB = 0xFF80000000000000,
+       64_TB = 0xFFC0000000000000,
+       32_TB = 0xFFE0000000000000,
+       16_TB = 0xFFF0000000000000,
+        8_TB = 0xFFF8000000000000,
+        4_TB = 0xFFFC000000000000,
+        2_TB = 0xFFFE000000000000,
+        1_TB = 0xFFFF000000000000,
+      512_GB = 0xFFFF800000000000,
+      256_GB = 0xFFFFC00000000000,
+      128_GB = 0xFFFFE00000000000,
+       64_GB = 0xFFFFF00000000000,
+       32_GB = 0xFFFFF80000000000,
+       16_GB = 0xFFFFFC0000000000,
+        8_GB = 0xFFFFFE0000000000,
+        4_GB = 0xFFFFFF0000000000,
+        2_GB = 0xFFFFFF8000000000,
+        1_GB = 0xFFFFFFC000000000,
+      512_MB = 0xFFFFFFE000000000,
+      256_MB = 0xFFFFFFF000000000,
+      128_MB = 0xFFFFFFF800000000,
+       64_MB = 0xFFFFFFFC00000000,
+       32_MB = 0xFFFFFFFE00000000,
+       16_MB = 0xFFFFFFFF00000000,
+        8_MB = 0xFFFFFFFF80000000,
+        4_MB = 0xFFFFFFFFC0000000,
+        2_MB = 0xFFFFFFFFE0000000,
+        1_MB = 0xFFFFFFFFF0000000,
+      512_KB = 0xFFFFFFFFF8000000,
+      256_KB = 0xFFFFFFFFFC000000,
+      128_KB = 0xFFFFFFFFFE000000,
+       64_KB = 0xFFFFFFFFFF000000,
        16_KB = 0xFFFFFFFFFFFFFFFF
     </enum>
-    <array>4</array>
+    <array>3</array>
     <platInit/>
     <persistRuntime/>
   </attribute>

@@ -88,8 +88,9 @@ const uint8_t FABRIC_ADDR_SS_GROUP_ID_END_BIT = 18;
 // chip ID (large system)
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_START_BIT = 19;
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_END_BIT = 21;
-// msel bit (large & small system)
-const uint8_t FABRIC_ADDR_MSEL_BIT = 13;
+// msel bits (large & small system)
+const uint8_t FABRIC_ADDR_MSEL_START_BIT = 13;
+const uint8_t FABRIC_ADDR_MSEL_END_BIT = 14;
 
 
 //------------------------------------------------------------------------------
@@ -157,14 +158,16 @@ fapi_try_exit:
 
 fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    uint64_t& o_base_address_nm,
-    uint64_t& o_base_address_m)
+    uint64_t& o_base_address_nm0,
+    uint64_t& o_base_address_nm1,
+    uint64_t& o_base_address_m,
+    uint64_t& o_base_address_mmio)
 {
     uint32_t l_fabric_system_id;
     uint8_t l_fabric_group_id;
     uint8_t l_fabric_chip_id;
     uint8_t l_fabric_addr_bar_mode;
-    uint8_t l_msel;
+    uint8_t l_mirror_policy;
     fapi2::buffer<uint64_t> l_base_address;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -182,7 +185,7 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, FAPI_SYSTEM, l_fabric_addr_bar_mode),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_ADDR_BAR_MODE)");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_msel),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_mirror_policy),
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
 
     // apply system ID
@@ -230,19 +233,29 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     }
 
     // set output addresses based on application of msel
-    if (l_msel == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+    if (l_mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
     {
-        // nm = 0b00, m = 0b10
-        o_base_address_nm = l_base_address();
-        l_base_address.setBit(FABRIC_ADDR_MSEL_BIT);
-        o_base_address_m = l_base_address();
+        // nm = 0b00/01, m = 0b10, mmio = 0b11
+        o_base_address_nm0 = l_base_address();               // 00
+        l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_nm1 = l_base_address();               // 01
+        l_base_address.setBit<FABRIC_ADDR_MSEL_START_BIT>();
+        l_base_address.clearBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_m = l_base_address();                 // 10
+        l_base_address.setBit(FABRIC_ADDR_MSEL_END_BIT);
+        o_base_address_mmio = l_base_address();              // 11
     }
     else
     {
-        // m = 0b10, m = 0b00
-        o_base_address_m = l_base_address();
-        l_base_address.setBit(FABRIC_ADDR_MSEL_BIT);
-        o_base_address_nm = l_base_address();
+        // nm = 0b01/10, m = 0b00, mmio = 0b11
+        o_base_address_m = l_base_address();                 // 00
+        l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_nm0 = l_base_address();               // 01
+        l_base_address.setBit<FABRIC_ADDR_MSEL_START_BIT>();
+        l_base_address.clearBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_nm1 = l_base_address();               // 10
+        l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_mmio = l_base_address();              // 11
     }
 
 fapi_try_exit:
