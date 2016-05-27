@@ -38,9 +38,17 @@
 // Includes
 //-----------------------------------------------------------------------------------
 #include <p9_pcie_config.H>
+#include <p9_fbc_utils.H>
 
 #include "p9_misc_scom_addresses.H"
 #include "p9_misc_scom_addresses_fld.H"
+
+
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+const uint8_t P9_PCIE_CONFIG_BAR_SHIFT = 8;
+
 
 //-----------------------------------------------------------------------------------
 // Function definitions
@@ -48,20 +56,40 @@
 fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_INF("Start");
-    // Four BARs
-    const uint8_t NUM_BAR = 4;
+    fapi2::ATTR_PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET_Type l_mmio_bar0_offsets;
+    fapi2::ATTR_PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET_Type l_mmio_bar1_offsets;
+    fapi2::ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET_Type l_register_bar_offsets;
+    fapi2::ATTR_PROC_PCIE_BAR_SIZE_Type l_bar_sizes;
 
-    uint64_t l_bar_address[NUM_BAR] = {0};
-    uint64_t l_bar_mask[NUM_BAR] = {0};
-    uint8_t l_bar_enable[NUM_BAR] = {0};
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     fapi2::buffer<uint64_t> l_buf = 0;
+    uint64_t l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m, l_base_addr_mmio;
+    uint8_t l_pec_id = 0;
+    uint8_t l_phb_id = 0;
+
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>(fapi2::TARGET_STATE_FUNCTIONAL);
     auto l_phb_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_FUNCTIONAL);
     FAPI_DBG("pec target vec size: %#x\n", l_pec_chiplets_vec.size());
     FAPI_DBG("phb target vec size: %#x\n", l_phb_chiplets_vec.size());
-    unsigned char l_pec_id = 0;
-    unsigned char l_phb_id = 0;
+
+    // read system level BAR MMIO offset/size attributes
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET, FAPI_SYSTEM, l_mmio_bar0_offsets),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_MMIO_BAR0_BASE_ADDR_OFFSET)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET, FAPI_SYSTEM, l_mmio_bar1_offsets),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET, FAPI_SYSTEM, l_register_bar_offsets),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_SIZE, FAPI_SYSTEM, l_bar_sizes),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_BAR_SIZE)");
+
+    // determine base address of chip MMIO range
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+             l_base_addr_nm0,
+             l_base_addr_nm1,
+             l_base_addr_m,
+             l_base_addr_mmio),
+             "Error from p9_fbc_utils_get_chip_base_address");
 
     for (auto l_pec_chiplets : l_pec_chiplets_vec)
     {
@@ -120,7 +148,12 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
 
     for (auto l_phb_chiplets : l_phb_chiplets_vec)
     {
-        // Get the pec id
+        fapi2::ATTR_PROC_PCIE_BAR_ENABLE_Type l_bar_enables;
+        fapi2::buffer<uint64_t> l_mmio0_bar = l_base_addr_mmio;
+        fapi2::buffer<uint64_t> l_mmio1_bar = l_base_addr_mmio;
+        fapi2::buffer<uint64_t> l_register_bar = l_base_addr_mmio;
+
+        // Get the phb id
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_phb_chiplets,
                                l_phb_id));
 
@@ -242,55 +275,53 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PE_DFREEZE_REG, l_buf));
 
-        // Get the attribute for BAR address and size.
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_BASE_ADDR, l_phb_chiplets,
-                               l_bar_address));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_SIZE, l_phb_chiplets,
-                               l_bar_mask));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_ENABLE, l_phb_chiplets,
-                               l_bar_enable));
+        // Get the BAR enable attribute
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_ENABLE, l_phb_chiplets, l_bar_enables),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_BAR_ENABLE)");
 
         // step 18: NestBase+StackBase+0xE<software programmed>Set MMIO Base
-        // Address Register 0 (MMIOBAR0)
-        FAPI_DBG("phb%i bar0 addr: %#lx", l_phb_id, l_bar_address[0]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR0_REG, l_bar_address[0]));
+        l_mmio0_bar += l_mmio_bar0_offsets[l_phb_id];
+        FAPI_DBG("phb%i bar0 addr: %#lx", l_phb_id, l_mmio0_bar());
+        l_mmio0_bar = l_mmio0_bar << P9_PCIE_CONFIG_BAR_SHIFT;
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR0_REG, l_mmio0_bar),
+                 "Error from putScom (PHB_MMIOBAR0_REG)");
 
         // step 19: NestBase+StackBase+0xF<software programmed>Set MMIO BASE
         // Address Register Mask 0 (MMIOBAR0_MASK)
-        FAPI_DBG("phb%i bar0 mask: %#lx", l_phb_id, l_bar_mask[0]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR0_MASK_REG, l_bar_mask[0]));
+        FAPI_DBG("phb%i bar0 size: %#lx", l_phb_id, l_bar_sizes[0]);
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR0_MASK_REG, l_bar_sizes[0]));
 
         // step 20: NestBase+StackBase+0x10<software programmed>Set MMIO Base
         // Address Register 1 (MMIOBAR1)
-        FAPI_DBG("phb%i bar1 addr: %#lx", l_phb_id, l_bar_address[1]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_REG, l_bar_address[1]));
+        l_mmio1_bar += l_mmio_bar1_offsets[l_phb_id];
+        FAPI_DBG("phb%i bar1 addr: %#lx", l_phb_id, l_mmio1_bar());
+        l_mmio1_bar = l_mmio1_bar << P9_PCIE_CONFIG_BAR_SHIFT;
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_REG, l_mmio1_bar),
+                 "Error from putScom (PHB_MMIOBAR1_REG)");
 
         // step 21: NestBase+StackBase+0x11<software programmed>Set MMIO Base
         // Address Register Mask 1 (MMIOBAR1_MASK)
-        FAPI_DBG("phb%i bar1 mask: %#lx", l_phb_id, l_bar_mask[1]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_MASK_REG, l_bar_mask[1]));
+        FAPI_DBG("phb%i bar1 size: %#lx", l_phb_id, l_bar_sizes[1]);
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_MASK_REG, l_bar_sizes[1]));
 
         // step 22: NestBase+StackBase+0x12<software programmed>Set PHB
         // Regsiter Base address Register (PHBBAR)
-        FAPI_DBG("phb%i phb addr: %#lx", l_phb_id, l_bar_address[2]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PHBBAR_REG, l_bar_address[2]));
+        l_register_bar += l_register_bar_offsets[l_phb_id];
+        FAPI_DBG("phb%i bar1 addr: %#lx", l_phb_id, l_register_bar());
+        l_register_bar = l_register_bar << P9_PCIE_CONFIG_BAR_SHIFT;
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_REG, l_register_bar),
+                 "Error from putScom (PHB_MMIOBAR1_REG)");
 
-        // step 23: NestBase+StackBase+0x13<software programmed>Set Interrupt
-        // BASEase Address Register (INTBAR)
-        FAPI_DBG("phb%i int addr: %#lx", l_phb_id, l_bar_address[3]);
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_INTBAR_REG, l_bar_address[3]));
-
-        // step 24: NestBase+StackBase+0x14<software programmed>Set Base
+        // step 23: NestBase+StackBase+0x14<software programmed>Set Base
         // addressress Enable Register (BARE)
         l_buf = (uint64_t)0x0;
-        l_buf.insertFromRight<PHB_BARE_REG_PE_MMIO_BAR0_EN, 1>(l_bar_enable[0]); // bit 0 for BAR0
-        l_buf.insertFromRight<PHB_BARE_REG_PE_MMIO_BAR1_EN, 1>(l_bar_enable[1]); // bit 1 for BAR1
-        l_buf.insertFromRight<PHB_BARE_REG_PE_PHB_BAR_EN, 1>(l_bar_enable[2]); // bit 2 for PHB
-        l_buf.insertFromRight<PHB_BARE_REG_PE_INT_BAR_EN, 1>(l_bar_enable[3]); // bit 3 for INT
+        l_buf.insertFromRight<PHB_BARE_REG_PE_MMIO_BAR0_EN, 1>(l_bar_enables[0]); // bit 0 for BAR0
+        l_buf.insertFromRight<PHB_BARE_REG_PE_MMIO_BAR1_EN, 1>(l_bar_enables[1]); // bit 1 for BAR1
+        l_buf.insertFromRight<PHB_BARE_REG_PE_PHB_BAR_EN, 1>(l_bar_enables[2]);   // bit 2 for PHB
         FAPI_DBG("phb%i bar enable: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_BARE_REG, l_buf));
 
-        // Phase2 init step 25
+        // Phase2 init step 24
         // PCIBase+StackBase +0x0A
         // 0x00000000_00000000
         // Remove ETU/AIB bus from reset (PHBReset)
