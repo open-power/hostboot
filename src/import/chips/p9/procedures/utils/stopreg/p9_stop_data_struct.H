@@ -48,9 +48,9 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
 namespace stopImageSection
 {
+#endif
 
 typedef struct
 {
@@ -133,7 +133,8 @@ enum
                         SCOM_SIZE_PER_CACHE_CHIPLET ));
 #ifdef __cplusplus
 }  // extern "C"
-#endif
 
 } //namespace stopImageSection ends
+#endif //__cplusplus
+
 #endif
