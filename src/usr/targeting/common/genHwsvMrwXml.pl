@@ -4468,6 +4468,33 @@ sub generate_xbus
     my $fapi_name = sprintf("pu.xbus:k0:n%d:s0:p%02d:c%d", $node, $proc, $xbus);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus";
 
+    # Peer target variables
+    my $peer;
+    my $p_proc;
+    my $p_port;
+    my $p_node;
+
+    # See if this bus is connected to anything
+    foreach my $pbus ( @pbus )
+    {
+        if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
+            "n${node}:p${proc}:x${xbus}" )
+        {
+            if ($pbus->[PBUS_SECOND_END_POINT_INDEX] ne "invalid")
+            {
+                $peer = 1;
+                $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
+                $p_port = $p_proc;
+                $p_node = $pbus->[PBUS_SECOND_END_POINT_INDEX];
+                $p_node =~ s/^n(.*):p.*:.*$/$1/;
+                $p_proc =~ s/^.*:p(.*):.*$/$1/;
+                $p_port =~ s/.*:p.*:.(.*)$/$1/;
+                my $node_config = $pbus->[PBUS_NODE_CONFIG_FLAG];
+                last;
+            }
+        }
+    }
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}xbus$xbus</id>
@@ -4498,6 +4525,25 @@ sub generate_xbus
         <id>CHIP_UNIT</id>
         <default>$xbus</default>
     </attribute>";
+
+    if ($peer)
+    {
+        my $peerPhysPath = "physical:sys-${sys}/node-${p_node}/"
+            ."proc-${p_proc}/xbus-${p_port}";
+        my $peerHuid = sprintf("0x%02X0E%04X",${p_node},
+            $p_proc*MAX_XBUS_PER_PROC + $p_port);
+
+    print "
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>$peerPhysPath</default>
+    </attribute>
+    <compileAttribute>
+        <id>PEER_HUID</id>
+        <default>${peerHuid}</default>
+    </compileAttribute>";
+
+    }
 
     addPervasiveParentLink($sys,$node,$proc,$xbus,"xbus");
 
