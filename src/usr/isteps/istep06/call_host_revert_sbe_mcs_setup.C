@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep14/call_host_startprd_dram.C $            */
+/* $Source: src/usr/isteps/istep06/call_host_revert_sbe_mcs_setup.C $     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,38 +22,66 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <errl/errlentry.H>
-#include <initservice/isteps_trace.H>
 
-using namespace ERRORLOG;
+#include    <stdint.h>
 
-namespace ISTEP_14
+#include    <trace/interface.H>
+#include    <errl/errlentry.H>
+#include    <errl/errlmanager.H>
+
+#include    <isteps/hwpisteperror.H>
+#include    <initservice/isteps_trace.H>
+
+#include    <targeting/common/commontargeting.H>
+#include    <targeting/common/util.H>
+#include    <targeting/common/utilFilter.H>
+#include    <targeting/common/target.H>
+
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <p9_revert_sbe_mcs_setup.H>
+
+namespace ISTEP_06
 {
-void* call_host_startprd_dram (void *io_pArgs)
+
+void* call_host_revert_sbe_mcs_setup( void *io_pArgs )
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t l_err = NULL;
+    ISTEP_ERROR::IStepError l_stepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_startPRD_dram entry" );
+            "call_host_revert_sbe_mcs_setup entry" );
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-    // update firdata inputs for OCC
-    TARGETING::Target* masterproc = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
-    l_errl = HBOCC::loadHostDataToSRAM(masterproc,
-                                        PRDF::ALL_PROC_MEM_MASTER_CORE);
-    if (l_errl)
+    TARGETING::Target * l_masterProc;
+    TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Running p9_revert_sbe_mcs_setup on "
+              "target HUID %.8X",
+              TARGETING::get_huid(l_masterProc));
+
+    // cast the target to a fapi2 target
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_master_proc( l_masterProc );
+
+    //Invode p9_revert_sbe_mcs_setup
+    FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup, l_fapi_master_proc );
+
+    if (l_err)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Error returned from call to HBOCC::loadHostDataToSRAM");
+                  "ERROR 0x%.8X: p9_revert_sbe_mcs_setup",
+                  l_err->reasonCode());
+        // Create IStep error log and cross reference error
+        l_stepError.addErrorDetails(l_err);
+        // Commit error
+        errlCommit(l_err,SBE_COMP_ID);
     }
-#endif
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_startPRD_dram exit" );
+            "call_host_revert_sbe_mcs_setup exit" );
 
-    // end task, returning any errorlogs to IStepDisp
-    return l_errl;
+    return l_stepError.getErrorHandle();
 }
 
 };

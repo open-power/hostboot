@@ -31,7 +31,7 @@
  * @note    IStep definition for Hostboot - Slave SBE
  *
  *  IStep 06    Slave SBE
- *  IPL FLow Doc        v0.93 (04/04/16)
+ *  IPL FLow Doc        v0.95
  *
  *  06.1    host_bootloader
  *        : Host Bootloader (non-executable istep)
@@ -128,13 +128,13 @@ void* call_host_update_master_tpm( void *io_pArgs );
 void* host_gard( void *io_pArgs );
 
 /**
- * @brief   proc_revert_sbe_mcs_setup (istep 6.10)
+ * @brief   host_revert_sbe_mcs_setup (istep 6.10)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_proc_revert_sbe_mcs_setup (void * io_pArgs);
+void* call_host_revert_sbe_mcs_setup (void * io_pArgs);
 
 /**
  * @brief   host_start_occ_xstop_handler (istep 6.11)
@@ -146,13 +146,13 @@ void* call_proc_revert_sbe_mcs_setup (void * io_pArgs);
 void* host_start_occ_xstop_handler (void * io_pArgs);
 
 /**
- * @brief   host_setup_voltages (istep 6.12)
+ * @brief   host_voltage_config (istep 6.12)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* call_host_setup_voltages (void * io_pArgs);
+void* call_host_voltage_config (void * io_pArgs);
 
 
 };
@@ -214,8 +214,8 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,10,"proc_revert_sbe_mcs_setup"),
-                ISTEP_06::call_proc_revert_sbe_mcs_setup,
+                ISTEPNAME(06,10,"host_revert_sbe_mcs_setup"),
+                ISTEP_06::call_host_revert_sbe_mcs_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
@@ -224,8 +224,8 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(06,12,"host_setup_voltages"),
-                ISTEP_06::call_host_setup_voltages,
+                ISTEPNAME(06,12,"host_voltage_config"),
+                ISTEP_06::call_host_voltage_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 

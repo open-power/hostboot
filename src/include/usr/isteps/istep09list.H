@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
  * @file    istep09list.H
  *
  *  IStep 09    Activate PowerBus
- *  IPL FLow Doc        v0.67 (11/11/15)
+ *  IPL FLow Doc        v0.95
  *
  *    09.1    fabric_erepair
  *          : Restore Fabric Bus eRepair data
@@ -44,10 +44,10 @@
  *          : Advanced post EI/EDI training
  *    09.6    proc_smp_link_layer
  *          : Start SMP link layer
- *    09.7    host_startprd_pbus
- *          : Load PRD for powerbus domain
- *    09.9    proc_fab_iovalid
+ *    09.7    proc_fab_iovalid
  *          : Lower functional fences on local SMP
+ *    09.8    host_fbc_eff_config_aggregate
+ *          : Pick link(s) for coherency
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -229,21 +229,16 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(09,07,"host_startprd_pbus"),
-                ISTEP_09::call_host_startprd_pbus,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(09,08,"host_attnlisten_proc"),
-                ISTEP_09::call_host_attnlisten_proc,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(09,09,"proc_fab_iovalid"),
+                ISTEPNAME(09,07,"proc_fab_iovalid"),
                 ISTEP_09::call_proc_fab_iovalid,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-};
+        {
+                ISTEPNAME(09,08,"host_fbc_eff_config_aggregate"),
+                NULL,                                       // @TODO-RTC:154376
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+    };
 
 const DepModInfo  g_istep09Dependancies = {
     {

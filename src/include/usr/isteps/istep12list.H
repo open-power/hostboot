@@ -30,7 +30,7 @@
  * @file    istep12list.H
  *
  *  IStep 12    Step 12 DMI Training
- *  IPL FLow Doc        v0.93 (04/04/16)
+ *  IPL FLow Doc        v0.95
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -74,6 +74,11 @@ const   TaskInfo    g_istep12[]  =   {
                 ISTEPNAME(12,01,"mss_getecid"),
                 ISTEP_12::call_mss_getecid,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,02,"host_attnlisten_memb"),    // @TODO-RTC:154658
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
 
 };

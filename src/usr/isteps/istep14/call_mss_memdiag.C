@@ -46,6 +46,17 @@ void* call_mss_memdiag (void* io_pArgs)
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_mss_memdiag entry");
 
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    // @TODO-RTC: 155065
+    // update firdata inputs for OCC
+    TARGETING::Target* masterproc = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+    l_errl = HBOCC::loadHostDataToSRAM(masterproc,
+                                        PRDF::ALL_PROC_MEM_MASTER_CORE);
+    assert(l_errl==NULL,
+           "Error returned from call to HBOCC::loadHostDataToSRAM");
+#endif
+
     TARGETING::TargetHandleList l_targetList;
     TARGETING::TYPE targetType;
 

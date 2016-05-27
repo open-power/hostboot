@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,9 +29,7 @@
  * @file    istep14list.H
  *
  *  IStep 14
- *  IPL FLow Doc        v0.67 (11/11/15)
- *    14.7    proc_setup_bars
- *          : Setup Memory BARs
+ *  IPL FLow Doc        v0.95
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -45,17 +43,6 @@
 namespace   ISTEP_14
 {
 
-/**
- *  @brief   host_startprd_dram
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return any errlogs to istep
- *
- */
-void*  call_host_startprd_dram( void    *io_pArgs );
-
-
 
 /**
  *  @brief   mss_memdiag
@@ -66,8 +53,6 @@ void*  call_host_startprd_dram( void    *io_pArgs );
  *
  */
 void*    call_mss_memdiag( void    *io_pArgs );
-
-
 
 /**
  *  @brief   mss_thermal_init
@@ -88,7 +73,6 @@ void*    call_mss_thermal_init( void    *io_pArgs );
  *
  */
 void*    call_proc_pcie_config( void    *io_pArgs );
-
 
 /**
  *  @brief   mss_power_cleanup
@@ -151,47 +135,42 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(14,01,"host_startprd_dram"),
-                ISTEP_14::call_host_startprd_dram,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,02,"mss_memdiag"),
+                ISTEPNAME(14,01,"mss_memdiag"),
                 ISTEP_14::call_mss_memdiag,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,03,"mss_thermal_init"),
+                ISTEPNAME(14,02,"mss_thermal_init"),
                 ISTEP_14::call_mss_thermal_init,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,04,"proc_pcie_config"),
+                ISTEPNAME(14,03,"proc_pcie_config"),
                 ISTEP_14::call_proc_pcie_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,05,"mss_power_cleanup"),
+                ISTEPNAME(14,04,"mss_power_cleanup"),
                 ISTEP_14::call_mss_power_cleanup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,06,"proc_setup_bars"),
+                ISTEPNAME(14,05,"proc_setup_bars"),
                 ISTEP_14::call_proc_setup_bars,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,07,"proc_htm_setup"),
+                ISTEPNAME(14,06,"proc_htm_setup"),
                 ISTEP_14::call_proc_htm_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,08,"proc_exit_cache_contained"),
+                ISTEPNAME(14,07,"proc_exit_cache_contained"),
                 ISTEP_14::call_proc_exit_cache_contained,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(14,09,"host_mpipl_service"),
+                ISTEPNAME(14,08,"host_mpipl_service"),
                 ISTEP_14::call_host_mpipl_service,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
