@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pcie_config
+OBJS+=p9_fbc_utils.o
 $(call BUILD_PROCEDURE)
