@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,28 @@
 
 #ifndef __P9_MISC_SCOM_ADDRESSES_FLD_FIXES_H
 #define __P9_MISC_SCOM_ADDRESSES_FLD_FIXES_H
+
+// N2 Chiplet Config Register1
+REG64_FLD(PERV_N2_CPLT_CONF1_TC_PSI_IOVALID_DC,  10, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// PSI Receive Status Register
+REG64_FLD(PU_RX_PSI_STATUS_CHECK_PASS,            0, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+REG64_FLD(PU_RX_PSI_STATUS_CHECK_FAIL,            1, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// PSI Transmit Control Register
+REG64_FLD(PU_TX_PSI_CNTL_IORESET,                 0, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// PSI Receive Control Register
+REG64_FLD(PU_RX_PSI_CNTL_IORESET,                 0, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// PSI Transmit Channel Internal Address Register
+REG64_FLD(PU_TX_CH_INTADDR_IAR_ADDR,              0, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+REG64_FLD(PU_TX_CH_INTADDR_IAR_ADDR_LEN,          8, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// PSI Transmit Channel Misc Register
+REG64_FLD(PU_TX_CH_MISC_WEN0,                    12, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+REG64_FLD(PU_TX_CH_MISC_WEN1,                    13, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+REG64_FLD(PU_TX_CH_MISC_WEN2,                    14, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
 
 //Example
 //Copy the whole line from the *scom_addresses_fld.H file.  Then add FIX in front of REG
