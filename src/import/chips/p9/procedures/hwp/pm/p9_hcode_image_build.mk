@@ -22,9 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_hcode_image_build
+PROCEDURE = p9_hcode_image_build
 HCODE_UTIL=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/xip/
+HCODE_UTIL+=$(ROOTPATH)/chips/p9/utils/imageProcs/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
 HCODE_UTIL+=$(ROOTPATH)/tools/imageProcs/
 $(PROCEDURE)_DEPLIBS+=p9_xip_image
