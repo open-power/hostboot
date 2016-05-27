@@ -83,8 +83,8 @@ use constant
     MAX_PHB_PER_PROC => 6,
     MAX_MBA_PER_MEMBUF => 2,
     MAX_OBUS_PER_PROC => 4,
-    MAX_PPE_PER_PROC => 21,
-    MAX_PERV_PER_PROC => 42,
+    MAX_PPE_PER_PROC => 50,   #Only 21, but they are sparsely populated
+    MAX_PERV_PER_PROC => 55,  #Only 42, but they are sparsely populated
     MAX_CAPP_PER_PROC => 2,
     MAX_SBE_PER_PROC => 1,
     MAX_NV_PER_PROC => 2,
