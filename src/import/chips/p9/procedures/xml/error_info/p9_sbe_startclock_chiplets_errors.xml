@@ -27,11 +27,5 @@
 <!-- Halt codes for p9_sbe_startclock_chiplets -->
 
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_READ_CHECKSTOP_ERR</rc>
-    <description>Read and or all Checkstop error</description>
-    <ffdc>READ_CHECKSTOP</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+ 
 </hwpErrors>
