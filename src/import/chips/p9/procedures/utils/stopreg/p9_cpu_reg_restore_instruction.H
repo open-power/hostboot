@@ -40,10 +40,10 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
 
 namespace stopImageSection
 {
+#endif
 
 /**
  * @brief enumerates opcodes for few instructions.
@@ -66,10 +66,10 @@ enum
     ATTN_OPCODE       = 0x00000200,
 };
 
+#ifdef __cplusplus
 } // namespace stopImageSection ends
 
-#ifdef __cplusplus
 } // extern "C"
-#endif
+#endif //__cplusplus
 
 #endif //__REG_RESTORE_INSTRUCTION_H
