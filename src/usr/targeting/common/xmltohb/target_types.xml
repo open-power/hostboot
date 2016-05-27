@@ -2116,6 +2116,20 @@
     <attribute><id>PROC_EPS_WRITE_CYCLES_T1</id></attribute>
     <attribute><id>PROC_EPS_WRITE_CYCLES_T2</id></attribute>
     <!-- End proc_fbc_eff_config -->
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id></attribute>
+    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
+    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_SLOPE</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2143,6 +2157,14 @@
     <attribute><id>FRU_ID</id></attribute>
     <attribute><id>TPM_PRIMARY_INFO</id></attribute>
     <attribute><id>TPM_BACKUP_INFO</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
+    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
+    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
 </targetType>
 
 <!-- chip-processor-power9 -->
@@ -2758,6 +2780,7 @@
     <attribute><id>EFF_DRAM_TWTR_L</id></attribute>
     <attribute><id>EFF_DRAM_TMAW</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+    <attribute><id>VMEM_ID</id></attribute>
 </targetType>
 
 <targetType>
