@@ -63,7 +63,8 @@
   <hwpError>
     <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR type.</description>
-    <ffdc>DIMM_VOLTAGE</ffdc>
+    <ffdc>OPERABLE</ffdc>
+    <ffdc>ENDURANT</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -106,4 +107,3 @@
   </hwpError>
 
 </hwpErrors>
-

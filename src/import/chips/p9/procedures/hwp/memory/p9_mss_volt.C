@@ -53,11 +53,11 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_volt( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
-        FAPI_INF("Start mss volt");
-
         // Loop through MCS
         for (const auto& l_mcs : i_targets)
         {
+            FAPI_INF("Populating decoder cache for %s", mss::c_str(l_mcs));
+
             //Factory cache is per MCS
             std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
             FAPI_TRY( mss::spd::populate_decoder_caches(l_mcs, l_factory_caches),
@@ -68,7 +68,7 @@ extern "C"
             {
                 const auto& l_dimm_pos = mss::pos(l_dimm);
 
-                // Fiind decoder factory for this dimm position
+                // Find decoder factory for this dimm position
                 auto l_it = l_factory_caches.find(l_dimm_pos);
                 // Check to make sure it's valid
                 // TODO - RTC 152390 change factory check
@@ -87,9 +87,14 @@ extern "C"
                     //Check to make sure 1.2 V is both operable and endurant, fail if it is not
                     FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
                                   fapi2::MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE().
-                                  set_DIMM_VOLTAGE(uint64_t(mss::DDR4_NOMINAL_VOLTAGE)).
+                                  set_OPERABLE(l_dimm_nominal).
+                                  set_ENDURANT(l_dimm_endurant).
                                   set_DIMM_TARGET(l_dimm),
-                                  "1.2V is not operable");
+                                  "%s: DIMM is not operable (%d)"
+                                  " and/or endurant (%d) at 1.2V",
+                                  mss::c_str(l_dimm),
+                                  l_dimm_nominal,
+                                  l_dimm_endurant);
                 } // scope
             } // l_dimm
 
