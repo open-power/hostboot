@@ -47,6 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 
 #Required include before all the procedure.mk are included

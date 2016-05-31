@@ -31,6 +31,7 @@ PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
