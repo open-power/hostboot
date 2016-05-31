@@ -616,7 +616,7 @@ pba_slave_setup_boot_phase(
     l_data64 = ps.value;
 
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
-             "Failed to set Slave 3 control register");
+             "Failed to set Slave 0 control register");
 
     FAPI_INF("Skipping PBA Slave 1 ...");
     // Slave 1 is not used during Boot phase
@@ -711,7 +711,7 @@ pba_slave_setup_runtime_phase(
     l_data64 = ps.value;
 
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
-             "Failed to set Slave 3 control register");
+             "Failed to set Slave 0 control register");
 
     FAPI_INF("Initialize PBA Slave 1 for SGPE 24x7 use...");
     // Slave 1 (SGPE 24x7).  This is a read/write slave.  Write gethering is
@@ -732,8 +732,8 @@ pba_slave_setup_runtime_phase(
 
     l_data64 = ps.value;
 
-    FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL2_SCOM, l_data64),
-             "Failed to set Slave 2 control register");
+    FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL1_SCOM, l_data64),
+             "Failed to set Slave 1 control register");
 
 
     FAPI_INF("Disabling PBA Slave 2 ...  To be enabled/setup by OCC Firmware");
