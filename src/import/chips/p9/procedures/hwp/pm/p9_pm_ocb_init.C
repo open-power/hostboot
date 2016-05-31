@@ -224,7 +224,7 @@ fapi2::ReturnCode p9_pm_ocb_init(
     // -------------------------------------------------------------------------
     if (i_mode == p9pm::PM_INIT)
     {
-        FAPI_DBG("Functionality not yet defined for Channel Initialization.");
+        FAPI_DBG(" Channel initialization is a no-op.");
     }
     // -------------------------------------------------------------------------
     // RESET mode: Change the OCB channel registers to scan-0 flush state
@@ -482,80 +482,82 @@ fapi2::ReturnCode pm_ocb_reset(
     FAPI_IMP("p9_pm_ocb_reset Enter");
     fapi2::buffer<uint64_t> l_buf64;
 
-    uint8_t i = 0;
+    // vector of reset channels
+    std::vector<uint8_t> v_reset_chan;
+    v_reset_chan.push_back(1);
 
     // -------------------------------------------------------------------------
     // Loop over PIB Registers
     // -------------------------------------------------------------------------
-    for (i = 0; i <= MAX_OCB_CHANNELS; i++)
+    for (auto chan : v_reset_chan)
     {
         fapi2::buffer<uint64_t> l_data64;
         // Clear out OCB Channel BAR registers
-        FAPI_TRY(fapi2::putScom(i_target, OCBARn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBARn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d BAR Register", i);
+                 "Channel %d BAR Register", chan);
 
         // Clear out OCB Channel control and status registers
         l_data64.flush<1>();
-        FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_CLEAR[i], l_data64),
+        FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_CLEAR[chan], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Control & Status Register Clear", i);
+                 "Channel %d Control & Status Register Clear", chan);
 
         // Put channels in Circular mode
         //  - set bits 4,5 (circular mode) using OR
         l_data64.flush<0>().setBit<4>().setBit<5>();
-        FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_OR[i], l_data64),
+        FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_OR[chan], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Control & Status OR Register Set", i);
+                 "Channel %d Control & Status OR Register Set", chan);
 
         // Clear out OCB Channel Error Status registers
-        FAPI_TRY(fapi2::putScom(i_target, OCBESRn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBESRn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Error Status Register", i);
+                 "Channel %d Error Status Register", chan);
     }
 
     // -------------------------------------------------------------------------
     // Loop over OCI Registers
     // -------------------------------------------------------------------------
-    for (i = 0; i <= MAX_OCB_CHANNELS; i++)
+    for (auto chan : v_reset_chan)
     {
         fapi2::buffer<uint64_t> l_data64;
         // Clear out Pull Base
-        FAPI_TRY(fapi2::putScom(i_target, OCBSLBRn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBSLBRn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Pull Base Register", i);
+                 "Channel %d Pull Base Register", chan);
 
         // Clear out Push Base
-        FAPI_TRY(fapi2::putScom(i_target, OCBSHBRn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBSHBRn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Push Base Register", i);
+                 "Channel %d Push Base Register", chan);
 
         // Clear out Pull Control & Status
-        FAPI_TRY(fapi2::putScom(i_target, OCBSLCSn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBSLCSn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Pull Control & Status Register", i);
+                 "Channel %d Pull Control & Status Register", chan);
 
         // Clear out Push Control & Status
-        FAPI_TRY(fapi2::putScom(i_target, OCBSHCSn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBSHCSn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Push Control & Status Register", i);
+                 "Channel %d Push Control & Status Register", chan);
 
         // Clear out Stream Error Status
-        FAPI_TRY(fapi2::putScom(i_target, OCBSESn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBSESn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Stream Error Status Register", i);
+                 "Channel %d Stream Error Status Register", chan);
 
         // Clear out Linear Window Control
-        FAPI_TRY(fapi2::putScom(i_target, OCBLWCRn[i], 0),
+        FAPI_TRY(fapi2::putScom(i_target, OCBLWCRn[chan], 0),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Linear Window Control Register", i);
+                 "Channel %d Linear Window Control Register", chan);
 
         // Clear out Linear Window Base
         //  - set bits 3:9
         l_data64.setBit<3, 7>();
-        FAPI_TRY(fapi2::putScom(i_target, OCBLWSBRn[i], l_data64),
+        FAPI_TRY(fapi2::putScom(i_target, OCBLWSBRn[chan], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Linear Window Base Register", i);
+                 "Channel %d Linear Window Base Register", chan);
     }
 
     // Set Interrupt Source Mask Registers 0 & 1
