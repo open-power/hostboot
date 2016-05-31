@@ -503,7 +503,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             }
         }
 
-        TRACFCOMP( g_trac_ibscom, ">>HUID=%.8X, Op=%d, Addr=%.8X", get_huid(i_target), i_opType, i_addr );
+        TRACDCOMP( g_trac_ibscom, ">>HUID=%.8X, Op=%d, Addr=%.8X", get_huid(i_target), i_opType, i_addr );
 
         if (i_opType == DeviceFW::READ)
         {
@@ -868,7 +868,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
     {
         mutex_unlock(l_mutex);
     }
-    TRACFCOMP( g_trac_ibscom, "<<HUID=%.8X, Op=%d, Addr=%.8X", get_huid(i_target), i_opType, i_addr );
+    TRACDCOMP( g_trac_ibscom, "<<HUID=%.8X, Op=%d, Addr=%.8X", get_huid(i_target), i_opType, i_addr );
 
     return l_err;
 }
