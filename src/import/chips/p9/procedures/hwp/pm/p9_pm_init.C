@@ -24,22 +24,35 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_pm_init.C
-/// @brief Wrapper that calls underlying HWPs to perform a Power Management
-///        init function when needing to initialize the OCC complex.
+/// @brief Wrapper that initializes or resets the OCC complex.
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
 // *HWP HWP Backup Owner :
 // *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 1
+// *HWP Level            : 2
 // *HWP Consumed by      : HS
 
 ///
 /// High-level procedure flow:
 ///
 /// @verbatim
-/// Invoke the sub-functions to initialize the OCC (GPEs, FIRs, PPM, PPC405)
-/// for the first time during boot.
+///
+///  PM_INIT
+///    Initialize Cores and Quads
+///    Initialize OCB channels
+///    Initialize PSS
+///    Initialize PBA
+///    Mask CME FIRs and Core-Quad Errors
+///    Initialize Stop GPE
+///    Initialize Pstate GPE
+///    Start OCC PPC405
+///    Clear off pending Special Wakeup requests on all configured EX chiplets
+///
+///  PM_RESET
+///    Invoke "p9_pm_reset()" to reset the PM OCC complex (Cores, Quads, CMEs,
+///    OCB channels, PBA bus, PSS, PPC405 and GPEs)
+///
 /// @endverbatim
 ///
 
@@ -49,16 +62,28 @@
 #include <p9_pm_init.H>
 
 // -----------------------------------------------------------------------------
-// Constant definitions
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// Global variables
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Function prototypes
 // -----------------------------------------------------------------------------
+
+///
+/// @brief Call underlying unit procedures to initialize the PM complex.
+///
+/// @param[in] i_target Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+///
+fapi2::ReturnCode pm_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+///
+/// @brief Clears OCC special wake-up on all configured EX chiplets
+///
+/// @param[in] i_target   Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+///
+fapi2::ReturnCode clear_occ_special_wakeups(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 // -----------------------------------------------------------------------------
 // Function definitions
@@ -66,17 +91,23 @@
 
 fapi2::ReturnCode p9_pm_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    p9pm::PM_FLOW_MODE i_mode)
+    const p9pm::PM_FLOW_MODE i_mode)
 {
     FAPI_INF("Entering p9_pm_init ...");
+
+    fapi2::ReturnCode l_rc;
 
     if (i_mode == p9pm::PM_INIT)
     {
         FAPI_DBG("Initialize the OCC Complex.");
+        FAPI_TRY(pm_init(i_target),
+                 "ERROR: Failed to initialize OCC Complex");
     }
     else if (i_mode == p9pm::PM_RESET)
     {
         FAPI_DBG("Reset the OCC Complex.");
+        FAPI_EXEC_HWP(l_rc, p9_pm_reset, i_target);
+        FAPI_TRY(l_rc, "ERROR: Failed to reset OCC complex");
     }
     else
     {
@@ -89,3 +120,137 @@ fapi_try_exit:
     FAPI_INF("Exiting p9_pm_init...");
     return fapi2::current_err;
 }
+
+fapi2::ReturnCode pm_init(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("Entering pm_init...");
+
+    fapi2::ReturnCode l_rc;
+
+    //  ************************************************************************
+    //  Initialize Cores and Quads
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_corequad_init to initialize cores & quads");
+    FAPI_EXEC_HWP(l_rc, p9_pm_corequad_init,
+                  i_target,
+                  p9pm::PM_INIT,
+                  0,//CME FIR MASK for reset
+                  0,//Core Error Mask for reset
+                  0 //Quad Error Mask for reset
+                 );
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize cores & quads");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After cores & quads init"));
+
+    //  ************************************************************************
+    //  Issue init to OCB
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_ocb_init to initialize OCB channels");
+    FAPI_EXEC_HWP(l_rc, p9_pm_ocb_init,
+                  i_target,
+                  p9pm::PM_INIT,// Channel setup type
+                  p9ocb::OCB_CHAN1,// Channel
+                  p9ocb:: OCB_TYPE_NULL,// Channel type
+                  0,// Channel base address
+                  0,// Push/Pull queue length
+                  p9ocb::OCB_Q_OUFLOW_NULL,// Channel flow control
+                  p9ocb::OCB_Q_ITPTYPE_NULL// Channel interrupt control
+                 );
+    FAPI_TRY(l_rc,
+             "ERROR: Failed to initialize channel 1");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After OCB channels init"));
+
+    //  ************************************************************************
+    //  Initializes P2S and HWC logic
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_pss_init to initialize P2S and HWC logic");
+    FAPI_EXEC_HWP(l_rc, p9_pm_pss_init, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize PSS & HWC");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PSS & HWC init"));
+
+    //  ************************************************************************
+    //  Initializes PBA
+    //  Note:  This voids the channel used by the GPEs
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_pba_init to initialize PBA");
+    FAPI_EXEC_HWP(l_rc, p9_pm_pba_init, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize PBA BUS");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PBA bus init"));
+
+    //  ************************************************************************
+    //  Mask the FIRs as errors can occur in what follows
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_firinit to mask errors/FIRs");
+    FAPI_EXEC_HWP(l_rc, p9_pm_firinit, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to mask OCC,PBA & CME FIRs/Errors.");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs and Errors"));
+
+    //  ************************************************************************
+    //  Initialize the STOP GPE Engine
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_stop_gpe_init to initialize SGPE");
+    FAPI_EXEC_HWP(l_rc, p9_pm_stop_gpe_init, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize SGPE");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After SGPE initialization"));
+
+    // ************************************************************************
+    // Switch off OCC initiated special wakeup on EX to allowSTOP functionality
+    // ************************************************************************
+    FAPI_DBG("Clear off the wakeup");
+    FAPI_TRY(clear_occ_special_wakeups(i_target),
+             "ERROR: Failed to clear off the wakeup");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "EX targets off special wakeup"));
+
+    //  ************************************************************************
+    //  Initialize the PSTATE GPE Engine
+    //  ************************************************************************
+    /* TODO: RTC 157096: Enable pstate GPE initialization in PM_INIT phase
+    FAPI_DBG("Executing p9_pm_pstate_gpe_init to initialize PGPE");
+    FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_INIT);
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
+    */
+
+    //  ************************************************************************
+    //  Start OCC PPC405
+    //  ************************************************************************
+    FAPI_DBG("Executing p9_pm_occ_control to start OCC PPC405");
+    FAPI_EXEC_HWP(l_rc, p9_pm_occ_control, i_target,
+                  p9occ_ctrl::PPC405_START,// Operation on PPC405
+                  p9occ_ctrl::PPC405_BOOT_NULL // PPC405 boot location
+                 );
+    FAPI_TRY(l_rc, "ERROR: Failed to initialize OCC PPC405");
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode clear_occ_special_wakeups(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("Entering clear_occ_special_wakeups...");
+    fapi2::buffer<uint64_t> l_data64;
+
+    auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
+                        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    FAPI_DBG("No. of functional EX chiplets: %u ", l_exChiplets.size());
+
+    // Iterate through the EX chiplets
+    for (auto l_ex_chplt : l_exChiplets)
+    {
+        FAPI_DBG("Clear OCC special wakeup on ex chiplet 0x%08X", l_ex_chplt);
+        FAPI_TRY(fapi2::getScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
+                 "ERROR: Failed to read OCC Spl wkup on EX 0x%08X", l_ex_chplt);
+        l_data64.clearBit<0>();
+        FAPI_TRY(fapi2::putScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
+                 "ERROR: Failed to clear OCC Spl wkup on EX 0x%08X", l_ex_chplt);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+

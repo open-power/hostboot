@@ -94,7 +94,7 @@ const uint8_t DOORBELLS_COUNT = 4;
 // Reset function
 ///
 /// @brief Stop the CMEs and clear the CME FIRs, PPM Errors and their masks
-///        for all functional and enabled EX chiplets
+//        for all functional and enabled EX chiplets
 ///
 /// @param[in] i_target Proc Chip target
 /// @param[in] i_cmeFirMask  Mask value for CME FIR
@@ -217,7 +217,7 @@ fapi2::ReturnCode pm_corequad_init(
         FAPI_TRY(fapi2::putScom(l_quad_chplt, l_address, l_data64),
                  "ERROR: Failed to reset CME Flags");
 
-        auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
+        auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
 
         // For each functional EX chiplet
@@ -260,7 +260,7 @@ fapi2::ReturnCode pm_corequad_init(
                                    l_firMask),
                      "ERROR: Failed to get local FIR Mask");
             l_data64.flush<0>().insertFromRight<0, 32>(l_firMask);
-            l_address = EX_CME_SCOM_LFIRMASK_OR;
+            l_address = EX_CME_SCOM_LFIRMASK;
             FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
                      "ERROR: Failed to restore the CME Local FIR");
 
@@ -415,7 +415,7 @@ fapi2::ReturnCode pm_corequad_reset(
             // Write parameter provided value to CME FIR MASK
             FAPI_INF(" Write Local CME FIR MASK ");
             l_data64.flush<0>().insertFromRight<0, 32>(i_cmeFirMask);
-            l_address = EX_CME_SCOM_LFIRMASK_OR;
+            l_address = EX_CME_SCOM_LFIRMASK;
             FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
                      "ERROR: Failed to clear the Local CME FIR Mask");
 

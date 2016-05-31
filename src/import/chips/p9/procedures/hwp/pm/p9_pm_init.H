@@ -24,28 +24,33 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_pm_init.H
-/// @brief Wrapper that calls underlying HWPs to perform a Power Management
-///        Init function when needing to initialize the OCC complex.
+/// @brief Wrapper that initializes or resets the OCC complex.
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
 // *HWP HWP Backup Owner :
 // *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 1
+// *HWP Level            : 2
 // *HWP Consumed by      : HS
 
 #ifndef _P9_PM_INIT_H
 #define _P9_PM_INIT_H
 
 // -----------------------------------------------------------------------------
-// Constant definitions
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Includes
 // -----------------------------------------------------------------------------
-#include <p9_pm.H>
 #include <fapi2.H>
+#include <p9_pm.H>
+#include <p9_pm_utils.H>
+#include <p9_pm_corequad_init.H>
+#include <p9_pm_ocb_init.H>
+#include <p9_pm_pss_init.H>
+#include <p9_pm_pba_init.H>
+#include <p9_pm_firinit.H>
+#include <p9_pm_stop_gpe_init.H>
+#include <p9_pm_occ_control.H>
+#include <p9_pm_reset.H>
+
 
 // Function pointer defintion
 typedef fapi2::ReturnCode (*p9_pm_init_FP_t) (
@@ -56,12 +61,10 @@ extern "C"
 {
 //------------------------------------------------------------------------------
 ///
-/// @brief Call underlying unit procedures to perform readiness for
-///             initialization of PM complex.
+/// @brief Wrapper that initializes or resets the OCC complex.
 ///
-/// @param[in] i_target Primary Chip target which will be passed
-///                     to all the procedures
-/// @param[in] i_mode   (PM_INIT / PM_RESET)
+/// @param[in] i_target Chip target
+/// @param[in] i_mode   Mode of operation (PM_INIT/ PM_RESET)
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error code.
 ///
