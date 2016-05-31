@@ -33,6 +33,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/
 
 ##  Include sub dirs

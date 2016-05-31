@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/fapi2/test/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/

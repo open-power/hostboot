@@ -32,6 +32,7 @@ GENPATH?=$(ROOTPATH)/obj/genfiles
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk

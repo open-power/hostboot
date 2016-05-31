@@ -29,6 +29,7 @@ MODULE = istep09
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/

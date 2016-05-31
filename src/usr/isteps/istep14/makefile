@@ -32,6 +32,7 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
