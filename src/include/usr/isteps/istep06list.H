@@ -51,12 +51,12 @@
  *      :   Update master TPM
  *  06.9    host_gard
  *      :   Do Gard
- *  06.10   proc_revert_sbe_mcs_setup
+ *  06.10   host_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
  *  06.11   host_start_occ_xstop_handler
  *      :   Start OpenPOWER xstop
- *  06.12   host_setup_voltages
- *      :   Set correct chip voltage
+ *  06.12   host_voltage_config
+ *      :   Calculate correct chip voltage
  *
  */
 
