@@ -16,6 +16,9 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#include <endian.h>
+
 // IMPORTANT notice on usage of io_RingType and io_instanceId arguments
 //
 // io_RingTyp
@@ -86,13 +89,13 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
     if (i_magic == P9_XIP_MAGIC_HW)
     {
         sbe_offset = *((uint32_t*)i_ringSectionPtr + temp);
-        temp = myRev32(sbe_offset);
+        temp = htobe32(sbe_offset);
     }
     else if (i_magic == P9_XIP_MAGIC_SEEPROM)
     {
         sbe_offset = 0;
         i_ddLevel = 0;
-        temp = myRev32(sbe_offset);
+        temp = htobe32(sbe_offset);
     }
 
     // Looper for each SBE chiplet
@@ -227,18 +230,18 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
                     int var = l * 8 + i_ddLevel + temp;
                     int temp1 =  var / 4;
                     ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                    ring_offset = myRev32(ring_offset);
+                    ring_offset = htobe32(ring_offset);
                     var = ring_offset + i_ddLevel + temp;
                     temp1 = var / 2 + local;
                     chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                    chiplet_offset = myRev16(chiplet_offset);
+                    chiplet_offset = htobe16(chiplet_offset);
 
                     if(i_RingBlockType == SINGLE_RING)
                     {
                         var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                         temp1 = var / 4;
                         next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                        next_ring_offset = myRev32(next_ring_offset);
+                        next_ring_offset = htobe32(next_ring_offset);
                         ringSize = next_ring_offset;
                         io_RingType = COMMON;
 
@@ -285,7 +288,7 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
 
                                 for (uint32_t m = 0; m < ringSize / 4; m++)
                                 {
-                                    printf("compressed data %d  --- %08x   \t", m, myRev32(deltaRingRS4_4B[m]));
+                                    printf("compressed data %d  --- %08x   \t", m, htobe32(deltaRingRS4_4B[m]));
                                 }
 
                                 printf("\n");
@@ -333,18 +336,18 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
                                 uint32_t var = l * 8 + i_ddLevel + temp + 4;
                                 int temp1 =  var / 4;
                                 ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                                ring_offset = myRev32(ring_offset);
+                                ring_offset = htobe32(ring_offset);
                                 var = ring_offset + i_ddLevel + temp;
                                 temp1 = var / 2 + local;
                                 chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                                chiplet_offset = myRev16(chiplet_offset);
+                                chiplet_offset = htobe16(chiplet_offset);
 
                                 if(i_RingBlockType == SINGLE_RING)
                                 {
                                     var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                                     temp1 = var / 4;
                                     next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                                    next_ring_offset = myRev32(next_ring_offset);
+                                    next_ring_offset = htobe32(next_ring_offset);
                                     ringSize = next_ring_offset;
                                     io_RingType = INSTANCE;
 
@@ -388,7 +391,7 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
                                             for (uint32_t m = 0; m < ringSize / 4; m++)
                                             {
                                                 printf("compressed data %d  --- %08x   \t",
-                                                       m, myRev32(deltaRingRS4_4B[m]));
+                                                       m, htobe32(deltaRingRS4_4B[m]));
                                             }
 
                                             printf("\n");
@@ -453,7 +456,7 @@ int get_ring_from_sgpe_image ( void*
     int temp = (i_ddLevel >> 2) + 4;
     uint32_t* deltaRingRS4_4B;
     uint32_t spge_offset = *((uint32_t*)i_ringSectionPtr + temp);
-    temp = myRev32(spge_offset);
+    temp = htobe32(spge_offset);
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
     uint8_t iv_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
@@ -479,18 +482,18 @@ int get_ring_from_sgpe_image ( void*
                 int var = 0 + i_ddLevel + temp;
                 int temp1 =  var / 4;
                 ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                ring_offset = myRev32(ring_offset);
+                ring_offset = htobe32(ring_offset);
                 var = ring_offset + i_ddLevel + temp;
                 temp1 = var / 2 + local;
                 chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                chiplet_offset = myRev16(chiplet_offset);
+                chiplet_offset = htobe16(chiplet_offset);
 
                 if (i_RingBlockType == SINGLE_RING)
                 {
                     var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                     temp1 = var / 4;
                     next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                    next_ring_offset = myRev32(next_ring_offset);
+                    next_ring_offset = htobe32(next_ring_offset);
                     ringSize = next_ring_offset;
                     io_RingType = COMMON;
 
@@ -536,7 +539,7 @@ int get_ring_from_sgpe_image ( void*
 
                             for (uint32_t m = 0; m < ringSize / 4; m++)
                             {
-                                printf("compressed data %d  --- %08x   \t", m, myRev32(deltaRingRS4_4B[m]));
+                                printf("compressed data %d  --- %08x   \t", m, htobe32(deltaRingRS4_4B[m]));
                             }
 
                             printf("\n");
@@ -587,18 +590,18 @@ int get_ring_from_sgpe_image ( void*
                             uint32_t var = 4 + i_ddLevel + temp;
                             int temp1 =  var / 4;
                             ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                            ring_offset = myRev32(ring_offset);
+                            ring_offset = htobe32(ring_offset);
                             var = ring_offset + i_ddLevel + temp;
                             temp1 = var / 2 + local;
                             chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                            chiplet_offset = myRev16(chiplet_offset);
+                            chiplet_offset = htobe16(chiplet_offset);
 
                             if (i_RingBlockType == SINGLE_RING)
                             {
                                 var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                                 temp1 = var / 4;
                                 next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                                next_ring_offset = myRev32(next_ring_offset);
+                                next_ring_offset = htobe32(next_ring_offset);
                                 ringSize = next_ring_offset;
                                 io_RingType = INSTANCE;
 
@@ -642,7 +645,7 @@ int get_ring_from_sgpe_image ( void*
 
                                         for (uint32_t m = 0; m < ringSize / 4; m++)
                                         {
-                                            printf("compressed data %d  --- %08x   \t", m, myRev32(deltaRingRS4_4B[m]));
+                                            printf("compressed data %d  --- %08x   \t", m, htobe32(deltaRingRS4_4B[m]));
                                         }
 
                                         printf("\n");
@@ -704,7 +707,7 @@ int get_ring_from_cme_image ( void*
     int temp = (i_ddLevel >> 2) + 2;
     uint32_t* deltaRingRS4_4B;
     uint32_t spge_offset = *((uint32_t*)i_ringSectionPtr + temp);
-    temp = myRev32(spge_offset);
+    temp = htobe32(spge_offset);
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
     uint8_t iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
@@ -730,18 +733,18 @@ int get_ring_from_cme_image ( void*
                 int var = 0 + i_ddLevel + temp;
                 int temp1 =  var / 4;
                 ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                ring_offset = myRev32(ring_offset);
+                ring_offset = htobe32(ring_offset);
                 var = ring_offset + i_ddLevel + temp;
                 temp1 = var / 2 + local;
                 chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                chiplet_offset = myRev16(chiplet_offset);
+                chiplet_offset = htobe16(chiplet_offset);
 
                 if (i_RingBlockType == SINGLE_RING)
                 {
                     var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                     temp1 = var / 4;
                     next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                    next_ring_offset = myRev32(next_ring_offset);
+                    next_ring_offset = htobe32(next_ring_offset);
                     ringSize = next_ring_offset;
                     io_RingType = COMMON;
 
@@ -787,7 +790,7 @@ int get_ring_from_cme_image ( void*
 
                             for (uint32_t m = 0; m < ringSize / 4; m++)
                             {
-                                printf("compressed data %d  --- %08x   \t", m, myRev32(deltaRingRS4_4B[m]));
+                                printf("compressed data %d  --- %08x   \t", m, htobe32(deltaRingRS4_4B[m]));
                             }
 
                             printf("\n");
@@ -840,18 +843,18 @@ int get_ring_from_cme_image ( void*
                                 uint32_t var = z * 4 + i_ddLevel + temp + 4;
                                 int temp1 =  var / 4;
                                 ring_offset =  *((uint32_t*)i_ringSectionPtr + temp1);
-                                ring_offset = myRev32(ring_offset);
+                                ring_offset = htobe32(ring_offset);
                                 var = ring_offset + i_ddLevel + temp;
                                 temp1 = var / 2 + local;
                                 chiplet_offset  = *((uint16_t*)i_ringSectionPtr + temp1);
-                                chiplet_offset = myRev16(chiplet_offset);
+                                chiplet_offset = htobe16(chiplet_offset);
 
                                 if (i_RingBlockType == SINGLE_RING)
                                 {
                                     var = ring_offset + (chiplet_offset - 8) + i_ddLevel + temp;
                                     temp1 = var / 4;
                                     next_ring_offset = *((uint32_t*)i_ringSectionPtr + temp1);
-                                    next_ring_offset = myRev32(next_ring_offset);
+                                    next_ring_offset = htobe32(next_ring_offset);
                                     ringSize = next_ring_offset;
                                     io_RingType = INSTANCE;
 
@@ -897,7 +900,7 @@ int get_ring_from_cme_image ( void*
 
                                             for (uint32_t m = 0; m < ringSize / 4; m++)
                                             {
-                                                printf("compressed data %d  --- %08x   \t", m, myRev32(deltaRingRS4_4B[m]));
+                                                printf("compressed data %d  --- %08x   \t", m, htobe32(deltaRingRS4_4B[m]));
                                             }
 
                                             printf("\n");
@@ -972,7 +975,7 @@ int tor_get_ring(  void*
     if (i_magic == P9_XIP_MAGIC_HW)
     {
         ddLevelCount =  *((uint32_t*)i_ringSectionPtr + 0);
-        ddLevelCount = myRev32(ddLevelCount);
+        ddLevelCount = htobe32(ddLevelCount);
 
         if(dbgl > 1)
         {
@@ -983,8 +986,8 @@ int tor_get_ring(  void*
         {
             local = 2;
             ddLevelOffset  =  *((uint32_t*)i_ringSectionPtr + local);
-            temp = myRev32(ddLevelOffset) >> 24 & 0x000000FF;
-            ddLevelOffset = myRev32(ddLevelOffset) & 0x00FFFFFF;
+            temp = htobe32(ddLevelOffset) >> 24 & 0x000000FF;
+            ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
 
             if(dbgl > 1)
             {
@@ -996,11 +999,11 @@ int tor_get_ring(  void*
             {
                 ddLevelOffset  =  *((uint32_t*)i_ringSectionPtr + local);
                 ddLevelOffset = ddLevelOffset & 0xFFFFFF00;
-                ddLevelOffset = myRev32(ddLevelOffset);
+                ddLevelOffset = htobe32(ddLevelOffset);
                 ddLevelOffset = ddLevelOffset + 8;
                 local = local + 1;
                 temp1 = *((uint32_t*)i_ringSectionPtr + local);
-                temp1 = myRev32(temp1);
+                temp1 = htobe32(temp1);
                 break;
             }
         }
@@ -1076,9 +1079,9 @@ int tor_get_ring(  void*
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset = myRev32(l_ppe_offset);
+            l_ppe_offset = htobe32(l_ppe_offset);
             l_ppe_size = *((uint32_t*)i_ringSectionPtr + temp + 1 );
-            l_ppe_size = myRev32(l_ppe_size);
+            l_ppe_size = htobe32(l_ppe_size);
         }
         else if (i_PpeType == CME)
         {
@@ -1090,9 +1093,9 @@ int tor_get_ring(  void*
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset = myRev32(l_ppe_offset);
+            l_ppe_offset = htobe32(l_ppe_offset);
             l_ppe_size = *((uint32_t*)i_ringSectionPtr + temp + 1 );
-            l_ppe_size = myRev32(l_ppe_size);
+            l_ppe_size = htobe32(l_ppe_size);
         }
         else if (i_PpeType == SGPE)
         {
@@ -1105,9 +1108,9 @@ int tor_get_ring(  void*
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset = myRev32(l_ppe_offset);
+            l_ppe_offset = htobe32(l_ppe_offset);
             l_ppe_size = *((uint32_t*)i_ringSectionPtr + temp + 1 );
-            l_ppe_size = myRev32(l_ppe_size);
+            l_ppe_size = htobe32(l_ppe_size);
         }
 
         if (io_ringBlockSize < l_ppe_size)
@@ -1248,11 +1251,11 @@ int tor_get_ring(  void*
                 printf("SBE(1):Offset 0x%08x \n", l_cplt_offset);
             }
 
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
             uint32_t l_ppe_cplt_offset  = l_cplt_offset;
             temp = temp + 2;
             l_ppe_offset  = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset  = myRev32(l_ppe_offset);
+            l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
             if(dbgl > 1)
@@ -1287,7 +1290,7 @@ int tor_get_ring(  void*
             }
 
             l_cplt_offset = *((uint32_t*)i_ringSectionPtr + l_word);
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
             l_word++;
 
             if(dbgl > 1)
@@ -1296,7 +1299,7 @@ int tor_get_ring(  void*
             }
 
             l_cplt_size = *((uint32_t*)i_ringSectionPtr + l_word );
-            l_cplt_size = myRev32(l_cplt_size);
+            l_cplt_size = htobe32(l_cplt_size);
 
             if(l_sbeTorId == EC_CPLT && io_RingType == INSTANCE)
             {
@@ -1401,11 +1404,11 @@ int tor_get_ring(  void*
                 printf("CME(1):ppe type Offset 0x%08x \n", l_cplt_offset);
             }
 
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
             uint32_t l_ppe_cplt_offset  = l_cplt_offset;
             temp = temp + 2;
             l_ppe_offset  = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset  = myRev32(l_ppe_offset);
+            l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
             if(dbgl > 1)
@@ -1440,7 +1443,7 @@ int tor_get_ring(  void*
             }
 
             l_cplt_offset = *((uint32_t*)i_ringSectionPtr + l_word);
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
             l_word++;
 
             if(dbgl > 1)
@@ -1449,7 +1452,7 @@ int tor_get_ring(  void*
             }
 
             l_cplt_size = *((uint32_t*)i_ringSectionPtr + l_word );
-            l_cplt_size = myRev32(l_cplt_size);
+            l_cplt_size = htobe32(l_cplt_size);
 
             if(l_cmeTorId == CME11_CPLT && io_RingType == INSTANCE)
             {
@@ -1480,11 +1483,11 @@ int tor_get_ring(  void*
                 printf("SGPE(1):Offset 0x%08x \n", l_cplt_offset);
             }
 
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
 
             temp = temp + 1;
             l_ppe_offset  = *((uint32_t*)i_ringSectionPtr + temp);
-            l_ppe_offset  = myRev32(l_ppe_offset);
+            l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
             if(dbgl > 1)
@@ -1519,10 +1522,10 @@ int tor_get_ring(  void*
             }
 
             l_cplt_offset = *((uint32_t*)i_ringSectionPtr + l_word);
-            l_cplt_offset = myRev32(l_cplt_offset);
+            l_cplt_offset = htobe32(l_cplt_offset);
             l_word++;
             l_cplt_size = *((uint32_t*)i_ringSectionPtr + l_word );
-            l_cplt_size = myRev32(l_cplt_size);
+            l_cplt_size = htobe32(l_cplt_size);
 
             if( io_RingType == INSTANCE)
             {
