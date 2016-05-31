@@ -66,32 +66,6 @@ extern "C"
     const uint64_t FLAG_PBA_TTYPE_SHIFT = 28;
     const uint64_t FLAG_PBA_TTYPE_MASK = 0b111;
 
-// --------------------------------------------------------------------
-// TODO: RTC 147511 - Remove this definition when SBE code is updated
-//                    and use PBA class.
-// ---------------------------------------------------------------------
-//these give the bit mask for each flag
-    enum p9_pba_flags
-    {
-        //fastmode flag, if this flag is set it means we will not check for errors until the very last granule for the read/write
-        FLAG_FASTMODE = 0x80000000ull,
-        //ttype flag, this is 3 bits, will be set to 0 for dma, 1, to lco_m, 2 for atomic, 3 for cache_inj, and 4 for ci_pr_w --same as in the documentation and how they will be passed to the register
-        FLAG_TTYPE    = 0x70000000ull
-    };
-
-    enum p9_pba_write_ttype
-    {
-        DMA = 0,
-        LCO = 1,
-        ATOMIC = 2,
-        INJ = 3,
-        CI = 4
-    };
-
-    const uint64_t FLAG_TTYPE_SHIFT = 28;
-// -----------------------------------------------------
-
-
 } //extern "C"
 
 #endif //_P9_PBA_CONSTANTS_H_
