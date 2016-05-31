@@ -125,6 +125,22 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
+        //Disable Incoming PSI Interrupts
+        TRACDCOMP(g_trac_intr, "IntrRp::_init() Disabling PSI Interrupts");
+        uint64_t l_disablePsiIntr = PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI;
+        uint64_t size = sizeof(l_disablePsiIntr);
+        l_err = deviceWrite(procTarget,
+                     &l_disablePsiIntr,
+                     size,
+                 DEVICE_SCOM_ADDRESS(PSI_BRIDGE_INTP_STATUS_CTL_CLR_SCOM_ADDR));
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr,
+                             "IntrRp::_init() Error disabling PSI Interrupts.");
+            break;
+        }
+
       //TODO RTC 134431
       #ifdef CONFIG_MPIPL_ENABLED
         uint8_t is_mpipl = 0;
@@ -879,15 +895,13 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t l_intr_source)
     l_psiHbEsbptr +=
        (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_OFF_OFFSET)/sizeof(uint64_t));
 
-    uint64_t l_maskRead = *l_psiHbEsbptr;
-    TRACDCOMP(g_trac_intr, "Mask read result: %lx", l_maskRead);
+    //MMIO Read to this address transitions the ESB to the off state
+    volatile uint64_t l_maskRead = *l_psiHbEsbptr;
+    eieio();
 
-/*
-    TODO RTC 150260
-
-    //Perform 2nd read to verify in OFF state
+    //Perform 2nd read to verify in OFF state - the read returns the previous
+    // esb state, so a 2nd read is required to know it is in the off state
     l_maskRead = *l_psiHbEsbptr;
-    TRACDCOMP(g_trac_intr, "Mask read result: %lx", l_maskRead);
 
     if (l_maskRead != ESB_STATE_OFF)
     {
@@ -905,7 +919,6 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t l_intr_source)
                );
 
     }
-**/
 
     return l_err;
 }
@@ -917,12 +930,12 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source)
     l_psiHbEsbptr +=
      (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_RESET_OFFSET)/sizeof(uint64_t));
 
-    uint64_t l_unmaskRead = *l_psiHbEsbptr;
-    TRACDCOMP(g_trac_intr, "Unmask read result: %lx", l_unmaskRead);
+    //MMIO Read to this address transitions the ESB to the RESET state
+    volatile uint64_t l_unmaskRead = *l_psiHbEsbptr;
+    eieio();
 
-/* TODO RTC 150260
-
-    //Read 2nd time to verify proper ESB state
+    //Perform 2nd read to verify in RESET state - the read returns the previous
+    // esb state, so a 2nd read is required to know it is in the off state
     l_unmaskRead = *l_psiHbEsbptr;
 
     if (l_unmaskRead != ESB_STATE_RESET)
@@ -941,7 +954,6 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source)
                );
 
     }
-**/
     return l_err;
 }
 
