@@ -138,7 +138,7 @@ function fsp-ci-wait {
     return $rc
 }
 
-function testr {
+function run_fsp_ci {
     ### Call fsp-ci to test hostboot release
     # Start fsp-CI job and set URL
     retries=3
@@ -165,10 +165,12 @@ function testr {
     ### Wait on fsp-CI job to complete, whether pass or fail
     fsp-ci-wait $URL || exit -1
 
+}
+
+function release {
     ### Handle cmvc final commands to integrate track, post notes to BQ
     hbRelease post-release --level $RELEASE_NAME --released $PREVIOUS_RELEASE --feature $FEATURE --release $FIPS_RELEASE || exit -1
 }
-
 
 function usage {
     echo "Usage: auto-release.sh [OPTIONS]"
@@ -176,6 +178,7 @@ function usage {
     echo "OPTIONS:"
     echo " -b   Run build phase"
     echo " -t   Run test and release phase"
+    echo " -c   Run test phase only (fsp-ci)"
     echo " -h   Help"
     exit 1
 }
@@ -188,14 +191,18 @@ then
     exit 1
 fi
 
-while getopts "bth" opt; do
+while getopts "btch" opt; do
     case $opt in
         b)
             build
             ;;
         t)
             setup
-            testr
+            run_fsp_ci
+            release
+            ;;
+        c)
+            run_fsp_ci
             ;;
         h)
             usage
