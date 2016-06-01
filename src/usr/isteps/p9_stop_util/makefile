@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/makefile $
+# $Source: src/usr/isteps/p9_stop_util/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,30 +22,19 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH=../../..
-MODULE = isteps
+ROOTPATH = ../../../..
+MODULE = p9_stop_util
 
-SUBDIRS+=istep06.d
-SUBDIRS+=istep07.d
-SUBDIRS+=istep08.d
-SUBDIRS+=istep09.d
-SUBDIRS+=istep10.d
-SUBDIRS+=istep11.d
-SUBDIRS+=istep12.d
-SUBDIRS+=istep13.d
-SUBDIRS+=istep14.d
-SUBDIRS+=istep15.d
-SUBDIRS+=istep16.d
-SUBDIRS+=istep20.d
-SUBDIRS+=istep21.d
-SUBDIRS+=pm.d
-SUBDIRS += p9_stop_util.d
+PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-OBJS += hwpisteperror.o
-OBJS += hwpistepud.o
-OBJS += istepHelperFuncs.o
-OBJS += pbusLinkSvc.o
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
+OBJS += p9_stop_util.o
 
+include ${ROOTPATH}/procedure.rules.mk
+include $(PROCEDURES_PATH)/utils/stopreg/p9_stop_api.mk
 include ${ROOTPATH}/config.mk
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/

@@ -132,6 +132,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep15Dependancies = {
     {
         DEP_LIB(libistep15.so),
+        DEP_LIB(libp9_stop_util.so),
         NULL
     }
 };
