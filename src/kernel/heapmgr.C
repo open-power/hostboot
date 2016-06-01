@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,7 +138,8 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     size_t asize = bucketByteSize(chunk->bucket)-8;
     if(asize < i_sz)
     {
-        new_ptr = _allocate(i_sz);
+        new_ptr = (i_sz > MAX_SMALL_ALLOC_SIZE) ?
+            _allocateBig(i_sz) : _allocate(i_sz);
         memcpy(new_ptr, i_ptr, asize);
         _free(i_ptr);
     }
