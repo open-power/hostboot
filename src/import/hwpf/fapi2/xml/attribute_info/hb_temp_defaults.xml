@@ -202,6 +202,15 @@
     <attribute>
         <id>ATTR_OBUS_RATIO_VALUE</id>
     </attribute>
+    <attribute>
+        <id>ATTR_PIBMEM_REPAIR0</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PIBMEM_REPAIR1</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_PIBMEM_REPAIR2</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

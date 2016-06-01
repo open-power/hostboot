@@ -703,4 +703,33 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>ATTR_PIBMEM_REPAIR0</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Pibmem repair attribute 0</description>
+    <valueType>uint64</valueType>
+    <persistRuntime/>
+    <platInit/>
+    <writeable/>
+</attribute>
+
+ <attribute>
+     <id>ATTR_PIBMEM_REPAIR1</id>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <description>Pibmem repair attribute 1</description>
+     <valueType>uint64</valueType>
+     <persistRuntime/>
+     <platInit/>
+     <writeable/>
+</attribute>
+
+ <attribute>
+     <id>ATTR_PIBMEM_REPAIR2</id>
+     <targetType>TARGET_TYPE_SYSTEM</targetType>
+     <description>Pibmem repair attribute 2</description>
+     <valueType>uint64</valueType>
+     <persistRuntime/>
+     <platInit/>
+     <writeable/>
+</attribute>
 </attributes>
