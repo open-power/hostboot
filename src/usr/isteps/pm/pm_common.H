@@ -27,6 +27,7 @@
 
 #include <limits.h>
 #include <errl/errlentry.H>
+#include <util/utillidmgr.H>
 #include <diag/prdf/prdfWriteHomerFirData.H>
 
 namespace HBPM
@@ -60,7 +61,6 @@ namespace HBPM
     {
         OccHostDataVersion = 0x00000090,
 
-        OCC_LIDID = 0x81e00430, // @TODO RTC: 148935 Where to define?
         OCC_IBSCOM_RANGE_IN_MB = MEGABYTE,
 
         // Interrupt Types
@@ -70,10 +70,6 @@ namespace HBPM
         // FIR Master
         NOT_FIR_MASTER = 0x00000000,
         IS_FIR_MASTER  = 0x00000001,
-
-        // Hcode Reference Image LIDs
-        NIMBUS_HCODE_LIDID = 0x81e00602, // @TODO RTC: 148935 Where to define?
-        CUMULUS_HCODE_LIDID = 0x81e00603, // @TODO RTC: 148935 Where to define?
     };
 
     /**
@@ -87,7 +83,7 @@ namespace HBPM
     errlHndl_t pstateParameterBuild( TARGETING::Target* i_target,
                                      void* i_homer);
 
-/**
+    /**
      * @brief Sets up OCC Host data in Homer
      *
      * @param[in] i_proc:         target processor to load
@@ -139,11 +135,13 @@ namespace HBPM
      *                                 proc's OCC image in the homer
      * @param[in] i_occImgVaddr:    Virtual address of current
      *                                 proc's OCC image in the homer
+     * @param[in] i_mode            Selects initial load vs concurrent reloads
      * @return errlHndl_t  Error log if loadOCCImageToHomer failed
      */
     errlHndl_t loadOCCImageToHomer(TARGETING::Target* i_target,
                                    uint64_t i_occImgPaddr,
-                                   uint64_t i_occImgVaddr);
+                                   uint64_t i_occImgVaddr,
+                                   uint32_t i_mode);
 
     /**
      * @brief Start PM Complex.

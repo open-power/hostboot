@@ -32,6 +32,7 @@
 #include <util/utillidmgr.H>
 
 #include <pm/pm_common.H>
+#include <isteps/pm/pm_common_ext.H>
 
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
@@ -72,52 +73,6 @@ namespace RTPM
     }
 
 
-    // @TODO RTC: 148935 Defer creation of publicly accessible version for
-    //       HTMGT to consume that also handles the non-runtime case
-    /**
-     *  @brief Convert HOMER physical address space to a vitual address
-     *  @param[in]  i_proc_target  Processsor target
-     *  @param[in]  i_phys_addr    Physical address
-     *  @return NULL on error, else virtual address
-     */
-    void *convertHomerPhysToVirt( TARGETING::Target* i_proc_target,
-                                  uint64_t i_phys_addr)
-    {
-        int rc = 0;
-
-        void *l_virt_addr = reinterpret_cast <void*>
-            (i_proc_target->getAttr<ATTR_HOMER_VIRT_ADDR>());
-
-        if((i_proc_target->getAttr<ATTR_HOMER_PHYS_ADDR>() != i_phys_addr) ||
-            (NULL == l_virt_addr))
-        {
-            if(NULL != l_virt_addr)
-            {
-                rc = g_hostInterfaces->unmap_phys_mem(l_virt_addr);
-                if(rc)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              ERR_MRK"convertHomerPhysToVirt: "
-                              "unmap_phys_mem failed, rc=0x%0X",
-                              rc);
-
-                    l_virt_addr = NULL;
-                }
-            }
-
-            l_virt_addr = g_hostInterfaces->map_phys_mem(i_phys_addr,
-                                                         4*MEGABYTE);
-
-            // Update the attributes for the current values
-            i_proc_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_phys_addr);
-            i_proc_target->setAttr<ATTR_HOMER_VIRT_ADDR>(
-                reinterpret_cast<uint64_t>(l_virt_addr));
-        }
-
-        return l_virt_addr;
-    }
-
-
     /**
      *  @brief Load OCC/HCODE images into mainstore
      */
@@ -144,7 +99,7 @@ namespace RTPM
                    i_occ_common_addr,
                    i_chip,
                    i_mode);
-/* @TODO RTC: 148935 */
+
         do
         {
             // Utility to convert i_chip to Target
@@ -162,11 +117,11 @@ namespace RTPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "load_pm_complex: "
                            "proc Target HUID=0x%08X",
-                            proc_target->getAttr<ATTR_HUID>());
+                            get_huid(proc_target));
             }
 
-            void* occVirt = convertHomerPhysToVirt(proc_target,
-                                                   i_homer_addr);
+            void* occVirt = HBPM::convertHomerPhysToVirt(proc_target,
+                                                         i_homer_addr);
             if(NULL == occVirt)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -175,8 +130,7 @@ namespace RTPM
                 break;
             }
 
-            uint64_t l_homer_addr_va =
-                reinterpret_cast <uint64_t>(occVirt);
+            uint64_t l_homer_addr_va = reinterpret_cast <uint64_t>(occVirt);
 
             err = HBPM::loadOCCSetup(proc_target,
                                      i_homer_addr,
@@ -192,7 +146,8 @@ namespace RTPM
 
             err = HBPM::loadOCCImageToHomer(proc_target,
                                             i_homer_addr,
-                                            l_homer_addr_va);
+                                            l_homer_addr_va,
+                                            i_mode);
             if(err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -237,7 +192,7 @@ namespace RTPM
                 break;
             }
         } while(0);
-/* @TODO RTC: 148935 */
+
         if (err)
         {
             pm_complex_error(err,
@@ -262,10 +217,6 @@ namespace RTPM
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "start_pm_complex: RtProcChip %llx", i_chip);
 
-        // Run Sheldon's simics command file @TODO RTC: 148935
-        /* MAGIC_INSTRUCTION(MAGIC_RUN_COMMAND_FILE); @TODO RTC: 148935 */
-
-/* @TODO RTC: 148935 start */
         do
         {
             // Utility to convert i_chip to Target
@@ -283,7 +234,7 @@ namespace RTPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "start_pm_complex: "
                            "proc Target HUID=0x%08X",
-                           proc_target->getAttr<ATTR_HUID>());
+                           get_huid(proc_target));
             }
 
             err = HBPM::startPMComplex(proc_target);
@@ -295,7 +246,7 @@ namespace RTPM
                 break;
             }
         } while(0);
-/* end @TODO RTC: 148935 */
+
         if ( err )
         {
             pm_complex_error(err,
@@ -319,7 +270,7 @@ namespace RTPM
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "reset_pm_complex: RtProcChip %llx", i_chip);
-/* @TODO RTC: 148935 start */
+
         do
         {
             // Utility to convert i_chip to Target
@@ -337,7 +288,7 @@ namespace RTPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "reset_pm_complex: "
                            "proc Target HUID=0x%08X",
-                           proc_target->getAttr<ATTR_HUID>());
+                           get_huid(proc_target));
             }
 
             err = HBPM::resetPMComplex(proc_target);
@@ -349,7 +300,7 @@ namespace RTPM
                 break;
             }
         } while(0);
-/* end @TODO RTC: 148935 */
+
         if ( err )
         {
             pm_complex_error(err,

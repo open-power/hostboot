@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,9 @@ enum LidId
 {
     TEST_LIDID = 0x00000111,
     OCC_LIDID = 0x81e00430,
+    // Hcode Reference Image LIDs
+    NIMBUS_HCODE_LIDID = 0x81e00602,
+    CUMULUS_HCODE_LIDID = 0x81e00603,
 };
 
 }
@@ -140,6 +143,43 @@ class UtilLidMgr
      *                  return errl !=  NULL  -> failure
      */
     errlHndl_t getLid(void* i_dest, size_t i_destSize);
+
+    /**
+     *  @brief Get Stored LID Image
+     *
+     *  @par Detailed Description:
+     *          Determines if a lid image is stored in hostboot
+     *          memory space for this UtilLidMgr object.  If an
+     *          image is not stored, then the lid image is stored.
+     *          Returns pointer and size for the lid image.
+     *
+     *  @param[out] o_pLidImage
+     *          Pointer to where lid image is stored in hostboot
+     *          memory
+     *
+     *  @param[out] o_lidImageSize
+     *          Size of lid image is stored in hostboot memory
+     *
+     *
+     *  @return     errlHndl_t
+     *                  return errl ==  NULL  -> success
+     *                  return errl !=  NULL  -> failure
+     */
+    errlHndl_t getStoredLidImage(void*& o_pLidImage,
+                                 size_t& o_lidImageSize);
+
+    /**
+     *  @brief Release LID Image
+     *
+     *  @par Detailed Description:
+     *          Frees memory space allocated for the lid image.
+     *          Clears variables associated with storing the image.
+     *
+     *  @return     errlHndl_t
+     *                  return errl ==  NULL  -> success
+     *                  return errl !=  NULL  -> failure
+     */
+    errlHndl_t releaseLidImage(void);
 
 #ifdef __HOSTBOOT_RUNTIME
     /**
@@ -322,6 +362,16 @@ class UtilLidMgr
      * @brief Pointer to message queue
      */
     msg_q_t iv_HbMsgQ;
+
+    /**
+     * @brief pointer to buffer with image of current LID
+     */
+    void* iv_pLidImage;
+
+    /**
+     * @brief size of buffer with image of current LID
+     */
+    size_t iv_lidImageSize;
 
 
 #else // __HOSTBOOT_RUNTIME

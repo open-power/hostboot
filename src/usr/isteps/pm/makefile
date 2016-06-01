@@ -29,7 +29,6 @@ MODULE = pm
 SUBDIRS+=runtime.d
 
 ## Objects unique to HB IPL
-OBJS +=
 
 ## Objects common to HB IPL and HBRT
 include pm.mk
