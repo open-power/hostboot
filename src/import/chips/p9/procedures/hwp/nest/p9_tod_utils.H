@@ -304,6 +304,15 @@ extern "C" {
         TOD_OSC_NONE           // No oscillators connected
     };
 
+    //Enum that gives which oscilators we need to disable -- used in p9_tod_cleanup
+    enum p9_tod_osc_disable
+    {
+        TOD_OSC_0_DISABLE,
+        TOD_OSC_1_DISABLE,
+        TOD_OSC_0_AND_1_DISABLE,
+        TOD_OSC_DISABLE_NONE
+    };
+
     struct p9_tod_setup_conf_regs
     {
         fapi2::buffer<uint64_t> tod_m_path_ctrl_reg;
