@@ -83,6 +83,37 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     return l_err;
 }
 
+errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
+                                         size_t& o_lidImageSize)
+{
+    errlHndl_t l_err = NULL;
+
+    if((NULL == iv_lidBuffer) || (0 == iv_lidSize))
+    {
+        l_err = loadLid();
+    }
+
+    if(l_err)
+    {
+        o_lidImageSize = 0;
+        o_pLidImage = NULL;
+    }
+    else
+    {
+        o_lidImageSize = iv_lidSize;
+        o_pLidImage = iv_lidBuffer;
+    }
+
+    return l_err;
+}
+
+errlHndl_t UtilLidMgr::releaseLidImage(void)
+{
+    errlHndl_t l_err = cleanup();
+
+    return l_err;
+}
+
 errlHndl_t UtilLidMgr::loadLid()
 {
     if (NULL != iv_lidBuffer) return NULL;

@@ -30,8 +30,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 
@@ -81,6 +79,3 @@ include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
-
-
-include ${ROOTPATH}/config.mk

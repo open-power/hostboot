@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,30 @@ class LidMgrRtTest : public CxxTest::TestSuite
                     TS_FAIL("testLidInPnor: failed to get lid from PNOR");
                 }
                 delete[] l_ptr;
+
+                void* l_pLidImage = NULL;
+                size_t l_lidImageSize = 0;
+                l_errl = l_lidMgr.getStoredLidImage(l_pLidImage,
+                                                    l_lidImageSize);
+                if (l_errl)
+                {
+                    errlCommit(l_errl, UTIL_COMP_ID);
+                    TS_FAIL("testLidInPnor: failed to store lid from PNOR");
+                }
+
+                if (l_lidImageSize != l_lidPnorInfo.size)
+                {
+                    TS_FAIL("testLidInPnor: lidImageSize does not match pnor"
+                            " TEST section size 0x%.8X != 0x%.8X",
+                            l_lidImageSize, l_lidPnorInfo.size);
+                }
+
+                l_errl = l_lidMgr.releaseLidImage();
+                if(l_errl)
+                {
+                    errlCommit(l_errl, UTIL_COMP_ID);
+                    TS_FAIL("testLidInPnor: failed to release lid from PNOR");
+                }
             }while(0);
         }
 };

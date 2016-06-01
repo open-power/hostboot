@@ -44,6 +44,8 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 : iv_needUnlock(false)
 ,iv_queueRegistered(false)
 ,iv_HbMsgQ(NULL)
+,iv_pLidImage(NULL)
+,iv_lidImageSize(0)
 ,iv_lidSize(0)
 {
     updateLid(i_lidId);
@@ -208,6 +210,8 @@ errlHndl_t UtilLidMgr::getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor)
     return errl;
 }
 
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 errlHndl_t UtilLidMgr::getLidPnor(void* i_dest,
                                   size_t i_destSize,
                                   bool& o_imgInPnor)
@@ -511,8 +515,8 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                      *   @reasoncode    Util::UTIL_LIDMGR_UNSUP_MSG
                      *   @userdata1     LID ID
                      *   @userdata2     Message Type
-                     *   @devdesc       Invalid Message type received from FSP when
-                     *                  transferring LID pages.
+                     *   @devdesc       Invalid Message type received from FSP
+                     *                  when transferring LID pages.
                      */
                     errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                          Util::UTIL_LIDMGR_GETLID,
@@ -539,6 +543,60 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
     return errl;
 }
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
+                                         size_t& o_lidImageSize)
+{
+    errlHndl_t errl = NULL;
+
+    if((iv_pLidImage != NULL) && (iv_lidImageSize != 0))
+    {
+        o_pLidImage = iv_pLidImage;
+        o_lidImageSize = iv_lidImageSize;
+    }
+    else
+    {
+        if(0 == iv_lidImageSize)
+        {
+            errl = getLidSize(iv_lidImageSize);
+        }
+
+        if(errl != NULL)
+        {
+            if(iv_pLidImage != NULL)
+            {
+                free(iv_pLidImage);
+            }
+
+            iv_pLidImage = static_cast<void*>(malloc(iv_lidImageSize));
+
+            errl = getLid(iv_pLidImage, iv_lidImageSize);
+        }
+
+        if(errl)
+        {
+            cleanup();
+        }
+
+        o_pLidImage = iv_pLidImage;
+        o_lidImageSize = iv_lidImageSize;
+    }
+
+    return errl;
+}
+
+
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+errlHndl_t UtilLidMgr::releaseLidImage(void)
+{
+    errlHndl_t errl = cleanup();
+
+    return errl;
+}
+
 
 errlHndl_t UtilLidMgr::sendMboxMessage( MBOX_MSG_TYPE type,
                                         msg_t * i_msg )
@@ -679,6 +737,13 @@ errlHndl_t UtilLidMgr::cleanup()
         }
     }
 
+    if(iv_pLidImage != NULL)
+    {
+        free(iv_pLidImage);
+        iv_pLidImage = NULL;
+    }
+
+    iv_lidImageSize = 0;
 
     return l_err;
 }
