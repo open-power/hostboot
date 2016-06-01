@@ -978,6 +978,7 @@ int tor_get_ring(  void*
 
     if (i_magic == P9_XIP_MAGIC_HW)
     {
+        uint8_t dd_check = 0;
         ddLevelCount =  *((uint32_t*)i_ringSectionPtr + 0);
         ddLevelCount = htobe32(ddLevelCount);
 
@@ -1008,8 +1009,15 @@ int tor_get_ring(  void*
                 local = local + 1;
                 temp1 = *((uint32_t*)i_ringSectionPtr + local);
                 temp1 = htobe32(temp1);
+                dd_check = 1;
                 break;
             }
+        }
+
+        if(!dd_check)
+        {
+            MY_INF(" invalid DD level input \n");
+            return IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND;
         }
     }
     else if( i_magic ==  P9_XIP_MAGIC_SEEPROM)
