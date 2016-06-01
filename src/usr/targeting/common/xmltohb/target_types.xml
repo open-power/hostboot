@@ -2230,6 +2230,7 @@
     <attribute><id>MC_SYNC_MODE</id></attribute>
     <attribute><id>NHTM_TRACE_TYPE</id></attribute>
     <attribute><id>CHTM_TRACE_TYPE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
@@ -2301,6 +2302,7 @@
     <attribute><id>POUNDV_BUCKET_NUM</id><default>0</default></attribute>
     <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
 </targetType>
 
 <!-- EX: Use same EX target for both Nimbus and Cumulus
@@ -2313,8 +2315,9 @@
         <id>TYPE</id>
         <default>EX</default>
     </attribute>
-    <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
 </targetType>
 
 <!-- CORE: Use same CORE target for both Nimbus and Cumulus
@@ -2326,10 +2329,11 @@
         <id>TYPE</id>
         <default>CORE</default>
     </attribute>
-    <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>CHIPLET_ID</id></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
 </targetType>
 
 <!-- MCS
@@ -2730,6 +2734,7 @@
     <attribute><id>EFF_DRAM_TWTR_S</id></attribute>
     <attribute><id>EFF_DRAM_TWTR_L</id></attribute>
     <attribute><id>EFF_DRAM_TMAW</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -2756,6 +2761,7 @@
     <attribute><id>EFF_DIMM_SIZE</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -2787,6 +2793,7 @@
     <attribute><id>MSS_VOLT_VPP</id></attribute>
     <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 </targetType>
 
 <targetType>
@@ -2898,7 +2905,7 @@
     <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL_P9</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1_P9</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2_P9</id></attribute>
-
+    <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
 </targetType>
 
 <!-- PHB
@@ -2922,6 +2929,7 @@
     <attribute><id>PROC_PCIE_BAR_ENABLE</id></attribute>
     <attribute><id>PROC_PCIE_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_PCIE_BAR_SIZE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
 
 
 </targetType>
@@ -2959,6 +2967,7 @@
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>OPTICS_CONFIG_MODE</id></attribute>
     <attribute><id>PEER_TARGET</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
@@ -2990,6 +2999,7 @@
         <default>NV</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
 </targetType>
@@ -3143,6 +3153,7 @@
     </attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
 </targetType>
 
 <targetType>
