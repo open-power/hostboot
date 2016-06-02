@@ -24,6 +24,8 @@
     <description>Mapping keyword smaller than minimum expected</description>
     <ffdc>SIZE</ffdc>
     <ffdc>EXPECTED</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -31,12 +33,15 @@
     <description>Version in vpd mapping keyword not supported</description>
     <ffdc>VERSION</ffdc>
     <ffdc>EXPECTED</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_TYPE</rc>
     <description>Type not supported. Supported types are MR and MT</description>
-    <ffdc>TYPE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -47,38 +52,45 @@
     <ffdc>MEMVPDFREQ1</ffdc>
     <ffdc>MEMVPDFREQ2</ffdc>
     <ffdc>MEMVPDFREQ3</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_RANK</rc>
     <description>Invalid Rank. Valid values are 0,1,2 and 4</description>
     <ffdc>RANK</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_NO_MATCH_FOUND</rc>
     <description>
-      No keyword specified for MCA, Ranks, and frequency
+      No keyword specified for MCS, Ranks, and frequency
     </description>
-    <ffdc>TYPE</ffdc>
-    <ffdc>MCA</ffdc>
+    <ffdc>MCS</ffdc>
     <ffdc>FREQ</ffdc>
     <ffdc>DIMM0RANK</ffdc>
     <ffdc>DIMM1RANK</ffdc>
     <ffdc>HEADER</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_CONFIGURATION</rc>
-    <description>Unsupported MCA, Ranks, and frequency</description>
+    <description>Unsupported MCS, Ranks, and frequency</description>
     <ffdc>TYPE</ffdc>
-    <ffdc>MCA</ffdc>
+    <ffdc>MCS</ffdc>
     <ffdc>FREQ</ffdc>
     <ffdc>DIMM0RANK</ffdc>
     <ffdc>DIMM1RANK</ffdc>
-    <ffdc>VPDMCAMASK</ffdc>
+    <ffdc>VPDMCSMASK</ffdc>
     <ffdc>VPDFREQMASK</ffdc>
     <ffdc>VPDRANKMASK</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
