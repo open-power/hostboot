@@ -1464,9 +1464,6 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size());
 
-// @todo RTC:149770 Once ZZ supports DIMMs, add DIMMs back in min hdw check.
-// It works for stand alone.
-#if (0)
         if (l_dimms.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
@@ -1517,7 +1514,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             errlCommit(l_errl, HWAS_COMP_ID);
             // errl is now NULL
         } // if no dimms
-#endif
+
         // There needs to be either functional MCS/MCAs (NIMBUS) or MCS/MBAs
         // (CUMULUS). Check for MCAs first.
         PredicateCTM l_mca(CLASS_UNIT, TYPE_MCA);
@@ -2079,9 +2076,6 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         case TYPE_MCA:
         {
-// @todo RTC:149770 Once ZZ supports DIMMs, add DIMMs back in min hdw check.
-// It works for stand alone.
-#if (0)
             // No Child DIMMs
             // If next is not a DIMM sharing the same MCA, deconfig MCS
             if ( (l_nextTargetInfo == NULL) ||
@@ -2095,7 +2089,6 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             // No Parent MCS
             // If MCA doesn't share the same MCS as MCSIndex, deconfig MCA
             else
-#endif // the new line can be removed
             if ( (l_MCSIndex == __INT_MAX__) ||
                     !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCSIndex]))
             {
