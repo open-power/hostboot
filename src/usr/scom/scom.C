@@ -180,11 +180,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
     errlHndl_t l_err = NULL;
 
-    enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
-
-    mutex_t* l_mutex = NULL;
-    bool need_unlock = false;
-
     do {
         // In HOSTBOOT_RUNTIME we always defer indirect scoms to Sapphire.
 #ifndef __HOSTBOOT_RUNTIME
@@ -202,15 +197,115 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
             break;
 #ifndef __HOSTBOOT_RUNTIME
         }
-
-        // We are performing an indirect scom.
-        uint64_t elapsed_indScom_time_ns = 0;
         uint64_t l_io_buffer = 0;
         uint64_t temp_scomAddr = 0;
+        uint8_t form = 0;
 
         memcpy(&l_io_buffer, io_buffer, 8);
         memcpy(&temp_scomAddr, &i_addr, 8);
 
+        // Bits 0:3 of the address hold the indirect and form bits
+        // We shift out 60 bits to read the form bit here
+        form = (i_addr >> 60) & 1;
+
+        // If the form is 0, we are using the "old" indirect scom method
+        if (form == 0)
+        {
+            // setupForm0ScomRegs sets up the registers for form0 scom op
+            l_err = doForm0IndirectScom(i_opType,
+                                        i_target,
+                                        io_buffer,
+                                        io_buflen,
+                                        i_accessType,
+                                        i_addr);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_scom,
+                    "checkIndirectAndDoScom: Error from doForm0IndirectScom");
+                break;
+            }
+        }
+
+        // If form is equal to 1, we are using new FBC method
+        else if (form == 1)
+        {
+            l_err = doForm1IndirectScom(i_opType,
+                                        i_target,
+                                        io_buffer,
+                                        io_buflen,
+                                        i_accessType,
+                                        i_addr);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_scom,
+                    "checkIndirectAndDoScom: Error from doForm1IndirectScom");
+                break;
+
+            }
+        }
+
+        // Unsupported form, break out
+        else
+        {
+            TRACFCOMP(g_trac_scom, "Unsupported indirect scom form %d", form);
+
+            /*@
+             * @errortype
+             * @moduleid     SCOM::SCOM_CHECK_INDIRECT_AND_DO_SCOM
+             * @reasoncode   SCOM::SCOM_INVALID_FORM
+             * @userdata1    Address
+             * @userdata2    HUID of Target
+             * @devdesc      Unsupported indirect scom form
+             * @custdesc     A problem occurred during the IPL of the system.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  SCOM_CHECK_INDIRECT_AND_DO_SCOM,
+                                  SCOM_INVALID_FORM,
+                                  i_addr,
+                                  get_huid(i_target),
+                                  true /*Add HB Software Callout*/);
+
+            break;
+        }
+
+#endif // __HOSTBOOT_RUNTIME
+    } while(0);
+
+    if(i_opMode & fapi2::IGNORE_HW_ERROR)
+    {
+        TRACFCOMP(g_trac_scom, "IGNORE_HW_ERROR opmode detected for scom, any errors are being deleted");
+        delete l_err;
+    }
+
+    return l_err;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               uint64_t i_addr)
+{
+    errlHndl_t l_err = NULL;
+
+    enum { MAX_INDSCOM_TIMEOUT_NS = 100000 }; //=.1ms
+
+    mutex_t* l_mutex = NULL;
+    bool need_unlock = false;
+    uint64_t elapsed_indScom_time_ns = 0;
+    uint64_t l_io_buffer = 0;
+    uint64_t temp_scomAddr = 0;
+
+    memcpy(&l_io_buffer, io_buffer, 8);
+    memcpy(&temp_scomAddr, &i_addr, 8);
+
+    do {
         // Get the 20bit indirect scom address
         temp_scomAddr = temp_scomAddr & 0x001FFFFF00000000;
 
@@ -227,11 +322,9 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         // bit 48-63 - local addr
         i_addr = i_addr & 0x000000007FFFFFFF;
 
-
         // If we are doing a read. We need to do a write first..
         if(i_opType == DeviceFW::READ)
         {
-
             // use the chip-specific mutex attribute
             l_mutex =
               i_target->getHbMutexAttr<TARGETING::ATTR_SCOM_IND_MUTEX>();
@@ -252,9 +345,9 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                              i_addr);
 
             if (l_err != NULL)
-	    {
+            {
                 break;
-	    }
+            }
 
             // Need to check loop on read until we see done, error,
             //  or we timeout
@@ -336,11 +429,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 }
                 else
                 {
-                //Add the callouts for the specific PCB/PIB error
-                PIB::addFruCallouts( i_target,
-                                     scomout.piberr,
-                                     i_addr,
-                                     l_err );
+                    //Add the callouts for the specific PCB/PIB error
+                    PIB::addFruCallouts( i_target,
+                                         scomout.piberr,
+                                         i_addr,
+                                         l_err );
                 }
 
                 //Add this target to the FFDC
@@ -505,14 +598,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                   .addToLog(l_err);
             }
         } // end of write
-#endif // __HOSTBOOT_RUNTIME
     } while(0);
-
-    if(i_opMode & fapi2::IGNORE_HW_ERROR)
-    {
-        TRACFCOMP(g_trac_scom, "IGNORE_HW_ERROR opmode detected for scom, any errors are being deleted");
-        delete l_err;
-    }
 
     if( need_unlock )
     {
@@ -521,7 +607,107 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 
     return l_err;
 }
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               uint64_t i_addr)
+{
+    errlHndl_t l_err = NULL;
 
+    uint64_t l_io_buffer = 0;
+    uint64_t temp_scomAddr = 0;
+    uint64_t l_data_from_addr = 0;
+
+    memcpy(&l_io_buffer, io_buffer, 8);
+    memcpy(&temp_scomAddr, &i_addr, 8);
+
+    do {
+        if(i_opType == DeviceFW::READ)
+        {
+            TRACFCOMP(g_trac_scom, "doForm1IndirectScom: Indirect Scom Form 1"
+                " does not support read op");
+
+            /*@
+             * @errortype
+             * @moduleid     SCOM::SCOM_DO_FORM_1_INDIRECT_SCOM
+             * @reasoncode   SCOM::SCOM_FORM_1_READ_REQUEST
+             * @userdata1    Address
+             * @userdata2    Operation Type
+             * @devdesc      No read op on form 1 indirect scom.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  SCOM_DO_FORM_1_INDIRECT_SCOM,
+                                  SCOM_FORM_1_READ_REQUEST,
+                                  i_addr,
+                                  i_opType,
+                                  true /*Add HB SW Callout*/);
+
+            break;
+        }
+        // We want to make sure the user inputted data bits 0:11 are zero
+        // so we can push addr(20:31) in it.
+        if ((l_io_buffer & 0xFFF0000000000000) != 0)
+        {
+            TRACFCOMP(g_trac_scom, "doForm1IndirectScom> User supplied "
+                "data(0:11) is not Zero: data out of range");
+
+            /*@
+             * @errortype
+             * @moduleid     SCOM::SCOM_DO_FORM_1_INDIRECT_SCOM
+             * @reasoncode   SCOM::SCOM_FORM_1_INVALID_DATA
+             * @userdata1    Address
+             * @userdata2    User supplied data
+             * @devdesc      Bits 0:11 in user supplied data is not zero
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  SCOM_DO_FORM_1_INDIRECT_SCOM,
+                                  SCOM_FORM_1_INVALID_DATA,
+                                  i_addr,
+                                  l_io_buffer,
+                                  true /*Add HB SW Callout*/);
+
+            break;
+        }
+
+        // Set up Address reg
+        // cmdreg = addr(32:63)
+        temp_scomAddr = i_addr & 0x00000000FFFFFFFF;
+
+        // Set up data regs
+        // data(0:11) = addr(20:31)
+        l_data_from_addr = i_addr & 0x00000FFF00000000;
+        // Do some bit shifting so things line up nicely
+        l_data_from_addr = (l_data_from_addr << 20 );
+
+        // data(12:63) = data(12:63)
+        // Set Data reg
+        l_io_buffer = l_io_buffer | l_data_from_addr;
+
+        // Now perform the op requested using the
+        // local io_buffer with the indirect addr imbedded.
+        l_err = doScomOp(i_opType,
+                         i_target,
+                         & l_io_buffer,
+                         io_buflen,
+                         i_accessType,
+                         temp_scomAddr);
+
+        if (l_err != NULL)
+        {
+            TRACFCOMP(g_trac_scom, "doForm1IndirectScom: Write op fail");
+            break;
+        }
+
+    }while(0);
+
+    return l_err;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

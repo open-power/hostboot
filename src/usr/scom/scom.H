@@ -149,9 +149,8 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
 /**
  * @brief Performs a SCom operation
- * This function performs a SCOM operation by calling doScomOP after
- * It handles whether the address is  a regular or an indirect SCOM
- * address
+ * This function determines whether the scom in inband or not, and the
+ * form of the scom operation. It then calls the apporpriate doForm operation
  *
  * @param[in]   i_opType        Operation type
  * @param[in]   i_target        SCom target
@@ -174,6 +173,57 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   int64_t i_accessType,
                                   uint64_t i_addr,
                                   uint64_t i_opMode);
+
+/**
+ * @brief Performs a SCom operation
+ * This function sets up the needed scom registers based on form 0
+ * and calls doScomOp
+ *
+ * @param[in]   i_opType        Operation type
+ * @param[in]   i_target        SCom target
+ * @param[in/out] io_buffer     Read: pointer to output data storage
+ *                              Write: pointer to data to be written
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output: Read: size of output data
+ *                                      Write: size of data written
+ * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
+ *                              @see usr/devicefw/userif.H
+ * @param[in]   i_addr          Scom Address Value.
+ *
+ * @return  errlHndl_t
+ */
+
+errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               uint64_t i_addr);
+
+/**
+ * @brief Performs a SCom operation
+ * This function sets up the needed scom registers based on form 1
+ * and calls doScomOp
+ *
+ * @param[in]   i_opType        Operation type
+ * @param[in]   i_target        SCom target
+ * @param[in/out] io_buffer     Read: pointer to output data storage
+ *                              Write: pointer to data to be written
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output: Read: size of output data
+ *                                      Write: size of data written
+ * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
+ *                              @see usr/devicefw/userif.H
+ * @param[in]   i_addr          Scom Address Value.
+ *
+ * @return  errlHndl_t
+ */
+errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
+                               TARGETING::Target* i_target,
+                               void* io_buffer,
+                               size_t& io_buflen,
+                               int64_t i_accessType,
+                               uint64_t i_addr);
 
 
 }; // End namespace
