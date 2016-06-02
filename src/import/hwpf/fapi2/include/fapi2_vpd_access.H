@@ -37,10 +37,10 @@ namespace fapi2
 constexpr uint64_t VPD_INFO_INVALID  = 0xffffffffffffffff;
 
 /// @brief  Specialized class representing required VPDInfo to be used
-///         in collecting VPD for the MCA target type.
-/// @tparam T fapi2::TARGET_TYPE_MCA
+///         in collecting VPD for the MCS target type.
+/// @tparam T fapi2::TARGET_TYPE_MCS
 template<>
-class VPDInfo<TARGET_TYPE_MCA>
+class VPDInfo<TARGET_TYPE_MCS>
 {
     public:
         // @brief VPDInfo constructor
@@ -71,7 +71,7 @@ class VPDInfo<TARGET_TYPE_MCA>
 /// @note passing nullptr for o_blob will return the size of the keyword
 ///
 /// Example:
-/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCA> vpdInfo(MR_keyword);
+/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> vpdInfo(MR_keyword);
 /// vpdInfo.iv_freq = 2667;
 ///
 /// uint8_t * blob = NULL;
@@ -79,7 +79,7 @@ class VPDInfo<TARGET_TYPE_MCA>
 /// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
 /// blob = static_cast<uint8_t *>(malloc(vpdInfo.iv_size));
 /// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob now contains the VPD data for the MCA.
+/// blob now contains the VPD data for the MCS.
 ///
 template<TargetType T>
 ReturnCode getVPD(const Target<T>& i_target,

@@ -67,8 +67,13 @@ extern "C"
 
         // Get nest freq && F/W attr that tells me if sync mode is required
         // or if I have to figure that out
-        FAPI_TRY( mss::required_synch_mode(l_required_sync_mode) );
-        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_FREQ_PB_MHZ, fapi2::Target<TARGET_TYPE_SYSTEM>(), l_nest_freq) );
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_REQUIRED_SYNCH_MODE,
+                                 fapi2::Target<TARGET_TYPE_SYSTEM>(),
+                                 l_required_sync_mode ) );
+
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_FREQ_PB_MHZ,
+                                 fapi2::Target<TARGET_TYPE_SYSTEM>(),
+                                 l_nest_freq) );
 
         FAPI_INF("Retrieved req'd sync mode: %d and nest freq %d", l_required_sync_mode, l_nest_freq);
 
@@ -87,7 +92,9 @@ extern "C"
             const auto& l_proc_chip = mss::find_target<TARGET_TYPE_PROC_CHIP>(l_mcbist);
 
             // Cast converts enum class to uint8_t& expected for ATTR_SET
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MC_SYNC_MODE, l_proc_chip, reinterpret_cast<uint8_t(&)>(l_mc_in_sync) ),
+            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MC_SYNC_MODE,
+                                     l_proc_chip,
+                                     reinterpret_cast<uint8_t(&)>(l_mc_in_sync) ),
                       "Failed to set ATTR_MC_SYNC_MODE");
         }
 
