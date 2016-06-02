@@ -672,15 +672,6 @@ namespace TARGETING
                 uint8_t procActive = 0xc0;
                 (*proc)->setAttr<ATTR_PROC_PCIE_PHB_ACTIVE>(procActive);
 
-                //mcbist
-                TARGETING::TargetHandleList l_mcbistList;
-                getChildChiplets(l_mcbistList,(*proc), TARGETING::TYPE_MCBIST);
-                for(TargetHandleList::const_iterator mcbist = l_mcbistList.begin();
-                    mcbist != l_mcbistList.end(); ++mcbist)
-                {
-                    (*mcbist)->setAttr<ATTR_MSS_FREQ>(1600);
-                }
-
                 //mca
                 TARGETING::TargetHandleList l_mcaList;
                 getChildChiplets(l_mcaList,(*proc),TARGETING::TYPE_MCA);

@@ -29,10 +29,10 @@
  * @file    istep07list.H
  *
  *  IStep 07    Nest Chiplets
- *  IPL FLow Doc        v0.93 (04/04/16)
+ *  IPL FLow Doc        v0.95 (04/04/16)
  *
  *    07.1    host_mss_attr_cleanup
- *          : Clean up attributes
+ *          : (placeholder)
  *    07.2    mss_volt
  *          : Calc dimm voltage
  *    07.3    mss_freq
@@ -53,19 +53,6 @@
 
 namespace   ISTEP_07
 {
-/**
- *  @brief   host_mss_attr_cleanup
- *
- *           Clean up attributes on reconfig loops
- *
- *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
- *                              or NULL.
- *  return  any error logs to istep
- *
- */
-void*    call_host_mss_attr_cleanup( void * io_pArgs );
-
-
 
 /**
  *  @brief   mss_volt
