@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <errl/errlmanager.H>
 
 #include    <isteps/hwpisteperror.H>
 
@@ -45,8 +46,15 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+// fapi2 support
+#include <fapi2.H>
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
 
-#include    <config.h>
+#include <config.h>
+
+// HWP
+#include <p9_mss_attr_update.H>
 
 namespace   ISTEP_07
 {
@@ -61,21 +69,36 @@ using   namespace   TARGETING;
 //
 void*    call_mss_attr_update( void *io_pArgs )
 {
-
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
     errlHndl_t l_err = NULL;
 
-    //@TODO RTC:133830 add the procedure back in when ready
-    //FAPI_INVOKE_HWP(l_err, p9_mss_attr_update);
-    if(l_err)
+    // Get all functional MCS chiplets
+    TARGETING::TargetHandleList l_mcsTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCS);
+
+    for (const auto & l_mcsTarget: l_mcsTargetList)
     {
-        l_StepError.addErrorDetails(l_err);
-        errlCommit( l_err, HWPF_COMP_ID );
+        const fapi2::Target<fapi2::TARGET_TYPE_MCS>
+            l_fapi2_mcs_target(l_mcsTarget);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_mss_attr_update HWP on "
+            "MCS target HUID %.8X", TARGETING::get_huid(l_mcsTarget));
+        FAPI_INVOKE_HWP(l_err, p9_mss_attr_update, l_fapi2_mcs_target);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR 0x%.8X : p9_mss_attr_update HWP returned "
+                "error for HUID %.8x",
+                l_err->reasonCode(), TARGETING::get_huid(l_mcsTarget));
+            l_StepError.addErrorDetails(l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 
     return l_StepError.getErrorHandle();
 }

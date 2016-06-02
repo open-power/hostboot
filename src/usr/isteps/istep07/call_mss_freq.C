@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /**
  *  @file call_mss_freq.C
- *  Contain the wrapper for istep 7.3
+ *  Contains the wrapper for istep 7.3
  */
 
 /******************************************************************************/
@@ -46,7 +46,13 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
+// HWP
+#include    <p9_mss_freq.H>
+#include    <p9_mss_freq_system.H>
+// #include <p9_xip_customize.H> // RTC:138226
 namespace   ISTEP_07
 {
 
@@ -60,44 +66,32 @@ using   namespace   TARGETING;
 //
 void*    call_mss_freq( void *io_pArgs )
 {
-
     IStepError l_StepError;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
-/*
-    //@TODO RTC: 133830 Add the wrapper back in when ready
-    errlHndl_t l_err = NULL;
+
     TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    getAllChiplets(l_membufTargetList, TYPE_MCS);
 
-    for (TargetHandleList::const_iterator
-            l_membuf_iter = l_membufTargetList.begin();
-            l_membuf_iter != l_membufTargetList.end();
-            ++l_membuf_iter)
+    for (const auto & l_membuf_target : l_membufTargetList)
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target* l_membuf_target = *l_membuf_iter;
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  mss_freq HWP "
-                "target HUID %.8X",
+                "p9_mss_freq HWP target HUID %.8x",
                 TARGETING::get_huid(l_membuf_target));
 
         //  call the HWP with each target   ( if parallel, spin off a task )
-        // $$const fapi::Target l_fapi_membuf_target(
-        fapi::Target l_fapi_membuf_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
-                    (const_cast<TARGETING::Target*>(l_membuf_target)) );
+        fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_membuf_target
+            (l_membuf_target);
 
-        //@TODO RTC:133830 FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_membuf_target);
-        //Remove when above HWP is working:
-        FAPI_INVOKE_HWP(l_err, mss_freq, l_fapi_membuf_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_membuf_target);
 
         //  process return code.
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR 0x%.8X:  mss_freq HWP ",
-                     l_err->reasonCode());
+            "ERROR 0x%.8X:  p9_mss_freq HWP on target HUID %.8x",
+            l_err->reasonCode(), TARGETING::get_huid(l_membuf_target) );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
@@ -108,15 +102,69 @@ void*    call_mss_freq( void *io_pArgs )
             // Commit Error
             errlCommit( l_err, HWPF_COMP_ID );
 
-         }
+        }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "SUCCESS :  mss_freq HWP");
         }
     } // End memBuf loop
-*/
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
+
+    if(l_StepError.getErrorHandle() == NULL)
+    {
+        TARGETING::TargetHandleList l_mcbistTargetList;
+        getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > l_fapi2_mcbistTargetList;
+
+
+        for (const auto & l_mcbist_target : l_mcbistTargetList)
+        {
+            //  call the HWP with each target   ( if parallel, spin off a task )
+            fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target(l_mcbist_target);
+            l_fapi2_mcbistTargetList.push_back(l_fapi_mcbist_target);
+        }
+
+
+        FAPI_INVOKE_HWP(l_err, p9_mss_freq_system, l_fapi2_mcbistTargetList);
+
+        //  process return code.
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "ERROR 0x%.8X:  p9_mss_freq_system HWP while running on mcbist targets");
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS :  mss_freq_system HWP");
+        }
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "WARNING skipping p9_mss_freq_system HWP due to error detected in p9_mss_freq HWP. An error should have been committed.");
+    }
+
+
+    // TODO RTC:138226
+    // 3c) FW examines current synchronous mode nest freq and will customize the
+    // SBE and reboot if necessary on the master only
+    // (slaves get data via mbox scratch registers)
+    /* FAPI_INVOKE_HWP(l_err, p9_xip_customize,
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_system_target,
+            void* io_image);
+    */
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
+
 
     return l_StepError.getErrorHandle();
 }

@@ -9567,7 +9567,7 @@
     <id>sys0node0dimm0</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030000</default></attribute>
-    <attribute><id>POSITION</id><default>1</default></attribute>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p00</default>
     </attribute>
@@ -9599,7 +9599,7 @@
     <id>sys0node0dimm1</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030001</default></attribute>
-    <attribute><id>POSITION</id><default>0</default></attribute>
+    <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p01</default>
     </attribute>
@@ -9631,7 +9631,7 @@
     <id>sys0node0dimm2</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030002</default></attribute>
-    <attribute><id>POSITION</id><default>3</default></attribute>
+    <attribute><id>POSITION</id><default>2</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p02</default>
     </attribute>
@@ -9663,7 +9663,7 @@
     <id>sys0node0dimm3</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030003</default></attribute>
-    <attribute><id>POSITION</id><default>2</default></attribute>
+    <attribute><id>POSITION</id><default>3</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p03</default>
     </attribute>
@@ -9759,7 +9759,7 @@
     <id>sys0node0dimm6</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030006</default></attribute>
-    <attribute><id>POSITION</id><default>7</default></attribute>
+    <attribute><id>POSITION</id><default>6</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p06</default>
     </attribute>
@@ -9791,7 +9791,7 @@
     <id>sys0node0dimm7</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030007</default></attribute>
-    <attribute><id>POSITION</id><default>6</default></attribute>
+    <attribute><id>POSITION</id><default>7</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p07</default>
     </attribute>
@@ -10015,7 +10015,7 @@
     <id>sys0node0dimm14</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x0003000E</default></attribute>
-    <attribute><id>POSITION</id><default>15</default></attribute>
+    <attribute><id>POSITION</id><default>14</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p14</default>
     </attribute>
@@ -10047,7 +10047,7 @@
     <id>sys0node0dimm15</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x0003000F</default></attribute>
-    <attribute><id>POSITION</id><default>14</default></attribute>
+    <attribute><id>POSITION</id><default>15</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p15</default>
     </attribute>
@@ -10079,7 +10079,7 @@
     <id>sys0node0dimm16</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030010</default></attribute>
-    <attribute><id>POSITION</id><default>17</default></attribute>
+    <attribute><id>POSITION</id><default>16</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p16</default>
     </attribute>
@@ -10111,7 +10111,7 @@
     <id>sys0node0dimm17</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>0x00030011</default></attribute>
-    <attribute><id>POSITION</id><default>16</default></attribute>
+    <attribute><id>POSITION</id><default>17</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p17</default>
     </attribute>
