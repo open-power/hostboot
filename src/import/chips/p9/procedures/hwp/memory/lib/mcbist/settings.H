@@ -47,6 +47,7 @@ namespace mcbist
 enum stop_conditions
 {
     NO_STOP_ON_ERROR   = 0b00,
+    DONT_STOP          = NO_STOP_ON_ERROR,
     STOP_AFTER_ADDRESS = 0b01,
     STOP_AFTER_RANK    = 0b10,
     STOP_AFTER_SUBTEST = 0b11,
@@ -61,7 +62,6 @@ enum end_boundary
     NONE         = 0,
     CONTINUOUS   = NONE,
     NEVER        = NONE,
-    DONT_STOP    = NONE,
     MASTER_RANK  = 1,
     MRANK        = MASTER_RANK,
     SLAVE_RANK   = 2,
@@ -96,6 +96,15 @@ class thresholds
         ///
         thresholds():
             iv_value(0)
+        { }
+
+
+        ///
+        /// @brief Thresholds class ctor
+        /// @param[in] uint64_t representing the threshold register contents
+        ///
+        thresholds(const uint64_t i_value):
+            iv_value(i_value)
         { }
 
         ///
@@ -414,6 +423,7 @@ struct constraints
         iv_thresholds(),
         iv_pattern(NO_PATTERN),
         iv_end_boundary(NONE),
+        iv_speed(LUDICROUS),
         iv_start_address(0),
         iv_end_address(0)
     {
@@ -460,10 +470,29 @@ struct constraints
                  i_stop, uint64_t(i_thresholds), uint64_t(i_start_address));
     }
 
+    ///
+    /// @brief constraints constructor
+    /// @param[in] i_stop stop conditions
+    /// @param[in] i_thresholds thresholds
+    /// @param[in] i_start_address address to start from
+    ///
+    constraints( const stop_conditions i_stop,
+                 const thresholds& i_thresholds,
+                 const speed i_speed,
+                 const end_boundary i_end_boundary,
+                 const address& i_start_address ):
+        constraints(i_stop, i_thresholds, i_start_address)
+    {
+        iv_end_boundary = i_end_boundary;
+        iv_speed = i_speed;
+        FAPI_INF("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
+    }
+
     stop_conditions iv_stop;
     thresholds iv_thresholds;
     uint64_t iv_pattern;
     end_boundary iv_end_boundary;
+    speed iv_speed;
     mcbist::address iv_start_address;
     mcbist::address iv_end_address;
 };

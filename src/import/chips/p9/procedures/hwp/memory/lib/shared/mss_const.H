@@ -49,6 +49,9 @@ enum sizes
     MAX_SLEW_VALUE = 15,           ///< 4 bit value
     MAX_SUPPORTED_FREQUENCIES = 1, ///< Number of supported frequencies. Right now it's only 2400
 
+    BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
+    T_PER_MT     = 1000000,          ///< Multiplier to go from MT/s to T/s
+
     // All need to be attributes - BRS
     // 48:51, 0b1100, (def_is_sim);       # BIG_STEP = 12 (changed from default for SIM)
     // 48:51, 0b0000, any;       # BIG_STEP = 0  SWyatt
@@ -87,6 +90,11 @@ enum times
     // From the DDR4spec 2400 speed - need to be changed to read attributes. BRS
     tWLO = 10,
     tWLOE = 2,
+
+    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
+    BG_SCRUB_IN_HOURS       = 12,
+
+    CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap
 };
 
 enum states

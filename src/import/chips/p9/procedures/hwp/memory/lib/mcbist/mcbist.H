@@ -36,6 +36,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/poll.H>
+#include <lib/eff_config/memory_size.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
 #include <lib/mcbist/patterns.H>
@@ -84,6 +85,7 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t SRERR_REG = MCBIST_MBSEC1Q;
         static constexpr uint64_t THRESHOLD_REG = MCBIST_MBSTRQ;
         static constexpr uint64_t FIRQ_REG = MCBIST_MCBISTFIRQ;
+        static constexpr uint64_t LAST_ADDR_REG = MCBIST_MCBMCATQ;
 
         static constexpr uint64_t MCBAMR0A0Q_REG = MCBIST_MCBAMR0A0Q;
         static constexpr uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
@@ -117,6 +119,11 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             COMPL_3RD_CMD = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_3RD_CMD,
             ADDR_REV_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ADDR_REV_MODE,
             ADDR_RAND_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ADDR_RAND_MODE,
+
+            // Goto subtests use the compl_1st - rand_mode to define the subtest to jump to
+            GOTO_SUBTEST = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_COMPL_1ST_CMD,
+            GOTO_SUBTEST_LEN = 5,
+
             ECC_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ECC_MODE,
             DATA_MODE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE,
             DATA_MODE_LEN = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE_LEN,
@@ -135,6 +142,7 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
 
             MCBIST_START = MCBIST_MCB_CNTLQ_START,
             MCBIST_STOP = MCBIST_MCB_CNTLQ_STOP,
+            MCBIST_RESUME = MCBIST_MCB_CNTLQ_RESUME_FROM_PAUSE,
 
             MCBIST_IN_PROGRESS = MCBIST_MCB_CNTLSTATQ_IP,
             MCBIST_DONE = MCBIST_MCB_CNTLSTATQ_DONE,
@@ -266,6 +274,39 @@ class subtest_t
             return;
         }
 
+        ///
+        /// @brief Get the port from this subtest
+        /// @note The port number is relative to the MCBIST
+        /// @return the port of the subtest
+        ///
+        inline uint64_t get_port()
+        {
+            uint64_t l_port = 0;
+            constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
+            iv_mcbmr.template extractToRight<TT::COMPL_1ST_CMD, l_len>(l_port);
+            return l_port;
+        }
+
+        ///
+        /// @brief Get the DIMM from this subtest
+        /// @return the DIMM this subtest has been configured for
+        ///
+        inline uint64_t get_dimm()
+        {
+            return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
+        }
+
+        ///
+        /// @brief Add the subtest to go to
+        /// @param[in] the subtest to jump to
+        /// @return void
+        ///
+        inline void change_goto_subtest( const uint64_t i_jmp_to )
+        {
+            iv_mcbmr.template insertFromRight<TT::GOTO_SUBTEST, TT::GOTO_SUBTEST_LEN>(i_jmp_to);
+            FAPI_INF("changing subtest to jump to %d (0x%02x)", i_jmp_to, iv_mcbmr);
+            return;
+        }
 
         ///
         /// @brief Generate addresses in reverse order
@@ -342,8 +383,9 @@ class subtest_t
         inline void change_addr_sel( const uint16_t i_index )
         {
             // Roll the index around - tidy support for an index which is out of range.
-            static const uint16_t MAX_ADDRESS_START_END_REGISTERS = 3 + 1;
+            constexpr uint16_t MAX_ADDRESS_START_END_REGISTERS = 3 + 1;
             iv_mcbmr.template insertFromRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(i_index % MAX_ADDRESS_START_END_REGISTERS);
+            FAPI_INF("changed address select to index %d (0x%x)", i_index, iv_mcbmr);
             return;
         }
 
@@ -398,6 +440,39 @@ inline subtest_t<T> write_subtest()
 }
 
 ///
+/// @brief Return a scrub subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> scrub_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 1001 - we want subtest type to be a Scrub
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::SCRUB_RRWR);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
 /// @brief Return a read subtest - configured simply
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
@@ -427,6 +502,29 @@ inline subtest_t<T> read_subtest()
     // By default we want to turn on ECC. Caller can turn it off.
     l_subtest.change_ecc_mode(mss::ON);
 
+    return l_subtest;
+}
+
+///
+/// @brief Return a goto subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] the subtest we should go to
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> goto_subtest( const uint64_t i_jump_to )
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0111 - we want subtest type to be a Goto
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::GOTO_SUBTEST_N);
+
+    // Plug in the subtest the user passed in
+    l_subtest.change_goto_subtest(i_jump_to);
     return l_subtest;
 }
 
@@ -501,7 +599,8 @@ class program
             iv_addr_map3(0),
             iv_config(0),
             iv_control(0),
-            iv_async(false)
+            iv_async(false),
+            iv_pattern(PATTERN_0)
         {
             // Enable the maintenance mode addressing
             change_maint_address_mode(mss::ON);
@@ -512,6 +611,10 @@ class program
 
             // Turn off counting mode for all address configs
             iv_addr_gen.insertFromRight<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(0b0000);
+
+            // By default if there's an error, we stop after the errored address
+            iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(
+                stop_conditions::STOP_AFTER_ADDRESS);
         }
 
         ///
@@ -526,19 +629,141 @@ class program
         }
 
         ///
+        /// @brief Change the mcbist thresholds
+        /// @param[in] i_thresholds the new thresholds
+        /// @return void
+        ///
+        inline void change_thresholds( const thresholds& i_thresholds )
+        {
+            iv_thresholds = i_thresholds;
+            return;
+        }
+
+        ///
+        /// @brief Change MCBIST Speed
+        /// @param[in] i_target the target behind which the memory sits
+        /// @param[in] i_speed the speed eunmeration
+        /// @return FAPI2_RC_SUCCSS iff ok
+        ///
+        inline fapi2::ReturnCode change_speed( const fapi2::Target<T>& i_target, const speed i_speed )
+        {
+            switch (i_speed)
+            {
+                case speed::LUDICROUS:
+                    change_min_cmd_gap(0);
+                    change_min_gap_timebase(mss::OFF);
+                    return fapi2::FAPI2_RC_SUCCESS;
+                    break;
+
+                case speed::BG_SCRUB:
+                    {
+                        uint64_t l_freq = 0;
+                        uint64_t l_size = 0;
+                        uint64_t l_min_cmd_gap = 0;
+
+                        constexpr uint64_t l_seconds = SEC_IN_HOUR * BG_SCRUB_IN_HOURS;
+
+                        FAPI_TRY( mss::freq(i_target, l_freq) );
+                        FAPI_TRY( mss::eff_memory_size(i_target, l_size) );
+
+                        // MIN CMD GAP = TOTAL CYCLES / TOTAL ADDRESSES
+                        // TOTAL CYCLES = 12 hours x 60 min/hr x 60 sec/min x [DRAM freq] cycles/sec x
+                        //    1/2 (MEM logic runs half DRAM freq)
+                        // TOTAL ADDRESSES = sum over all dimms of ( [DIMM CAPACITY]/128B )
+                        l_min_cmd_gap = ((l_seconds * (l_freq * T_PER_MT)) / 2) / ((l_size * BYTES_PER_GB) / 128);
+
+                        FAPI_INF("setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds, gap: %d",
+                                 l_freq, l_size, l_seconds, l_min_cmd_gap);
+
+                        if (CMD_TIMEBASE < l_min_cmd_gap)
+                        {
+                            change_min_cmd_gap(l_min_cmd_gap / CMD_TIMEBASE);
+                            change_min_gap_timebase(mss::ON);
+                        }
+                        else
+                        {
+                            change_min_cmd_gap(l_min_cmd_gap);
+                            change_min_gap_timebase(mss::OFF);
+                        }
+
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }
+                    break;
+
+                // Otherwise it's SAME_SPEED or something else in which case we do nothing
+                default:
+                    break;
+            };
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Change MCBIST Stop conditions
         /// @param[in] i_stops the stop conditions
+        /// @param[in] i_only_if_error forces the stop conditions to only be in effect if there is an error
+        /// if there is not an error the subtest continues. Defaults to mss::NO, meaning these are forced conditions
         /// @return FAPI2_RC_SUCCSS iff ok
-        /// @note if the user askes for stop-on-error we stop after the operation on the failed address has completed
+        /// @note By default the MCBIST is programmed to always stop after an errored address. This API
+        /// allows the caller to force a stop at a boundary or to force no stopping on errors
         ///
-        inline void change_stops( const stop_conditions i_stops )
+        inline void change_stops( const stop_conditions i_stops, const bool i_only_if_error = mss::NO )
         {
-            if (i_stops != DONT_CHANGE)
+            // If there's no change, just get outta here
+            if (i_stops == DONT_CHANGE)
             {
-                iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_stops);
+                goto fapi_try_exit;
             }
 
+            // If these conditions only take effect when there's an error, set that up in the ERROR_MODE field
+            // NO_STOP_ON_ERROR is specific to the ERROR MODE field, so set that up here too
+            if ((i_only_if_error == mss::YES) || (i_stops == NO_STOP_ON_ERROR))
+            {
+                iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_stops);
+                goto fapi_try_exit;
+            }
+
+            // Otherwise, these are forced conditions and they need to be put in their specific fields
+            switch(i_stops)
+            {
+                case STOP_AFTER_ADDRESS:
+                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR>();
+                    break;
+
+                case STOP_AFTER_RANK:
+                    iv_config.setBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>();
+                    break;
+
+                case STOP_AFTER_SUBTEST:
+                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST>();
+                    break;
+
+                // Same as don't-change
+                default:
+                    break;
+            };
+
+        fapi_try_exit:
             FAPI_INF("load MCBIST stops: 0x%016lx (0x%016lx)", i_stops, iv_config);
+
+            return;
+        }
+
+        ///
+        /// @brief Change MCBIST End boundaries
+        /// @param[in] i_end the end boundary
+        /// @return FAPI2_RC_SUCCSS iff ok
+        /// @note this really is just deciding if the stop conditions are master or slave rank boundaries
+        ///
+        inline void change_end_boundary( const end_boundary i_end )
+        {
+            // This is a little funny ... the hardware has one bit representing 'master' and 'slave'
+            // So, NONE really represents a stop condition. We probably should combine the two, but the
+            // API doc from PRD asks for them separate.
+            uint64_t l_detect_slave = i_end == end_boundary::SLAVE_RANK ? 1 : 0;
+            FAPI_INF("load MCBIST end boundaries: detect slave?  %s", (l_detect_slave == 1 ? "yes" : "no") );
+            iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>(l_detect_slave);
         }
 
         ///
@@ -849,22 +1074,28 @@ class program
         }
 
         ///
-        /// @brief Clear mcbist errors
-        /// @param[in] i_target fapi2::Target<T> of the MCBIST
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @brief Store off the pattern index. We'll use this to write the patterns when we load the program
+        /// @param[in] i_index an index such as mss::mcbist::PATTERN_0
+        /// @return fapi2::ReturnCode checks for bad pattern index
+        /// @warning if you give a pattern index which does not exist your pattern will not change.
+        /// @note patterns default to PATTERN_0
         ///
-        inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target ) const
+        inline fapi2::ReturnCode change_pattern( const uint64_t i_pattern )
         {
-            // TK: Clear the more detailed errors checked above
-            FAPI_INF("Clear MCBIST error state");
-            FAPI_TRY( mss::putScom(i_target, TT::MCBSTATQ_REG, 0) );
-            FAPI_TRY( mss::putScom(i_target, TT::SRERR_REG, 0) );
-            FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, 0) );
+            FAPI_INF("change MCBIST pattern index %d", i_pattern);
+
+            // Sanity check the pattern since they're just numbers.
+            FAPI_ASSERT( i_pattern <= mcbist::NO_PATTERN,
+                         fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_pattern),
+                         "Attempting to change a pattern which does not exist %d", i_pattern );
+
+            iv_pattern = i_pattern;
+
+            return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit:
             return fapi2::current_err;
         }
-
 
         // Vector of subtests. Note the MCBIST subtests are spread across
         // 8 registers - 4 subtests fit in one 64b register
@@ -901,6 +1132,12 @@ class program
 
         // True iff we want to run in asynchronous mode
         bool                        iv_async;
+
+        // The pattern for the pattern generator
+        uint64_t                    iv_pattern;
+
+        // The error thresholds for the program
+        thresholds                  iv_thresholds;
 };
 
 ///
@@ -1073,6 +1310,25 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Resume the MCBIST engine
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode resume( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_buf;
+
+    FAPI_TRY( mss::getScom(i_target, TT::CNTLQ_REG, l_buf) );
+    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESUME>()) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Return whether or not the MCBIST engine has an operation in progress
 /// @tparam T the fapi2::TargetType - derived
 /// @param[in] i_target the target to effect
@@ -1159,12 +1415,34 @@ inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const m
 }
 
 ///
+/// @brief Clear mcbist errors
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target fapi2::Target<T> of the MCBIST
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target )
+{
+    // TK: Clear the more detailed errors checked above
+    FAPI_INF("Clear MCBIST error state");
+    FAPI_TRY( mss::putScom(i_target, TT::MCBSTATQ_REG, 0) );
+    FAPI_TRY( mss::putScom(i_target, TT::SRERR_REG, 0) );
+    FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, 0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Load MCBIST pattern given a pattern
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
 /// @param[in] i_pattern an mcbist::patterns
 /// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -1172,11 +1450,9 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
 {
     uint64_t l_address = TT::PATTERN0_REG;
 
-    // Sanity check the pattern as the user can pass in anything they like
-    FAPI_ASSERT( i_pattern.size() == TT::PATTERN_COUNT,
-                 fapi2::MSS_MEMDIAGS_INVALID_PATTERN_SIZE().set_SIZE(i_pattern.size()).set_TARGET(i_target),
-                 "Attempting to load a pattern which is not %d elements (%d)", TT::PATTERN_COUNT, i_pattern.size() );
+    // TODO RTC:155561 Add random pattern support.
 
+    // TK: algorithm for patterns which include ECC bits in them
     // Loop over the cache lines in the pattern. We write one half of the cache line
     // to the even register and half to the odd.
     for (const auto& l_cache_line : i_pattern)
@@ -1198,39 +1474,52 @@ fapi_try_exit:
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_index an index representing the pattern you'd like
+/// @param[in] i_index the pattern index
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, uint64_t i_index )
+inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, uint64_t i_pattern )
 {
-    if (NO_PATTERN != i_index)
+    if (NO_PATTERN != i_pattern)
     {
         bool l_invert = false;
 
-        FAPI_INF("%s load MCBIST pattern index %d", mss::c_str(i_target), i_index);
-
         // Sanity check the pattern since they're just numbers.
-        FAPI_ASSERT( i_index <= mcbist::LAST_PATTERN,
-                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_index).set_TARGET(i_target),
-                     "Attempting to load a pattern which does not exist %d", i_index );
+        // Belt-and-suspenders FAPI_ASSERT as the sim-only uses this API directly.
+        FAPI_ASSERT( i_pattern <= mcbist::LAST_PATTERN,
+                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_pattern),
+                     "Attempting to load a pattern which does not exist %d", i_pattern );
 
         // The indexes are split in to even and odd where the odd indexes don't really exist.
         // They're just indicating that we want to grab the even index and invert it. So calculate
         // the proper vector index and acknowledge the inversion if necessary.
-        if ((i_index % 2) != 0)
+        if ((i_pattern % 2) != 0)
         {
             l_invert = true;
-            i_index -= 1;
+            i_pattern -= 1;
         }
 
-        return load_pattern(i_target, patterns[i_index / 2], l_invert);
+        return load_pattern(i_target, patterns[i_pattern / 2], l_invert);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST pattern given an index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    return load_pattern(i_target, i_program.iv_pattern);
 }
 
 ///
@@ -1246,6 +1535,20 @@ inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, cons
 {
     FAPI_INF("load MCBIST threshold register: 0x%016lx", i_thresholds );
     return mss::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
+}
+
+///
+/// @brief Load MCBIST Threshold Register
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the program containing the thresholds
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    return load_thresholds(i_target, i_program.iv_thresholds);
 }
 
 } // namespace

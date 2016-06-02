@@ -19,10 +19,50 @@
 
 <hwpErrors>
 
+  <registerFfdc>
+    <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+    <scomRegister>MCBIST_MCBMR0Q</scomRegister>
+    <scomRegister>MCBIST_MCBCFGQ</scomRegister>
+    <scomRegister>MCBIST_MCB_CNTLQ</scomRegister>
+    <scomRegister>MCBIST_MCB_CNTLSTATQ</scomRegister>
+    <scomRegister>MCBIST_MCBSTATQ</scomRegister>
+    <scomRegister>MCBIST_MCBPARMQ</scomRegister>
+    <scomRegister>MCBIST_MCBAGRAQ</scomRegister>
+    <scomRegister>MCBIST_MBSEC1Q</scomRegister>
+    <scomRegister>MCBIST_MBSTRQ</scomRegister>
+    <scomRegister>MCBIST_MCBISTFIRQ</scomRegister>
+    <scomRegister>MCBIST_MCBAMR0A0Q</scomRegister>
+    <scomRegister>MCBIST_MCBAMR1A0Q</scomRegister>
+    <scomRegister>MCBIST_MCBAMR2A0Q</scomRegister>
+    <scomRegister>MCBIST_MCBAMR3A0Q</scomRegister>
+
+    <scomRegister>MCBIST_MCBFD0Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD1Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD2Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD3Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD4Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD5Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD6Q</scomRegister>
+    <scomRegister>MCBIST_MCBFD7Q</scomRegister>
+
+    <scomRegister>MCBIST_MCBSA0Q</scomRegister>
+    <scomRegister>MCBIST_MCBSA1Q</scomRegister>
+    <scomRegister>MCBIST_MCBSA2Q</scomRegister>
+    <scomRegister>MCBIST_MCBSA3Q</scomRegister>
+    <scomRegister>MCBIST_MCBEA0Q</scomRegister>
+    <scomRegister>MCBIST_MCBEA1Q</scomRegister>
+    <scomRegister>MCBIST_MCBEA2Q</scomRegister>
+    <scomRegister>MCBIST_MCBEA3Q</scomRegister>
+  </registerFfdc>
+
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN</rc>
     <description>A UE or SUE was caused by the last MCBIST pattern</description>
     <ffdc>STATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -33,6 +73,10 @@
     <rc>RC_MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
     <description>A miscompare error was caused by the last MCBIST pattern</description>
     <ffdc>PORT</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -43,16 +87,16 @@
     <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_INDEX</rc>
     <description>An invalid pattern index was passed to the pattern loader</description>
     <ffdc>INDEX</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_SIZE</rc>
     <description>An invalid pattern (incorrect size) was passed to the pattern loader</description>
     <ffdc>SIZE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -63,6 +107,24 @@
     <rc>RC_MSS_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
     <description>The MCBIST engine failed to start its program</description>
     <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
+    <description>The MCBIST engine failed to stop its program</description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -74,6 +136,10 @@
     <description>The port used in an MCBIST program is not functional</description>
     <ffdc>RELATIVE_PORT_POSITION</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -84,6 +150,10 @@
     <rc>RC_MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
     <description>A superfast read operation failed initialization</description>
     <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
@@ -94,6 +164,53 @@
     <rc>RC_MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
     <description>A superfast init operation failed initialization</description>
     <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
+    <description>A continuous scrub operation failed initialization</description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
+    <description>A continue request asked to stop at a boundary, but we are there already</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BOUNDARY</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>

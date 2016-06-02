@@ -37,6 +37,7 @@
     <scomRegister>MCBIST_CCS_MODEQ</scomRegister>
     <scomRegister>MCBIST_CCS_STATQ</scomRegister>
     <scomRegister>MCBIST_CCS_CNTLQ</scomRegister>
+    <scomRegister>MCBIST_MCBMCATQ</scomRegister>
   </registerFfdc>
 
   <hwpError>

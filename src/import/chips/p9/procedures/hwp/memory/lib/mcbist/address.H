@@ -141,6 +141,24 @@ class address
             o_end.iv_address.setBit<START, LEN>();
         }
 
+
+        ///
+        /// @brief Get an end address for sim mode
+        /// @param[out] o_end representing an address to end at
+        /// @note this pointer is the start address
+        ///
+        inline void get_sim_end_address( address& o_end ) const
+        {
+            // This magic number represents a range of addresses which cover all
+            // cache lines the training algorithms touch. By effecting 0 - this end
+            // address you'll effect everything which has bad ECC in the sim.
+            constexpr uint64_t l_magic_sim_number = 0b1000000;
+
+            get_range<COL>(o_end);
+            o_end.set_column(l_magic_sim_number);
+            return;
+        }
+
         ///
         /// @brief Get a range of addresses given a master rank
         /// @param[in] i_start representing an address to start from

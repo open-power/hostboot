@@ -213,16 +213,13 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     bool l_poll_result = false;
     poll_parameters l_poll_parameters;
 
-    FAPI_TRY( i_program.clear_errors(i_target) );
-
-    // Slam the subtests in to the mcbist registers
-    FAPI_TRY( load_mcbmr(i_target, i_program) );
-
-    // Slam the parameters in to the mcbist parameter register
-    FAPI_TRY( load_mcbparm(i_target, i_program) );
+    FAPI_TRY( clear_errors(i_target) );
 
     // Slam the address generator config
     FAPI_TRY( load_addr_gen(i_target, i_program) );
+
+    // Slam the parameters in to the mcbist parameter register
+    FAPI_TRY( load_mcbparm(i_target, i_program) );
 
     // Slam the configured address maps down
     FAPI_TRY( load_mcbamr( i_target, i_program) );
@@ -232,6 +229,16 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     // Slam the control register down
     FAPI_TRY( load_control( i_target, i_program) );
+
+    // Load the patterns and any associated bits for random, etc
+    FAPI_TRY( load_pattern( i_target, i_program) );
+
+    // Load the thresholds
+    FAPI_TRY( load_thresholds( i_target, i_program) );
+
+    // Slam the subtests in to the mcbist registers
+    // Always do this last so the action file triggers see the other bits set
+    FAPI_TRY( load_mcbmr(i_target, i_program) );
 
     // Start the engine, and then poll for completion
     FAPI_TRY(start_stop(i_target, mss::START));

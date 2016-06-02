@@ -37,6 +37,7 @@
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/settings.H>
+#include <lib/eff_config/memory_size.H>
 
 #include <lib/utils/poll.H>
 #include <tests/target_fixture.H>
@@ -45,6 +46,7 @@ using fapi2::FAPI2_RC_SUCCESS;
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
+using fapi2::TARGET_TYPE_DIMM;
 
 namespace mss
 {
@@ -64,6 +66,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
     // Loops over MCBIST targets that were defined in the associated config
     for_each_target([l_fir_mask](const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
     {
+
         SECTION("Test thresholds structure")
         {
             mss::mcbist::thresholds l_t;
@@ -194,8 +197,8 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             // of polling on an AWAN, but not so much that we run the risk of timing out
             mss::mcbist::address().get_range<mss::mcbist::address::COL>(l_const.iv_end_address);
             l_const.iv_end_address.set_column(0b111111);
-            memdiags::sf_operation<TARGET_TYPE_MCBIST> l_bob(i_target, l_const, mss::mcbist::init_subtest<TARGET_TYPE_MCBIST>());
-            REQUIRE_FALSE( l_bob.init() );
+            memdiags::operation<TARGET_TYPE_MCBIST> l_bob(i_target, mss::mcbist::init_subtest<TARGET_TYPE_MCBIST>(), l_const);
+            REQUIRE_FALSE( l_bob.multi_port_init() );
             REQUIRE_FALSE( l_bob.execute() );
 
             // Check the things we default to so that we have a canary in case the defaults change
@@ -239,6 +242,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
 
             // Poll for the fir bit. We expect this to be set ...
             fapi2::buffer<uint64_t> l_status;
+            fapi2::buffer<uint64_t> l_last_address;
 
             // A small vector of addresses to poll during the polling loop
             static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
@@ -255,6 +259,10 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
             },
             l_probes);
+
+            // Pass or fail output the current address. This is useful for debugging when we can get it.
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMCATQ, l_last_address) );
+            FAPI_INF("MCBIST last address: 0x%016lx", l_last_address);
 
             REQUIRE( l_poll_results == true );
 
@@ -282,8 +290,8 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             // of polling on an AWAN, but not so much that we run the risk of timing out
             mss::mcbist::address().get_range<mss::mcbist::address::COL>(l_const.iv_end_address);
             l_const.iv_end_address.set_column(0b111111);
-            memdiags::sf_operation<TARGET_TYPE_MCBIST> l_bob(i_target, l_const, mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>());
-            REQUIRE_FALSE( l_bob.init() );
+            memdiags::operation<TARGET_TYPE_MCBIST> l_bob(i_target, mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>(), l_const);
+            REQUIRE_FALSE( l_bob.multi_port_init() );
             REQUIRE_FALSE( l_bob.execute() );
 
             // Check the things we default to so that we have a canary in case the defaults change
@@ -327,6 +335,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
 
             // Poll for the fir bit. We expect this to be set ...
             fapi2::buffer<uint64_t> l_status;
+            fapi2::buffer<uint64_t> l_last_address;
 
             // A small vector of addresses to poll during the polling loop
             static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
@@ -343,6 +352,10 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
             },
             l_probes);
+
+            // Pass or fail output the current address. This is useful for debugging when we can get it.
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMCATQ, l_last_address) );
+            FAPI_INF("MCBIST last address: 0x%016lx", l_last_address);
 
             REQUIRE( l_poll_results == true );
 
@@ -386,7 +399,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x00000000000000a0 == l_read );
+                REQUIRE( 0x00000000000000a8 == l_read );
             }
 
             // Load thresholds - default state (expecting 0's)
@@ -408,13 +421,14 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 fapi2::buffer<uint64_t> l_read;
 
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
-                REQUIRE(l_read == 0x1FFFFFC000000000);
+                REQUIRE(l_read == 0x1fffffc000000000);
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
-                REQUIRE(l_read == 0x1FFFFFFFFC000000);
+                REQUIRE(l_read == 0x1fffffe07c000000);
             }
 
             // Poll for the fir bit. We expect this to be set ...
             fapi2::buffer<uint64_t> l_status;
+            fapi2::buffer<uint64_t> l_last_address;
 
             // A small vector of addresses to poll during the polling loop
             static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
@@ -432,6 +446,10 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             },
             l_probes);
 
+            // Pass or fail output the current address. This is useful for debugging when we can get it.
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMCATQ, l_last_address) );
+            FAPI_INF("MCBIST last address: 0x%016lx", l_last_address);
+
             REQUIRE( l_poll_results == true );
 
             // Check for errors
@@ -446,6 +464,238 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             }
 
         }
+
+        SECTION("Test continuous scrub")
+        {
+            // How many DIMM do we have? This effects the subtests we create
+            const auto l_dimm_count = mss::find_targets<TARGET_TYPE_DIMM>(i_target).size();
+            FAPI_INF("seeing %d DIMM", l_dimm_count);
+
+            // The addresses here are calculated so that we get a few iterations
+            // of polling on an AWAN, but not so much that we run the risk of timing out
+            mss::mcbist::address l_start;
+            mss::mcbist::address().get_range<mss::mcbist::address::DIMM>(l_start);
+            l_start.set_bank(0);
+            l_start.set_bank_group(0);
+            l_start.set_column(0);
+
+            REQUIRE_FALSE( memdiags::background_scrub(i_target, memdiags::stop_conditions::NO_STOP_ON_ERROR, memdiags::thresholds(),
+                           memdiags::speed::BG_SCRUB, l_start) );
+
+            // check the state of the mcbist engine
+
+            // Check the iv_parameters
+            {
+                fapi2::buffer<uint64_t> l_read;
+                uint64_t l_size;
+                REQUIRE_FALSE( mss::eff_memory_size(i_target, l_size) );
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBPARMQ, l_read) );
+
+                FAPI_INF("seeing memory size %d", l_size);
+
+                switch (l_size)
+                {
+                    case 128:
+                        REQUIRE(l_read == 0x68000000000000);
+                        break;
+
+                    case 64:
+                        REQUIRE(l_read == 0xC8000000000000);
+                        break;
+
+                    default:
+                        FAIL("Memory size not supported");
+                        break;
+                };
+            }
+
+            // Check the address registers
+            {
+                // Address config 0 should have the start and end for a complete DIMM (in sim)
+                fapi2::buffer<uint64_t> l_read;
+
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
+                REQUIRE(l_read == 0x0);
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
+                REQUIRE(l_read == 0x000000207C000000);
+            }
+            {
+                // Address 1 should have the start we configured and an end which is the
+                // real end of the DIMM address range
+                fapi2::buffer<uint64_t> l_read;
+
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA1Q, l_read) );
+                REQUIRE(l_read == 0x1fffffc000000000);
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA1Q, l_read) );
+                REQUIRE(l_read == 0x1fffffe07c000000);
+            }
+
+            // Check the subtests
+            {
+                if (l_dimm_count == 8)
+                {
+                    fapi2::buffer<uint64_t> l_read;
+
+                    REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMR0Q, l_read) );
+                    REQUIRE(l_read == 0x9009718090089208);
+                    REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMR1Q, l_read) );
+                    REQUIRE(l_read == 0x9408960898089a08);
+                    REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMR2Q, l_read) );
+                    REQUIRE(l_read == 0x9c089e0871040000);
+                }
+            }
+
+            // Make sure continuous scrub doesn't set the FIR bit. More for verifying our actions than
+            // anything else
+            {
+                fapi2::buffer<uint64_t> l_read;
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBISTFIRQ, l_read) );
+                REQUIRE( l_read.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == false );
+            }
+
+            // We should have the LEN64 bit turned off
+            {
+                fapi2::buffer<uint64_t> l_read;
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
+                REQUIRE( 0x0000000000000000 == l_read );
+            }
+
+
+        }
+
+        SECTION("Test targeted scrub")
+        {
+            // Test that passing in no-stop is a bug
+            REQUIRE( memdiags::targeted_scrub(i_target, memdiags::stop_conditions::DONT_STOP, memdiags::thresholds(),
+                                              memdiags::speed::LUDICROUS, mss::mcbist::address(),
+                                              memdiags::end_boundary::MASTER_RANK) );
+
+            REQUIRE_FALSE( memdiags::targeted_scrub(i_target, memdiags::stop_conditions::STOP_AFTER_RANK, memdiags::thresholds(),
+                                                    memdiags::speed::LUDICROUS, mss::mcbist::address(),
+                                                    memdiags::end_boundary::MASTER_RANK) );
+
+            // Make sure targeted scrub sets the FIR bit. More for verifying our actions than
+            // anything else
+            {
+                fapi2::buffer<uint64_t> l_read;
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBISTFIRQ, l_read) );
+                REQUIRE( l_read.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true );
+            }
+
+            // Check the address registers
+            {
+                // Address config 0 should have the start and end for a complete DIMM (in sim)
+                fapi2::buffer<uint64_t> l_read;
+
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
+                REQUIRE(l_read == 0x0);
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
+                REQUIRE(l_read == 0x000000207C000000);
+            }
+
+            // Check the subtests
+            {
+                fapi2::buffer<uint64_t> l_read;
+
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMR0Q, l_read) );
+                REQUIRE(l_read == 0x900c000000000000);
+            }
+
+            // We should have the LEN64 bit turned off but we turned on pause-on-rank boundary
+            {
+                fapi2::buffer<uint64_t> l_read;
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
+                REQUIRE( 0x0000000020000020 == l_read );
+            }
+
+        }
+
+        SECTION("Test what happens on stop-after-rank")
+        {
+            mss::mcbist::address l_start_address;
+            mss::mcbist::address l_end_address;
+            fapi2::ReturnCode l_rc;
+
+            // Make our start be really close to the end of the rank an our end be the end so we
+            // can check to see what happens at the end of the rank
+            l_start_address.get_range<mss::mcbist::address::MRANK>(l_end_address);
+            l_start_address = l_end_address - 10;
+
+            memdiags::constraints l_const(memdiags::stop_conditions::STOP_AFTER_RANK, memdiags::thresholds(),
+                                          memdiags::speed::LUDICROUS, memdiags::end_boundary::MASTER_RANK,
+                                          l_start_address);
+
+            l_const.iv_end_address = l_end_address;
+
+            memdiags::targeted_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
+
+            REQUIRE_FALSE( l_rc );
+
+            // Add a goto on to the end of this program so that if it stops we know it stopped because
+            // of the rank boundary.
+            l_op.get_program().iv_subtests.push_back(mss::mcbist::goto_subtest<TARGET_TYPE_MCBIST>(0));
+
+            REQUIRE_FALSE( l_op.execute() );
+
+            // A small vector of addresses to poll during the polling loop
+            static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
+            {
+                {i_target, "mcbist current address", MCBIST_MCBMCATQ},
+            };
+
+            poll_parameters l_poll_parameters;
+            fapi2::buffer<uint64_t> l_status;
+            fapi2::buffer<uint64_t> l_last_address;
+
+            bool l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
+                                            [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+            {
+                FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+                l_status = stat_reg;
+                return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
+            },
+            l_probes);
+
+            // Pass or fail output the current address. This is useful for debugging when we can get it.
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMCATQ, l_last_address) );
+            FAPI_INF("MCBIST last address: 0x%016lx", l_last_address);
+
+            REQUIRE( l_poll_results == true );
+
+            // Check for errors
+            {
+                fapi2::buffer<uint64_t> l_read;
+
+                REQUIRE( 0x20000000000000 == (l_status & l_fir_mask) );
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSTATQ, l_read) );
+                REQUIRE(l_read == 0);
+                REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MBSEC1Q, l_read) );
+                REQUIRE(l_read == 0);
+            }
+
+            // We asked to stop at the end of a rank, so we should not be able to continue to the end of the rank
+            REQUIRE( memdiags::continue_cmd(i_target, memdiags::end_boundary::MRANK, memdiags::stop_conditions::STOP_AFTER_RANK) );
+
+            // Continue but ask to stop at the end of the subtest
+            REQUIRE_FALSE( memdiags::continue_cmd(i_target, memdiags::end_boundary::NONE,
+                                                  memdiags::stop_conditions::STOP_AFTER_SUBTEST) );
+
+            l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
+                                       [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+            {
+                FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+                l_status = stat_reg;
+                return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
+            },
+            l_probes);
+
+            // Pass or fail output the current address. This is useful for debugging when we can get it.
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBMCATQ, l_last_address) );
+            FAPI_INF("MCBIST last address: 0x%016lx", l_last_address);
+
+            REQUIRE( l_poll_results == true );
+        }
+
 
         return 0;
     });

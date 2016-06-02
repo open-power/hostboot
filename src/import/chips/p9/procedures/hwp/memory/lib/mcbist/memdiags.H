@@ -48,10 +48,14 @@ using mss::mcbist::constraints;
 using mss::mcbist::speed;
 using mss::mcbist::end_boundary;
 using mss::mcbist::stop_conditions;
-using mss::mcbist::address;
 using mss::mcbist::cache_line;
 using mss::mcbist::pattern;
 using mss::mcbist::patterns;
+
+// Why not mss::mcbist::address? Because the fields can't be pulled in via using,
+// and it seems even more confusing to have a memdiags address but have to use
+// mcbist fields. So, we all use mcbist address until such time that its promoted
+// to some other general namespace.
 
 using mss::mcbist::PATTERN_ZEROS;
 using mss::mcbist::PATTERN_0;
@@ -69,35 +73,45 @@ using mss::mcbist::LAST_PATTERN;
 using mss::mcbist::NO_PATTERN;
 
 ///
+/// @brief Stop the current command
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode stop( const fapi2::Target<T>& i_target );
+
+///
 /// @class Base class for memdiags operations
 /// @tparam T fapi2::TargetType of the MCBIST engine
 ///
 template< fapi2::TargetType T >
-class base
+class operation
 {
     public:
         ///
-        /// @brief memdiags::base constructor
+        /// @brief memdiags::operation constructor
         /// @param[in] i_target the target of the mcbist engine
+        /// @param[in] i_subtest the proper subtest for this operation
         /// @param[in] i_const mss::constraint structure
         ///
-        base( const fapi2::Target<T>& i_target,
-              const memdiags::constraints i_const ):
+        operation( const fapi2::Target<T>& i_target,
+                   const mss::mcbist::subtest_t<T> i_subtest,
+                   const constraints i_const ):
             iv_target(i_target),
+            iv_subtest(i_subtest),
             iv_const(i_const)
         {
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), iv_is_sim) );
+            return;
+
+        fapi_try_exit:
+            // Seems like a safe risk to take ...
+            FAPI_ERR("Unable to get the attribute ATTR_IS_SIMULATION");
+            return;
         }
 
-        base() = delete;
-
-        ///
-        /// @brief memdiags::base initializer
-        /// @return FAPI2_RC_SUCCESS iff everything ok
-        /// @note specialized for Nimbus as the port select mechanism is different
-        // Needed because of the scom operations done in the initialization. There
-        // is no good way to handle these errors in a constructor
-        ///
-        fapi2::ReturnCode init();
+        operation() = delete;
 
         ///
         /// @brief Execute the memdiags operation
@@ -109,134 +123,177 @@ class base
         }
 
         ///
-        /// @brief memdiags::base destructor
+        /// @brief memdiags::operation destructor
         ///
-        virtual ~base() = default;
+        virtual ~operation() = default;
+
+        ///
+        /// @brief memdiags init helper
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructores more easily.
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode base_init();
+
+        ///
+        /// @brief memdiags multi-port init helper
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructores more easily.
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode multi_port_init();
+
+        ///
+        /// @brief Single port initializer
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructores more easily.
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode single_port_init();
+
+        ///
+        /// @brief get the protected mcbist program - useful for testing
+        /// @return a reference to the iv_program member
+        /// @note Intentionally not const ref; allows getter to set.
+        ///
+        mss::mcbist::program<T>& get_program()
+        {
+            return iv_program;
+        }
 
     protected:
         fapi2::Target<T>          iv_target;
+        mss::mcbist::subtest_t<T> iv_subtest;
         constraints               iv_const;
         mss::mcbist::program<T>   iv_program;
+        uint8_t                   iv_is_sim;
 };
 
 ///
-/// @class Base class for memdiags super-fast operations
+/// @class Class for memdiags' super-fast init
 /// @tparam T fapi2::TargetType of the MCBIST engine
 ///
 template< fapi2::TargetType T >
-class sf_operation : public base<T>
-{
-    public:
-        ///
-        /// @brief memdiags::sf_operation constructor
-        /// @param[in] i_target the target of the mcbist engine
-        /// @param[in] i_const mss::constraint structure
-        /// @param[in] i_subtest the appropriate subtest for this operation
-        ///
-        sf_operation( const fapi2::Target<T>& i_target,
-                      const memdiags::constraints i_const,
-                      const mss::mcbist::subtest_t<T> i_subtest ):
-            base<T>(i_target, i_const),
-            iv_subtest(i_subtest)
-        {
-        }
-
-        sf_operation() = delete;
-
-        ///
-        /// @brief memdiags::sf_operation initializer
-        /// @return FAPI2_RC_SUCCESS iff everything ok
-        // Needed because of the scom operations done in the initialization. There
-        // is no good way to handle these errors in a constructor
-        ///
-        fapi2::ReturnCode init();
-
-        ///
-        /// @brief memdiags::sf_operation destructor
-        ///
-        virtual ~sf_operation() = default;
-
-    protected:
-        mss::mcbist::subtest_t<T> iv_subtest;
-};
-
-///
-/// @class Base class for memdiags' super-fast init
-/// @tparam T fapi2::TargetType of the MCBIST engine
-///
-template< fapi2::TargetType T >
-struct sf_init_operation : public sf_operation<T>
+struct sf_init_operation : public operation<T>
 {
 
     ///
     /// @brief memdiags::sf_init_operation constructor
     /// @param[in] i_target the target of the mcbist engine
-    /// @param[in] i_pattern an index representing a pattern to use to initize memory
+    /// @param[in] i_const mss::constraint structure
     /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
     ///
     sf_init_operation( const fapi2::Target<T>& i_target,
-                       const uint64_t i_pattern,
+                       const constraints i_const,
                        fapi2::ReturnCode& o_rc ):
-        sf_operation<T>(i_target, constraints(i_pattern), mss::mcbist::init_subtest<T>())
+        operation<T>(i_target, mss::mcbist::init_subtest<T>(), i_const)
     {
-        o_rc = sf_operation<T>::init();
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
     }
 
     sf_init_operation() = delete;
 };
 
 ///
-/// @class Base class for memdiags' super-fast read
+/// @class Class for memdiags' super-fast read
 /// @tparam T fapi2::TargetType of the MCBIST engine
 ///
 template< fapi2::TargetType T >
-struct sf_read_operation : public sf_operation<T>
+struct sf_read_operation : public operation<T>
 {
 
     ///
     /// @brief memdiags::sf_read_operation constructor
     /// @param[in] i_target the target of the mcbist engine
-    /// @param[in] i_stop stop conditions
-    /// @param[in] i_thresholds thresholds
+    /// @param[in] i_const mss::constraint structure
     /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
     ///
     sf_read_operation( const fapi2::Target<T>& i_target,
-                       const memdiags::stop_conditions i_stop,
-                       const memdiags::thresholds& i_thresholds,
+                       const constraints i_const,
                        fapi2::ReturnCode& o_rc ):
-        sf_operation<T>(i_target, constraints(i_stop, i_thresholds), mss::mcbist::read_subtest<T>())
+        operation<T>(i_target, mss::mcbist::read_subtest<T>(), i_const)
     {
-        o_rc = sf_operation<T>::init();
-    }
-
-    ///
-    /// @brief memdiags::sf_read_operation constructor - given starting address
-    /// @param[in] i_target the target of the mcbist engine
-    /// @param[in] i_stop stop conditions
-    /// @param[in] i_thresholds thresholds
-    /// @param[in] i_address start address of read operation
-    /// @note the address indicates this operation is performed on one port, one dimm until the end
-    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
-    ///
-    sf_read_operation( const fapi2::Target<T>& i_target,
-                       const memdiags::stop_conditions i_stop,
-                       const memdiags::thresholds& i_thresholds,
-                       const memdiags::address& i_start_address,
-                       fapi2::ReturnCode& o_rc ):
-        sf_operation<T>(i_target, constraints(i_stop, i_thresholds, i_start_address), mss::mcbist::read_subtest<T>())
-    {
-        o_rc = sf_read_operation<T>::end_of_port_init();
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
     }
 
     sf_read_operation() = delete;
+};
+
+///
+/// @class Class for memdiags' super-fast read to end of port
+/// @tparam T fapi2::TargetType of the MCBIST engine
+///
+template< fapi2::TargetType T >
+struct sf_read_eop_operation : public operation<T>
+{
+    ///
+    /// @brief memdiags::sf_read_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const mss::constraint structure
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+    ///
+    sf_read_eop_operation( const fapi2::Target<T>& i_target,
+                           const constraints i_const,
+                           fapi2::ReturnCode& o_rc ):
+        operation<T>(i_target, mss::mcbist::read_subtest<T>(), i_const)
+    {
+        // We're a single-port operation
+        o_rc = this->single_port_init();
+    }
+
+    sf_read_eop_operation() = delete;
+};
+
+///
+/// @class Class for memdiags' continuous scrub
+/// @tparam T fapi2::TargetType of the MCBIST engine
+///
+template< fapi2::TargetType T >
+struct continuous_scrub_operation : public operation<T>
+{
 
     ///
-    /// @brief memdiags::sf_read_operation end-of-port initializer
-    /// @return FAPI2_RC_SUCCESS iff everything ok
-    // Needed because of the scom operations done in the initialization. There
-    // is no good way to handle these errors in a constructor
+    /// @brief memdiags::continuous_scrub_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const the contraints of the operation
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
     ///
-    fapi2::ReturnCode end_of_port_init();
+    continuous_scrub_operation( const fapi2::Target<T>& i_target,
+                                const constraints i_const,
+                                fapi2::ReturnCode& o_rc );
+
+    continuous_scrub_operation() = delete;
+};
+
+///
+/// @class Class for memdiags' targeted scrub
+/// @tparam T fapi2::TargetType of the MCBIST engine
+///
+template< fapi2::TargetType T >
+struct targeted_scrub_operation : public operation<T>
+{
+
+    ///
+    /// @brief memdiags::targeted_scrub_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const the contraints of the operation
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+    ///
+    targeted_scrub_operation( const fapi2::Target<T>& i_target,
+                              const constraints i_const,
+                              fapi2::ReturnCode& o_rc ):
+        operation<T>(i_target, mss::mcbist::scrub_subtest<T>(), i_const)
+    {
+        // Scrub operations run 128B
+        this->iv_program.change_len64(mss::OFF);
+
+        // We're a single-port operation
+        o_rc = this->single_port_init();
+    }
+
+    targeted_scrub_operation() = delete;
 };
 
 ///
@@ -281,27 +338,45 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions i_stop,
                            const thresholds& i_thresholds,
-                           const address& i_address );
+                           const mss::mcbist::address& i_address );
 
 ///
-/// @brief Scrub - scrub all memory behind the target
+/// @brief Scrub - continuous scrub all memory behind the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
 /// @param[in] i_thresholds thresholds
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the address from which to start.
-/// @param[in] i_end whether to end, and where (default = continuous scrub)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode scrub( const fapi2::Target<T>& i_target,
-                         const stop_conditions i_stop,
-                         const thresholds& i_thresholds,
-                         const speed i_speed,
-                         const address& i_address,
-                         const end_boundary i_end = end_boundary::NEVER );
+fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
+                                    const stop_conditions i_stop,
+                                    const thresholds& i_thresholds,
+                                    const speed i_speed,
+                                    const mss::mcbist::address& i_address );
+
+///
+/// @brief Scrub - targeted scrub all memory described by the input address (rank, slave, etc.)
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_stop stop conditions
+/// @param[in] i_thresholds thresholds
+/// @param[in] i_speed the speed to scrub
+/// @param[in] i_address mcbist::address representing the address from which to start.
+/// @param[in] i_end whether to end, and where
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The address is often the port, dimm, rank but this is not enforced in the API.
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
+                                  const stop_conditions i_stop,
+                                  const thresholds& i_thresholds,
+                                  const speed i_speed,
+                                  const mss::mcbist::address& i_address,
+                                  const end_boundary i_end );
 
 ///
 /// @brief Continue current command on next address
@@ -316,7 +391,7 @@ fapi2::ReturnCode scrub( const fapi2::Target<T>& i_target,
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
-                                const end_boundary i_end = end_boundary::DONT_STOP,
+                                const end_boundary i_end = end_boundary::NONE,
                                 const stop_conditions i_stop = stop_conditions::DONT_CHANGE,
                                 const speed i_speed = speed::SAME_SPEED );
 
@@ -335,18 +410,10 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T >
 fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
                                 const thresholds& i_thresholds,
-                                const end_boundary i_end = end_boundary::DONT_STOP,
+                                const end_boundary i_end = end_boundary::NONE,
                                 const stop_conditions i_stop = stop_conditions::DONT_CHANGE,
                                 const speed i_speed = speed::SAME_SPEED );
 
-///
-/// @brief Stop the current command
-/// @tparam T the fapi2::TargetType of the target
-/// @param[in] i_target the target
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode stop( const fapi2::Target<T>& i_target );
 
 } // namespace
 

@@ -88,9 +88,8 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             // Setup l_start to represent this rank, and then make the end address from that.
             l_start.set_master_rank(*r);
 
-            l_start.get_range<mss::mcbist::address::COL>(l_end);
             // Set C3 bit to get an entire cache line
-            l_end.set_field<mss::mcbist::address::COL>(0b1000000);
+            l_start.get_sim_end_address(l_end);
 
             // By default we're in maint address mode, not address counting mode. So we give it a start and end, and ignore
             // anything invalid - that's what maint address mode is all about
