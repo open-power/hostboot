@@ -732,4 +732,12 @@
      <platInit/>
      <writeable/>
 </attribute>
+
+<attribute>
+  <id>ATTR_SENSEADJ_STEP</id>
+  <targetType>TARGET_TYPE_EQ</targetType>
+  <description>IPL for skew adjust and duty cycle adjust</description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
 </attributes>
