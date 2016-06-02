@@ -846,7 +846,7 @@ public:
               TS_FAIL( "ScomTest::test_Translate_SCOM_MBA_MBS> ERROR : Unexpected error log from write1" );
               fails++;
               errlCommit(l_err,SCOM_COMP_ID);
-             }
+            }
 
               delete l_err;
           }
@@ -859,7 +859,6 @@ public:
       for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
       {
           memset(read_data, 0, sizeof read_data);
-
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
@@ -880,7 +879,6 @@ public:
                               &(read_data[x]),
                               op_size,
                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
 
           if( l_err )
           {
@@ -916,8 +914,211 @@ public:
 
   //@todo - write error path testcase for FSI scom using bad address
 
+  /**
+   * @brief multi chip SCOM test
+   *
+   */
+  void test_Form1IBSCOMreadWrite_proc(void)
+  {
 
+      TRACFCOMP( g_trac_scom, "ScomTest::test_Form1IBSCOMreadWrite_proc> Start" );
 
+/*
+ * TODO RTC 158024 - Enable form 1  test case
+
+      uint64_t fails = 0;
+      uint64_t total = 0;
+      errlHndl_t l_err = NULL;
+
+      //@VBU workaround - Disable Indirect SCOM test case o
+      //Test case read/writes to valid addresses and is
+      //potentially destructive on VBU
+      if (TARGETING::is_vpo())
+      {
+           return;
+      }
+
+      // Setup some targets to use
+      enum {
+          myPROC0,
+          NUM_TARGETS
+      };
+      TARGETING::Target* scom_targets[NUM_TARGETS];
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          scom_targets[x] = NULL;
+      }
+
+      // Target Proc 9 - the FSI wrap-back connection in simics
+      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+      epath.addLast(TARGETING::TYPE_SYS,0);
+      epath.addLast(TARGETING::TYPE_NODE,0);
+      epath.addLast(TARGETING::TYPE_PROC,0);
+
+      scom_targets[myPROC0] = TARGETING::targetService().toTarget(epath);
+
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          //only run if the target exists
+          if(scom_targets[x] == NULL)
+          {
+              TRACDCOMP( g_trac_scom, "ScomTestForm1 - TARGET = NULL - 1 x = %d", x);
+              continue;
+          }
+          else if ((scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
+                   (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
+          {
+              // If both FSI and XSCOM are not enabled.. then ignore..
+              TRACDCOMP(g_trac_scom, "INDIRECT SCOMForm1>> SKIPPING ");
+              scom_targets[x] = NULL; //remove from our list
+          }
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+          {
+              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWriteForm1 > Target %d is not functional", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+      }
+
+      // scratch data to use
+
+      struct {
+          TARGETING::Target* target;
+          uint64_t addr;
+          uint64_t data;
+          bool     isFail;
+      } test_data[] = {
+          { scom_targets[myPROC0], 0x900003210D010BEE, 0x0004432112344321, false}, // Form 1
+          { scom_targets[myPROC0], 0x9000012307011BEE, 0x000443211234ABAB, false }, // Form 1
+          { scom_targets[myPROC0], 0x9000000007011BEE, 0x123443211234ABAB, true }, // Form 1
+          { scom_targets[myPROC0], 0x9FEEDB0B0DEADBEE, 0x000443211234ABAB, true }, // Form 1
+      };
+      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
+
+      size_t op_size = sizeof(uint32_t);
+
+      // write all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+          l_err = deviceWrite( test_data[x].target,
+                               &(test_data[x].data),
+                               op_size,
+                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+
+          if(!test_data[x].isFail && l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Unexpected error log from device write: addr=0x%X, RC=%X ",  test_data[x].addr, l_err->reasonCode() );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+              l_err = NULL;
+          }
+          else if(test_data[x].isFail && !l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Expected an Error from device write: addr=0x%X", x,  test_data[x].addr );
+              TS_FAIL( "ScomTest::test_IndirectScomForm1_proc> ERROR : Expected an error log from device write and did not get one : addr=0x%X",  test_data[x].addr );
+              fails++;
+          }
+          else if(l_err)
+          {
+              //delete expected errors
+              delete l_err;
+          }
+      }
+          // Now lets make sure the data is correct
+          // Form 1 doesn't support read. Simics action is set up to write to
+          // a regigster whcih will we scom
+          // allocate space for read data
+      struct {
+          TARGETING::Target* target;
+          uint64_t addr;
+      } read_addresses[] = {
+          { scom_targets[myPROC0], 0x0D010123 }, // Form 1
+          { scom_targets[myPROC0], 0x07011123 }, // Form 1
+      };
+      const uint64_t READ_ADDRS = sizeof(read_addresses)/sizeof(read_addresses[0]);
+      uint64_t read_form1data[READ_ADDRS];
+
+      memset(read_form1data, 0, sizeof read_form1data);
+
+      // read all the read registers
+      for( uint64_t x = 0; x < READ_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(read_addresses[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+          l_err = deviceRead( read_addresses[x].target,
+                              &(read_form1data[x]),
+                              op_size,
+                              DEVICE_SCOM_ADDRESS(read_addresses[x].addr) );
+
+          if(l_err)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] read written data: Unxpected Error from device : addr=0x%X, RC=%X", x,  read_addresses[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Unxpected Error on reading written data : addr=0x%X, RC=%X", read_addresses[x].addr, l_err->reasonCode() );
+              fails++;
+          }
+          if((read_form1data[x] & 0x000000000000FFFF) !=
+                (test_data[x].data & 0x000000000000FFFF))
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Data miss-match : addr=0x%X, read_form1data=0x%llx, write_data=0x%llx", x, read_addresses[x].addr, read_form1data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Data miss-match between read and expected data" );
+              fails++;
+          }
+      }
+
+      // allocate space for read data
+      uint64_t read_data[NUM_ADDRS];
+
+      memset(read_data, 0, sizeof read_data);
+
+      // read all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+          l_err = deviceRead( test_data[x].target,
+                              &(read_data[x]),
+                              op_size,
+                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+
+          // Form1 doesn't support read so if we don't get an error back, that's bad
+          if(!l_err)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Expected Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Expected Error on READ : addr=0x%X, RC=%X", test_data[x].addr, l_err->reasonCode() );
+              fails++;
+          }
+          // else, if we are form1 and DO get an error back on read, that's expected.
+          else
+          {
+              //delete expected errors
+              delete l_err;
+          }
+      }
+*/
+  }
 
 
   /**

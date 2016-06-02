@@ -37,6 +37,7 @@ namespace SCOM
         SCOM_FIND_PARENT_TARGET         = 0x03,
         SCOM_CHECK_INDIRECT_AND_DO_SCOM = 0x04,
         SCOM_TRANSLATE_P9               = 0x05,
+        SCOM_DO_FORM_1_INDIRECT_SCOM    = 0x06,
     };
 
     enum scomReasonCode
@@ -54,6 +55,9 @@ namespace SCOM
         SCOM_TRANS_CANT_FIND_PARENT = SCOM_COMP_ID | 0x0B,
         SCOM_TARGET_ADDR_MISMATCH   = SCOM_COMP_ID | 0x0C,
         SCOM_ISCHIPUNITSCOM_INVALID = SCOM_COMP_ID | 0x0D,
+        SCOM_INVALID_FORM           = SCOM_COMP_ID | 0x0E,
+        SCOM_FORM_1_INVALID_DATA    = SCOM_COMP_ID | 0x0F,
+        SCOM_FORM_1_READ_REQUEST    = SCOM_COMP_ID | 0x10,
     };
 
     enum UserDetailsTypes
