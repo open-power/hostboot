@@ -265,7 +265,7 @@ RUNTIME_MODULES += scom_rt
 RUNTIME_MODULES += vpd_rt
 RUNTIME_MODULES += i2c_rt
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)
-RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),bus_training_rt)
+#RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),bus_training_rt)  @RTC 136120 runtime lane repair support
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt)
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt)
 RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt)
@@ -303,14 +303,18 @@ hbicore_LDFILE = kernel.ld
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
 
+hbicore_DATA_MODULES += ${prd_rule_prf_targets}
+
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
 hbicore_test_MODULES += ${hbicore_MODULES}
 hbicore_test_EXTENDED_MODULES += ${hbicore_EXTENDED_MODULES}
 hbicore_test_EXTENDED_MODULES += ${TESTCASE_MODULES}
+hbicore_test_DATA_MODULES += ${hbicore_DATA_MODULES}
 hbicore_test_DATA_MODULES += testdata
 ifndef SKIP_BINARY_FILES
 hbicore_test_DATA_MODULES += secureboot_signed_container
 endif
+
 hbicore_test_LDFILE = kernel.ld
 
 hbirt_OBJECTS += ${RUNTIME_OBJECTS}

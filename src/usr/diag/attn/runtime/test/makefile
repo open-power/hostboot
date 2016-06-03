@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -35,6 +35,6 @@ OBJS += attnfakereg.o
 
 MODULE = testattn_rt
 
-TESTS = *.H
+#TESTS = *.H  @RTC 155588 re-enable after cleaning up for P9
 
 include ${ROOTPATH}/config.mk
