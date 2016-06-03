@@ -2310,7 +2310,7 @@ errlHndl_t bld_fdt_secureboot(devTree * i_dt, bool i_smallTree)
         i_dt->addPropertyString(secBootNode, "hash-algo", "sha512");
 
         /* compatibility strings -- currently only one */
-        const char* compatStr[] = {"ibm,power-secureboot-v1", NULL};
+        const char* compatStr[] = {"ibm,secureboot-v1", NULL};
         i_dt->addPropertyStrings(secBootNode, "compatible", compatStr);
 
         if (SECUREBOOT::enabled())

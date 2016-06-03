@@ -28,6 +28,7 @@ MODULE = secureboot_trusted
 OBJS += $(if $(CONFIG_TPMDD),trustedboot.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedbootCmds.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedTypes.o,)
+OBJS += $(if $(CONFIG_TPMDD),tpmLogMgr.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedbootUtils.o,)
 
 SUBDIRS += $(if $(CONFIG_TPMDD),test.d,)

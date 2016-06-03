@@ -36,6 +36,7 @@
 #include <secureboot/trustedbootif.H>
 #include <i2c/tpmddif.H>
 #include <trace/interface.H>
+#include <sys/msg.h>
 #include "trustedTypes.H"
 
 // ----------------------------------------------
@@ -58,8 +59,14 @@ namespace TRUSTEDBOOT
 class SystemTpms
 {
 public:
-    SystemTpms();
+    SystemTpms():
+        msgQ(msg_q_create()),
+        tpmDaemonShutdown(false)
+    { }
 
+
+    msg_q_t   msgQ;        ///< TrustedBootRp message queue
+    bool      tpmDaemonShutdown;  ///< Has the TPM Daemon already been shutdown
     TpmTarget tpm[MAX_SYSTEM_TPMS];
 };
 
@@ -96,6 +103,44 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target);
  *       error log.
  */
 errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target);
+
+
+/**
+ * @brief Verify a functional TPM still exists in the system
+ * @return errlHndl_t NULL if TPM available, otherwise a pointer to the
+ *       error log.
+*/
+errlHndl_t tpmVerifyFunctionalTpmExists();
+
+/**
+ * @brief Extend a measurement into a TPM and log
+ * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_pcr PCR to write to
+ * @param[in] i_algId Algorithm to extend
+ * @param[in] i_digest Digest value to write to PCR
+ * @param[in] i_digestSize Byte size of i_digest data
+ * @param[in] i_logMsg Null terminated log message
+ */
+void pcrExtendSingleTpm(TpmTarget & io_target,
+                        TPM_Pcr i_pcr,
+                        TPM_Alg_Id i_algId,
+                        const uint8_t* i_digest,
+                        size_t  i_digestSize,
+                        const char* i_logMsg);
+
+
+/**
+ * @brief Is the TPM_REQUIRED flag set such that the
+ *         system should not boot without a functional TPM
+ * @retval true TPM is required to boot
+ * @retval false TPM is not required, failures should be logged
+ */
+bool isTpmRequired();
+
+/** Thread start routine for the TPM Daemon
+ * @param[in] void*, unused
+ */
+void* tpmDaemon(void* unused);
 
 } // end TRUSTEDBOOT namespace
 #endif

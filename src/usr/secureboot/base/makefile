@@ -33,8 +33,7 @@ OBJS += purge.o
 OBJS += securerom.o
 OBJS += rom_entry.o
 OBJS += trustedboot_base.o
-OBJS += $(if $(CONFIG_TPMDD),tpmLogMgr.o,)
-OBJS += $(if $(CONFIG_TPMDD),trustedTypes_base.o,)
+OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
 OBJS += containerheader.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
