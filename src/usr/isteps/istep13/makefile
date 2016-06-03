@@ -68,6 +68,9 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
 
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcs_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcbist_scom.mk
+
 #TODO RTC:149115 New fapi2::Target::getChildren interface
 # include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 # include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
