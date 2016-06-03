@@ -891,6 +891,7 @@ actionclass RcdParityError0
 {
     funccall("maskRcdParitySideEffects");
     CalloutMbaAndDimmOnPort0;
+    SUEGenerationPoint;
 };
 
 /** Handle RCD Parity Error 1 */
@@ -898,6 +899,7 @@ actionclass RcdParityError1
 {
     funccall("maskRcdParitySideEffects");
     CalloutMbaAndDimmOnPort1;
+    SUEGenerationPoint;
 };
 
 /** Callouts specific to MBASECUREFIR attentions. */
