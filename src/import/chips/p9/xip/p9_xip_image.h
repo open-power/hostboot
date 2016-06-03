@@ -1801,10 +1801,8 @@ typedef enum
     P9_XIP_SECTION_SGPE_QPMR     = P9_XIP_SECTIONS_PLUS(0),
     P9_XIP_SECTION_SGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
     P9_XIP_SECTION_SGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_SGPE_INT_VECT = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_SGPE_IMG_HDR  = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTION_SGPE_HCODE    = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTIONS_SGPE         = P9_XIP_SECTIONS_PLUS(6) // # sections
+    P9_XIP_SECTION_SGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTIONS_SGPE         = P9_XIP_SECTIONS_PLUS(4) // # sections
 } p9_xip_section_sgpe_t;
 
 #define P9_XIP_SECTION_NAMES_SGPE(var)         \
@@ -1812,8 +1810,6 @@ typedef enum
                          ".qpmr",              \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
-                         ".vect",              \
-                         ".sgpe_image_header", \
                          ".hcode")
 
 /**************************************************************************/
@@ -1824,17 +1820,13 @@ typedef enum
 {
     P9_XIP_SECTION_RESTORE_CPMR = P9_XIP_SECTIONS_PLUS(0),
     P9_XIP_SECTION_RESTORE_SELF = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_RESTORE_SPR  = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_RESTORE_SCOM = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTIONS_RESTORE     = P9_XIP_SECTIONS_PLUS(4) // # sections
+    P9_XIP_SECTIONS_RESTORE     = P9_XIP_SECTIONS_PLUS(2) // # sections
 } p9_xip_section_restore_t;
 
 #define P9_XIP_SECTION_NAMES_RESTORE(var)    \
     P9_XIP_SECTION_NAMES(var,                \
                          ".cpmr",            \
-                         ".self_restore",    \
-                         ".spr_restore",     \
-                         ".scom_restore")
+                         ".self_restore")
 
 /**************************************************************************/
 /* CME Image                                                             */
@@ -1842,21 +1834,13 @@ typedef enum
 
 typedef enum
 {
-    P9_XIP_SECTION_CME_INT_VECT  = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_CME_IMG_HDR   = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_CME_HCODE     = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_CME_CMN_RING  = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_CME_SPEC_RING = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTIONS_CME          = P9_XIP_SECTIONS_PLUS(5) // # sections
+    P9_XIP_SECTION_CME_HCODE     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTIONS_CME          = P9_XIP_SECTIONS_PLUS(1) // # sections
 } p9_xip_section_cme_t;
 
 #define P9_XIP_SECTION_NAMES_CME(var)          \
     P9_XIP_SECTION_NAMES(var,                  \
-                         ".vect",              \
-                         ".cme_image_header",  \
-                         ".hcode",             \
-                         ".cmn_ring",          \
-                         ".spec_ring")
+                         ".hcode")
 
 /**************************************************************************/
 /* PGPE Image                                                             */
@@ -1866,18 +1850,14 @@ typedef enum
 {
     P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(0),
     P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_PGPE_INT_VECT = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_PGPE_IMG_HDR  = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
+    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(3) // # sections
 } p9_xip_section_pgpe_t;
 
 #define P9_XIP_SECTION_NAMES_PGPE(var)         \
     P9_XIP_SECTION_NAMES(var,                  \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
-                         ".vect",              \
-                         ".pgpe_image_header", \
                          ".hcode")
 
 /**************************************************************************/
