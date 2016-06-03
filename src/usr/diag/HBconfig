@@ -1,5 +1,5 @@
 config HBRT_PRD
-    default n
+    default y
     help
         Enable HBRT PRD.
 
