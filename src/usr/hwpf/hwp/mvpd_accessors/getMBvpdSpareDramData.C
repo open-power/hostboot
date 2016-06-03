@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.8 2015/12/16 16:23:45 janssens Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.9 2016/06/03 11:41:23 thi Exp $
 #include  <stdint.h>
 
 //  fapi support
@@ -41,7 +41,7 @@ using namespace fapi;
  *                                      or ENUM_ATTR_SPD_CUSTOM_YES
  * @return ReturnCode
  */
-fapi::ReturnCode getDimmType(const fapi::Target &i_tgtHandle,
+fapi::ReturnCode getDimmTypeFromSPD(const fapi::Target &i_tgtHandle,
                              uint8_t &o_customDimm);
 
 
@@ -94,7 +94,7 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
     {
         uint8_t l_customDimm = 0;
 
-        l_rc = getDimmType(i_mba,l_customDimm);
+        l_rc = getDimmTypeFromSPD(i_mba,l_customDimm);
         if(l_rc)
         {
             FAPI_ERR("getMBvpdSpareDramData: Read of Custom Dimm failed");
@@ -200,7 +200,7 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
 
 
 
-fapi::ReturnCode getDimmType(const fapi::Target &i_tgtHandle,
+fapi::ReturnCode getDimmTypeFromSPD(const fapi::Target &i_tgtHandle,
                              uint8_t &o_customDimm)
 {
     fapi::ReturnCode          l_rc;
