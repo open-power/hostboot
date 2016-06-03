@@ -722,7 +722,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
 errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            TPM_Pcr i_pcr,
                            TPM_Alg_Id i_algId,
-                           uint8_t* i_digest,
+                           const uint8_t* i_digest,
                            size_t  i_digestSize)
 {
     errlHndl_t err = NULL;
@@ -749,7 +749,6 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
 
         // Argument verification
         if (fullDigestSize == 0 ||
-            fullDigestSize != i_digestSize ||
             NULL == i_digest ||
             IMPLEMENTATION_PCR < i_pcr
             )
@@ -784,7 +783,8 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
         cmd->pcrHandle = i_pcr;
         cmd->digests.count = 1;
         cmd->digests.digests[0].algorithmId = i_algId;
-        memcpy(cmd->digests.digests[0].digest.bytes, i_digest, fullDigestSize);
+        memcpy(cmd->digests.digests[0].digest.bytes, i_digest,
+               (i_digestSize < fullDigestSize ? i_digestSize : fullDigestSize));
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,

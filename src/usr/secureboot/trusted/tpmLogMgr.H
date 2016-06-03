@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/trusted/base/tpmLogMgr.H $                 */
+/* $Source: src/usr/secureboot/trusted/tpmLogMgr.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,12 +41,9 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <sys/sync.h>
-#include "../trustedboot.H"
-#include "../trustedTypes.H"
-#else
+#endif
 #include "trustedboot.H"
 #include "trustedTypes.H"
-#endif
 
 #ifdef __cplusplus
 namespace TRUSTEDBOOT

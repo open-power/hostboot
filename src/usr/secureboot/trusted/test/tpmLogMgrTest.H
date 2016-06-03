@@ -36,7 +36,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include "../trustedTypes.H"
-#include "../base/tpmLogMgr.H"
+#include "../tpmLogMgr.H"
 
 
 using namespace TRUSTEDBOOT;

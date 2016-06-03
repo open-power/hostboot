@@ -41,8 +41,7 @@
 #include "../trustedTypes.H"
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
-#include "../base/trustedboot_base.H"
-#include "../base/tpmLogMgr.H"
+#include "../tpmLogMgr.H"
 
 using namespace TRUSTEDBOOT;
 
