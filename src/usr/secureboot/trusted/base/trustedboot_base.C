@@ -34,6 +34,7 @@
 // ----------------------------------------------
 #include <string.h>
 #include <sys/time.h>
+#include <sys/msg.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -41,11 +42,10 @@
 #include <errl/errludstring.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
-#include "trustedboot_base.H"
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
-#include "tpmLogMgr.H"
+#include "trustedbootMsg.H"
 
 // ----------------------------------------------
 // Trace definitions
@@ -62,10 +62,6 @@ namespace TRUSTEDBOOT
 /// Global object to store TPM status
 SystemTpms systemTpms;
 
-SystemTpms::SystemTpms()
-{
-}
-
 TpmTarget::TpmTarget()
 {
     memset(this, 0, sizeof(TpmTarget));
@@ -77,52 +73,106 @@ TpmTarget::TpmTarget()
 
 
 errlHndl_t pcrExtend(TPM_Pcr i_pcr,
-                     uint8_t* i_digest,
+                     const uint8_t* i_digest,
                      size_t  i_digestSize,
-                     const char* i_logMsg)
+                     const char* i_logMsg,
+                     bool i_sendAsync)
 {
     errlHndl_t err = NULL;
 #ifdef CONFIG_TPMDD
-    TPM_Alg_Id algId = TPM_ALG_SHA256;
+    MessageMode mode = MSG_MODE_ASYNC;
 
-    size_t fullDigestSize = getDigestSize(algId);
-    char logMsg[MAX_TPM_LOG_MSG];
+    assert(!systemTpms.tpmDaemonShutdown, "TPM Daemon shutdown");
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
                ENTER_MRK"pcrExtend() pcr=%d msg='%s'", i_pcr, i_logMsg);
-    TRACFBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
+    TRACUBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
-    // Ensure proper digest size
-    uint8_t digestData[fullDigestSize];
-    memset(digestData, 0, sizeof(digestData));
+    // msgData will be freed when message is processed for async
+    //   or below for sync message
+    PcrExtendMsgData* msgData = new PcrExtendMsgData;
+    memset(msgData, 0, sizeof(PcrExtendMsgData));
+    msgData->mPcrIndex = i_pcr;
+    msgData->mAlgId = TPM_ALG_SHA256;
+    msgData->mEventType = EV_ACTION;
+    msgData->mDigestSize = (i_digestSize < sizeof(msgData->mDigest) ?
+                            i_digestSize : sizeof(msgData->mDigest));
 
-    // copy over the incoming digest to append or truncate to what we need
-    memcpy(digestData, i_digest,
-           (i_digestSize < fullDigestSize ? i_digestSize : fullDigestSize));
+
+    // copy over the incoming digest and truncate to what we need
+    memcpy(msgData->mDigest, i_digest, msgData->mDigestSize);
 
     // Truncate logMsg if required
-    memset(logMsg, 0, sizeof(logMsg));
-    memcpy(logMsg, i_logMsg,
-           (strlen(i_logMsg) < MAX_TPM_LOG_MSG ? strlen(i_logMsg) :
-            MAX_TPM_LOG_MSG));
+    memcpy(msgData->mLogMsg, i_logMsg,
+           (strlen(i_logMsg) < sizeof(msgData->mLogMsg) ? strlen(i_logMsg) :
+            sizeof(msgData->mLogMsg)-1)  // Leave room for NULL termination
+           );
 
-
-    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx++)
+    if (!i_sendAsync)
     {
-        // Add the event to this TPM, if an error occurs the TPM will
-        //  be marked as failed and the error log committed
-        pcrExtendSingleTpm(systemTpms.tpm[idx],
-                           i_pcr,
-                           algId,
-                           digestData,
-                           fullDigestSize,
-                           logMsg);
+        mode = MSG_MODE_SYNC;
     }
 
-    // Lastly make sure we are in a state where we have a functional TPM
-    err = tpmVerifyFunctionalTpmExists();
+    Message* msg = Message::factory(MSG_TYPE_PCREXTEND,
+                                    sizeof(PcrExtendMsgData),
+                                    reinterpret_cast<uint8_t*>(msgData),
+                                    mode);
+    // Message owns msgData now
+    msgData = NULL;
 
+    if (!i_sendAsync)
+    {
+        int rc = msg_sendrecv(systemTpms.msgQ, msg->iv_msg);
+        if (0 == rc)
+        {
+            err = msg->iv_errl;
+            msg->iv_errl = NULL;
+        }
+        // Sendrecv failure
+        else
+        {
+            /*@
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        MOD_TPM_PCREXTEND
+             * @reasoncode      RC_PCREXTEND_SENDRECV_FAIL
+             * @userdata1       rc from msq_sendrecv()
+             * @devdesc         msg_sendrecv() failed
+             * @custdesc        Firmware error during system boot
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_TPM_PCREXTEND,
+                                          RC_PCREXTEND_SENDRECV_FAIL,
+                                          rc,
+                                          0,
+                                          true);
+            err->collectTrace(SECURE_COMP_NAME);
+        }
+        delete msg;
+        msg = NULL;
+    }
+    else
+    {
+        int rc = msg_send(systemTpms.msgQ, msg->iv_msg);
+        if (rc)
+        {
+            /*@
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        MOD_TPM_PCREXTEND
+             * @reasoncode      RC_PCREXTEND_SEND_FAIL
+             * @userdata1       rc from msq_send()
+             * @devdesc         msg_send() failed
+             * @custdesc        Firmware error during system boot
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_TPM_PCREXTEND,
+                                          RC_PCREXTEND_SEND_FAIL,
+                                          rc,
+                                          0,
+                                          true);
+            err->collectTrace(SECURE_COMP_NAME);
+        }
+    }
 
     TRACUCOMP( g_trac_trustedboot,
                EXIT_MRK"pcrExtend() - %s",
@@ -131,162 +181,5 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 #endif
     return err;
 }
-
-#ifdef CONFIG_TPMDD
-void pcrExtendSingleTpm(TpmTarget & io_target,
-                        TPM_Pcr i_pcr,
-                        TPM_Alg_Id i_algId,
-                        uint8_t* i_digest,
-                        size_t  i_digestSize,
-                        const char* i_logMsg)
-{
-    errlHndl_t err = NULL;
-    TCG_PCR_EVENT2 eventLog;
-    bool unlock = false;
-
-    do
-    {
-        mutex_lock( &io_target.tpmMutex );
-        unlock = true;
-
-        // Allocate the TPM log if it hasn't been already
-        if (!io_target.failed &&
-            io_target.available &&
-            NULL == io_target.logMgr)
-        {
-            io_target.logMgr = new TpmLogMgr;
-            err = TpmLogMgr_initialize(io_target.logMgr);
-            if (NULL != err)
-            {
-                break;
-            }
-        }
-
-        // Log the event, we will do this in two scenarios
-        //  - !initAttempted - prior to IPL of the TPM we log for replay
-        //  - initAttempted && !failed - TPM is functional so we log
-        if ((io_target.available &&
-             !io_target.initAttempted) ||
-            (io_target.available &&
-             io_target.initAttempted &&
-             !io_target.failed))
-        {
-            // Fill in TCG_PCR_EVENT2 and add to log
-            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr, i_algId, i_digest,
-                                                      i_digestSize, i_logMsg);
-            err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
-            if (NULL != err)
-            {
-                break;
-            }
-        }
-
-        // If the TPM init has occurred and it is currently
-        //  functional we will do our extension
-        if (io_target.available &&
-            io_target.initAttempted &&
-            !io_target.failed)
-        {
-
-            err = tpmCmdPcrExtend(&io_target,
-                                  i_pcr,
-                                  i_algId,
-                                  i_digest,
-                                  i_digestSize);
-            if (NULL != err)
-            {
-                break;
-            }
-        }
-    } while ( 0 );
-
-    if (NULL != err)
-    {
-        // We failed to extend to this TPM we can no longer use it
-        tpmMarkFailed(&io_target);
-
-        // Log this failure
-        errlCommit(err, SECURE_COMP_ID);
-        err = NULL;
-    }
-
-    if (unlock)
-    {
-        mutex_unlock(&io_target.tpmMutex);
-    }
-    return;
-}
-
-void tpmMarkFailed(TpmTarget * io_target)
-{
-
-    TRACFCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
-               "tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target->nodeTarget),
-               io_target->chip);
-
-    io_target->failed = true;
-    /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access
-
-}
-
-errlHndl_t tpmVerifyFunctionalTpmExists()
-{
-    errlHndl_t err = NULL;
-    bool foundFunctional = false;
-
-    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
-    {
-        if (!systemTpms.tpm[idx].failed ||
-            !systemTpms.tpm[idx].initAttempted)
-        {
-            foundFunctional = true;
-            break;
-        }
-    }
-
-    if (!foundFunctional)
-    {
-        TRACFCOMP( g_trac_trustedboot,
-                   "NO FUNCTIONAL TPM FOUND");
-
-        /*@
-         * @errortype
-         * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
-         * @severity       ERRL_SEV_UNRECOVERABLE
-         * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
-         * @userdata1      0
-         * @userdata2      0
-         * @devdesc        No functional TPMs exist in the system
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MOD_TPM_VERIFYFUNCTIONAL,
-                                       RC_TPM_NOFUNCTIONALTPM_FAIL,
-                                       0, 0,
-                                       true /*Add HB SW Callout*/ );
-
-        err->collectTrace( SECURE_COMP_NAME );
-    }
-
-    return err;
-}
-
-errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
-                             const uint16_t i_reasonCode,
-                             const uint64_t i_user1,
-                             const uint64_t i_user2)
-{
-    errlHndl_t err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    i_modId,
-                                    i_reasonCode,
-                                    i_user1,
-                                    i_user2,
-                                    true /*Add HB SW Callout*/ );
-    err->collectTrace( SECURE_COMP_NAME );
-    return err;
-}
-
-#endif
 
 } // end TRUSTEDBOOT

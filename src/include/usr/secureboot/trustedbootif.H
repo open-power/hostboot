@@ -86,15 +86,17 @@ namespace TRUSTEDBOOT
      * @param[in] i_digest Digest value to write to PCR
      * @param[in] i_digestSize Byte size of i_digest data
      * @param[in] i_logMsg Null terminated log message, truncated at 128 chars
+     * @param[in] i_sendAsync Perform extension asynchronously, default true
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      * Digest will be right padded with zeros or truncated to match TPM digest
      *  size being used
      */
     errlHndl_t pcrExtend(TPM_Pcr i_pcr,
-                         uint8_t* i_digest,
+                         const uint8_t* i_digest,
                          size_t  i_digestSize,
-                         const char* i_logMsg);
+                         const char* i_logMsg,
+                         bool i_sendAsync = true);
 
     /**
      * @brief Return a set of information related to every unique

@@ -42,12 +42,14 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
 #include <sys/mmio.h>
+#include <sys/task.h>
+#include <initservice/initserviceif.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
 #include "trustedbootUtils.H"
-#include "base/tpmLogMgr.H"
-#include "base/trustedboot_base.H"
+#include "tpmLogMgr.H"
+#include "base/trustedbootMsg.H"
 #include "../settings.H"
 
 namespace TRUSTEDBOOT
@@ -197,13 +199,6 @@ void* host_update_master_tpm( void *io_pArgs )
             }
         }
 
-        // Now we need to replay any existing entries in the log into the TPM
-        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
-            systemTpms.tpm[TPM_MASTER_INDEX].available)
-        {
-            tpmReplayLog(systemTpms.tpm[TPM_MASTER_INDEX]);
-        }
-
         if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
             !systemTpms.tpm[TPM_MASTER_INDEX].available)
         {
@@ -266,6 +261,12 @@ void* host_update_master_tpm( void *io_pArgs )
     if( unlock )
     {
         mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
+    }
+
+    if (NULL == err)
+    {
+        // Start the task to start to handle the message queue/extends
+        task_create(&TRUSTEDBOOT::tpmDaemon, NULL);
     }
 
     if (NULL == err)
@@ -413,7 +414,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
 
 errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
 {
-    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmLogConfigEntries()");
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"tpmLogConfigEntries()");
 
     errlHndl_t l_err = NULL;
 
@@ -485,6 +486,270 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
     } while(0);
 
     return l_err;
+}
+
+void pcrExtendSingleTpm(TpmTarget & io_target,
+                        TPM_Pcr i_pcr,
+                        TPM_Alg_Id i_algId,
+                        const uint8_t* i_digest,
+                        size_t  i_digestSize,
+                        const char* i_logMsg)
+{
+    errlHndl_t err = NULL;
+    TCG_PCR_EVENT2 eventLog;
+    bool unlock = false;
+
+    memset(&eventLog, 0, sizeof(eventLog));
+    do
+    {
+        mutex_lock( &io_target.tpmMutex );
+        unlock = true;
+
+        // Allocate the TPM log if it hasn't been already
+        if (!io_target.failed &&
+            io_target.available &&
+            NULL == io_target.logMgr)
+        {
+            io_target.logMgr = new TpmLogMgr;
+            err = TpmLogMgr_initialize(io_target.logMgr);
+            if (NULL != err)
+            {
+                break;
+            }
+        }
+
+        // Log the event, we will do this in two scenarios
+        //  - !initAttempted - prior to IPL of the TPM we log for replay
+        //  - initAttempted && !failed - TPM is functional so we log
+        if ((io_target.available &&
+             !io_target.initAttempted) ||
+            (io_target.available &&
+             io_target.initAttempted &&
+             !io_target.failed))
+        {
+            // Fill in TCG_PCR_EVENT2 and add to log
+            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr, i_algId, i_digest,
+                                                      i_digestSize, i_logMsg);
+            err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
+            if (NULL != err)
+            {
+                break;
+            }
+        }
+
+        // If the TPM init has occurred and it is currently
+        //  functional we will do our extension
+        if (io_target.available &&
+            io_target.initAttempted &&
+            !io_target.failed)
+        {
+
+            err = tpmCmdPcrExtend(&io_target,
+                                  i_pcr,
+                                  i_algId,
+                                  i_digest,
+                                  i_digestSize);
+        }
+    } while ( 0 );
+
+    if (NULL != err)
+    {
+        // We failed to extend to this TPM we can no longer use it
+        tpmMarkFailed(&io_target);
+
+        // Log this failure
+        errlCommit(err, SECURE_COMP_ID);
+        err = NULL;
+    }
+
+    if (unlock)
+    {
+        mutex_unlock(&io_target.tpmMutex);
+    }
+    return;
+}
+
+void tpmMarkFailed(TpmTarget * io_target)
+{
+
+    TRACFCOMP( g_trac_trustedboot,
+               ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
+               "tgt=0x%X chip=%d",
+               TARGETING::get_huid(io_target->nodeTarget),
+               io_target->chip);
+
+    io_target->failed = true;
+    /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access
+
+}
+
+errlHndl_t tpmVerifyFunctionalTpmExists()
+{
+    errlHndl_t err = NULL;
+    bool foundFunctional = false;
+
+    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
+    {
+        if ((!systemTpms.tpm[idx].failed && systemTpms.tpm[idx].available) ||
+            !systemTpms.tpm[idx].initAttempted)
+        {
+            foundFunctional = true;
+            break;
+        }
+    }
+
+    if (!foundFunctional)
+    {
+        TRACFCOMP( g_trac_trustedboot,
+                   "NO FUNCTIONAL TPM FOUND");
+
+        /*@
+         * @errortype
+         * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
+         * @severity       ERRL_SEV_UNRECOVERABLE
+         * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
+         * @userdata1      0
+         * @userdata2      0
+         * @devdesc        No functional TPMs exist in the system
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_TPM_VERIFYFUNCTIONAL,
+                                       RC_TPM_NOFUNCTIONALTPM_FAIL,
+                                       0, 0,
+                                       true /*Add HB SW Callout*/ );
+
+        err->collectTrace( SECURE_COMP_NAME );
+
+    }
+
+    return err;
+}
+
+
+void* tpmDaemon(void* unused)
+{
+    bool shutdownPending = false;
+    errlHndl_t err = NULL;
+
+    // Mark as an independent daemon so if it crashes we terminate
+    task_detach();
+
+    TRACUCOMP( g_trac_trustedboot, ENTER_MRK "TpmDaemon Thread Start");
+
+    // Register shutdown events with init service.
+    //      Done at the "end" of shutdown processing.
+    // This will flush any other messages (PCR extends) and terminate task
+    INITSERVICE::registerShutdownEvent(systemTpms.msgQ,
+                                       TRUSTEDBOOT::MSG_TYPE_SHUTDOWN);
+
+    Message* tb_msg = NULL;
+    while (true)
+    {
+        msg_t* msg = msg_wait(systemTpms.msgQ);
+
+        const MessageType type =
+            static_cast<MessageType>(msg->type);
+        tb_msg = NULL;
+
+        TRACUCOMP( g_trac_trustedboot, "TpmDaemon Handle CmdType %d",
+                   type);
+
+        switch (type)
+        {
+          case TRUSTEDBOOT::MSG_TYPE_SHUTDOWN:
+              {
+                  shutdownPending = true;
+              }
+              break;
+          case TRUSTEDBOOT::MSG_TYPE_PCREXTEND:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+
+                  TRUSTEDBOOT::PcrExtendMsgData* msgData =
+                      reinterpret_cast<TRUSTEDBOOT::PcrExtendMsgData*>
+                      (tb_msg->iv_data);
+
+                  assert(tb_msg->iv_len == sizeof(TRUSTEDBOOT::PcrExtendMsgData)
+                         && msgData != NULL, "Invalid PCRExtend Message");
+
+                  for (size_t idx = 0;
+                       idx < TRUSTEDBOOT::MAX_SYSTEM_TPMS; idx++)
+                  {
+                      // Add the event to this TPM,
+                      // if an error occurs the TPM will
+                      //  be marked as failed and the error log committed
+                      TRUSTEDBOOT::pcrExtendSingleTpm(
+                                   TRUSTEDBOOT::systemTpms.tpm[idx],
+                                   msgData->mPcrIndex,
+                                   msgData->mAlgId,
+                                   msgData->mDigest,
+                                   msgData->mDigestSize,
+                                   msgData->mLogMsg);
+                  }
+
+                  if (TRUSTEDBOOT::MSG_MODE_SYNC == tb_msg->iv_mode)
+                  {
+                      // Lastly make sure we are in a state
+                      //  where we have a functional TPM
+                      // Only do for sync messages that will actually
+                      //  get the error log back
+                      tb_msg->iv_errl =
+                          TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
+                  }
+              }
+              break;
+
+          default:
+            assert(false, "Invalid msg command");
+            break;
+        };
+
+        // Reply back, if we have a tb_msg do that way
+        if (NULL != tb_msg)
+        {
+            tb_msg->response(systemTpms.msgQ);
+        }
+        else
+        {
+            // use the HB message type to respond
+            int rc = msg_respond(systemTpms.msgQ, msg);
+            if (rc)
+            {
+                TRACFCOMP( g_trac_trustedboot,
+                           ERR_MRK "TpmDaemon: response msg_respond failure %d",
+                           rc);
+                /*@
+                 * @errortype       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        MOD_TPM_TPMDAEMON
+                 * @reasoncode      RC_MSGRESPOND_FAIL
+                 * @userdata1       rc from msq_respond()
+                 * @devdesc         msg_respond() failed
+                 * @custdesc        Firmware error during system boot
+                 */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              MOD_TPM_TPMDAEMON,
+                                              RC_MSGRESPOND_FAIL,
+                                              rc,
+                                              0,
+                                              true);
+                err->collectTrace(SECURE_COMP_NAME);
+
+                // Log this failure here since we can't reply to caller
+                errlCommit(err, SECURE_COMP_ID);
+
+            }
+        }
+
+        if (shutdownPending)
+        {
+            // Exit loop and terminate task
+            break;
+        }
+    }
+    // Daemon is shutting down we can't handle any requests after this
+    systemTpms.tpmDaemonShutdown = true;
+    TRACUCOMP( g_trac_trustedboot, EXIT_MRK "TpmDaemon Thread Terminate");
+    return NULL;
 }
 
 } // end TRUSTEDBOOT

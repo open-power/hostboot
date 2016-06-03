@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file ipmi.C
+ * @file ipmimsg.C
  * @brief code for the IPMI message class
  */
 

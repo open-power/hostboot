@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/trusted/base/tpmLogMgr.C $                 */
+/* $Source: src/usr/secureboot/trusted/tpmLogMgr.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,14 +41,12 @@
 #include <sys/mm.h>
 #include <util/align.H>
 #include <secureboot/trustedboot_reasoncodes.H>
-#include "../trustedbootUtils.H"
-#include "../trustedboot.H"
 #else
 #include "trustedboot_reasoncodes.H"
+#endif
 #include "trustedbootUtils.H"
 #include "trustedboot.H"
 #include "trustedTypes.H"
-#endif
 
 #ifdef __cplusplus
 namespace TRUSTEDBOOT
@@ -473,9 +471,11 @@ namespace TRUSTEDBOOT
 
         // Event field data
         eventLog.event.eventSize = strlen(i_logMsg);
+        memset(eventLog.event.event, 0, sizeof(eventLog.event.event));
         memcpy(eventLog.event.event, i_logMsg,
                (strlen(i_logMsg) > MAX_TPM_LOG_MSG ?
-                MAX_TPM_LOG_MSG : strlen(i_logMsg)) );
+                MAX_TPM_LOG_MSG - 1 // Leave room for NULL termination
+                : strlen(i_logMsg)) );
 
         return eventLog;
     }

@@ -125,7 +125,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target);
 errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            TPM_Pcr i_pcr,
                            TPM_Alg_Id i_algId,
-                           uint8_t* i_digest,
+                           const uint8_t* i_digest,
                            size_t  i_digestSize);
 
 /**
