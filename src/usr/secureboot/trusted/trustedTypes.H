@@ -76,7 +76,7 @@ namespace TRUSTEDBOOT
         TPM_BACKUP_INDEX = 1,     ///< Index for backup TPM
         MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
 
-        HASH_COUNT            = 1,       ///< Maximum # of digests
+        HASH_COUNT            = 2,       ///< Maximum # of digests
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
     };
@@ -203,7 +203,6 @@ namespace TRUSTEDBOOT
     /// Digest union
     union _TPMU_HA
     {
-        uint8_t bytes[0];
         uint8_t sha1[TPM_ALG_SHA1_SIZE];
         uint8_t sha256[TPM_ALG_SHA256_SIZE];
     } PACKED;
