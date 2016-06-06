@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 // File that plat uses to assign values to TargetFilter enum
-#include "plat_target_filter.H"
+#include <plat_target_filter.H>
 
 
 /// FAPI namespace
