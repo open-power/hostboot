@@ -308,6 +308,16 @@ class Target
         isFunctional(void) const;
 
         ///
+        /// @brief Returns the chiplet number associated with the Target
+        /// @return The chiplet number for the Target. 0 is returned if the
+        /// Target does not have a chiplet number (for ex, the PROC_CHIP Target)
+        /// @note For logical targets such as the EX, the chiplet number of
+        /// their immediate parent chiplet is returned
+        ///
+        inline uint8_t
+        getChipletNumber(void) const;
+
+        ///
         /// @brief Copy from a Target<O> to a Target<K>
         /// @tparam O the target type of the other
         ///
