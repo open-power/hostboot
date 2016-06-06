@@ -323,9 +323,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                        "ERROR: 0x%.8X : p9_cpu_special_wakeup set HWP(cpu %d)",
                        l_errl->reasonCode(),
                        l_masterCoreID);
-
-            l_errl->collectTrace(FAPI_TRACE_NAME,256);
-            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
             break;
         }
 
@@ -401,9 +398,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                        l_masterCoreID,
                        thread_bitset,
                        l_rasStatus );
-
-            l_errl->collectTrace(FAPI_TRACE_NAME,256);
-            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
         }
         else
         {

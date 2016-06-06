@@ -59,9 +59,13 @@
 
 #define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
     {\
-    fapi2::ReturnCode l_rc; \
-    FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
-    ERRHNDL = fapi2::rcToErrl(l_rc);\
+        fapi2::ReturnCode l_rc; \
+        FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
+        ERRHNDL = fapi2::rcToErrl(l_rc);\
+        if( ERRHNDL ) {\
+            ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
+            ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
+        }\
     }
 
 #endif // PLATHWPINVOKER_H_
