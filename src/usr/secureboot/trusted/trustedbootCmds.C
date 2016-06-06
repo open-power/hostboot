@@ -725,66 +725,109 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            const uint8_t* i_digest,
                            size_t  i_digestSize)
 {
+    return tpmCmdPcrExtend2Hash(io_target, i_pcr,
+                                i_algId, i_digest, i_digestSize,
+                                TPM_ALG_INVALID_ID, NULL, 0);
+}
+
+errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
+                                TPM_Pcr i_pcr,
+                                TPM_Alg_Id i_algId_1,
+                                const uint8_t* i_digest_1,
+                                size_t  i_digestSize_1,
+                                TPM_Alg_Id i_algId_2,
+                                const uint8_t* i_digest_2,
+                                size_t  i_digestSize_2)
+{
     errlHndl_t err = NULL;
     uint8_t dataBuf[sizeof(TPM2_ExtendIn)];
     size_t dataSize = sizeof(dataBuf);
-    size_t fullDigestSize = 0;
+    size_t fullDigestSize_1 = 0;
+    size_t fullDigestSize_2 = 0;
     TPM2_BaseOut* resp = (TPM2_BaseOut*)dataBuf;
     TPM2_ExtendIn* cmd = (TPM2_ExtendIn*)dataBuf;
 
 
     TRACDCOMP( g_trac_trustedboot,
-               ">>tpmCmdPcrExtend()" );
-    TRACUCOMP( g_trac_trustedboot,
-               ">>tpmCmdPcrExtend() Pcr(%d) Alg(%X) DS(%d)",
-               i_pcr, i_algId, (int)i_digestSize);
+               ">>tpmCmdPcrExtend2Hash()" );
+    if (NULL == i_digest_2)
+    {
+        TRACUCOMP( g_trac_trustedboot,
+                   ">>tpmCmdPcrExtend2Hash() Pcr(%d) Alg(%X) DS(%d)",
+                   i_pcr, i_algId_1, (int)i_digestSize_1);
+    }
+    else
+    {
+        TRACUCOMP( g_trac_trustedboot,
+                   ">>tpmCmdPcrExtend2Hash() Pcr(%d) Alg(%X:%X) DS(%d:%d)",
+                   i_pcr, i_algId_1, i_algId_2,
+                   (int)i_digestSize_1, (int)i_digestSize_2);
+    }
 
     do
     {
 
-        fullDigestSize = getDigestSize(i_algId);
+        fullDigestSize_1 = getDigestSize(i_algId_1);
+        if (NULL != i_digest_2)
+        {
+            fullDigestSize_2 = getDigestSize(i_algId_2);
+        }
 
         // Build our command block
         memset(dataBuf, 0, sizeof(dataBuf));
 
         // Argument verification
-        if (fullDigestSize == 0 ||
-            NULL == i_digest ||
-            IMPLEMENTATION_PCR < i_pcr
+        if (fullDigestSize_1 == 0 ||
+            NULL == i_digest_1 ||
+            IMPLEMENTATION_PCR < i_pcr ||
+            (NULL != i_digest_2 && fullDigestSize_2 == 0)
             )
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM PCR EXTEND ARG FAILURE FDS(%d) DS(%d) PCR(%d)",
-                       (int)fullDigestSize, (int)i_digestSize, i_pcr);
+                       "TPM PCR EXTEND ARG FAILURE FDS(%d:%d) DS(%d:%d) "
+                       "PCR(%d)",
+                       (int)fullDigestSize_1, (int)fullDigestSize_2,
+                       (int)i_digestSize_1, (int)i_digestSize_2, i_pcr);
             /*@
              * @errortype
              * @reasoncode     RC_TPM_INVALID_ARGS
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_TPM_CMD_PCREXTEND
              * @userdata1      Digest Ptr
-             * @userdata2[0:31] Full Digest Size
+             * @userdata2[0:15] Full Digest Size 1
+             * @userdata2[16:31] Full Digest Size 2
              * @userdata2[32:63] PCR
              * @devdesc        Unmarshaling error detected
              */
             err = tpmCreateErrorLog(MOD_TPM_CMD_PCREXTEND,
                                     RC_TPM_INVALID_ARGS,
-                                    (uint64_t)i_digest,
-                                    (fullDigestSize << 32) |
+                                    (uint64_t)i_digest_1,
+                                    (fullDigestSize_1 << 48) |
+                                    (fullDigestSize_2 << 32) |
                                     i_pcr);
             break;
         }
 
         // Log the input PCR value
         TRACUBIN(g_trac_trustedboot, "PCR In",
-                 i_digest, fullDigestSize);
+                 i_digest_1, fullDigestSize_1);
 
         cmd->base.tag = TPM_ST_SESSIONS;
         cmd->base.commandCode = TPM_CC_PCR_Extend;
         cmd->pcrHandle = i_pcr;
         cmd->digests.count = 1;
-        cmd->digests.digests[0].algorithmId = i_algId;
-        memcpy(cmd->digests.digests[0].digest.bytes, i_digest,
-               (i_digestSize < fullDigestSize ? i_digestSize : fullDigestSize));
+        cmd->digests.digests[0].algorithmId = i_algId_1;
+        memcpy(&(cmd->digests.digests[0].digest), i_digest_1,
+               (i_digestSize_1 < fullDigestSize_1 ?
+                i_digestSize_1 : fullDigestSize_1) );
+        if (NULL != i_digest_2)
+        {
+            cmd->digests.count = 2;
+            cmd->digests.digests[1].algorithmId = i_algId_2;
+            memcpy(&(cmd->digests.digests[1].digest), i_digest_2,
+                   (i_digestSize_2 < fullDigestSize_2 ?
+                    i_digestSize_2 : fullDigestSize_2));
+        }
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,

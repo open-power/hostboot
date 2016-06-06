@@ -60,8 +60,8 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                 delete err;
                 err = NULL;
             }
-            else if (TpmLogMgr_getLogSize(logMgr) != 69)
-                // 69 is size of header entry
+            else if (TpmLogMgr_getLogSize(logMgr) != 73)
+                // 73 is size of header entry
             {
                 TS_FAIL( "getTestLogMgr - Failed to find "
                          "proper header log Len=%d",
@@ -123,7 +123,7 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                         break;
                     }
 
-                    memset(log.digests.digests[0].digest.bytes,
+                    memset(&(log.digests.digests[0].digest),
                            0x51+idx, digestSize);
 
                     log.event.eventSize = 21+idx;
@@ -213,7 +213,9 @@ class TPMLogMgrTest: public CxxTest::TestSuite
             // Get a TCG_PCR_EVENT2
             TCG_PCR_EVENT2 eventLog = TpmLogMgr_genLogEventPcrExtend(
                                         pcr, algId,
-                                        digest, digestSize, i_logMsg);
+                                        digest, digestSize,
+                                        TPM_ALG_SHA1, digest,
+                                        digestSize, i_logMsg);
 
             // Add event to log
             errlHndl_t err = TpmLogMgr_addEvent(&i_logMgr, &eventLog);

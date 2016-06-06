@@ -129,6 +129,29 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            size_t  i_digestSize);
 
 /**
+ * @brief Send the TPM_Extend command to the targeted TPM and log
+ * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_pcr PCR to write to
+ * @param[in] i_algId_1 Algorithm to use
+ * @param[in] i_digest_1 Digest value to write to PCR, zeros appended as needed
+ * @param[in] i_digestSize_1 Byte size of i_digest_1 array
+ * @param[in] i_algId_2 Algorithm to use
+ * @param[in] i_digest_2 Digest value to write to PCR, zeros appended as needed
+ *                         NULL if second digest not used
+ * @param[in] i_digestSize_2 Byte size of i_digest_2 array
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
+ */
+errlHndl_t tpmCmdPcrExtend2Hash(TpmTarget * io_target,
+                                TPM_Pcr i_pcr,
+                                TPM_Alg_Id i_algId_1,
+                                const uint8_t* i_digest_1,
+                                size_t  i_digestSize_1,
+                                TPM_Alg_Id i_algId_2,
+                                const uint8_t* i_digest_2,
+                                size_t  i_digestSize_2);
+
+/**
  * @brief Send the TPM_Read command to the targeted TPM and log
  * @param[in/out] io_target Current TPM target structure
  * @param[in] i_pcr PCR to read from

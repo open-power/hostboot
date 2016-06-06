@@ -411,7 +411,8 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
                 err = tpmCmdPcrExtend(&io_target,
                             (TPM_Pcr)l_eventLog.pcrIndex,
                             l_algId,
-                            l_eventLog.digests.digests[i].digest.bytes,
+                            reinterpret_cast<uint8_t*>
+                                      (&(l_eventLog.digests.digests[i].digest)),
                             getDigestSize(l_algId));
                 if (err)
                 {
@@ -571,8 +572,12 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
              !io_target.failed))
         {
             // Fill in TCG_PCR_EVENT2 and add to log
-            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr, i_algId, i_digest,
-                                                      i_digestSize, i_logMsg);
+            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr,
+                                                      i_algId, i_digest,
+                                                      i_digestSize,
+                                                      TPM_ALG_SHA1, i_digest,
+                                                      i_digestSize,
+                                                      i_logMsg);
             err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
             if (NULL != err)
             {
@@ -587,11 +592,16 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
             !io_target.failed)
         {
 
-            err = tpmCmdPcrExtend(&io_target,
-                                  i_pcr,
-                                  i_algId,
-                                  i_digest,
-                                  i_digestSize);
+            // Perform the requested extension and also force into the
+            // SHA1 bank
+            err = tpmCmdPcrExtend2Hash(&io_target,
+                                       i_pcr,
+                                       i_algId,
+                                       i_digest,
+                                       i_digestSize,
+                                       TPM_ALG_SHA1,
+                                       i_digest,
+                                       i_digestSize);
         }
     } while ( 0 );
 

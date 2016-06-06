@@ -77,7 +77,7 @@ namespace TRUSTEDBOOT
     uint32_t TCG_EfiSpecIdEventStruct_size(TCG_EfiSpecIdEventStruct* val);
 
     enum {
-        TPMLOG_BUFFER_SIZE   = 1024, ///< Size of event log buffer in bytes
+        TPMLOG_BUFFER_SIZE   = 2048, ///< Size of event log buffer in bytes
         TPMLOG_DEVTREE_SIZE  = 64*1024, ///< Size to allocate for OPAL
     };
 
@@ -204,17 +204,23 @@ namespace TRUSTEDBOOT
      * @brief Get a TCG_PCR_EVENT2 populated with required data
      *
      * @param[in] i_pcr PCR to write to
-     * @param[in] i_algId Algorithm to use
-     * @param[in] i_digest Digest value to write to PCR
-     * @param[in] i_digestSize Byte size of i_digest array
+     * @param[in] i_algId_1 Algorithm to use
+     * @param[in] i_digest_1 Digest value to write to PCR
+     * @param[in] i_digestSize_1 Byte size of i_digest array
+     * @param[in] i_algId_2 Algorithm to use
+     * @param[in] i_digest_2 Digest value to write to PCR, NULL if not used
+     * @param[in] i_digestSize_2 Byte size of i_digest array
      * @param[in] i_logMsg Null terminated Log message
      *
      * @return TCG_PCR_EVENT2   PCR event log
      */
     TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
-                                                  TPM_Alg_Id i_algId,
-                                                  const uint8_t* i_digest,
-                                                  size_t i_digestSize,
+                                                  TPM_Alg_Id i_algId_1,
+                                                  const uint8_t* i_digest_1,
+                                                  size_t i_digestSize_1,
+                                                  TPM_Alg_Id i_algId_2,
+                                                  const uint8_t* i_digest_2,
+                                                  size_t i_digestSize_2,
                                                   const char* i_logMsg);
 
     /**

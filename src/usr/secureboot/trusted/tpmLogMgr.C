@@ -120,6 +120,8 @@ namespace TRUSTEDBOOT
             eventData->numberOfAlgorithms = htole32(HASH_COUNT);
             eventData->digestSizes[0].algorithmId = htole16(TPM_ALG_SHA256);
             eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
+            eventData->digestSizes[1].algorithmId = htole16(TPM_ALG_SHA1);
+            eventData->digestSizes[1].digestSize = htole16(TPM_ALG_SHA1_SIZE);
             eventData->vendorInfoSize = sizeof(vendorInfo);
             memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
             val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
@@ -156,16 +158,12 @@ namespace TRUSTEDBOOT
 
             mutex_init( &val->logMutex );
             mutex_lock( &val->logMutex );
-            TRACUCOMP( g_trac_trustedboot,
-                   ">>initializeUsingExistingLog() 1");
 
             val->logMaxSize = eventLogSize;
             val->eventLogInMem = eventLogPtr;
 
             // Ok, walk the log to figure out how big this is
             val->logSize = TpmLogMgr_calcLogSize(val);
-            TRACUCOMP( g_trac_trustedboot,
-                   ">>initializeUsingExistingLog() 2");
 
             if (0 == val->logSize)
             {
@@ -298,7 +296,7 @@ namespace TRUSTEDBOOT
     {
 
         // Debug display of raw data
-        TRACUCOMP(g_trac_trustedboot, "tpmDumpLog Size : %d\n",
+        TRACUCOMP(g_trac_trustedboot, "tpmDumpLog Size : %d",
                   (int)val->logSize);
 
 #ifdef __HOSTBOOT_MODULE
@@ -450,25 +448,45 @@ namespace TRUSTEDBOOT
     }
 
     TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
-                                                  TPM_Alg_Id i_algId,
-                                                  const uint8_t* i_digest,
-                                                  size_t i_digestSize,
+                                                  TPM_Alg_Id i_algId_1,
+                                                  const uint8_t* i_digest_1,
+                                                  size_t i_digestSize_1,
+                                                  TPM_Alg_Id i_algId_2,
+                                                  const uint8_t* i_digest_2,
+                                                  size_t i_digestSize_2,
                                                   const char* i_logMsg)
     {
         TCG_PCR_EVENT2 eventLog;
+        size_t fullDigestSize_1 = 0;
+        size_t fullDigestSize_2 = 0;
+
+        fullDigestSize_1 = getDigestSize(i_algId_1);
+        if (NULL != i_digest_2)
+        {
+            fullDigestSize_2 = getDigestSize(i_algId_2);
+        }
 
         memset(&eventLog, 0, sizeof(eventLog));
         eventLog.pcrIndex = i_pcr;
         eventLog.eventType = EV_ACTION;
 
-        // Update digest information, we only use 1 entry
+        // Update digest information
         eventLog.digests.count = 1;
-        eventLog.digests.digests[0].algorithmId = i_algId;
-        memcpy(eventLog.digests.digests[0].digest.bytes,
-               i_digest,
-               (i_digestSize > sizeof(TPMU_HA) ?
-                sizeof(TPMU_HA) : i_digestSize));
+        eventLog.digests.digests[0].algorithmId = i_algId_1;
+        memcpy(&(eventLog.digests.digests[0].digest),
+               i_digest_1,
+               (i_digestSize_1 < fullDigestSize_1 ?
+                i_digestSize_1 : fullDigestSize_1));
 
+        if (NULL != i_digest_2)
+        {
+            eventLog.digests.count = 2;
+            eventLog.digests.digests[1].algorithmId = i_algId_2;
+            memcpy(&(eventLog.digests.digests[1].digest),
+                   i_digest_2,
+                   (i_digestSize_2 < fullDigestSize_2 ?
+                    i_digestSize_2 : fullDigestSize_2));
+        }
         // Event field data
         eventLog.event.eventSize = strlen(i_logMsg);
         memset(eventLog.event.event, 0, sizeof(eventLog.event.event));
