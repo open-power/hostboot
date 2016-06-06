@@ -2106,6 +2106,9 @@
     <attribute><id>DISABLE_HBBL_VECTORS</id></attribute>
     <attribute><id>SECURITY_ENABLE</id></attribute>
     <attribute><id>SECURITY_MODE</id></attribute>
+    <attribute><id>PIBMEM_REPAIR0</id></attribute>
+    <attribute><id>PIBMEM_REPAIR1</id></attribute>
+    <attribute><id>PIBMEM_REPAIR2</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
