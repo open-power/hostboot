@@ -438,19 +438,21 @@ fapi2::ReturnCode rev_encoding_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
              l_raw_byte);
 
     // Extracting desired bits
-    uint8_t l_bit_fields = 0;
-    l_buffer.extractToRight<ENCODING_LEVEL_START, ENCODING_LEVEL_LEN>(l_bit_fields);
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight<ENCODING_LEVEL_START, ENCODING_LEVEL_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
-              (l_bit_fields != UNDEFINED),
+              (l_field_bits != UNDEFINED),
               BYTE_INDEX,
               l_raw_byte,
               "Failed check on SPD rev encoding level") );
 
     // Update output only after check passes
-    o_value = l_bit_fields;
+    o_value = l_field_bits;
 
     // Print decoded info
     FAPI_DBG("%s. Rev - Encoding Level : %d",
@@ -488,19 +490,21 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIM
              l_raw_byte);
 
     // Extracting desired bits
-    uint8_t l_bit_fields = 0;
-    l_buffer.extractToRight<ADDITIONS_LEVEL_START, ADDITIONS_LEVEL_LEN>(l_bit_fields);
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight<ADDITIONS_LEVEL_START, ADDITIONS_LEVEL_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check that value is valid
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
     FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
-              (l_bit_fields != UNDEFINED),
+              (l_field_bits != UNDEFINED),
               BYTE_INDEX,
               l_raw_byte,
               "Failed check on SPD rev encoding level") );
 
     // Update output only after check passes
-    o_value = l_bit_fields;
+    o_value = l_field_bits;
 
     // Print decoded info
     FAPI_DBG("%s. Rev - Additions Level : %d",
@@ -1017,7 +1021,7 @@ fapi2::ReturnCode decoder::sdram_density(const fapi2::Target<TARGET_TYPE_DIMM>& 
               BYTE_INDEX,
               l_field_bits,
               "Failed check for SPD DRAM capacity") );
-    FAPI_DBG("%s. SDRAM density: %d",
+    FAPI_DBG("%s. SDRAM density: %d Gb",
              mss::c_str(i_target),
              o_value);
 
@@ -1853,7 +1857,7 @@ fapi2::ReturnCode decoder::device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i
               l_field_bits,
               "Failed check for Device Width") );
 
-    FAPI_DBG("%s. Device Width: %d",
+    FAPI_DBG("%s. Device Width: %d bits",
              mss::c_str(i_target),
              o_value);
 
@@ -1887,6 +1891,7 @@ fapi2::ReturnCode decoder::num_package_ranks_per_dimm(const fapi2::Target<TARGET
     // Extracting desired bits
     fapi2::buffer<uint8_t> l_spd_buffer(l_raw_byte);
     uint8_t l_field_bits = 0;
+    l_spd_buffer.extractToRight<PACKAGE_RANKS_START, PACKAGE_RANKS_LEN>(l_field_bits);
 
     FAPI_DBG("Field Bits value: %d", l_field_bits);
 
@@ -3926,7 +3931,7 @@ fapi2::ReturnCode decoder::fine_offset_min_taa(const fapi2::Target<fapi2::TARGET
         int64_t& o_value)
 {
     // Trace in the front assists w/ debug
-    constexpr size_t BYTE_INDEX = 125;
+    constexpr size_t BYTE_INDEX = 123;
 
     FAPI_DBG("%s SPD data at Byte %d: 0x%llX.",
              mss::c_str(i_target),

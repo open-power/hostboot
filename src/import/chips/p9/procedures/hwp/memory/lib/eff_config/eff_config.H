@@ -43,12 +43,21 @@ namespace mss
 class eff_config
 {
     public:
+        //TK - Make this constructor take this as param - AAM
         std::shared_ptr<spd::decoder> iv_pDecoder;
 
-        // ctor
+        // TK - Adding decoder in ctor can allow me to save off the
+        // state of decoder timebases, target, fapi2 positions,
+        // and clock period eliminate code duplication.
+
+        //
+        // @brief Constructor
+        //
         eff_config() = default;
 
-        // dtor
+        //
+        // @brief Destructor
+        //
         ~eff_config() = default;
 
         ////////////////////////
@@ -690,7 +699,105 @@ class eff_config
         ///
         fapi2::ReturnCode memcal_interval(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
+        ///
+        /// @brief Determines & sets effective config for tRP
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tRCD
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trcd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tWTR_L
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_twtr_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tWTR_S
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_twtr_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tRRD_S
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trrd_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tRRD_L
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trrd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tfaw
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_tfaw(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tRAS
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_tras(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tRTP
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trtp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
 };// eff_config
+
+
+
+///
+/// @brief Returns Logical ranks in Primary SDRAM type
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode prim_sdram_logical_ranks(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_ranks);
+
+///
+/// @brief Returns Logical ranks in Secondary SDRAM type
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode sec_sdram_logical_ranks(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_ranks);
+
+///
+/// @brief Returns Logical ranks per DIMM
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode logical_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_rank_per_dimm);
 
 } // mss
 

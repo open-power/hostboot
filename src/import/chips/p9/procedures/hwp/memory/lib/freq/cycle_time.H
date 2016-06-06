@@ -118,7 +118,7 @@ inline fapi2::ReturnCode select_supported_freq(uint64_t& io_dimm_freq)
 
     // Selects next lowest freq btw 1866 - 2666 [MT/s]
     {
-        auto iterator = std::lower_bound(P9_FREQS.begin(), P9_FREQS.end(), io_dimm_freq);
+        auto iterator = std::upper_bound(P9_FREQS.begin(), P9_FREQS.end(), io_dimm_freq);
         io_dimm_freq = *(--iterator);
     }
 fapi_try_exit:

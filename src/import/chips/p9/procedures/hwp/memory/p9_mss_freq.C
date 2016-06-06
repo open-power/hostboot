@@ -81,10 +81,17 @@ extern "C"
                      "Failed check for freq_override()");
 
 #endif
+            // Default values for initialization as well as empty dimm list case
             uint64_t l_min_dimm_freq = 0;
             uint64_t l_desired_cas_latency = 0;
 
-            if(!l_cas_latency.iv_dimm_list_empty)
+            if(l_cas_latency.iv_dimm_list_empty)
+            {
+                // Cannot fail out for an empty DIMM configuration
+                // So default values are set
+                FAPI_INF("DIMM list is empty! Setting default values for CAS latency and DIMM speed.");
+            }
+            else
             {
                 uint64_t l_tCKmin = 0;
 
@@ -95,12 +102,12 @@ extern "C"
 
                 // Find dimm transfer speed from selected tCK
                 l_min_dimm_freq = mss::ps_to_freq(l_tCKmin);
+                FAPI_INF("DIMM speed from selected tCK: %d", l_min_dimm_freq);
 
                 FAPI_TRY(mss::select_supported_freq(l_min_dimm_freq),
                          "Failed select_supported_freq()");
 
-                // TK - RIT PROTECT - NEED TO CHANGE
-                l_min_dimm_freq = 2400;
+                FAPI_INF("Selected DIMM speed from supported speeds: %d", l_min_dimm_freq);
 
                 // Set attributes
                 FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
@@ -108,10 +115,10 @@ extern "C"
 
                 FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
                          "Failed set_CL_attr()");
-            }// end if
+            }// end else
 
-            FAPI_DBG( "Final Chosen Frequency: %d",  l_min_dimm_freq);
-            FAPI_DBG( "Final Chosen CL: %d",  l_desired_cas_latency);
+            FAPI_INF( "Final Chosen Frequency: %d",  l_min_dimm_freq);
+            FAPI_INF( "Final Chosen CL: %d",  l_desired_cas_latency);
 
         }
 

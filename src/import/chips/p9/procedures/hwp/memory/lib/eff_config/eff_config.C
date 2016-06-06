@@ -28,8 +28,10 @@
 
 #include <fapi2.H>
 #include <mss.H>
+
 #include <lib/eff_config/eff_config.H>
 #include <lib/eff_config/timing.H>
+#include <lib/spd/spd_decoder.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 
@@ -41,6 +43,122 @@ using fapi2::TARGET_TYPE_MCBIST;
 namespace mss
 {
 
+/////////////////////////
+// Non-member function implementations
+/////////////////////////
+
+// TK - Refactor functions to make them more
+// testable with next larger change set of decoder
+// and eff_config refactoring. Currently,
+// goal of achieving VBU value is achieved. - AAM
+
+///
+/// @brief Returns Logical ranks in Primary SDRAM type
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode prim_sdram_logical_ranks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_ranks)
+{
+    uint8_t l_signal_loading = 0;
+    uint8_t l_ranks_per_dimm = 0;
+    FAPI_TRY( i_pDecoder->prim_sdram_signal_loading(i_target, l_signal_loading) );
+    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_ranks_per_dimm) );
+
+    if(l_signal_loading == spd::SINGLE_LOAD_STACK)
+    {
+        uint8_t l_die_count = 0;
+        FAPI_TRY( i_pDecoder->prim_sdram_die_count(i_target, l_die_count) );
+
+        o_logical_ranks = l_ranks_per_dimm * l_die_count;
+    }
+    else
+    {
+        // Covers case for MONOLITHIC & MULTI_LOAD_STACK
+        o_logical_ranks = l_ranks_per_dimm;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Returns Logical ranks in Secondary SDRAM type
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode sec_sdram_logical_ranks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_ranks)
+{
+    uint8_t l_signal_loading = 0;
+    uint8_t l_ranks_per_dimm = 0;
+
+    FAPI_TRY( i_pDecoder->sec_sdram_signal_loading(i_target, l_signal_loading) );
+    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_ranks_per_dimm) );
+
+    if(l_signal_loading == spd::SINGLE_LOAD_STACK)
+    {
+        uint8_t l_die_count = 0;
+        FAPI_TRY( i_pDecoder->sec_sdram_die_count(i_target, l_die_count) );
+
+        o_logical_ranks = l_ranks_per_dimm * l_die_count;
+    }
+    else
+    {
+        // Covers case for MONOLITHIC & MULTI_LOAD_STACK
+        o_logical_ranks = l_ranks_per_dimm;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Returns Logical ranks per DIMM
+/// @param[in] i_target dimm target
+/// @param[in] i_pDecoder shared pointer to the SPD decoder
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode logical_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder,
+        uint8_t& o_logical_rank_per_dimm)
+{
+    uint8_t l_rank_mix = 0;
+
+    FAPI_TRY( i_pDecoder->rank_mix(i_target, l_rank_mix) );
+
+    if(l_rank_mix == spd::SYMMETRICAL)
+    {
+        FAPI_TRY( prim_sdram_logical_ranks(i_target, i_pDecoder, o_logical_rank_per_dimm) );
+    }
+    else
+    {
+        // Rank mix is ASYMMETRICAL
+        uint8_t l_prim_logical_rank_per_dimm = 0;
+        uint8_t l_sec_logical_rank_per_dimm = 0;
+
+        FAPI_TRY( prim_sdram_logical_ranks(i_target, i_pDecoder, l_prim_logical_rank_per_dimm) );
+        FAPI_TRY( sec_sdram_logical_ranks(i_target, i_pDecoder, l_sec_logical_rank_per_dimm) );
+
+        o_logical_rank_per_dimm = l_prim_logical_rank_per_dimm + l_sec_logical_rank_per_dimm;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/////////////////////////
+// Member Method implementation
+/////////////////////////
+
 ///
 /// @brief Determines & sets effective config for DRAM generation from SPD
 /// @param[in] i_target FAPI2 target
@@ -50,21 +168,18 @@ fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_
                                        const std::vector<uint8_t>& i_spd_data )
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( spd::dram_device_type(i_target, i_spd_data, l_decoder_val) );
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    {
-        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-        const auto l_dimm_num = index(i_target);
+    FAPI_TRY( eff_dram_gen(l_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( spd::dram_device_type(i_target, i_spd_data, l_decoder_val) );
 
-        uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY( eff_dram_gen(l_mcs, &l_mcs_attrs[0][0]) );
-
-        l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_mcs_attrs) );
-    }
+    l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -81,21 +196,18 @@ fapi2::ReturnCode eff_config::dimm_type(const fapi2::Target<TARGET_TYPE_DIMM>& i
                                         const std::vector<uint8_t>& i_spd_data )
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( spd::base_module_type(i_target, i_spd_data, l_decoder_val) );
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    {
-        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-        const auto l_dimm_num = index(i_target);
+    FAPI_TRY( eff_dimm_type(l_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( spd::base_module_type(i_target, i_spd_data, l_decoder_val) );
 
-        uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY( eff_dimm_type(l_mcs, &l_mcs_attrs[0][0]) );
-
-        l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_mcs_attrs) );
-    }
+    l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -107,25 +219,21 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_width(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_width(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->device_width(i_target, l_decoder_val) );
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    {
-        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-        const auto l_dimm_num = index(i_target);
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_decoder_val) );
+    FAPI_TRY( eff_dram_width(l_mcs, &l_mcs_attrs[0][0]) );
 
-        uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY( eff_dram_width(l_mcs, &l_mcs_attrs[0][0]) );
-
-        // TK - RIT skeleton. Need to finish - BRS
-        l_mcs_attrs[l_port_num][l_dimm_num] = 0x04;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_WIDTH, l_mcs, l_mcs_attrs) );
-    }
+    l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_WIDTH, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -137,7 +245,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_density(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_density(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
 
@@ -152,8 +260,7 @@ fapi2::ReturnCode eff_config::dram_density(const fapi2::Target<fapi2::TARGET_TYP
         uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
         FAPI_TRY( eff_dram_density(l_mcs, &l_mcs_attrs[0][0]) );
 
-        // TK - RIT skeleton. Need to finish - BRS
-        l_mcs_attrs[l_port_num][l_dimm_num] = 0x04;
+        l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_DENSITY, l_mcs, l_mcs_attrs) );
     }
 
@@ -167,25 +274,22 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
 
-    uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val) );
+    uint8_t l_ranks_per_dimm = 0;
+    uint8_t l_attrs_ranks_per_dimm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    {
-        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-        const auto l_dimm_num = index(i_target);
+    FAPI_TRY( eff_num_ranks_per_dimm(l_mcs, &l_attrs_ranks_per_dimm[0][0]) );
+    FAPI_TRY( logical_ranks_per_dimm(i_target, iv_pDecoder, l_ranks_per_dimm) );
 
-        uint8_t l_attrs_ranks_per_dimm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY(eff_num_ranks_per_dimm(l_mcs, &l_attrs_ranks_per_dimm[0][0]));
+    l_attrs_ranks_per_dimm[l_port_num][l_dimm_num] = l_ranks_per_dimm;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, l_mcs, l_attrs_ranks_per_dimm) );
 
-        // TK - RIT skeleton. Need to finish - BRS
-        l_attrs_ranks_per_dimm[l_port_num][l_dimm_num] = 0x2;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, l_mcs, l_attrs_ranks_per_dimm) );
-    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -198,16 +302,19 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::master_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::master_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
+    uint8_t l_decoder_val = 0;
     uint8_t l_attrs_master_ranks_per_dimm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val) );
     FAPI_TRY(eff_num_master_ranks_per_dimm(l_mcs, &l_attrs_master_ranks_per_dimm[0][0]));
 
-    l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)] = 0x02;
+    l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, l_mcs, l_attrs_master_ranks_per_dimm) );
 
 fapi_try_exit:
@@ -219,7 +326,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::primary_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::primary_stack_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     uint8_t l_decoder_val = 0;
     FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(i_target, l_decoder_val) );
@@ -248,20 +355,37 @@ fapi_try_exit:
 /// @warn Dependent on the following attributes already set:
 /// @warn eff_dram_density, eff_sdram_width, eff_ranks_per_dimm
 ///
-fapi2::ReturnCode eff_config::dimm_size(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_size(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    // Retrieve values needed to calculate dimm size
+    uint8_t l_bus_width = 0;
+    uint8_t l_sdram_width = 0;
+    uint8_t l_sdram_density = 0;
+    uint8_t l_logical_rank_per_dimm = 0;
 
-    // Get & update MCS attribute
-    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-    const auto l_dimm_num = index(i_target);
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_sdram_width) );
+    FAPI_TRY( iv_pDecoder->prim_bus_width(i_target, l_bus_width) );
+    FAPI_TRY( iv_pDecoder->sdram_density(i_target, l_sdram_density) );
+    FAPI_TRY( logical_ranks_per_dimm(i_target, iv_pDecoder, l_logical_rank_per_dimm) );
 
-    uint32_t l_attrs_dimm_size[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_size(l_mcs, &l_attrs_dimm_size[0][0]) );
+    {
+        // Calculate dimm size
+        // Formula from SPD Spec
+        // Total = SDRAM Capacity 8 * Primary Bus Width SDRAM Width * Logical Ranks per DIMM
+        uint32_t l_dimm_size = 0;
+        l_dimm_size = (l_sdram_density / 8.0) * (l_bus_width / l_sdram_width) * l_logical_rank_per_dimm;
 
-    l_attrs_dimm_size[l_port_num][l_dimm_num] = 0x10;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_SIZE, l_mcs, l_attrs_dimm_size) );
+        // Get & update MCS attribute
+        const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+        const auto l_dimm_num = index(i_target);
+
+        uint32_t l_attrs_dimm_size[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+        FAPI_TRY( eff_dimm_size(l_mcs, &l_attrs_dimm_size[0][0]) );
+
+        l_attrs_dimm_size[l_port_num][l_dimm_num] = uint8_t(l_dimm_size);
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_SIZE, l_mcs, l_attrs_dimm_size) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -280,16 +404,14 @@ fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE
     const auto l_dimm_num = index(i_target);
 
     uint8_t l_decoder_val = 0;
-    FAPI_TRY(iv_pDecoder->hybrid_media(i_target, l_decoder_val));
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    {
-        uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY( eff_hybrid_memory_type(l_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( eff_hybrid_memory_type(l_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY(iv_pDecoder->hybrid_media(i_target, l_decoder_val));
 
-        l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, l_mcs, l_mcs_attrs) );
-    }
+    l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -440,6 +562,7 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
                   "Failed to calculate clock period (tCK)");
 
         FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
         {
             // Calculate refresh cycle time in nCK & set attribute
             const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -512,7 +635,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::rcd_mirror_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::rcd_mirror_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_mirror_mode[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -539,21 +662,19 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_bank_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_bank_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_bank_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
     const auto l_dimm_num = index(i_target);
 
+    uint8_t l_bank_bits = 0;
+    uint8_t l_attrs_bank_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
     FAPI_TRY( eff_dram_bank_bits(l_mcs, &l_attrs_bank_bits[0][0]) );
-    l_attrs_bank_bits[l_port_num][l_dimm_num] = 0x04;
+    FAPI_TRY( iv_pDecoder->banks(i_target, l_bank_bits) );
+
+    l_attrs_bank_bits[l_port_num][l_dimm_num] = l_bank_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_BANK_BITS, l_mcs, l_attrs_bank_bits) );
 
 fapi_try_exit:
@@ -567,22 +688,21 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_row_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_row_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_row_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
     const auto l_dimm_num = index(i_target);
 
+    uint8_t l_row_bits = 0;
+    uint8_t l_attrs_row_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
     FAPI_TRY( eff_dram_row_bits(l_mcs, &l_attrs_row_bits[0][0]) );
-    l_attrs_row_bits[l_port_num][l_dimm_num] = 0x10;
+    FAPI_TRY( iv_pDecoder->row_address_bits(i_target, l_row_bits) );
+
+    l_attrs_row_bits[l_port_num][l_dimm_num] = l_row_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_ROW_BITS, l_mcs, l_attrs_row_bits) );
+
 fapi_try_exit:
     return fapi2::current_err;
 
@@ -594,7 +714,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::custom_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::custom_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     // Targets
@@ -621,7 +741,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dqs_time[PORTS_PER_MCS] = {};
@@ -647,7 +767,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::odt_read(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::odt_read(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -683,7 +803,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::odt_write(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::odt_write(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -727,7 +847,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_tccd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_tccd_l[PORTS_PER_MCS] = {};
@@ -753,7 +873,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::rtt_park(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -785,7 +905,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc00(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc00[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -811,7 +931,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc01(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc01[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -836,7 +956,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc02(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc02[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -861,7 +981,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc03[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -887,7 +1007,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc04[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -912,7 +1032,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc05[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -937,7 +1057,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc06_07(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc06_07(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc06_07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -962,7 +1082,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc08(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc08(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -987,7 +1107,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc09(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc09(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1012,7 +1132,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc10[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1038,7 +1158,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc11(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc11(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc11[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1063,7 +1183,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc12(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc12(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc12[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1088,7 +1208,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc13(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc13(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc13[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1113,7 +1233,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc14[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1138,7 +1258,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc15(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc15(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc15[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1165,7 +1285,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc1x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc1x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_1x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1192,7 +1312,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc2x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc2x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_2x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1218,7 +1338,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_3x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1244,7 +1364,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc4x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc4x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_4x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1270,7 +1390,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc5x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc5x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_5x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1296,7 +1416,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc6x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc6x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_6x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1322,7 +1442,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc7x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc7x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_7x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1348,7 +1468,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc8x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc8x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_8x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1374,7 +1494,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rc9x(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rc9x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_9x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1400,7 +1520,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rcax(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rcax(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_ax[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1426,7 +1546,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dimm_rcbx(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dimm_rcbx(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_bx[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1452,7 +1572,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_twr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_twr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_twr(PORTS_PER_MCS, 0);
@@ -1480,7 +1600,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::burst_length(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::burst_length(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_bl(PORTS_PER_MCS, 0);
@@ -1510,7 +1630,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::read_burst_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::read_burst_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_rbt[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1539,7 +1659,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_tm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_tm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_tm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1569,7 +1689,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_cwl(PORTS_PER_MCS, 0);
@@ -1598,7 +1718,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_lpasr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_lpasr(PORTS_PER_MCS, 0);
@@ -1627,7 +1747,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::additive_latency(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::additive_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_dram_al(PORTS_PER_MCS, 0);
@@ -1656,7 +1776,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dll_reset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dll_reset(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dll_reset[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1685,7 +1805,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dll_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dll_enable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dll_enable[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1714,7 +1834,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::dram_ron(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_ron(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dram_ron[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
@@ -1743,7 +1863,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::rtt_nom(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -1774,7 +1894,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::write_level_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::write_level_enable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_wr_lvl_enable(PORTS_PER_MCS, 0);
@@ -1803,7 +1923,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::output_buffer(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::output_buffer(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_output_buffer(PORTS_PER_MCS, 0);
@@ -1832,7 +1952,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::vref_dq_train_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::vref_dq_train_value(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -1865,7 +1985,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::vref_dq_train_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::vref_dq_train_enable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -1898,7 +2018,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::vref_dq_train_range(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::vref_dq_train_range(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -1930,7 +2050,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::ca_parity_latency(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::ca_parity_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_ca_parity_latency(PORTS_PER_MCS, 0);
@@ -1959,7 +2079,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::crc_error_clear(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::crc_error_clear(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_crc_error_clear(PORTS_PER_MCS, 0);
@@ -1988,7 +2108,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::ca_parity_error_status(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::ca_parity_error_status(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_ca_parity_error_status(PORTS_PER_MCS, 0);
@@ -2017,7 +2137,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::ca_parity(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::ca_parity(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_ca_parity(PORTS_PER_MCS, 0);
@@ -2046,7 +2166,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::odt_input_buffer(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::odt_input_buffer(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_odt_input_buffer(PORTS_PER_MCS, 0);
@@ -2075,7 +2195,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::data_mask(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::data_mask(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_data_mask(PORTS_PER_MCS, 0);
@@ -2104,7 +2224,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::write_dbi(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::write_dbi(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_write_dbi(PORTS_PER_MCS, 0);
@@ -2134,18 +2254,13 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::read_dbi(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::read_dbi(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
-    std::vector<uint8_t> l_attrs_read_dbi(PORTS_PER_MCS, 0);
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-    // Current index
-    const auto l_port_num = index(l_mca);
-
+    std::vector<uint8_t> l_attrs_read_dbi(PORTS_PER_MCS, 0);
     FAPI_TRY( eff_read_dbi(l_mcs, l_attrs_read_dbi.data()) );
 
     l_attrs_read_dbi[l_port_num] = 0x00;
@@ -2164,24 +2279,20 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::post_package_repair(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dram_ppr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
     const auto l_dimm_num = index(i_target);
 
-    // Port level?
+    uint8_t l_decoder_val = 0;
+    uint8_t l_attrs_dram_ppr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
     FAPI_TRY( eff_dram_ppr(l_mcs, &l_attrs_dram_ppr[0][0]) );
+    FAPI_TRY( iv_pDecoder->post_package_repair(i_target, l_decoder_val) );
 
-    l_attrs_dram_ppr[l_port_num][l_dimm_num] = 0x00;
-
+    l_attrs_dram_ppr[l_port_num][l_dimm_num] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_PPR, l_mcs, l_attrs_dram_ppr),
               "Failed setting attribute for DRAM_PPR");
 
@@ -2194,18 +2305,13 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::read_preamble_train(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::read_preamble_train(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
-    std::vector<uint8_t> l_attrs_rd_preamble_train(PORTS_PER_MCS, 0);
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-    // Current index
-    const auto l_port_num = index(l_mca);
-
+    std::vector<uint8_t> l_attrs_rd_preamble_train(PORTS_PER_MCS, 0);
     FAPI_TRY( eff_rd_preamble_train(l_mcs, l_attrs_rd_preamble_train.data()) );
 
     l_attrs_rd_preamble_train[l_port_num] = 0x00;
@@ -2224,7 +2330,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::read_preamble(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::read_preamble(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_rd_preamble(PORTS_PER_MCS, 0);
@@ -2254,7 +2360,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::write_preamble(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::write_preamble(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_wr_preamble(PORTS_PER_MCS, 0);
@@ -2284,7 +2390,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::self_refresh_abort(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::self_refresh_abort(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_self_ref_abort(PORTS_PER_MCS, 0);
@@ -2315,7 +2421,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::cs_to_cmd_addr_latency(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::cs_to_cmd_addr_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_cs_cmd_latency(PORTS_PER_MCS, 0);
@@ -2345,7 +2451,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::internal_vref_monitor(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::internal_vref_monitor(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_int_vref_mon(PORTS_PER_MCS, 0);
@@ -2375,7 +2481,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::max_powerdown_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::max_powerdown_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_powerdown_mode(PORTS_PER_MCS, 0);
@@ -2405,7 +2511,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::mpr_read_format(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::mpr_read_format(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_rd_format(PORTS_PER_MCS, 0);
@@ -2435,7 +2541,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::crc_wr_latency(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::crc_wr_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_crc_wr_latency(PORTS_PER_MCS, 0);
@@ -2465,7 +2571,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::temp_readout(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::temp_readout(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_temp_readout(PORTS_PER_MCS, 0);
@@ -2495,7 +2601,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::per_dram_addressability(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::per_dram_addressability(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_per_dram_access(PORTS_PER_MCS, 0);
@@ -2525,7 +2631,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::geardown_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::geardown_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_geardown_mode(PORTS_PER_MCS, 0);
@@ -2555,7 +2661,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::mpr_page(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::mpr_page(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_page(PORTS_PER_MCS, 0);
@@ -2585,7 +2691,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::mpr_mode(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::mpr_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_mode(PORTS_PER_MCS, 0);
@@ -2615,7 +2721,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::write_crc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::write_crc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_write_crc(PORTS_PER_MCS, 0);
@@ -2645,7 +2751,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::rtt_write(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::rtt_write(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -2677,7 +2783,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint32_t> l_attrs_zqcal_interval(PORTS_PER_MCS, 0);
@@ -2713,7 +2819,7 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint32_t> l_attrs_memcal_interval(PORTS_PER_MCS, 0);
@@ -2735,6 +2841,498 @@ fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<fapi2::TARGET_
                             l_mcs,
                             UINT32_VECTOR_TO_1D_ARRAY(l_attrs_memcal_interval, PORTS_PER_MCS)),
               "Failed setting attribute for MEMCAL_INTERVAL");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRP
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+
+    int64_t l_trp_in_ps = 0;
+
+    // Calculate tRP (in ps)
+    {
+        int64_t l_trp_mtb = 0;
+        int64_t l_trp_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(i_target, l_trp_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(i_target, l_trp_ftb) );
+
+        l_trp_in_ps = calc_timing_from_timebase(l_trp_mtb, l_mtb, l_trp_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_trp(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_trp_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_trp_in_nck = calc_nck(l_trp_in_ps,
+                                l_tCK_in_ps,
+                                int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated tRP (nck): %d", l_trp_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_trp(l_mcs, l_attrs_dram_trp.data()) );
+
+        l_attrs_dram_trp[l_port_num] = uint8_t( l_trp_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRP,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trp, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TRP");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRCD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_trcd_in_ps = 0;
+
+    // Calculate trcd (in ps)
+    {
+        int64_t l_trcd_mtb = 0;
+        int64_t l_trcd_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(i_target, l_trcd_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(i_target, l_trcd_ftb) );
+
+        l_trcd_in_ps = calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
+    }
+
+
+    {
+        std::vector<uint8_t> l_attrs_dram_trcd(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_trcd_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_trcd_in_nck = calc_nck(l_trcd_in_ps,
+                                 l_tCK_in_ps,
+                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated trcd (nck): %d", l_trcd_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_trcd(l_mcs, l_attrs_dram_trcd.data()) );
+
+        l_attrs_dram_trcd[l_port_num] = l_trcd_in_nck;
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRCD,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trcd, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TRCD");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tWTR_L
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_twtr_l_in_ps = 0;
+
+    // Calculate twtr_l (in ps)
+    {
+        constexpr int64_t l_twtr_l_ftb = 0;
+        int64_t l_twtr_l_mtb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_twtr_l(i_target, l_twtr_l_mtb) );
+
+        l_twtr_l_in_ps = calc_timing_from_timebase(l_twtr_l_mtb, l_mtb, l_twtr_l_ftb, l_ftb);
+    }
+
+
+    {
+        std::vector<uint8_t> l_attrs_dram_twtr_l(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_twtr_l_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_twtr_l_in_nck = calc_nck(l_twtr_l_in_ps,
+                                   l_tCK_in_ps,
+                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated twtr_l (nck): %d", l_twtr_l_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_twtr_l(l_mcs, l_attrs_dram_twtr_l.data()) );
+
+        l_attrs_dram_twtr_l[l_port_num] = uint8_t( l_twtr_l_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_L,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_l, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TWTR_L");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tWTR_S
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_twtr_s_in_ps = 0;
+
+    // Calculate twtr_s (in ps)
+    {
+        constexpr int64_t l_twtr_s_ftb = 0;
+        int64_t l_twtr_s_mtb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_twtr_s(i_target, l_twtr_s_mtb) );
+
+        l_twtr_s_in_ps = calc_timing_from_timebase(l_twtr_s_mtb, l_mtb, l_twtr_s_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_twtr_s(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_twtr_s_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_twtr_s_in_nck = calc_nck(l_twtr_s_in_ps,
+                                   l_tCK_in_ps,
+                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated twtr_s (nck): %d", l_twtr_s_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_twtr_s(l_mcs, l_attrs_dram_twtr_s.data()) );
+
+        l_attrs_dram_twtr_s[l_port_num] = uint8_t( l_twtr_s_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_S,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_s, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TWTR_S");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRRD_S
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_trrd_s_in_ps = 0;
+
+    // Calculate trrd_s (in ps)
+    {
+        int64_t l_trrd_s_mtb = 0;
+        int64_t l_trrd_s_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_trrd_s(i_target, l_trrd_s_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_s(i_target, l_trrd_s_ftb) );
+
+        l_trrd_s_in_ps = calc_timing_from_timebase(l_trrd_s_mtb, l_mtb, l_trrd_s_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_trrd_s_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_trrd_s_in_nck = calc_nck(l_trrd_s_in_ps,
+                                   l_tCK_in_ps,
+                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated trrd_s (nck): %d", l_trrd_s_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_trrd_s(l_mcs, l_attrs_dram_trrd_s.data()) );
+
+        l_attrs_dram_trrd_s[l_port_num] = uint8_t( l_trrd_s_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_S,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_s, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TRRD_S");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRRD_L
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_trrd_l_in_ps = 0;
+
+    // Calculate trrd_l (in ps)
+    {
+        int64_t l_trrd_l_mtb = 0;
+        int64_t l_trrd_l_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_trrd_l(i_target, l_trrd_l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_l(i_target, l_trrd_l_ftb) );
+
+        l_trrd_l_in_ps = calc_timing_from_timebase(l_trrd_l_mtb, l_mtb, l_trrd_l_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_trrd_l_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_trrd_l_in_nck = calc_nck(l_trrd_l_in_ps,
+                                   l_tCK_in_ps,
+                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated trrd_l (nck): %d", l_trrd_l_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_trrd_l(l_mcs, l_attrs_dram_trrd_l.data()) );
+
+        l_attrs_dram_trrd_l[l_port_num] = uint8_t( l_trrd_l_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_l, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TRRD_L");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tfaw
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_tfaw_in_ps = 0;
+
+    // Calculate tfaw (in ps)
+    {
+        constexpr int64_t l_tfaw_ftb = 0;
+        int64_t l_tfaw_mtb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_tfaw(i_target, l_tfaw_mtb) );
+
+        l_tfaw_in_ps = calc_timing_from_timebase(l_tfaw_mtb, l_mtb, l_tfaw_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_tfaw_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_tfaw_in_nck = calc_nck(l_tfaw_in_ps,
+                                 l_tCK_in_ps,
+                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated tfaw (nck): %d", l_tfaw_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_tfaw(l_mcs, l_attrs_dram_tfaw.data()) );
+
+        l_attrs_dram_tfaw[l_port_num] = uint8_t( l_tfaw_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tfaw, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TFAW");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRAS
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_tras(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    // TK - RIT skeleton. Need to finish - AAM
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_tras_in_ps = 0;
+
+    // Calculate tras (in ps)
+    {
+        constexpr int64_t l_tras_ftb = 0;
+        int64_t l_tras_mtb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_active_to_precharge_delay_time(i_target, l_tras_mtb) );
+
+        l_tras_in_ps = calc_timing_from_timebase(l_tras_mtb, l_mtb, l_tras_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_tras(PORTS_PER_MCS, 0);
+        int64_t l_tCK_in_ps = 0;
+        int64_t l_tras_in_nck = 0;
+
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+        // Calculate nck
+        l_tras_in_nck = calc_nck(l_tras_in_ps,
+                                 l_tCK_in_ps,
+                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+        FAPI_DBG("Calculated tras (nck): %d", l_tras_in_nck);
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_tras(l_mcs, l_attrs_dram_tras.data()) );
+
+        l_attrs_dram_tras[l_port_num] = uint8_t( l_tras_in_nck );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRAS,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tras, PORTS_PER_MCS)),
+                  "Failed setting attribute for tRAS");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRTP
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trtp(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+
+    // Values from proposed DDR4 Full spec update(79-4A)
+    // Item No. 1716.78C
+    // Page 241 & 246
+    constexpr int64_t l_max_trtp_in_ps = 7500;
+    constexpr int64_t l_min_trtp_in_nck = 4;
+
+    std::vector<uint8_t> l_attrs_dram_trtp(PORTS_PER_MCS, 0);
+    int64_t l_tCK_in_ps = 0;
+    int64_t l_calc_trtp_in_nck = 0;
+
+    // Calculate clock period (tCK) from selected freq from mss_freq
+    FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+    FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+
+    // Calculate nck
+    l_calc_trtp_in_nck = calc_nck(l_max_trtp_in_ps,
+                                  l_tCK_in_ps,
+                                  int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+    FAPI_DBG("Calculated trtp (nck): %d", l_calc_trtp_in_nck);
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_trtp(l_mcs, l_attrs_dram_trtp.data()) );
+
+    l_attrs_dram_trtp[l_port_num] = uint8_t( std::max(l_min_trtp_in_nck, l_calc_trtp_in_nck) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRTP,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trtp, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TRTP");
+
 fapi_try_exit:
     return fapi2::current_err;
 }

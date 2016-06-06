@@ -154,6 +154,15 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.rtt_write(l_dimm) );
         FAPI_TRY( l_eff_config.zqcal_interval(l_dimm) );
         FAPI_TRY( l_eff_config.memcal_interval(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trp(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trcd(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_twtr_l(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_twtr_s(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trrd_s(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trrd_l(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_tfaw(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_tras(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trtp(l_dimm) );
 
         // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
         {
@@ -205,6 +214,11 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         {
             uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0x7AC0, 0x7AC0};
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
+        }
+
+        {
+            uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] = {0x01, 0x01};
+            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, i_target, l_temp_refresh_mode ) );
         }
 
     }// dimm

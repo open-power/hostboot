@@ -521,4 +521,63 @@
         <mssAccessorName>eff_dram_tmaw</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_EFF_DRAM_WIDTH</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          SDRAM Device Width
+          Decodes SPD Byte 12 (bits 2~0).
+          Options: X4 (4 bits), X8 (8 bits), X16 (16 bits), X32 (32 bits).
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
+        <mssUnit>bits</mssUnit>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_width</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_RANK_MIX</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          DRAM Device Rank Mix
+          Decodes SPD Byte 12 (bits 5~3).
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>SYMMETRICAL = 0, ASYMMETICAL = 1</enum>
+        <mssUnit>decode from SPD spec</mssUnit>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Total number of ranks in each DIMM.
+          For monolithic and multi-load stack modules (SDP/DDP) this is the same as
+          the number of package ranks per DIMM (SPD Byte 12 bits 5~3).
+          For single load stack (3DS) modules this value is conceptually
+          [master + slave] ranks.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 2</array>
+        <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
+    </attribute>
+
 </attributes>

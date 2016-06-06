@@ -76,10 +76,6 @@ inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 {
     // Declaration of the vector correctly initializes it to the right size
     // in the case the enum for PORTS_PER_MCS changes
-
-    // RIT hackey to match the attribute file (likely fakeSPD is wrong) BRS
-    i_cas_latency = 0x10;
-
     std::vector<uint8_t> l_cls_vect(PORTS_PER_MCS, uint8_t(i_cas_latency) );
 
     // set CAS latency attribute
@@ -105,9 +101,9 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_M
 {
     // TK - RIT, needsto be corrected
     uint64_t l_nest_freq = 2;
-    const auto l_mcbist = i_target.getParent<fapi2::TARGET_TYPE_MCBIST>();
+    const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    FAPI_DBG("setting freq attrs for %s", mss::c_str(i_target));
+    FAPI_INF("Setting freq attrs for %s", mss::c_str(i_target));
 
     // TK
     //Update for P9, what do we do w/setting nest freq? - AAM

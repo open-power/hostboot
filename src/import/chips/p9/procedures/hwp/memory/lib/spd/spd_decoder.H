@@ -314,19 +314,19 @@ enum BYTE_EXTRACT : uint64_t
     // Bytes 320 ~ 383 Module Supplier’s Data ??
 };
 
-enum SDRAM_PACKAGE_TYPE : uint64_t
+enum SDRAM_PACKAGE_TYPE : size_t
 {
     // Signal loading
     MONOLITHIC = 0,
     NON_MONOLITHIC = 1,
 
     // Package Type
-    UNSPECIFIED = 0,
+    UNSPECIFIED = MONOLITHIC,
     MULTI_LOAD_STACK = 1,
     SINGLE_LOAD_STACK = 2,
 };
 
-enum NOMINAL_VOLTAGE : uint64_t
+enum NOMINAL_VOLTAGE : size_t
 {
     NOT_OPERABLE = 0,
     OPERABLE = 1,
@@ -335,6 +335,11 @@ enum NOMINAL_VOLTAGE : uint64_t
     ENDURANT = 1
 };
 
+enum rank_mix : size_t
+{
+    SYMMETRICAL,
+    ASYMMETRICAL,
+};
 
 ///
 /// @class decoder
