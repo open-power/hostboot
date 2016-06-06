@@ -448,7 +448,26 @@ class TrustedBootTest: public CxxTest::TestSuite
                                   fails,
                                   sizeof(TPM2_ExtendIn) +
                                   sizeof(TPMS_AUTH_COMMAND) +
-                                  4); //auth size field
+                                  sizeof(uint32_t) - //auth size field
+                                  sizeof(TPMT_HA)); // less second digest
+
+                cmdPtr->digests.count = 2;
+                cmdPtr->digests.digests[1].algorithmId = TPM_ALG_SHA1;
+
+                // Test with two hashes
+                runTpmMarshalTest(baseCmd,
+                                  dataBufOut,
+                                  sizeof(dataBufOut),
+                                  cmdSize,
+                                  "ExtendIn",
+                                  num_ops,
+                                  fails,
+                                  sizeof(TPM2_ExtendIn) +
+                                  sizeof(TPMS_AUTH_COMMAND) +
+                                  sizeof(uint32_t) - //auth size field
+                                  (TPM_ALG_SHA256_SIZE - TPM_ALG_SHA1_SIZE)
+                                  ); // less sha1 digest size
+
 
                 // Invalid number of digests
                 memset(dataBufIn, 0, sizeof(dataBufIn));
@@ -488,7 +507,8 @@ class TrustedBootTest: public CxxTest::TestSuite
                                   "PcrReadIn",
                                   num_ops,
                                   fails,
-                                  sizeof(TPM2_PcrReadIn));
+                                  sizeof(TPM2_PcrReadIn) -
+                                  sizeof(TPMS_PCR_SELECTION)); // less unused
 
                 // Invalid number of algorithms
                 memset(dataBufIn, 0, sizeof(dataBufIn));

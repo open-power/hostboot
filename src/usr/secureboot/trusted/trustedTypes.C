@@ -167,7 +167,7 @@ namespace TRUSTEDBOOT
             return NULL;
         }
         o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
-                                &(val->digest.bytes),
+                                &(val->digest),
                                 getDigestSize((TPM_Alg_Id)val->algorithmId));
         return o_tpmBuf;
     }
@@ -493,7 +493,7 @@ namespace TRUSTEDBOOT
         uint16_t* field16 = (uint16_t*)i_logBuf;
         *field16 = htole16(val->algorithmId);
         i_logBuf += sizeof(uint16_t);
-        memcpy(i_logBuf, val->digest.bytes,
+        memcpy(i_logBuf, &(val->digest),
                getDigestSize((TPM_Alg_Id)val->algorithmId));
         i_logBuf += getDigestSize((TPM_Alg_Id)val->algorithmId);
         return i_logBuf;
@@ -537,7 +537,7 @@ namespace TRUSTEDBOOT
                 break;
             }
 
-            memcpy(&(val->digest.bytes), i_tpmBuf, size);
+            memcpy(&(val->digest), i_tpmBuf, size);
             i_tpmBuf += size;
         } while(0);
 
@@ -555,7 +555,7 @@ namespace TRUSTEDBOOT
     {
         size_t digestSize = getDigestSize((TPM_Alg_Id)algorithmId);
         return (algorithmId == i_rhs.algorithmId) &&
-               (memcmp(digest.bytes, i_rhs.digest.bytes, digestSize) == 0);
+            (memcmp(&(digest), &(i_rhs.digest), digestSize) == 0);
     }
 #endif
 
@@ -871,7 +871,7 @@ namespace TRUSTEDBOOT
             {
                 *o_err = true;
                 i_tpmBuf = NULL;
-                TRACFCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
+                TRACUCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
                           "logUnmarshal() invalid pcrIndex %d",
                           val->pcrIndex);
                 break;
@@ -888,7 +888,7 @@ namespace TRUSTEDBOOT
             {
                 *o_err = true;
                 i_tpmBuf = NULL;
-                TRACFCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
+                TRACUCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
                           "logUnmarshal() invalid eventType %d",
                           val->eventType);
                 break;
