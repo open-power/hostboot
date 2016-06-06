@@ -32,6 +32,7 @@ CODE_PASS_BODY += $(OUT_FILE)
 INC_DIRS += $(ROOTPATH)/src/usr/targeting/
 INC_DIRS += $(GENDIR)
 INC_DIRS += $(ROOTPATH)/src/include/usr
+INC_DIRS += $(ROOTPATH)/src/include/usr/fapi2
 INC_DIRS += $(ROOTPATH)/src/import/hwpf/fapi2/include
 VPATH += $(ROOTPATH)/src/usr/pnor
 
