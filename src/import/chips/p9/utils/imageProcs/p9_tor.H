@@ -37,16 +37,9 @@ typedef struct
 {
     uint32_t sizeOfThis;
     uint16_t sizeOfCmsk;
-    uint16_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated.
+    uint16_t sizeOfMeta; // Exact size of meta data. Arbitrary size. Not null terminated
 } RingLayout_t;
 
-
-//
-// Temporary define until in TOR header by Giri.
-//
-//
-// Temporary define until in TOR header by Giri.
-//
 typedef struct
 {
     uint32_t TorNumDdLevels;
@@ -68,9 +61,10 @@ typedef struct
 
 #define IMGBUILD_TGR_RING_FOUND                        0
 #define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
-#define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image.
-#define IMGBUILD_TGR_INVALID_RING_ID                   2  // Ring is invalid or mismatch.
-#define IMGBUILD_TGR_AMBIGUOUS_API_PARMS               3  // Ring search in HW iamge got ambiguous condition.
+#define IMGBUILD_TGR_TOR_PUT_RING_DONE                 0
+#define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image
+#define IMGBUILD_TGR_INVALID_RING_ID                   2  // Ring is invalid or mismatch
+#define IMGBUILD_TGR_AMBIGUOUS_API_PARMS               3  // Ring search in HW iamge got ambiguous condition
 #define IMGBUILD_TGR_SECTION_NOT_FOUND                 4
 #define IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND             5
 #define IMGBUILD_TGR_OP_BUFFER_INVALID                 6
@@ -80,19 +74,20 @@ typedef struct
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_SGPE      11
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
+#define IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION    14  // Ring container is already available in ring section
 
 
 extern const char* ringVariantName[];
 extern const char* ppeTypeName[];
 
 
-typedef enum
-RingBlockType   // Different options to extract data using tor_access_ring API
+typedef enum RingBlockType   // Different options to extract data using tor_access_ring API
 {
-    SINGLE_RING      = 0x00,
-    DD_LEVEL_RINGS   = 0x01,
-    PPE_LEVEL_RINGS  = 0x02,
-    CPLT_LEVEL_RINGS = 0x03
+    GET_SINGLE_RING      = 0x00,
+    GET_DD_LEVEL_RINGS   = 0x01,
+    GET_PPE_LEVEL_RINGS  = 0x02,
+    GET_CPLT_LEVEL_RINGS = 0x03,
+    PUT_SINGLE_RING      = 0x04
 } RingBlockType_t;
 
 
@@ -161,91 +156,294 @@ typedef enum CmeTorId
     CME11_CPLT   = 11,
     CME_NOOF_CHIPLETS = 12
 } CmeTorId_t;
+
+typedef enum TorOffsetSize
+{
+    RING_OFFSET_SIZE = 2,
+    CPLT_OFFSET_SIZE = 4
+} TorOffsetSize_t;
+
 ///
 /// ****************************************************************************
 /// Function declares.
 /// ****************************************************************************
 ///
+/// Traverse on TOR structure and copies data in granular up to DD type,
+/// ppe type, ring type, RS4 ring container and ring address
+///
+/// \param[in]  i_ringSection A pointer to a Ring section binary image.
+/// It contains details of p9 Ring, which is used for scanning operation.
+/// TOR API supports two type of binary image. 1) HW image format and 2)
+/// SEEPROM image format binary
+///
+/// \param[in]  i_magic A uint64_t variable to indicate XIP image format
+/// ring section passed
+///
+/// \param[in]  i_ringId A enum to indicate unique ID for the ring
+///
+/// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
+/// uses DD level to extract single ring or block of rings from hw_image
+///
+/// \param[in]  i_PpeType A enum to indicate ppe type. They are SBE, CME
+/// and SGPE. It is used to decode TOR structure
+///
+/// \param[in/out] io_RingType A enum and passed by reference. Acts as input
+/// paramfor extracting block of rings copy under Chiplet level. Acts as
+/// outputparam to indicate type of single ring copied is whether common or
+/// instance specific ring
+///
+/// \param[in]  i_RingVariant A enum to indicate which variant type of
+/// requested for single ring extract. There are three major types. They are
+/// base, Cache contained and Risk level ring
+///
+/// \param[in/out] io_instanceId A variable to indicate chiplet instance ID.
+/// It returns Chiplet instance ID while doing get single ring operation
+///
+/// \param[in] i_RingVariant  A enum to indicate type of operation performed
+/// by TOR API Option:
+/// GET_SINGLE_RING indicates to extract single ring container.
+/// GET_DD_LEVEL_RINGS indicates to extract specific DD level TOR and rings
+/// GET_PPE_LEVEL_RINGS indcates to extract specific PPE level TOR and rings
+/// GET_CPLT_LEVEL_RINGS indciates to extract specific chiplet ring type
+/// TOR and rings
+/// PUT_SINGLE_RING indicates to extract ring absolute memory addres for
+/// ringType start and ringTorSlot location
+///
+/// \param[in/out] io_ringBlockPtr A void pointer to pointer. Returns data
+/// which copied during extract ring operation and returns tor absolute address
+/// where RingType offset slot is located while PUT_SINGLE_RING call.
+/// Note:- Caller's responsibility for free() to avoid memory leak
+///
+/// \param[in/out] io_ringBlockSize A variable. Returns size of data copied
+/// into io_ringBlockPtr and returns absolute offset where ring RS4 starts in
+/// TOR during PUT_SINGLE_RING call
+///
+/// \param[out] o_ringName A string. Returns name of ring ID in characters
+///
+/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+///
+/// This API traverse TOR structure of .ringSection from HW image or SBE image
+/// and the following n number of operation based on the call.
+///
+/// GET_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
+/// based on the following input param \a i_magic which gives details of image
+/// type, \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
+/// (Used only for HW image/optional for other image) i_ppeType which gives ppe
+/// type info, \a i_ringVarint gives ring variant info and \a io_instance which
+/// gives chiplet instance specific while accessing instance specific ring and
+/// returns chiplet number while accessing common ring. On return,
+/// \a io_ringBlockPtr contains RS4 container \a io_RingType contains which
+/// ring type of ring requested and \a io_ringBlockSize contains size of the
+/// data copied into io_ringBlockPtr. \a o_ringName returns ring string name.
+///
+/// GET_DD_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
+/// buffer based on the following input param \a i_magic which gives details
+/// of image type and \a i_ddLevel which gives dd spec(Used only for HW image
+/// /optional  for other image) On return, \a io_ringBlockPtr contains DD level
+/// specific ring section and \a io_ringBlockSize contains size of the data
+/// copied into io_ringBlockPtr. \a Other params are optional.
+/// This ringVariant works on HW image.
+///
+/// GET_PPE_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
+/// buffer based on the following input param \a i_magic which gives the detail
+/// of image type, i_ppeType which gives ppe type info  and \a i_ddLevel which
+/// gives dd spec(Used only for HW image/optional for other image) On return,
+/// \a io_ringBlockPtr contains PPE type specific ring section and
+/// \a io_ringBlockSize contains size of the data copied into io_ringBlockPtr.
+/// \a Other params are optional. This ringVariant works on HW image.
+///
+/// GET_CPLT_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
+/// buffer based on the following input param \a i_magic which gives the detail
+/// of image type, i_ppeType which gives ppe type info, \a i_ddLevel which gives
+/// dd spec(Used only for HW image/optional for other image) and \a io_RingType
+/// which gives ring type info. On return, \a io_ringBlockPtr contains chiplet
+/// specific ring type ring section and \a io_ringBlockSize contains size of
+/// the data copied into io_ringBlockPtr. \a Other params are optional.
+///
+/// PUT_SINGLE_RING (\a i_ringVariant) - traverse on \a i_ringSection buffer
+/// based on the following input param \a i_magic which gives detail of image
+/// type, \a i_ringId which gives ring info, \a i_ddLevel which gives dd spec
+/// (Used only for HW image/optional for other image), i_ppeType which gives
+/// ppe type info, \a i_ringVarint gives ring variant info and \a io_instance
+/// which gives chiplet instance specific while accessing instance specific
+/// ring and returns chiplet number while accessing common ring. On return,
+/// \a io_ringBlockPtr contains absolute memory address of ring type of
+/// requested ring and \a io_ringBlockSize contains of absolute memory addres
+/// of ringTor slot copied into io_ringBlockPtr \a o_ringName returns ring
+/// string name
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref TOR API RETURN errors
+int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .rings, .overrides and .overlays.
+                     uint64_t        i_magic,          // Image Magic Number
+                     RingID          i_ringId,         // Unique ring ID
+                     uint16_t        i_ddLevel,        // DD level info
+                     PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
+                     RingType_t&     io_RingType,      // 0: Common 1: Instance
+                     RingVariant_t   i_RingVariant,    // Base, Cache etc
+                     uint8_t&        io_instanceId,    // chiplet instance ID
+                     RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
+                     void**          io_ringBlockPtr,  // Addr of ring buffer
+                     uint32_t&       io_ringBlockSize, // size of ring data
+                     char*           o_ringName,       // Ring name
+                     uint32_t        i_dbgl = 0 );     // Debug option
 
 
-int get_ring_from_sbe_image ( void*
-                              i_ringSectionPtr, // Image pointer
-                              uint64_t        i_magic,          // Image Magic Number
-                              RingID          i_ringId,         // Unique ring ID
-                              uint16_t        i_ddLevel,        // DD level details
-                              RingType_t&     io_RingType,      // 0: Common 1: Instance
-                              RingVariant_t   i_RingVariant,    // Base, cache contained, Risk level,
-                              // Override and Overlay
-                              uint8_t&        io_instanceId,    // required Instance
-                              RingBlockType_t RingBlockType,    // 0: single ring,  1: ddLevel block
-                              void**          io_ringBlockPtr,  // RS4 Container data or block data
-                              uint32_t&       io_ringBlockSize, // size of data copied into ring block pointer
-                              char*           o_ringName,       // Name of ring
-                              uint32_t        dbgl);            // Debug option
+/// Traverse on TOR structure and copies RS4 ring container data for ring
+/// variant
+///
+/// \param[in]  i_ringSection A pointer to a Ring section binary image.
+/// It contain details of p9 Ring which is used for scanning operation.
+/// TOR API supports HW image format  only
+///
+/// \param[in]  i_ringId A enum to indicate unique ID for the ring
+///
+/// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
+/// uses DD level to extract single ring or block of rings on hw_image.
+///
+/// \param[in]  i_PpeType A enum to indicate ppe type.
+/// They are SBE, CME and SGPE. It is used to decode TOR structure
+///
+/// \param[in]  i_RingVariant A enum to indicate which variant type of
+/// requested for get single ring operation There are three major types.
+/// They are base, Cache contained and Risk level ring
+///
+/// \param[in] io_instanceId A variable to indicate chiplet instance ID
+///
+/// \param[in/out] io_ringBlockPtr A void point to pointer. Returns data
+/// which copied during extract ring operation
+/// Note- Caller's responsibility for free() to avoid memory leak
+///
+/// \param[in/out] io_ringBlockSize A variable. Returns size of data copied
+///  into io_ringBlockPtr
+///
+/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+///
+/// This API contains wrapper on top of tor_access_ring API to support get
+/// single ring container from .ring section and customizes for
+/// get_single_ring parameter.
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref TOR API RETURN errors
+int tor_get_single_ring ( void*          i_ringSection,
+                          uint16_t       i_ddLevel,
+                          RingID         i_ringId,
+                          PpeType_t      i_PpeType,
+                          RingVariant_t  i_RingVariant,
+                          uint8_t        i_instanceId,
+                          void**         io_ringBlockPtr,
+                          uint32_t&      io_ringBlockSize,
+                          uint32_t       i_dbgl = 0 );        // Debug option
 
-int get_ring_from_sgpe_image ( void*
-                               i_ringSectionPtr, // Image pointer
-                               RingID          i_ringId,         // Unique ring ID
-                               uint16_t        i_ddLevel,        // DD level details
-                               RingType_t&      io_RingType,       // 0: Common 1: Instance
-                               RingVariant_t   i_RingVariant,    // Base, cache contained, Risk level,
-                               // Override and Overlay
-                               uint8_t&         io_instanceId,    // required Instance
-                               RingBlockType_t RingBlockType,    // 0: single ring,  1: ddLevel block
-                               void**          io_ringBlockPtr,   // RS4 Container data or block data
-                               uint32_t&       io_ringBlockSize, // size of data copied into ring block pointer
-                               char*           o_ringName,       // Name of ring
-                               uint32_t        dbgl);            // Debug option
+/// Traverse on TOR structure and copies data in block level up to DD type,
+/// ppe type and ring type
+///
+/// \param[in]  i_ringSection A pointer to a Ring section binary image.
+/// It contains details of p9 Ring which is used for scanning operation.
+/// API supports HW image format only
+///
+/// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
+/// uses DD level to extract single ring or block of rings on hw_image
+///
+/// \param[in]  i_PpeType A enum to indicate ppe type passed.
+/// they are SBE, CME and SGPE. It is used to decode TOR structure
+/// TOR API uses Ppe type to extract single ring or block of rings
+/// on either hw_image or SBE image
+///
+/// \param[in]  i_RingType A enum and passed by reference. Acts as
+/// input param for extracting block of rings copy under Chiplet level
+///
+/// \param[in]  i_RingVariant A enum to indicate which variant type of
+/// requested for single ring extract. There are three major types.
+/// They are base, Cache contained and Risk level ring
+///
+/// \param[in]  i_instanceId A variable to indicate chiplet instance ID
+///
+/// \param[in/out] io_ringBlockPtr A void point to pointer. Returns data
+/// which copied block of rings. Note: Caller's responsibility for free()
+/// to avoid memory leak
+//
+/// \param[in/out] io_ringBlockSize A variable. Returns size of data
+/// copied into io_ringBlockPtr
+///
+/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+///
+/// This API contains wrapper on top of tor_access_ring API and supports
+/// to copy block of rings in DD level, ppe level and ringType level.
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref TOR API RETURN errors
+int tor_get_block_of_rings ( void*          i_ringSection,
+                             uint16_t       i_ddLevel,
+                             PpeType_t      i_PpeType,
+                             RingType_t     i_RingType,
+                             RingVariant_t  i_RingVariant,
+                             uint8_t        i_instanceId,
+                             void**         io_ringBlockPtr,
+                             uint32_t&      io_ringBlockSize,
+                             uint32_t       i_dbgl = 0 );
 
-int get_ring_from_cme_image ( void*           i_ringSectionPtr, // Image pointer
-                              RingID          i_ringId,         // Unique ring ID
-                              uint16_t        i_ddLevel,        // DD level details
-                              RingType_t&      io_RingType,       // 0: Common 1: Instance
-                              RingVariant_t   i_RingVariant,    // Base, cache contained, Risk level,
-                              // Override and Overlay
-                              uint8_t&        io_instanceId,    // required Instance
-                              RingBlockType_t RingBlockType,    // 0: single ring,  1: ddLevel block
-                              void**          io_ringBlockPtr,   // RS4 Container data or block data
-                              uint32_t&       io_ringBlockSize, // size of data copied into ring block pointer
-                              char*           o_ringName,       // Name of ring
-                              uint32_t        dbgl);            // Debug option
-
-int tor_access_ring(  void*
-                      i_ringSectionPtr, // Ring address Ptr any of .rings, .overrides and .overlays.
-                      uint64_t        i_magic,          // Image Magic Number
-                      RingID          i_ringId,         // Unique ring ID
-                      uint16_t        i_ddLevel,        // DD level info
-                      PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
-                      RingType_t&     io_RingType,      // 0: Common 1: Instance
-                      RingVariant_t   i_RingVariant,    // Base, Cache etc
-                      uint8_t&        io_instanceId,    // chiplet instance ID
-                      RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
-                      void**          io_ringBlockPtr,  // Addr of ring buffer
-                      uint32_t&       io_ringBlockSize, // size of ring data
-                      char*           o_ringName,       // Ring name
-                      uint32_t        i_dbgl = 0);      // Debug option
-
-int tor_get_single_ring ( void*
-                          i_ringSectionPt,     // Ring address Ptr any of .rings, .overrides and .overlays.
-                          uint16_t      i_ddLevel,           // DD level info
-                          RingID        i_ringId,            // Unique ring ID
-                          PpeType_t     i_PpeType,           // ppe Type
-                          RingVariant_t i_RingVariant,       // Base, cache contained, etc
-                          uint8_t       i_instanceId,        // Chiplet Instance ID
-                          void**        io_ringBlockPtr,     // Addr of ring buffer
-                          uint32_t&     io_ringBlockSize,    // size of ring data
-                          uint32_t      i_dbgl = 0);         // Debug option
-
-int tor_get_block_of_rings ( void*
-                             i_ringSectionPt,  // Ring address Ptr any of .rings, .overrides and .overlays.
-                             uint16_t      i_ddLevel,         // DD level
-                             PpeType_t     i_PpeType,         // ppe Type
-                             RingType_t    i_RingType,        // Common Or Instance
-                             RingVariant_t i_RingVariant,     // base,cache,etc
-                             uint8_t       i_instanceId,      // Chiplet Instance ID
-                             void**        io_ringBlockPtr,   // Addr of ring buffer
-                             uint32_t&     io_ringBlockSize,  // size of ring data
-                             uint32_t      i_dbgl = 0);       // Debug option
+/// Traverse on TOR structure and copies absolute memory address of Ringtype
+///  offset addres and TOR offset slot address
+///
+/// \param[in]  i_ringSection A pointer to a Ring section binary image.
+/// It contains details of p9 Ring which is used for scanning operation.
+///  TOR API supports SEEPROM image format.
+///
+/// \param[in/out]  io_ringSectionSize A value to indicate actual size of
+/// i_ringSection data passed in as input On return, updated size of section.
+/// Note: Caller manages this buffer and must make sure the RS4 ring fits
+/// before making this call
+///
+/// \param[in]  i_ringBuffer A pointer to a ring work buffer, which is used
+/// for scanning operation purpose
+///
+/// \param[in]  i_ringBufferSize A constant value to indicate size of
+/// ringBuffer data passed in
+///
+/// \param[in]  i_ringId A enum to indicate unique ID for the ring
+///
+/// \param[in]  i_PpeType A enum to indicate ppe type. They are SBE,
+/// CME and SGPE. It is used to decode TOR structure
+///
+/// \param[in]  i_RingType A enum to indicate ring type of ring whether
+/// common or instance specific ring
+///
+/// \param[in]  i_RingVariant A enum and used as input param to indicate
+/// which variant type of requested for single ring extract
+///
+/// \param[in] i_instanceId A variable to indicate chiplet instance ID
+///
+/// \param[in] i_rs4_container A void pointer. Contains RS4 compressed ring
+/// data which eventually attached into void image pointer i_ringSection
+///
+/// \param[in] - i_debug is debug statment params. Supports 0 to 3.
+///
+/// This API contains wrapper on tor_access_ring to get \a io_ringBlockPtr
+/// contains absolute memory address of ring type start address of the ring
+/// \a io_ringBlockSize contains absolute memory address of ringTorslot. Then
+/// appends new rs4 ring container at the end of ring section and updates new
+/// ring offset address on ring offset location. the slot must be empty. If there
+/// is non-zero content in the slot, the API will fail catastrophically. Do not
+/// "insert" or "replace" rings at ring section.
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref TOR API RETURN errors
+int tor_append_ring(  void*           i_ringSection,
+                      uint32_t&       io_ringSectionSize,
+                      void*           i_ringBuffer,
+                      const uint32_t  i_ringBufferSize,
+                      RingID          i_ringId,
+                      PpeType_t       i_ppeType,
+                      RingType_t      i_RingType,
+                      RingVariant_t   i_RingVariant,
+                      uint8_t         i_instanceId,
+                      void*           i_rs4Container,
+                      uint32_t        i_dbgl = 0 );
 };
-
 #endif //_P9_TOR_H_
+
