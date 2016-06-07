@@ -163,6 +163,24 @@ chip p9_ec
         capture     group default;
     };
 
+
+    ############################################################################
+    # EC Chiplet PLL Registers
+    ############################################################################
+
+    register EC_ERROR_REG
+    {
+        name        "EC Chiplet PCB SLAVE ERROR REG";
+        scomaddr    0x100F001F;
+        capture     group PllFIRs;
+    };
+
+    register EC_CONFIG_REG
+    {
+        name        "EC Chiplet PCB SLAVE CONFIG REG";
+        scomaddr    0x100F001E;
+        capture     group PllFIRs;
+    };
 };
 
  ##############################################################################

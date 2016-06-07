@@ -508,11 +508,9 @@ mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
  * @param   o_data   returned data
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 136052
 int32_t getCfam( ExtensibleChip * i_chip,
                  const uint32_t i_addr,
                  uint32_t & o_data);
-*/
 
 /**
  * @brief   get sysref clk target for the given proc target.

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfP8PllPcie.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfFsiCapUtil.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,14 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP8PllPcie_H
-#define __prdfP8PllPcie_H
+#ifndef FSI_CAP_UTIL_H
+#define FSI_CAP_UTIL_H
 
-/** @file  prdfP8PllPcie.H
- *  @brief Utility functions for PLL domain.
+/**
+ * @file    prdfFsiCapUtil.H
+ * @brief   Captures FSI status register for FFDC.
  */
 
-#include <UtilHash.H>
 namespace PRDF
 {
 
@@ -40,35 +40,15 @@ namespace PLL
 {
 
 /**
- * @brief   get the pcie source osc pos reporting error for this proc
- * @param   i_chip   P8 chip
+ * @brief   capture FSI Status Reg for FFDC
+ * @param   i_chip   Extensible chip
  * @param   i_sc     service data collector
- * @return  osc position
  */
-uint32_t getIoOscPos( ExtensibleChip * i_chip,
-                      STEP_CODE_DATA_STRUCT & io_sc );
+void captureFsiStatusReg( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc );
 
-} // end namespace PLL
+}// namespace PLL
 
-namespace Proc
-{
+} //namespace PRDF
 
-enum
-{
-    // All of the chiplet PLL_ERROR bits below
-    // are collected in this TP_LFIR bit
-    PLL_DETECT_P8 = 19,
-    // Chiplet PLL_ERROR mask and error bits
-    PLL_ERROR_MASK  = 12,
-    PLL_ERROR_BIT   = 25,
-    PB_DMI_RIGHT_PLL_ERROR = 25, // Venice only
-    PB_DMI_LEFT_PLL_ERROR  = 26, // Venice and Murano
-    // PCB Slave internal parity error
-    PARITY_ERROR_MASK  = 8,
-    PARITY_ERROR_BIT   = 4,
-};
-
-}//end namespace Proc
-} // end namespace PRDF
-
-#endif // __prdfP8PllPcie_H
+#endif  //FSI_CAP_UTIL_H
