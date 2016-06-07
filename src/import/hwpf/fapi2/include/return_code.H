@@ -138,6 +138,27 @@ class ReturnCode : public FirstFailureData<ReturnCode>
             return l_creator;
         }
 
+
+        ///
+        /// @brief explicit check for RC value
+        /// @return true if this instance has a matching RC
+        ///
+        inline bool isRC(const ReturnCodes i_rc) const
+        {
+            return static_cast<uint32_t>(i_rc) == iv_rc;
+        }
+
+
+        ///
+        /// @brief explicit check for RC value
+        /// @return true if this instance has a matching RC
+        ///
+        inline bool isRC(const uint32_t i_rc) const
+        {
+            return i_rc == iv_rc;
+        }
+
+
     private:
         uint32_t iv_rc;
 };

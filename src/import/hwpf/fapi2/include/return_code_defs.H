@@ -55,7 +55,7 @@ namespace fapi2
 ///
 /// @brief Enumeration of return codes
 ///
-enum ReturnCodes
+enum ReturnCodes : uint32_t
 {
     ///< Success
     FAPI2_RC_SUCCESS = 0,
