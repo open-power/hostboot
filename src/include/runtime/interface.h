@@ -377,9 +377,10 @@ typedef struct hostInterfaces
      *         given register data
      *
      *  @note The Hypervisor should perform the following actions:
-     *        - put the specified core into special wakeup
      *        - insert the data into the HCODE image (p9_stop_api)
-     *        - deassert special wakeup
+     *
+     *  @pre HBRT is responsible for enabling special wakeup on the
+     *       associated core(s) before calling this interface
      *
      *  @param  i_homer     start address of the homer image
      *  @param  i_section   runtime section to update
