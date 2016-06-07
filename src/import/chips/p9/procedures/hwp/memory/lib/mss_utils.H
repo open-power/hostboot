@@ -21,7 +21,7 @@
 /// @file mss_utils.H
 /// @brief Main include file for the Memory Subsystem
 ///
-// *HWP HWP Owner: Craig Hamilton <cchamilt@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
