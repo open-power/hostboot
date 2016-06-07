@@ -22,12 +22,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <fcntl.h>      //open()
-#include <sys/stat.h>
 #include <string.h>     //memcpy()
-#include <dirent.h>
 #include <errno.h>
 
 //
