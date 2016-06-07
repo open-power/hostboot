@@ -87,9 +87,7 @@ enum DOMAIN_ID
     MBA_DOMAIN    = 0x81,
 
     CLOCK_DOMAIN_FAB          = 0x90,
-    CLOCK_DOMAIN_MCS          = 0x91,
-    CLOCK_DOMAIN_MEMBUF       = 0x92,
-    CLOCK_DOMAIN_IO           = 0x93,
+    CLOCK_DOMAIN_MEMBUF       = 0x91,
 
     END_DOMAIN_ID
 };

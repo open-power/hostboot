@@ -227,7 +227,6 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
 //##                        util functions
 //##############################################################################
 
-/* TODO RTC 136052
 int32_t getCfam( ExtensibleChip * i_chip,
                  const uint32_t i_addr,
                  uint32_t & o_data)
@@ -256,19 +255,10 @@ int32_t getCfam( ExtensibleChip * i_chip,
         }
 
         errlHndl_t errH = NULL;
-        ecmdDataBufferBase cfamData(32);
-
-        FAPI_INVOKE_HWP(errH,
-                        fapiGetCfamRegister,
-                        PlatServices::getFapiTarget(l_procTgt),
-                        i_addr,
-                        cfamData);
-
-        if ( NULL == errH )
-        {
-            o_data = cfamData.getWord(0);
-        }
-        else
+        size_t l_size = sizeof(uint32_t);
+        errH = deviceRead(l_procTgt, &o_data, l_size,
+                          DEVICE_FSI_ADDRESS((uint64_t) i_addr));
+        if (errH)
         {
             rc = FAIL;
             PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam address: "
@@ -285,7 +275,6 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 

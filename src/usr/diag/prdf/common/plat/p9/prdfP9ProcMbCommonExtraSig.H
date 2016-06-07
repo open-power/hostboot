@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfFsiCapUtil.H $      */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9ProcMbCommonExtraSig.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,32 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef FSI_CAP_UTIL_H
-#define FSI_CAP_UTIL_H
 
-/**
- * @file    prdfFsiCapUtil.H
- * @brief   Captures FSI status register for FFDC.
- */
+#ifndef __prdfP9ProcMbCommonExtraSig_H
+#define __prdfP9ProcMbCommonExtraSig_H
 
-namespace PRDF
-{
+#include <prdrSignatures.H>
 
-class ExtensibleChip;
-struct STEP_CODE_DATA_STRUCT;
-namespace PLL
-{
-
-/**
- * @brief   capture FSI Status Reg for FFDC
- * @param   i_chip   Extensible chip
- * @param   i_sc     service data collector
- */
-void captureFsiStatusReg( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc );
-
-}// namespace PLL
-
-} //namespace PRDF
-
-#endif  //FSI_CAP_UTIL_H
+/* PLL Extra signatures */
+PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
+#endif // __prdfP9ProcMbCommonExtraSig_H

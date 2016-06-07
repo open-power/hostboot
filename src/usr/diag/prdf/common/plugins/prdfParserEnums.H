@@ -88,7 +88,6 @@ enum PositionBounds
     MAX_DIMM_PER_PORT   = 2,
     MAX_L4_PER_MEMBUF   = 1,
 
-    MAX_PCIE_OSC_PER_NODE = 2, // TODO: RTC 136052 may need to be removed
     INVALID_POSITION_BOUND = 0xffffffff,
 };
 

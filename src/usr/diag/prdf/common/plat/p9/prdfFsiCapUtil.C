@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfFsiCapUtil.C $      */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfFsiCapUtil.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,8 +43,8 @@ namespace PLL
 void captureFsiStatusReg( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // At runtime, PRD runs under the OPAL app and does not
-    // have access to drivers that read CFAM registers.
+    // In hostboot runtime, PRD does not have access to drivers that read
+    // CFAM registers
     #ifndef __HOSTBOOT_RUNTIME
 
     #define PRDF_FUNC "[PLL::captureFsiStatusReg] "

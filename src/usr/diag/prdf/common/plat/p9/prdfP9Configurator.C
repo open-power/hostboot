@@ -253,8 +253,8 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                           i_type );
         }
 
-        // Generic empty PLL domain maps, if they are used.
-        PllDomainMap pllDmnMap1, pllDmnMap2;
+        // Generic empty PLL domain map
+        PllDomainMap pllDmnMap;
 
         // Add each chip to the chip domain.
         for ( const auto & trgt : trgtList )
@@ -276,16 +276,13 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
             switch ( i_type )
             {
                 case TYPE_PROC:
-                    addChipToPllDomain( CLOCK_DOMAIN_FAB, pllDmnMap1,
+                    addChipToPllDomain( CLOCK_DOMAIN_FAB, pllDmnMap,
                                         chip, trgt, TYPE_PROC,
-                                        scanFac, resFac );
-                    addChipToPllDomain( CLOCK_DOMAIN_IO,  pllDmnMap2,
-                                        chip, trgt, TYPE_PCI,
                                         scanFac, resFac );
                     break;
 
                 case TYPE_MEMBUF:
-                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap1,
+                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
                                         chip, trgt, TYPE_MEMBUF,
                                         scanFac, resFac );
                     break;
@@ -295,8 +292,7 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         }
 
         // Add the PLL domain maps to the PLL domain map list.
-        if ( !pllDmnMap1.empty() ) io_pllDmnLst.push_back( pllDmnMap1 );
-        if ( !pllDmnMap2.empty() ) io_pllDmnLst.push_back( pllDmnMap2 );
+        if ( !pllDmnMap.empty() ) io_pllDmnLst.push_back( pllDmnMap );
 
         // Flush rule table cache since objects are all built.
         Prdr::LoadChipCache::flushCache();
@@ -315,7 +311,7 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
                                            ScanFacility & i_scanFac,
                                            ResolutionFactory & i_resFac )
 {
-    // TODO: RTC 136052 - The position used here should be based on clock
+    // TODO: RTC 155673 - The position used here should be based on clock
     //       domains. In the past there happened to be one clock source for each
     //       node. In which case, we just used the node position. Unfortunately,
     //       that is not very maintainable code. Instead, we should be querying
@@ -347,7 +343,7 @@ void PlatConfigurator::addPllDomainsToSystem( const PllDomainMapList & i_list )
           lit != i_list.end(); ++lit )
     {
         for ( PllDomainMap::const_iterator mit = lit->begin();
-              mit != lit->begin(); ++mit )
+              mit != lit->end(); ++mit )
         {
             sysDmnLst.push_back( mit->second );
         }

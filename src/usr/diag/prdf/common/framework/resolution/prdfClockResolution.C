@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,13 +72,6 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
                             PRDcallout(l_ptargetClock,
                             PRDcalloutData::TYPE_PROCCLK));
         #endif
-    }
-    else if (iv_targetType == TYPE_PCI)
-    {
-        // The PCIe OSC callout is being done inside
-        // chip plugins (prdfP8PllPcie) since the connected
-        // OSC can dynamically change and requires
-        // reading chip reg to figure out.
     }
     // Get all connected chips for non-CLOCK_CARD types.
     else

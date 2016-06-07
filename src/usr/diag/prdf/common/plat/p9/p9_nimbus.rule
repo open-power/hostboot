@@ -31,6 +31,9 @@ chip p9_nimbus
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+#Import signatures
+.include "prdfP9ProcMbCommonExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
@@ -1708,6 +1711,22 @@ chip p9_nimbus
         capture     group default;
     };
 
+    ############################################################################
+    # Non-FIR Registers
+    ############################################################################
+    register CFAM_FSI_STATUS
+    {
+        name        "TPC.FSI.FSI2PIB.STATUS";
+        scomaddr    0x00001007;
+        capture     group never;
+    };
+
+    register CFAM_FSI_GP7
+    {
+        name        "TPC.FSI.FSI_MAILBOX.FSXCOMP.FSXLOG.FSIGP7";
+        scomaddr    0x00002816;
+        capture     group never;
+    };
 };
 
  ##############################################################################

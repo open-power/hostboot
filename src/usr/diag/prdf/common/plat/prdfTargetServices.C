@@ -1442,13 +1442,6 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 
     do
     {
-        if ( i_oscPos >= MAX_PCIE_OSC_PER_NODE )
-        {
-            PRDF_ERR(PRDF_FUNC "target: 0x%.8X - invalid "
-                "i_oscPos: %d", getHuid(i_pGivenTarget), i_oscPos);
-            break;
-        }
-
         // If membuf target, use the connected proc target
         if(TYPE_MEMBUF == getTargetType(i_pGivenTarget))
         {
@@ -1464,9 +1457,7 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 
         PredicateIsFunctional l_funcFilter;
         PredicateCTM l_oscFilter(CLASS_CHIP, i_connType);
-        PredicateCTM l_peerFilter(CLASS_UNIT,
-                                  (i_connType == TYPE_OSCREFCLK ?
-                                   TYPE_REFCLKENDPT: TYPE_PCICLKENDPT));
+        PredicateCTM l_peerFilter(CLASS_UNIT, TYPE_MFREFCLKENDPT);
         PredicatePostfixExpr l_funcAndOscFilter, l_funcAndPeerFilter;
         l_funcAndOscFilter.push(&l_oscFilter).push(&l_funcFilter).And();
         l_funcAndPeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
