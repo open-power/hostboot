@@ -53,7 +53,7 @@
 #include    <p9_hcode_image_build.H>
 #include    <p9_stop_api.H>
 #include    <p9_xip_image.h>
-#include    <p9_image_help_base.H>
+#include    <p9_infrastruct_help.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
