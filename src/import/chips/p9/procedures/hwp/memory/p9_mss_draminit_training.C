@@ -84,36 +84,7 @@ extern "C"
             // Setup a series of register probes which we'll see during the polling loop
             // Leaving these probes in here as we need them from time to time, but they
             // take up a lot of sim time, so we like to remove them simply
-#ifdef TRAINING_POLLING_PROBES
-            l_program.iv_probes =
-            {
-                // One block for each DP16
-                {p, "wr_cntr_status0 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_0},
-                {p, "wr_cntr_status1 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_0},
-                {p, "wr_cntr_status2 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_0},
-                {p, "wr_lvl_status (dp16 0)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_0},
 
-                {p, "wr_cntr_status0 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_1},
-                {p, "wr_cntr_status1 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_1},
-                {p, "wr_cntr_status2 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_1},
-                {p, "wr_lvl_status (dp16 1)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_1},
-
-                {p, "wr_cntr_status0 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_2},
-                {p, "wr_cntr_status1 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_2},
-                {p, "wr_cntr_status2 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_2},
-                {p, "wr_lvl_status (dp16 2)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_2},
-
-                {p, "wr_cntr_status0 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_3},
-                {p, "wr_cntr_status1 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_3},
-                {p, "wr_cntr_status2 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_3},
-                {p, "wr_lvl_status (dp16 3)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_3},
-
-                {p, "wr_cntr_status0 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_4},
-                {p, "wr_cntr_status1 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_4},
-                {p, "wr_cntr_status2 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_4},
-                {p, "wr_lvl_status (dp16 4)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_4},
-            };
-#endif
             // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
             // and we're supposed to poll for the done or timeout bit. But we don't want
             // to wait 0xFFFF cycles before we start polling - that's too long. So we put
@@ -129,11 +100,6 @@ extern "C"
             // we configured on this port.
             std::vector<uint64_t> l_pairs;
 
-#ifdef CAL_STATUS_DOESNT_REPORT_COMPLETE
-            // This isn't correct - shouldn't be setting
-            static const uint64_t CLEAR_CAL_COMPLETE = 0x000000000000F000;
-            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_STATUS_P0, CLEAR_CAL_COMPLETE) );
-#endif
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 

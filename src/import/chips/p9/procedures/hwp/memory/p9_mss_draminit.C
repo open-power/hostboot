@@ -75,9 +75,9 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Configure the CCS engine. Since this is a chunk of McBIST logic, we don't want
+        // Configure the CCS engine. Since this is a chunk of MCBIST logic, we don't want
         // to do it for every port. If we ever break this code out so f/w can call draminit
-        // per-port (separate threads) we'll need to proved them a way to set this up before
+        // per-port (separate threads) we'll need to provide them a way to set this up before
         // sapwning per-port threads.
         {
             fapi2::buffer<uint64_t> l_ccs_config;

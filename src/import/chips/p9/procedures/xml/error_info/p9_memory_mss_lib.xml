@@ -33,11 +33,127 @@
 <hwpErrors>
 
   <registerFfdc>
+    <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
+    <scomRegister>MCA_DDRPHY_PC_MR0_PRI_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_PRI_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_PRI_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_PRI_RP3_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_SEC_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_SEC_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_SEC_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR0_SEC_RP3_P0</scomRegister>
+
+    <scomRegister>MCA_DDRPHY_PC_MR1_PRI_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_PRI_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_PRI_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_PRI_RP3_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_SEC_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_SEC_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_SEC_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR1_SEC_RP3_P0</scomRegister>
+
+    <scomRegister>MCA_DDRPHY_PC_MR2_PRI_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_PRI_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_PRI_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_PRI_RP3_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_SEC_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_SEC_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_SEC_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR2_SEC_RP3_P0</scomRegister>
+
+    <scomRegister>MCA_DDRPHY_PC_MR3_PRI_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_PRI_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_PRI_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_PRI_RP3_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_SEC_RP0_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_SEC_RP1_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_SEC_RP2_P0</scomRegister>
+    <scomRegister>MCA_DDRPHY_PC_MR3_SEC_RP3_P0</scomRegister>
+  </registerFfdc>
+
+  <registerFfdc>
     <id>REG_FFDC_MSS_CCS_FAILURE</id>
     <scomRegister>MCBIST_CCS_MODEQ</scomRegister>
     <scomRegister>MCBIST_CCS_STATQ</scomRegister>
     <scomRegister>MCBIST_CCS_CNTLQ</scomRegister>
     <scomRegister>MCBIST_MCBMCATQ</scomRegister>
+
+    <!-- Instructions -->
+    <scomRegister>MCBIST_CCS_INST_ARR0_00</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_01</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_02</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_03</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_04</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_05</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_06</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_07</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_08</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_09</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR0_10</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_11</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_12</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_13</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_14</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_15</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_16</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_17</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_18</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_19</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR0_20</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_21</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_22</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_23</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_24</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_25</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_26</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_27</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_28</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_29</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR0_30</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR0_31</scomRegister>
+
+    <!-- Control array -->
+    <scomRegister>MCBIST_CCS_INST_ARR1_00</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_01</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_02</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_03</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_04</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_05</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_06</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_07</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_08</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_09</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR1_10</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_11</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_12</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_13</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_14</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_15</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_16</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_17</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_18</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_19</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR1_20</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_21</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_22</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_23</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_24</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_25</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_26</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_27</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_28</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_29</scomRegister>
+
+    <scomRegister>MCBIST_CCS_INST_ARR1_30</scomRegister>
+    <scomRegister>MCBIST_CCS_INST_ARR1_31</scomRegister>
+
+    <!-- to get the CCS state machine hung state -->
+    <scomRegister>MCBIST_MCBERRPTQ</scomRegister>
   </registerFfdc>
 
   <hwpError>
@@ -46,6 +162,10 @@
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
     </collectRegisterFfdc>
     <callout>
@@ -65,6 +185,10 @@
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
       <priority>HIGH</priority>
@@ -82,6 +206,10 @@
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
     </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
       <priority>HIGH</priority>
@@ -96,6 +224,10 @@
     <description>CCS failed to return from in_progress status and failed to describe an error further.</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
     </collectRegisterFfdc>
     <callout>

@@ -58,7 +58,8 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN</rc>
     <description>A UE or SUE was caused by the last MCBIST pattern</description>
-    <ffdc>STATUS</ffdc>
+    <ffdc>STATUS0</ffdc>
+    <ffdc>STATUS1</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
@@ -73,6 +74,7 @@
     <rc>RC_MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
     <description>A miscompare error was caused by the last MCBIST pattern</description>
     <ffdc>PORT</ffdc>
+    <ffdc>SUBTEST</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>

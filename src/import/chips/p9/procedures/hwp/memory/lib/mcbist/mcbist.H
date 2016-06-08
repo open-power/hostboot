@@ -82,7 +82,8 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t MCBSTATQ_REG = MCBIST_MCBSTATQ;
         static constexpr uint64_t MCBPARMQ_REG = MCBIST_MCBPARMQ;
         static constexpr uint64_t MCBAGRAQ_REG = MCBIST_MCBAGRAQ;
-        static constexpr uint64_t SRERR_REG = MCBIST_MBSEC1Q;
+        static constexpr uint64_t SRERR0_REG = MCBIST_MBSEC0Q;
+        static constexpr uint64_t SRERR1_REG = MCBIST_MBSEC1Q;
         static constexpr uint64_t THRESHOLD_REG = MCBIST_MBSTRQ;
         static constexpr uint64_t FIRQ_REG = MCBIST_MCBISTFIRQ;
         static constexpr uint64_t LAST_ADDR_REG = MCBIST_MCBMCATQ;
@@ -198,6 +199,8 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
 
             LOGGED_ERROR_ON_PORT_INDICATOR = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR,
             LOGGED_ERROR_ON_PORT_INDICATOR_LEN = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR_LEN,
+            SUBTEST_NUM_INDICATOR = MCBIST_MCBSTATQ_MCBIST_SUBTEST_NUM_INDICATOR,
+            SUBTEST_NUM_INDICATOR_LEN = MCBIST_MCBSTATQ_MCBIST_SUBTEST_NUM_INDICATOR_LEN,
 
             UE_COUNT = MCBIST_MBSEC1Q_UE_COUNT,
             UE_COUNT_LEN = MCBIST_MBSEC1Q_UE_COUNT_LEN,
@@ -1030,41 +1033,38 @@ class program
         ///
         inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
         {
-            // TK: Check for more detailed errors
-
             // Until reading the error array is documented, comparison errors 'just' result in
             // a flag indicating there was a problem on port.
             {
                 fapi2::buffer<uint64_t> l_data;
-                uint64_t l_read = 0;
+                uint64_t l_port = 0;
+                uint64_t l_subtest = 0;
                 FAPI_TRY( mss::getScom(i_target, TT::MCBSTATQ_REG, l_data) );
-                l_data.extractToRight<TT::LOGGED_ERROR_ON_PORT_INDICATOR, TT::LOGGED_ERROR_ON_PORT_INDICATOR_LEN>(l_read);
+                l_data.extractToRight<TT::LOGGED_ERROR_ON_PORT_INDICATOR, TT::LOGGED_ERROR_ON_PORT_INDICATOR_LEN>(l_port);
+                l_data.extractToRight<TT::SUBTEST_NUM_INDICATOR, TT::SUBTEST_NUM_INDICATOR_LEN>(l_subtest);
 
-                FAPI_ASSERT( l_read == 0,
+                FAPI_ASSERT( l_port == 0,
                              fapi2::MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN()
                              .set_TARGET(i_target)
-                             .set_PORT(mss::first_bit_set(l_read)),
-                             "MCBIST error on port %d", mss::first_bit_set(l_read) );
+                             .set_PORT(mss::first_bit_set(l_port))
+                             .set_SUBTEST(l_subtest),
+                             "MCBIST error on port %d subtest %d", mss::first_bit_set(l_port), l_subtest );
             }
 
             // Check for UE errors
             {
-                fapi2::buffer<uint64_t> l_data;
-                uint64_t l_read = 0;
-                FAPI_TRY( mss::getScom(i_target, TT::SRERR_REG, l_data) );
+                fapi2::buffer<uint64_t> l_read0;
+                fapi2::buffer<uint64_t> l_read1;
 
-                // For now, lets catch anything in the scrub/read error reg - not just UE
-#ifdef CATCH_UE_ONLY
-                l_data.extractToRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(l_read);
-#else
-                l_read = l_data;
-#endif
+                FAPI_TRY( mss::getScom(i_target, TT::SRERR0_REG, l_read0) );
+                FAPI_TRY( mss::getScom(i_target, TT::SRERR1_REG, l_read1) );
 
-                FAPI_ASSERT( l_read == 0,
+                FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
                              fapi2::MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN()
                              .set_TARGET(i_target)
-                             .set_STATUS(l_read),
-                             "MCBIST scrub/read error 0x%016lx", l_read );
+                             .set_STATUS0(l_read0)
+                             .set_STATUS1(l_read1),
+                             "MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", l_read0, l_read1 );
             }
 
             FAPI_INF("Execution success - no errors seen from MCBIST program");
@@ -1427,7 +1427,8 @@ inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target )
     // TK: Clear the more detailed errors checked above
     FAPI_INF("Clear MCBIST error state");
     FAPI_TRY( mss::putScom(i_target, TT::MCBSTATQ_REG, 0) );
-    FAPI_TRY( mss::putScom(i_target, TT::SRERR_REG, 0) );
+    FAPI_TRY( mss::putScom(i_target, TT::SRERR0_REG, 0) );
+    FAPI_TRY( mss::putScom(i_target, TT::SRERR1_REG, 0) );
     FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, 0) );
 
 fapi_try_exit:
