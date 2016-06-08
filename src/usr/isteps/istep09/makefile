@@ -41,8 +41,6 @@ OBJS += call_fabric_pre_trainadv.o
 OBJS += call_fabric_io_run_training.o
 OBJS += call_fabric_post_trainadv.o
 OBJS += call_proc_smp_link_layer.o
-OBJS += call_host_startprd_pbus.o
-OBJS += call_host_attnlisten_proc.o
 OBJS += call_proc_fab_iovalid.o
 OBJS += call_host_fbc_eff_config_aggregate.o
 
@@ -51,9 +49,10 @@ VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 include ${ROOTPATH}/procedure.rules.mk
 
 #@TODO RTC:134079 Re-enable for l2 story
+# -- waiting for ekb fix for p9_io_xbus_restore_erepair.mk
 # fabric_erepair
-# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
-# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
+#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
+#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
 
 # fabric_io_dccal
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
@@ -61,9 +60,9 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
 # fabric_pre_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pre_trainadv.mk
 
-#//@TODO RTC:134079 Re-enable for l2 story
 # fabric_io_run_training
-# include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_linktrain.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_linktrain.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_clear_firs.mk
 
 # fabric_post_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_post_trainadv.mk
