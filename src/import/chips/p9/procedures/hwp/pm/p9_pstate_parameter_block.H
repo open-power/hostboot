@@ -180,12 +180,20 @@ typedef struct
 //  uint32_t attr_freq_proc_refclock;
     uint32_t attr_freq_proc_refclock_khz;
     uint32_t attr_proc_dpll_divider;
+    uint32_t attr_nest_frequency_mhz;
 
 // Frequency Bias attributes
     int8_t attr_freq_bias_ultraturbo;
     int8_t attr_freq_bias_turbo;
     int8_t attr_freq_bias_nominal;
     int8_t attr_freq_bias_powersave;
+
+// External Voltage Timing attributes
+    uint32_t attr_ext_vrm_transition_start_ns;
+    uint32_t attr_ext_vrm_transition_rate_inc_uv_per_us;
+    uint32_t attr_ext_vrm_transition_rate_dec_uv_per_us;
+    uint32_t attr_ext_vrm_stabilization_time_us;
+    uint32_t attr_ext_vrm_step_size_mv;
 
 // Voltage Bias attributes
     int8_t attr_voltage_ext_vdd_bias_ultraturbo;
@@ -205,9 +213,10 @@ typedef struct
     uint32_t attr_pm_safe_frequency_mhz;
     uint32_t attr_pm_safe_voltage_mv;
 
-//  uint32_t attr_freq_core_floor;
+    uint32_t attr_freq_core_floor;
     uint32_t attr_freq_core_floor_mhz;
     uint32_t attr_boot_freq_mhz;
+    uint32_t attr_nest_freq_mhz;
 
 // Resonant clock frequency attrmbutes
     uint32_t attr_pm_resonant_clock_full_clock_sector_buffer_frequency_khz;
