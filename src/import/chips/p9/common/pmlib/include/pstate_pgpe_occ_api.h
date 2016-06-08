@@ -104,8 +104,8 @@ typedef struct ipcmsg_start_stop
 typedef struct ipcmsg_clip_update
 {
     ipcmsg_base_t   msg_cb;
-    uint8_t         ps_val_clip_min[MAX_QUADS];
-    uint8_t         ps_val_clip_max[MAX_QUADS];
+    uint8_t         ps_val_clip_min[MAXIMUM_QUADS];
+    uint8_t         ps_val_clip_max[MAXIMUM_QUADS];
     uint8_t         pad[2];
 } ipcmsg_clip_update_t;
 
@@ -114,7 +114,7 @@ typedef struct ipcmsg_set_pmcr
 {
     ipcmsg_base_t   msg_cb;
     uint8_t         pad[6];
-    uint64_t        pmcr[MAX_QUADS];
+    uint64_t        pmcr[MAXIMUM_QUADS];
 } ipcmsg_set_pmcr_t;
 
 
