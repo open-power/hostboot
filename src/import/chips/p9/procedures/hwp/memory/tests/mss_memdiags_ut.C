@@ -219,7 +219,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000080 == l_read );
+                REQUIRE( 0x0000000000000081 == l_read );
             }
 
             // Load thresholds - default state (expecting 0's)
@@ -312,7 +312,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000080 == l_read );
+                REQUIRE( 0x0000000000000081 == l_read );
             }
 
             // Load thresholds - default state (expecting 0's)
@@ -405,7 +405,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x00000000000000a8 == l_read );
+                REQUIRE( 0x00000000000000a9 == l_read );
             }
 
             // Load thresholds - default state (expecting 0's)
@@ -572,7 +572,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000000 == l_read );
+                REQUIRE( 0x0000000000000001 == l_read );
             }
 
 
@@ -623,7 +623,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000020000020 == l_read );
+                REQUIRE( 0x0000000020000021 == l_read );
             }
 
         }

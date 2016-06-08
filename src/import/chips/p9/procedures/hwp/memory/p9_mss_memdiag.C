@@ -35,6 +35,8 @@
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 
+#include <lib/fir/memdiags_fir.H>
+
 using fapi2::TARGET_TYPE_MCBIST;
 
 extern "C"
@@ -47,6 +49,9 @@ extern "C"
     fapi2::ReturnCode p9_mss_memdiag( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
         FAPI_INF("Start memdiag");
+
+        // Unmask the memdiags FIR
+        FAPI_TRY( mss::unmask_memdiags_errors(i_target) );
 
         FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 

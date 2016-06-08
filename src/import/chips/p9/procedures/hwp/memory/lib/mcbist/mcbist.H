@@ -583,7 +583,7 @@ inline subtest_t<T> init_subtest()
 /// - FORCE_PAUSE_AFTER_ADDR - don't pause after current address
 /// - FORCE_PAUSE_AFTER_SUBTEST - no pause after subtest
 /// - ENABLE_SPEC_ATTN - disabled
-/// - ENABLE_HOST_ATTN - disabled
+/// - ENABLE_HOST_ATTN - enabled
 ///
 
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -618,6 +618,9 @@ class program
             // By default if there's an error, we stop after the errored address
             iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(
                 stop_conditions::STOP_AFTER_ADDRESS);
+
+            // All mcbist attentions are host attentions, special attention bit is already clear
+            iv_config.setBit<TT::CFG_ENABLE_HOST_ATTN>();
         }
 
         ///
