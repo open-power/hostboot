@@ -39,6 +39,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${PROCEDURE_PATH}/xml/error_info/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -48,6 +50,11 @@ OBJS += call_proc_setup_bars.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_host_mpipl_service.o
+OBJS += memdiags.o
+OBJS += mcbist.o
+OBJS += sim.o
+OBJS += rank.o
+OBJS += patterns.o
 
 #Object files from lib directories
 OBJS += memory_size.o
@@ -68,3 +75,5 @@ include ${ROOTPATH}/config.mk
 VPATH    += ${PROCEDURE_PATH}/hwp/nest/ ${PROCEDURE_PATH}/hwp/memory/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
