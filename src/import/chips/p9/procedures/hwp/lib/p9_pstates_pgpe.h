@@ -47,6 +47,7 @@
 
 #define PSTATE_PARMSBLOCK_MAGIC 0x5053544154453030ull /* PSTATE00 */
 
+#ifndef __ASSEMBLER__
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -116,8 +117,6 @@ typedef struct
 
     /// UltraTurbo Segment VIDs by Core Count
     VIDModificationTable ut_vid_mod;
-
-    uint8_t pad[4];
 
 } WOFElements;
 
@@ -218,28 +217,28 @@ typedef struct
     /// Resonant Clock Grid Management Setup
     ResonantClockingSetup resclk;
 
-    //Time b/w ext VRM detects write voltage cmd and when voltage begins to move
+    /// Time b/w ext VRM detects write voltage cmd and when voltage begins to move
     uint32_t ext_vrm_transition_start_ns;
 
-    //Transition rate for an increasing VDD voltage excursion
+    /// Transition rate for an increasing VDD voltage excursion
     uint32_t ext_vrm_transition_rate_inc_uv_per_us;
 
-    //Transition rate for an decreasing VDD voltage excursion
+    /// Transition rate for an decreasing VDD voltage excursion
     uint32_t ext_vrm_transition_rate_dec_uv_per_us;
 
-    //Delay to account for VDD rail setting
+    /// Delay to account for VDD rail setting
     uint32_t ext_vrm_stabilization_time_us;
 
-    //External VRM transition step size
+    /// External VRM transition step size
     uint32_t ext_vrm_step_size_mv;
 
-    //Nest frequency in Mhz. This is used by FIT interrupt
+    /// Nest frequency in Mhz. This is used by FIT interrupt
     uint32_t nest_frequency_mhz;
 
-    //Precalculated Pstate-Voltage Slopes
+    /// Precalculated Pstate-Voltage Slopes
     uint16_t PsVSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
-    //Precalculated Voltage-Pstates Slopes
+    /// Precalculated Voltage-Pstates Slopes
     uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
 
@@ -251,5 +250,5 @@ typedef struct
 #ifdef __cplusplus
 } // end extern C
 #endif
-
+#endif    /* __ASSEMBLER__ */
 #endif    /* __P9_PSTATES_PGPE_H__ */
