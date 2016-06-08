@@ -34,4 +34,7 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
+echo "+++ Pulling in new scomdef file"
+mkdir -p $sb/engd/scomdef/
+cp /esw/fips910/Current/current/src/engd/scomdef/p9n_10.scomdef $sb/engd/scomdef/
 
