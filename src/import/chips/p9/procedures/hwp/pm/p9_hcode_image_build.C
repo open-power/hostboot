@@ -40,6 +40,7 @@
 #include <p9_hcode_image_build.H>
 #include "p9_xip_image.h"
 #include "p9_hcode_image_defines.H"
+#include "p9_pm_hcd_flags.h"
 #include "p9_stop_util.H"
 #include "p9_scan_ring_util.H"
 #include "p9_tor.H"
@@ -50,6 +51,7 @@
 #include <p9_ringId.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_fbc_utils.H>
+#include "p9_pstate_parameter_block.H"
 
 #ifdef __CRONUS_VER
     #include <string>
@@ -230,7 +232,7 @@ extern "C"
 
         iv_secSize[ImgSec(PLAT_CME, P9_XIP_SECTION_CME_HCODE)]        =   CME_SRAM_SIZE;
 
-        //iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_PPPMR)]    =   HALF_KB;
+        iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_PPMR)]       =   HALF_KB;
         iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_LVL1_BL)]    =   PGPE_LVL_1_BOOT_LOAD_SIZE ;
         iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_LVL2_BL)]    =   PGPE_LVL_2_BOOT_LOAD_SIZE ;
         iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_HCODE)]      =   PGPE_MAX_AREA_SIZE;
@@ -302,6 +304,15 @@ extern "C"
             std::map<uint32_t, ExpairId> iv_idMap;
     };
 
+#define     ALIGN_DBWORD( OUTSIZE, INSIZE )         \
+    {                                               \
+        OUTSIZE = INSIZE;                           \
+        if( 0 != (INSIZE/8) )                       \
+        {                                           \
+            OUTSIZE = ((( INSIZE + 7 )/ 8) << 3 );  \
+        }                                           \
+    }
+
     /**
      * @brief constructor
      */
@@ -321,7 +332,7 @@ extern "C"
         }
     }
 
-    //-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
     /**
      * @brief   returns ex chiplet ID associated with a scan ring and EQ id.
@@ -374,7 +385,7 @@ extern "C"
         return exChipletId;
     }
 
-    //-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
     uint32_t validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& o_sramImgSize )
     {
@@ -386,6 +397,7 @@ extern "C"
             ImgSizeBank sizebank;
             sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
             cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+            PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) i_pChipHomer->ppmrRegion.ppmrHeader;
 
             //FIXME size will change once SCOM and 24x7 are handled
             o_sramImgSize =  SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_offset);
@@ -411,6 +423,16 @@ extern "C"
                 rc = CME_SRAM_IMG_SIZE_ERR;
                 break;
             }
+
+            o_sramImgSize = SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_img_size);
+            rc = sizebank.isSizeGood( PLAT_PGPE, P9_XIP_SECTION_PGPE_HCODE, o_sramImgSize );
+            FAPI_DBG("PGPE SRAM Image : 0x%08X Size Check : %s", o_sramImgSize, rc ? "FAILURE" : "SUCCESS" );
+
+            if( rc )
+            {
+                rc = PGPE_SRAM_IMG_SIZE_ERR;
+                break;
+            }
         }
         while(0);
 
@@ -419,13 +441,13 @@ extern "C"
         return rc;
     }
 
-    //-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
     /**
      * @brief   validates arguments passed for hcode image build
      * @param   refer to p9_hcode_image_build arguments
      * @return  fapi2 return code
-     */
+    */
     fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImageOut,
             SysPhase_t i_phase, ImageType_t i_imgType,
             void* i_pBuf1, uint32_t i_bufSize1, void* i_pBuf2,
@@ -489,7 +511,7 @@ extern "C"
         return fapi2::current_err;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
     /**
      * @brief   Copies section of hardware image to HOMER
      * @param   i_destPtr       a location in HOMER
@@ -557,10 +579,12 @@ extern "C"
         uint8_t attrVal = 0;
         uint32_t cmeFlag = 0;
         uint32_t sgpeFlag = 0;
+        pgpe_flags_t pgpeFlags;
 
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
         sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
+        PgpeHeader_t* pPgpeHdr = (PgpeHeader_t*)& i_pChipHomer->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR];
 
         //Handling flags common to CME and SGPE
 
@@ -617,13 +641,31 @@ extern "C"
 
         FAPI_DBG("STOP_11_to_8          :   %s", attrVal ? "TRUE" : "FALSE" );
 
-        //Updating flag field in CME/SGPE Image header
+        // Set PGPE Header Flags from Attributes
+        FAPI_DBG(" -------------------- PGPE Flags -----------------");
+        pgpeFlags.value = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PGPE_HCODE_FUNCTION_ENABLE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PGPE_HCODE_FUNCTION_ENABLE");
+
+        // If 0 (Hcode disabled), then set the occ_opc_immed_response flag bit
+        if( !attrVal )
+        {
+            pgpeFlags.fields.occ_ipc_immed_response = 1;
+        }
+
+        FAPI_DBG("PGPE Hcode Mode        :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
+
+        // Updating flag fields in the headers
         pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
         pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
+        pPgpeHdr->g_pgpe_flags          =   SWIZZLE_2_BYTE(pgpeFlags.value);
 
         FAPI_INF("CME Flag Value        : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
         FAPI_INF("SGPE Flag Value       : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
-        FAPI_DBG(" ==================== CME/SGPE Flags Ends =================");
+        FAPI_INF("PGPE Flag Value       : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
+        FAPI_DBG(" -------------------- CME/SGPE Flags Ends ---------------==");
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -645,7 +687,7 @@ extern "C"
         pCpmrHdr->cmeImgOffset              =   SWIZZLE_4_BYTE((CPMR_CME_HCODE_OFFSET >> CME_BLK_SIZE_SHIFT));
         pCpmrHdr->cmePstateOffset           =   CPMR_CME_HCODE_OFFSET + SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset);
         pCpmrHdr->cmePstateOffset           =   SWIZZLE_4_BYTE(pCpmrHdr->cmePstateOffset);
-        pCpmrHdr->cmePstateLength           =   0;
+        pCpmrHdr->cmePstateLength           =   pCmeHdr->g_cme_pstate_region_length;
         pCpmrHdr->cmeImgLength              =   pCmeHdr->g_cme_hcode_length;// already swizzled
         pCpmrHdr->coreScomOffset            =   SWIZZLE_4_BYTE(CORE_SCOM_START);
         pCpmrHdr->coreScomLength            =   SWIZZLE_4_BYTE(CORE_SCOM_RES_SIZE);
@@ -670,7 +712,6 @@ extern "C"
 
         //Updating CME Image header
         pCmeHdr->g_cme_magic_number         =   SWIZZLE_8_BYTE(CME_MAGIC_NUMBER);
-
         pCmeHdr->g_cme_scom_offset          =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length) +
                                                 SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length) +
                                                 SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length);
@@ -682,32 +723,38 @@ extern "C"
         pCmeHdr->g_cme_scom_length          =   SWIZZLE_4_BYTE(CORE_SCOM_PER_CME);
 
         FAPI_INF("========================= CME Header Start ==================================");
-        FAPI_INF("  Magic Num       = 0x%16lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_magic_number));
-        FAPI_INF("  HC Offset       = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_offset));
-        FAPI_INF("  HC Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length));
-        FAPI_INF("  PS Offset       = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset));
-        FAPI_INF("  PS Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length));
-        FAPI_INF("  CR Offset       = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset));
-        FAPI_INF("  CR Ovrd Offset  = 0x%08X", SWIZZLE_4_BYTE(pCmeHdr->g_cme_cmn_ring_ovrd_offset ));
-        FAPI_INF("  CR Size         = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length));
-        FAPI_INF("  CSR Offset      = 0x%08X (Real offset / 32) ", SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset));
-        FAPI_INF("  CSR Length      = 0x%08X (Real length / 32)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length) );
-        FAPI_INF("  SCOM Offset     = 0x%08X (Real offset / 32)",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
-        FAPI_INF("  SCOM Area Len   = 0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_length));
-        FAPI_INF("  CPMR Phy Add    = 0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
+        char magicWord[16] = {0};
+        uint64_t temp = pCmeHdr->g_cme_magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG("  Magic Num       :   %s",      magicWord);
+        FAPI_INF("  HC Offset       :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_offset));
+        FAPI_INF("  HC Size         :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length));
+        FAPI_INF("  PS Offset       :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset));
+        FAPI_INF("  PS Size         :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length));
+        FAPI_INF("  CR Offset       :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset));
+        FAPI_INF("  CR Ovrd Offset  :   0x%08X", SWIZZLE_4_BYTE(pCmeHdr->g_cme_cmn_ring_ovrd_offset ));
+        FAPI_INF("  CR Size         :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_length));
+        FAPI_INF("  CSR Offset      :   0x%08X (Real offset / 32) ", SWIZZLE_4_BYTE(pCmeHdr->g_cme_core_spec_ring_offset));
+        FAPI_INF("  CSR Length      :   0x%08X (Real length / 32)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_max_spec_ring_length) );
+        FAPI_INF("  SCOM Offset     :   0x%08X (Real offset / 32)",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
+        FAPI_INF("  SCOM Area Len   :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_length));
+        FAPI_INF("  CPMR Phy Add    :   0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
         FAPI_INF("========================= CME Header End ==================================");
 
         FAPI_INF("==========================CPMR Header===========================================");
-        FAPI_INF(" CME HC Offset            : 0x%08X (Real offset / 32)", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
-        FAPI_INF(" CME HC Length            : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
-        FAPI_INF(" PS  Offset               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateOffset));
-        FAPI_INF(" PS  Length               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateLength));
-        FAPI_INF(" CR  Offset               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingOffset));
-        FAPI_INF(" CR  Length               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingLength));
-        FAPI_INF(" CSR Offset               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingOffset));
-        FAPI_INF(" CSR Length               : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingLength));
-        FAPI_INF(" Core SCOM Offset         : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomOffset));
-        FAPI_INF(" Core SCOM Length         : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomLength ));
+        temp = pCpmrHdr->magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG(" Magic Num        : %s", magicWord);
+        FAPI_INF(" CME HC Offset    : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
+        FAPI_INF(" CME HC Length    : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
+        FAPI_INF(" PS  Offset       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateOffset));
+        FAPI_INF(" PS  Length       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmePstateLength));
+        FAPI_INF(" CR  Offset       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingOffset));
+        FAPI_INF(" CR  Length       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingLength));
+        FAPI_INF(" CSR Offset       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingOffset));
+        FAPI_INF(" CSR Length       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingLength));
+        FAPI_INF(" Core SCOM Offset : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomOffset));
+        FAPI_INF(" Core SCOM Length : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomLength ));
         FAPI_INF("==================================CPMR Ends=====================================");
 
     }
@@ -750,40 +797,51 @@ extern "C"
     {
         uint32_t rc = IMG_BUILD_SUCCESS;
 
+
         QpmrHeaderLayout_t* pQpmrHdr = ( QpmrHeaderLayout_t*) & (i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader);
         sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
         memcpy( pQpmrHdr, &io_qpmrHdr, sizeof( QpmrHeaderLayout_t ) );
+        //FIXME Populating headers fields with max possible values for now. This is to keep things in line with SGPE
+        //bootloader design. SGPE bootloader doesn't expect a hole in image layout how ever due to current design of
+        //hcode image build there are holes between various section of image say common and instance ring.
 
         pQpmrHdr->magic_number                  =   SWIZZLE_8_BYTE(QPMR_MAGIC_NUMBER);
         pSgpeHdr->g_sgpe_magic_number           =   SWIZZLE_8_BYTE(SGPE_MAGIC_NUMBER);
 
         FAPI_INF("==============================QPMR==================================");
-        FAPI_INF("  Magic Num               : 0x%16lX", SWIZZLE_8_BYTE(pQpmrHdr->magic_number));
-        FAPI_INF("  Build Date              : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->buildDate));
-        FAPI_INF("  Version                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->buildVersion));
-        FAPI_INF("  BC Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootCopierOffset));
-        FAPI_INF("  BL Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootLoaderOffset));
-        FAPI_INF("  BL Size                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootLoaderLength));
-        FAPI_INF("  HC Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->sgpeImgOffset));
-        FAPI_INF("  HC Size                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->sgpeImgLength));
+        char magicWord[16] = {0};
+        uint64_t temp = pQpmrHdr->magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG("  Magic Num               : %s", magicWord);
+        FAPI_DBG("  Build Date              : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->buildDate));
+        FAPI_DBG("  Version                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->buildVersion));
+        FAPI_DBG("  BC Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootCopierOffset));
+        FAPI_DBG("  BL Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootLoaderOffset));
+        FAPI_DBG("  BL Size                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->bootLoaderLength));
+        FAPI_DBG("  HC Offset               : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->sgpeImgOffset));
+        FAPI_DBG("  HC Size                 : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->sgpeImgLength));
         FAPI_DBG("  Cmn Ring Offset         : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadCommonRingOffset) );
         FAPI_DBG("  Cmn Ring Length         : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadCommonRingLength) );
         FAPI_DBG("  Cmn Ring Ovrd Offset    : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadCommonOvrdOffset) );
         FAPI_DBG("  Cmn Ring Ovrd Length    : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadCommonOvrdLength) );
         FAPI_DBG("  Quad Spec Ring Offset   : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadSpecRingOffset) );
         FAPI_DBG("  Quad Spec Ring Length   : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadSpecRingLength) );
-        FAPI_INF("==============================QPMR Ends==============================");
-        FAPI_INF("===========================SGPE Image Hdr=============================");
-        FAPI_INF(" Cmn Ring Offset          :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_cmn_ring_occ_offset ));
-        FAPI_INF(" Override Offset          :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_cmn_ring_ovrd_occ_offset ));
-        FAPI_INF(" Flags                    :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags ));
-        FAPI_INF(" Quad Spec Ring Offset    :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_spec_ring_occ_offset ));
-        FAPI_INF(" Quad SCOM SRAM Offset    :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_offset));
-        FAPI_INF(" Quad SCOM Mem Offset     :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_mem_offset));
-        FAPI_INF(" Quad SCOM Mem Length     :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_mem_length ));
-        FAPI_INF(" 24x7 Offset              :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_24x7_offset ));
-        FAPI_INF(" 24x7 Length              :  0x%08X", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_24x7_length ));
-        FAPI_INF("========================SGPE Image Hdr Ends===========================");
+        FAPI_DBG("==============================QPMR Ends==============================");
+
+        FAPI_DBG("===========================SGPE Image Hdr=============================");
+        temp = pSgpeHdr->g_sgpe_magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG(" Magic Num                :  %s",     magicWord);
+        FAPI_DBG(" Cmn Ring Offset          :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_cmn_ring_occ_offset ));
+        FAPI_DBG(" Override Offset          :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_cmn_ring_ovrd_occ_offset ));
+        FAPI_DBG(" Flags                    :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags ));
+        FAPI_DBG(" Quad Spec Ring Offset    :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_spec_ring_occ_offset ));
+        FAPI_DBG(" Quad SCOM SRAM Offset    :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_offset));
+        FAPI_DBG(" Quad SCOM Mem Offset     :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_mem_offset));
+        FAPI_DBG(" Quad SCOM Mem Length     :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_scom_mem_length ));
+        FAPI_DBG(" 24x7 Offset              :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_24x7_offset ));
+        FAPI_DBG(" 24x7 Length              :  0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_24x7_length ));
+        FAPI_DBG("========================SGPE Image Hdr Ends===========================");
 
         return rc;
     }
@@ -1145,11 +1203,12 @@ extern "C"
      * @brief       copies PGPE section from hardware image to HOMER.
      * @param[in]   i_pImageIn      points to start of hardware image.
      * @param[in]   i_pChipHomer    points to HOMER image in main memory.
+     * @param[io]   io_ppmrHdr      an instance of PpmrHeader_t
      * @param[in]   i_imgType       image sections  to be built
      * @return IMG_BUILD_SUCCESS if function succeeds, error code otherwise.
      */
     uint32_t buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
-                             ImageType_t i_imgType )
+                             PpmrHeader_t& io_ppmrHdr, ImageType_t i_imgType )
     {
         uint32_t retCode = IMG_BUILD_SUCCESS;
         FAPI_INF("> PGPE Img build")
@@ -1160,6 +1219,11 @@ extern "C"
             //Let us find XIP Header for SGPE
             P9XipSection ppeSection;
             uint8_t* pPgpeImg = NULL;
+
+            //Init PGPE region with zero
+            memset( i_pChipHomer->ppmrRegion.ppmrHeader, 0x00, ONE_MB );
+
+            PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) i_pChipHomer->ppmrRegion.ppmrHeader;
 
             if(!i_imgType.pgpeImageBuild )
             {
@@ -1176,9 +1240,29 @@ extern "C"
             }
 
             pPgpeImg = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
+            FAPI_DBG("HW image PGPE Offset = 0x%08X", ppeSection.iv_offset);
 
-            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.l1BootLoader, pPgpeImg,
-                                         P9_XIP_SECTION_PGPE_LVL1_BL, PLAT_SGPE, ppeSection );
+            FAPI_INF("PPMR Header");
+            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.ppmrHeader,
+                                         pPgpeImg,
+                                         P9_XIP_SECTION_PGPE_PPMR,
+                                         PLAT_PGPE,
+                                         ppeSection );
+
+            if( rcTemp )
+            {
+                FAPI_ERR("Failed to copy PPMR Header");
+                retCode = BUILD_FAIL_PGPE_PPMR;
+                break;
+            }
+
+            memcpy( &io_ppmrHdr, pPpmrHdr, sizeof(PpmrHeader_t));
+
+            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.l1BootLoader,
+                                         pPgpeImg,
+                                         P9_XIP_SECTION_PGPE_LVL1_BL,
+                                         PLAT_PGPE,
+                                         ppeSection );
 
             if( rcTemp )
             {
@@ -1187,9 +1271,14 @@ extern "C"
                 break;
             }
 
+            io_ppmrHdr.g_ppmr_bc_offset = PPMR_HEADER_LEN;
 
-            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.l2BootLoader, pPgpeImg,
-                                         P9_XIP_SECTION_PGPE_LVL2_BL, PLAT_PGPE, ppeSection );
+
+            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.l2BootLoader,
+                                         pPgpeImg,
+                                         P9_XIP_SECTION_PGPE_LVL2_BL,
+                                         PLAT_PGPE,
+                                         ppeSection );
 
             if( rcTemp )
             {
@@ -1198,8 +1287,14 @@ extern "C"
                 break;
             }
 
-            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.pgpeBin.hcode, pPgpeImg,
-                                         P9_XIP_SECTION_PGPE_HCODE, PLAT_PGPE, ppeSection );
+            io_ppmrHdr.g_ppmr_bl_offset = io_ppmrHdr.g_ppmr_bc_offset + PGPE_LVL_1_BOOT_LOAD_SIZE;
+            io_ppmrHdr.g_ppmr_bl_length = ppeSection.iv_size;
+
+            rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.pgpeSramImage,
+                                         pPgpeImg,
+                                         P9_XIP_SECTION_PGPE_HCODE,
+                                         PLAT_PGPE,
+                                         ppeSection );
 
             if( rcTemp )
             {
@@ -1208,8 +1303,15 @@ extern "C"
                 break;
             }
 
-            //FIXME PGPE image header shall be populated after its definition is published.
+            io_ppmrHdr.g_ppmr_hcode_offset = io_ppmrHdr.g_ppmr_bl_offset + PGPE_LVL_2_BOOT_LOAD_SIZE;
+            io_ppmrHdr.g_ppmr_hcode_length = ppeSection.iv_size;
 
+            //Finally let us take care of endianess
+            io_ppmrHdr.g_ppmr_bc_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bc_offset);
+            io_ppmrHdr.g_ppmr_bl_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_offset);
+            io_ppmrHdr.g_ppmr_bl_length    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_length);
+            io_ppmrHdr.g_ppmr_hcode_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_offset);
+            io_ppmrHdr.g_ppmr_hcode_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
         }
         while(0);
 
@@ -1263,14 +1365,14 @@ extern "C"
                 break;
             }
 
-            FAPI_DBG("================== Input Buffer Specs ====================");
+            FAPI_DBG("------------------ Input Buffer Specs --------------------");
             FAPI_DBG("Ring section (buf,size)=(0x%016llX,0x%08X)",
                      (uintptr_t)(i_ringData.iv_pRingBuffer), i_ringData.iv_ringBufSize);
             FAPI_DBG("Work buf1 (buf,size)=(0x%016llX,0x%08X)",
                      (uintptr_t)(i_ringData.iv_pWorkBuf1), i_ringData.iv_sizeWorkBuf1);
             FAPI_DBG("Work buf2 (buf,size)=(0x%016llX,0x%08X)",
                      (uintptr_t)(i_ringData.iv_pWorkBuf2), i_ringData.iv_sizeWorkBuf2);
-            FAPI_DBG("================== Buffer Specs Ends ====================");
+            FAPI_DBG("---------------=== Buffer Specs Ends --------------------");
 
             uint32_t l_bootMask = ENABLE_ALL_CORE;
             fapi2::ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
@@ -1377,6 +1479,7 @@ extern "C"
                 ALIGN_DWORD(tempRingLength, tempBufSize)
                 ALIGN_RING_LOC( pOverrideStart, pOvrdRingPayload );
 
+
                 memcpy( pOvrdRingPayload, i_ringData.iv_pWorkBuf2, tempBufSize);
                 *(pScanRingIndex + ringIndex) = SWIZZLE_2_BYTE((pOvrdRingPayload - pOverrideStart) + ringStartToHdrOffset);
 
@@ -1405,29 +1508,321 @@ extern "C"
         }
         while(0);
 
-        sgpeOvrdRings.dumpOverrideRings();
-
-        FAPI_DBG("====================SGPE Override Rings================" );
-        FAPI_DBG("====================SGPE Header ========================");
+        FAPI_DBG("--------------------SGPE Override Rings---------------=" );
+        FAPI_DBG("--------------------SGPE Header --------------------====");
         FAPI_DBG("Override Ring Offset 0x%08X", SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
+
+        sgpeOvrdRings.dumpOverrideRings();
 
         FAPI_INF("< layoutSgpeScanOverride")
         return rc;
     }
 
-//------------------------------------------------------------------------------
+    /**
+     * @brief   update fields of PGPE image header region with parameter block info.
+     * @param   i_pHomer    points to start of chip's HOMER.
+     */
+
+
+    void updatePgpeHeader( void* const i_pHomer )
+    {
+        FAPI_DBG("> updatePgpeHeader");
+        Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
+        PgpeHeader_t*  pPgpeHdr = (PgpeHeader_t*)&pHomerLayout->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR];
+        PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) pHomerLayout->ppmrRegion.ppmrHeader;
+        //Updating PGPE Image Header
+        //Global P-State Parameter Block SRAM address
+        pPgpeHdr->g_pgpe_gppb_sram_addr               =     0;      // set by PGPE Hcode
+
+        //PGPE Hcode length
+        pPgpeHdr->g_pgpe_hcode_length                 =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_hcode_length);
+
+        //Global P-State Parameter Block HOMER address
+        pPgpeHdr->g_pgpe_gppb_mem_offset              =     (OCI_PBA_ADDR_BASE |
+                (SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_gppb_offset) +
+                 PPMR_OFFSET ));
+        //Global P-State Parameter Block length
+        pPgpeHdr->g_pgpe_gppb_length                  =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_gppb_length);
+
+        //P-State Parameter Block HOMER offset
+        pPgpeHdr->g_pgpe_gen_pstables_mem_offset      =     (OCI_PBA_ADDR_BASE |
+                (SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_offset) +
+                 PPMR_OFFSET ));
+
+        //P-State Table length
+        pPgpeHdr->g_pgpe_gen_pstables_length          =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_length);
+
+        //OCC P-State Table SRAM address
+        pPgpeHdr->g_pgpe_occ_pstables_sram_addr       =     0;
+
+        //OCC P-State Table Length
+        pPgpeHdr->g_pgpe_occ_pstables_len             =     0;
+
+        //PGPE Beacon SRAM address
+        pPgpeHdr->g_pgpe_beacon_addr                  =     0;
+        pPgpeHdr->g_quad_status_addr                  =     0;
+        pPgpeHdr->g_wof_table_addr                    =     0;
+        pPgpeHdr->g_wof_table_length                  =     0;
+
+        //Finally handling the endianess
+        pPgpeHdr->g_pgpe_magic_number                   =   SWIZZLE_8_BYTE(PGPE_MAGIC_NUMBER);
+        pPgpeHdr->g_pgpe_gppb_sram_addr                 =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr);
+        pPgpeHdr->g_pgpe_hcode_length                   =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_hcode_length);
+        pPgpeHdr->g_pgpe_gppb_mem_offset                =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_mem_offset);
+        pPgpeHdr->g_pgpe_gppb_length                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_length);
+        pPgpeHdr->g_pgpe_gen_pstables_mem_offset        =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gen_pstables_mem_offset);
+        pPgpeHdr->g_pgpe_gen_pstables_length            =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gen_pstables_length);
+        pPgpeHdr->g_pgpe_occ_pstables_sram_addr         =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_occ_pstables_sram_addr);
+        pPgpeHdr->g_pgpe_occ_pstables_len               =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_occ_pstables_len);
+        pPgpeHdr->g_pgpe_beacon_addr                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_beacon_addr);
+        pPgpeHdr->g_quad_status_addr                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_quad_status_addr);
+        pPgpeHdr->g_wof_table_addr                      =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_addr);
+        pPgpeHdr->g_wof_table_length                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length);
+
+        FAPI_DBG("================================PGPE Image Header==========================================")
+        char magicWord[16] = {0};
+        uint64_t temp = pPgpeHdr->g_pgpe_magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG("PGPE Magic Word           :       %s", magicWord);
+        FAPI_DBG("Hcode Length              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_length));
+        FAPI_DBG("GPPB SRAM                 :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr));
+        FAPI_DBG("GPPB Mem Offset           :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_mem_offset));
+        FAPI_DBG("GPPB Length               :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_length));
+        FAPI_DBG("PS Table Mem Offset       :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gen_pstables_mem_offset));
+        FAPI_DBG("PS Table Length           :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gen_pstables_length));
+        FAPI_DBG("OCC PST SRAM              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_occ_pstables_sram_addr));
+        FAPI_DBG("OCC PST Length            :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_occ_pstables_len));
+        FAPI_DBG("Beacon  Offset            :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_beacon_addr));
+        FAPI_DBG("Quad Status               :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_quad_status_addr));
+        FAPI_DBG("WOF Addr                  :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_addr));
+        FAPI_DBG("WOF Length                :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length));
+        FAPI_DBG("==============================PGPE Image Header End========================================")
+
+        FAPI_DBG("< updatePgpeHeader");
+    }
+
+//---------------------------------------------------------------------------
+
+    void updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr )
+    {
+        FAPI_DBG("> updatePpmrHeader");
+        Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
+        PpmrHeader_t*  pPpmrHdr = (PpmrHeader_t*) &pHomerLayout->ppmrRegion.ppmrHeader;
+        memcpy( pPpmrHdr, &io_ppmrHdr, sizeof(PpmrHeader_t) );
+
+        FAPI_DBG("=========================== PPMR Header  ====================================" );
+        char magicWord[16] = {0};
+        uint64_t temp = io_ppmrHdr.g_ppmr_magic_number;
+        memcpy(magicWord, &temp, sizeof(uint64_t));
+        FAPI_DBG("Magic Word            :    %s", magicWord);
+        FAPI_DBG("BC Offset             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bc_offset));
+        FAPI_DBG("BL Offset             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bl_offset));
+        FAPI_DBG("BL Length             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bl_length));
+        FAPI_DBG("Hcode Offset          :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_hcode_offset));
+        FAPI_DBG("Hcode Length          :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_hcode_length));
+        FAPI_DBG("GPPB Offset           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_gppb_offset));
+        FAPI_DBG("GPPB Length           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_gppb_length));
+        FAPI_DBG("LPPB Offset           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_lppb_offset));
+        FAPI_DBG("LPPB Length           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_lppb_length));
+        FAPI_DBG("OPPB Offset           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_oppb_offset));
+        FAPI_DBG("OPPB Length           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_oppb_length));
+        FAPI_DBG("PS Table Offset       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_offset));
+        FAPI_DBG("PS Table Length       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pstables_length));
+        FAPI_DBG("PSGPE SRAM Size       :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_pgpe_sram_img_size));
+        FAPI_DBG("=========================== PPMR Header ends ==================================" );
+
+        updatePgpeHeader( i_pHomer );
+
+        FAPI_DBG("< updatePpmrHeader");
+    }
+
+//---------------------------------------------------------------------------
 
     /**
-     * @brief   creates a lean scan ring layout for core specific rings in HOMER.
-     * @param   i_pHOMER        points to HOMER image.
-     * @param   i_chipState     functional state of all cores within P9 chip
-     * @param   i_ringData      scan ring related data
-     * @param   i_debugMode     debug type set for scan rings
-     * @param   i_ringVariant   scan ring flavor
-     * @param   i_imgType       image type to be built
-     * @param   io_cmeRings     instance of RingBucket
-     * @param   io_cmnRingSize  input: CME region length populated. output: CME region length after copying cmn ring.
-     * @param   IMG_BUILD_SUCCESS   if function succeeds else error code.
+     * @brief   updates the PState parameter block info in CPMR and PPMR region.
+     * @param   i_pHomer    points to start of of chip's HOMER.
+     * @param   i_procTgt   fapi2 target associated with P9 chip.
+     * @param   i_imgType   image type to be built.
+     * return   fapi2::Returncode
+     */
+    fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt,
+                                           PpmrHeader_t& io_ppmrHdr,
+                                           ImageType_t i_imgType )
+    {
+        FAPI_INF("buildParameterBlock entered");
+
+        do
+        {
+            if( !i_imgType.pgpePstateParmBlockBuild )
+            {
+                break;
+            }
+
+            fapi2::ReturnCode retCode;
+            Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
+            PPMRLayout_t*  pPpmr = (PPMRLayout_t*) &pHomerLayout->ppmrRegion;
+            cmeHeader_t* pCmeHdr = (cmeHeader_t*) &pHomerLayout->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+
+            uint32_t ppmrRunningOffset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_offset) +
+                                         SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
+
+            FAPI_DBG("Hcode ppmrRunningOffset 0x%08x", ppmrRunningOffset );
+
+            uint32_t pgpeRunningOffset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
+
+            FAPI_DBG(" PGPE Hcode End 0x%08x", pgpeRunningOffset );
+
+            uint32_t sizeAligned = 0;
+            uint32_t sizePStateBlock = 0;
+            PstateSuperStructure pStateSupStruct;
+
+            //Building P-State Parameter block info by calling a HWP
+            FAPI_DBG("Generating P-State Parameter Block" );
+            FAPI_EXEC_HWP(retCode, p9_pstate_parameter_block, i_procTgt, &pStateSupStruct);
+            FAPI_TRY(retCode);
+
+            //-------------------------- Local P-State Parameter Block ------------------------------
+
+            uint32_t localPspbStartIndex = SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length);
+            uint8_t* pLocalPState = &pHomerLayout->cpmrRegion.cmeSramRegion[localPspbStartIndex];
+
+            sizePStateBlock = sizeof(LocalPstateParmBlock);
+
+            FAPI_DBG("Copying Local P-State Parameter Block into CPMR" );
+            memcpy( pLocalPState, &pStateSupStruct.localppb, sizePStateBlock );
+
+            ALIGN_DBWORD( sizeAligned, sizePStateBlock )
+            uint32_t localPStateBlock = sizeAligned;
+            FAPI_DBG("LPSPB Actual size 0x%08x After Alignment 0x%08x", sizePStateBlock, sizeAligned  );
+
+            pCmeHdr->g_cme_pstate_region_length = localPStateBlock;
+            pCmeHdr->g_cme_common_ring_offset  = SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset) + localPStateBlock;
+
+            //-------------------------- Local P-State Parameter Block Ends --------------------------
+
+            //-------------------------- Global P-State Parameter Block ------------------------------
+
+            FAPI_DBG("Copying Global P-State Parameter Block" );
+            sizePStateBlock = sizeof(GlobalPstateParmBlock);
+
+            // MAKE ASSERT
+            if (sizePStateBlock > PSTATE_OUTPUT_TABLE_SIZE)
+            {
+                FAPI_ERR("GlobalPstateParmBlock exceeds allocation:  size = %X (%d), allocation = %X (%d)",
+                         sizePStateBlock, sizePStateBlock,
+                         PSTATE_OUTPUT_TABLE_SIZE, PSTATE_OUTPUT_TABLE_SIZE);
+            }
+
+            FAPI_DBG("GPPBB pgpeRunningOffset 0x%08x", pgpeRunningOffset );
+            memcpy( &pPpmr->pgpeSramImage[pgpeRunningOffset], &pStateSupStruct.globalppb, sizePStateBlock );
+
+            ALIGN_DBWORD( sizeAligned, sizePStateBlock )
+            FAPI_DBG("GPSPB Actual size 0x%08x After Alignment 0x%08x", sizePStateBlock, sizeAligned  );
+
+            //Updating PPMR header info with GPSPB offset and length
+            io_ppmrHdr.g_ppmr_gppb_offset =  ppmrRunningOffset;
+            io_ppmrHdr.g_ppmr_gppb_length =  sizeAligned;
+
+            ppmrRunningOffset += sizeAligned;
+            pgpeRunningOffset += sizeAligned;
+            FAPI_DBG("OPPB pgpeRunningOffset 0x%08x OPPB ppmrRunningOffset 0x%08x",
+                     pgpeRunningOffset, ppmrRunningOffset );
+
+            //------------------------------ Global P-State Parameter Block Ends ----------------------
+
+            //------------------------------ OCC P-State Parameter Block ------------------------------
+
+            FAPI_INF("Copying OCC P-State Parameter Block" );
+            sizePStateBlock = sizeof(OCCPstateParmBlock);
+            ALIGN_DBWORD( sizeAligned, sizePStateBlock )
+
+            FAPI_DBG("OPPB size 0x%08x (%d)", sizeAligned, sizeAligned );
+            FAPI_DBG("OPSPB Actual size = 0x%08x (%d);  After Alignment = 0x%08x (%d)",
+                     sizePStateBlock, sizePStateBlock,
+                     sizeAligned, sizeAligned );
+
+            // MAKE ASSERT
+            if (sizePStateBlock > OCC_PARAM_BLOCK_SIZE)
+            {
+                FAPI_ERR("OCCPstateParmBlock exceeds allocation:  size = %X (%d), allocation = %X (%d)",
+                         sizePStateBlock, sizePStateBlock,
+                         OCC_PARAM_BLOCK_SIZE, OCC_PARAM_BLOCK_SIZE);
+            }
+
+            //  The PPMR offset is from the begining --- which is the ppmrHeader
+            io_ppmrHdr.g_ppmr_oppb_offset = pPpmr->occParmBlock - pPpmr->ppmrHeader;
+            io_ppmrHdr.g_ppmr_oppb_length = sizeAligned;
+            FAPI_DBG("OPPB ppmrRunningOffset 0x%08x", io_ppmrHdr.g_ppmr_oppb_offset);
+
+            memcpy( &pPpmr->occParmBlock, &pStateSupStruct.occppb, sizePStateBlock );
+
+            //-------------------------- OCC P-State Parameter Block Ends ------------------------------
+
+
+
+            io_ppmrHdr.g_ppmr_lppb_offset        =   CPMR_OFFSET + CPMR_CME_HCODE_OFFSET + localPspbStartIndex;
+            io_ppmrHdr.g_ppmr_lppb_length        =
+                localPStateBlock;   //FIXME RTC 159737 Need to clarify it from booting perspective
+
+
+            //------------------------------ OCC P-State Table Allocation ------------------------------
+
+            //  The PPMR offset is from the begining --- which is the ppmrHeader
+            io_ppmrHdr.g_ppmr_pstables_offset    =   pPpmr->pstateTable - pPpmr->ppmrHeader;;
+            io_ppmrHdr.g_ppmr_pstables_length    =   sizeof(GeneratedPstateInfo);
+
+            //------------------------------ OCC P-State Table Allocation Ends -------------------------
+
+
+            //------------------------------ Calculating total PGPE Image Size in SRAM ------------------------
+
+            io_ppmrHdr.g_ppmr_pgpe_sram_img_size =  SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length) +
+                                                    io_ppmrHdr.g_ppmr_gppb_length;
+
+            FAPI_DBG("OPPB pgpeRunningOffset 0x%08x io_ppmrHdr.g_ppmr_pgpe_sram_img_size 0x%08x",
+                     pgpeRunningOffset, io_ppmrHdr.g_ppmr_pgpe_sram_img_size );
+
+            //Finally let us handle endianess
+            //CME Header
+            pCmeHdr->g_cme_pstate_region_length  =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length);
+            pCmeHdr->g_cme_common_ring_offset    = SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset);
+
+            //PPMR Header
+            io_ppmrHdr.g_ppmr_magic_number       =   SWIZZLE_8_BYTE(PPMR_MAGIC_NUMBER);
+            io_ppmrHdr.g_ppmr_gppb_offset        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_gppb_offset);
+            io_ppmrHdr.g_ppmr_gppb_length        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_gppb_length);
+            io_ppmrHdr.g_ppmr_oppb_offset        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_oppb_offset);
+            io_ppmrHdr.g_ppmr_oppb_length        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_oppb_length);
+            io_ppmrHdr.g_ppmr_lppb_offset        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_lppb_offset);
+            io_ppmrHdr.g_ppmr_lppb_length        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_lppb_length);
+            io_ppmrHdr.g_ppmr_pstables_offset    =   SWIZZLE_4_BYTE( io_ppmrHdr.g_ppmr_pstables_offset);
+            io_ppmrHdr.g_ppmr_pstables_length    =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_pstables_length);
+            io_ppmrHdr.g_ppmr_pgpe_sram_img_size =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_pgpe_sram_img_size);
+        }
+        while(0);
+
+    fapi_try_exit:
+        FAPI_INF("buildParameterBlock exit");
+
+        return fapi2::current_err;
+    }
+
+//---------------------------------------------------------------------------
+
+    /**
+     * @brief   copies override flavor of scan rings
+     * @param   i_pImageIn          points to start of hardware image.
+     * @param   i_pOverride         points to override rings.
+     * @param   o_pImageOut         points to HOMER image.
+     * @param   i_ddLevel           dd level associated with P9 chip.
+     * @param   i_pBuf1             work buffer1
+     * @param   i_bufSize1          work buffer1 size.
+     * @param   i_pBuf2             work buffer2
+     * @param   i_bufSize2          work buffer2 size.
+     * @param   i_imgType           image type to be built.
+     * @param   o_qpmr              temp instance of QpmrHeaderLayout_t
+     * @param   i_platId            platform associated with scan ring.
+     * @return  IMG_BUILD_SUCCESS if successful else error code.
      */
     uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
                                    const P9FuncModel& i_chipState,
@@ -1587,7 +1982,6 @@ extern "C"
                     }
 
                     ALIGN_DWORD(tempRepairLength, tempSize);
-
                     ringLength += tempSize;
                 }
 
@@ -2007,7 +2401,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   creates a scan ring layout for quad common rings in HOMER.
@@ -2111,7 +2505,7 @@ extern "C"
         return rc;
     }
 
-    //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
     /**
      * @brief   creates a scan ring layout for quad common rings in HOMER.
@@ -2169,7 +2563,6 @@ extern "C"
                                     io_qpmrHdr,
                                     i_imgType );
 
-
             //Manage the Quad specific rings in HOMER
             layoutInstRingsForSgpe( i_pHomer,
                                     i_chipState,
@@ -2219,7 +2612,7 @@ extern "C"
 
         return rc;
     }
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
     /**
      * @brief updates the IVPR attributes for SGPE, PGPE.
      * @brief   i_pChipHomer points to start of HOMER
@@ -2227,6 +2620,7 @@ extern "C"
     fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
     {
         QpmrHeaderLayout_t* pQpmrHdr = (QpmrHeaderLayout_t*)i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader;
+        PpmrHeader_t* pPpmrHdr = (PpmrHeader_t*) i_pChipHomer->ppmrRegion.ppmrHeader;
 
         uint32_t attrVal = SWIZZLE_4_BYTE(pQpmrHdr->bootCopierOffset);
         attrVal |= (0x80000000 | ONE_MB);
@@ -2238,19 +2632,21 @@ extern "C"
 
         FAPI_DBG("Set ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
 
-        attrVal = (uint8_t*)(i_pChipHomer->ppmrRegion.l1BootLoader) - (uint8_t*)(i_pChipHomer);
-        attrVal |= 0x80000000;
+        attrVal = SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bc_offset);
+        attrVal |= (0x80000000 | PPMR_OFFSET);
+
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET,
                                i_procTgt,
                                attrVal ),
                  "Error from FAPI_ATTR_SET for attribute ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET");
 
         FAPI_DBG("Set ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08X", attrVal );
+
     fapi_try_exit:
         return fapi2::current_err;
     }
 
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
     /**
      * @brief Set the Fabric System, Group and Chip IDs into SGPE and CME headers
      * @brief   i_pChipHomer points to start of HOMER
@@ -2290,11 +2686,11 @@ extern "C"
         FAPI_DBG("Fabric Chip ID         :   0x%01X", l_chip_id);
 
         // Create a unit16_t Location Ids in the form of:
-        //    0:3   Å Group ID (loaded from ATTR_PROC_FABRIC_GROUP_ID)
-        //    4:6    ÅChip ID (loaded from ATTR_PROC_FABRIC_CHIP_ID)
+        //    0:3   ¬Å Group ID (loaded from ATTR_PROC_FABRIC_GROUP_ID)
+        //    4:6    ¬ÅChip ID (loaded from ATTR_PROC_FABRIC_CHIP_ID)
         //    7       0
-        //    8:12   ÅSystem ID (loaded from ATTR_PROC_FABRIC_SYSTEM_ID)
-        //    13:15 Å 00
+        //    8:12   ¬ÅSystem ID (loaded from ATTR_PROC_FABRIC_SYSTEM_ID)
+        //    13:15 ¬Å 00
 
         l_location_id.insert < 0, 4, 8 - 4,  uint8_t > ( l_group_id );
         l_location_id.insert < 4, 3, 8 - 3,  uint8_t > ( l_chip_id );
@@ -2395,7 +2791,7 @@ extern "C"
         return fapi2::current_err;
     }
 
-    //--------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 
     /**
      * @brief   populate L2 Epsilon SCOM register.
@@ -2589,7 +2985,7 @@ extern "C"
         return fapi2::current_err;
     }
 
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
     /**
      * @brief   populate L3 Epsilon SCOM register.
@@ -2793,7 +3189,7 @@ extern "C"
         return fapi2::current_err;
     }
 
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                             void* const     i_pImageIn,
@@ -2892,16 +3288,24 @@ extern "C"
             FAPI_INF("CME built");
 
             FAPI_INF("PGPE building");
-            //FIXME RTC 148009 PGPE Header needs to be defined.
-            ppeImgRc = buildPgpeImage( i_pImageIn, pChipHomer, i_imgType );
+            PpmrHeader_t l_ppmrHdr;
+            ppeImgRc = buildPgpeImage( i_pImageIn, pChipHomer, l_ppmrHdr, i_imgType );
 
             FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
                          fapi2::PGPE_BUILD_FAIL()
                          .set_PGPE_FAIL_SECTN( ppeImgRc ),
                          "Failed to copy PGPE section in HOMER" );
 
-            FAPI_INF("PGPE built");
+            //Update P State parameter block info in HOMER
+            retCode = buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType );
 
+            if( retCode )
+            {
+                FAPI_ERR("Failed to add parameter block");
+                break;
+            }
+
+            FAPI_INF("PGPE built");
             //Let us add Scan Rings to the image.
             uint8_t l_ringDebug = 0;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RING_DBG_MODE,
@@ -2983,6 +3387,9 @@ extern "C"
 
             //Update QPMR Header area in HOMER
             updateQpmrHeader( pChipHomer, l_qpmrHdr );
+
+            //update PPMR Header area in HOMER
+            updatePpmrHeader( pChipHomer, l_ppmrHdr );
 
             //Update L2 Epsilon SCOM Registers
             retCode = populateEpsilonL2ScomReg( pChipHomer );

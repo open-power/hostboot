@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,10 +36,21 @@
 #define __P9_PSTATES_OCC_H__
 
 #include <p9_pstates_common.h>
+#include <p9_pstates_pgpe.h>
 
+#ifndef __ASSEMBLER__
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/// PstateParmsBlock Magic Number
+///
+/// This magic number identifies a particular version of the
+/// PstateParmsBlock and its substructures.  The version number should be
+/// kept up to date as changes are made to the layout or contents of the
+/// structure.
+
+#define OCC_PARMSBLOCK_MAGIC 0x4f43435050423030ull /* OCCPPB00 */
 
 /// IDDQ Reading Type
 /// Each entry is 2 bytes. The values are in 6.25mA units; this allow for a
@@ -51,7 +62,7 @@ typedef uint16_t iddq_entry_t;
 /// Each entry is 1 byte. The values are in 0.5degC units; this allow for a
 /// maximum value of 127degC to be represented.
 ///
-typedef uint16_t avgtemp_entry_t;
+typedef uint8_t avgtemp_entry_t;
 
 /// Iddq Table
 ///
@@ -76,10 +87,10 @@ typedef struct
     uint8_t     good_caches_per_sort;
 
     /// Good Normal Cores
-    uint8_t     good_normal_cores[MAX_QUADS];
+    uint8_t     good_normal_cores[MAXIMUM_QUADS];
 
     /// Good Caches
-    uint8_t     good_caches[MAX_QUADS];
+    uint8_t     good_caches[MAXIMUM_QUADS];
 
     /// RDP to TDP Scaling Factor in 0.01% units
     uint16_t    rdp_to_tdp_scale_factor;
@@ -103,10 +114,10 @@ typedef struct
     iddq_entry_t ivdd_all_good_cores_off_good_caches_on[IDDQ_MEASUREMENTS];
 
     /// IVDD Quad 0 Good Cores ON, Caches ON; 6.25mA units
-    iddq_entry_t ivdd_quad_good_cores_on_good_caches_on[MAX_QUADS][IDDQ_MEASUREMENTS];
+    iddq_entry_t ivdd_quad_good_cores_on_good_caches_on[MAXIMUM_QUADS][IDDQ_MEASUREMENTS];
 
-    /// IVDDN ; 6.25mA units
-    iddq_entry_t ivdn;
+    /// IVDDN  6.25mA units
+    iddq_entry_t ivdn[IDDQ_MEASUREMENTS];
 
 
     /// IVDD ALL Good Cores ON, Caches ON; 6.25mA units
@@ -119,10 +130,13 @@ typedef struct
     avgtemp_entry_t avgtemp_all_good_cores_off[IDDQ_MEASUREMENTS];
 
     /// avgtemp Quad 0 Good Cores ON, Caches ON; 6.25mA units
-    avgtemp_entry_t avgtemp_quad_good_cores_on[MAX_QUADS][IDDQ_MEASUREMENTS];
+    avgtemp_entry_t avgtemp_quad_good_cores_on[MAXIMUM_QUADS][IDDQ_MEASUREMENTS];
 
     /// avgtempN ; 6.25mA units
     avgtemp_entry_t avgtemp_vdn;
+
+    /// spare (per MVPD documentation
+    uint8_t spare_1[43];
 
 } IddqTable;
 
@@ -131,6 +145,9 @@ typedef struct
 /// The layout of the data created by the Pstate table creation firmware for
 /// comsumption by the OCC firmware.  This data will reside in the Quad
 /// Power Management Region (QPMR).
+///
+/// This structure is aligned to 128B to allow for easy downloading using the
+/// OCC block copy engine
 ///
 typedef struct
 {
@@ -168,11 +185,10 @@ typedef struct
     // Minimum Pstate;  Maximum is always 0.
     uint32_t pstate_min;    // Comes from PowerSave #V point after biases
 
-} OCCPstateParmBlock;
-
+} __attribute__((aligned(128))) OCCPstateParmBlock;
 
 #ifdef __cplusplus
 } // end extern C
 #endif
-
+#endif    /* __ASSEMBLER__ */
 #endif    /* __P9_PSTATES_OCC_H__ */

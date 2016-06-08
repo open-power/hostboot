@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #ifndef __P9_PSTATES_CME_H__
 #define __P9_PSTATES_CME_H__
 
+#include <p9_pstates_common.h>
 
 /// \defgroup QM Flags
 ///
@@ -64,12 +65,21 @@
 
 /// @}
 
-
+#ifndef __ASSEMBLER__
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdint.h>
+
+/// LocalParmsBlock Magic Number
+///
+/// This magic number identifies a particular version of the
+/// PstateParmsBlock and its substructures.  The version number should be
+/// kept up to date as changes are made to the layout or contents of the
+/// structure.
+
+#define LOCAL_PARMSBLOCK_MAGIC 0x434d455050423030ull /* CMEPPB00 */
 
 /// Quad Manager Flags
 ///
@@ -292,5 +302,5 @@ typedef struct
 #ifdef __cplusplus
 } // end extern C
 #endif
-
+#endif    /* __ASSEMBLER__ */
 #endif    /* __P9_PSTATES_CME_H__ */

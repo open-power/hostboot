@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,6 +133,37 @@ typedef union occ_scratch2
 #endif
     } fields;
 } occ_scratch2_t;
+
+typedef union pgpe_flags
+{
+    uint16_t value;
+    struct
+    {
+#ifdef _BIG_ENDIAN
+        uint16_t  resclk_enable                 : 1;
+        uint16_t  ivrm_enable                   : 1;
+        uint16_t  vdm_enable                    : 1;
+        uint16_t  wof_enable                    : 1;
+        uint16_t  dpll_dynamic_fmax_enable      : 1;
+        uint16_t  dpll_dynamic_fmin_enable      : 1;
+        uint16_t  dpll_droop_protect_enable     : 1;
+        uint16_t  reserved7                     : 1;
+        uint16_t  occ_ipc_immed_response        : 1;
+        uint16_t  reserved_9_15                 : 7;
+#else
+        uint16_t  reserved_9_15                 : 7;
+        uint16_t  occ_ipc_immed_response        : 1;
+        uint16_t  reserved7                     : 1;
+        uint16_t  dpll_droop_protect_enable     : 1;
+        uint16_t  dpll_dynamic_fmin_enable      : 1;
+        uint16_t  dpll_dynamic_fmax_enable      : 1;
+        uint16_t  wof_enable                    : 1;
+        uint16_t  vdm_enable                    : 1;
+        uint16_t  ivrm_enable                   : 1;
+        uint16_t  resclk_enable                 : 1;
+#endif
+    } fields;
+} pgpe_flags_t;
 
 typedef union cme_flags
 {

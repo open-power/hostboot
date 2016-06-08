@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #define MAX_PSTATE_TABLE_ENTRIES  128
 #define GEN_PSTATES_TBL_MAGIC    0x50535441424c3030 //PSTABL00 (last two ASCII characters indicate version number)
 
+#ifndef __ASSEMBLER__
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -137,5 +138,5 @@ typedef struct
 #ifdef __cplusplus
 } // end extern C
 #endif
-
+#endif    /* __ASSEMBLER__ */
 #endif    /* __P9_PSTATES_TABLE_H__ */
