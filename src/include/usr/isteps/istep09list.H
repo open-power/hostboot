@@ -146,34 +146,6 @@ void*   call_proc_smp_link_layer( void    *io_pArgs );
 
 
 /**
- *  @brief   host_startprd_pbus
- *
- *           Load PRD for powerbus domain
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_host_startprd_pbus( void    *io_pArgs );
-
-
-
-/**
- *  @brief   host_attnlisten_proc
- *
- *           Start listening for attentions
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    call_host_attnlisten_proc( void    *io_pArgs );
-
-
-
-/**
  *  @brief   proc_fab_iovalid
  *
  *           Lower functional fences on local SMP
