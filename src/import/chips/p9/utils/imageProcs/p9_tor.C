@@ -34,6 +34,9 @@
 #include "p9_tor.H"
 #include "p9_xip_image.h"
 
+namespace P9_TOR
+{
+
 //
 // PPE type names:
 // These strings must adhere precisely to the enum of PpeType.
@@ -1809,3 +1812,4 @@ int tor_get_block_of_rings ( void*           i_ringSectionPt,
 
     return rc;
 }
+};

@@ -23,6 +23,9 @@
 #include "p9_ringId.H"
 #include "p9_infrastruct_help.H"
 
+namespace P9_TOR
+{
+
 #define NUM_RING_IDS              P9_NUM_RINGS
 
 typedef struct
@@ -252,6 +255,6 @@ int tor_get_block_of_rings ( void*
                              void**        io_ringBlockPtr,  // Addr of ring buffer
                              uint32_t&     io_ringBlockSize  // size of ring data
                            );
-
+};
 
 #endif //_P9_TOR_H_
