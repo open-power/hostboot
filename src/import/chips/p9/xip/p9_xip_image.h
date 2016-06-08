@@ -1083,7 +1083,7 @@ p9_xip_find(void* i_image,
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
 int
-p9_xip_delete_section(void* io_image, 
+p9_xip_delete_section(void* io_image,
                       void* o_imageBuf,
                       const uint32_t i_imageBufSize,
                       const int i_sectionId);
@@ -1893,14 +1893,16 @@ typedef enum
 
 typedef enum
 {
-    P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(3) // # sections
+    P9_XIP_SECTION_PGPE_PPMR     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(4) // # sections
 } p9_xip_section_pgpe_t;
 
 #define P9_XIP_SECTION_NAMES_PGPE(var)         \
     P9_XIP_SECTION_NAMES(var,                  \
+                         ".ppmr_header",       \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
                          ".hcode")
