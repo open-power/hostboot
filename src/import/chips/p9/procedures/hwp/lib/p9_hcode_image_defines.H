@@ -35,32 +35,39 @@
 #ifndef __HW_IMG_DEFINE
 #define __HW_IMG_DEFINE
 
-
 #include <p9_hcd_header_defs.H>
+#include <p9_pstates_cmeqm.h>
+#include <p9_pstates_common.h>
+#include <p9_pstates_occ.h>
+#include <p9_pstates_pgpe.h>
+#include <p9_pstates_table.h>
+
 //--------------------------------------------------------------------------
 // local structs and constants
 // -------------------------------------------------------------------------
 #ifndef __ASSEMBLER__
-
+#ifdef __cplusplus
 #ifndef __PPE_PLAT
 namespace p9_hcodeImageBuild
 {
 #endif //__PPE_PLAT
+#endif //__cplusplus
 #endif //__ASSEMBLER__
-
 // Constants used in both C++ and Assembler/Linker code
 CONST_UINT32_T(CPMR_HEADER_SIZE, 256);
 CONST_UINT32_T(QPMR_HEADER_SIZE, 512);
+CONST_UINT32_T(PPMR_HEADER_SIZE, 512);
+CONST_UINT32_T(PGPE_IVPR_ADDR,   0xfff20000);
 
 //#pragma message (STR(CPMR_HEADER_SIZE))
 
 // Define the Magic Numbers for the various images
 HCD_MAGIC_NUMBER(CPMR_MAGIC_NUMBER, ULL(0x43504d525f312e30));  // CPMR_1.0
-HCD_MAGIC_NUMBER(QPMR_MAGIC_NUMBER, ULL(0x51504d525f312e30));  // QPMR_1.0
 HCD_MAGIC_NUMBER(CME_MAGIC_NUMBER , ULL(0x434d455f5f312e30));  // CME__1.0
+HCD_MAGIC_NUMBER(QPMR_MAGIC_NUMBER, ULL(0x51504d525f312e30));  // QPMR_1.0
 HCD_MAGIC_NUMBER(SGPE_MAGIC_NUMBER, ULL(0x534750455f312e30 )); // SGPE_1.0
+HCD_MAGIC_NUMBER(PPMR_MAGIC_NUMBER, ULL(0x50504d525f312e30));  // PPMR_1.0
 HCD_MAGIC_NUMBER(PGPE_MAGIC_NUMBER , ULL(0x504750455F312E30)); // PGPE_1.0
-
 
 /**
  * @brief models QPMR header in HOMER
@@ -124,7 +131,7 @@ typedef struct
 {
 #endif
 HCD_HDR_ATTN  ( attnOpcodes, 2);
-HCD_HDR_UINT64( magic_number, CPMR_MAGIC_NUMBER);  // CPMR_1.0
+HCD_HDR_UINT64( magic_number, CPMR_MAGIC_NUMBER);
 HCD_HDR_UINT32( cpmrbuildDate, 0);
 HCD_HDR_UINT32( cpmrVersion, 0);
 HCD_HDR_UINT8_VEC (cpmrReserveFlags, 7, 0);
@@ -139,14 +146,61 @@ HCD_HDR_UINT32( coreSpecRingOffset, 0);
 HCD_HDR_UINT32( coreSpecRingLength, 0);
 HCD_HDR_UINT32( coreScomOffset, 0);
 HCD_HDR_UINT32( coreScomLength, 0);
-HCD_HDR_PAD(256);
+HCD_HDR_PAD(CPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
 } __attribute__((packed, aligned(256))) cpmrHeader_t;
 #endif
 
+
 // @todo Get around the above hardcoding.
+
+/**
+ * PPMR Header
+ *
+ *  This header is only consumed by Hcode Image Build and
+ *  lab tools, not by PPE code.  It is generated with assembler
+ *  primitives during PGPE build and placed in HOMER by
+ *  Hcode Image Build.
+ */
+
+#ifdef __ASSEMBLER__
+.macro  .ppmr_header
+.section ".ppmr_header" , "aw"
+.balign    8
+#else
+typedef struct
+{
+#endif
+//Offset are wrt to start of PPMR unless specified otherwise
+//length in bytes unless specified otherwise.
+HCD_HDR_UINT64(g_ppmr_magic_number, PPMR_MAGIC_NUMBER);  // PPMR_1.0
+HCD_HDR_UINT32(g_ppmr_bc_offset,    0 );  // PGPE Level1 Boot loader
+HCD_HDR_UINT32(g_ppmr_reserve1,     0 );
+HCD_HDR_UINT32(g_ppmr_bl_offset,    0 );  // PGPE Level2 Boot loader
+HCD_HDR_UINT32(g_ppmr_bl_length,    0 );  // PGPE Level2 Boot loader
+HCD_HDR_UINT32(g_ppmr_build_date,   0 );  // Build date for PGPE Image
+HCD_HDR_UINT32(g_ppmr_build_ver,    0 );  // Build Version
+HCD_HDR_UINT64(g_ppmr_reserve_flag, 0 );  // Reserve Flag
+HCD_HDR_UINT32(g_ppmr_hcode_offset, 0 );  // Offset to start of PGPE Hcode
+HCD_HDR_UINT32(g_ppmr_hcode_length, 0 );  // PGPE Hcode length in Bytes
+HCD_HDR_UINT32(g_ppmr_gppb_offset,  0 );  // Offset to Global P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_gppb_length,  0 );  // Length of Global P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_lppb_offset,  0 );  // Offset to Local P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_lppb_length,  0 );  // Length of Local P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_oppb_offset,  0 );  // Offset to OCC P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_oppb_length,  0 );  // Length of OCC P State Parameter Block
+HCD_HDR_UINT32(g_ppmr_pstables_offset, 0); // Offset to PState Table
+HCD_HDR_UINT32(g_ppmr_pstables_length, 0); // Length of P State table
+HCD_HDR_UINT32(g_ppmr_pgpe_sram_img_size, 0); // PGPE Actual SRAM Image Size
+HCD_HDR_UINT32(g_ppmr_pgpe_boot_prog_code, 0 );// for debug of PGPE booting
+HCD_HDR_PAD(0x200);
+#ifdef __ASSEMBLER__
+.endm
+#else
+} __attribute__((packed, aligned(0x200))) PpmrHeader_t;
+#endif
 
 /**
  * SGPE Header
@@ -169,7 +223,7 @@ HCD_HDR_PAD(256);
 typedef struct
 {
 #endif
-HCD_HDR_UINT64(g_sgpe_magic_number, P9_XIP_MAGIC_SGPE);   //XIP SGPE
+HCD_HDR_UINT64(g_sgpe_magic_number, SGPE_MAGIC_NUMBER);   //SGPE 1.0
 HCD_HDR_UINT32(g_sgpe_reset_address, 0);
 HCD_HDR_UINT32(g_sgpe_reserve1, 0);
 HCD_HDR_UINT32(g_sgpe_ivpr_address, 0);
@@ -214,7 +268,7 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 typedef struct
 {
 #endif
-HCD_HDR_UINT64(g_cme_magic_number, CME_MAGIC_NUMBER);  // CME__1.0
+HCD_HDR_UINT64(g_cme_magic_number, CME_MAGIC_NUMBER);
 HCD_HDR_UINT32(g_cme_hcode_offset, 0);
 HCD_HDR_UINT32(g_cme_hcode_length, 0);
 HCD_HDR_UINT32(g_cme_common_ring_offset, 0);
@@ -255,25 +309,40 @@ typedef struct CMEImageFlags
  * PGPE Header
  *
  * The PGPE header is loaded in the OCC SRAM so it is "tight" (little extra space)
- * Thus, this "structure" is NOT padded to a specific size and is limited to
- * 64B.  Also, structure member names are preceded with "g_" as these becoming
- * global variables in the CME Hcode.
+ * Also, structure member names are preceded with "g_" as these becoming
+ * global variables in the PGPE Hcode.
  */
 #ifdef __ASSEMBLER__
 .macro  .pgpe_header
-.section ".pgpe_header" , "aw"
+.section ".pgpe_image_header" , "aw"
 .balign    8
 #else
 typedef struct
 {
 #endif
-HCD_HDR_UINT64(g_pgpe_magic_number, PGPE_MAGIC_NUMBER);  // PGPE_1.0
-HCD_HDR_UINT32(g_pgpe_build_date, 0);
-HCD_HDR_UINT32(g_pgpe_build_ver, 0);
-HCD_HDR_UINT32(g_pgpe_hcode_offset, 0);
-HCD_HDR_UINT32(g_pgpe_hcode_length, 0);
-HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
-//FIXME Need to get info on other fields
+HCD_HDR_UINT64(g_pgpe_magic_number, PGPE_MAGIC_NUMBER);     // PGPE_1.0
+HCD_HDR_UINT32(g_pgpe_sys_reset_addr,           0 );        // Fully qualified OCC address where pk_init resides
+HCD_HDR_UINT32(g_pgpe_shared_sram_addr,         0 );        // SRAM address where shared SRAM begins
+HCD_HDR_UINT32(g_pgpe_ivpr_addr,   PGPE_IVPR_ADDR );        // Beginning of PGPE region in OCC SRAM
+HCD_HDR_UINT32(g_pgpe_shared_sram_len,          0 );        // Length of shared SRAM area
+HCD_HDR_UINT32(g_pgpe_build_date,               0 );        // Build date for PGPE Image
+HCD_HDR_UINT32(g_pgpe_build_ver,                0 );        // Build Version
+HCD_HDR_UINT16(g_pgpe_flags,                    0 );        // PGPE Flags
+HCD_HDR_UINT16(g_pgpe_reserve1,                 0 );        // Reserve field
+HCD_HDR_UINT32(g_pgpe_reserve2,                 0 );        // Reserve field
+HCD_HDR_UINT32(g_pgpe_gppb_sram_addr,           0 );        // Offset to Global P State Parameter Block
+HCD_HDR_UINT32(g_pgpe_hcode_length,             0 );        // Length of PGPE Hcode
+HCD_HDR_UINT32(g_pgpe_gppb_mem_offset,
+               0 );        // Offset to start of Global PS Param Block wrt start of HOMER.
+HCD_HDR_UINT32(g_pgpe_gppb_length,              0 );        // Length of Global P State Parameter Block
+HCD_HDR_UINT32(g_pgpe_gen_pstables_mem_offset,  0 );        // Offset to PState Table wrt start of HOMER
+HCD_HDR_UINT32(g_pgpe_gen_pstables_length,      0 );        // Length of P State table
+HCD_HDR_UINT32(g_pgpe_occ_pstables_sram_addr,   0 );        // Offset to start of OCC P-State table
+HCD_HDR_UINT32(g_pgpe_occ_pstables_len,         0 );        // Length of OCC P-State table
+HCD_HDR_UINT32(g_pgpe_beacon_addr,              0 );        // SRAM addr where PGPE beacon is located
+HCD_HDR_UINT32(g_quad_status_addr,              0 );
+HCD_HDR_UINT32(g_wof_table_addr,                0 );
+HCD_HDR_UINT32(g_wof_table_length,              0 );
 #ifdef __ASSEMBLER__
 .endm
 #else
@@ -409,17 +478,39 @@ enum
     SGPE_PROC_FAB_ADDR_BAR_MODE_POS =   0x00008000,
 
     // PPMR
-
     //** Boot Loaders
-    PGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
-    PGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
-    PGPE_INT_VECTOR             = 384,
-    PGPE_HCODE_SIZE             = 30 * ONE_KB,
-    PGPE_PARAM_BLOCK_SIZE       = 8 * ONE_KB,  //Global and OCC PPB
-    PSTATE_OUTPUT_TABLE         = 8 * ONE_KB,
+    PPMR_OFFSET                 =  HOMER_PPMR_REGION_NUM * ONE_MB,
+    PPMR_HEADER_LEN             =  512,
+    PGPE_LVL_1_BOOT_LOAD_SIZE   =  ONE_KB,
+    PGPE_LVL_2_BOOT_LOAD_SIZE   =  ONE_KB,
+    PGPE_MAX_AREA_SIZE          =  48 * ONE_KB, // @todo RTC 158543 Reallocate space
 
-    PGPE_MAX_AREA_SIZE          = 48 * ONE_KB, // @todo RTC 158543 Reallocate space
+    PGPE_HOMER_SRAM_ALLOC       =  128 * ONE_KB,
+    PGPE_HOMER_SRAM_RESERVE     =  PGPE_HOMER_SRAM_ALLOC -
+                                   (PPMR_HEADER_LEN  +
+                                    PGPE_LVL_1_BOOT_LOAD_SIZE +
+                                    PGPE_LVL_2_BOOT_LOAD_SIZE +
+                                    PGPE_MAX_AREA_SIZE),
 
+    PGPE_INT_VECTOR             =  384,
+    PGPE_HCODE_SIZE             =  32 * ONE_KB,
+    PGPE_PARAM_BLOCK_SIZE       =  8 * ONE_KB,
+
+    // @todo: get these from the p9_homer_map.h file
+    HOMER_OOC_PARAM_BLOCK_ADDR      =  0x00320000,   // PPMR + 128KB
+    HOMER_PSTATE_OUTPUT_TABLE_ADDR  =  0x00324000,   // PPMR + 144KB
+    HOMER_WOF_TABLE_ADDR            =  0x003C0000,   // PPMR + 768KB (the last 256KB)
+
+    OCC_PARAM_BLOCK_ALLOC       =  16 * ONE_KB,
+    OCC_PARAM_BLOCK_SIZE        =  8 * ONE_KB,
+
+    PSTATE_OUTPUT_TABLE_ALLOC   =  16 * ONE_KB,
+    PSTATE_OUTPUT_TABLE_SIZE    =  8 * ONE_KB,
+
+    WOF_TABLES_BLOCK_ALLOC       =  256 * ONE_KB,
+
+    OCI_SRAM_ADDR_BASE          =  0xFFF20000,   // @todo: what is this for?
+    OCI_PBA_ADDR_BASE           =  0x80300000,
     IGNORE_CHIPLET_INSTANCE     =  0xFF,
 
     //RING LAYOUT
@@ -468,6 +559,7 @@ enum ImgBldRetCode_t
     CME_SRAM_IMG_SIZE_ERR       =   31,
     SGPE_SRAM_IMG_SIZE_ERR      =   32,
     PGPE_SRAM_IMG_SIZE_ERR      =   33,
+    BUILD_FAIL_PGPE_PPMR        =   34,
 };
 
 /**
@@ -658,24 +750,17 @@ typedef struct
 /**
  * @brief   models image section associated with PGPE in HOMER.
  */
-typedef union PgpeHcodeLayout
-{
-    uint8_t hcode[PGPE_HCODE_SIZE];
-    struct
-    {
-        uint8_t pgpeIntVector[PGPE_INT_VECTOR];
-        PgpeHeader_t imgHeader;
-        uint8_t exe[PGPE_HCODE_SIZE - PGPE_INT_VECTOR - sizeof(PgpeHeader_t)];
-    } elements;
-} PgpeHcodeLayout_t;
-
 typedef struct
 {
-    uint8_t l1BootLoader[PGPE_LVL_1_BOOT_LOAD_SIZE];
-    uint8_t l2BootLoader[PGPE_LVL_2_BOOT_LOAD_SIZE];
-    PgpeHcodeLayout_t pgpeBin;
-    uint8_t paramBlock[PGPE_PARAM_BLOCK_SIZE];
-    uint8_t pstateOutputTable[PSTATE_OUTPUT_TABLE];
+    uint8_t  ppmrHeader[PPMR_HEADER_LEN];
+    uint8_t  l1BootLoader[PGPE_LVL_1_BOOT_LOAD_SIZE];
+    uint8_t  l2BootLoader[PGPE_LVL_2_BOOT_LOAD_SIZE];
+    uint8_t  pgpeSramImage[PGPE_MAX_AREA_SIZE];     // Includes the Global Pstate Parameter Block
+    uint8_t  ppmr_reserved0[PGPE_HOMER_SRAM_RESERVE];
+    uint8_t  occParmBlock[sizeof(OCCPstateParmBlock)];  // PPMR + 128KB
+    uint8_t  occParmBlockReserve[OCC_PARAM_BLOCK_ALLOC - sizeof(OCCPstateParmBlock)];
+    uint8_t  pstateTable[sizeof(GeneratedPstateInfo)];  // PPMR + 144KB
+    uint8_t  pstateTableReserve[PSTATE_OUTPUT_TABLE_ALLOC - sizeof(GeneratedPstateInfo)];
 } PPMRLayout_t;
 
 /**
@@ -702,9 +787,11 @@ typedef struct
     uint8_t      pgpeReserve[ONE_MB - sizeof( PPMRLayout_t )];
 } Homerlayout_t;
 
+#ifdef __cplusplus
 #ifndef __PPE_PLAT
 }// namespace p9_hcodeImageBuild ends
 #endif //__PPE_PLAT
+#endif //__cplusplus
 
 #endif //__ASSEMBLER__
 #endif //__HW_IMG_DEFINE
