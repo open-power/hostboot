@@ -82,7 +82,9 @@
 </registerFfdc>
 
 <registerFfdc>
-  <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+  <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
+  <scomRegister>MCA_DDRPHY_PC_INIT_CAL_ERROR_P0</scomRegister>
+  <scomRegister>MCA_DDRPHY_PC_ERROR_STATUS0_P0</scomRegister>
   <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_0</scomRegister>
   <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_1</scomRegister>
   <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_2</scomRegister>
@@ -116,7 +118,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -139,7 +141,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -162,7 +164,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -185,7 +187,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -208,7 +210,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -231,7 +233,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -254,7 +256,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -277,7 +279,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -300,7 +302,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -323,7 +325,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -346,7 +348,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -369,7 +371,7 @@
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
