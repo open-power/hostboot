@@ -28700,5 +28700,21 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>SENSEADJ_STEP</id>
+    <description>
+        IPL for skew adjust and duty cycle adjust
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SENSEADJ_STEP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
