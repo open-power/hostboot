@@ -38,3 +38,14 @@ echo "+++ Pulling in new scomdef file"
 mkdir -p $sb/engd/scomdef/
 cp /esw/fips910/Current/current/src/engd/scomdef/p9n_10.scomdef $sb/engd/scomdef/
 
+
+echo "+++ Pulling in tracks for defects 995057 and 996620"
+echo "+++ Includes changes for p9n.chip, buildIndScom.pl, and adds p9n_memory.act"
+
+sbex -t 995057 996620 -r fips910
+workon -rc ${SANDBOXRC} -sb ${SANDBOXNAME} -m ppc -c "cd $sb/simu/fsp && mk -a > /dev/null"
+chmod 755 $sb/simu/data/cec-chip/p9n.chip
+sed -i 's/#       "OB/    "OB/' $sb/simu/data/cec-chip/p9n.chip
+exit
+
+
