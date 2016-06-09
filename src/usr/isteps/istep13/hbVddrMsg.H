@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ public:
         MEM_VOLTAGE_DOMAIN_AVDD = 0x02,
         MEM_VOLTAGE_DOMAIN_VCS  = 0x03,
         MEM_VOLTAGE_DOMAIN_VPP  = 0x04,
-        MEM_VOLTAGE_DOMAIN_VDDR = 0x05,
+        MEM_VOLTAGE_DOMAIN_VDDR = 0x05,  // aka VMEM
 
         // Good range markers - Need to be adjusted if the above change
         MEM_VOLTAGE_DOMAIN_MIN_VALUE = MEM_VOLTAGE_DOMAIN_VDD,
@@ -94,8 +94,8 @@ public:
     struct hwsvPowrMemVoltDomainRequest_t
     {
         MEM_VOLTAGE_DOMAIN            domain;
-        TARGETING::ATTR_VMEM_ID_type  domainId;
-        TARGETING::ATTR_MSS_VOLT_type voltageMillivolts;
+        TARGETING::ATTR_VDDR_ID_type  domainId;
+        TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS_type voltageMillivolts;
 
         hwsvPowrMemVoltDomainRequest_t()
             : domain(MEM_VOLTAGE_DOMAIN_UNKNOWN),
@@ -116,7 +116,7 @@ public:
     struct hwsvPowrMemVoltDomainReply_t
     {
         MEM_VOLTAGE_DOMAIN           domain;
-        TARGETING::ATTR_VMEM_ID_type domainId;
+        TARGETING::ATTR_VDDR_ID_type domainId;
         uint32_t                     plid;
 
         hwsvPowrMemVoltDomainReply_t()
@@ -207,40 +207,38 @@ public:
 private:
 
     /**
-     *  @brief For a given memory buffer and memory voltage domain, adds a
+     *  @brief For a given mcbist and memory voltage domain, adds a
      *      voltage programming request record to the input list
      *
-     *  @tparam OFFSET_DISABLEMENT_ATTR
-     *      ID of the attribute to read to determine if a given memory voltage
-     *      domain offset voltage should be applied or not.  Should be one of
-     *      the TARGETING::ATTR_*_ID attribute IDs, where * = VMEM, VPP, VCS,
-     *      VDD, or AVDD.
+     *  @tparam MSS_DOMAIN_PROGRAM
+     *      ID of the attribute to read to determine how we program this domain.
+     *      Value of the attribute should be one of these:
+     *      MSS_PROGRAM_TYPE::POWERON = no additional programming necessary,
+     *      MSS_PROGRAM_TYPE::STATIC  = use static value,
+     *      MSS_PROGRAM_TYPE::DYNAMIC = use dynamic value
      *
-     *  @tparam VOLTAGE_ATTR_WHEN_OFFSET_ENABLED
+     *  @tparam VOLTAGE_ATTR_STATIC
      *      ID of the attribute which should be read to obtain the given memory
      *      voltage domain's offset voltage to program.  In this case the offset
      *      voltage acts as the actual voltage.  Should be one of the
-     *      TARGETING::ATTR_MEM_*_OFFSET_MILLIVOLTS attribute IDs, where
+     *      TARGETING::ATTR_MSS_VOLT_*_MILLIVOLTS attribute IDs, where
      *      * = VMEM, VPP, VCS, VDD, or AVDD.  Only used when the memory voltage
-     *      domain's offset voltage is enabled.  Otherwise the parameter, below,
+     *      domain's programming equals static.  Otherwise the parameter, below,
      *      controls how the voltage, if any, is programmed.
      *
-     *  @tparam VOLTAGE_ATTR_WHEN_OFFSET_DISABLED
+     *  @tparam VOLTAGE_ATTR_DYNAMIC
      *      ID of the attribute which should be read to obtain the given memory
      *      voltage domain's voltage to program.  Only applied if the memory
-     *      voltage domain's offset voltage is disabled -AND- the attribute ID
-     *      is different than the one given by
-     *      VOLTAGE_ATTR_WHEN_OFFSET_ENABLED.   Should be one of
-     *      TARGETING::ATTR_VPP_BASE, TARGETING::ATTR_MSS_VOLT, or
-     *      TARGETING::ATTR_MEM_*_OFFSET_MILLIVOLTS where * = VPP, AVDD, or
-     *      VCS.
+     *      voltage domain's programming equals dynamic. Should be one of the
+     *      TARGETING::ATTR_MSS_VOLT_*_OFFSET_MILLIVOLTS attribute IDs,
+     *      where * = VMEM, VPP, VCS, VDD, or AVDD.
      *
      *  @note: This function does not ensure that all permutations of the above
      *    template parameters are valid.
      *
-     *  @param[in] i_pMembuf
-     *      Handle to a memory buffer target.  Function will assert if NULL or
-     *      not a memory buffer target.
+     *  @param[in] i_pMcbist
+     *      Handle to a MCBIST target.  Function will assert if NULL or
+     *      not a MCBIST target.
      *
      *  @param[in,out] io_domains
      *      On input, an existing list of 0 or more voltage domain records.  On
@@ -250,12 +248,12 @@ private:
      *  @return N/A
      */
     template<
-        const TARGETING::ATTRIBUTE_ID OFFSET_DISABLEMENT_ATTR,
-        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_ENABLED,
-        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_DISABLED,
+        const TARGETING::ATTRIBUTE_ID MSS_DOMAIN_PROGRAM,
+        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_STATIC,
+        const TARGETING::ATTRIBUTE_ID VOLTAGE_ATTR_DYNAMIC,
         const TARGETING::ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
     void addMemoryVoltageDomains(
-        const TARGETING::Target* const     i_pMembuf,
+        const TARGETING::Target* const     i_pMcbist,
               HBVddrMsg::RequestContainer& io_domains) const;
 
 protected:

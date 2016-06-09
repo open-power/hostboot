@@ -177,10 +177,7 @@ static errlHndl_t for_each_vddr_domain_with_functional_memory(
     l_membufTargetList.erase(pInvalidEntries,l_membufTargetList.end());
 
     // Invoke callback for one Centaur per unique VDDR domain
-    for (TargetHandleList::iterator
-            l_membuf_iter = l_membufTargetList.begin();
-            l_membuf_iter != l_membufTargetList.end();
-            ++l_membuf_iter)
+    for (const auto & l_membuf_iter: l_membufTargetList)
     {
         Target* l_pCentaur = *l_membuf_iter;
 

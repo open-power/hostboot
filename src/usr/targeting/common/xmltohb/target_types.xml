@@ -394,13 +394,7 @@
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>400,0,0,0,0,0</default>
     </attribute>
-    <attribute><id>MSS_VOLT</id></attribute>
-    <attribute><id>VPP_BASE</id></attribute>
-    <attribute><id>MEM_VDDR_OFFSET_MILLIVOLTS</id></attribute>
-    <attribute><id>MEM_AVDD_OFFSET_MILLIVOLTS</id></attribute>
-    <attribute><id>MEM_VDD_OFFSET_MILLIVOLTS</id></attribute>
-    <attribute><id>MEM_VCS_OFFSET_MILLIVOLTS</id></attribute>
-    <attribute><id>MEM_VPP_OFFSET_MILLIVOLTS</id></attribute>
+
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
@@ -420,11 +414,7 @@
         <default>0</default>
     </attribute>
     <attribute><id>MSS_CACHE_ENABLE</id></attribute>
-    <attribute><id>VMEM_ID</id></attribute>
-    <attribute><id>AVDD_ID</id></attribute>
-    <attribute><id>VDD_ID</id></attribute>
-    <attribute><id>VCS_ID</id></attribute>
-    <attribute><id>VPP_ID</id></attribute>
+
     <attribute><id>EI_BUS_TX_LANE_INVERT</id></attribute>
      <!-- Begin poreve_memory_attributes.xml -->
      <attribute><id>SBE_SEEPROM_I2C_ADDRESS_BYTES</id></attribute>
@@ -786,6 +776,7 @@
     <attribute><id>PIBMEM_REPAIR0</id></attribute>
     <attribute><id>PIBMEM_REPAIR1</id></attribute>
     <attribute><id>PIBMEM_REPAIR2</id></attribute>
+
     <!-- proc_fbc_eff_config -->
     <attribute><id>PROC_FABRIC_CORE_FLOOR_RATIO</id></attribute>
     <attribute><id>PROC_FABRIC_CORE_CEILING_RATIO</id></attribute>
@@ -821,6 +812,15 @@
     <attribute><id>FREQ_PB</id></attribute>
     <attribute><id>FREQ_X</id></attribute>
 <!-- End TODO -->
+
+
+<!-- Enable memory voltages -->
+    <attribute><id>SUPPORTS_DYNAMIC_MEM_VOLT</id></attribute>
+    <attribute><id>MSS_VDD_PROGRAM</id></attribute>
+    <attribute><id>MSS_AVDD_PROGRAM</id></attribute>
+    <attribute><id>MSS_VCS_PROGRAM</id></attribute>
+    <attribute><id>MSS_VPP_PROGRAM</id></attribute>
+    <attribute><id>MSS_VDDR_PROGRAM</id></attribute>
 
 </targetType>
 
@@ -1645,7 +1645,6 @@
     <attribute><id>EFF_DRAM_TWTR_L</id></attribute>
     <attribute><id>EFF_DRAM_TMAW</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
-    <attribute><id>VMEM_ID</id></attribute>
     <attribute><id>MEMVPD_POS</id></attribute>
     <attribute><id>VPD_OVERRIDE_MT</id></attribute>
     <attribute><id>VPD_OVERRIDE_MT_ENABLE</id></attribute>
@@ -1703,14 +1702,36 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
-    <attribute><id>MSS_VOLT</id></attribute>
-    <attribute><id>MSS_VOLT_VDDR</id></attribute>
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
     <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
-    <attribute><id>MSS_VOLT_VPP</id></attribute>
     <attribute><id>MSS_FREQ_BIAS_PERCENTAGE</id></attribute>
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+
+    <attribute><id>MSS_VOLT</id></attribute><!-- deprecated -->
+
+<!-- Enable memory voltage attributes -->
+<!-- Static voltages -->
+    <attribute><id>MSS_VOLT_VPP_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VDDR_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VCS_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VDD_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_AVDD_MILLIVOLTS</id></attribute>
+
+<!-- Dynamic voltages -->
+    <attribute><id>MSS_VOLT_VPP_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VDDR_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VCS_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_VDD_OFFSET_MILLIVOLTS</id></attribute>
+    <attribute><id>MSS_VOLT_AVDD_OFFSET_MILLIVOLTS</id></attribute>
+
+<!-- Unique domain id -->
+    <attribute><id>VPP_ID</id></attribute>
+    <attribute><id>VDDR_ID</id></attribute>
+    <attribute><id>VCS_ID</id></attribute>
+    <attribute><id>VDD_ID</id></attribute>
+    <attribute><id>AVDD_ID</id></attribute>
+
 </targetType>
 
 <targetType>
