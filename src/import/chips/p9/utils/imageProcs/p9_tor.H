@@ -77,10 +77,6 @@ typedef struct
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
 
-#define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
-#define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
-#define MY_DBG(_fmt_, _args_...) printf(_fmt_, ##_args_)
-
 
 extern const char* ringVariantName[];
 extern const char* ppeTypeName[];

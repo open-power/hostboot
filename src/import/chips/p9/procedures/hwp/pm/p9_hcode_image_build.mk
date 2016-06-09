@@ -22,5 +22,7 @@ HCODE_UTIL+=$(ROOTPATH)/chips/p9/xip/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
 HCODE_UTIL+=$(ROOTPATH)/tools/imageProcs/
 $(PROCEDURE)_DEPLIBS+=p9_xip_image
+$(PROCEDURE)_DEPLIBS+=p9_tor
+$(PROCEDURE)_DEPLIBS+=p9_ringId
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)
