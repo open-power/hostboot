@@ -226,7 +226,7 @@ public:
             ErrlUserDetailsAttribute pMembufEUDA(c_target,ATTR_CHIP_ID);
             pMembufEUDA.addData(ATTR_EC);
             pMembufEUDA.addData(ATTR_CHIP_ID);
-            pMembufEUDA.addData(ATTR_MSS_VOLT);
+            pMembufEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
             pMembufEUDA.addData(ATTR_MSS_FREQ);
 
             // skipped - not there
@@ -255,7 +255,7 @@ public:
             ErrlUserDetailsAttribute pDimmEUDA(c_target,ATTR_CHIP_ID);
             pDimmEUDA.addData(ATTR_EC);
             pDimmEUDA.addData(ATTR_CHIP_ID);
-            pDimmEUDA.addData(ATTR_MSS_VOLT);
+            pDimmEUDA.addData(ATTR_MSS_VOLT_VDDR_MILLIVOLTS);
             pDimmEUDA.addData(ATTR_MSS_FREQ);
 
             // skipped - not there

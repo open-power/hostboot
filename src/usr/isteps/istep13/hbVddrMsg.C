@@ -39,9 +39,12 @@
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
 #include "platform_vddr.H"
+#include <istepHelperFuncs.H>
+#include <targeting/common/target.H>
 
 
 using namespace ERRORLOG;
+
 using namespace TARGETING;
 
 // Trace definition
@@ -55,7 +58,6 @@ HBVddrMsg::HBVddrMsg()
 {
     TRACDCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::HBVddrMsg()" );
     TRACDCOMP( g_trac_volt, EXIT_MRK "HBVddrMsg::HBVddrMsg()" );
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,54 +118,47 @@ bool isUnusedVoltageDomain(
 //******************************************************************************
 
 template<
-    const ATTRIBUTE_ID OFFSET_DISABLEMENT_ATTR,
-    const ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_ENABLED,
-    const ATTRIBUTE_ID VOLTAGE_ATTR_WHEN_OFFSET_DISABLED,
+    const ATTRIBUTE_ID MSS_DOMAIN_PROGRAM,
+    const ATTRIBUTE_ID VOLTAGE_ATTR_STATIC,
+    const ATTRIBUTE_ID VOLTAGE_ATTR_DYNAMIC,
     const ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
 void HBVddrMsg::addMemoryVoltageDomains(
-    const TARGETING::Target* const     i_pMembuf,
+    const TARGETING::Target* const     i_pMcbist,
           HBVddrMsg::RequestContainer& io_domains) const
 {
     assert(
-        (i_pMembuf != NULL),
+        (i_pMcbist != NULL),
         "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed NULL "
-        "memory buffer target handle.");
+        "MCBIST target handle.");
 
     assert(
-        (    (   i_pMembuf->getAttr<TARGETING::ATTR_CLASS>()
-              == TARGETING::CLASS_CHIP)
-          && (   i_pMembuf->getAttr<TARGETING::ATTR_TYPE>()
-              == TARGETING::TYPE_MEMBUF)),
+        (    (   i_pMcbist->getAttr<TARGETING::ATTR_CLASS>()
+              == TARGETING::CLASS_UNIT)
+          && (   i_pMcbist->getAttr<TARGETING::ATTR_TYPE>()
+              == TARGETING::TYPE_MCBIST)),
         "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed non-"
-        "memory buffer target handle of class = 0x%08X and type of 0x%08X.",
-        i_pMembuf->getAttr<TARGETING::ATTR_CLASS>(),
-        i_pMembuf->getAttr<TARGETING::ATTR_TYPE>());
+        "MCBIST target handle of class = 0x%08X and type of 0x%08X.",
+        i_pMcbist->getAttr<TARGETING::ATTR_CLASS>(),
+        i_pMcbist->getAttr<TARGETING::ATTR_TYPE>());
 
-    TARGETING::Target* pSysTarget = NULL;
+    TARGETING::Target* pSysTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(pSysTarget);
 
     assert(
-        (pSysTarget != NULL),
+        (pSysTarget != nullptr),
         "HBVddrMsg::addMemoryVoltageDomains: Code bug!  System target was "
         "NULL.");
 
-    typename AttributeTraits< OFFSET_DISABLEMENT_ATTR >::Type
-        disableOffsetVoltage =
-            pSysTarget->getAttr< OFFSET_DISABLEMENT_ATTR >();
+    typename AttributeTraits< MSS_DOMAIN_PROGRAM >::Type
+        domainProgram = pSysTarget->getAttr< MSS_DOMAIN_PROGRAM >();
 
-    assert(
-        (disableOffsetVoltage <= true),
-        "HBVddrMsg::addMemoryVoltageDomains: Code Bug!  Unsupported "
-        "value of 0x%02X for attribute ID of 0x%08X.",
-        disableOffsetVoltage,
-        OFFSET_DISABLEMENT_ATTR);
 
     // Initialized by constructor to invalid defaults
     HBVddrMsg::hwsvPowrMemVoltDomainRequest_t entry;
 
     switch(VOLTAGE_DOMAIN_ID_ATTR)
     {
-        case TARGETING::ATTR_VMEM_ID:
+        case TARGETING::ATTR_VDDR_ID:
             entry.domain = MEM_VOLTAGE_DOMAIN_VDDR;
             break;
         case TARGETING::ATTR_VCS_ID:
@@ -189,27 +184,26 @@ void HBVddrMsg::addMemoryVoltageDomains(
 
     // There is no reasonable check to validate if a voltage ID we're reading
     // is valid so it has to be assumed good
-    entry.domainId = i_pMembuf->getAttr< VOLTAGE_DOMAIN_ID_ATTR >();
+    entry.domainId = i_pMcbist->getAttr< VOLTAGE_DOMAIN_ID_ATTR >();
 
     // There is no reasonable check to validate if a voltage we're
     // reading is valid so it has to be assumed good for the cases below
-    if(!disableOffsetVoltage)
+    if(domainProgram == MSS_PROGRAM_TYPE::STATIC)
     {
         typename
-        TARGETING::AttributeTraits< VOLTAGE_ATTR_WHEN_OFFSET_ENABLED >::Type
+        TARGETING::AttributeTraits< VOLTAGE_ATTR_STATIC >::Type
             voltageMillivolts
-                = i_pMembuf->getAttr< VOLTAGE_ATTR_WHEN_OFFSET_ENABLED >();
+                = i_pMcbist->getAttr< VOLTAGE_ATTR_STATIC >();
 
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
         io_domains.push_back(entry);
     }
-    else if(   VOLTAGE_ATTR_WHEN_OFFSET_DISABLED
-            != VOLTAGE_ATTR_WHEN_OFFSET_ENABLED)
+    else if(domainProgram == MSS_PROGRAM_TYPE::DYNAMIC)
     {
         typename
-        TARGETING::AttributeTraits< VOLTAGE_ATTR_WHEN_OFFSET_DISABLED >::Type
+        TARGETING::AttributeTraits< VOLTAGE_ATTR_DYNAMIC >::Type
             voltageMillivolts
-                = i_pMembuf->getAttr< VOLTAGE_ATTR_WHEN_OFFSET_DISABLED >();
+                = i_pMcbist->getAttr< VOLTAGE_ATTR_DYNAMIC >();
 
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
         io_domains.push_back(entry);
@@ -226,80 +220,64 @@ void HBVddrMsg::createVddrData(
 {
     TRACFCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::createVddrData" );
 
-    // Go through all the memory buffers and gather their domains, domain
+    // Go through all the mcbist targets and gather their domains, domain
     // specific IDs, and domain specific voltages
     io_request.clear();
 
     do{
 
-        TARGETING::TargetHandleList membufTargetList;
-        //When request is a disable command, disable all present Centaurs
-        // in case we go through a reconfigure loop
-        if(i_requestType == HB_VDDR_DISABLE)
-        {
-            getChipResources( membufTargetList, TYPE_MEMBUF,
-                              UTIL_FILTER_PRESENT );
-        }
-        //When the request is an enable command, enable only functional
-        // centaurs.
-        else
-        {
-            getAllChips(membufTargetList, TYPE_MEMBUF);
-        }
+        TARGETING::TargetHandleList l_mcbistTargetList;
 
-        TARGETING::Target* pMembuf =NULL;
-        for (TARGETING::TargetHandleList::const_iterator
-                ppMembuf = membufTargetList.begin();
-             ppMembuf != membufTargetList.end();
-             ++ppMembuf)
-        {
-            pMembuf = *ppMembuf;
+        // get all functional MCBIST targets
+        getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
 
+        for (const auto & pMcbist: l_mcbistTargetList)
+        {
             if(i_requestType == HB_VDDR_ENABLE)
             {
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_CENT_VDD_OFFSET_DISABLE,
-                    TARGETING::ATTR_MEM_VDD_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_MEM_VDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VDD_PROGRAM,
+                    TARGETING::ATTR_MSS_VOLT_VDD_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
                     TARGETING::ATTR_VDD_ID>(
-                        pMembuf,
+                        pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_CENT_AVDD_OFFSET_DISABLE,
-                    TARGETING::ATTR_MEM_AVDD_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_MEM_AVDD_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_AVDD_PROGRAM,
+                    TARGETING::ATTR_MSS_VOLT_AVDD_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
                     TARGETING::ATTR_AVDD_ID>(
-                        pMembuf,
+                        pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_CENT_VCS_OFFSET_DISABLE,
-                    TARGETING::ATTR_MEM_VCS_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_MEM_VCS_OFFSET_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VCS_PROGRAM,
+                    TARGETING::ATTR_MSS_VOLT_VCS_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
                     TARGETING::ATTR_VCS_ID>(
-                        pMembuf,
+                        pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
-                    TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_MSS_VOLT_VPP,
+                    TARGETING::ATTR_MSS_VPP_PROGRAM,
+                    TARGETING::ATTR_MSS_VOLT_VPP_MILLIVOLTS,
+                    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_MILLIVOLTS,
                     TARGETING::ATTR_VPP_ID>(
-                        pMembuf,
+                        pMcbist,
                         io_request);
             }
 
             (void)addMemoryVoltageDomains<
-                TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
-                TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_MSS_VOLT,
-                TARGETING::ATTR_VMEM_ID>(
-                    pMembuf,
+                TARGETING::ATTR_MSS_VDDR_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VDDR_ID>(
+                    pMcbist,
                     io_request);
         }
 
-        if (membufTargetList.size() > 1)
+        if (l_mcbistTargetList.size() > 1)
         {
             // Take out the duplicate records in io_request by first
             // sorting and then removing the duplicates
@@ -314,7 +292,7 @@ void HBVddrMsg::createVddrData(
 
         if( ( (i_requestType == HB_VDDR_ENABLE) ||
               (i_requestType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
-           && (!membufTargetList.empty())      )
+           && (!l_mcbistTargetList.empty())      )
         {
             // Inhibit sending any request to turn on a domain with no voltage.
             // When disabling we don't need to do this because the voltage is
@@ -343,6 +321,12 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
     do
     {
         RequestContainer l_request;
+        if (!TARGETING::is_vpo())
+        {
+            TRACFCOMP(g_trac_volt,
+                "hbVddrMsg::sendMsg skipped because of VPO environment");
+            break;
+        }
 
         if ( ! ( (i_msgType == HB_VDDR_ENABLE) ||
                  (i_msgType == HB_VDDR_DISABLE) ||
@@ -367,11 +351,11 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
         }
         createVddrData(i_msgType, l_request);
 
-
         size_t l_dataCount = l_request.size();
 
         // Only send a message if there is data to send
-        if (l_dataCount)
+        // Skip sending message if VPO
+        if ( l_dataCount )
         {
             uint32_t l_msgSize = l_dataCount *
                 sizeof(hwsvPowrMemVoltDomainRequest_t);
@@ -390,7 +374,7 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
             hwsvPowrMemVoltDomainRequest_t* l_ptr =
                 reinterpret_cast<hwsvPowrMemVoltDomainRequest_t*>(l_data);
 
-            for (size_t j =0; j<l_dataCount; ++j)
+            for (size_t j = 0; j<l_dataCount; ++j)
             {
                 l_ptr->domain=l_request.at(j).domain;
                 l_ptr->domainId=l_request.at(j).domainId;
@@ -434,34 +418,31 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
 }
 
 //
-// calloutCentaurChildDimms : HW callout for the failing DIMMs
+// calloutMcbistChildDimms : HW callout for the failing DIMMs
 //
-void calloutCentaurChildDimms(
-                              errlHndl_t & io_errl,
-                              const TARGETING::Target * i_membuf)
+void calloutMcbistChildDimms( errlHndl_t & io_errl,
+                              const TARGETING::Target * i_mcbist)
 {
-    TRACFCOMP(g_trac_volt, ENTER_MRK "calloutCentaurChildDimms");
+    TRACFCOMP(g_trac_volt, ENTER_MRK "calloutMcbistChildDimms");
 
     TARGETING::TargetHandleList l_dimmList;
 
     // Get child dimms
     getChildAffinityTargets( l_dimmList,
-                             i_membuf,
+                             i_mcbist,
                              CLASS_NA,
                              TYPE_DIMM );
 
     if( !l_dimmList.empty())
     {
         // iterate over the DIMMs and call them out
-        TargetHandleList::iterator l_iter = l_dimmList.begin();
-
-        for(;l_iter != l_dimmList.end(); ++l_iter)
+        for (const auto & l_dimm : l_dimmList)
         {
             TRACFCOMP( g_trac_volt, INFO_MRK
-                    "HBVddrMsg::calloutCentaurChildDimms Target HUID = 0x%08X" ,
-                    TARGETING::get_huid(*l_iter) );
+                    "HBVddrMsg::calloutMcbistChildDimms Target HUID = 0x%08X" ,
+                    TARGETING::get_huid(l_dimm) );
 
-            io_errl->addHwCallout( *l_iter,
+            io_errl->addHwCallout( l_dimm,
                     HWAS::SRCI_PRIORITY_LOW,
                     HWAS::NO_DECONFIG,
                     HWAS::GARD_NULL );
@@ -469,13 +450,12 @@ void calloutCentaurChildDimms(
     }
     else
     {
-        TRACFCOMP(g_trac_volt, "Centuar [ 0x%08X ] No child DIMMs found!",
-                               TARGETING::get_huid(i_membuf));
+        TRACFCOMP(g_trac_volt, "Mcbist [ 0x%08X ] No child DIMMs found!",
+                               TARGETING::get_huid(i_mcbist));
     }
 
-    TRACFCOMP(g_trac_volt, EXIT_MRK "calloutCentaurChildDimms");
+    TRACFCOMP(g_trac_volt, EXIT_MRK "calloutMcbistChildDimms");
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // HBVddrMsg::processVDDRmsg
@@ -484,9 +464,9 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
 {
     TRACFCOMP(g_trac_volt, ENTER_MRK "HBVddrMsg::processVDDRmsg");
     errlHndl_t l_errLog = NULL;
+
     //check to see if an error occurred from the powr Enable/Disable functions
     //and is inside the message
-
     uint32_t l_msgSize = i_recvMsg->data[1];
     uint16_t l_elementCount = l_msgSize/sizeof(hwsvPowrMemVoltDomainReply_t);
     const uint8_t* l_extraData = NULL;
@@ -495,7 +475,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
     do{
         if (l_extraData==NULL)
         {
-            //an error occred in obtaining the extra data from the response msg
+            //an error occurred in obtaining the extra data from the response msg
             TRACFCOMP( g_trac_volt, ERR_MRK
                        "HBVddrMsg::processVDDRmsg: l_extraData = NULL");
             //create an errorlog
@@ -516,7 +496,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
         }
 
         MEM_VOLTAGE_DOMAIN domain = MEM_VOLTAGE_DOMAIN_UNKNOWN;
-        TARGETING::ATTR_VMEM_ID_type l_domainId =0x0;
+        TARGETING::ATTR_VDDR_ID_type l_domainId =0x0;
         uint32_t l_errPlid =0x0;
 
         TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
@@ -534,7 +514,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
                       "domain = 0x%08X, l_domainId=0x%08X, l_errPlid=0x%08X",
                       domain,l_domainId,l_errPlid);
-            if (l_errPlid ==0x0)
+            if (l_errPlid == 0x0)
             {
                 TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
                           "no plid error found for domain = 0x%08X, "
@@ -542,10 +522,10 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             }
             else
             {
-                //error occured so break out of the loop and indicate
+                //error occurred so break out of the loop and indicate
                 //an error was present
                 TRACFCOMP( g_trac_volt, ERR_MRK
-                           "HBVddrMsg::processVDDRmsg: error occured "
+                           "HBVddrMsg::processVDDRmsg: error occurred "
                            "on the powr function called in hwsv");
                 //create an errorlog
                 /*@
@@ -567,60 +547,56 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                              HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
                              HWAS::SRCI_PRIORITY_MED );
 
-                // Find the centaur buffers associated with this Domain id
-                TARGETING::TargetHandleList membufTargetList;
-                TARGETING::ATTR_VMEM_ID_type  l_attr_domainId = 0x0;
-                TARGETING::Target* pMembuf =NULL;
-                getAllChips(membufTargetList, TYPE_MEMBUF);
+                // Find the MCBIST associated with this Domain ID
+                TARGETING::TargetHandleList mcbistTargetList;
+                TARGETING::ATTR_VDDR_ID_type  l_attr_domainId = 0x0;
 
-                for (TARGETING::TargetHandleList::const_iterator
-                        ppMembuf = membufTargetList.begin();
-                        ppMembuf != membufTargetList.end();
-                        ++ppMembuf)
+                getAllChiplets(mcbistTargetList, TYPE_MCBIST);
+
+                bool l_domain_found;
+                for (const auto & pMcbist: mcbistTargetList)
                 {
-                    pMembuf = *ppMembuf;
-                    // Get the domain id and check if this Id is matching
-                    // centaur chip reported for failing domain Id
+                    l_domain_found = true;
                     switch(domain)
                     {
-                        // Add hw callouts for the failing Centaur and it's
-                        // child DIMMs
+                        // Add hw callouts for child DIMMs
                         case MEM_VOLTAGE_DOMAIN_VDDR:
                             l_attr_domainId =
-                                pMembuf->getAttr< TARGETING::ATTR_VMEM_ID >();
+                                pMcbist->getAttr< TARGETING::ATTR_VDDR_ID >();
                             break;
                         case MEM_VOLTAGE_DOMAIN_VCS:
                             l_attr_domainId =
-                                   pMembuf->getAttr< TARGETING::ATTR_VCS_ID>();
+                                   pMcbist->getAttr< TARGETING::ATTR_VCS_ID>();
                             break;
                         case MEM_VOLTAGE_DOMAIN_VPP:
                             l_attr_domainId =
-                                    pMembuf->getAttr< TARGETING::ATTR_VPP_ID>();
+                                    pMcbist->getAttr< TARGETING::ATTR_VPP_ID>();
                             break;
                         case MEM_VOLTAGE_DOMAIN_AVDD:
                             l_attr_domainId =
-                                   pMembuf->getAttr< TARGETING::ATTR_AVDD_ID>();
+                                   pMcbist->getAttr< TARGETING::ATTR_AVDD_ID>();
                             break;
                         case MEM_VOLTAGE_DOMAIN_VDD:
                             l_attr_domainId =
-                                    pMembuf->getAttr< TARGETING::ATTR_VDD_ID>();
+                                    pMcbist->getAttr< TARGETING::ATTR_VDD_ID>();
                             break;
                         default:
-                            // Mark this Centaur as Not found
-                            pMembuf = NULL;
+                            // Mark this Dimm as Not found
+                            l_domain_found = false;
                             TRACFCOMP( g_trac_volt, ERR_MRK
-                                    "[ ERROR ]  unsupported Domain" );
+                                    "[ ERROR ] unsupported Domain %d", domain );
                             break;
                     }
 
-                    // Call out DIMMs associated for this Centaur
-                    if(( pMembuf != NULL ) && ( l_attr_domainId == l_domainId ))
+                    // Add Callout MCBIST dimms
+                    if((l_domain_found) && ( l_attr_domainId == l_domainId ))
                     {
                         TRACFCOMP( g_trac_volt, INFO_MRK
-                                " Target Centaur HUID = 0x%08X",
-                                TARGETING::get_huid(pMembuf));
+                         "HBVddrMsg::processVDDRmsg MCBIST Target HUID = 0x%08X"
+                         " matches failing domain 0x%08X and ID = 0x%08X",
+                         TARGETING::get_huid(pMcbist), domain, l_domainId );
 
-                        calloutCentaurChildDimms( l_errLog, pMembuf );
+                        calloutMcbistChildDimms(l_errLog, pMcbist);
                     }
                 }
 
@@ -653,7 +629,6 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
         if (l_value1 ==0)
         {
             //process a response to a request
-
             uint32_t l_msgType =i_Msg->type;
             TRACFCOMP( g_trac_volt, INFO_MRK
                        "HBVddrMsg::processMsg l_msgType=x%08X",l_msgType );
@@ -667,7 +642,6 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
                 {
                     break;
                 }
-
             }
             else
             {
@@ -694,6 +668,7 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             //an error occurred so should stop the IPL
             TRACFCOMP( g_trac_volt, ERR_MRK
                        "HBVddrMsg::RecvMsgHndlr recv'd an error message" );
+
             //generate an errorlog
             /*@
              *   @errortype
@@ -743,7 +718,16 @@ void HBVddrMsg::createErrLog(errlHndl_t& io_err,
 errlHndl_t platform_enable_vddr()
 {
     errlHndl_t l_err = NULL;
-    if(INITSERVICE::spBaseServicesEnabled())
+
+    TARGETING::Target* pSysTarget = nullptr;
+    TARGETING::targetService().getTopLevelTarget(pSysTarget);
+    assert(
+        (pSysTarget != nullptr),
+        "platform_enable_vddr: Code bug!  System target was NULL.");
+
+    // only enable vddr if system supports dynamic voltage and MBOX available
+    if((pSysTarget->getAttr< TARGETING::ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >() == 1)
+        && (INITSERVICE::spBaseServicesEnabled()))
     {
         HBVddrMsg l_hbVddr;
 
@@ -764,7 +748,8 @@ errlHndl_t platform_enable_vddr()
     else // no FSP/mbox services available
     {
         TRACFCOMP(g_trac_volt,"call_host_enable_vddr"
-                "no-op because mbox not available");
+            " no-op because mbox not available or system"
+            " does not support dynamic voltages");
     }
 
     return l_err;

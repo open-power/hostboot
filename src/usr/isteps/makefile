@@ -46,6 +46,10 @@ OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
 OBJS += pbusLinkSvc.o
 
+
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 include ${ROOTPATH}/config.mk

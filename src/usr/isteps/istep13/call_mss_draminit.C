@@ -57,72 +57,84 @@ using namespace TARGETING;
 namespace ISTEP_13
 {
 
-void   mss_post_draminit( IStepError & l_stepError )
+void   mss_post_draminit( IStepError & io_stepError )
 {
     errlHndl_t l_err = NULL;
     bool rerun_vddr = false;
 
     do {
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit entry" );
-
-    //@TODO RTC: 134081. The helper function is currently commented out because
-    //some of the attributes don't exist. uncomment it once attribute support is
-    //in place
-    set_eff_config_attrs_helper(DEFAULT, rerun_vddr);
-
-    if ( rerun_vddr == false )
-    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "mss_post_draminit: nothing to do" );
-        break;
-    }
+            "mss_post_draminit entry" );
 
-    // Call mss_volt_vddr_offset to recalculate VDDR voltage
-    // @TODO RTC: 152294 Uncomment once attribute support is in place
+        set_eff_config_attrs_helper(DEFAULT, rerun_vddr);
 
-//     l_err = ISTEP_07::setMemoryVoltageDomainOffsetVoltage<
-//         TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
-//         TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
-//         TARGETING::ATTR_VMEM_ID>();
+        if ( rerun_vddr == false )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "mss_post_draminit: nothing to do" );
+            break;
+        }
 
-//     if(l_err)
-//     {
-//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
-//             "ERROR 0x%08X: setMemoryVoltageDomainOffsetVoltage for VDDR domain",
-//             l_err->reasonCode());
-//         l_stepError.addErrorDetails(l_err);
-//         errlCommit(l_err,HWPF_COMP_ID);
-//         break;
-//     }
-//     else
-//     {
-//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-//                    "mss_post_draminit: mss_volt_vddr_offset(): SUCCESS");
-//     }
+        // Call mss_volt_vddr_offset to recalculate VDDR voltage
+        TARGETING::Target* pSysTarget = nullptr;
+        TARGETING::targetService().getTopLevelTarget(pSysTarget);
+        assert((pSysTarget != nullptr),
+                "mss_post_draminit: Code bug!  System target was NULL.");
 
-    // Call HWSV to call POWR code
-    // This fuction has compile-time binding for different platforms
-    l_err = platform_adjust_vddr_post_dram_init();
+        // only calculate if system supports dynamic voltage
+        if (pSysTarget->getAttr< TARGETING::ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >()
+            == 1)
+        {
+            // Update mss_volt_vddr_offset_millivolts attribute
+            l_err = computeDynamicMemoryVoltage<
+                        TARGETING::ATTR_MSS_VDDR_PROGRAM,
+                        TARGETING::ATTR_VDDR_ID>();
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%08X: computeDynamicMemoryVoltage for "
+                    "VDDR domain",
+                    l_err->reasonCode());
+                io_stepError.addErrorDetails(l_err);
+                errlCommit(l_err,HWPF_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "mss_post_draminit: mss_volt_vddr_offset_millivolts "
+                 "successfully updated");
+            }
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "mss_post_draminit: dynamic voltage not "
+                "supported on this system");
+            break;
+        }
 
-    if( l_err )
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR 0x%.8X: mss_post_draminit: "
-                  "platform_adjust_vddr_post_dram_init() returns error",
-                  l_err->reasonCode());
+        // Call HWSV to call POWR code
+        // This fuction has compile-time binding for different platforms
+        l_err = platform_adjust_vddr_post_dram_init();
 
-        // Create IStep error log and cross reference to error that occurred
-        l_stepError.addErrorDetails( l_err );
+        if( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_post_draminit: "
+                      "platform_adjust_vddr_post_dram_init() returns error",
+                      l_err->reasonCode());
 
-        // Commit Error
-        errlCommit( l_err, HWPF_COMP_ID );
-    }
+            // Create IStep error log and cross reference to error that occurred
+            io_stepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
 
     } while(0);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "mss_post_draminit exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit exit" );
     return;
 }
 
