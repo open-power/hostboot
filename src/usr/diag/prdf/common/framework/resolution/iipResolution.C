@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,8 @@
 #include <prdfAnalyzeConnected.H>
 #include <prdfPlatServices.H>
 #undef iipResolution_C
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -213,56 +215,46 @@ int32_t TryResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 //--------------------------------------------------------------------
 int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    using namespace TARGETING;
+    TargetHandle_t sourceTrgt = ServiceDataCollector::getTargetAnalyzed();
+    TargetHandle_t connTrgt   = nullptr;
 
-    TargetHandle_t sourceTrgt  = ServiceDataCollector::getTargetAnalyzed();
-    TargetHandle_t connTrgt    = NULL;
-    TargetHandle_t srcEndPoint = NULL;
-
-    if(TYPE_NA == iv_peerConnType)
+    if ( TYPE_NA == iv_peerConnType )
     {
-        TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
-
-        if ( 0xffffffff == iv_idx )
+        if ( INVALID_INDEX == iv_idx )
         {
-            if ( 0 < list.size() )
-                connTrgt = list[0];
+            connTrgt = getConnectedParent( sourceTrgt, iv_targetType );
         }
         else
         {
-            for (TargetHandleList::iterator i = list.begin();
-                 i != list.end();
-                 i++)
-            {
-                if ( iv_idx == getTargetPosition(*i) )
-                {
-                    connTrgt = *i;
-                    break;
-                }
-            }
+            connTrgt = getConnectedChild( sourceTrgt, iv_targetType, iv_idx );
         }
     }
     else
     {
-        srcEndPoint = getConnectedChild( sourceTrgt, iv_peerConnType, iv_idx );
+        TargetHandle_t srcEndPoint
+                    = getConnectedChild( sourceTrgt, iv_peerConnType, iv_idx );
 
-        if ( NULL != srcEndPoint )
+        if ( nullptr != srcEndPoint )
             connTrgt = getConnectedPeerTarget( srcEndPoint );
     }
 
-    if ( NULL != connTrgt )
+    if ( nullptr != connTrgt )
+    {
         io_serviceData.service_data->SetCallout( connTrgt,
                                                  iv_priority,
-                                                 iv_gardState);
+                                                 iv_gardState );
+    }
     else
     {
-        if ( NULL != iv_altResolution )
+        if ( nullptr != iv_altResolution )
+        {
             iv_altResolution->Resolve( io_serviceData );
+        }
         else
         {
             PRDF_ERR( "[CalloutConnected::Resolve] No connected chip found:"
                       " sourceTrgt=0x%08x, iv_peerConnType=0x%x",
-                        getHuid(sourceTrgt), iv_peerConnType);
+                        getHuid(sourceTrgt), iv_peerConnType );
 
             io_serviceData.service_data->SetCallout( sourceTrgt,
                                                      MRU_MED,
@@ -278,39 +270,27 @@ int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 //--------------------------------------------------------------------
 int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    using namespace TARGETING;
-
     TargetHandle_t sourceTrgt = ServiceDataCollector::getTargetAnalyzed();
-    TargetHandle_t connTrgt   = NULL;
+    TargetHandle_t connTrgt   = nullptr;
 
-    TargetHandleList list = getConnected( sourceTrgt, iv_targetType );
-
-    if ( 0xffffffff == iv_idx )
+    if ( INVALID_INDEX == iv_idx )
     {
-        if ( 0 < list.size() )
-            connTrgt = list[0];
+        connTrgt = getConnectedParent( sourceTrgt, iv_targetType );
     }
     else
     {
-        for (TargetHandleList::iterator i = list.begin(); i != list.end(); i++)
-        {
-            if ( iv_idx == getTargetPosition(*i) )
-            {
-                connTrgt = *i;
-                break;
-            }
-        }
+        connTrgt = getConnectedChild( sourceTrgt, iv_targetType, iv_idx );
     }
 
     // If valid chip found, look up in global system container.
-    CHIP_CLASS * connChip = NULL;
-    if ( NULL != connTrgt )
+    CHIP_CLASS * connChip = nullptr;
+    if ( nullptr != connTrgt )
     {
         connChip = systemPtr->GetChip( connTrgt );
     }
 
     // Analyze chip.
-    if ( NULL != connChip )
+    if ( nullptr != connChip )
         return connChip->Analyze( io_serviceData,
                         io_serviceData.service_data->getSecondaryAttnType() );
     else

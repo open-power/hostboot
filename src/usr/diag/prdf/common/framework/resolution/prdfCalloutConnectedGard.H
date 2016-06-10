@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,17 +51,13 @@ struct STEP_CODE_DATA_STRUCT;
 class CalloutConnectedGard : public Resolution
 {
   public:
-    /**
-     * @brief default ctor
-     */
-    CalloutConnectedGard(void);
 
     /**
      * @brief   Constructor
      * @param   i_targetType      type of desired unit that's connected to
      *                            i_psourceHandle
      * @param   i_idx             index into getConnected list to callout
-     *                            (i_idx = 0xffffffff means callout the first
+     *                            (i_idx = INVALID_INDEX means callout the first
      *                            valid target)
      * @param   i_priority        callout priority  @see srci.H for priority
      *                            values
@@ -73,12 +69,16 @@ class CalloutConnectedGard : public Resolution
      * @param   i_trgtGardState   gard policy associated with target callout
      * @note    Don't use this class to callout clocks - use ClockResolution
      */
-    CalloutConnectedGard( TARGETING::TYPE i_targetType,
-                    uint32_t i_idx = 0xffffffff,
-                    PRDpriority i_priority = MRU_MED,
-                    Resolution * i_altResolution = NULL,
-                    TARGETING::TYPE i_peerConnType = TARGETING::TYPE_NA,
-                    GARD_POLICY i_trgtGardState = PRDF::GARD );
+    CalloutConnectedGard( TARGETING::TYPE i_targetType   = TARGETING::TYPE_NA,
+                          uint32_t i_idx                 = INVALID_INDEX,
+                          PRDpriority i_priority         = MRU_MED,
+                          Resolution * i_altResolution   = nullptr,
+                          TARGETING::TYPE i_peerConnType = TARGETING::TYPE_NA,
+                          GARD_POLICY i_trgtGardState    = PRDF::GARD ) :
+        iv_targetType(i_targetType), iv_idx(i_idx), iv_priority(i_priority),
+        iv_altResolution(i_altResolution), iv_peerConnType(i_peerConnType),
+        iv_gardState(i_trgtGardState)
+    {}
 
     // ~CalloutConnectedGard(); default dtor is sufficient
 
@@ -96,7 +96,15 @@ class CalloutConnectedGard : public Resolution
     /**
      * @brief     overloads operator ==
      */
-    virtual bool operator==(const CalloutConnectedGard & i_right ) const;
+    virtual bool operator==(const CalloutConnectedGard & i_right ) const
+    {
+        return ( iv_targetType    == i_right.iv_targetType     &&
+                 iv_idx           == i_right.iv_idx            &&
+                 iv_priority      == i_right.iv_priority       &&
+                 iv_altResolution == i_right.iv_altResolution  &&
+                 iv_peerConnType  == i_right.iv_peerConnType   &&
+                 iv_gardState     == i_right.iv_gardState );
+    }
 
   protected:  // Data
 
@@ -106,40 +114,9 @@ class CalloutConnectedGard : public Resolution
     Resolution * iv_altResolution;
     TARGETING::TYPE iv_peerConnType;
     GARD_POLICY iv_gardState; ///< gard policy associated with resolution
+
+    static constexpr uint32_t INVALID_INDEX = 0xffffffff;
 };
-
-inline CalloutConnectedGard::CalloutConnectedGard( void ) :
-    iv_targetType( TARGETING::TYPE_NA ),
-    iv_idx( 0xffffffff ),
-    iv_priority( MRU_LOW ),
-    iv_altResolution( NULL ),
-    iv_peerConnType( TARGETING::TYPE_NA ),
-    iv_gardState( PRDF::GARD )
-{}
-
-inline CalloutConnectedGard::CalloutConnectedGard( TARGETING::TYPE i_targetType,
-                                 uint32_t i_idx,
-                                 PRDpriority i_priority,
-                                 Resolution * i_altResolution,
-                                 TARGETING::TYPE i_peerConnType,
-                                 GARD_POLICY i_trgtGardState ) :
-      iv_targetType( i_targetType ),
-      iv_idx( i_idx ),
-      iv_priority( i_priority ),
-      iv_altResolution( i_altResolution ),
-      iv_peerConnType( i_peerConnType ),
-      iv_gardState( i_trgtGardState )
-{ }
-
-inline bool CalloutConnectedGard::operator ==
-                    ( const CalloutConnectedGard & i_right ) const
-{
-     return ( iv_targetType == i_right.iv_targetType &&
-              iv_idx ==  i_right.iv_idx && iv_priority == i_right.iv_priority &&
-              iv_altResolution == i_right.iv_altResolution &&
-              iv_peerConnType == i_right.iv_peerConnType &&
-              iv_gardState == i_right.iv_gardState );
-}
 
 } // end namespace PRDF
 
