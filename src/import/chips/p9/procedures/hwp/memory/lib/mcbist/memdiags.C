@@ -151,7 +151,7 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
 {
-    FAPI_INF("multi-port init");
+    FAPI_INF("multi-port init %s", mss::c_str(iv_target));
 
     // Deterimine which ports are functional and whether we can broadcast to them
     // TK on the broadcast BRS

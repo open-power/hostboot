@@ -67,6 +67,10 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
     for_each_target([l_fir_mask](const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
     {
 
+        uint8_t is_sim = 0;
+        REQUIRE_FALSE( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION,
+                                     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+
         SECTION("Test thresholds structure")
         {
             mss::mcbist::thresholds l_t;
@@ -192,6 +196,8 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             // Loading of patterns is tested in the mcbist unit test.
 
             mss::mcbist::constraints l_const(memdiags::PATTERN_5);
+
+            FAPI_INF("\n\n\n start sf_init\n\n\n");
 
             // The addresses here are calculated so that we get a few iterations
             // of polling on an AWAN, but not so much that we run the risk of timing out
@@ -420,10 +426,13 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
 
+                // We use different address end boundaries if we're in sim or not.
+                const uint64_t l_end_expect = is_sim ? 0x1fffffe07c000000 : 0x1ffffffffc000000;
+
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
                 REQUIRE(l_read == 0x1fffffc000000000);
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
-                REQUIRE(l_read == 0x1fffffe07c000000);
+                REQUIRE(l_read == l_end_expect);
             }
 
             // Poll for the fir bit. We expect this to be set ...
@@ -514,20 +523,26 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 // Address config 0 should have the start and end for a complete DIMM (in sim)
                 fapi2::buffer<uint64_t> l_read;
 
+                // We use different address end boundaries if we're in sim or not.
+                const uint64_t l_end_expect = is_sim ? 0x000000207C000000 : 0x1ffffffffc000000;
+
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
                 REQUIRE(l_read == 0x0);
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
-                REQUIRE(l_read == 0x000000207C000000);
+                REQUIRE(l_read == l_end_expect);
             }
             {
                 // Address 1 should have the start we configured and an end which is the
                 // real end of the DIMM address range
                 fapi2::buffer<uint64_t> l_read;
 
+                // We use different address end boundaries if we're in sim or not.
+                const uint64_t l_end_expect = is_sim ? 0x1fffffe07c000000 : 0x1ffffffffc000000;
+
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA1Q, l_read) );
                 REQUIRE(l_read == 0x1fffffc000000000);
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA1Q, l_read) );
-                REQUIRE(l_read == 0x1fffffe07c000000);
+                REQUIRE(l_read == l_end_expect);
             }
 
             // Check the subtests
@@ -587,10 +602,13 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 // Address config 0 should have the start and end for a complete DIMM (in sim)
                 fapi2::buffer<uint64_t> l_read;
 
+                // We use different address end boundaries if we're in sim or not.
+                const uint64_t l_end_expect = is_sim ? 0x000000207C000000 : 0x1ffffffffc000000;
+
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBSA0Q, l_read) );
                 REQUIRE(l_read == 0x0);
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBEA0Q, l_read) );
-                REQUIRE(l_read == 0x000000207C000000);
+                REQUIRE(l_read == l_end_expect);
             }
 
             // Check the subtests

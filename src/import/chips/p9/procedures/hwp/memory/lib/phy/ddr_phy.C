@@ -389,25 +389,26 @@ fapi2::ReturnCode bang_bang_lock( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     FAPI_DBG("Wait at least 32 memory clock cycles");
     FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 32), mss::cycles_to_simcycles(32)) );
 
-    // Don't bother in cycle sim, we don't do the actual aligment
-    if (!is_sim)
-    {
-        // Check for BB lock.
-        for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
-        {
-            FAPI_DBG("Wait for BB lock in status register, bit %u",
-                     MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK);
+    // TODO RTC: 153954 implement bang-bang lock and other analog type things we can't do in sim
+#ifdef BANG_BANG_LOCK_IMPLEMENTED
 
-            FAPI_ASSERT( mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, mss::poll_parameters(DELAY_100NS),
-                                   [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-            {
-                FAPI_DBG("stat_reg 0x%llx, remaining: %d", stat_reg, poll_remaining);
-                return stat_reg.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>();
-            }),
-            fapi2::MSS_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p),
-            "MCA %s failed bang-bang alignment", mss::c_str(p) );
-        }
+    // Check for BB lock.
+    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    {
+        FAPI_DBG("Wait for BB lock in status register, bit %u",
+                 MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK);
+
+        FAPI_ASSERT( mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, mss::poll_parameters(DELAY_100NS),
+                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_DBG("stat_reg 0x%llx, remaining: %d", stat_reg, poll_remaining);
+            return stat_reg.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>();
+        }),
+        fapi2::MSS_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p),
+        "MCA %s failed bang-bang alignment", mss::c_str(p) );
     }
+
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;

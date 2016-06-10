@@ -63,13 +63,8 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     FAPI_TRY( mss::eff_memcal_interval(i_target, l_memcal_interval) );
     FAPI_TRY( mss::eff_zqcal_interval(i_target, l_zqcal_interval) );
 
-    // Get out of here if this isn't sim - we haven't done the work for calculating init cal periods
+    // TODO RTC:155854 We haven't done the work for calculating init cal periods
     // in effective config yet, and the MC setup below is hard wired for sim
-    if (!is_sim)
-    {
-        FAPI_ERR("Did you forget to implement periodic enables for power on?");
-        fapi2::Assert(false);
-    }
 
     FAPI_DBG("memcal interval %dck, zqcal interval %dck", l_memcal_interval, l_zqcal_interval);
 

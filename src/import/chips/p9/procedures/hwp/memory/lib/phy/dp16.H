@@ -48,6 +48,8 @@ inline uint64_t freq_bitfield_helper( const uint64_t i_freq )
 {
     fapi2::buffer<uint64_t> l_data(0b1000);
 
+    FAPI_DBG("freq_bitfield_helper seeing MT/s: %d", i_freq);
+
     // Shift l_data over based on freq.
     switch(i_freq)
     {
@@ -64,7 +66,14 @@ inline uint64_t freq_bitfield_helper( const uint64_t i_freq )
             l_data >>= 1;
             break;
 
-            // 2666 is >> 0
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            l_data >>= 0;
+            break;
+
+        default:
+            FAPI_ERR("Unkown MT/s: %d", i_freq);
+            fapi2::Assert(false);
+            break;
     };
 
     return l_data;
