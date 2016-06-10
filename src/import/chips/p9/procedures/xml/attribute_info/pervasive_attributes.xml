@@ -581,110 +581,11 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PERV_CTRL0_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Perv_ctrl0</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_PERV_CTRL1_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value of Perv_ctrl1</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL0_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl0</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL1_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl1</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL2_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl2</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL3_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value of Root_ctrl3</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL4_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl4</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL5_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl5</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL6_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl6</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL7_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl7</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_ROOT_CTRL8_SHADOW</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Flush value for Root_ctrl8</description>
-  <valueType>uint32</valueType>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
     <id>ATTR_VITL_CLK_SETUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Nimbus DD1</description>
     <valueType>uint8</valueType>
-    <writeable/>
+    <platInit/>    
 </attribute>
 
 <attribute>
@@ -740,4 +641,13 @@
   <valueType>uint8</valueType>
   <platInit/>
 </attribute>
+
+<attribute>
+    <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
 </attributes>
