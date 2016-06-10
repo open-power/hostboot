@@ -33,6 +33,8 @@ SOURCES += $(GENPATH)/empty_attribute.xml
 
 TARGETS += fapi2_attribute_service.C
 
+CLEAN_TARGETS += $(GENPATH)/fapi2_attribute_service.C
+
 define createIfAttrService_RUN
 		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) -a $$(filter-out $$<,$$^)
 endef
