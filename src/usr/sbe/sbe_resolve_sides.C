@@ -70,7 +70,6 @@ extern trace_desc_t* g_trac_sbe;
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-
 using namespace ERRORLOG;
 using namespace TARGETING;
 
@@ -126,7 +125,7 @@ errlHndl_t resolveProcessorSbeSeeproms()
             TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
                        "Do Nothing in SBE_UPDATE_SEQUENTIAL mode with FSP-"
                        "services enabled or running in simics");
-             break;
+            break;
         }
 #endif
 
@@ -668,12 +667,30 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
             if ( ( updateForHBB == true ) &&
                  ( io_sideState.cur_side != READ_ONLY_SEEPROM ) )
             {
-                io_sideState.actions |= REIPL;
-                TRACUCOMP( g_trac_sbe, ERR_MRK
-                           "performSideActions: resolveImageHBBaddr returned "
-                           "updateForHBB=%d, and not on READ_ONLY_SEEPROM so "
-                           "REIPL (actions=0x%X)",
-                           updateForHBB, io_sideState.actions);
+                TARGETING::Target* sys = NULL;
+                (void) TARGETING::targetService().getTopLevelTarget( sys );
+                assert(sys, "performSideActions() system target is NULL");
+                ATTR_MNFG_FLAGS_type mnfg_flags =
+                  sys->getAttr<ATTR_MNFG_FLAGS>();
+
+                // If we are overriding the HBB value we do not want to trigger
+                //  a reboot because if we do we will end up in an infinite
+                //  loop.  Instead we will let the IPL go all the way up to
+                //  runtime knowing that the next IPL will use the overridden
+                //  HBB value.
+                if( mnfg_flags & MNFG_FLAG_FORCE_HBB_TO_GOLDEN )
+                {
+                    TRACFCOMP( g_trac_sbe, "performSideActions: skipping REIPL for HBB override scenario" );
+                }
+                else
+                {
+                    io_sideState.actions |= REIPL;
+                    TRACUCOMP( g_trac_sbe, ERR_MRK
+                               "performSideActions: resolveImageHBBaddr returned "
+                               "updateForHBB=%d, and not on READ_ONLY_SEEPROM so "
+                               "REIPL (actions=0x%X)",
+                               updateForHBB, io_sideState.actions);
+                }
             }
         }
 
@@ -1387,7 +1404,6 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
                TARGETING::get_huid(i_target), i_side, i_pnorSideId);
 
     do{
-
         // Get info from PNOR
         PNOR::SideInfo_t pnor_side_info;
         err = PNOR::getSideInfo (i_pnorSideId, pnor_side_info);
@@ -1402,68 +1418,101 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
             break;
         }
 
-        // Only Need to Check/Update if PNOR has Other Side
-        if ( pnor_side_info.hasOtherSide == true )
+
+        // Override the HBB we write based on mfg-flag to allow a single-sided
+        //  PNOR to boot with either side of the SBE
+        //  (only need to override if we aren't running a single-sided image)
+        uint64_t l_hbbOffset = pnor_side_info.hbbMmioOffset;
+        uint64_t l_hbbAddress = pnor_side_info.hbbAddress;
+
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        TARGETING::Target* sys = NULL;
+        (void) TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys, "resolveImageHBBaddr() system target is NULL");
+
+        // if we are currently acting upon the primary side, we need to
+        //  fetch the HBB information from the golden side instead
+        ATTR_MNFG_FLAGS_type mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
+        if( (mnfg_flags & MNFG_FLAG_FORCE_HBB_TO_GOLDEN)
+            && !pnor_side_info.isGolden )
         {
-            // Read the MMIO offset associated with the HBB address
-            // from the image
-            rc = sbe_xip_get_scalar( io_imgPtr,
-                                     "standalone_mbox2_value",
-                                     &data);
-            if ( rc != 0 )
+            PNOR::SideId l_goldSide = PNOR::INVALID_SIDE;
+            if( PNOR::WORKING == i_pnorSideId )
             {
-                rc_fail_on_get = true; // get failed
-
-                TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
-                           "sbe_xip_get_scalar() failed rc = 0x%X (%d)",
-                           rc, rc_fail_on_get);
-                break;
-            }
-
-            if ( pnor_side_info.hbbMmioOffset == data )
-            {
-                TRACUCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
-                           "offset = 0x%X that matches PNOR MMIO="
-                           "0x%X for HBB Address=0x%X",
-                           data, pnor_side_info.hbbMmioOffset,
-                           pnor_side_info.hbbAddress);
+                l_goldSide = PNOR::ALTERNATE;
             }
             else
             {
-                TRACFCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
-                           "offset = 0x%X does NOT match PNOR MMIO="
-                           "0x%X for HBB Address=0x%X. Updating Image",
-                           data, pnor_side_info.hbbMmioOffset,
-                           pnor_side_info.hbbAddress);
-
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: data", &data, 8 );
-
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: hbbMmioOffset",
-                          &pnor_side_info.hbbMmioOffset, 8 );
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: hbbAddress",
-                          &pnor_side_info.hbbAddress, 8);
-
-                rc = sbe_xip_set_scalar( io_imgPtr, "standalone_mbox2_value",
-                                         pnor_side_info.hbbMmioOffset);
-
-                if ( rc != 0 )
-                {
-                    rc_fail_on_get = false; // set failed
-
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
-                               "sbe_xip_set_scalar() failed rc = 0x%X (%d)",
-                               rc, rc_fail_on_get);
-                    break;
-                }
-                o_imageWasUpdated = true;
+                l_goldSide = PNOR::WORKING;
+            }
+            PNOR::SideInfo_t l_goldPnorInfo;
+            err = PNOR::getSideInfo( l_goldSide, l_goldPnorInfo );
+            if ( err )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK "resolveImageHBBaddr() - Error returned from PNOR ::getSideInfo() on gold side rc=0x%.4X, Target UID=0x%X i_pnorSideId",
+                           err->reasonCode(),
+                           TARGETING::get_huid(i_target),
+                           i_pnorSideId);
+                break;
             }
 
+            l_hbbOffset = l_goldPnorInfo.hbbMmioOffset;
+            l_hbbAddress = l_goldPnorInfo.hbbAddress;
+            TRACFCOMP( g_trac_sbe, "resolveImageHBBaddr() - forcing HBB to golden side value of %.16llX", l_hbbOffset );
+        }
+#endif
+
+        // Read the MMIO offset associated with the HBB address
+        // from the image
+        rc = sbe_xip_get_scalar( io_imgPtr,
+                                 "standalone_mbox2_value",
+                                 &data);
+        if ( rc != 0 )
+        {
+            rc_fail_on_get = true; // get failed
+
+            TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
+                       "sbe_xip_get_scalar() failed rc = 0x%X (%d)",
+                       rc, rc_fail_on_get);
+            break;
+        }
+
+        if ( l_hbbOffset == data )
+        {
+            TRACUCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
+                       "offset = 0x%llX that matches PNOR MMIO="
+                       "0x%llX for HBB Address=0x%X",
+                       data, l_hbbOffset,
+                       l_hbbAddress);
         }
         else
         {
-              // pnor_side_info.hasOtherSide is false
-              TRACUCOMP( g_trac_sbe, "resolveImageHBBaddr: PNOR only has "
-                         "1 side - No Update Required");
+            TRACFCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
+                       "offset = 0x%llX does NOT match PNOR MMIO="
+                       "0x%llX for HBB Address=0x%X. Updating Image",
+                       data, l_hbbOffset,
+                       l_hbbAddress);
+
+            TRACFBIN (g_trac_sbe, "resolveImageHBBaddr: data", &data, 8 );
+
+            TRACFBIN (g_trac_sbe, "resolveImageHBBaddr: l_hbbOffset",
+                      &l_hbbOffset, 8 );
+            TRACFBIN (g_trac_sbe, "resolveImageHBBaddr: hbbAddress",
+                      &l_hbbAddress, 8);
+
+            rc = sbe_xip_set_scalar( io_imgPtr, "standalone_mbox2_value",
+                                     l_hbbOffset );
+
+            if ( rc != 0 )
+            {
+                rc_fail_on_get = false; // set failed
+
+                TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
+                           "sbe_xip_set_scalar() failed rc = 0x%X (%d)",
+                           rc, rc_fail_on_get);
+                break;
+            }
+            o_imageWasUpdated = true;
         }
 
     }while(0);

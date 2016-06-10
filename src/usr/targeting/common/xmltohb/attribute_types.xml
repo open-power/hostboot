@@ -3437,6 +3437,11 @@
         <name>UPDATE_BOTH_SIDES_OF_SBE</name>
         <value>0x00040000</value>
     </enumerator>
+    <enumerator>
+        <!-- Force the HBB pointer both sides of SBE to point to golden side -->
+        <name>FORCE_HBB_TO_GOLDEN</name>
+        <value>0x00080000</value>
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->

@@ -271,7 +271,7 @@ namespace SBE
 
                 TRACUCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
                            "Main Loop: tgt=0x%X, i=%d",
-                           TARGETING::get_huid(sbeState.target), i)
+                           TARGETING::get_huid(sbeState.target), i);
 
                 // Check to see if current target is master processor
                 if ( sbeState.target == masterProcChipTargetHandle)
@@ -2534,7 +2534,7 @@ namespace SBE
                                "NOT Booting READ_ONLY SEEPROM. Check for update"
                                " on cur side=%d ",
                                TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side)
+                               io_sbeState.cur_seeprom_side);
 
                     // Check for clean vs. dirty only on cur side
                     if ( i_system_situation & SITUATION_CUR_IS_DIRTY )
