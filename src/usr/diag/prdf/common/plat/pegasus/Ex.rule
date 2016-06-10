@@ -1347,8 +1347,7 @@ group gCoreFir filter singlebit,
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
      */
-    # FIXME: RTC 85697: Make sure this is SUE-CS bit
-    (CoreFir, bit(55)) ? calloutProcLow2ndLvlMedThr1SUE_NoGard;
+    (CoreFir, bit(55)) ? nestHangDetect;
 
     /** COREFIR[56|57|58]
      *  RESERVED
@@ -2057,12 +2056,14 @@ actionclass calloutProcLow2ndLvlMedThr1
 
 };
 
-/** callouts Proc on first instance. Calls for second level support as well.
- *  Set SUE flag, garding not done */
-actionclass calloutProcLow2ndLvlMedThr1SUE_NoGard
+/** Calls out and gards the parent PROC on first instance. Also, calls for
+ *  second level support just in case replacing the processor did not resolve
+ *  the issue. This bit is also a possible checkstop SUE. */
+actionclass nestHangDetect
 {
-    callout(connected(TYPE_PROC),MRU_LOW, NO_GARD);
-    callout2ndLvlMedThr1;
+    callout(connected(TYPE_PROC),MRU_MED);
+    callout2ndLvlLow;
+    threshold1;
     flag(SUE);
 };
 
