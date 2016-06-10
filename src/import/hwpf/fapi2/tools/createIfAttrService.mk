@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,8 @@ SOURCES += $(FAPI2_ATTR_XML)
 SOURCES += $(GENPATH)/empty_attribute.xml
 
 TARGETS += fapi2_attribute_service.C
+
+CLEAN_TARGETS += $(GENPATH)/fapi2_attribute_service.C
 
 define createIfAttrService_RUN
 		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) -a $$(filter-out $$<,$$^)

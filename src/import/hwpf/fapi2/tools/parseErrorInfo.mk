@@ -31,6 +31,12 @@ TARGETS += hwp_ffdc_classes.H
 TARGETS += collect_reg_ffdc.H
 TARGETS += set_sbe_error.H
 
+CLEAN_TARGETS += $(GENPATH)/hwp_return_codes.H
+CLEAN_TARGETS += $(GENPATH)/hwp_error_info.H
+CLEAN_TARGETS += $(GENPATH)/hwp_ffdc_classes.H
+CLEAN_TARGETS += $(GENPATH)/collect_reg_ffdc.H
+CLEAN_TARGETS += $(GENPATH)/set_sbe_error.H
+
 define parseErrorInfo_RUN
 		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
 endef
@@ -41,6 +47,7 @@ $(call BUILD_GENERATED)
 # environment hasn't defined any of its own.
 GENERATED = empty_error_xml
 TARGETS += empty_error.xml
+CLEAN_TARGETS += $(GENPATH)/empty_error.xml
 
 define empty_error_xml_RUN
 		$(C1) echo "<hwpErrors/>" > $$($(GENERATED)_PATH)/empty_error.xml

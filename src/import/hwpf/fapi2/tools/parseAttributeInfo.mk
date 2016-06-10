@@ -34,6 +34,14 @@ TARGETS += attrEnumInfo.csv
 TARGETS += fapi2AttrOverrideData.H
 TARGETS += fapi2AttrOverrideEnums.H
 
+CLEAN_TARGETS += $(GENPATH)/attribute_ids.H
+CLEAN_TARGETS += $(GENPATH)/fapi2_chip_ec_feature.C
+CLEAN_TARGETS += $(GENPATH)/attribute_plat_check.H
+CLEAN_TARGETS += $(GENPATH)/attributesSupported.html
+CLEAN_TARGETS += $(GENPATH)/attrInfo.csv
+CLEAN_TARGETS += $(GENPATH)/attrEnumInfo.csv
+CLEAN_TARGETS += $(GENPATH)/fapi2AttrOverrideData.H
+CLEAN_TARGETS += $(GENPATH)/fapi2AttrOverrideEnums.H
 
 define parseAttributeInfo_RUN
 		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
@@ -45,6 +53,7 @@ $(call BUILD_GENERATED)
 # environment hasn't defined any of its own.
 GENERATED = empty_attribute_xml
 TARGETS += empty_attribute.xml
+CLEAN_TARGETS += $(GENPATH)/empty_attribute.xml
 
 define empty_attribute_xml_RUN
 		$(C1) echo "<attributes/>" > $$($(GENERATED)_PATH)/empty_attribute.xml
