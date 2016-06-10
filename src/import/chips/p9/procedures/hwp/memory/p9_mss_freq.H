@@ -33,6 +33,9 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
+#ifndef MSS_FREQ_H_
+#define MSS_FREQ_H_
+
 #include <fapi2.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/cycle_time.H>
@@ -141,3 +144,5 @@ extern "C"
     fapi2::ReturnCode p9_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 }
+
+#endif
