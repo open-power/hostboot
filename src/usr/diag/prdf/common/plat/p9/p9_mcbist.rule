@@ -186,9 +186,9 @@ group gMCBISTFIR filter singlebit
     (rMCBISTFIR, bit(9)) ? TBDDefaultCallout;
 
     /** MCBISTFIR[10]
-     *  
+     *  MCBIST Command Complete
      */
-    (rMCBISTFIR, bit(10)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(10)) ? analyzeMcbistCmdComplete;
 
     /** MCBISTFIR[11]
      *  
@@ -470,4 +470,10 @@ group gMCBISTFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+
+/** Analyze MCBIST Command Complete attention */
+actionclass analyzeMcbistCmdComplete
+{
+    funccall("McbistCmdComplete");
+};
 

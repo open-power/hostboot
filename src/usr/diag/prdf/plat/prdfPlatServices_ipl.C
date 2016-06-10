@@ -65,49 +65,36 @@ bool isInMdiaMode()
 
 //------------------------------------------------------------------------------
 
-int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
+int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
                           MDIA::MaintCommandEventType i_eventType )
 {
-    #define PRDF_FUNC "[PlatServices::mdiaSendCmdComplete] "
+    #define PRDF_FUNC "[PlatServices::mdiaSendEventMsg] "
 
     int32_t o_rc = SUCCESS;
 
 #ifndef CONFIG_VPO_COMPILE
 
-    do
+    PRDF_ASSERT( nullptr != i_trgt );
+
+    // Only MCBIST and MBA supported.
+    TYPE trgtType = getTargetType( i_trgt );
+    PRDF_ASSERT( TYPE_MCBIST == trgtType || TYPE_MBA == trgtType );
+
+    // MDIA must be running.
+    PRDF_ASSERT( isInMdiaMode() );
+
+    // Send command complete to MDIA.
+    MDIA::MaintCommandEvent mdiaEvent;
+    mdiaEvent.target = i_trgt;
+    mdiaEvent.type   = i_eventType;
+
+    errlHndl_t errl = MDIA::processEvent( mdiaEvent );
+    if ( NULL != errl )
     {
-        if ( !isInMdiaMode() ) break; // no-op
-
-        // Verify type.
-        TYPE l_type = getTargetType(i_mbaTarget);
-        if ( TYPE_MBA != l_type )
-        {
-            PRDF_ERR( PRDF_FUNC "unsupported target type %d", l_type );
-            o_rc = FAIL;
-            break;
-        }
-
-        // Send command complete to MDIA.
-        MDIA::MaintCommandEvent l_mdiaEvent;
-
-        l_mdiaEvent.target = i_mbaTarget;
-        l_mdiaEvent.type = i_eventType;
-
-        errlHndl_t errl = MDIA::processEvent( l_mdiaEvent );
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "MDIA::processEvent() failed" );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
-            break;
-        }
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_target=0x%08x i_eventType=%d",
-                  getHuid(i_mbaTarget), i_eventType );
+        PRDF_ERR( PRDF_FUNC "MDIA::processEvent() failed: i_target=0x%08x "
+                  "i_eventType=%d", getHuid(i_trgt), i_eventType );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
     }
 
 #endif

@@ -55,12 +55,12 @@ namespace PlatServices
 bool isInMdiaMode();
 
 /**
- * @brief  Sends a maintenance command message to MDIA.
- * @param  i_mbaTarget An MBA target.
+ * @brief  Sends a MCBIST/maintenance event message to MDIA.
+ * @param  i_trgt      An MCBIST or MBA target.
  * @param  i_eventType MDIA event type
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_mbaTarget,
+int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
                           MDIA::MaintCommandEventType i_eventType );
 
 /**
