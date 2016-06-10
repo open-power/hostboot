@@ -40,7 +40,6 @@
 //#include <prdfCenDqBitmap.H> TODO RTC 136126
 
 #include <diag/mdia/mdia.H>
-#include <diag/mdia/mdiamevent.H>
 #include <config.h>
 
 using namespace TARGETING;

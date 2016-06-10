@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,34 +35,6 @@
 
 namespace MDIA
 {
-struct MaintCommandEvent;
-
-/**
- * @brief MaintCommandEventType - maint command event types
- */
-enum MaintCommandEventType
-{
-    /**
-     * @brief COMMAND_COMPLETE - command finished at end of last rank
-     */
-    COMMAND_COMPLETE,
-
-    /**
-     * @brief COMMAND_STOPPED - command finished at end of other rank
-     */
-    COMMAND_STOPPED,
-
-    /**
-     * @brief SKIP_MBA - stop testing mba
-     */
-    SKIP_MBA,
-
-    /**
-     * @brief RESET_TIMER - command done but expect long analysis
-     */
-    RESET_TIMER,
-};
-
 /**
  * @brief runStep istep dispatcher entry point.
  *
@@ -90,6 +64,37 @@ errlHndl_t runStep(const TARGETING::TargetHandleList & i_targetList);
 void waitingForMaintCmdEvents(bool & o_waiting);
 
 /**
+ * @brief MaintCommandEventType - maint command event types
+ */
+enum MaintCommandEventType
+{
+    /** The command reached the end of the address range. */
+    COMMAND_COMPLETE,
+
+    /** A fault is found during analysis and no further testing is needed. */
+    STOP_TESTING,
+
+    /** PRD detected an error and needs time to complete analysis. */
+    RESET_TIMER,
+};
+
+/**
+ * @brief MaintCommandEvent maint command event
+ */
+struct MaintCommandEvent
+{
+    /**
+     * @brief type the type associated with the event
+     */
+    MaintCommandEventType type;
+
+    /**
+     * @brief target the target associated with the event
+     */
+    TARGETING::TargetHandle_t target;
+};
+
+/**
  * @brief processEvent prd callback
  *
  * called by prd to inform memory diagnostics of attention
@@ -105,5 +110,7 @@ void waitingForMaintCmdEvents(bool & o_waiting);
  * @post message processed
  */
 errlHndl_t processEvent(MaintCommandEvent & i_event);
+
 }
+
 #endif

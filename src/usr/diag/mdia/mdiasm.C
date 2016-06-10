@@ -34,7 +34,6 @@
 #include "mdiamonitor.H"
 #include <errl/errlmanager.H>
 #include <stdio.h>
-#include <mdia/mdiamevent.H>
 #include <hbotcompid.H>
 //#include <fapi.H>  TODO RTC 145132
 //#include <fapiPlatHwpInvoker.H>  TODO RTC 145132
@@ -1129,8 +1128,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         // If shutdown is requested and we're not in MNFG mode
         // skip testing on all MBAs
         if(( INITSERVICE::isShutdownRequested() ) &&
-           (( COMMAND_COMPLETE == eventType ) ||
-            ( COMMAND_STOPPED  == eventType )) &&
+           ( COMMAND_COMPLETE == eventType ) &&
            ! (( MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
                 & iv_globals.mfgPolicy) ||
               ( MNFG_FLAG_ENABLE_STANDARD_PATTERN_TEST
@@ -1143,7 +1141,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 get_huid(getTarget(wfp)), cmd,
                 i_event.type, iv_globals.mfgPolicy);
 
-            eventType = SKIP_MBA;
+            eventType = STOP_TESTING;
         }
 
 #ifdef CONFIG_BMC_IPMI
@@ -1160,8 +1158,9 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 #endif
 
         switch(eventType)
+        {
             case COMMAND_COMPLETE:
-            {
+
                 // command stopped or complete at end of last rank
 
                 wfp.restartCommand = false;
@@ -1177,25 +1176,16 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 wfp.data = NULL;
 
                 break;
-            case COMMAND_STOPPED:
 
-                // command stopped at end of some other rank
+            case STOP_TESTING:
 
-                flags = START_NEXT_CMD;
-                wfp.restartCommand = true;
-
-                break;
-
-            case SKIP_MBA:
-
-                // stop testing on this mba
+                // stop testing on this target
 
                 wfp.status = COMPLETE;
 
-                // done with this maint command
+                // done with this command
                 flags = DELETE_CMD | STOP_CMD | START_NEXT_CMD;
                 wfp.data = NULL;
-
 
                 break;
 

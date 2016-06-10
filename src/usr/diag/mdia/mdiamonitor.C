@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,7 +26,6 @@
 #include <targeting/common/util.H>
 #include <targeting/common/target.H>
 #include <vector>
-#include <diag/mdia/mdiamevent.H>
 #include "mdiamonitor.H"
 #include "mdiasm.H"
 #include "mdiatrace.H"
