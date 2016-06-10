@@ -505,7 +505,7 @@ namespace HTMGT
                          * @userdata2 comm established
                          * @userdata3 OCC state
                          * @userdata4 exception
-                         * @devdesc Unable to send cmd to OCC exception
+                         * @devdesc Unable to send cmd to OCC due to exception
                          */
                         bldErrLog(l_errlHndl, HTMGT_MOD_SEND_OCC_CMD,
                                   HTMGT_RC_OCC_EXCEPTION,
@@ -872,6 +872,11 @@ namespace HTMGT
                     {
                         iv_Occ->collectCheckpointScomData(l_excErr);
                     }
+                    // Add proc callout
+                    l_excErr->addHwCallout(iv_Occ->getTarget(),
+                                           HWAS::SRCI_PRIORITY_MED,
+                                           HWAS::NO_DECONFIG,
+                                           HWAS::GARD_NULL);
                     ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
 
                     // Save exception so we don't log it again

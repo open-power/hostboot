@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,6 +159,9 @@ namespace HTMGT
             bool l_bad_fru_data = false;
             uint8_t numCallouts = 0;
             uint8_t calloutIndex = 0;
+            bool l_fw_callout_found = false;
+            HWAS::callOutPriority fw_priority;
+            occErrlCallout_t fw_callout;
             while (calloutIndex < l_max_callouts)
             {
                 const occErrlCallout_t callout =
@@ -171,13 +174,24 @@ namespace HTMGT
                                                       priority);
                     if (l_success == true)
                     {
-                        l_success = elogAddCallout(l_errlHndl,
-                                                   priority,
-                                                   callout,
-                                                   numCallouts);
-                        if (l_success == false)
+                        // Don't add FW callout (unless no other callouts)
+                        if ((callout.type == OCC_CALLOUT_TYPE_COMPONENT_ID) &&
+                            ((callout.calloutValue&0xFF) == 0x01))
                         {
-                            l_bad_fru_data = true;
+                            l_fw_callout_found = true;
+                            fw_priority = priority;
+                            fw_callout = callout;
+                        }
+                        else
+                        {
+                            l_success = elogAddCallout(l_errlHndl,
+                                                       priority,
+                                                       callout,
+                                                       numCallouts);
+                            if (l_success == false)
+                            {
+                                l_bad_fru_data = true;
+                            }
                         }
                     }
                     else
@@ -207,6 +221,18 @@ namespace HTMGT
                     break;
                 }
                 ++calloutIndex;
+            }
+            if (l_fw_callout_found && (numCallouts == 0))
+            {
+                // No other callouts were found, so add FW callout
+                bool l_success = elogAddCallout(l_errlHndl,
+                                                fw_priority,
+                                                fw_callout,
+                                                numCallouts);
+                if (l_success == false)
+                {
+                    l_bad_fru_data = true;
+                }
             }
 
             // Any bad fru data found ?
