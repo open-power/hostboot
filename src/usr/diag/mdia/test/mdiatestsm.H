@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,7 +34,6 @@
 #include <cxxtest/TestSuite.H>
 #include "../mdiasm.H"
 #include "../mdiasmimpl.H"
-#include <diag/mdia/mdiamevent.H>
 #include <targeting/common/utilFilter.H>
 #include "../mdiatrace.H"
 #include "../mdiamonitor.H"
@@ -333,7 +334,7 @@ class MdiaSmTest : public CxxTest::TestSuite
 
                 if(StateMachine::workItemIsAsync(tmp) != it->expected)
                 {
-                    TS_FAIL("unexpected result from " 
+                    TS_FAIL("unexpected result from "
                             "StateMachine::workItemIsAsync: %d", it->workItem);
                 }
             }
