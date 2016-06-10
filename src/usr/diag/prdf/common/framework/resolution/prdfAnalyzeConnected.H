@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,62 +58,46 @@ struct STEP_CODE_DATA_STRUCT;
 */
 class AnalyzeConnected : public Resolution
 {
-public:
-  /**
-   default ctor
-   */
-  AnalyzeConnected(void);
+  public:
 
-  /**
-   * @brief       Constructor
-   * @param[in]   i_targetType  Target type of unit that's connected to given
-   *                            target
-   * @param[in]   i_idx:        index into getConnected list of chip.
-   */
-  AnalyzeConnected( TARGETING::TYPE i_targetType,
-                    uint32_t i_idx =0xffffffff );
+    /**
+     * @brief       Constructor
+     * @param[in]   i_targetType  Target type of unit that's connected to given
+     *                            target
+     * @param[in]   i_idx:        index into getConnected list of chip.
+     */
+    AnalyzeConnected( TARGETING::TYPE i_targetType = TARGETING::TYPE_NA,
+                      uint32_t i_idx               = INVALID_INDEX ) :
+        iv_targetType(i_targetType), iv_idx(i_idx)
+    {}
 
-  // ~prdfAnalyzeConnected(); default dtor is sufficient
+    // ~prdfAnalyzeConnected(); default dtor is sufficient
 
-  /**
-   * @brief     Determine chip object for current connected unit and call its
-   *            analyze func.
-   * @param[io] io_service_data References to STEP_CODE_DATA_STRUCT
-   * @return    SUCCESS | non-zero if chip not found.
-   * @note      if the call to getConnected yields NULL  than the
-   *            altResolution is called. If the altResolution is NULL than the
-   *            source is added to the callout list.
-   */
-  virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data );
+    /**
+     * @brief     Determine chip object for current connected unit and call its
+     *            analyze func.
+     * @param[io] io_service_data References to STEP_CODE_DATA_STRUCT
+     * @return    SUCCESS | non-zero if chip not found.
+     * @note      if the call to getConnected yields NULL  than the
+     *            altResolution is called. If the altResolution is NULL than the
+     *            source is added to the callout list.
+     */
+    virtual int32_t Resolve( STEP_CODE_DATA_STRUCT & io_service_data );
 
-  virtual bool operator==(const AnalyzeConnected & r) const;
+    virtual bool operator==(const AnalyzeConnected & r) const
+    {
+        return ( iv_targetType == r.iv_targetType &&
+                 iv_idx        == r.iv_idx );
+    }
 
-private:  // functions
-private:  // Data
+  private:  // functions
+  private:  // Data
 
-  TARGETING::TYPE iv_targetType;
-  uint32_t  iv_idx;
+    TARGETING::TYPE iv_targetType;
+    uint32_t  iv_idx;
+
+    static constexpr uint32_t INVALID_INDEX = 0xffffffff;
 };
-
-inline AnalyzeConnected::AnalyzeConnected(void)
-                              : iv_targetType(TARGETING::TYPE_NA),
-                                iv_idx(0xffffffff)
-{
-}
-
-inline AnalyzeConnected::AnalyzeConnected(
-                                TARGETING::TYPE i_targetType,
-                                uint32_t i_idx )
-                                : iv_targetType(i_targetType),
-                                  iv_idx(i_idx)
-{
-}
-
-inline bool AnalyzeConnected::operator==(const AnalyzeConnected & r) const
-{
-  return ( iv_targetType == r.iv_targetType &&
-            iv_idx == r.iv_idx );
-}
 
 } // end namespace PRDF
 

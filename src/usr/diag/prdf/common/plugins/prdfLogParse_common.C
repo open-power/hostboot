@@ -160,32 +160,100 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
 
     switch ( o_targetType )
     {
-        case TYPE_MEMBUF:
-            snprintf( o_chipName, i_sz_chipName, "mb(n%dp%d)",
-                      l_node, l_chip );
-            break;
         case TYPE_PROC:
             snprintf( o_chipName, i_sz_chipName, "pu(n%dp%d)",
                       l_node, l_chip );
             break;
+
+        case TYPE_EQ:
+            l_chip    = l_chip / MAX_EQ_PER_PROC;
+            l_chiplet = l_chiplet % MAX_EQ_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "eq(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         case TYPE_EX:
             l_chip    = l_chip / MAX_EX_PER_PROC;
             l_chiplet = l_chiplet % MAX_EX_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "ex(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
+
+        case TYPE_CORE:
+            l_chip    = l_chip / MAX_EC_PER_PROC;
+            l_chiplet = l_chiplet % MAX_EC_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "(ecn%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_CAPP:
+            l_chip    = l_chip / MAX_CAPP_PER_PROC;
+            l_chiplet = l_chiplet % MAX_CAPP_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "capp(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_PEC:
+            l_chip    = l_chip / MAX_PEC_PER_PROC;
+            l_chiplet = l_chiplet % MAX_PEC_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "pec(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_PHB:
+            l_chip    = l_chip / MAX_PHB_PER_PROC;
+            l_chiplet = l_chiplet % MAX_PHB_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "phb(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_OBUS:
+            l_chip    = l_chip / MAX_OBUS_PER_PROC;
+            l_chiplet = l_chiplet % MAX_OBUS_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "ob(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_XBUS:
+            l_chip    = l_chip / MAX_XBUS_PER_PROC;
+            l_chiplet = l_chiplet % MAX_XBUS_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "xb(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_MCBIST:
+            l_chip    = l_chip / MAX_MCBIST_PER_PROC;
+            l_chiplet = l_chiplet % MAX_MCBIST_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "mcb(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         case TYPE_MCS:
             l_chip    = l_chip / MAX_MCS_PER_PROC;
             l_chiplet = l_chiplet % MAX_MCS_PER_PROC;
             snprintf( o_chipName, i_sz_chipName, "mcs(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
+
+        case TYPE_MCA:
+            l_chip    = l_chip / MAX_MCA_PER_PROC;
+            l_chiplet = l_chiplet % MAX_MCA_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "mca(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_MEMBUF:
+            snprintf( o_chipName, i_sz_chipName, "mb(n%dp%d)",
+                      l_node, l_chip );
+            break;
+
         case TYPE_MBA:
             l_chip    = l_chip / MAX_MBA_PER_MEMBUF;
             l_chiplet = l_chiplet % MAX_MBA_PER_MEMBUF;
             snprintf( o_chipName, i_sz_chipName, "mba(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;
+
         default:
             snprintf( o_chipName, i_sz_chipName, "????" );
     }
