@@ -109,8 +109,9 @@ Target<K, V>& Target<K, V>::operator=(const Target& i_right)
 /// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to compare.
 /// @return bool. True if equal.
-/// @note Platforms need to define this so that the physical
-/// targets are determined to be equivilent rather than just the handles
+/// @note This platform uses handles for comparison as
+/// target handles are statically defined so the order
+/// is consistent.
 ///
 template<TargetType K, typename V>
 bool Target<K, V>::operator==(const Target& i_right) const
@@ -122,13 +123,27 @@ bool Target<K, V>::operator==(const Target& i_right) const
 /// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to compare.
 /// @return bool. True if not equal.
-/// @note Platforms need to define this so that the physical
-/// targets are determined to be equivilent rather than just the handles
+/// @note This platform uses handles for comparison as
+/// target handles are statically defined so the order
+/// is consistent.
 ///
 template<TargetType K, typename V>
 bool Target<K, V>::operator!=(const Target& i_right) const
 { return i_right.iv_handle != iv_handle; }
 
+///
+/// @brief Less Than Comparison Operator
+/// @param[in] i_right Reference to Target to compare.
+/// @return bool. True if less than i_right
+/// @note This platform uses handles for comparison as
+/// target handles are statically defined so the order
+/// is consistent.
+///
+template<TargetType K, typename V>
+bool Target<K, V>::operator<(const Target& i_right) const
+{
+    return  iv_handle < i_right.iv_handle;
+}
 
 ///
 /// @brief This function takes in a FAPI2 Type and returns the corresponding
