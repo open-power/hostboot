@@ -22,67 +22,86 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
 /// @file p9_pm_pfet_control.C
-/// @brief Perform override operations to the EX PFET headers
+/// @brief Enable PFET devices to power on/off all enabled Core and Cache
+/// chiplets in target passed.
 ///
-// *HWP HWP Owner: Greg Still  <stillgs@us.ibm.com>
-// *HWP FW  Owner: Sunil Kumar <skumar8j@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: HS
-///
-/// High-level procedure flow:
-/// \verbatim
-///
-///  Procedure Prereq:
-///     - System clocks are running
-/// \endverbatim
-///
-///   PFVddCntlStat (0x106) layout
-///     Control
-///       0:1 - core_vdd_pfet_force_state 00: nop; 01: Voff; 10: Vret;
-///             11: Von (4:5 must be 00)
-///       2:3 - eco_vdd_pfet_force_state  00: nop; 01: Voff; 10: Vret;
-///             11: Von (6:7 must be 00)
-///       4   - core_vdd_pfet_val_override 0: disable; 1: enable
-///             (0 enables 0:1)
-///       5   - core_vdd_pfet_sel_override 0: disable; 1: enable(0 enables 0:1)
-///       6   - eco_vdd_pfet_val_override  0: disable; 1: enable(0 enables 2:3)
-///       7   - eco_vdd_pfet_sel_override  0: disable; 1: enable:(0 enables 2:3)
-///
-///     Status
-///       42:45 - core_vdd_pfet_state
-///               (42: Idle; 43: Increment; 44: Decrement; 45: Wait)
-///       46:49 - not relevant
-///       50:53 - eco_vdd_pfet_state
-///               (50: Idle; 51: Increment; 52: Decrement; 53: Wait)
-///       54:57 - not relevant
-///
-///   PFVcsCntlStat (0x10E) layout
-///     Control
-///       0:1 - core_vcs_pfet_force_state 00: nop; 01: Voff; 10: Vret;
-//              11: Von (4:5 must be 00)
-///       2:3 - eco_vcs_pfet_force_state  00: nop; 01: Voff; 10: Vret;
-///             11: Von (6:7 must be 00)
-///       4   - core_vcs_pfet_val_override 0: disable; 1: enable(0 enables 0:1)
-///       5   - core_vcs_pfet_sel_override 0: disable; 1: enable(0 enables 0:1)
-///       6   - eco_vcs_pfet_val_override  0: disable; 1: enable(0 enables 2:3)
-///       7   - eco_vcs_pfet_sel_override  0: disable; 1: enable(0 enables 2:3)
-///     Status
-///       42:45 - core_vcs_pfet_state
-///               (42: Idle; 43: Increment; 44: Decrement; 45: Wait)
-///       46:49 - not relevant
-///       50:53 - eco_vcs_pfet_state
-//                (50: Idle; 51: Increment; 52: Decrement; 53: Wait)
-///       54:57 - not relevant
-///
+//----------------------------------------------------------------------------
+// *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 2
+// *HWP Consumed by     : OCC:CME:FSP
+//----------------------------------------------------------------------------
+//
+// @verbatim
+// High-level procedure flow:
+// PFET Control
+// Power-on via Hardare FSM:
+// ------------------------
+// VDD first, VCS second
+// Read PFETCNTLSTAT_REG and check for bits 0:3 being 0b0000.
+// Write PFETCNTLSTAT_REG with values defined below
+// -vdd_pfet_force_state = 11 (Force Von)
+// -vdd_pfet_val_override = 0 (Override disabled)
+// -vdd_pfet_sel_override = 0 (Override disabled)
+// -vdd_pfet_enable_regulation_finger = 0 (Regulation finger controlled by FSM)
+// Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)-Timeout value = 1ms
+// (Optional) Check PFETCNTLSTAT_REG[VDD_PG_SEL]being 0x8 (Off encode point)
+// Write PFETCNTLSTAT_REG_WCLEAR
+// -vdd_pfet_force_state = 00 (No Operation);all fields set to 1 for WAND
+// Write PFETCNTLSTAT_REG_OR with values defined below
+// -vcs_pfet_force_state = 11 (Force Von)
+// Write to PFETCNTLSTAT_REG_CLR
+// -vcs_pfet_val_override = 0 (Override disabled)
+// -vcs_pfet_sel_override = 0 (Override disabled)
+// Note there is no vcs_pfet_enable_regulation_finger
+// Poll for PFETCNTLSTAT_REG[VCS_PG_STATE] for 0b1000 (FSM idle)-Timeout value = 1ms
+// (Optional) Check PFETCNTLSTAT_REG[VCS_PG_SEL] being 0x8 (Off encode point)
+// Write PFETCNTLSTAT_REG_WCLEAR
+// -vcs_pfet_force_state = 00 (No Operation);all fields set to 1 for WAND
+//
+// Power-off via Hardare FSM:
+// -------------------------
+// VCS first, VDD second
+// Read PFETCNTLSTAT_REG and check for bits 0:3 being 0b0000.
+// Write PFETCNTLSTAT_REG with values defined below
+// -vcs_pfet_force_state = 01 (Force Voff)
+// -vcs_pfet_val_override = 0 (Override disabled)
+// -vcs_pfet_sel_override = 0 (Override disabled)
+// Note there is no vcs_pfet_enable_regulation_finger
+// Poll for PFETCNTLSTAT_REG[VCS_PG_STATE] for 0b1000 (FSM idle)-Timeout value = 1ms
+// (Optional) Check PFETCNTLSTAT_REG[VCS_PG_SEL]being 0x8 (Off encode point)
+// Write PFETCNTLSTAT_REG_WCLEAR
+// -vcs_pfet_force_state = 00 (No Operation);all fields set to 1 for WAND
+// Write PFETCNTLSTAT_REG_OR with values defined below
+// -vdd_pfet_force_state = 01 (Force Voff)
+// Write to PFETCNTLSTAT_REG_CLR
+// -vdd_pfet_val_override = 0 (Override disabled)
+// -vdd_pfet_sel_override = 0 (Override disabled)
+// -vdd_pfet_enable_regulation_finger = 0 (Regulation finger controlled by FSM)
+// Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)-Timeout value = 1ms
+// (Optional) Check PFETCNTLSTAT_REG[VDD_PG_SEL] being 0x8 (Off encode point)
+// Write PFETCNTLSTAT_REG_WCLEAR
+// -vdd_pfet_force_state = 00 (No Operation);all fields set to 1 for WAND
+//
+// NOTE:
+// For EQ supports: VDD,VCS,BOTH
+// For EC & EX supports: VDD only. VCS returns an error. BOTH reports a warning that only VDD was controlled.
+// EX target only powers OFF the two cores associated with that 'half' of the quad.
+//
+// Procedure Prereq:
+//    - System clocks are running
+//
+// @TODO:RTC:157109
+// @endverbatim
 //------------------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------
-#include "p9_pm_pfet_control.H"
+#include <p9_pm_pfet_control.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -92,210 +111,592 @@
 // Global variables
 //------------------------------------------------------------------------------
 
-enum PFETCONTROL_Constants
+enum pfetRegField
 {
-    CORE_FORCE_STATE        = 0,
-    CORE_FORCE_LENGTH       = 2,  // 0:1
-    ECO_FORCE_STATE         = 2,
-    ECO_FORCE_LENGTH        = 2,  // 2:3
-    CORE_OVERRIDE_STATE     = 4,
-    CORE_OVERRIDE_LENGTH    = 2,  // 4:5
-    ECO_OVERRIDE_STATE      = 6,
-    ECO_OVERRIDE_LENGTH     = 2,  // 6:7
-    CORE_OVERRIDE_SEL       = 22,
-    CORE_OVERRIDE_SEL_LENGTH = 4,  // 22:25
-    ECO_OVERRIDE_SEL        = 38,
-    ECO_OVERRIDE_SEL_LENGTH = 4,  // 38:41
-    CORE_FSM_IDLE_BIT       = 42,
-    ECO_FSM_IDLE_BIT        = 50,
-    PFET_MAX_IDLE_POLLS     = 16,
-    PFET_POLL_WAIT          = 1000000,  // 100us (in ns units)
-    PFET_POLL_WAIT_SIM      = 1000      // 100us (in sim cycles)
+    PFET_NOP           = 0,
+    PFET_FORCE_VOFF    = 1,
+    PFET_NOP_RESERVERD = 2,
+    PFET_FORCE_VON     = 3
 };
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
+enum PFCS_Bits
+{
+    VDD_PFET_FORCE_STATE_BIT             = 0,
+    VCS_PFET_FORCE_STATE_BIT             = 2,
+    VDD_PFET_VAL_OVERRIDE_BIT            = 4,
+    VDD_PFET_SEL_OVERRIDE_BIT            = 5,
+    VCS_PFET_VAL_OVERRIDE_BIT            = 6,
+    VCS_PFET_SEL_OVERRIDE_BIT            = 7,
+    VDD_PFET_REGULATION_FINGER_EN_BIT    = 8,
+    VDD_PFET_REGULATION_FINGER_VALUE_BIT = 9,
+    RESERVED1_BIT                        = 10,
+    VDD_PFET_ENABLE_VALUE_BIT            = 12,
+    VDD_PFET_SEL_VALUE_BIT               = 20,
+    VCS_PFET_ENABLE_VALUE_BIT            = 24,
+    VCS_PFET_SEL_VALUE_BIT               = 32,
+    RESERVED2_BIT                        = 36,
+    VDD_PG_STATE_BIT                     = 42,
+    VDD_PG_SEL_BIT                       = 46,
+    VCS_PG_STATE_BIT                     = 50,
+    VCS_PG_SEL_BIT                       = 54,
+    RESERVED3_BIT                        = 58
+};
 
-
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
-
-fapi2::ReturnCode pm_pfet_on(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_ex_number,
-    const PMPFETTYPE_C::pfet_dom_t i_domain);
-
-fapi2::ReturnCode pm_pfet_off(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_ex_number,
-    const PMPFETTYPE_C::pfet_dom_t i_domain);
-
-fapi2::ReturnCode pm_pfet_off_override(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_ex_number,
-    const PMPFETTYPE_C::pfet_dom_t i_domain);
-
-fapi2::ReturnCode pm_pfet_poll(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_ex_number,
-    const uint64_t i_address,
-    const PMPFETTYPE_C::pfet_dom_t i_domain);
-
-fapi2::ReturnCode pm_pfet_read_state(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_address,
-    const uint32_t i_bitoffset,
-    char* o_state);
-
-fapi2::ReturnCode pm_pfet_ivrm_fsm_fix(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint8_t i_ex_number,
-    const PMPFETTYPE_C::pfet_dom_t i_domain,
-    const PMPFETTYPE_C::pfet_force_t i_op);
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
-fapi2::ReturnCode
-p9_pm_pfet_control(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                   const uint8_t i_ex_number, PMPFETTYPE_C::pfet_dom_t i_domain,
-                   PMPFETTYPE_C::pfet_force_t i_op)
+///
+/// @brief Enable power on/off for core and cache chiplets
+///
+/// @param [in]  i_target          Target type Core/EQ/Ex chiplet
+/// @param [in]  i_rail            Valid rail options:BOTH/VDD/VCS
+/// @param [in]  i_op              Valid options:OFF/ON
+///
+/// @return FAPI2_RC_SUCCESS on success, error otherwise.
+///
+template <fapi2::TargetType K >
+static fapi2::ReturnCode pfet_ctrl(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op);
+
+///
+/// @brief Enable power on/off for core and cache chiplets-VDD
+///
+/// @param [in]  i_target          Target type Core/EQ/Ex chiplet
+/// @param [in]  i_op              Valid options:OFF/ON
+/// @param [in]  i_PPM_PFCS_RW     Register offset for target type Core/EQ/EX
+/// @param [in]  i_PPM_PFCS_CLR    Register offset for target type Core/EQ/EX
+/// @param [in]  i_PPM_PFCS_OR     Register offset for target type Core/EQ/EX
+///
+/// @return FAPI2_RC_SUCCESS on success, error otherwise.
+///
+template <fapi2::TargetType K >
+fapi2::ReturnCode pfet_ctrl_vdd(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_force_t  i_op,
+    const uint64_t i_PPM_PFCS_RW,
+    const uint64_t i_PPM_PFCS_CLR,
+    const uint64_t i_PPM_PFCS_OR);
+
+///
+/// @brief Enable power on/off for core and cache chiplets-VCS
+///
+/// @param [in]  i_target          Target type Core/EQ/Ex chiplet
+/// @param [in]  i_op              Valid options:OFF/ON
+/// @param [in]  i_PPM_PFCS_RW     Register offset for target type Core/EQ/EX
+/// @param [in]  i_PPM_PFCS_CLR    Register offset for target type Core/EQ/EX
+/// @param [in]  i_PPM_PFCS_OR     Register offset for target type Core/EQ/EX
+///
+/// @return FAPI2_RC_SUCCESS on success, error otherwise.
+///
+template <fapi2::TargetType K >
+fapi2::ReturnCode pfet_ctrl_vcs(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_force_t  i_op,
+    const uint64_t i_PPM_PFCS_RW,
+    const uint64_t i_PPM_PFCS_CLR,
+    const uint64_t i_PPM_PFCS_OR);
+
+
+// Procedure pfet control-EQ entry point, comments in header
+fapi2::ReturnCode p9_pm_pfet_control_eq(
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
-    FAPI_IMP("p9_pm_pfet_control Enter");
+    fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_unit_pos     = 0;
+    bool core_target_found = false;
 
-    FAPI_IMP("p9_pm_pfet_control Exit");
-    return fapi2::FAPI2_RC_SUCCESS;
-}
+    FAPI_INF("p9_pm_pfet_control_eq: Entering...");
 
-///-----------------------------------------------------------------------------
-/// pm_pfet_on
-///
-/// @brief  Turn a chiplet domain on - VCS first, then VDD
-///
-/// @param[in] i_target     Chip target
-/// @param[in] i_ex_number  EX number
-/// @param[in] i_domain     Domain: ECO, CORE, BOTH
-///
-/// @retval FAPI_RC_SUCCESS in case of Success,
-/// @retval BAD_RETURN_CODE otherwise
-fapi2::ReturnCode
-pm_pfet_on(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-           const uint8_t i_ex_number,
-           const PMPFETTYPE_C::pfet_dom_t i_domain)
+    // Get chiplet position
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    FAPI_INF("pfet control for EQ chiplet %d", l_unit_pos);
+
+    // When i_op == OFF all functional cores first followed by EQ
+    // When i_op ==  ON EQ first followed by all functional cores
+    if(i_op == PM_PFET_TYPE_C::ON)
+    {
+        FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_EQ>(i_target,
+                 i_rail, i_op), "Error: pfet_ctrl for eq!!");
+    }
+
+    // Check for all core chiplets in EQ and power on/off targets accordingly
+    for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+         (fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_target, l_unit_pos));
+        FAPI_INF("Core chiplet %d in EQ", l_unit_pos);
+        FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
+                 i_rail, i_op), "Error: pfet_ctrl for core!!");
+        core_target_found = true;
+    }
+
+    // Power on/off EQ target
+    if( (i_op == PM_PFET_TYPE_C::OFF) && (core_target_found) )
+    {
+        FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_EQ>(i_target,
+                 i_rail, i_op), "Error: pfet_ctrl for eq!!");
+    }
+    else if( ((i_op == PM_PFET_TYPE_C::ON) && !(core_target_found)) ||
+             ((i_op == PM_PFET_TYPE_C::OFF) && !(core_target_found)) )
+    {
+        FAPI_INF("EQ chiplet no. %d; No core target found in functional state in this EQ\n", l_unit_pos);
+    }
+
+    FAPI_INF("p9_pm_pfet_control_eq: ...Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+} //p9_pm_pfet_control_eq
+
+
+// Procedure pfet control-EX entry point, comments in header
+fapi2::ReturnCode p9_pm_pfet_control_ex(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
-    FAPI_IMP("p9_pm_pfet_on Enter");
+    fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_unit_pos     = 0;
+    bool core_target_found = false;
 
-    return fapi2::FAPI2_RC_SUCCESS;
-}
+    FAPI_INF("p9_pm_pfet_control_ex: Entering...");
 
-///-----------------------------------------------------------------------------
-/// pm_pfet_off
-///
-/// @brief  Turn a chiplet domain off - VDD first, then VCS
-///
-/// @param[in] i_target     Chip target
-/// @param[in] i_ex_number  EX number
-/// @param[in] i_domain     Domain: ECO, CORE, BOTH
-///
-/// @retval FAPI_RC_SUCCESS in case of success,
-/// @retval BAD_RETURN_CODE otherwise
-fapi2::ReturnCode
-pm_pfet_off(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-            const uint8_t i_ex_number,
-            const PMPFETTYPE_C::pfet_dom_t i_domain)
+    // Get chiplet position
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    FAPI_INF("pfet control for EX chiplet %d", l_unit_pos);
+
+    // Check for all core chiplets in EX and power on/off targets accordingly
+    for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+         (fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_target, l_unit_pos));
+        FAPI_INF("Core chiplet %d in EX", l_unit_pos);
+        FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
+                 i_rail, i_op), "Error: pfet_ctrl for core!!");
+        core_target_found = true;
+    }
+
+    // When no functional chiplet target found
+    if(!core_target_found)
+    {
+        FAPI_INF("EX chiplet no. %d; No core target found in functional state in this EX\n", l_unit_pos);
+    }
+
+    FAPI_INF("p9_pm_pfet_control_ex: ...Exiting");
+
+fapi_try_exit:
+    return fapi2::current_err;
+} //p9_pm_pfet_control_ex
+
+
+// Procedure pfet control-Core entry point, comments in header
+fapi2::ReturnCode p9_pm_pfet_control_ec(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
-    FAPI_IMP("p9_pm_pfet_off Enter");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    return fapi2::FAPI2_RC_SUCCESS;
-}
+    FAPI_INF("p9_pm_pfet_control_core: Entering...");
 
-///-----------------------------------------------------------------------------
-/// pm_pfet_off_override
-///
-/// @param[in] i_target     Chip target
-/// @param[in] i_ex_number  EX number
-/// @param[in] i_domain     Domain: ECO, CORE, BOTH
-///
-/// @retval FAPI_RC_SUCCESS in case of success,
-/// @retval BAD_RETURN_CODE otherwise
+    FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(i_target,
+             i_rail, i_op), "Error: pfet_ctrl for core!!");
 
-fapi2::ReturnCode
-pm_pfet_off_override(const
-                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     const uint8_t i_ex_number,
-                     const PMPFETTYPE_C::pfet_dom_t i_domain)
-{
-    FAPI_IMP("p9_pm_pfet_off_override Enter");
+    FAPI_INF("p9_pm_pfet_control_core: ...Exiting");
 
-    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+} //p9_pm_pfet_control_ec
 
-}
-///-----------------------------------------------------------------------------
-/// pm_pfet_poll
-///
-/// @param[in] i_target     Chip target
-/// @param[in] i_address    Address to poll for PFET State
-/// @param[in] i_domain     Domain: BOTH, ECO, CORE
-///
-/// @retval FAPI_RC_SUCCESS in case of success
-/// @retval RC_PROCPM_PFET_TIMEOUT otherwise
-
-fapi2::ReturnCode
-pm_pfet_poll(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-             const uint8_t i_ex_number, const uint64_t i_address,
-             const PMPFETTYPE_C::pfet_dom_t i_domain)
-{
-    FAPI_IMP("p9_pm_pfet_poll Enter");
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-}
 
 //------------------------------------------------------------------------------
-/// pm_pfet_read_state
-///
-/// @param[in]  i_target     Chip target
-/// @param[in]  i_address    Address to poll for PFET State
-/// @param[in]  i_bitoffset  Bit to poll on
-/// @param[out] o_state      String representing the state of the controller
-///                          "OFF", "ON", "REGULATION", "UNDEFINED"
-/// @retval FAPI_RC_SUCCESS in case of success
-/// @retval RC_PROCPM_PFET_TIMEOUT otherwise
-
-fapi2::ReturnCode
-pm_pfet_read_state(const
-                   fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                   const uint64_t i_address,
-                   const uint32_t i_bitoffset,
-                   const char* o_state)
+// pfet_ctrl:
+//  Function to power on/off core and cache chiplets
+//------------------------------------------------------------------------------
+template <fapi2::TargetType K >
+fapi2::ReturnCode pfet_ctrl(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
-    FAPI_IMP("p9_pm_pfet_read_state Enter");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_temp64;
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_unit_pos     = 0;
+    uint8_t VDD_VCS_PFET_FORCE_STATE_BITS_0_3 = VDD_PFET_FORCE_STATE_BIT;
 
+    // Registers used to perform power on/off to core & cache chiplets
+    // PPM PFETCNTLSTAT REG
+    uint64_t PPM_PFCS_RW = 0;
+    uint64_t PPM_PFCS_CLR = 0;
+    uint64_t PPM_PFCS_OR = 0;
+
+    FAPI_INF("pfet_ctrl: Entering...");
+
+    // Get chiplet position
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+
+    // Check for target passed
+    if(i_target.getType() & fapi2::TARGET_TYPE_CORE)
+    {
+        FAPI_INF("pfet control for Core chiplet %d", l_unit_pos);
+        PPM_PFCS_RW = C_PPM_PFCS_SCOM;    //PPM_PFCS_RW
+        PPM_PFCS_CLR = C_PPM_PFCS_SCOM1;  //PPM_PFCS_CLR
+        PPM_PFCS_OR = C_PPM_PFCS_SCOM2;   //PPM_PFCS_OR
+    }
+    else if(i_target.getType() & fapi2::TARGET_TYPE_EQ)
+    {
+        FAPI_INF("pfet control for EQ chiplet %d", l_unit_pos);
+        PPM_PFCS_RW = EQ_PPM_PFCS_SCOM;
+        PPM_PFCS_CLR = EQ_PPM_PFCS_SCOM1;
+        PPM_PFCS_OR = EQ_PPM_PFCS_SCOM2;
+    }
+    else if(i_target.getType() & fapi2::TARGET_TYPE_EX)
+    {
+        FAPI_INF("pfet control for EX chiplet %d", l_unit_pos);
+        PPM_PFCS_RW = EX_PPM_PFCS_SCOM;
+        PPM_PFCS_CLR = EX_PPM_PFCS_SCOM1;
+        PPM_PFCS_OR = EX_PPM_PFCS_SCOM2;
+    }
+    else
+    {
+        // Invalid chiplet selected
+        FAPI_ASSERT(false,
+                    fapi2::PFET_CTRL_INVALID_CHIPLET_ERROR()
+                    .set_TARGET(i_target),
+                    "ERROR: Invalid chiplet selected. Target:%x", i_target);
+    }
+
+    // Check for PFET hardware FSM
+    // Read PFETCNTLSTAT_REG and check for bits [0:3]=0b0000
+    FAPI_DBG("Make sure that we are not forcing PFET for VCS or VDD off");
+    FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS_RW, l_data64),
+             "Failed to read PPM_PFCS_RW");
+
+    l_data64.extractToRight(l_temp64, VDD_VCS_PFET_FORCE_STATE_BITS_0_3, 4);
+
+    FAPI_ASSERT(l_temp64 == 0,
+                fapi2::PFET_FORCE_STATE_NOT_ZERO_ERROR()
+                .set_VALUE(l_temp64).set_TARGET(i_target),
+                "ERROR: PFET force state not zero");
+
+    switch(i_op)
+    {
+        case PM_PFET_TYPE_C::OFF:
+            switch(i_rail)
+            {
+                case PM_PFET_TYPE_C::BOTH:
+                case PM_PFET_TYPE_C::VCS:
+                    if(( (i_rail == PM_PFET_TYPE_C::BOTH) && (i_target.getType() & fapi2::TARGET_TYPE_EQ) ) ||
+                       ( (i_rail == PM_PFET_TYPE_C::VCS)  && (i_target.getType() & fapi2::TARGET_TYPE_EQ) ))
+                    {
+                        // VCS first, VDD second for BOTH rails power off
+                        pfet_ctrl_vcs(i_target,
+                                      i_op,
+                                      PPM_PFCS_RW,
+                                      PPM_PFCS_CLR,
+                                      PPM_PFCS_OR);
+
+                        if(i_rail == PM_PFET_TYPE_C::BOTH)
+                        {
+                            pfet_ctrl_vdd(i_target,
+                                          i_op,
+                                          PPM_PFCS_RW,
+                                          PPM_PFCS_CLR,
+                                          PPM_PFCS_OR);
+                        }
+
+                        break;
+                    }
+                    else
+                    {
+                        FAPI_IMP("WARNING:Only VDD (not BOTH/VCS) is controlled for target Core & EX");
+
+                        if(i_rail == PM_PFET_TYPE_C::VCS)
+                        {
+                            break;
+                        }
+                    }
+
+                case PM_PFET_TYPE_C::VDD:
+                    pfet_ctrl_vdd(i_target,
+                                  i_op,
+                                  PPM_PFCS_RW,
+                                  PPM_PFCS_CLR,
+                                  PPM_PFCS_OR);
+
+                    break;
+            }
+
+            break;
+
+        case PM_PFET_TYPE_C::ON:
+            if(i_target.getType() & fapi2::TARGET_TYPE_EX)
+            {
+                FAPI_IMP("WARNING:Target EX only power off the two cores associated with that 'half' of the quad");
+                break;
+            }
+
+            switch(i_rail)
+            {
+                case PM_PFET_TYPE_C::BOTH:
+                case PM_PFET_TYPE_C::VDD:
+                    // VDD first, VCS second for BOTH rails power on
+                    pfet_ctrl_vdd(i_target,
+                                  i_op,
+                                  PPM_PFCS_RW,
+                                  PPM_PFCS_CLR,
+                                  PPM_PFCS_OR);
+
+                    if( (i_rail == PM_PFET_TYPE_C::BOTH) && (i_target.getType() & fapi2::TARGET_TYPE_EQ) )
+                    {
+                        pfet_ctrl_vcs(i_target,
+                                      i_op,
+                                      PPM_PFCS_RW,
+                                      PPM_PFCS_CLR,
+                                      PPM_PFCS_OR);
+                    }
+
+                    if(( (i_rail == PM_PFET_TYPE_C::BOTH) && (i_target.getType() & fapi2::TARGET_TYPE_CORE) ) ||
+                       ( (i_rail == PM_PFET_TYPE_C::BOTH) && (i_target.getType() & fapi2::TARGET_TYPE_EX) ))
+                    {
+                        FAPI_IMP("WARNING:Only VDD (not BOTH/VCS) is controlled for target Core & EX");
+                    }
+
+                    break;
+
+                case PM_PFET_TYPE_C::VCS:
+                    if(i_target.getType() & fapi2::TARGET_TYPE_EQ)
+                    {
+                        pfet_ctrl_vcs(i_target,
+                                      i_op,
+                                      PPM_PFCS_RW,
+                                      PPM_PFCS_CLR,
+                                      PPM_PFCS_OR);
+                    }
+                    else
+                    {
+                        FAPI_IMP("WARNING:Only VDD (not BOTH/VCS) is controlled for target Core & EX");
+                    }
+
+                    break;
+            }
+
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
-//-----------------------------------------------------------------------------
-/// pm_pfet_ivrm_fsm_fix
-///
-/// @brief Fix ivrm FSM interference with PFET power off
-/// @param[in] i_target     Chip target
-/// @param[in] i_ex_number  EX number
-/// @param[in] i_domain     Domain: BOTH, ECO, CORE
-/// @param[in] i_op         Operation: VON, VOFF, NONE
 
-fapi2::ReturnCode
-pm_pfet_ivrm_fsm_fix(const
-                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     const uint8_t i_ex_number,
-                     const PMPFETTYPE_C::pfet_dom_t i_domain,
-                     const PMPFETTYPE_C::pfet_force_t i_op)
+//------------------------------------------------------------------------------
+// pfet_ctrl_vdd:
+//  Function to power on/off core and cache chiplets
+//------------------------------------------------------------------------------
+template <fapi2::TargetType K >
+fapi2::ReturnCode pfet_ctrl_vdd(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_force_t i_op,
+    const uint64_t i_PPM_PFCS_RW,
+    const uint64_t i_PPM_PFCS_CLR,
+    const uint64_t i_PPM_PFCS_OR)
 {
-    FAPI_IMP("p9_pm_pfet_ivrm_fsm_fix Enter");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_temp64;
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint16_t                 l_delayCnt = 10000;
+
+    FAPI_INF("pfet_ctrl_vdd: Entering...");
+
+    if(i_op == PM_PFET_TYPE_C::OFF)
+    {
+        // Clear VDD PFET stage select and value override bits
+        FAPI_DBG("Clear VDD PFET stage select and value override bits");
+        l_data64.flush<0>().
+        setBit<VDD_PFET_FORCE_STATE_BIT, 2>().
+        setBit<VDD_PFET_VAL_OVERRIDE_BIT>().
+        setBit<VDD_PFET_SEL_OVERRIDE_BIT>().
+        setBit<VDD_PFET_REGULATION_FINGER_EN_BIT>();
+
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+                 "putScom failed for address PPM_PFCS_CLR");
+
+        FAPI_DBG("Force VDD off");
+        l_data64.flush<0>().insertFromRight(PFET_FORCE_VOFF, VDD_PFET_FORCE_STATE_BIT, 2);
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_OR, l_data64),
+                 "putScom failed for address PPM_PFCS_OR");
+    }
+    else
+    {
+        // Clear VDD PFET stage select and value override bits
+        FAPI_DBG("Clear VDD PFET stage select and value override bits");
+        l_data64.flush<0>().
+        setBit<VDD_PFET_VAL_OVERRIDE_BIT>().
+        setBit<VDD_PFET_SEL_OVERRIDE_BIT>().
+        setBit<VDD_PFET_REGULATION_FINGER_EN_BIT>();
+
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+                 "putScom failed for address PPM_PFCS_CLR");
+
+        FAPI_DBG("Force VDD on");
+        l_data64.flush<0>().insertFromRight(PFET_FORCE_VON, VDD_PFET_FORCE_STATE_BIT, 2);
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_OR, l_data64),
+                 "putScom failed for address PPM_PFCS_OR");
+    }
+
+    // Check for valid power on completion
+    // Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)
+    // Timeout value = 1ms
+    // Polling the register in the interval of 100us (max 100us*10=1ms)
+    FAPI_DBG("Polling register in interval of 100us (max 100us*10=1ms) \
+             for power gate sequencer state: FSM idle else timeout");
+
+    do
+    {
+        fapi2::delay(PFET_DELAY, PFET_SIM_CYCLES_DELAY);
+
+        FAPI_TRY(fapi2::getScom(i_target, i_PPM_PFCS_RW, l_data64),
+                 "getScom failed for address PPM_PFCS_RW");
+        l_data64.extractToRight(l_temp64, VDD_PG_STATE_BIT, 4);
+
+        if(l_temp64 == 0x8)
+        {
+            break;
+        }
+
+        l_delayCnt--;
+    }
+    while(l_delayCnt > 0);
+
+    FAPI_INF("Delay count: %d", l_delayCnt);
+
+    FAPI_ASSERT(l_temp64 == 0x8,
+                fapi2::PFET_CTRL_VDD_PG_STATE_TIMEOUT_ERROR()
+                .set_VALUE(l_temp64).set_TARGET(i_target),
+                "ERROR: VDD FSM idle timeout");
+
+    // Optional check VDD_PG_SEL
+    FAPI_DBG("Optionally checking for VDD_PG_SEL value");
+    l_data64.extractToRight(l_temp64, VDD_PG_SEL_BIT, 4);
+    FAPI_DBG("Value of VDD_PG_SEL: %0x", l_temp64);
+
+    // Write PFETCNTLSTAT_REG_WCLEAR vdd_pfet_force_state = 00 (No Operation)
+    FAPI_DBG("vdd_pfet_force_state = 00, or Idle");
+    l_data64.flush<0>().setBit<VDD_PFET_FORCE_STATE_BIT, 2>();
+    FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+             "putScom failed for address PPM_PFCS_CLR");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+//------------------------------------------------------------------------------
+// pfet_ctrl_vcs:
+//  Function to power on/off core and cache chiplets
+//------------------------------------------------------------------------------
+template <fapi2::TargetType K >
+fapi2::ReturnCode pfet_ctrl_vcs(
+    const fapi2::Target< K >&  i_target,
+    const PM_PFET_TYPE_C::pfet_force_t i_op,
+    const uint64_t i_PPM_PFCS_RW,
+    const uint64_t i_PPM_PFCS_CLR,
+    const uint64_t i_PPM_PFCS_OR)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_temp64;
+
+    uint16_t                 l_delayCnt = 10000;
+
+    FAPI_INF("pfet_ctrl_vcs: Entering...");
+
+    if(i_op == PM_PFET_TYPE_C::OFF)
+    {
+        // Clear VCS PFET stage select and value override bits
+        FAPI_DBG("Clear VCS PFET stage select and value override bits");
+        l_data64.flush<0>().
+        setBit<VCS_PFET_FORCE_STATE_BIT, 2>().
+        setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
+        setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
+
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+                 "putScom failed for address PPM_PFCS_CLR");
+
+        FAPI_DBG("Force VCS off");
+        l_data64.flush<0>().insertFromRight(PFET_FORCE_VOFF, VCS_PFET_FORCE_STATE_BIT, 2);
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_OR, l_data64),
+                 "putScom failed for address PPM_PFCS_OR");
+    }
+    else
+    {
+        // Clear VCS PFET stage select and value override bits
+        FAPI_DBG("Clear VCS PFET stage select and value override bits");
+        l_data64.flush<0>().
+        setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
+        setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
+
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+                 "putScom failed for address PPM_PFCS_CLR");
+
+        FAPI_DBG("Force VCS on");
+        l_data64.flush<0>().insertFromRight(PFET_FORCE_VON, VCS_PFET_FORCE_STATE_BIT, 2);
+        FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_OR, l_data64),
+                 "putScom failed for address PPM_PFCS_OR");
+    }
+
+    // Check for valid power on completion
+    // Poll for PFETCNTLSTAT_REG[VCS_PG_STATE] for 0b1000 (FSM idle)
+    // Timeout value = 1ms
+    // Polling the register in the interval of 100us (max 100us*10=1ms)
+    FAPI_DBG("Polling register in interval of 100us (max 100us*10=1ms) \
+             for power gate sequencer state: FSM idle else timeout");
+
+    do
+    {
+        fapi2::delay(PFET_DELAY, PFET_SIM_CYCLES_DELAY);
+
+        FAPI_TRY(fapi2::getScom(i_target, i_PPM_PFCS_RW, l_data64),
+                 "getScom failed for address PPM_PFCS_RW");
+        l_data64.extractToRight(l_temp64, VCS_PG_STATE_BIT, 4);
+
+        if(l_temp64 == 0x8)
+        {
+            break;
+        }
+
+        l_delayCnt--;
+    }
+    while(l_delayCnt > 0);
+
+    FAPI_INF("Delay count: %d", l_delayCnt);
+
+    FAPI_ASSERT(l_temp64 == 0x8,
+                fapi2::PFET_CTRL_VCS_PG_STATE_TIMEOUT_ERROR()
+                .set_VALUE(l_temp64).set_TARGET(i_target),
+                "ERROR: VCS FSM idle timeout");
+
+    // Optional check VCS_PG_SEL
+    FAPI_DBG("Optionally checking for VCS_PG_SEL value");
+    l_data64.extractToRight(l_temp64, VCS_PG_SEL_BIT, 4);
+    FAPI_DBG("Value of VCS_PG_SEL: %0x", l_temp64);
+
+    // Write PFETCNTLSTAT_REG_WCLEAR vcs_pfet_force_state = 00 (No Operation)
+    FAPI_DBG("vcs_pfet_force_state = 00, or Idle");
+    l_data64.flush<0>().setBit<VCS_PFET_FORCE_STATE_BIT, 2>();
+    FAPI_TRY(fapi2::putScom(i_target, i_PPM_PFCS_CLR, l_data64),
+             "putScom failed for address PPM_PFCS_CLR");
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 

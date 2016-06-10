@@ -22,15 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// @file p9_pm_pfet_control.C
-/// @brief Perform override operations to the EX PFET headers
 ///
-/// *HWP HWP Owner: Greg Still  <stillgs@us.ibm.com>
-/// *HWP FW  Owner: Sunil Kumar <skumar8j@in.ibm.com>
-/// *HWP Team: PM
-/// *HWP Level: 1
-/// *HWP Consumed by: HS
+/// @file p9_pm_pfet_control.H
+/// @brief Enable PFET devices to power on/off all enabled Core and Cache
+/// chiplets in target passed.
 ///
+//----------------------------------------------------------------------------
+// *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 2
+// *HWP Consumed by     : OCC:CME:FSP
+//----------------------------------------------------------------------------
 
 #ifndef _P9_PM_PFETCTL_H_
 #define _P9_PM_PFETCTL_H_
@@ -39,37 +42,108 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p9_pm_pfet_types.H"
-#include "fapi2.H"
-#include "p9_pm.H"
+#include <fapi2.H>
+#include <p9_quad_scom_addresses.H>
+
+static int const PFET_DELAY = 100000;         // 100us in ns
+static int const PFET_SIM_CYCLES_DELAY = 0;
+
+namespace PM_PFET_TYPE_C
+{
+//Valid rail options
+enum pfet_rail_t
+{
+    BOTH,
+    VDD,
+    VCS
+};
+
+//Valid force options
+enum pfet_force_t
+{
+    OFF,
+    ON
+};
+}
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_pm_pfet_control_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    const uint8_t,
-    PMPFETTYPE_C::pfet_dom_t,
-    PMPFETTYPE_C::pfet_force_t);
+typedef fapi2::ReturnCode (*p9_pm_pfet_control_eq_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op);
 
-extern "C" {
+typedef fapi2::ReturnCode (*p9_pm_pfet_control_ex_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op);
 
-/// @brief Controls the pfets for the specified EX chiplet
-///
-/// @param[in] i_target    Processor Chip target
-/// @param[in] i_ex_number EX number
-/// @param[in] i_domain    Domain: BOTH, ECO, CORE
-/// @param[in] i_op        Operation:
-///                        VON: Turns a chiplet domain on, VCS then VDD
-///                        VOFF: Turns a chiplet domain off, VDD then VCS
-//                         VOFF_OVERRIDE: Turns a chiplet domain off with
-///                                         controller override
-///
-/// @return SUCCESS incase of success,
-/// @return BAD_RETURN_CODE otherwise
-    fapi2::ReturnCode p9_pm_pfet_control(const
-                                         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                         const uint8_t i_ex_number,
-                                         PMPFETTYPE_C::pfet_dom_t i_domain,
-                                         PMPFETTYPE_C::pfet_force_t i_op);
+typedef fapi2::ReturnCode (*p9_pm_pfet_control_ec_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+    const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+    const PM_PFET_TYPE_C::pfet_force_t i_op);
+
+extern "C"
+{
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+    /**
+     ** @brief HWP
+     ** p9_pm_pfet_control_eq - Enable power on/off for cache chiplet
+     **
+     ** @param[in]  &i_target    Target type cache chiplet
+     ** @param[in]  i_rail       Valid rail options:
+     **                          BOTH
+     **                          VDD
+     **                          VCS
+     ** @param[in]  i_op         Valid options:
+     **                          OFF
+     **                          ON
+     ** @return FAPI2_RC_SUCCESS on success, error otherwise
+     **/
+    fapi2::ReturnCode  p9_pm_pfet_control_eq (
+        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+        const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+        const PM_PFET_TYPE_C::pfet_force_t i_op);
+
+    /**
+     ** @brief HWP
+     ** p9_pm_pfet_control_ex - Enable power on/off for EX chiplet
+     **
+     ** @param[in]  &i_target    Target type EX chiplet
+     ** @param[in]  i_rail       Valid rail options:
+     **                          BOTH
+     **                          VDD
+     **                          VCS
+     ** @param[in]  i_op         Valid options:
+     **                          OFF
+     **                          ON
+     ** @return FAPI2_RC_SUCCESS on success, error otherwise
+     **/
+    fapi2::ReturnCode  p9_pm_pfet_control_ex (
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+        const PM_PFET_TYPE_C::pfet_force_t i_op);
+
+    /**
+     ** @brief HWP
+     ** p9_pm_pfet_control_ec - Enable power on/off for core chiplet
+     **
+     ** @param[in]  &i_target    Target type core chiplet
+     ** @param[in]  i_rail       Valid rail options:
+     **                          BOTH
+     **                          VDD
+     **                          VCS
+     ** @param[in]  i_op         Valid options:
+     **                          OFF
+     **                          ON
+     ** @return FAPI2_RC_SUCCESS on success, error otherwise
+     **/
+    fapi2::ReturnCode  p9_pm_pfet_control_ec (
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+        const PM_PFET_TYPE_C::pfet_rail_t  i_rail,
+        const PM_PFET_TYPE_C::pfet_force_t i_op);
 
 } // extern "C"
 

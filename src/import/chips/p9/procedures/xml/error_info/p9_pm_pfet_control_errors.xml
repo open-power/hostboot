@@ -1,0 +1,66 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_pm_pfet_control_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>                       -->
+    <!-- *HWP FW Owner: Sumit Kumar <sumit_kumar@in.ibm.com>                -->
+<!-- *HWP Team: PM                                                          -->
+<!-- *HWP Level: 2                                                          -->
+<!-- *HWP Consumed by: OCC:CME:FSP                                              -->
+
+<!-- Error definitions for p9_pm_pfet_control procedure -->
+<!-- ********************************************************************   -->
+<hwpErrors>
+  <hwpError>
+    <rc>RC_PFET_CTRL_INVALID_CHIPLET_ERROR</rc>
+    <description>
+    Invalid chiplet selected.
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PFET_FORCE_STATE_NOT_ZERO_ERROR</rc>
+    <description>
+    PFET force state not zero.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PFET_CTRL_VDD_PG_STATE_TIMEOUT_ERROR</rc>
+    <description>
+    VDD FSM idle timeout. 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+  </hwpError>
+  <hwpError>
+    <rc>RC_PFET_CTRL_VCS_PG_STATE_TIMEOUT_ERROR</rc>
+    <description>
+    VCS FSM idle timeout. 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VALUE</ffdc>
+  </hwpError>
+</hwpErrors>
