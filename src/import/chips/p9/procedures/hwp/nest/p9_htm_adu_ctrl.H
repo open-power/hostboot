@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/hwp/nest/p9_htm_start.H $                 */
+/* $Source: chips/p9/procedures/hwp/nest/p9_htm_adu_ctrl.H $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015,2016                                                    */
+/* COPYRIGHT 2016                                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17,13 +17,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /// ----------------------------------------------------------------------------
-/// @file  p9_htm_start.H
+/// @file  p9_htm_adu_ctrl.H
 ///
-/// @brief Start the HTM collection from a processor chip
-///
-/// The purpose of this procedure is to start the HTM collection from a
-/// processor chip.
-///
+/// @brief Provides ADU control functions that help with HTM collection actions.
 ///
 /// ----------------------------------------------------------------------------
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
@@ -33,37 +29,29 @@
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
-#ifndef _P9_HTM_START_H_
-#define _P9_HTM_START_H_
+#ifndef _P9_HTM_ADU_CTRL_H_
+#define _P9_HTM_ADU_CTRL_H_
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
-// Function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_htm_start_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
-
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 ///
-/// @brief p9_htm_start procedure
+/// @brief Use ADU to trigger start/stop globally the NHTM engines
 ///
-/// This HWP is to trigger the HTM collection process.
-/// p9_htm_setup must be called before running this HWP.
+/// @param[in] i_target        Reference to target
+/// @param[in] i_address       Address of PMISC command that should have
+///                            the start/stop/pause bits set accordingly.
 ///
-/// @param[in]    i_target   Reference to TARGET_TYPE_PROC_CHIP target
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-extern "C"
-{
+fapi2::ReturnCode aduNHTMControl(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_addr);
 
-    fapi2::ReturnCode p9_htm_start(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-} // extern "C"
-
-#endif  // _P9_HTM_START_H_
+#endif  // _P9_HTM_ADU_CTRL_H_
