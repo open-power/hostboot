@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -35,17 +35,45 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_PROC_HTM_CTRL_BAD_STATE</rc>
+    <rc>RC_P9_NHTM_CTRL_BAD_STATE</rc>
     <description>
-        HTM is not at the expected state for current operation.
+        NHTM is not at the expected state for current operation.
     </description>
-    <ffdc>HTM_STATUS_REG</ffdc>
     <ffdc>TARGET</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
     </callout>
-    <!-- TODO: Add deconfigure/HW callout -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_P9_CHTM_CTRL_BAD_STATE</rc>
+    <description>
+        CHTM is not at the expected state for current operation.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>HTM_STATUS_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_P9_NHTM_CTRL_TIMEOUT</rc>
+    <description>
+        NHTM state machine change did not complete in allotted time.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DELAY_COUNT</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM0</ffdc>
+    <ffdc>HTM_STATUS_REG_NHTM1</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
 </hwpError>
 
 <hwpError>
@@ -65,6 +93,7 @@
     <description>
         The selected Core HTM trace type is not yet supported.
     </description>
+    <ffdc>CORE_POS</ffdc>
     <ffdc>CHTM_TRACE_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>

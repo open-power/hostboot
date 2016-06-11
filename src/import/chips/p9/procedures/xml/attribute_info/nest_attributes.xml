@@ -898,28 +898,25 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+  <id>ATTR_PROC_NHTM_BAR_BASE_ADDR</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The base addresses where the HTM traces start.  They are
-                calculated based on the HTM trace sizes requested by users.
-                There are two different HTM trace areas, thus two different
-                base addresses.
+  <description> The base address where the NHTM traces start.  They are
+                calculated based on the NHTM trace size requested by user.
+                This address in memory will be the location where NHTM0/1
+                traces are output.
                 Set by p9_mss_eff_grouping.
-                Used by p9_setup_bars.
+                Used by p9_setup_bars and p9_htm_setup.
   </description>
   <valueType>uint64</valueType>
-  <array>2</array>
   <writeable/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
-  <id>ATTR_PROC_HTM_BAR_SIZES</id>
+  <id>ATTR_PROC_NHTM_BAR_SIZE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The amount of memory a user can reserve to store HTM traces.
-                There are two different HTM trace areas, thus two different
-                sizes (For example, one to store NHTM0 and one forNHTM1).
-                Set by user via attribute override.
+  <description> The amount of memory a user can reserve to store NHTM traces.
+                This amount will be used to store both NHTM0 and NHTM1 traces.
                 Used by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
@@ -941,10 +938,60 @@
      16_MB = 0x0000000001000000,
       ZERO = 0x0000000000000000
   </enum>
-  <array>2</array>
+  <initToZero/>
   <writeable/>
   <persistRuntime/>
 </attribute>
+
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_CHTM_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The base addresses where the CHTM traces start.  They are
+                calculated based on the CHTM trace sizes requested by users.
+                There are 24 different CHTM regions, thus 24 different sizes.
+                Each region is to store HTM trace for a core.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>24</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_CHTM_BAR_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The amount of memory a user can reserve to store CHTM traces.
+                There are 24 cores, thus 24 different sizes.
+                Used by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <array>24</array>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
@@ -963,8 +1010,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description> The amount of memory a user can reserve to store OCC sandbox
                 functions.
-                Platform is to initialize this attribute to 0 (default).
-                Set by user via attribute override.
                 Used by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
@@ -986,7 +1031,7 @@
      16_MB = 0x0000000001000000,
       ZERO = 0x0000000000000000
   </enum>
-  <platInit/>
+  <writeable/>
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************** -->

@@ -75,8 +75,8 @@
         Sandbox bar sizes.
     </description>
     <ffdc>TOTAL_SIZE</ffdc>
-    <ffdc>HTM_BAR_SIZE_1</ffdc>
-    <ffdc>HTM_BAR_SIZE_2</ffdc>
+    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
@@ -91,8 +91,8 @@
         HTM and OCC Sandbox bars are not possible.
     </description>
     <ffdc>TOTAL_SIZE</ffdc>
-    <ffdc>HTM_BAR_SIZE_1</ffdc>
-    <ffdc>HTM_BAR_SIZE_2</ffdc>
+    <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>

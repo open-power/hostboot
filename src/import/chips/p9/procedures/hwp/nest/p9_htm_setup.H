@@ -21,15 +21,16 @@
 ///
 /// @brief Perform p9_htm_setup on a processor chip
 ///
-/// The purpose of this procedure is to setup and start HTM on a processor
+/// The purpose of this procedure is to setup HTM on a processor
 /// chip.
+///
 /// Some start/setup attributes are used as part of the setup process.
 ///
 /// ----------------------------------------------------------------------------
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 1
+/// *HWP Level       : 2
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -43,7 +44,26 @@
 
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_htm_setup_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const bool i_start);
+
+//----------------------------------------------------------------------------
+// Constant definitions
+//----------------------------------------------------------------------------
+// Size selected via HTM_MEM.MEM_SIZE_SMALL (bit 13)
+enum htm_size_t
+{
+    HTM_512M_OR_16M = 0x0,
+    HTM_1G_OR_32M   = 0x1,
+    HTM_2G_OR_64M   = 0x3,
+    HTM_4G_OR_128M  = 0x7,
+    HTM_8G_OR_256M  = 0xF,
+    HTM_16G_OR_512M = 0x1F,
+    HTM_32G_OR_1G   = 0x3F,
+    HTM_64G_OR_2G   = 0x7F,
+    HTM_128G_OR_4G  = 0xFF,
+    HTM_256G_OR_8G  = 0x1FF
+};
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -54,14 +74,17 @@ extern "C"
 ///
 /// @brief p9_htm_setup procedure
 ///
-/// This HWP is to setup the HTM on the input processor chip.
+/// The purpose of this procedure is to setup HTM on a processor
+/// chip.
 ///
-/// @param[in]    i_target   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]    i_target   Reference to TARGET_TYPE_PROC_CHIP target.
+/// @param[in]    i_start    Start HTM after setup.
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_htm_setup(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_start = true);
 
 } // extern "C"
 

@@ -149,7 +149,6 @@
     <attribute><id>PROC_L3_BAR_GROUP_MASK_REG</id></attribute>
     <!--   proc_fab_smp_fabric_attributes.xml  -->
     <attribute><id>PROC_PCIE_NOT_F_LINK</id></attribute>
-    <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
     <attribute><id>MSS_MCS_GROUP_32</id></attribute>
     <attribute><id>MSS_MEM_IPL_COMPLETE</id></attribute>
     <!-- Start pm_plat_attributes.xml -->
@@ -278,7 +277,6 @@
     <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
-    <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
     <attribute><id>ICACHE_LINE_SIZE</id></attribute>
     <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
     <attribute><id>ICACHE_SIZE</id></attribute>
@@ -309,10 +307,6 @@
     <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
     <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
     <attribute><id>PROC_FABRIC_X_ADDR_DIS</id></attribute>
-    <attribute><id>PROC_FABRIC_SYSTEM_ID</id></attribute>
-    <attribute><id>PROC_OCC_SANDBOX_BASE_ADDR</id></attribute>
-    <attribute><id>PROC_HTM_BAR_SIZES</id></attribute>
-
     <attribute><id>PROC_PCIE_HOTPLUG_I2C_DEVICE_ADDRESS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_ENABLE_ACTIONS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id></attribute>
@@ -931,7 +925,6 @@
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
-    <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
     <attribute><id>PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
     <attribute><id>STOPGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
@@ -948,8 +941,6 @@
     <attribute><id>BOOT_FREQ_MULT</id></attribute>
     <attribute><id>PFET_OFF_CONTROLS</id></attribute>
     <attribute><id>MC_SYNC_MODE</id></attribute>
-    <attribute><id>NHTM_TRACE_TYPE</id></attribute>
-    <attribute><id>CHTM_TRACE_TYPE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <!-- proc_fbc_eff_config_links -->
     <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
@@ -965,6 +956,64 @@
     <!-- End proc_fbc_eff_config_links -->
     <attribute><id>FSI_GP_SHADOWS_OVERWRITE</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
+    <attribute><id>PROC_NHTM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_NHTM_BAR_SIZE</id></attribute>
+    <attribute><id>PROC_CHTM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_CHTM_BAR_SIZES</id></attribute>
+    <attribute><id>NHTM_TRACE_TYPE</id></attribute>
+    <attribute><id>CHTM_TRACE_TYPE</id></attribute>
+    <attribute><id>HTMSC_TTYPEFILT_PAT</id></attribute>
+    <attribute><id>HTMSC_TSIZEFILT_PAT</id></attribute>
+    <attribute><id>HTMSC_TTYPEFILT_MASK</id></attribute>
+    <attribute><id>HTMSC_TSIZEFILT_MASK</id></attribute>
+    <attribute><id>HTMSC_TTYPEFILT_INVERT</id></attribute>
+    <attribute><id>HTMSC_CRESPFILT_INVERT</id></attribute>
+    <attribute><id>HTMSC_FILT_PAT</id></attribute>
+    <attribute><id>HTMSC_FILT_CRESP_PAT</id></attribute>
+    <attribute><id>HTMSC_FILT_MASK</id></attribute>
+    <attribute><id>HTMSC_FILT_CRESP_MASK</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CONTENT_SEL</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_SYNC_STAMP_FORCE</id></attribute>
+    <attribute><id>NHTM_HTMSC_MODE_WRITETOIO</id></attribute>
+    <attribute><id>CHTM_HTMSC_MODE_CONTENT_SEL</id></attribute>
+    <attribute><id>CHTM_HTMSC_MODE_CAPTURE</id></attribute>
+    <attribute><id>CHTM_HTMSC_MODE_CORE_INSTR_STALL</id></attribute>
+    <attribute><id>HTMSC_MODE_WRAP</id></attribute>
+    <attribute><id>HTMSC_MODE_DIS_TSTAMP</id></attribute>
+    <attribute><id>HTMSC_MODE_SINGLE_TSTAMP</id></attribute>
+    <attribute><id>HTMSC_MODE_MARKERS_ONLY</id></attribute>
+    <attribute><id>HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id></attribute>
+    <attribute><id>HTMSC_MODE_VGTARGET</id></attribute>
+    <attribute><id>HTMSC_MEM_SCOPE</id></attribute>
+    <attribute><id>HTMSC_MEM_PRIORITY</id></attribute>
+    <attribute><id>NHTM_CTRL_TRIG</id></attribute>
+    <attribute><id>NHTM_CTRL_MARK</id></attribute>
+    <attribute><id>CHTM_CTRL_TRIG</id></attribute>
+    <attribute><id>CHTM_CTRL_MARK</id></attribute>
+    <attribute><id>HTMSC_CTRL_DBG0_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_DBG1_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_RUN_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_OTHER_DBG0_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_XSTOP_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_CHIP0_STOP</id></attribute>
+    <attribute><id>HTMSC_CTRL_CHIP1_STOP</id></attribute>
+    <attribute><id>HTMSC_IMA_PDBAR_SPLIT_CORE_MODE</id></attribute>
+    <attribute><id>HTMSC_IMA_PDBAR_SCOPE</id></attribute>
+    <attribute><id>HTMSC_IMA_PDBAR_ADDR</id></attribute>
+    <attribute><id>PROC_FABRIC_SYSTEM_ID</id></attribute>
+    <attribute><id>PROC_OCC_SANDBOX_BASE_ADDR</id></attribute>
+
+<!-- TODO: RTC 156244 - To be removed -->
+    <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
+    <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_HTM_BAR_SIZES</id></attribute>
+<!-- End TODO: RTC 156244 -->
+
 </targetType>
 
 <!-- chip-processor-nimbus -->

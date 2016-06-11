@@ -64,7 +64,7 @@ const uint8_t BASE_ADDR = 3;         // Base Address
 // Number of memory regions
 const uint8_t NUM_NON_MIRROR_REGIONS = 8;
 const uint8_t NUM_MIRROR_REGIONS = 4;
-const uint8_t NUM_OF_HTM_REGIONS = 2; // 2 HTM memory regions
+const uint8_t NUM_OF_CHTM_REGIONS = 24;        // 24 CHTM memory regions
 const uint8_t NUM_OF_ALT_MEM_REGIONS = 2; // 2 memory holes
 
 // ------------------------------------------------------
