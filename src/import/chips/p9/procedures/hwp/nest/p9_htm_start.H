@@ -51,17 +51,6 @@
 typedef fapi2::ReturnCode (*p9_htm_start_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-//----------------------------------------------------------------------------
-// Constant definitions
-//----------------------------------------------------------------------------
-
-// Timeout count for HTM control
-const uint32_t PROC_HTM_CTRL_TIMEOUT_COUNT   = 20;
-
-// HTM operations delay times for HW/sim
-const uint32_t PROC_HTM_CTRL_HW_NS_DELAY     = 50000;
-const uint32_t PROC_HTM_CTRL_SIM_CYCLE_DELAY = 50000;
-
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
