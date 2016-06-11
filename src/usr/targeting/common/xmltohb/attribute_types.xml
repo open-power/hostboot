@@ -13780,58 +13780,20 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PROC_HTM_BAR_SIZE</id>
-    <description>Desired HTM trace memory size value
-      creator: platform
-      firmware notes:
-        set by platform to request size of per-chip area reserved
-        for HTM trace memory
-    </description>
-    <simpleType>
-        <uint64_t>
-            <default>0</default>
-        </uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_HTM_BAR_SIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PROC_OCC_SANDBOX_SIZE</id>
-    <description>Desired size of OCC sandbox memory region
-      creator: platform
-      firmware notes:
-        set by platform to request size of per-chip area reserved
-        for OCC sandbox function
+    <description> The amount of memory a user can reserve to store OCC sandbox
+                  functions.
+                  Used by p9_mss_eff_grouping.
     </description>
     <simpleType>
         <uint64_t>
-            <default>0</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_HTM_BAR_BASE_ADDR</id>
-    <description>HTM trace memory base address allocated
-    </description>
-    <simpleType><uint64_t></uint64_t></simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+        <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -22106,47 +22068,6 @@ DEPRECATED!!!!
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
-<attribute>
-  <id>PROC_HTM_BAR_SIZES</id>
-  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
-  <description> The amount of memory a user can reserve to store HTM traces.
-                There are two different HTM trace areas, thus two different
-                sizes (For example, one to store NHTM0 and one for NHTM1).
-                Platform is to initialize this attribute to 0 (default).
-                Set by user via attribute override.
-                Used by p9_mss_eff_grouping.
-                256_GB = 0x0000004000000000,
-                128_GB = 0x0000002000000000,
-                 64_GB = 0x0000001000000000,
-                 32_GB = 0x0000000800000000,
-                 16_GB = 0x0000000400000000,
-                  8_GB = 0x0000000200000000,
-                  4_GB = 0x0000000100000000,
-                  2_GB = 0x0000000080000000,
-                  1_GB = 0x0000000040000000,
-                512_MB = 0x0000000020000000,
-                256_MB = 0x0000000010000000,
-                128_MB = 0x0000000008000000,
-                 64_MB = 0x0000000004000000,
-                 32_MB = 0x0000000002000000,
-                 16_MB = 0x0000000001000000,
-                  ZERO = 0x0000000000000000
-  </description>
-  <simpleType>
-    <uint64_t>
-      <default>0,0</default>
-    </uint64_t>
-    <array>2</array>
-  </simpleType>
-  <writeable/>
-  <persistency>volatile-zeroed</persistency>
-  <readable/>
-  <hwpfToHbAttrMap>
-    <id>ATTR_PROC_HTM_BAR_SIZES</id>
-    <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
-</attribute>
-
 
 <attribute>
     <id>PROC_PCIE_IOVALID_ENABLE</id>
@@ -23455,790 +23376,6 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
       <id>ATTR_PROC_FABRIC_A_LINK_DELAY</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>NHTM_TRACE_TYPE</id>
-    <description>
-      The Nest HTM trace type desired to be collected.
-      - Platform is to default to DISABLE (0x0).
-      - User can change NHTM trace type (i.e. enable NHTM trace
-      collection) using Attribute Override.
-      DISABLE = 0x0, FABRIC = 0x1, EVENT = 0x2, OCC = 0x3
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_NHTM_TRACE_TYPE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>CHTM_TRACE_TYPE</id>
-    <description>
-      The Core HTM trace type desired to be collected.
-      - Platform is to default to DISABLE (0x0)
-      - User can change CHTM trace type (i.e. enable CHTM trace
-        collection) using Attribute Override.
-        DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_CHTM_TRACE_TYPE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_TTYPEFILT_PAT</id>
-    <description>
-      Nest HTM: defines the TTYPE pattern to match in Fabric trace mode.
-      HTM Ttype Filter Control Register (1:7).
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_TTYPEFILT_PAT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_TSIZEFILT_PAT</id>
-    <description>
-      Nest HTM: defines the TSIZE pattern to match in Fabric trace mode.
-      HTM Ttype Filter Control Register (8:15).
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_TSIZEFILT_PAT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_TTYPEFILT_MASK</id>
-    <description>
-      Nest HTM: TTYPE pattern mask.
-      HTM Ttype Filter Control Register (17:23).
-      If set to 1, do not need to match w/ the pattern.
-      If all mask bits are set, no TTYPE pattern/masking is done
-      - Platform is to default to 0x7F
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_TTYPEFILT_MASK</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_TSIZEFILT_MASK</id>
-    <description>
-      Nest HTM: TSIZE pattern mask.
-      HTM Ttype Filter Control Register (24:31).
-      If set to 1, do not need to match w/ the Pattern.
-      If all mask bits are set, no TSIZE pattern/masking is done
-      - Platform is to default to 0xFF
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_TSIZEFILT_MASK</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_TTYPEFILT_INVERT</id>
-    <description>
-      Nest HTM: TTYPE/TSIZE Capture Invert.
-      HTM Ttype Filter Control Register (32).
-      0 : Capture record based on ttype/tsize pattern matching
-      1 : Capture record based on ttype/tsize pattern NOT matching
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_TTYPEFILT_INVERT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CRESPFILT_INVERT</id>
-    <description>
-      Nest HTM: CRESP Filter Capture Invert.
-      HTM Ttype Filter Control Register (33).
-      0 : Capture record based on cresp filter pattern matching
-      1 : Capture record based on cresp filter pattern NOT matching
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CRESPFILT_INVERT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_FILT_PAT</id>
-    <description>
-      HTM Filter Control Register (0:22).
-      In Fabric trace mode, defines the TTAG/Scope/Source pattern to
-      match in the RCMD and CRESP:
-          0:3   rcmd_ttag(0:2) Group ID Pattern for rcmd and cresp
-                filtering.
-          4:6   rcmd_ttag(3:5) Chip ID Pattern for rcmd and cresp
-                filtering.
-          7:16  rcmd_ttag(6:13) Unit ID Pattern for rcmd and cresp
-                (if from this chip) filtering.
-          17:19 rcmd_scope(0:2) Scope Pattern for rcmd and cresp
-                filtering.
-          20:21 rcmd_source(0:1) Source Pattern for rcmd filtering.
-          22    Powerbus PORT pattern for rcmd and cresp filtering.
-        In OCC trace mode, defines the occ_trace_data(0:22) pattern
-        to match:
-          0:22  occ_trace_data(0:22) pattern.
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>0</default>
-      </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_FILT_PAT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_FILT_CRESP_PAT</id>
-    <description>
-      Nest HTM: defines the CRESP Filter pattern in FABRIC trace mode.
-      HTM Filter Control Register (27:31).
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_FILT_CRESP_PAT</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_FILT_MASK</id>
-    <description>
-      Nest HTM FABRIC: Pattern mask.
-      HTM Filter Control Register (32:54).
-      Bits set to 1 in this mask do not need to match w/ the Filter
-      pattern.
-      If all mask bits are set, No pattern matching is done.
-      - Platform is to default to 0x3FFFFF
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>0x3FFFFF</default>
-      </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_FILT_MASK</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_FILT_CRESP_MASK</id>
-    <description>
-      Nest HTM FABRIC: CRESP Filter Mask.
-      HTM Filter Control Register (59:63).
-      Bits set to 1 in this mask do not need to match w/ the CRESP
-      Filter pattern.
-      If all mask bits are set, no pattern matching is done
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_FILT_CRESP_MASK</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_CONTENT_SEL</id>
-    <description>
-      Nest HTM: defines the NHTM trace mode.
-      HTM Collection Mode Register (1:2).
-      - Platform is to default to 0x0 (FABRIC)
-      - User can change the value using Attribute Override.
-      FABRIC = 0x0, EVENT = 0x1, OCC = 0x2
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_CONTENT_SEL</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_CAPTURE</id>
-    <description>
-      Nest HTM: defines capture mode according to trace mode.
-      HTM Collection Mode Register (4:12).
-      When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
-        456789012
-        0xxxx0000 : Ignore HTM generated data writes
-        1xxxx0000 : Capture htm generated data writes
-        x0xxx0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
-        x1xxx0000 : Filtering applied on ttype = PMISC and ttype = report hang
-        xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
-        xx01x0000 : CRESP Mode: Reserved
-        xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
-        xx11x0000 : CRESP Mode: Ignore CRESP
-        xxxx00000 : Pre-Allocate maximum memory buffers (8)
-        xxxx10000 : Pre-Allocate fewer memory buffers (4)
-      When htm_mode_q(1 TO 2) == 01, i.e. OTHER
-        00000xxxx : Pre-Allocate maximum memory buffers (8)
-        00001xxxx : Pre-Allocate fewer memory buffers (4)
-        0000xmmmx : mmm for optional external mux control
-        0000xxxx0 : Both -other- trace buses to NHTM0
-        0000xxxx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
-      When htm_mode_q(1 TO 2) == 10, i.e. OCC
-        00000xxx0 : Pre-Allocate maximum memory buffers (8)
-        00001xxx0 : Pre-Allocate fewer memory buffers (4)
-        0000xmmm0 : mmm for optional external mux control
-      - Platform is to default to 0x040 (Precise CRESP, 0b001000000)
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>0x040</default>
-      </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_CAPTURE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_WRAP</id>
-    <description>
-      Nest HTM: Trace Wrap mode.
-      HTM Collection Mode Register (13).
-      0 = Stop trace when top of Trace Memory is reached
-      1 = Wrap trace to beginning of Trace Memory
-      - Platform is to default to 0x1
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>1</default>
-      </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_WRAP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
-    <description>
-      Nest HTM: TimeStamp Writes option.
-      HTM Collection Mode Register (14).
-      0 = Write of timestamps enabled to indicate elapsed time
-          between records.
-      1 = Timestamps written only to indicate record loss
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_SINGLE_TSTAMP</id>
-    <description>
-      Nest HTM: Overflow Timestamps option.
-      HTM Collection Mode Register (15).
-      0 = Timestamp written to indicate elapsed time overflow.
-      1 = Only one timestamp is written between entries, overflow
-          indication is lost
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_MARKERS_ONLY</id>
-    <description>
-      Nest HTM: Stamp/Marker only mode.
-      HTM Collection Mode Register (17).
-      0 = Normal trace
-      1 = Ignore incoming trace data and save only markers caused
-          by HTM_TRIG writes,
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
-    <description>
-      Nest HTM: Group scope option.
-      HTM Collection Mode Register (18).
-      This is a powerbus debug bit
-      0 = htm write ops sent with group scope
-      1 = htm write ops sent with Vg scope using programmed
-          target bits.
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override..
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_SYNC_STAMP_FORCE</id>
-    <description>
-      Nest HTM: Control the number of cycles to wait to force a
-      synchronization stamp or reset the timer.
-      HTM Collection Mode Register (19:21).
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_SYNC_STAMP_FORCE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_WRITETOIO</id>
-    <description>
-      Nest HTM: Use space option.
-      HTM Collection Mode Register (22).
-      0 = Use HTM_CL_Write op to target system memory.
-          Do pre-allocation sequence. (default)
-      1 = Use ci_pr_st op to target anywhere else.
-          Dont do pre-allocate sequence.
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_WRITETOIO</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MODE_VGTARGET</id>
-    <description>
-      Nest HTM: VG target mode.
-      HTM Collection Mode Register (24:39).
-      Vg Target bits should be configured if HTM_MEM[scope] is Vg
-      or if Disable Group Scope=1
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-    </description>
-    <simpleType>
-      <uint32_t>
-        <default>0</default>
-      </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MODE_VGTARGET</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MEM_SCOPE</id>
-    <description>
-      Setting of memory scope for HTM collection.
-      HTM Memory Configuration Register (1:3)
-      - Platform is to default to 0x0 (LOCAL).
-      - User can change HTM scope using Attribute Override.
-      LOCAL = 0x0, NEARNODE = 0x1, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MEM_SCOPE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_MEM_PRIORITY</id>
-    <description>
-      Setting of memory priority for HTM collection.
-      HTM Memory Configuration Register (4)
-      - Platform is to default to LOW.
-      - User can change MEM_PRIORITY using Attribute Override.
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_MEM_PRIORITY</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_TRIG</id>
-    <description>
-      Setting of Trigger control.
-      HTM Trigger Control Register (0:1)
-        00 local triggers are not forwarded to the PowerBus, it is
-            inserted into the trace when tracing.  Both local and
-            global triggers control the HTM
-        01 local triggers are not forwarded to the PowerBus, it is
-            inserted into the traCe when tracing.  Only local triggers
-            control the HTM
-        1x local triggers are forwarded to the PowerBus, it is not
-            inserted into the trace when tracing.  Only global
-            triggers control the HTM
-      - Platform is to default to 0x1.
-      - User can change MEM_PRIORITY using Attribute Override.
-      LOCAL_GLOBAL = 0x0, LOCAL = 0x1, GLOBAL = 0x2
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>1</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_TRIG</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_MARK</id>
-    <description>
-      Setting of Mark control.
-      HTM Trigger Control Register (4:5)
-      00 local markers are not forwarded to the PowerBus.  Both
-          local and global markers are inserted into the trace
-      01 local markers are not forwarded to the PowerBus.  Only
-          local markers are inserted into the trace
-      10 local markers are forwarded to the PowerBus.  Only global
-          markers are inserted into the trace
-      11 local markers are forwarded to the PowerBus.  Markers
-          are not inserted into the trace (Fabric Trace Mode)
-
-      - Platform is to default to 1.
-      - User can change MEM_PRIORITY using Attribute Override.
-      LOCAL_GLOBAL = 0x0, LOCAL_MARK = 0x1, GLOBAL_MARK = 0x2,
-      NO_MARK = 0x3
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>1</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_MARK</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_DBG0_STOP</id>
-    <description>
-      Enable Stop on PB Chiplet Debug Trigger 0.
-      HTM Trigger Control Register (6)
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-      DISABLE = 0x0, ENABLE = 0x1
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_DBG0_STOP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_DBG1_STOP</id>
-    <description>
-      Enable Stop on PB Chiplet Debug Trigger 1.
-      HTM Trigger Control Register (7)
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-      DISABLE = 0x0, ENABLE = 0x1
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_DBG1_STOP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_RUN_STOP</id>
-    <description>
-      Enable trace stop on falling edge of PB chiplet trace run.
-      HTM Trigger Control Register (8)
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-      DISABLE = 0x0, ENABLE = 0x1
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_RUN_STOP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
-    <description>
-      Enable Stop using OCC Control.
-      HTM Trigger Control Register (9)
-      - Platform is to default to 0x0
-      - User can change the value using Attribute Override.
-      DISABLE = 0x0, ENABLE = 0x1
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>HTMSC_CTRL_XSTOP_STOP</id>
-    <description>
-      Enable Stop on chiplet XSTOP.
-      HTM Trigger Control Register (13)
-      - Platform is to default to 0x1
-      - User can change the value using Attribute Override.
-      DISABLE = 0x0, ENABLE = 0x1
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>1</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_HTMSC_CTRL_XSTOP_STOP</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -29351,6 +28488,1138 @@ DEPRECATED!!!!
 </attribute>
 
 <!--- TODO: End RTC 155880 workaround -->
+
+<attribute>
+    <id>PROC_NHTM_BAR_BASE_ADDR</id>
+    <description> The base address where the NHTM traces start.  They are
+                  calculated based on the NHTM trace size requested by user.
+                  This address in memory will be the location where NHTM0/1
+                  traces are output.
+                  Set by p9_mss_eff_grouping.
+                  Used by p9_setup_bars and p9_htm_setup.
+    </description>
+    <simpleType><uint64_t></uint64_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NHTM_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_NHTM_BAR_SIZE</id>
+  <description> The amount of memory a user can reserve to store NHTM traces.
+                This amount will be used to store both NHTM0 and NHTM1 traces.
+                Used by p9_mss_eff_grouping.
+  </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_NHTM_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_CHTM_BAR_BASE_ADDR</id>
+    <description> The base addresses where the CHTM traces start.  They are
+                  calculated based on the CHTM trace sizes requested by users.
+                  There are 24 different CHTM regions, thus 24 different sizes.
+                  Each region is to store HTM trace for a core.
+                  Set by p9_mss_eff_grouping.
+                  Used by p9_setup_bars.
+    </description>
+    <simpleType>
+      <uint64_t></uint64_t>
+      <array>24</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_CHTM_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_CHTM_BAR_SIZES</id>
+    <description> The amount of memory a user can reserve to store CHTM traces.
+                  There are 24 cores, thus 24 different sizes.
+                  Used by p9_mss_eff_grouping.
+    </description>
+    <simpleType>
+      <uint64_t>
+      </uint64_t>
+      <array>24</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_CHTM_BAR_SIZES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_TRACE_TYPE</id>
+    <description> The Nest HTM trace type desired to be collected.  This setting
+                  is applied to both NHTM0 and NHTM1.
+                  DISABLE = 0x0, FABRIC = 0x1, EVENT = 0x2, OCC = 0x3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_TRACE_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_TRACE_TYPE</id>
+    <description> The Core HTM trace type desired to be collected.
+                  DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+      <array>24</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_TRACE_TYPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_PAT</id>
+    <description> Nest HTM: defines the TTYPE pattern to match in Fabric trace
+                  mode.  These bits are used with the ttype Filter Mask to
+                  indicate the TTYPE value that should be matched on the rcmd.
+                  HTM Ttype Filter Control Register (1:7).
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TSIZEFILT_PAT</id>
+    <description> Nest HTM: defines the TSIZE pattern to match in Fabric trace
+                  mode. These bits are used with the tsize filter mask to indicate
+                  the TSIZE value that should be matched on the rcmd
+                  HTM Ttype Filter Control Register (8:15).
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TSIZEFILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_MASK</id>
+    <description> Nest HTM: TTYPE pattern mask.
+                  If mask bit is clear to 0, then do not need to match w/ the pattern.
+                  If all mask bits are clear, no TTYPE pattern/masking is done.
+                  The inversion of this attribute value will be programmed into
+                  bits 17:23 of HTM Ttype Filter Control Register.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TSIZEFILT_MASK</id>
+    <description> Nest HTM: TSIZE pattern mask.
+                  If mask bit is clear to 0, then do not need to match w/ the pattern.
+                  If all mask bits are clear, no TSIZE pattern/masking is done.
+                  The inversion of this attribute value will be programmed into
+                  bits 24:31 of HTM Ttype Filter Control Register.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TSIZEFILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_TTYPEFILT_INVERT</id>
+    <description> Nest HTM: TTYPE/TSIZE Capture Invert.
+                  HTM Ttype Filter Control Register (32).
+                  This bit controls the inversion of the ttype/tsize filter.
+                  0 : Capture record based on ttype/tsize pattern matching
+                  1 : Capture record based on ttype/tsize pattern NOT matching
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_TTYPEFILT_INVERT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CRESPFILT_INVERT</id>
+    <description> Nest HTM: CRESP Filter Capture Invert.
+                  HTM Ttype Filter Control Register (33).
+                  This bit controls the inversion of the cresp filter.
+                  0: Capture record based on cresp filter pattern/mask match
+                  1: Capture record based on cresp filter pattern/mask NOT matching.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CRESPFILT_INVERT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_PAT</id>
+    <description> Nest HTM: Filter Pattern.
+                  HTM Filter Control Register (0:22).
+                  In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                  match in the RCMD and CRESP:
+                      0:3   rcmd_ttag(0:2) Group ID Pattern for rcmd and cresp
+                            filtering.
+                      4:6   rcmd_ttag(3:5) Chip ID Pattern for rcmd and cresp
+                            filtering.
+                      7:16  rcmd_ttag(6:13) Unit ID Pattern for rcmd and cresp
+                            (if from this chip) filtering.
+                      17:19 rcmd_scope(0:2) Scope Pattern for rcmd and cresp
+                            filtering.
+                      20:21 rcmd_source(0:1) Source Pattern for rcmd filtering.
+                      22    Powerbus PORT pattern for rcmd and cresp filtering.
+                   In OCC trace mode, defines the occ_trace_data(0:22) pattern
+                   to match:
+                      0:22  occ_trace_data(0:22) pattern.
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_CRESP_PAT</id>
+    <description> Nest HTM: defines the CRESP Filter pattern in FABRIC trace mode.
+                  HTM Filter Control Register (27:31).
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_CRESP_PAT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_MASK</id>
+    <description> Nest HTM FABRIC: Pattern mask.
+                  HTM Filter Control Register (32:54).
+                  Bits clear to 0 in this mask do not need to match with the
+                  Filter Pattern.
+                  If all bits are clear, no pattern/masking is done and all
+                  Cresp/rcmd are captured in Fabric trace mode and all
+                  OCC commands are captured in OCC mode.
+                  The inversion of this attribute value will be programmed into
+                  bits 32:54 of HTM Ttype Filter Control Register.
+                  In Fabric Trace Mode:
+                   32:35: rcmd_ttag(0:3) Group ID Mask
+                   36:38: rcmd_ttag(4:6) Chip ID Mask
+                   39:48: rcmd_ttag(7:16) Unit ID Pattern
+                   49:51: rcmd_scope(0:2) Mask
+                   52:53: rcmd_source(0:1) Mask
+                   54in the : PowerBus PORT MASK (for rcmd and cresp filtering0
+                   In OCC Trace Mode
+                   32:54 occ_trace_data(0:22) Mask
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_FILT_CRESP_MASK</id>
+    <description> Nest HTM FABRIC: CRESP Filter Mask.
+                  HTM Filter Control Register (59:63).
+                  If mask bit is clear to 0, then do not need to match w/ the CRESP
+                  Filter pattern.
+                  If all mask bits are clear, no pattern matching is done.
+                  The inversion of this attribute value will be programmed into
+                  bits 59:63 of HTM Ttype Filter Control Register.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_FILT_CRESP_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CONTENT_SEL</id>
+    <description> Nest HTM: defines the NHTM trace mode.
+                  HTM Collection Mode Register (1:2).
+                  Only FABRIC is supported at this time.
+                  FABRIC = 0x0, EVENT = 0x1, OCC = 0x2
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CONTENT_SEL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES</id>
+    <description> Nest HTM: defines if the generated data writes are captured.
+                  HTM Collection Mode Register (4).
+                  0 - Ignore HTM generated data writes
+                  1 - Capture even HTM generated writes if they meet the filtering
+                      criteria.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_GENERATED_WRITES</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL</id>
+    <description> Nest HTM: defines if the filtering will apply to ttype=PMISC
+                  and ttype=Report Hang commands when filtering is enabled.
+                  HTM Collection Mode Register (5).
+                  0 - filtering ignored on PMISC
+                  1 - Apply filtering to PMISC also
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_ENABLE_FILTER_ALL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE</id>
+    <description> Nest HTM: defines if Precise cresp mode is disabled.
+                  0 - Disable precisce cresp mode
+                  1 - Enable precisce cresp mode
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_PRECISE_CRESP_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION</id>
+    <description> Nest HTM: defines Limit Memory Allocation mode.
+                   0 - Pre-allocate maximum memory buffers (NHTM=8)
+                   1 - Pre-allocate only one half maximum memory buffers
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_LIMIT_MEM_ALLOCATION</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD</id>
+    <description> Nest HTM: defines PMISC only Command trace mode.
+                   0 rCmd amd cResp port 0 only goes to NHTM0
+                   1 rCmd and Cresp port 0 is stored alternately to NHTM0 and
+                     NHTM1, switching based for each valid
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_CAPTURE_PMISC_ONLY_CMD</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_SYNC_STAMP_FORCE</id>
+    <description> Control the number of cycles to wait to force a synchronization
+                  stamp or reset the timer.  For NHTM only.
+                  HTM Collection Mode Register (19:21).
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_SYNC_STAMP_FORCE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_HTMSC_MODE_WRITETOIO</id>
+    <description> Use space option. For NHTM only.
+                  HTM Collection Mode Register (22).
+                  0 = Use HTM_CL_Write op to target system memory.
+                      Do pre-allocation sequence. (default)
+                  1 = Use ci_pr_st op to target anywhere else.
+                      Dont do pre-allocate sequence.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_HTMSC_MODE_WRITETOIO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_HTMSC_MODE_CONTENT_SEL</id>
+    <description> Core HTM: defines the CHTM trace mode.
+                  HTM Collection Mode Register (1:2).
+                  Only Direct Memory Write mode (IMA) is supported at this time.
+                  CI = 0x0, LLAT = 0x1, PPE = 0x2, DMW = 0x3
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_HTMSC_MODE_CONTENT_SEL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_HTMSC_MODE_CAPTURE</id>
+    <description> Core HTM: defines capture mode according to trace mode.
+                  HTM Collection Mode Register (4:9).
+                  When htm_mode_q(1 TO 2) == 00, i.e. Core Instruction Trace
+                    00xxxx : tc_pc_trace_active asserted when HTM_STAT[Tracing]=1 to purge the ERAT when entering and exitting trace
+                    01xxxx : tc_pc_trace_active asserted when HTM_MODE[HTM_Trace_enable]=1 to purge the ERAT only at the beginning
+                  When htm_mode_q(1 TO 2) == 01, i.e. LLAT Trace
+                    0xxxxx : capture on assertion of l2_htm_llat_disp_req, i.e. any dispatch request
+                    1xxxxx : capture on assertion of l2_htm_llat_disp_req AND l2_llat_htm_rcdisp_occurred, i.e. only on passed dispatch
+                    x0xxxx : capture on assertion of l2_htm_llat_disp_req, i.e. loads or stores
+                    x1xxxx : capture on assertion of l2_htm_llat_disp_req AND l2_llat_htm_rcdisp_ld_not_st, i.e. only loads
+                    xx0xxx : capture on assertion of l2_llat_htm_pbl3hit_dval
+                    xx1xxx : no capture on assertion of l2_llat_htm_pbl3hit_dval - enable embedded timestamp 
+                  When htm_mode_q(1 TO 2) == 11, i.e. Direct Memory Write
+                    1xxxxx : Enable HPMC-IMA Mode         
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_HTMSC_MODE_CAPTURE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_HTMSC_MODE_CORE_INSTR_STALL</id>
+    <description> For CHTM only.
+                   0: Core execution is stalled whenever the data buffers are almost full to prevent losing records.
+                   1: Core execution is never stalled and entries may be discarded when buffer is full
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_HTMSC_MODE_CORE_INSTR_STALL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_WRAP</id>
+    <description> Trace Wrap mode, used for both NHTM and CHTM
+                  HTM Collection Mode Register (13).
+                  0 = Wrap trace to beginning of Trace Memory
+                  1 = Stop trace when top of Trace Memory is reached
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_WRAP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_DIS_TSTAMP</id>
+    <description> TimeStamp Writes option, used for both NHTM and CHTM
+                  HTM Collection Mode Register (14).
+                  0 = Write of timestamps enabled to indicate elapsed time
+                      between records.
+                  1 = Timestamps written only to indicate record loss
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_SINGLE_TSTAMP</id>
+    <description> Overflow Timestamps option, used for both NHTM and CHTM.
+                  HTM Collection Mode Register (15).
+                  0 = Timestamp written to indicate elapsed time overflow.
+                  1 = Only one timestamp is written between entries, overflow
+                      indication is lost
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_MARKERS_ONLY</id>
+    <description> Nest HTM: Stamp/Marker only mode.
+                  HTM Collection Mode Register (17).
+                  0 = Normal trace
+                  1 = Ignore incoming trace data and save only markers caused
+                      by HTM_TRIG writes,
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+    <description> Nest HTM: Group scope option.
+                  HTM Collection Mode Register (18).
+                  This is a powerbus debug bit
+                  0 = htm write ops sent with group scope
+                  1 = htm write ops sent with Vg scope using programmed
+                      target bits.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MODE_VGTARGET</id>
+    <description> Nest HTM: VG target mode.
+                  HTM Collection Mode Register (24:39).
+                  Vg Target bits should be configured if HTM_MEM[scope] is Vg
+                  or if Disable Group Scope=1
+    </description>
+    <simpleType>
+      <uint32_t>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MODE_VGTARGET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MEM_SCOPE</id>
+    <description> Setting of memory scope for HTM collection.
+                  HTM Memory Configuration Register (1:3)
+                  LOCAL = 0x0, NEARNODE = 0x1, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MEM_SCOPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_MEM_PRIORITY</id>
+    <description> Setting of memory priority for HTM collection.
+                  HTM Memory Configuration Register (4)
+                  LOW = 0x0, HIGH = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_MEM_PRIORITY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_CTRL_TRIG</id>
+    <description> Setting of Trigger control for NHTM.
+                  HTM Trigger Control Register (0:1)
+                    00 local triggers are not forwarded to the PowerBus, it is
+                       inserted into the trace when tracing.  Both local and
+                       global triggers control the HTM
+                    01 local triggers are not forwarded to the PowerBus, it is
+                       inserted into the traCe when tracing.  Only local triggers
+                       control the HTM
+                    1x local triggers are forwarded to the PowerBus, it is not
+                       inserted into the trace when tracing.  Only global
+                       triggers control the HTM
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_CTRL_TRIG</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NHTM_CTRL_MARK</id>
+    <description> Setting of Mark control for NHTM.
+                  HTM Trigger Control Register (4:5)
+                  00 local markers are not forwarded to the PowerBus.  Both
+                     local and global markers are inserted into the trace
+                  01 local markers are not forwarded to the PowerBus.  Only
+                     local markers are inserted into the trace
+                  10 local markers are forwarded to the PowerBus.  Only global
+                     markers are inserted into the trace
+                  11 local markers are forwarded to the PowerBus.  Markers
+                     are not inserted into the trace (Fabric Trace Mode)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_NHTM_CTRL_MARK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_CTRL_TRIG</id>
+    <description> Setting of Trigger control.
+                  HTM Trigger Control Register (0:1)
+                    00 local triggers are not forwarded to the PowerBus, it is
+                       inserted into the trace when tracing.  Both local and
+                       global triggers control the HTM
+                    01 local triggers are not forwarded to the PowerBus, it is
+                       inserted into the traCe when tracing.  Only local triggers
+                       control the HTM
+                    1x local triggers are forwarded to the PowerBus, it is not
+                       inserted into the trace when tracing.  Only global
+                       triggers control the HTM
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_CTRL_TRIG</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CHTM_CTRL_MARK</id>
+    <description> Setting of Mark control.
+                  HTM Trigger Control Register (4:5)
+                  00 local markers are not forwarded to the PowerBus.  Both
+                     local and global markers are inserted into the trace
+                  01 local markers are not forwarded to the PowerBus.  Only
+                     local markers are inserted into the trace
+                  10 local markers are forwarded to the PowerBus.  Only global
+                     markers are inserted into the trace
+                  11 local markers are forwarded to the PowerBus.  Markers
+                     are not inserted into the trace (Fabric Trace Mode)
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CHTM_CTRL_MARK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_DBG0_STOP</id>
+    <description> Enable Stop on PB Chiplet Debug Trigger 0.
+                  HTM Trigger Control Register (6)
+                  DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_DBG0_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_DBG1_STOP</id>
+    <description> Enable Stop on PB Chiplet Debug Trigger 1.
+                  HTM Trigger Control Register (7)
+                  DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_DBG1_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_RUN_STOP</id>
+    <description> Enable trace stop on falling edge of PB chiplet trace run.
+                  HTM Trigger Control Register (8)
+                  DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_RUN_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_OTHER_DBG0_STOP</id>
+    <description> Enable Stop using OCC Control.
+                  HTM Trigger Control Register (9)
+                  DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_XSTOP_STOP</id>
+    <description> Enable Stop on chiplet XSTOP.
+                  HTM Trigger Control Register (13)
+                  ENABLE = 0x0, DISABLE = 0x1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_XSTOP_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_CHIP0_STOP</id>
+    <description> Stop on PC_TC_DBG_Trigger0
+                  1 = stop trigger Core Debug Trigger 0
+                  0 = ignore Core Debug Trigger  0
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_CHIP0_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_CTRL_CHIP1_STOP</id>
+    <description> Stop on PC_TC_DBG_Trigger1
+                  1 = stop trigger Core Debug Trigger 1
+                  0 = ignore Core Debug Trigger  1
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_CTRL_CHIP1_STOP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_IMA_PDBAR_SPLIT_CORE_MODE</id>
+    <description> This bit controls the indexing of the PDBAR address for the
+                  starting address of the write to the PDBAR space.
+                  For CHTM only.
+                  0 'Big Core' mode.
+                  1 'Split Core' mode.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_IMA_PDBAR_SPLIT_CORE_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_IMA_PDBAR_SCOPE</id>
+    <description>  This register defines the starting Scope of the PowerBus
+                   operation. The Scope will be increased if necessary however
+                   it is more efficient to have the request issued according to
+                   where the target memory is located.
+                       000 LOCAL scope
+                       001 Reserved
+                       010 NEAR NODE scope (Nn)
+                       011 GROUP scope (G).
+                       100 REMOTE scope (Rn).
+                       101 VECTORED group scope (Vg).
+                       110 Reserved
+                       111 Reserved
+                   Note 1: Since P9 uses a Group Class MCD, the HTM will always
+                   force a 'Nodal' scope to 'Group' scope.  If the scope is
+                   initialized to 'Vectored Group Scope', the HTM_MODE[Vg_Target]
+                   bits must also be initialized.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_IMA_PDBAR_SCOPE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HTMSC_IMA_PDBAR_ADDR</id>
+    <description>  IMA Write Physical Base Address  
+    </description>
+    <simpleType>
+      <uint64_t>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_HTMSC_IMA_PDBAR_ADDR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!-- TODO: RTC 156244 - To be removed -->
+
+<attribute>
+    <id>PROC_HTM_BAR_SIZE</id>
+    <description>Desired HTM trace memory size value
+      creator: platform
+      firmware notes:
+        set by platform to request size of per-chip area reserved
+        for HTM trace memory
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_HTM_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_HTM_BAR_BASE_ADDR</id>
+    <description>HTM trace memory base address allocated
+    </description>
+    <simpleType><uint64_t></uint64_t></simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_HTM_BAR_SIZES</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description> The amount of memory a user can reserve to store HTM traces.
+                There are two different HTM trace areas, thus two different
+                sizes (For example, one to store NHTM0 and one for NHTM1).
+                Platform is to initialize this attribute to 0 (default).
+                Set by user via attribute override.
+                Used by p9_mss_eff_grouping.
+                256_GB = 0x0000004000000000,
+                128_GB = 0x0000002000000000,
+                 64_GB = 0x0000001000000000,
+                 32_GB = 0x0000000800000000,
+                 16_GB = 0x0000000400000000,
+                  8_GB = 0x0000000200000000,
+                  4_GB = 0x0000000100000000,
+                  2_GB = 0x0000000080000000,
+                  1_GB = 0x0000000040000000,
+                512_MB = 0x0000000020000000,
+                256_MB = 0x0000000010000000,
+                128_MB = 0x0000000008000000,
+                 64_MB = 0x0000000004000000,
+                 32_MB = 0x0000000002000000,
+                 16_MB = 0x0000000001000000,
+                  ZERO = 0x0000000000000000
+  </description>
+  <simpleType>
+    <uint64_t>
+      <default>0,0</default>
+    </uint64_t>
+    <array>2</array>
+  </simpleType>
+  <writeable/>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_HTM_BAR_SIZES</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<!-- End TODO: RTC 156244 -->
 
 <attribute>
   <id>MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>

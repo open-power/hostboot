@@ -665,7 +665,7 @@ namespace TARGETING
                 (*proc)->setAttr<ATTR_PROC_MEM_BASES>(memBases);
                 uint64_t memSizes[] = {0x800000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
                 (*proc)->setAttr<ATTR_PROC_MEM_SIZES>(memSizes);
-                (*proc)->setAttr<ATTR_PROC_HTM_BAR_BASE_ADDR>(0);
+                (*proc)->setAttr<ATTR_PROC_NHTM_BAR_BASE_ADDR>(0);
                 //(*proc)->setAttr<ATTR_PROC_PCIE_LANE_EQUALIZATION>(pcieLane); //defaulted in attribute_types.xml
                 uint8_t mssMem[] = {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
                 (*proc)->setAttr<ATTR_MSS_MEM_MC_IN_GROUP>(mssMem);
