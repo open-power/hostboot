@@ -238,7 +238,7 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ASSEMBLER__
-
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -723,6 +723,21 @@ p9_xip_translate_header(P9XipHeader* o_hostHeader,
 /// \retval non-0 See \ref p9_xip_image_errors
 int
 p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data);
+
+
+/// Get endianness converted value from the P9-XIP image toc data
+///
+/// \param[in] i_item - decoded toc entry
+
+/// \param[out] o_data A pointer to an 8-byte integer to receive the scalar
+/// data. Assuming the item is located this variable is assigned by the call.
+/// In the event of an error the final state of \a o_data is not specified.
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref p9_xip_image_errors
+int
+p9_xip_get_item(const P9XipItem *i_item, uint64_t* o_data);
 
 
 /// Get an integral element from a vector held in a P9-XIP image
@@ -1279,7 +1294,42 @@ p9_xip_host2image(const void* i_image,
                   void* i_hostAddress,
                   uint64_t* o_imageAddress);
 
+/// Get all the information required to search and find the TOC
+///
+/// \param[in] i_image A pointer to a P9-XIP image in host memory
+///
+/// \param[out][optional] o_toc A pointer to TOC listing
+///
+/// \param[out][optional] o_entries Number of TOC entries located
+///
+/// \param[out][optional] o_sorted Indication if the TOC is sorted
+///
+/// \param[out][optional] o_strings A pointer to String section containing TOC
+///                                 names
+///
+/// \retval 0 Success
+///
+/// \retval non-0 See \ref p9_xip_image_errors
+int
+p9_xip_get_toc(void* i_image,
+               P9XipToc** o_toc,
+               size_t* o_entries,
+               int* o_sorted,
+               char** o_strings);
 
+
+/// \brief Decode a TOC entry from dump file
+///
+///\param[in] - i_image - seeprom image
+///\param[in] - i_dump - dump file
+///\param[in] - i_imageToc - TOC entry
+///\param[out] - o_item - decoded toc entry
+///
+///\return - 0 Success; non-0 See \ref p9_xip_image_errors
+int
+p9_xip_decode_toc_dump(void* i_image, void* i_dump,
+        P9XipToc* i_imageToc,
+        P9XipItem* o_item);
 
 // PHYP has their own way of implementing the <string.h> functions. PHYP also
 // does not allow static functions or data, so all of the XIP_STATIC functions

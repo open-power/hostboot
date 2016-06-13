@@ -638,12 +638,12 @@ xipImage2Section(const void* i_image,
 ///
 /// All return values are optional.
 
-XIP_STATIC int
-xipGetToc(void* i_image,
-          P9XipToc** o_toc,
-          size_t* o_entries,
-          int* o_sorted,
-          char** o_strings)
+int
+p9_xip_get_toc(void* i_image,
+               P9XipToc** o_toc,
+               size_t* o_entries,
+               int* o_sorted,
+               char** o_strings)
 {
     int rc;
     P9XipSection tocSection, stringsSection;
@@ -777,7 +777,7 @@ xipLinearSearch(void* i_image, const char* i_id, P9XipToc** o_entry)
     char* strings;
 
     *o_entry = 0;
-    rc = xipGetToc(i_image, &imageToc, &entries, 0, &strings);
+    rc = p9_xip_get_toc(i_image, &imageToc, &entries, 0, &strings);
 
     if (!rc)
     {
@@ -822,7 +822,7 @@ xipBinarySearch(void* i_image, const char* i_id, P9XipToc** o_entry)
     {
         *o_entry = 0;
 
-        rc = xipGetToc(i_image, &imageToc, &entries, &sorted, &strings);
+        rc = p9_xip_get_toc(i_image, &imageToc, &entries, &sorted, &strings);
 
         if (rc)
         {
@@ -1142,6 +1142,50 @@ xipDecodeToc(void* i_image,
     return rc;
 }
 
+int
+p9_xip_decode_toc_dump(void* i_image, void* i_dump,
+                       P9XipToc* i_imageToc,
+                       P9XipItem* o_item)
+{
+    int rc = 0;
+    P9XipToc hostToc = {0};
+    P9XipSection stringsSection = {0};
+
+    if (!xipNormalized(i_image))
+    {
+        rc = TRACE_ERROR(P9_XIP_NOT_NORMALIZED);
+        return rc;
+    }
+
+    // Translate the TOC entry and set the TOC pointer, data type and
+    // number of elements in the outgoing structure. The Id string is
+    // always located in the TOC_STRINGS section.
+
+    xipTranslateToc(&hostToc, i_imageToc);
+
+    o_item->iv_toc = i_imageToc;
+    o_item->iv_type = hostToc.iv_type;
+    o_item->iv_elements = hostToc.iv_elements;
+
+    p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS, &stringsSection);
+    o_item->iv_id =
+        (char*)i_image + stringsSection.iv_offset + hostToc.iv_id;
+
+    //Print only the attributes present in fixed section of SEEPROM image
+    if (hostToc.iv_section == P9_XIP_SECTION_FIXED)
+    {
+        //get the attribute value from dump file
+        o_item->iv_imageData = (void*)((uint8_t*)i_dump + hostToc.iv_data);
+        o_item->iv_address = xipLinkAddress(i_image) + hostToc.iv_data;
+        o_item->iv_partial = 0;
+    }
+    else
+    {
+        o_item->iv_address = 0;
+    }
+
+    return rc;
+}
 
 /// Sort the TOC
 
@@ -1167,7 +1211,7 @@ xipSortToc(void* io_image)
             break;
         }
 
-        rc = xipGetToc(io_image, &hostToc, &entries, 0, &strings);
+        rc = p9_xip_get_toc(io_image, &hostToc, &entries, 0, &strings);
 
         if (rc)
         {
@@ -1807,7 +1851,7 @@ p9_xip_normalize(void* io_image)
         if (!xipNormalized(io_image))
         {
 
-            rc = xipGetToc(io_image, &imageToc, &tocEntries, 0, 0);
+            rc = p9_xip_get_toc(io_image, &imageToc, &tocEntries, 0, 0);
 
             if (rc)
             {
@@ -2006,8 +2050,58 @@ p9_xip_find(void* i_image,
     return rc;
 }
 
+int
+p9_xip_get_item(const P9XipItem* i_item, uint64_t* o_data)
+{
+    switch (i_item->iv_type)
+    {
+        case P9_XIP_UINT8:
+            *o_data = *((uint8_t*)(i_item->iv_imageData));
+            break;
 
+        case P9_XIP_UINT16:
+            *o_data = htobe16(*((uint16_t*)(i_item->iv_imageData)));
+            break;
 
+        case P9_XIP_UINT32:
+            *o_data = htobe32(*((uint32_t*)(i_item->iv_imageData)));
+            break;
+
+        case P9_XIP_UINT64:
+            *o_data = htobe64(*((uint64_t*)(i_item->iv_imageData)));
+            break;
+
+        case P9_XIP_INT8:
+            *o_data = *((int8_t*)(i_item->iv_imageData));
+            break;
+
+        case P9_XIP_INT16:
+            *o_data = htobe16(*((int16_t*)(i_item->iv_imageData)));
+            break;
+
+        case P9_XIP_INT32:
+            *o_data = htobe32(*((int32_t*)(i_item->iv_imageData)));
+            break;
+
+        case P9_XIP_INT64:
+            *o_data = htobe64(*((int64_t*)(i_item->iv_imageData)));
+            break;
+
+        case P9_XIP_ADDRESS:
+            *o_data = i_item->iv_address;
+            break;
+
+        case P9_XIP_STRING:
+            //Nothing to do in case of string, but making sure rc is valid
+            break;
+
+        default:
+            return TRACE_ERROR(P9_XIP_TYPE_ERROR);
+            break;
+    }
+
+    return 0;
+}
 
 int
 p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
@@ -2019,53 +2113,11 @@ p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
 
     if (!rc)
     {
-        switch (item.iv_type)
-        {
-            case P9_XIP_UINT8:
-                *o_data = *((uint8_t*)(item.iv_imageData));
-                break;
-
-            case P9_XIP_UINT16:
-                *o_data = htobe16(*((uint16_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_UINT32:
-                *o_data = htobe32(*((uint32_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_UINT64:
-                *o_data = htobe64(*((uint64_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_INT8:
-                *o_data = *((int8_t*)(item.iv_imageData));
-                break;
-
-            case P9_XIP_INT16:
-                *o_data = htobe16(*((int16_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_INT32:
-                *o_data = htobe32(*((int32_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_INT64:
-                *o_data = htobe64(*((int64_t*)(item.iv_imageData)));
-                break;
-
-            case P9_XIP_ADDRESS:
-                *o_data = item.iv_address;
-                break;
-
-            default:
-                rc = TRACE_ERROR(P9_XIP_TYPE_ERROR);
-                break;
-        }
+        rc = p9_xip_get_item(&item, o_data);
     }
 
     return rc;
 }
-
 
 int
 p9_xip_get_element(void* i_image,
@@ -2972,7 +3024,7 @@ p9_xip_map_toc(void* io_image,
             break;
         }
 
-        rc = xipGetToc(io_image, &imageToc, &entries, 0, 0);
+        rc = p9_xip_get_toc(io_image, &imageToc, &entries, 0, 0);
 
         if (rc)
         {
