@@ -211,6 +211,9 @@
     <attribute>
         <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
     </attribute>
+    <attribute>
+        <id>ATTR_ECID</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

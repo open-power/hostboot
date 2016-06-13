@@ -25,7 +25,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@
 
 
 typedef fapi2::ReturnCode (*p9_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-        const fapi2::variable_buffer& fuseString);
+        fapi2::variable_buffer& fuseString);
 
 /// @brief Get ECID string from target using SCOM
 ///
@@ -47,7 +47,7 @@ typedef fapi2::ReturnCode (*p9_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_T
 extern "C"
 {
     fapi2::ReturnCode p9_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-                                 const fapi2::variable_buffer& o_fuseString);
+                                 fapi2::variable_buffer& o_fuseString);
 }
 
 #endif
