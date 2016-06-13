@@ -40,7 +40,8 @@ my $help = 0;
 
 my %globals = ( branch => "master",
                 component => "esw_hbfw",
-                cmvcUser => "hostboot" );
+                cmvcUser => "hostboot",
+                email => "hostboot\@us.ibm.com" );
 # Token used by git-CI-tool @execute_discover, update there too
 my $TOKEN = "!@#%^";
 
@@ -61,7 +62,8 @@ GetOptions("debug!" => \$debug,
            "help" => \$help,
            "branch:s" => \$globals{"branch"},
            "component:s" => \$globals{"component"},
-           "cmvcUser:s" => \$globals{"cmvcUser"});
+           "cmvcUser:s" => \$globals{"cmvcUser"},
+           "email:s" => \$globals{"email"});
 
 my %commands = ( "define" => \&execute_define,
                  "undef" => \&execute_undef,
@@ -412,14 +414,17 @@ sub execute_pre_release
     my $release = "";
     my $level = "";
     my $checkInDir = "";
+    my $released = "";
 
     GetOptions("release:s" => \$release);
     GetOptions("level:s" => \$level);
     GetOptions("checkInDir:s" => \$checkInDir);
+    GetOptions("released:s" => \$released);
 
     die "Missing release" if ($release eq "");
     die "Missing level" if ($level eq "");
     die "Missing check in directory" if ($checkInDir eq "");
+    die "Missing released" if ($released eq "");
 
     if($release =~ m/fips9/)
     {
@@ -441,6 +446,9 @@ sub execute_pre_release
 
     # CMVC create track
     run_system_command("Track -create -release $release -feature $feature -verbose");
+
+    # Add in cmvc coReqs and cmvc preReqs
+    execute_cmvc_reqs($feature,$level,$released,$release);
 
     #Lock Files
     run_system_command("File -lock $CMVC_FILES -release $release -feature $feature -verbose");
@@ -1991,6 +1999,58 @@ sub cq_workitem_num
     }
 }
 
+# sub coreq_workitem_num
+#
+# Search through a git commit for all coReq instances.
+#
+# @param[in] commit - The git commit.
+#
+# @return array of strings - CMVC-Coreq numbers or "".
+#
+
+sub coreq_workitem_num
+{
+    my $commit = shift;
+
+    my @msg_lines = split('\n',git_commit_msg($commit));
+    my @coreqs = ();
+
+    foreach my $line (@msg_lines)
+    {
+        if ($line =~ m/CMVC-Coreq:\s*([0-9]+)/i)
+        {
+            push @coreqs, $1;
+        }
+    }
+    return @coreqs;
+}
+
+# sub prereq_workitem_num
+#
+# Search through a git commit for all preReq instances.
+#
+# @param[in] commit - The git commit.
+#
+# @return array of strings - CMVC-Prereq numbers or "".
+#
+
+sub prereq_workitem_num
+{
+    my $commit = shift;
+
+    my @msg_lines = split('\n',git_commit_msg($commit));
+    my @prereqs = ();
+
+    foreach my $line (@msg_lines)
+    {
+        if($line =~  m/CMVC-Prereq:\s*([0-9]+)/i)
+        {
+            push @prereqs, $1;
+        }
+    }
+    return @prereqs;
+}
+
 # sub gerrit_changeid_num
 #
 # Determine the Gerrit Change-Id associated with a git commit.
@@ -2315,7 +2375,7 @@ sub bq_login
                      cqport => "6600" );
 
     # Read username / password.
-    $bq_login_params{user} = "hostboot\@us.ibm.com";
+    $bq_login_params{user} = $globals{email};
     my $password = `cat $HOSTBOOT_GSA_HOME/private/password`;
     die $? if $?;
     chomp($password);
@@ -2457,6 +2517,50 @@ sub bq_add_releaseList
     system "wget -q -O - --load-cookies $cookie_name '".BQ_SERVER.
            "?verb=editnote_form_response&table=$cqtype&id=$cqid&uid=$track&".
            "note_string=$note' > /dev/null";
+
+}
+
+# sub execute_cmvc_reqs
+#
+# Given a commit, find the CMVC coreqs and prereqs and add these
+# tracks to the auto release track.
+#
+# @param[in] feature - Current Release track in CMVC
+# @param[in] level - hostboot level tag
+# @param[in] released - previously released hostboot level tag
+# @param[in] release - which release this is (e.g. fips910, fips860)
+#
+
+sub execute_cmvc_reqs
+{
+    my $feature = shift;
+    my $level = shift;
+    my $released = shift;
+    my $release = shift;
+
+    #need to get commit
+    my $commits = git_commit_history($level, $released);
+
+    foreach my $commit (@{$commits})
+    {
+        my @coreq_list = coreq_workitem_num($commit);
+        foreach my $coreq (@coreq_list)
+        {
+            if($coreq ne "")
+            {
+                run_system_command("coreqTracks -r $release -t $feature -t2 $coreq -e $globals{email}");
+            }
+        }
+
+        my @prereq_list = prereq_workitem_num($commit);
+        foreach my $prereq (@prereq_list)
+        {
+            if($prereq ne "")
+            {
+                run_system_command("prereqTracks -r $release -t $prereq -t2 $feature -e $globals{email}");
+            }
+        }
+    }
 
 }
 
