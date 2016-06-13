@@ -34,6 +34,7 @@
 #define PLATATTRIBUTESERVICE_H_
 
 #include <attribute_service.H>
+#include <plat_chip_ec_feature.H>
 namespace fapi2
 {
 
