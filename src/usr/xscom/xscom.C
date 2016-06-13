@@ -551,9 +551,6 @@ uint64_t* getCpuIdVirtualAddress( XSComBase_t& o_mmioAddr )
 void resetScomEngine(TARGETING::Target* i_target,
                            uint64_t* i_virtAddr)
 {
-    // @todo-RTC:128077 XSCOM support for P9
-    return;
-
     errlHndl_t l_err = NULL;
     HMER l_hmer;
     uint64_t io_buffer = 0;
@@ -561,14 +558,16 @@ void resetScomEngine(TARGETING::Target* i_target,
     uint64_t* l_virtAddr = 0;
 
     // xscom registers that need to be set.
-    XscomAddrType_t XscomAddr[] = { {0x0202000F, CurThreadCpu},
-                                    {0x02020007, TargetCpu},
-                                    {0x02020009, TargetCpu},};
+    XscomAddrType_t XscomAddr[] = {
+        {0x00090018, CurThreadCpu}, //XSCOM_RCVED_STAT_REG
+        {0x00090012, TargetCpu}, //XSCOM_LOG_REG
+        {0x00090013, TargetCpu}, //XSCOM_ERR_REG
+    };
 
     TRACFCOMP(g_trac_xscom,"resetScomEngine: XSCOM RESET INTIATED");
 
     // Loop through the registers you want to write to 0
-    for (int i = 0; i<3; i++)
+    for (size_t i = 0; i<(sizeof(XscomAddr)/sizeof(XscomAddr[0])); i++)
     {
         // First address we need to read is for the Cpu that this thread is
         // running on.  Need to find the virtAddr for that CPU.
@@ -627,8 +626,6 @@ void collectXscomFFDC(TARGETING::Target* i_target,
                             uint64_t* i_virtAddr,
                             errlHndl_t& io_errl)
 {
-// @todo-RTC:128077 XSCOM support for P9
-#if (0)
     errlHndl_t l_err = NULL;
     HMER l_hmer;
     uint64_t io_buffer = 0;
@@ -636,10 +633,12 @@ void collectXscomFFDC(TARGETING::Target* i_target,
     uint64_t* l_virtAddr = 0;
 
     // xscom registers that need to be set.
-    XscomAddrType_t XscomAddr[4] = { {0x0202000F, CurThreadCpu},
-                                     {0x02020004, TargetCpu},
-                                     {0x02020007, TargetCpu},
-                                     {0x02020009, TargetCpu},};
+    XscomAddrType_t XscomAddr[4] = {
+        {0x00090018, CurThreadCpu}, //XSCOM_RCVED_STAT_REG
+        {0x00090012, TargetCpu}, //XSCOM_LOG_REG
+        {0x00090013, TargetCpu}, //XSCOM_ERR_REG
+        {0x0009001C, TargetCpu}, //ADS_XSCOM_CMD_REG
+    };
 
 
     TRACFCOMP(g_trac_xscom,"collectXscomFFDC: XSCOM COLLECT FFDC STARTED");
@@ -647,13 +646,14 @@ void collectXscomFFDC(TARGETING::Target* i_target,
     ERRORLOG::ErrlUserDetailsLogRegister l_logReg(i_target);
 
     // Loop through the addresses you want to collect.
-    for (int i = 0; i<4; i++)
+    for (size_t i = 0; i<(sizeof(XscomAddr)/sizeof(XscomAddr[0])); i++)
     {
 
         // If collecting first address, need to collect from Source Chip
         if (XscomAddr[i].target_type == CurThreadCpu)
         {
-            l_virtAddr =  getCpuIdVirtualAddress();
+            XSComBase_t l_ignored = 0;
+            l_virtAddr =  getCpuIdVirtualAddress(l_ignored);
         }
         else
         {
@@ -695,7 +695,6 @@ void collectXscomFFDC(TARGETING::Target* i_target,
 
     // Add the register FFDC to the errorlog passed in.
     l_logReg.addToLog(io_errl);
-#endif
     return;
 }
 
