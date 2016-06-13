@@ -86,7 +86,25 @@ extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
 }
 
-namespace OB
+namespace OB0
+{
+extern const GenRingIdList RING_ID_LIST_COMMON[];
+extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+}
+
+namespace OB1
+{
+extern const GenRingIdList RING_ID_LIST_COMMON[];
+extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+}
+
+namespace OB2
+{
+extern const GenRingIdList RING_ID_LIST_COMMON[];
+extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+}
+
+namespace OB3
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];

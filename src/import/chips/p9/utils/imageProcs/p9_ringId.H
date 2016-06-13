@@ -29,7 +29,8 @@ enum RINGTYPE
     COMMON_RING = 0,
     INSTANCE_RING = 1
 };
-}; //end of RING_TYPES namespace
+
+}; //end of RS4 namespace
 enum CHIPLET_TYPE
 {
     PERV_TYPE,
@@ -41,7 +42,10 @@ enum CHIPLET_TYPE
     PCI0_TYPE,
     PCI1_TYPE,
     PCI2_TYPE,
-    OB_TYPE,
+    OB0_TYPE,
+    OB1_TYPE,
+    OB2_TYPE,
+    OB3_TYPE,
     XB_TYPE,
     EQ_TYPE,
     EC_TYPE,
@@ -75,65 +79,74 @@ enum RingID
     perv_pll_bndy_bucket_3 = 12,
     perv_pll_bndy_bucket_4 = 13,
     perv_pll_bndy_bucket_5 = 14,
-    perv_repr = 15,
-    occ_repr = 16,
-    // values 17-18 unused
+    perv_pll_func = 15,
+    perv_pibnet_gptr = 16,
+    perv_pibnet_time = 17,
+    perv_repr = 18,
+    occ_repr = 19,
+    perv_pibnet_repr = 20,
 
     // Nest Chiplet Rings - N0
-    n0_fure = 19,
-    n0_gptr = 20,
-    n0_time = 21,
-    n0_nx_fure = 22,
-    n0_nx_gptr = 23,
-    n0_nx_time = 24,
-    n0_cxa0_fure = 25,
-    n0_cxa0_gptr = 26,
-    n0_cxa0_time = 27,
-    n0_repr = 28,
-    n0_nx_repr = 29,
-    n0_cxa0_repr = 30,
-    // values 31-33 unused
+    n0_fure = 21,
+    n0_gptr = 22,
+    n0_time = 23,
+    n0_nx_fure = 24,
+    n0_nx_gptr = 25,
+    n0_nx_time = 26,
+    n0_cxa0_fure = 27,
+    n0_cxa0_gptr = 28,
+    n0_cxa0_time = 29,
+    n0_repr = 30,
+    n0_nx_repr = 31,
+    n0_cxa0_repr = 32,
 
     // Nest Chiplet Rings - N1
-    n1_fure = 34,
-    n1_gptr = 35,
-    n1_time = 36,
-    n1_ioo0_fure = 37,
-    n1_ioo0_gptr = 38,
-    n1_ioo0_time = 39,
-    n1_ioo1_fure = 40,
-    n1_ioo1_gptr = 41,
-    n1_ioo1_time = 42,
-    n1_mcs23_fure = 43,
-    n1_mcs23_gptr = 44,
-    n1_mcs23_time = 45,
-    n1_repr = 46,
-    n1_ioo0_repr = 47,
-    n1_ioo1_repr = 48,
-    n1_mcs23_repr = 49,
-    // values 50-52 unused
+    n1_fure = 33,
+    n1_gptr = 34,
+    n1_time = 35,
+    n1_ioo0_fure = 36,
+    n1_ioo0_gptr = 37,
+    n1_ioo0_time = 38,
+    n1_ioo1_fure = 39,
+    n1_ioo1_gptr = 40,
+    n1_ioo1_time = 41,
+    n1_mcs23_fure = 42,
+    n1_mcs23_gptr = 43,
+    n1_mcs23_time = 44,
+    n1_repr = 45,
+    n1_ioo0_repr = 46,
+    n1_ioo1_repr = 47,
+    n1_mcs23_repr = 48,
 
     // Nest Chiplet Rings - N2
-    n2_fure = 53,
-    n2_gptr = 54,
-    n2_time = 55,
-    n2_cxa1_fure = 56,
-    n2_cxa1_gptr = 57,
-    n2_cxa1_time = 58,
-    n2_repr = 59,
-    n2_cxa1_repr = 60,
-    // values 61-63 unused
+    n2_fure = 49,
+    n2_gptr = 50,
+    n2_time = 51,
+    n2_cxa1_fure = 52,
+    n2_cxa1_gptr = 53,
+    n2_cxa1_time = 54,
+    n2_psi_fure = 55,
+    n2_psi_gptr = 56,
+    n2_psi_time = 57,
+    n2_repr = 58,
+    n2_cxa1_repr = 59,
+    n2_psi_repr = 60,
+    // values 61 unused
 
     // Nest Chiplet Rings - N3
-    n3_fure = 64,
-    n3_gptr = 65,
-    n3_time = 66,
-    n3_mcs01_fure = 67,
-    n3_mcs01_gptr = 68,
-    n3_mcs01_time = 69,
-    n3_repr = 70,
-    n3_mcs01_repr = 71,
-    // values 72-74 unused
+    n3_fure = 62,
+    n3_gptr = 63,
+    n3_time = 64,
+    n3_mcs01_fure = 65,
+    n3_mcs01_gptr = 66,
+    n3_mcs01_time = 67,
+    n3_np_fure = 68,
+    n3_np_gptr = 69,
+    n3_np_time = 70,
+    n3_repr = 71,
+    n3_mcs01_repr = 72,
+    n3_np_repr = 73,
+    // values 74 unused
 
     // X-Bus Chiplet Rings
     // Common - apply to all instances of X-Bus
@@ -150,21 +163,21 @@ enum RingID
     xb_io2_gptr = 85,
     xb_io2_time = 86,
     xb_pll_gptr = 87,
-    xb_pll_other = 88,
     xb_pll_bndy  = 89,
     xb_pll_bndy_bucket_1 = 90,
     xb_pll_bndy_bucket_2 = 91,
     xb_pll_bndy_bucket_3 = 92,
     xb_pll_bndy_bucket_4 = 93,
     xb_pll_bndy_bucket_5 = 94,
+    xb_pll_func = 95,
 
     // X-Bus Chiplet Rings
     // X0, X1 and X2 instance specific Rings
-    xb_repr = 95,
-    xb_io0_repr = 96,
-    xb_io1_repr = 97,
-    xb_io2_repr = 98,
-    // values 99-100 unused
+    xb_repr = 96,
+    xb_io0_repr = 97,
+    xb_io1_repr = 98,
+    xb_io2_repr = 99,
+    // values 100 unused
 
     // MC Chiplet Rings
     // Common - apply to all instances of MC
@@ -178,105 +191,163 @@ enum RingID
     mc_iom23_gptr = 108,
     mc_iom23_time = 109,
     mc_pll_gptr = 110,
-    mc_pll_other = 111,
-    mc_pll_bndy  = 112,
-    mc_pll_bndy_bucket_1 = 113,
-    mc_pll_bndy_bucket_2 = 114,
-    mc_pll_bndy_bucket_3 = 115,
-    mc_pll_bndy_bucket_4 = 116,
-    mc_pll_bndy_bucket_5 = 117,
+    mc_pll_bndy  = 111,
+    mc_pll_bndy_bucket_1 = 112,
+    mc_pll_bndy_bucket_2 = 113,
+    mc_pll_bndy_bucket_3 = 114,
+    mc_pll_bndy_bucket_4 = 115,
+    mc_pll_bndy_bucket_5 = 116,
+    mc_pll_func = 117,
 
     // MC Chiplet Rings
     // MC01 and MC23 instance specific Rings
     mc_repr = 118,
     mc_iom01_repr = 119,
     mc_iom23_repr = 120,
-    // values 121-123 unused
+    // values 121-122 unused
 
     // OB Chiplet Rings
     // Common - apply to all instances of O-Bus
-    ob_fure = 124,
-    ob_gptr = 125,
-    ob_time = 126,
-    ob_pll_gptr = 127,
-    ob_pll_other = 128,
-    ob_pll_bndy  = 129,
-    ob_pll_bndy_bucket_1 = 130,
-    ob_pll_bndy_bucket_2 = 131,
-    ob_pll_bndy_bucket_3 = 132,
-    ob_pll_bndy_bucket_4 = 133,
-    ob_pll_bndy_bucket_5 = 134,
+    ob0_fure = 123,
+    ob0_gptr = 124,
+    ob0_time = 125,
+    ob0_pll_gptr = 126,
+    ob0_pll_bndy  = 127,
+    ob0_pll_bndy_bucket_1 = 128,
+    ob0_pll_bndy_bucket_2 = 129,
+    ob0_pll_bndy_bucket_3 = 130,
+    ob0_pll_bndy_bucket_4 = 131,
+    ob0_pll_bndy_bucket_5 = 132,
+    ob0_pll_func = 133,
 
     // OB Chiplet Rings
     // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob_repr = 135,
-    // values 136-137 unused
+    ob0_repr = 134,
+    // values 135-136 unused
+
+    ob1_fure = 137,
+    ob1_gptr = 138,
+    ob1_time = 139,
+    ob1_pll_gptr = 140,
+    ob1_pll_bndy  = 141,
+    ob1_pll_bndy_bucket_1 = 142,
+    ob1_pll_bndy_bucket_2 = 143,
+    ob1_pll_bndy_bucket_3 = 144,
+    ob1_pll_bndy_bucket_4 = 145,
+    ob1_pll_bndy_bucket_5 = 146,
+    ob1_pll_func = 147,
+
+    // OB Chiplet Rings
+    // OB0, OB1, OB2 and OB3 instance specific Ring
+    ob1_repr = 148,
+    // values 149-150 unused
+
+
+    ob2_fure = 151,
+    ob2_gptr = 152,
+    ob2_time = 153,
+    ob2_pll_gptr = 154,
+    ob2_pll_bndy  = 155,
+    ob2_pll_bndy_bucket_1 = 156,
+    ob2_pll_bndy_bucket_2 = 157,
+    ob2_pll_bndy_bucket_3 = 158,
+    ob2_pll_bndy_bucket_4 = 159,
+    ob2_pll_bndy_bucket_5 = 160,
+    ob2_pll_func = 161,
+
+    // OB Chiplet Rings
+    // OB0, OB1, OB2 and OB3 instance specific Ring
+    ob2_repr = 162,
+    // values 163-164 unused
+
+
+    ob3_fure = 165,
+    ob3_gptr = 166,
+    ob3_time = 167,
+    ob3_pll_gptr = 168,
+    ob3_pll_bndy  = 169,
+    ob3_pll_bndy_bucket_1 = 170,
+    ob3_pll_bndy_bucket_2 = 171,
+    ob3_pll_bndy_bucket_3 = 172,
+    ob3_pll_bndy_bucket_4 = 173,
+    ob3_pll_bndy_bucket_5 = 174,
+    ob3_pll_func = 175,
+
+    // OB Chiplet Rings
+    // OB0, OB1, OB2 and OB3 instance specific Ring
+    ob3_repr = 176,
+    // value177-178 unused
+
 
     // PCI Chiplet Rings
     // PCI0 Common Rings
-    pci0_fure = 138,
-    pci0_gptr = 139,
-    pci0_time = 140,
+    pci0_fure = 179,
+    pci0_gptr = 180,
+    pci0_time = 181,
+    pci0_pll_func = 182,
+    pci0_pll_gptr = 183,
     // Instance specific Rings
-    pci0_repr = 141,
+    pci0_repr = 184,
 
     // PCI1 Common Rings
-    pci1_fure = 142,
-    pci1_gptr = 143,
-    pci1_time = 144,
+    pci1_fure = 185,
+    pci1_gptr = 186,
+    pci1_time = 187,
+    pci1_pll_func = 188,
+    pci1_pll_gptr = 189,
     // Instance specific Rings
-    pci1_repr = 145,
+    pci1_repr = 190,
 
     // PCI2 Common Rings
-    pci2_fure = 146,
-    pci2_gptr = 147,
-    pci2_time = 148,
+    pci2_fure = 191,
+    pci2_gptr = 192,
+    pci2_time = 193,
+    pci2_pll_func = 194,
+    pci2_pll_gptr = 195,
     // Instance specific Rings
-    pci2_repr = 149,
-    // vlaues 150-152 unused
+    pci2_repr = 196,
 
     // Quad Chiplet Rings
     // Common - apply to all Quad instances
-    eq_fure = 153,
-    eq_gptr = 154,
-    eq_time = 155,
-    ex_l3_fure = 156,
-    ex_l3_gptr = 157,
-    ex_l3_time = 158,
-    ex_l2_fure = 159,
-    ex_l2_gptr = 160,
-    ex_l2_time = 161,
-    ex_l3_refr_fure = 162,
-    ex_l3_refr_gptr = 163,
-    ex_l3_refr_time = 164,
-    eq_ana_func = 165,
-    eq_ana_gptr = 166,
-    eq_dpll_func = 167,
-    eq_dpll_gptr = 168,
-    eq_dpll_other = 169,
+    eq_fure = 197,
+    eq_gptr = 198,
+    eq_time = 199,
+    eq_mode = 200,
+    ex_l3_fure = 201,
+    ex_l3_gptr = 202,
+    ex_l3_time = 203,
+    ex_l2_mode = 204,
+    ex_l2_fure = 205,
+    ex_l2_gptr = 206,
+    ex_l2_time = 207,
+    ex_l3_refr_fure = 208,
+    ex_l3_refr_gptr = 209,
+    ex_l3_refr_time = 210,
+    eq_ana_func = 211,
+    eq_ana_gptr = 212,
+    eq_dpll_func = 213,
+    eq_dpll_gptr = 214,
+    eq_dpll_mode = 215,
+    eq_ana_bndy = 216,
+    eq_ana_mode = 217,
 
     // Quad Chiplet Rings
     // EQ0 - EQ5 instance specific Rings
-    eq_repr = 170,
-    ex_l3_repr = 171,
-    ex_l2_repr = 172,
-    ex_l3_refr_repr = 173,
-
-    // Quad Chiplet Rings
-    // Common - apply to all Quad instances
-    eq_ana_bndy = 174,
-    // values 175-176 unused
+    eq_repr = 218,
+    ex_l3_repr = 219,
+    ex_l2_repr = 220,
+    ex_l3_refr_repr = 221,
 
     // Core Chiplet Rings
     // Common - apply to all Core instances
-    ec_func = 177,
-    ec_gptr = 178,
-    ec_time = 179,
-    ec_mode = 180,
+    ec_func = 222,
+    ec_gptr = 223,
+    ec_time = 224,
+    ec_mode = 225,
 
     // Core Chiplet Rings
     // EC0 - EC23 instance specific Ring
-    ec_repr = 181,
+    ec_repr = 226,
     //***************************
     // Rings needed for SBE - End
     //***************************
@@ -297,16 +368,17 @@ struct CHIPLET_DATA
 };
 
 // This is used to Set (Mark) the left-most bit
-const uint32_t INSTANCE_RING_MARK = 0x8000000;
+const uint8_t INSTANCE_RING_MARK = 0x80;
 //
 // This is used to Set (Mark) the left-most bit
-const uint32_t INSTANCE_RING_MASK = 0x7FFFFFFF;
+const uint8_t INSTANCE_RING_MASK = 0x7F;
 
 namespace PERV
 {
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -331,16 +403,20 @@ enum RingOffset
     perv_pll_bndy_bucket_3 = 11,
     perv_pll_bndy_bucket_4 = 12,
     perv_pll_bndy_bucket_5 = 13,
+    perv_pll_func   = 14,
+    perv_pibnet_gptr = 15,
+    perv_pibnet_time = 16,
     // Instance Rings
     perv_repr     = (0 | INSTANCE_RING_MARK),
-    occ_repr      = (1 | INSTANCE_RING_MARK)
+    occ_repr      = (1 | INSTANCE_RING_MARK),
+    perv_pibnet_repr = (2 | INSTANCE_RING_MARK)
 };
 
 static const CHIPLET_DATA g_pervData =
 {
     1,  // Pervasive Chiplet ID is 1
-    14, // 14 common rings for pervasive chiplet
-    2   // 2 instance specific rings for pervasive chiplet
+    17, // 17 common rings for pervasive chiplet
+    3   // 3 instance specific rings for pervasive chiplet
 };
 }; // end of namespace PERV
 
@@ -349,6 +425,7 @@ namespace N0
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -382,6 +459,7 @@ namespace N1
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -419,6 +497,7 @@ namespace N2
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -430,16 +509,20 @@ enum RingOffset
     n2_cxa1_fure = 3,
     n2_cxa1_gptr = 4,
     n2_cxa1_time = 5,
+    n2_psi_fure = 6,
+    n2_psi_gptr = 7,
+    n2_psi_time = 8,
     // Instance Rings
     n2_repr      = (0 | INSTANCE_RING_MARK),
-    n2_cxa1_repr = (1 | INSTANCE_RING_MARK)
+    n2_cxa1_repr = (1 | INSTANCE_RING_MARK),
+    n2_psi_repr  = (2 | INSTANCE_RING_MARK)
 };
 
 static const CHIPLET_DATA g_n2Data =
 {
     4, // N2 Chiplet ID is 4.
-    6, // 6 common rings for N2 Chiplet
-    2  // 2 instance specific rings for N2 chiplet
+    9, // 9 common rings for N2 Chiplet
+    3  // 3 instance specific rings for N2 chiplet
 };
 };
 
@@ -448,6 +531,7 @@ namespace N3
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -459,16 +543,20 @@ enum RingOffset
     n3_mcs01_fure = 3,
     n3_mcs01_gptr = 4,
     n3_mcs01_time = 5,
+    n3_np_fure = 6,
+    n3_np_gptr = 7,
+    n3_np_time = 8,
     // Instance Rings
     n3_repr       = (0 | INSTANCE_RING_MARK),
     n3_mcs01_repr = (1 | INSTANCE_RING_MARK),
+    n3_np_repr = (2 | INSTANCE_RING_MARK),
 };
 
 static const CHIPLET_DATA g_n3Data =
 {
     5, // N3 Chiplet ID is 5
-    6, // 6 common rings for N3 Chiplet
-    2  // 2 instance specific rings for N3 chiplet
+    9, // 9 common rings for N3 Chiplet
+    3  // 3 instance specific rings for N3 chiplet
 };
 };
 
@@ -477,6 +565,7 @@ namespace XB
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -495,17 +584,17 @@ enum RingOffset
     xb_io2_gptr  = 10,
     xb_io2_time  = 11,
     xb_pll_gptr  = 12,
-    xb_pll_other = 13,
-    xb_pll_bndy  = 14,
+    xb_pll_bndy  = 13,
     // The values for this and the following constant are purposefully made
     // identical. The idea is to enable the user to specify directly the bucket
     // number or use the Attribute. Giving same number here will enable
     // evaluating to the same offset.
-    xb_pll_bndy_bucket_1  = 14,
-    xb_pll_bndy_bucket_2  = 15,
-    xb_pll_bndy_bucket_3  = 16,
-    xb_pll_bndy_bucket_4  = 17,
-    xb_pll_bndy_bucket_5  = 18,
+    xb_pll_bndy_bucket_1  = 13,
+    xb_pll_bndy_bucket_2  = 14,
+    xb_pll_bndy_bucket_3  = 15,
+    xb_pll_bndy_bucket_4  = 16,
+    xb_pll_bndy_bucket_5  = 17,
+    xb_pll_func = 18,
     // Instance Rings
     xb_repr      = (0 | INSTANCE_RING_MARK),
     xb_io0_repr  = (1 | INSTANCE_RING_MARK),
@@ -526,6 +615,7 @@ namespace MC
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -541,14 +631,14 @@ enum RingOffset
     mc_iom23_gptr = 7,
     mc_iom23_time = 8,
     mc_pll_gptr   = 9,
-    mc_pll_other  = 10,
     // To find the bucket id for MC PLL, NEST_PLL_BUCKET attribute will be used
-    mc_pll_bndy = 11,
-    mc_pll_bndy_bucket_1 = 11,
-    mc_pll_bndy_bucket_2 = 12,
-    mc_pll_bndy_bucket_3 = 13,
-    mc_pll_bndy_bucket_4 = 14,
-    mc_pll_bndy_bucket_5 = 15,
+    mc_pll_bndy = 10,
+    mc_pll_bndy_bucket_1 = 10,
+    mc_pll_bndy_bucket_2 = 11,
+    mc_pll_bndy_bucket_3 = 12,
+    mc_pll_bndy_bucket_4 = 13,
+    mc_pll_bndy_bucket_5 = 14,
+    mc_pll_func = 15,
     // Instance Rings
     mc_repr       = (0 | INSTANCE_RING_MARK),
     mc_iom01_repr = (1 | INSTANCE_RING_MARK),
@@ -563,48 +653,164 @@ static const CHIPLET_DATA g_mcData =
 };
 }; // end of namespace MC
 
-namespace OB
+namespace OB0
 {
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
 {
     // Common Rings
-    ob_fure      = 0,
-    ob_gptr      = 1,
-    ob_time      = 2,
-    ob_pll_gptr  = 3,
-    ob_pll_other = 4,
-    ob_pll_bndy  = 5,
+    ob0_fure      = 0,
+    ob0_gptr      = 1,
+    ob0_time      = 2,
+    ob0_pll_gptr  = 3,
+    ob0_pll_bndy  = 4,
     // The values for this and the following constant are purposefully made
     // identical. The idea is to enable the user to specify directly the bucket
     // number or use the Attribute. Giving same number here will enable
     // evaluating to the same offset.
-    ob_pll_bndy_bucket_1 = 5,
-    ob_pll_bndy_bucket_2 = 6,
-    ob_pll_bndy_bucket_3 = 7,
-    ob_pll_bndy_bucket_4 = 8,
-    ob_pll_bndy_bucket_5 = 9,
+    ob0_pll_bndy_bucket_1 = 4,
+    ob0_pll_bndy_bucket_2 = 5,
+    ob0_pll_bndy_bucket_3 = 6,
+    ob0_pll_bndy_bucket_4 = 7,
+    ob0_pll_bndy_bucket_5 = 8,
+    ob0_pll_func = 9,
     // Instance Rings
-    ob_repr      = (0 | INSTANCE_RING_MARK)
+    ob0_repr      = (0 | INSTANCE_RING_MARK)
 };
 
-static const CHIPLET_DATA g_obData =
+static const CHIPLET_DATA g_ob0Data =
 {
     9,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     10, // 10 common rings for OB Chiplet
     1   // 1 instance specific rings for each OB chiplet
 };
-}; // end of namespace OB
+}; // end of namespace OB0
 
+namespace OB1
+{
+struct RingVariants
+{
+    uint16_t iv_base;
+    uint16_t iv_riskLevel;
+};
+
+enum RingOffset
+{
+    // Common Rings
+    ob1_fure      = 0,
+    ob1_gptr      = 1,
+    ob1_time      = 2,
+    ob1_pll_gptr  = 3,
+    ob1_pll_bndy  = 4,
+    // The values for this and the following constant are purposefully made
+    // identical. The idea is to enable the user to specify directly the bucket
+    // number or use the Attribute. Giving same number here will enable
+    // evaluating to the same offset.
+    ob1_pll_bndy_bucket_1 = 4,
+    ob1_pll_bndy_bucket_2 = 5,
+    ob1_pll_bndy_bucket_3 = 6,
+    ob1_pll_bndy_bucket_4 = 7,
+    ob1_pll_bndy_bucket_5 = 8,
+    ob1_pll_func = 9,
+    // Instance Rings
+    ob1_repr      = (0 | INSTANCE_RING_MARK)
+};
+
+static const CHIPLET_DATA g_ob1Data =
+{
+    10,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    10, // 10 common rings for OB Chiplet
+    1   // 1 instance specific rings for each OB chiplet
+};
+}; // end of namespace OB1
+
+
+namespace OB2
+{
+struct RingVariants
+{
+    uint16_t iv_base;
+    uint16_t iv_riskLevel;
+};
+
+enum RingOffset
+{
+    // Common Rings
+    ob2_fure      = 0,
+    ob2_gptr      = 1,
+    ob2_time      = 2,
+    ob2_pll_gptr  = 3,
+    ob2_pll_bndy  = 4,
+    // The values for this and the following constant are purposefully made
+    // identical. The idea is to enable the user to specify directly the bucket
+    // number or use the Attribute. Giving same number here will enable
+    // evaluating to the same offset.
+    ob2_pll_bndy_bucket_1 = 4,
+    ob2_pll_bndy_bucket_2 = 5,
+    ob2_pll_bndy_bucket_3 = 6,
+    ob2_pll_bndy_bucket_4 = 7,
+    ob2_pll_bndy_bucket_5 = 8,
+    ob2_pll_func = 9,
+    // Instance Rings
+    ob2_repr      = (0 | INSTANCE_RING_MARK)
+};
+
+static const CHIPLET_DATA g_ob2Data =
+{
+    11,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    10, // 10 common rings for OB Chiplet
+    1   // 1 instance specific rings for each OB chiplet
+};
+}; // end of namespace OB2
+
+namespace OB3
+{
+struct RingVariants
+{
+    uint16_t iv_base;
+    uint16_t iv_riskLevel;
+};
+
+enum RingOffset
+{
+    // Common Rings
+    ob3_fure      = 0,
+    ob3_gptr      = 1,
+    ob3_time      = 2,
+    ob3_pll_gptr  = 3,
+    ob3_pll_bndy  = 4,
+    // The values for this and the following constant are purposefully made
+    // identical. The idea is to enable the user to specify directly the bucket
+    // number or use the Attribute. Giving same number here will enable
+    // evaluating to the same offset.
+    ob3_pll_bndy_bucket_1 = 4,
+    ob3_pll_bndy_bucket_2 = 5,
+    ob3_pll_bndy_bucket_3 = 6,
+    ob3_pll_bndy_bucket_4 = 7,
+    ob3_pll_bndy_bucket_5 = 8,
+    ob3_pll_func = 9,
+    // Instance Rings
+    ob3_repr      = (0 | INSTANCE_RING_MARK)
+};
+
+static const CHIPLET_DATA g_ob3Data =
+{
+    12,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    10, // 10 common rings for OB Chiplet
+    1   // 1 instance specific rings for each OB chiplet
+};
+}; // end of namespace OB2
 namespace PCI0
 {
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -613,6 +819,8 @@ enum RingOffset
     pci0_fure = 0,
     pci0_gptr = 1,
     pci0_time = 2,
+    pci0_pll_func = 3,
+    pci0_pll_gptr = 4,
     // Instance Rings
     pci0_repr = (0 | INSTANCE_RING_MARK)
 };
@@ -620,7 +828,7 @@ enum RingOffset
 static const CHIPLET_DATA g_pci0Data =
 {
     13, // PCI0 Chiplet Chiplet ID is 13
-    3,  // 3 common rings for PCI0 chiplet
+    5,  // 5 common rings for PCI0 chiplet
     1,  // 1 instance specific rings for PCI0 chiplet
 };
 };
@@ -630,6 +838,7 @@ namespace PCI1
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -638,6 +847,8 @@ enum RingOffset
     pci1_fure = 0,
     pci1_gptr = 1,
     pci1_time = 2,
+    pci1_pll_func = 3,
+    pci1_pll_gptr = 4,
     // Instance Rings
     pci1_repr = (0 | INSTANCE_RING_MARK)
 };
@@ -645,7 +856,7 @@ enum RingOffset
 static const CHIPLET_DATA g_pci1Data =
 {
     14, // PCI1 Chiplet Chiplet ID is 14
-    3,  // 3 common rings for PCI1 chiplet
+    5,  // 5 common rings for PCI1 chiplet
     1,  // 1 instance specific rings for PCI1 chiplet
 };
 };
@@ -655,6 +866,7 @@ namespace PCI2
 struct RingVariants
 {
     uint16_t iv_base;
+    uint16_t iv_riskLevel;
 };
 
 enum RingOffset
@@ -663,6 +875,8 @@ enum RingOffset
     pci2_fure = 0,
     pci2_gptr = 1,
     pci2_time = 2,
+    pci2_pll_func = 3,
+    pci2_pll_gptr = 4,
     // Instance Rings
     pci2_repr = (0 | INSTANCE_RING_MARK)
 };
@@ -670,7 +884,7 @@ enum RingOffset
 static const CHIPLET_DATA g_pci2Data =
 {
     15, // PCI2 Chiplet Chiplet ID is 15
-    3,  // 3 common rings for PCI2 chiplet
+    5,  // 5 common rings for PCI2 chiplet
     1,  // 1 instance specific rings for PCI2 chiplet
 };
 
@@ -691,33 +905,36 @@ enum RingOffset
     eq_fure         = 0,
     eq_gptr         = 1,
     eq_time         = 2,
-    ex_l3_fure      = 3,
-    ex_l3_gptr      = 4,
-    ex_l3_time      = 5,
-    ex_l2_fure      = 6,
-    ex_l2_gptr      = 7,
-    ex_l2_time      = 8,
-    ex_l3_refr_fure = 9,
-    ex_l3_refr_gptr = 10,
-    ex_l3_refr_time = 11,
-    eq_ana_func     = 12,
-    eq_ana_gptr     = 13,
-    eq_dpll_func    = 14,
-    eq_dpll_gptr    = 15,
-    eq_dpll_other   = 16,
-    eq_ana_bndy     = 17,
+    eq_mode         = 3,
+    ex_l3_fure      = 4,
+    ex_l3_gptr      = 5,
+    ex_l3_time      = 6,
+    ex_l2_mode      = 7,
+    ex_l2_fure      = 8,
+    ex_l2_gptr      = 9,
+    ex_l2_time      = 10,
+    ex_l3_refr_fure = 11,
+    ex_l3_refr_gptr = 12,
+    eq_ana_func     = 13,
+    eq_ana_gptr     = 14,
+    eq_dpll_func    = 15,
+    eq_dpll_gptr    = 16,
+    eq_dpll_mode    = 17,
+    eq_ana_bndy     = 18,
+    eq_ana_mode     = 19,
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ex_l3_repr      = (1 | INSTANCE_RING_MARK),
     ex_l2_repr      = (2 | INSTANCE_RING_MARK),
-    ex_l3_refr_repr = (3 | INSTANCE_RING_MARK)
+    ex_l3_refr_repr = (3 | INSTANCE_RING_MARK),
+    ex_l3_refr_time = (4 | INSTANCE_RING_MARK)
 };
 
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    18, // 18 common rings for Quad chiplet
-    4,  // 4 instance specific rings for each EQ chiplet
+    21, // 21 common rings for Quad chiplet
+    5,  // 5 instance specific rings for each EQ chiplet
 };
 }; // end of namespace EQ
 
@@ -749,14 +966,14 @@ static const CHIPLET_DATA g_ecData =
 };
 }; // end of namespace EC
 
-static const uint32_t INVALID_RING = 999;
+static const uint8_t INVALID_RING = 0xFF;
 
 // This structure is needed for mapping a RingID to it's corresponding name.
 // The names will be used by the build scripts when generating the TOR.
 #ifndef __PPE__
 struct ringProperties_t
 {
-    uint32_t iv_torOffSet;
+    uint8_t iv_torOffSet;
     char iv_name[25];
     CHIPLET_TYPE iv_type;
 };
@@ -764,7 +981,7 @@ struct ringProperties_t
 #ifdef __PPE__
 struct ringProperties_t
 {
-    uint32_t iv_torOffSet;
+    uint8_t iv_torOffSet;
     CHIPLET_TYPE iv_type;
 };
 #endif
@@ -773,210 +990,257 @@ struct ringProperties_t
 static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
 {
     // Pervasive Ring
-    {PERV::perv_fure,      "perv_fure"},      // 0
-    {PERV::perv_gptr,      "perv_gptr"},      // 1
-    {PERV::perv_time,      "perv_time"},      // 2
-    {PERV::occ_fure,       "occ_fure"},       // 3
-    {PERV::occ_gptr,       "occ_gptr"},       // 4
-    {PERV::occ_time,       "occ_time"},       // 5
-    {PERV::perv_ana_func,  "perv_ana_func"},  // 6
-    {PERV::perv_ana_gptr,  "perv_ana_gptr"},  // 7
-    {PERV::perv_pll_gptr,  "perv_pll_gptr"},  // 8
-    {PERV::perv_pll_bndy,  "perv_pll_bndy"},  // 9
-    {PERV::perv_pll_bndy_bucket_1, "perv_pll_bndy_bucket_1"},  // 10
-    {PERV::perv_pll_bndy_bucket_2, "perv_pll_bndy_bucket_2"},  // 11
-    {PERV::perv_pll_bndy_bucket_3, "perv_pll_bndy_bucket_3"},  // 12
-    {PERV::perv_pll_bndy_bucket_4, "perv_pll_bndy_bucket_4"},  // 13
-    {PERV::perv_pll_bndy_bucket_5, "perv_pll_bndy_bucket_5"},  // 14
-    {PERV::perv_repr,      "perv_repr"},  // 15
-    {PERV::occ_repr,       "occ_repr"},   // 16
-    {INVALID_RING,         ""}, // 17 // for future.
-    {INVALID_RING,         ""}, // 18 // for future.
+    {PERV::perv_fure,               "perv_fure"},      // 0
+    {PERV::perv_gptr,               "perv_gptr"},      // 1
+    {PERV::perv_time,               "perv_time"},      // 2
+    {PERV::occ_fure,                "occ_fure"},       // 3
+    {PERV::occ_gptr,                "occ_gptr"},       // 4
+    {PERV::occ_time,                "occ_time"},       // 5
+    {PERV::perv_ana_func,           "perv_ana_func"},  // 6
+    {PERV::perv_ana_gptr,           "perv_ana_gptr"},  // 7
+    {PERV::perv_pll_gptr,           "perv_pll_gptr"},  // 8
+    {PERV::perv_pll_bndy,           "perv_pll_bndy"},  // 9
+    {PERV::perv_pll_bndy_bucket_1,  "perv_pll_bndy_bucket_1"},  // 10
+    {PERV::perv_pll_bndy_bucket_2,  "perv_pll_bndy_bucket_2"},  // 11
+    {PERV::perv_pll_bndy_bucket_3,  "perv_pll_bndy_bucket_3"},  // 12
+    {PERV::perv_pll_bndy_bucket_4,  "perv_pll_bndy_bucket_4"},  // 13
+    {PERV::perv_pll_bndy_bucket_5,  "perv_pll_bndy_bucket_5"},  // 14
+    {PERV::perv_pll_func,           "perv_pll_func"}, // 15
+    {PERV::perv_pibnet_gptr,        "perv_pibnet_gptr"}, // 16
+    {PERV::perv_pibnet_time,        "perv_pibnet_time"}, // 17
+    {PERV::perv_repr,               "perv_repr"},  // 18
+    {PERV::occ_repr,                "occ_repr"},   // 19
+    {PERV::perv_pibnet_repr,        "perv_pibnet_repr"}, // 20
 
     // Nest N0 Ring
-    {N0::n0_fure,         "n0_fure"},      // 19
-    {N0::n0_gptr,         "n0_gptr"},      // 20
-    {N0::n0_time,         "n0_time"},      // 21
-    {N0::n0_nx_fure,      "n0_nx_fure"},   // 22
-    {N0::n0_nx_gptr,      "n0_nx_gptr"},   // 23
-    {N0::n0_nx_time,      "n0_nx_time"},   // 24
-    {N0::n0_cxa0_fure,    "n0_cxa0_fure"}, // 25
-    {N0::n0_cxa0_gptr,    "n0_cxa0_gptr"}, // 26
-    {N0::n0_cxa0_time,    "n0_cxa0_time"}, // 27
-    {N0::n0_repr,         "n0_repr"},      // 28
-    {N0::n0_nx_repr,      "n0_nx_repr"},   // 29
-    {N0::n0_cxa0_repr,    "n0_cxa0_repr"}, // 30
-    {INVALID_RING,         ""}, // 31 // for future.
-    {INVALID_RING,         ""}, // 32 // for future.
-    {INVALID_RING,         ""}, // 33 // for future.
+    {N0::n0_fure,                   "n0_fure"},      // 21
+    {N0::n0_gptr,                   "n0_gptr"},      // 22
+    {N0::n0_time,                   "n0_time"},      // 23
+    {N0::n0_nx_fure,                "n0_nx_fure"},   // 24
+    {N0::n0_nx_gptr,                "n0_nx_gptr"},   // 25
+    {N0::n0_nx_time,                "n0_nx_time"},   // 26
+    {N0::n0_cxa0_fure,              "n0_cxa0_fure"}, // 27
+    {N0::n0_cxa0_gptr,              "n0_cxa0_gptr"}, // 28
+    {N0::n0_cxa0_time,              "n0_cxa0_time"}, // 29
+    {N0::n0_repr,                   "n0_repr"},      // 30
+    {N0::n0_nx_repr,                "n0_nx_repr"},   // 31
+    {N0::n0_cxa0_repr,              "n0_cxa0_repr"}, // 32
 
     // Nest N1 Ring
-    {N1::n1_fure,         "n1_fure"},       // 34
-    {N1::n1_gptr,         "n1_gptr"},       // 35
-    {N1::n1_time,         "n1_time"},       // 36
-    {N1::n1_ioo0_fure,    "n1_ioo0_fure"},  // 37
-    {N1::n1_ioo0_gptr,    "n1_ioo0_gptr"},  // 38
-    {N1::n1_ioo0_time,    "n1_ioo0_time"},  // 39
-    {N1::n1_ioo1_fure,    "n1_ioo1_fure"},  // 40
-    {N1::n1_ioo1_gptr,    "n1_ioo1_gptr"},  // 41
-    {N1::n1_ioo1_time,    "n1_ioo1_time"},  // 42
-    {N1::n1_mcs23_fure,   "n1_mcs23_fure"}, // 43
-    {N1::n1_mcs23_gptr,   "n1_mcs23_gptr"}, // 44
-    {N1::n1_mcs23_time,   "n1_mcs23_time"}, // 45
-    {N1::n1_repr,         "n1_repr"},       // 46
-    {N1::n1_ioo0_repr,    "n1_ioo0_repr"},  // 47
-    {N1::n1_ioo1_repr,    "n1_ioo1_repr"},  // 48
-    {N1::n1_mcs23_repr,   "n1_mcs23_repr"}, // 49
-    {INVALID_RING,         ""}, // 50 // for future.
-    {INVALID_RING,         ""}, // 51 // for future.
-    {INVALID_RING,         ""}, // 52 // for future.
+    {N1::n1_fure,                   "n1_fure"},       // 33
+    {N1::n1_gptr,                   "n1_gptr"},       // 34
+    {N1::n1_time,                   "n1_time"},       // 35
+    {N1::n1_ioo0_fure,              "n1_ioo0_fure"},  // 36
+    {N1::n1_ioo0_gptr,              "n1_ioo0_gptr"},  // 37
+    {N1::n1_ioo0_time,              "n1_ioo0_time"},  // 38
+    {N1::n1_ioo1_fure,              "n1_ioo1_fure"},  // 39
+    {N1::n1_ioo1_gptr,              "n1_ioo1_gptr"},  // 40
+    {N1::n1_ioo1_time,              "n1_ioo1_time"},  // 41
+    {N1::n1_mcs23_fure,             "n1_mcs23_fure"}, // 42
+    {N1::n1_mcs23_gptr,             "n1_mcs23_gptr"}, // 43
+    {N1::n1_mcs23_time,             "n1_mcs23_time"}, // 44
+    {N1::n1_repr,                   "n1_repr"},       // 45
+    {N1::n1_ioo0_repr,              "n1_ioo0_repr"},  // 46
+    {N1::n1_ioo1_repr,              "n1_ioo1_repr"},  // 47
+    {N1::n1_mcs23_repr,             "n1_mcs23_repr"}, // 48
 
     // Nest N2 Ring
-    {N2::n2_fure,         "n2_fure"},       // 53
-    {N2::n2_gptr,         "n2_gptr"},       // 54
-    {N2::n2_time,         "n2_time"},       // 55
-    {N2::n2_cxa1_fure,    "n2_cxa1_fure"},  // 56
-    {N2::n2_cxa1_gptr,    "n2_cxa1_gptr"},  // 57
-    {N2::n2_cxa1_time,    "n2_cxa1_time"},  // 58
-    {N2::n2_repr,         "n2_repr"},       // 59
-    {N2::n2_cxa1_repr,    "n2_cxa1_repr"},  // 60
-    {INVALID_RING,         ""}, // 61 // for future.
-    {INVALID_RING,         ""}, // 62 // for future.
-    {INVALID_RING,         ""}, // 63 // for future.
+    {N2::n2_fure,                   "n2_fure"},       // 49
+    {N2::n2_gptr,                   "n2_gptr"},       // 50
+    {N2::n2_time,                   "n2_time"},       // 51
+    {N2::n2_cxa1_fure,              "n2_cxa1_fure"},  // 52
+    {N2::n2_cxa1_gptr,              "n2_cxa1_gptr"},  // 53
+    {N2::n2_cxa1_time,              "n2_cxa1_time"},  // 54
+    {N2::n2_psi_fure,               "n2_psi_fure"}, // 55
+    {N2::n2_psi_gptr,               "n2_psi_gptr"}, // 56
+    {N2::n2_psi_time,               "n2_psi_time"}, // 57
+    {N2::n2_repr,                   "n2_repr"},       // 58
+    {N2::n2_cxa1_repr,              "n2_cxa1_repr"},  // 59
+    {N2::n2_psi_repr,               "n2_psi_repr"}, // 60
+    {INVALID_RING,                  ""}, // 61 // for future.
 
     // Nest N3 Ring
-    {N3::n3_fure,         "n3_fure"},       // 64
-    {N3::n3_gptr,         "n3_gptr"},       // 65
-    {N3::n3_time,         "n3_time"},       // 66
-    {N3::n3_mcs01_fure,   "n3_mcs01_fure"}, // 67
-    {N3::n3_mcs01_gptr,   "n3_mcs01_gptr"}, // 68
-    {N3::n3_mcs01_time,   "n3_mcs01_time"}, // 69
-    {N3::n3_repr,         "n3_repr"},       // 70
-    {N3::n3_mcs01_repr,   "n3_mcs01_repr"}, // 71
-    {INVALID_RING,        ""}, // 72 // for future.
-    {INVALID_RING,        ""}, // 73 // for future.
-    {INVALID_RING,        ""}, // 74 // for future.
+    {N3::n3_fure,                   "n3_fure"},       // 62
+    {N3::n3_gptr,                   "n3_gptr"},       // 63
+    {N3::n3_time,                   "n3_time"},       // 64
+    {N3::n3_mcs01_fure,             "n3_mcs01_fure"}, // 65
+    {N3::n3_mcs01_gptr,             "n3_mcs01_gptr"}, // 66
+    {N3::n3_mcs01_time,             "n3_mcs01_time"}, // 67
+    {N3::n3_np_fure,                "n3_np_fure"}, // 68
+    {N3::n3_np_gptr,                "n3_np_gptr"}, // 69
+    {N3::n3_np_time,                "n3_np_time"}, // 70
+    {N3::n3_repr,                   "n3_repr"},       // 71
+    {N3::n3_mcs01_repr,             "n3_mcs01_repr"}, // 72
+    {N3::n3_np_repr,                "n3_np_repr"}, // 73
+    {INVALID_RING,                  ""}, // 74 // for future.
 
     // XB Ring
-    {XB::xb_fure,         "xb_fure"},      // 75
-    {XB::xb_gptr,         "xb_gptr"},      // 76
-    {XB::xb_time,         "xb_time"},      // 77
-    {XB::xb_io0_fure,     "xb_io0_fure"},  // 78
-    {XB::xb_io0_gptr,     "xb_io0_gptr"},  // 79
-    {XB::xb_io0_time,     "xb_io0_time"},  // 80
-    {XB::xb_io1_fure,     "xb_io1_fure"},  // 81
-    {XB::xb_io1_gptr,     "xb_io1_gptr"},  // 82
-    {XB::xb_io1_time,     "xb_io1_time"},  // 83
-    {XB::xb_io2_fure,     "xb_io2_fure"},  // 84
-    {XB::xb_io2_gptr,     "xb_io2_gptr"},  // 85
-    {XB::xb_io2_time,     "xb_io2_time"},  // 86
-    {XB::xb_pll_gptr,     "xb_pll_gptr"},  // 87
-    {XB::xb_pll_other,    "xb_pll_other"}, // 88
-    {XB::xb_pll_bndy,     "xb_pll_bndy"},  // 89
-    {XB::xb_pll_bndy_bucket_1, "xb_pll_bndy_bucket_1"}, // 90
-    {XB::xb_pll_bndy_bucket_2, "xb_pll_bndy_bucket_2"}, // 91
-    {XB::xb_pll_bndy_bucket_3, "xb_pll_bndy_bucket_3"}, // 92
-    {XB::xb_pll_bndy_bucket_4, "xb_pll_bndy_bucket_4"}, // 93
-    {XB::xb_pll_bndy_bucket_5, "xb_pll_bndy_bucket_5"}, // 94
-    {XB::xb_repr,         "xb_repr"},     // 95
-    {XB::xb_io0_repr,     "xb_io0_repr"}, // 96
-    {XB::xb_io1_repr,     "xb_io1_repr"}, // 97
-    {XB::xb_io2_repr,     "xb_io2_repr"}, // 98
-    {INVALID_RING,        ""}, // 99  // for future.
-    {INVALID_RING,        ""}, // 100 // for future.
+    {XB::xb_fure,                   "xb_fure"},      // 75
+    {XB::xb_gptr,                   "xb_gptr"},      // 76
+    {XB::xb_time,                   "xb_time"},      // 77
+    {XB::xb_io0_fure,               "xb_io0_fure"},  // 78
+    {XB::xb_io0_gptr,               "xb_io0_gptr"},  // 79
+    {XB::xb_io0_time,               "xb_io0_time"},  // 80
+    {XB::xb_io1_fure,               "xb_io1_fure"},  // 81
+    {XB::xb_io1_gptr,               "xb_io1_gptr"},  // 82
+    {XB::xb_io1_time,               "xb_io1_time"},  // 83
+    {XB::xb_io2_fure,               "xb_io2_fure"},  // 84
+    {XB::xb_io2_gptr,               "xb_io2_gptr"},  // 85
+    {XB::xb_io2_time,               "xb_io2_time"},  // 86
+    {XB::xb_pll_gptr,               "xb_pll_gptr"},  // 87
+    {XB::xb_pll_bndy,               "xb_pll_bndy"},  // 89
+    {XB::xb_pll_bndy_bucket_1,      "xb_pll_bndy_bucket_1"}, // 90
+    {XB::xb_pll_bndy_bucket_2,      "xb_pll_bndy_bucket_2"}, // 91
+    {XB::xb_pll_bndy_bucket_3,      "xb_pll_bndy_bucket_3"}, // 92
+    {XB::xb_pll_bndy_bucket_4,      "xb_pll_bndy_bucket_4"}, // 93
+    {XB::xb_pll_bndy_bucket_5,      "xb_pll_bndy_bucket_5"}, // 94
+    {XB::xb_pll_func,               "xb_pll_func"},  // 95
+    {XB::xb_repr,                   "xb_repr"},     // 96
+    {XB::xb_io0_repr,               "xb_io0_repr"}, // 97
+    {XB::xb_io1_repr,               "xb_io1_repr"}, // 98
+    {XB::xb_io2_repr,               "xb_io2_repr"}, // 99
+    {INVALID_RING,                  ""}, // 100 // for future.
 
     // MC Ring
-    {MC::mc_fure,         "mc_fure"},       // 101
-    {MC::mc_gptr,         "mc_gptr"},       // 102
-    {MC::mc_time,         "mc_time"},       // 103
-    {MC::mc_iom01_fure,   "mc_iom01_fure"}, // 104
-    {MC::mc_iom01_gptr,   "mc_iom01_gptr"}, // 105
-    {MC::mc_iom01_time,   "mc_iom01_time"}, // 106
-    {MC::mc_iom23_fure,   "mc_iom23_fure"}, // 107
-    {MC::mc_iom23_gptr,   "mc_iom23_gptr"}, // 108
-    {MC::mc_iom23_time,   "mc_iom23_time"}, // 119
-    {MC::mc_pll_gptr,     "mc_pll_gptr"},   // 110
-    {MC::mc_pll_other,    "mc_pll_other"},  // 111
-    {MC::mc_pll_bndy,     "mc_pll_bndy"},   // 112
-    {MC::mc_pll_bndy_bucket_1, "mc_pll_bndy_bucket_1"}, // 113
-    {MC::mc_pll_bndy_bucket_2, "mc_pll_bndy_bucket_2"}, // 114
-    {MC::mc_pll_bndy_bucket_3, "mc_pll_bndy_bucket_3"}, // 115
-    {MC::mc_pll_bndy_bucket_4, "mc_pll_bndy_bucket_4"}, // 116
-    {MC::mc_pll_bndy_bucket_5, "mc_pll_bndy_bucket_5"}, // 117
-    {MC::mc_repr,         "mc_repr"},       // 118
-    {MC::mc_iom01_repr,   "mc_iom01_repr"}, // 119
-    {MC::mc_iom23_repr,   "mc_iom23_repr"}, // 120
-    {INVALID_RING,        ""}, // 121 // for future.
-    {INVALID_RING,        ""}, // 122 // for future.
-    {INVALID_RING,        ""}, // 123 // for future.
+    {MC::mc_fure,                   "mc_fure"},       // 101
+    {MC::mc_gptr,                   "mc_gptr"},       // 102
+    {MC::mc_time,                   "mc_time"},       // 103
+    {MC::mc_iom01_fure,             "mc_iom01_fure"}, // 104
+    {MC::mc_iom01_gptr,             "mc_iom01_gptr"}, // 105
+    {MC::mc_iom01_time,             "mc_iom01_time"}, // 106
+    {MC::mc_iom23_fure,             "mc_iom23_fure"}, // 107
+    {MC::mc_iom23_gptr,             "mc_iom23_gptr"}, // 108
+    {MC::mc_iom23_time,             "mc_iom23_time"}, // 119
+    {MC::mc_pll_gptr,               "mc_pll_gptr"},   // 110
+    {MC::mc_pll_bndy,               "mc_pll_bndy"},   // 111
+    {MC::mc_pll_bndy_bucket_1,      "mc_pll_bndy_bucket_1"}, // 112
+    {MC::mc_pll_bndy_bucket_2,      "mc_pll_bndy_bucket_2"}, // 113
+    {MC::mc_pll_bndy_bucket_3,      "mc_pll_bndy_bucket_3"}, // 114
+    {MC::mc_pll_bndy_bucket_4,      "mc_pll_bndy_bucket_4"}, // 115
+    {MC::mc_pll_bndy_bucket_5,      "mc_pll_bndy_bucket_5"}, // 116
+    {MC::mc_pll_func,               "mc_pll_func"},       // 117
+    {MC::mc_repr,                   "mc_repr"},       // 118
+    {MC::mc_iom01_repr,             "mc_iom01_repr"}, // 119
+    {MC::mc_iom23_repr,             "mc_iom23_repr"}, // 120
+    {INVALID_RING,                  ""}, // 121 // for future.
+    {INVALID_RING,                  ""}, // 122 // for future.
 
     // OB Ring
-    {OB::ob_fure,         "ob_fure"},  // 124
-    {OB::ob_gptr,         "ob_gptr"},  // 125
-    {OB::ob_time,         "ob_time"},  // 126
-    {OB::ob_pll_gptr,     "ob_pll_gptr"},      // 127
-    {OB::ob_pll_other,    "ob_pll_other"},     // 128
-    {OB::ob_pll_bndy,     "ob_pll_bndy"},      // 129
-    {OB::ob_pll_bndy_bucket_1, "ob_pll_bndy_bucket_1"}, // 130
-    {OB::ob_pll_bndy_bucket_2, "ob_pll_bndy_bucket_2"}, // 131
-    {OB::ob_pll_bndy_bucket_3, "ob_pll_bndy_bucket_3"}, // 132
-    {OB::ob_pll_bndy_bucket_4, "ob_pll_bndy_bucket_4"}, // 133
-    {OB::ob_pll_bndy_bucket_5, "ob_pll_bndy_bucket_5"}, // 134
-    {OB::ob_repr,         "ob_repr"},          // 135
-    {INVALID_RING,        ""}, // 136 // for future.
-    {INVALID_RING,        ""}, // 137 // for future.
+    {OB0::ob0_fure,                 "ob0_fure"},  // 123
+    {OB0::ob0_gptr,                 "ob0_gptr"},  // 124
+    {OB0::ob0_time,                 "ob0_time"},  // 125
+    {OB0::ob0_pll_gptr,             "ob0_pll_gptr"},      // 126
+    {OB0::ob0_pll_bndy,             "ob0_pll_bndy"},      // 127
+    {OB0::ob0_pll_bndy_bucket_1,    "ob0_pll_bndy_bucket_1"}, // 128
+    {OB0::ob0_pll_bndy_bucket_2,    "ob0_pll_bndy_bucket_2"}, // 129
+    {OB0::ob0_pll_bndy_bucket_3,    "ob0_pll_bndy_bucket_3"}, // 130
+    {OB0::ob0_pll_bndy_bucket_4,    "ob0_pll_bndy_bucket_4"}, // 131
+    {OB0::ob0_pll_bndy_bucket_5,    "ob0_pll_bndy_bucket_5"}, // 132
+    {OB0::ob0_pll_func,             "ob0_pll_func"},      // 133
+    {OB0::ob0_repr,                 "ob0_repr"},          // 134
+    {INVALID_RING,                  ""}, // 135 // for future.
+    {INVALID_RING,                  ""}, // 136 // for future.
+
+    {OB1::ob1_fure,                 "ob1_fure"},  // 137
+    {OB1::ob1_gptr,                 "ob1_gptr"},  // 138
+    {OB1::ob1_time,                 "ob1_time"},  // 139
+    {OB1::ob1_pll_gptr,             "ob1_pll_gptr"},      // 140
+    {OB1::ob1_pll_bndy,             "ob1_pll_bndy"},      // 141
+    {OB1::ob1_pll_bndy_bucket_1,    "ob1_pll_bndy_bucket_1"}, // 142
+    {OB1::ob1_pll_bndy_bucket_2,    "ob1_pll_bndy_bucket_2"}, // 143
+    {OB1::ob1_pll_bndy_bucket_3,    "ob1_pll_bndy_bucket_3"}, // 144
+    {OB1::ob1_pll_bndy_bucket_4,    "ob1_pll_bndy_bucket_4"}, // 145
+    {OB1::ob1_pll_bndy_bucket_5,    "ob1_pll_bndy_bucket_5"}, // 146
+    {OB1::ob1_pll_func,             "ob1_pll_func"},      // 147
+    {OB1::ob1_repr,                 "ob1_repr"},          // 148
+    {INVALID_RING,                  ""}, // 149 // for future.
+    {INVALID_RING,                  ""}, // 150 // for future.
+
+    {OB2::ob2_fure,                 "ob2_fure"},  // 151
+    {OB2::ob2_gptr,                 "ob2_gptr"},  // 152
+    {OB2::ob2_time,                 "ob2_time"},  // 153
+    {OB2::ob2_pll_gptr,             "ob2_pll_gptr"},     // 154
+    {OB2::ob2_pll_bndy,             "ob2_pll_bndy"},      // 155
+    {OB2::ob2_pll_bndy_bucket_1,    "ob2_pll_bndy_bucket_1"}, // 156
+    {OB2::ob2_pll_bndy_bucket_2,    "ob2_pll_bndy_bucket_2"}, // 157
+    {OB2::ob2_pll_bndy_bucket_3,    "ob2_pll_bndy_bucket_3"}, // 158
+    {OB2::ob2_pll_bndy_bucket_4,    "ob2_pll_bndy_bucket_4"}, // 159
+    {OB2::ob2_pll_bndy_bucket_5,    "ob2_pll_bndy_bucket_5"}, // 160
+    {OB2::ob2_pll_func,             "ob2_pll_func"},      // 161
+    {OB2::ob2_repr,                 "ob2_repr"},          // 162
+    {INVALID_RING,                  ""}, // 163 // for future.
+    {INVALID_RING,                  ""}, // 164 // for future.
+
+    {OB3::ob3_fure,                 "ob3_fure"},  // 165
+    {OB3::ob3_gptr,                 "ob3_gptr"},  // 166
+    {OB3::ob3_time,                 "ob3_time"},  // 167
+    {OB3::ob3_pll_gptr,             "ob3_pll_gptr"},      // 168
+    {OB3::ob3_pll_bndy,             "ob3_pll_bndy"},      // 169
+    {OB3::ob3_pll_bndy_bucket_1,    "ob3_pll_bndy_bucket_1"}, // 170
+    {OB3::ob3_pll_bndy_bucket_2,    "ob3_pll_bndy_bucket_2"}, // 171
+    {OB3::ob3_pll_bndy_bucket_3,    "ob3_pll_bndy_bucket_3"}, // 172
+    {OB3::ob3_pll_bndy_bucket_4,    "ob3_pll_bndy_bucket_4"}, // 173
+    {OB3::ob3_pll_bndy_bucket_5,    "ob3_pll_bndy_bucket_5"}, // 174
+    {OB3::ob3_pll_func,             "ob3_pll_func"},      // 175
+    {OB3::ob3_repr,                 "ob3_repr"},          // 176
+    {INVALID_RING,                  ""}, // 177 // for future.
+    {INVALID_RING,                  ""}, // 178 // for future.
 
     // PCI0 Ring
-    {PCI0::pci0_fure,     "pci0_fure"}, // 138
-    {PCI0::pci0_gptr,     "pci0_gptr"}, // 139
-    {PCI0::pci0_time,     "pci0_time"}, // 140
-    {PCI0::pci0_repr,     "pci0_repr"}, // 141
+    {PCI0::pci0_fure,               "pci0_fure"}, // 179
+    {PCI0::pci0_gptr,               "pci0_gptr"}, // 180
+    {PCI0::pci0_time,               "pci0_time"}, // 181
+    {PCI0::pci0_pll_func,           "pci0_pll_func"}, // 182
+    {PCI0::pci0_pll_gptr,           "pci0_pll_gptr"}, // 183
+    {PCI0::pci0_repr,               "pci0_repr"}, // 184
     // PCI1 Ring
-    {PCI1::pci1_fure,     "pci1_fure"}, // 142
-    {PCI1::pci1_gptr,     "pci1_gptr"}, // 143
-    {PCI1::pci1_time,     "pci1_time"}, // 144
-    {PCI1::pci1_repr,     "pci1_repr"}, // 145
+    {PCI1::pci1_fure,               "pci1_fure"}, // 185
+    {PCI1::pci1_gptr,               "pci1_gptr"}, // 186
+    {PCI1::pci1_time,               "pci1_time"}, // 187
+    {PCI1::pci1_pll_func,           "pci1_pll_func"}, // 188
+    {PCI1::pci1_pll_gptr,           "pci1_pll_gptr"}, // 189
+    {PCI1::pci1_repr,               "pci1_repr"}, // 190
     // PCI2 Ring
-    {PCI2::pci2_fure,     "pci2_fure"}, // 146
-    {PCI2::pci2_gptr,     "pci2_gptr"}, // 147
-    {PCI2::pci2_time,     "pci2_time"}, // 148
-    {PCI2::pci2_repr,     "pci2_repr"}, // 149
-    {INVALID_RING,         ""}, // 150 // for future.
-    {INVALID_RING,         ""}, // 151 // for future.
-    {INVALID_RING,         ""}, // 152 // for future.
+    {PCI2::pci2_fure,               "pci2_fure"}, // 191
+    {PCI2::pci2_gptr,               "pci2_gptr"}, // 192
+    {PCI2::pci2_time,               "pci2_time"}, // 193
+    {PCI2::pci2_pll_func,           "pci2_pll_func"}, // 194
+    {PCI2::pci2_pll_gptr,           "pci2_pll_gptr"}, // 195
+    {PCI2::pci2_repr,               "pci2_repr"}, // 196
 
     // EQ Ring
-    {EQ::eq_fure,         "eq_fure"},    // 153
-    {EQ::eq_gptr,         "eq_gptr"},    // 154
-    {EQ::eq_time,         "eq_time"},    // 155
-    {EQ::ex_l3_fure,      "ex_l3_fure"}, // 156
-    {EQ::ex_l3_gptr,      "ex_l3_gptr"}, // 157
-    {EQ::ex_l3_time,      "ex_l3_time"}, // 158
-    {EQ::ex_l2_fure,      "ex_l2_fure"}, // 159
-    {EQ::ex_l2_gptr,      "ex_l2_gptr"}, // 160
-    {EQ::ex_l2_time,      "ex_l2_time"}, // 161
-    {EQ::ex_l3_refr_fure, "ex_l3_refr_fure"}, // 162
-    {EQ::ex_l3_refr_gptr, "ex_l3_refr_gptr"}, // 163
-    {EQ::ex_l3_refr_time, "ex_l3_refr_time"}, // 164
-    {EQ::eq_ana_func,     "eq_ana_func"},     // 165
-    {EQ::eq_ana_gptr,     "eq_ana_gptr"},     // 166
-    {EQ::eq_dpll_func,    "eq_dpll_func"},    // 167
-    {EQ::eq_dpll_gptr,    "eq_dpll_gptr"},    // 168
-    {EQ::eq_dpll_other,   "eq_dpll_other"},   // 169
-    {EQ::eq_repr,         "eq_repr"},    // 170
-    {EQ::ex_l3_repr,      "ex_l3_repr"}, // 171
-    {EQ::ex_l2_repr,      "ex_l2_repr"}, // 172
-    {EQ::ex_l3_refr_repr, "ex_l3_refr_repr"}, // 173
-    {EQ::eq_ana_bndy,     "eq_ana_bndy"}, // 174
-    {INVALID_RING,        ""}, // 175 // for future.
-    {INVALID_RING,        ""}, // 176 // for future.
+    {EQ::eq_fure,                   "eq_fure"},    // 197
+    {EQ::eq_gptr,                   "eq_gptr"},    // 198
+    {EQ::eq_time,                   "eq_time"},    // 199
+    {EQ::eq_mode,                   "eq_mode"},    // 200
+    {EQ::ex_l3_fure,                "ex_l3_fure"}, // 201
+    {EQ::ex_l3_gptr,                "ex_l3_gptr"}, // 202
+    {EQ::ex_l3_time,                "ex_l3_time"}, // 203
+    {EQ::ex_l2_mode,                "ex_l2_mode"}, // 204
+    {EQ::ex_l2_fure,                "ex_l2_fure"}, // 205
+    {EQ::ex_l2_gptr,                "ex_l2_gptr"}, // 206
+    {EQ::ex_l2_time,                "ex_l2_time"}, // 207
+    {EQ::ex_l3_refr_fure,           "ex_l3_refr_fure"}, // 208
+    {EQ::ex_l3_refr_gptr,           "ex_l3_refr_gptr"}, // 209
+    {EQ::ex_l3_refr_time,           "ex_l3_refr_time"}, // 210
+    {EQ::eq_ana_func,               "eq_ana_func"},     // 211
+    {EQ::eq_ana_gptr,               "eq_ana_gptr"},     // 212
+    {EQ::eq_dpll_func,              "eq_dpll_func"},    // 213
+    {EQ::eq_dpll_gptr,              "eq_dpll_gptr"},    // 214
+    {EQ::eq_dpll_mode,              "eq_dpll_mode"},   // 215
+    {EQ::eq_ana_bndy,               "eq_ana_bndy"}, // 216
+    {EQ::eq_ana_mode,               "eq_ana_mode"}, // 217
+    {EQ::eq_repr,                   "eq_repr"},    // 218
+    {EQ::ex_l3_repr,                "ex_l3_repr"}, // 219
+    {EQ::ex_l2_repr,                "ex_l2_repr"}, // 220
+    {EQ::ex_l3_refr_repr,           "ex_l3_refr_repr"}, // 221
 
     // Core Ring
-    {EC::ec_func,         "ec_func"}, // 177
-    {EC::ec_gptr,         "ec_gptr"}, // 178
-    {EC::ec_time,         "ec_time"}, // 179
-    {EC::ec_mode,         "ec_mode"}, // 180
-    {EC::ec_repr,         "ec_repr"}  // 181
+    {EC::ec_func,                   "ec_func"}, // 222
+    {EC::ec_gptr,                   "ec_gptr"}, // 223
+    {EC::ec_time,                   "ec_time"}, // 224
+    {EC::ec_mode,                   "ec_mode"}, // 225
+    {EC::ec_repr,                   "ec_repr"}  // 226
 };
 #endif
 
@@ -985,210 +1249,257 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
 static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
 {
     // Pervasive Ring
-    {PERV::perv_fure,       PERV_TYPE},      // 0
-    {PERV::perv_gptr,      PERV_TYPE},      // 1
-    {PERV::perv_time,      PERV_TYPE},      // 2
-    {PERV::occ_fure,       PERV_TYPE},       // 3
-    {PERV::occ_gptr,       PERV_TYPE},       // 4
-    {PERV::occ_time,       PERV_TYPE},       // 5
-    {PERV::perv_ana_func,  PERV_TYPE},  // 6
-    {PERV::perv_ana_gptr,  PERV_TYPE},  // 7
-    {PERV::perv_pll_gptr,  PERV_TYPE},  // 8
-    {PERV::perv_pll_bndy,  PERV_TYPE},  // 9
-    {PERV::perv_pll_bndy_bucket_1, PERV_TYPE},  // 10
-    {PERV::perv_pll_bndy_bucket_2, PERV_TYPE},  // 11
-    {PERV::perv_pll_bndy_bucket_3, PERV_TYPE},  // 12
-    {PERV::perv_pll_bndy_bucket_4, PERV_TYPE},  // 13
-    {PERV::perv_pll_bndy_bucket_5, PERV_TYPE},  // 14
-    {PERV::perv_repr,      PERV_TYPE},  // 15
-    {PERV::occ_repr,       PERV_TYPE},   // 16
-    {INVALID_RING,         PERV_TYPE}, // 17 // for future.
-    {INVALID_RING,         PERV_TYPE}, // 18 // for future.
+    {PERV::perv_fure,               PERV_TYPE},      // 0
+    {PERV::perv_gptr,               PERV_TYPE},      // 1
+    {PERV::perv_time,               PERV_TYPE},      // 2
+    {PERV::occ_fure,                PERV_TYPE},       // 3
+    {PERV::occ_gptr,                PERV_TYPE},       // 4
+    {PERV::occ_time,                PERV_TYPE},       // 5
+    {PERV::perv_ana_func,           PERV_TYPE},  // 6
+    {PERV::perv_ana_gptr,           PERV_TYPE},  // 7
+    {PERV::perv_pll_gptr,           PERV_TYPE},  // 8
+    {PERV::perv_pll_bndy,           PERV_TYPE},  // 9
+    {PERV::perv_pll_bndy_bucket_1,  PERV_TYPE},  // 10
+    {PERV::perv_pll_bndy_bucket_2,  PERV_TYPE},  // 11
+    {PERV::perv_pll_bndy_bucket_3,  PERV_TYPE},  // 12
+    {PERV::perv_pll_bndy_bucket_4,  PERV_TYPE},  // 13
+    {PERV::perv_pll_bndy_bucket_5,  PERV_TYPE},  // 14
+    {PERV::perv_pll_func,           PERV_TYPE}, // 15
+    {PERV::perv_pibnet_gptr,        PERV_TYPE}, // 16
+    {PERV::perv_pibnet_time,        PERV_TYPE}, // 17
+    {PERV::perv_repr,               PERV_TYPE},  // 18
+    {PERV::occ_repr,                PERV_TYPE},   // 19
+    {PERV::perv_pibnet_repr,        PERV_TYPE}, // 20
 
     // Nest N0 Ring
-    {N0::n0_fure,         N0_TYPE},      // 19
-    {N0::n0_gptr,         N0_TYPE},      // 20
-    {N0::n0_time,         N0_TYPE},      // 21
-    {N0::n0_nx_fure,      N0_TYPE},   // 22
-    {N0::n0_nx_gptr,      N0_TYPE},   // 23
-    {N0::n0_nx_time,      N0_TYPE},   // 24
-    {N0::n0_cxa0_fure,    N0_TYPE}, // 25
-    {N0::n0_cxa0_gptr,    N0_TYPE}, // 26
-    {N0::n0_cxa0_time,    N0_TYPE}, // 27
-    {N0::n0_repr,         N0_TYPE},      // 28
-    {N0::n0_nx_repr,      N0_TYPE},   // 29
-    {N0::n0_cxa0_repr,    N0_TYPE}, // 30
-    {INVALID_RING,         N0_TYPE}, // 31 // for future.
-    {INVALID_RING,         N0_TYPE}, // 32 // for future.
-    {INVALID_RING,         N0_TYPE}, // 33 // for future.
+    {N0::n0_fure,         N0_TYPE},      // 21
+    {N0::n0_gptr,         N0_TYPE},      // 22
+    {N0::n0_time,         N0_TYPE},      // 23
+    {N0::n0_nx_fure,      N0_TYPE},   // 24
+    {N0::n0_nx_gptr,      N0_TYPE},   // 25
+    {N0::n0_nx_time,      N0_TYPE},   // 26
+    {N0::n0_cxa0_fure,    N0_TYPE}, // 27
+    {N0::n0_cxa0_gptr,    N0_TYPE}, // 28
+    {N0::n0_cxa0_time,    N0_TYPE}, // 29
+    {N0::n0_repr,         N0_TYPE},      // 30
+    {N0::n0_nx_repr,      N0_TYPE},   // 31
+    {N0::n0_cxa0_repr,    N0_TYPE}, // 32
 
     // Nest N1 Ring
-    {N1::n1_fure,         N1_TYPE},       // 34
-    {N1::n1_gptr,         N1_TYPE},       // 35
-    {N1::n1_time,         N1_TYPE},       // 36
-    {N1::n1_ioo0_fure,    N1_TYPE},  // 37
-    {N1::n1_ioo0_gptr,    N1_TYPE},  // 38
-    {N1::n1_ioo0_time,    N1_TYPE},  // 39
-    {N1::n1_ioo1_fure,    N1_TYPE},  // 40
-    {N1::n1_ioo1_gptr,    N1_TYPE},  // 41
-    {N1::n1_ioo1_time,    N1_TYPE},  // 42
-    {N1::n1_mcs23_fure,   N1_TYPE}, // 43
-    {N1::n1_mcs23_gptr,   N1_TYPE}, // 44
-    {N1::n1_mcs23_time,   N1_TYPE}, // 45
-    {N1::n1_repr,         N1_TYPE},       // 46
-    {N1::n1_ioo0_repr,    N1_TYPE},  // 47
-    {N1::n1_ioo1_repr,    N1_TYPE},  // 48
-    {N1::n1_mcs23_repr,   N1_TYPE}, // 49
-    {INVALID_RING,         N1_TYPE}, // 50 // for future.
-    {INVALID_RING,         N1_TYPE}, // 51 // for future.
-    {INVALID_RING,         N1_TYPE}, // 52 // for future.
+    {N1::n1_fure,         N1_TYPE},       // 33
+    {N1::n1_gptr,         N1_TYPE},       // 34
+    {N1::n1_time,         N1_TYPE},       // 35
+    {N1::n1_ioo0_fure,    N1_TYPE},  // 36
+    {N1::n1_ioo0_gptr,    N1_TYPE},  // 37
+    {N1::n1_ioo0_time,    N1_TYPE},  // 38
+    {N1::n1_ioo1_fure,    N1_TYPE},  // 39
+    {N1::n1_ioo1_gptr,    N1_TYPE},  // 40
+    {N1::n1_ioo1_time,    N1_TYPE},  // 41
+    {N1::n1_mcs23_fure,   N1_TYPE}, // 42
+    {N1::n1_mcs23_gptr,   N1_TYPE}, // 43
+    {N1::n1_mcs23_time,   N1_TYPE}, // 44
+    {N1::n1_repr,         N1_TYPE},       // 45
+    {N1::n1_ioo0_repr,    N1_TYPE},  // 46
+    {N1::n1_ioo1_repr,    N1_TYPE},  // 47
+    {N1::n1_mcs23_repr,   N1_TYPE}, // 48
 
     // Nest N2 Ring
-    {N2::n2_fure,         N2_TYPE},       // 53
-    {N2::n2_gptr,         N2_TYPE},       // 54
-    {N2::n2_time,         N2_TYPE},       // 55
-    {N2::n2_cxa1_fure,    N2_TYPE},  // 56
-    {N2::n2_cxa1_gptr,    N2_TYPE},  // 57
-    {N2::n2_cxa1_time,    N2_TYPE},  // 58
-    {N2::n2_repr,         N2_TYPE},       // 59
-    {N2::n2_cxa1_repr,    N2_TYPE},  // 60
-    {INVALID_RING,         N2_TYPE}, // 61 // for future.
-    {INVALID_RING,         N2_TYPE}, // 62 // for future.
-    {INVALID_RING,         N2_TYPE}, // 63 // for future.
+    {N2::n2_fure,         N2_TYPE}, // 49
+    {N2::n2_gptr,         N2_TYPE}, // 50
+    {N2::n2_time,         N2_TYPE}, // 51
+    {N2::n2_cxa1_fure,    N2_TYPE}, // 52
+    {N2::n2_cxa1_gptr,    N2_TYPE}, // 53
+    {N2::n2_cxa1_time,    N2_TYPE}, // 54
+    {N2::n2_psi_fure,     N2_TYPE}, // 55
+    {N2::n2_psi_gptr,     N2_TYPE}, // 56
+    {N2::n2_psi_time,     N2_TYPE}, // 57
+    {N2::n2_repr,         N2_TYPE}, // 58
+    {N2::n2_cxa1_repr,    N2_TYPE}, // 59
+    {N2::n2_psi_repr,     N2_TYPE}, // 60
+    {INVALID_RING,        N1_TYPE},// 61 // for future
 
     // Nest N3 Ring
-    {N3::n3_fure,         N3_TYPE},       // 64
-    {N3::n3_gptr,         N3_TYPE},       // 65
-    {N3::n3_time,         N3_TYPE},       // 66
-    {N3::n3_mcs01_fure,   N3_TYPE}, // 67
-    {N3::n3_mcs01_gptr,   N3_TYPE}, // 68
-    {N3::n3_mcs01_time,   N3_TYPE}, // 69
-    {N3::n3_repr,         N3_TYPE},       // 70
-    {N3::n3_mcs01_repr,   N3_TYPE}, // 71
-    {INVALID_RING,        N3_TYPE}, // 72 // for future.
-    {INVALID_RING,        N3_TYPE}, // 73 // for future.
+    {N3::n3_fure,         N3_TYPE}, // 62
+    {N3::n3_gptr,         N3_TYPE}, // 63
+    {N3::n3_time,         N3_TYPE}, // 64
+    {N3::n3_mcs01_fure,   N3_TYPE}, // 65
+    {N3::n3_mcs01_gptr,   N3_TYPE}, // 66
+    {N3::n3_mcs01_time,   N3_TYPE}, // 67
+    {N3::n3_np_fure,      N3_TYPE}, // 68
+    {N3::n3_np_gptr,      N3_TYPE}, // 69
+    {N3::n3_np_time,      N3_TYPE}, // 70
+    {N3::n3_repr,         N3_TYPE}, // 71
+    {N3::n3_mcs01_repr,   N3_TYPE}, // 72
+    {N3::n3_np_repr,      N3_TYPE}, // 73
     {INVALID_RING,        N3_TYPE}, // 74 // for future.
 
     // XB Ring
-    {XB::xb_fure,         XB_TYPE},      // 75
-    {XB::xb_gptr,         XB_TYPE},      // 76
-    {XB::xb_time,         XB_TYPE},      // 77
-    {XB::xb_io0_fure,     XB_TYPE},  // 78
-    {XB::xb_io0_gptr,     XB_TYPE},  // 79
-    {XB::xb_io0_time,     XB_TYPE},  // 80
-    {XB::xb_io1_fure,     XB_TYPE},  // 81
-    {XB::xb_io1_gptr,     XB_TYPE},  // 82
-    {XB::xb_io1_time,     XB_TYPE},  // 83
-    {XB::xb_io2_fure,     XB_TYPE},  // 84
-    {XB::xb_io2_gptr,     XB_TYPE},  // 85
-    {XB::xb_io2_time,     XB_TYPE},  // 86
-    {XB::xb_pll_gptr,     XB_TYPE},  // 87
-    {XB::xb_pll_other,    XB_TYPE}, // 88
-    {XB::xb_pll_bndy,     XB_TYPE},  // 89
-    {XB::xb_pll_bndy_bucket_1, XB_TYPE}, // 90
-    {XB::xb_pll_bndy_bucket_2, XB_TYPE}, // 91
-    {XB::xb_pll_bndy_bucket_3, XB_TYPE}, // 92
-    {XB::xb_pll_bndy_bucket_4, XB_TYPE}, // 93
-    {XB::xb_pll_bndy_bucket_5, XB_TYPE}, // 94
-    {XB::xb_repr,         XB_TYPE},     // 95
-    {XB::xb_io0_repr,     XB_TYPE}, // 96
-    {XB::xb_io1_repr,     XB_TYPE}, // 97
-    {XB::xb_io2_repr,     XB_TYPE}, // 98
-    {INVALID_RING,        XB_TYPE}, // 99  // for future.
-    {INVALID_RING,        XB_TYPE}, // 100 // for future.
+    {XB::xb_fure,               XB_TYPE},      // 75
+    {XB::xb_gptr,               XB_TYPE},      // 76
+    {XB::xb_time,               XB_TYPE},      // 77
+    {XB::xb_io0_fure,           XB_TYPE},  // 78
+    {XB::xb_io0_gptr,           XB_TYPE},  // 79
+    {XB::xb_io0_time,           XB_TYPE},  // 80
+    {XB::xb_io1_fure,           XB_TYPE},  // 81
+    {XB::xb_io1_gptr,           XB_TYPE},  // 82
+    {XB::xb_io1_time,           XB_TYPE},  // 83
+    {XB::xb_io2_fure,           XB_TYPE},  // 84
+    {XB::xb_io2_gptr,           XB_TYPE},  // 85
+    {XB::xb_io2_time,           XB_TYPE},  // 86
+    {XB::xb_pll_gptr,           XB_TYPE},  // 87
+    {XB::xb_pll_bndy,           XB_TYPE},  // 89
+    {XB::xb_pll_bndy_bucket_1,  XB_TYPE}, // 90
+    {XB::xb_pll_bndy_bucket_2,  XB_TYPE}, // 91
+    {XB::xb_pll_bndy_bucket_3,  XB_TYPE}, // 92
+    {XB::xb_pll_bndy_bucket_4,  XB_TYPE}, // 93
+    {XB::xb_pll_bndy_bucket_5,  XB_TYPE}, // 94
+    {XB::xb_pll_func,           XB_TYPE},  // 95
+    {XB::xb_repr,               XB_TYPE},     // 96
+    {XB::xb_io0_repr,           XB_TYPE}, // 97
+    {XB::xb_io1_repr,           XB_TYPE}, // 98
+    {XB::xb_io2_repr,           XB_TYPE}, // 99
+    {INVALID_RING,              XB_TYPE}, // 100  // for future.
 
     // MC Ring
-    {MC::mc_fure,         MC_TYPE},       // 101
-    {MC::mc_gptr,         MC_TYPE},       // 102
-    {MC::mc_time,         MC_TYPE},       // 103
-    {MC::mc_iom01_fure,   MC_TYPE}, // 104
-    {MC::mc_iom01_gptr,   MC_TYPE}, // 105
-    {MC::mc_iom01_time,   MC_TYPE}, // 106
-    {MC::mc_iom23_fure,   MC_TYPE}, // 107
-    {MC::mc_iom23_gptr,   MC_TYPE}, // 108
-    {MC::mc_iom23_time,   MC_TYPE}, // 119
-    {MC::mc_pll_gptr,     MC_TYPE},   // 110
-    {MC::mc_pll_other,    MC_TYPE},  // 111
-    {MC::mc_pll_bndy,     MC_TYPE},   // 112
-    {MC::mc_pll_bndy_bucket_1, MC_TYPE}, // 113
-    {MC::mc_pll_bndy_bucket_2, MC_TYPE}, // 114
-    {MC::mc_pll_bndy_bucket_3, MC_TYPE}, // 115
-    {MC::mc_pll_bndy_bucket_4, MC_TYPE}, // 116
-    {MC::mc_pll_bndy_bucket_5, MC_TYPE}, // 117
-    {MC::mc_repr,         MC_TYPE},       // 118
-    {MC::mc_iom01_repr,   MC_TYPE}, // 119
-    {MC::mc_iom23_repr,   MC_TYPE}, // 120
-    {INVALID_RING,        MC_TYPE}, // 121 // for future.
-    {INVALID_RING,        MC_TYPE}, // 122 // for future.
-    {INVALID_RING,        MC_TYPE}, // 123 // for future.
+    {MC::mc_fure,               MC_TYPE}, // 101
+    {MC::mc_gptr,               MC_TYPE}, // 102
+    {MC::mc_time,               MC_TYPE}, // 103
+    {MC::mc_iom01_fure,         MC_TYPE}, // 104
+    {MC::mc_iom01_gptr,         MC_TYPE}, // 105
+    {MC::mc_iom01_time,         MC_TYPE}, // 106
+    {MC::mc_iom23_fure,         MC_TYPE}, // 107
+    {MC::mc_iom23_gptr,         MC_TYPE}, // 108
+    {MC::mc_iom23_time,         MC_TYPE}, // 119
+    {MC::mc_pll_gptr,           MC_TYPE}, // 110
+    {MC::mc_pll_bndy,           MC_TYPE}, // 111
+    {MC::mc_pll_bndy_bucket_1,  MC_TYPE}, // 112
+    {MC::mc_pll_bndy_bucket_2,  MC_TYPE}, // 113
+    {MC::mc_pll_bndy_bucket_3,  MC_TYPE}, // 114
+    {MC::mc_pll_bndy_bucket_4,  MC_TYPE}, // 115
+    {MC::mc_pll_bndy_bucket_5,  MC_TYPE}, // 116
+    {MC::mc_pll_func,           MC_TYPE}, // 117
+    {MC::mc_repr,               MC_TYPE}, // 118
+    {MC::mc_iom01_repr,         MC_TYPE}, // 119
+    {MC::mc_iom23_repr,         MC_TYPE}, // 120
+    {INVALID_RING,              MC_TYPE}, // 121 // for future.
+    {INVALID_RING,              MC_TYPE}, // 122 // for future.
 
     // OB Ring
-    {OB::ob_fure,         OB_TYPE},  // 124
-    {OB::ob_gptr,         OB_TYPE},  // 125
-    {OB::ob_time,         OB_TYPE},  // 126
-    {OB::ob_pll_gptr,     OB_TYPE},      // 127
-    {OB::ob_pll_other,    OB_TYPE},     // 128
-    {OB::ob_pll_bndy,     OB_TYPE},      // 129
-    {OB::ob_pll_bndy_bucket_1, OB_TYPE}, // 130
-    {OB::ob_pll_bndy_bucket_2, OB_TYPE}, // 131
-    {OB::ob_pll_bndy_bucket_3, OB_TYPE}, // 132
-    {OB::ob_pll_bndy_bucket_4, OB_TYPE}, // 133
-    {OB::ob_pll_bndy_bucket_5, OB_TYPE}, // 134
-    {OB::ob_repr,         OB_TYPE},          // 135
-    {INVALID_RING,        OB_TYPE}, // 136 // for future.
-    {INVALID_RING,        OB_TYPE}, // 137 // for future.
+    {OB0::ob0_fure,             OB0_TYPE}, // 123
+    {OB0::ob0_gptr,             OB0_TYPE}, // 124
+    {OB0::ob0_time,             OB0_TYPE}, // 125
+    {OB0::ob0_pll_gptr,         OB0_TYPE}, // 126
+    {OB0::ob0_pll_bndy,         OB0_TYPE}, // 127
+    {OB0::ob0_pll_bndy_bucket_1, OB0_TYPE}, // 128
+    {OB0::ob0_pll_bndy_bucket_2, OB0_TYPE}, // 129
+    {OB0::ob0_pll_bndy_bucket_3, OB0_TYPE}, // 130
+    {OB0::ob0_pll_bndy_bucket_4, OB0_TYPE}, // 131
+    {OB0::ob0_pll_bndy_bucket_5, OB0_TYPE}, // 132
+    {OB0::ob0_pll_func,         OB0_TYPE}, // 133
+    {OB0::ob0_repr,             OB0_TYPE}, // 134
+    {INVALID_RING,              OB0_TYPE}, // 135 // for future.
+    {INVALID_RING,              OB0_TYPE}, // 136 // for future.
+
+    {OB1::ob1_fure,             OB1_TYPE}, // 137
+    {OB1::ob1_gptr,             OB1_TYPE}, // 138
+    {OB1::ob1_time,             OB1_TYPE}, // 139
+    {OB1::ob1_pll_gptr,         OB1_TYPE}, // 140
+    {OB1::ob1_pll_bndy,         OB1_TYPE}, // 141
+    {OB1::ob1_pll_bndy_bucket_1, OB1_TYPE}, // 142
+    {OB1::ob1_pll_bndy_bucket_2, OB1_TYPE}, // 143
+    {OB1::ob1_pll_bndy_bucket_3, OB1_TYPE}, // 144
+    {OB1::ob1_pll_bndy_bucket_4, OB1_TYPE}, // 145
+    {OB1::ob1_pll_bndy_bucket_5, OB1_TYPE}, // 146
+    {OB1::ob1_pll_func,         OB1_TYPE}, // 147
+    {OB1::ob1_repr,             OB1_TYPE}, // 148
+    {INVALID_RING,              OB1_TYPE}, // 149 // for future.
+    {INVALID_RING,              OB1_TYPE}, // 150 // for future.
+
+    {OB2::ob2_fure,             OB2_TYPE}, // 151
+    {OB2::ob2_gptr,             OB2_TYPE}, // 152
+    {OB2::ob2_time,             OB2_TYPE}, // 153
+    {OB2::ob2_pll_gptr,         OB2_TYPE}, // 154
+    {OB2::ob2_pll_bndy,         OB2_TYPE}, // 155
+    {OB2::ob2_pll_bndy_bucket_1, OB2_TYPE}, // 156
+    {OB2::ob2_pll_bndy_bucket_2, OB2_TYPE}, // 157
+    {OB2::ob2_pll_bndy_bucket_3, OB2_TYPE}, // 158
+    {OB2::ob2_pll_bndy_bucket_4, OB2_TYPE}, // 159
+    {OB2::ob2_pll_bndy_bucket_5, OB2_TYPE}, // 160
+    {OB2::ob2_pll_func,         OB2_TYPE}, // 161
+    {OB2::ob2_repr,             OB2_TYPE}, // 162
+    {INVALID_RING,              OB2_TYPE}, // 163 // for future.
+    {INVALID_RING,              OB2_TYPE}, // 164 // for future.
+
+    {OB3::ob3_fure,             OB3_TYPE}, // 165
+    {OB3::ob3_gptr,             OB3_TYPE}, // 166
+    {OB3::ob3_time,             OB3_TYPE}, // 167
+    {OB3::ob3_pll_gptr,         OB3_TYPE}, // 168
+    {OB3::ob3_pll_bndy,         OB3_TYPE}, // 169
+    {OB3::ob3_pll_bndy_bucket_1, OB3_TYPE}, // 170
+    {OB3::ob3_pll_bndy_bucket_2, OB3_TYPE}, // 171
+    {OB3::ob3_pll_bndy_bucket_3, OB3_TYPE}, // 172
+    {OB3::ob3_pll_bndy_bucket_4, OB3_TYPE}, // 173
+    {OB3::ob3_pll_bndy_bucket_5, OB3_TYPE}, // 174
+    {OB3::ob3_pll_func,         OB3_TYPE}, // 175
+    {OB3::ob3_repr,             OB3_TYPE}, // 176
+    {INVALID_RING,              OB3_TYPE}, // 177 // for future.
+    {INVALID_RING,              OB3_TYPE}, // 178 // for future.
 
     // PCI0 Ring
-    {PCI0::pci0_fure,     PCI0_TYPE}, // 138
-    {PCI0::pci0_gptr,     PCI0_TYPE}, // 139
-    {PCI0::pci0_time,     PCI0_TYPE}, // 140
-    {PCI0::pci0_repr,     PCI0_TYPE}, // 141
+    {PCI0::pci0_fure,     PCI0_TYPE}, // 179
+    {PCI0::pci0_gptr,     PCI0_TYPE}, // 180
+    {PCI0::pci0_time,     PCI0_TYPE}, // 181
+    {PCI0::pci0_pll_func, PCI0_TYPE}, // 182
+    {PCI0::pci0_pll_gptr, PCI0_TYPE}, // 183
+    {PCI0::pci0_repr,     PCI0_TYPE}, // 184
     // PCI1 Ring
-    {PCI1::pci1_fure,     PCI1_TYPE}, // 142
-    {PCI1::pci1_gptr,     PCI1_TYPE}, // 143
-    {PCI1::pci1_time,     PCI1_TYPE}, // 144
-    {PCI1::pci1_repr,     PCI1_TYPE}, // 145
+    {PCI1::pci1_fure,     PCI1_TYPE}, // 185
+    {PCI1::pci1_gptr,     PCI1_TYPE}, // 186
+    {PCI1::pci1_time,     PCI1_TYPE}, // 187
+    {PCI1::pci1_pll_func, PCI1_TYPE}, // 188
+    {PCI1::pci1_pll_gptr, PCI1_TYPE}, // 189
+    {PCI1::pci1_repr,     PCI1_TYPE}, // 190
     // PCI2 Ring
-    {PCI2::pci2_fure,     PCI2_TYPE}, // 146
-    {PCI2::pci2_gptr,     PCI2_TYPE}, // 147
-    {PCI2::pci2_time,     PCI2_TYPE}, // 148
-    {PCI2::pci2_repr,     PCI2_TYPE}, // 149
-    {INVALID_RING,         PCI2_TYPE}, // 150 // for future.
-    {INVALID_RING,         PCI2_TYPE}, // 151 // for future.
-    {INVALID_RING,         PCI2_TYPE}, // 152 // for future.
+    {PCI2::pci2_fure,     PCI2_TYPE}, // 191
+    {PCI2::pci2_gptr,     PCI2_TYPE}, // 192
+    {PCI2::pci2_time,     PCI2_TYPE}, // 193
+    {PCI2::pci2_pll_func, PCI2_TYPE}, // 194
+    {PCI2::pci2_pll_gptr, PCI2_TYPE}, // 195
+    {PCI2::pci2_repr,     PCI2_TYPE}, // 196
 
     // EQ Ring
-    {EQ::eq_fure,         EQ_TYPE},    // 153
-    {EQ::eq_gptr,         EQ_TYPE},    // 154
-    {EQ::eq_time,         EQ_TYPE},    // 155
-    {EQ::ex_l3_fure,      EQ_TYPE}, // 156
-    {EQ::ex_l3_gptr,      EQ_TYPE}, // 157
-    {EQ::ex_l3_time,      EQ_TYPE}, // 158
-    {EQ::ex_l2_fure,      EQ_TYPE}, // 159
-    {EQ::ex_l2_gptr,      EQ_TYPE}, // 160
-    {EQ::ex_l2_time,      EQ_TYPE}, // 161
-    {EQ::ex_l3_refr_fure, EQ_TYPE}, // 162
-    {EQ::ex_l3_refr_gptr, EQ_TYPE}, // 163
-    {EQ::ex_l3_refr_time, EQ_TYPE}, // 164
-    {EQ::eq_ana_func,     EQ_TYPE},     // 165
-    {EQ::eq_ana_gptr,     EQ_TYPE},     // 166
-    {EQ::eq_dpll_func,    EQ_TYPE},    // 167
-    {EQ::eq_dpll_gptr,    EQ_TYPE},    // 168
-    {EQ::eq_dpll_other,   EQ_TYPE},   // 169
-    {EQ::eq_repr,         EQ_TYPE},    // 170
-    {EQ::ex_l3_repr,      EQ_TYPE}, // 171
-    {EQ::ex_l2_repr,      EQ_TYPE}, // 172
-    {EQ::ex_l3_refr_repr, EQ_TYPE}, // 173
-    {EQ::eq_ana_bndy,     EQ_TYPE}, // 174
-    {INVALID_RING,        EQ_TYPE}, // 175 // for future.
-    {INVALID_RING,        EQ_TYPE}, // 176 // for future.
+    {EQ::eq_fure,         EQ_TYPE}, // 197
+    {EQ::eq_gptr,         EQ_TYPE}, // 198
+    {EQ::eq_time,         EQ_TYPE}, // 199
+    {EQ::eq_mode,         EQ_TYPE}, // 200
+    {EQ::ex_l3_fure,      EQ_TYPE}, // 201
+    {EQ::ex_l3_gptr,      EQ_TYPE}, // 202
+    {EQ::ex_l3_time,      EQ_TYPE}, // 203
+    {EQ::ex_l2_mode,      EQ_TYPE}, // 204
+    {EQ::ex_l2_fure,      EQ_TYPE}, // 205
+    {EQ::ex_l2_gptr,      EQ_TYPE}, // 206
+    {EQ::ex_l2_time,      EQ_TYPE}, // 207
+    {EQ::ex_l3_refr_fure, EQ_TYPE}, // 208
+    {EQ::ex_l3_refr_gptr, EQ_TYPE}, // 209
+    {EQ::ex_l3_refr_time, EQ_TYPE}, // 210
+    {EQ::eq_ana_func,     EQ_TYPE}, // 211
+    {EQ::eq_ana_gptr,     EQ_TYPE}, // 212
+    {EQ::eq_dpll_func,    EQ_TYPE}, // 213
+    {EQ::eq_dpll_gptr,    EQ_TYPE}, // 214
+    {EQ::eq_dpll_mode,    EQ_TYPE}, // 215
+    {EQ::eq_ana_bndy,     EQ_TYPE}, // 216
+    {EQ::eq_ana_mode,     EQ_TYPE}, // 217
+    {EQ::eq_repr,         EQ_TYPE}, // 218
+    {EQ::ex_l3_repr,      EQ_TYPE}, // 219
+    {EQ::ex_l2_repr,      EQ_TYPE}, // 220
+    {EQ::ex_l3_refr_repr, EQ_TYPE}, // 221
 
     // Core Ring
-    {EC::ec_func,         EC_TYPE}, // 177
-    {EC::ec_gptr,         EC_TYPE}, // 178
-    {EC::ec_time,         EC_TYPE}, // 179
-    {EC::ec_mode,         EC_TYPE}, // 180
-    {EC::ec_repr,         EC_TYPE}  // 181
+    {EC::ec_func,         EC_TYPE}, // 222
+    {EC::ec_gptr,         EC_TYPE}, // 223
+    {EC::ec_time,         EC_TYPE}, // 224
+    {EC::ec_mode,         EC_TYPE}, // 225
+    {EC::ec_repr,         EC_TYPE}  // 226
 };
 #endif
 #endif
