@@ -29,14 +29,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 ##########################################################
 # Following are needed to include hwpf/hwp/fapi.H
 ##########################################################
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 ##########################################################
-# Following is needed to include mss_maint_cmds.H
+# Following is needed to include memdiags.H
 ##########################################################
-#EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp TODO RTC 145132
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 
 OBJS += mdiafakesm.o
 OBJS += mdiafakecm.o
@@ -45,5 +51,6 @@ MODULE = testmdia
 
 #TODO RTC 148565 - reenable test cases once they are updated
 #TESTS = *.H
+TESTS = mdiatestsm.H
 
 include ${ROOTPATH}/config.mk

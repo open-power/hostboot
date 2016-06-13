@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -86,6 +88,12 @@ enum
     MBA01_CMD_STATUS = 0X0301060C,
     MBA01_MBMACAQ = 0X0301060D,
     MBA01_MBMEA = 0X0301060E,
+
+    // mcbist unit regs
+    MCBIST_FIR = 0x07012300,
+    MCBIST_FIR_MASK = 0x07012303,
+    MCBIST_FIR_ACT0 = 0x07012306,
+    MCBIST_FIR_ACT1 = 0x07012307,
 
     // mcs unit regs
     MCI_FIR = 0x02011840,

@@ -51,7 +51,17 @@ class MdiaSmTest : public CxxTest::TestSuite
         void getTargets(uint64_t i_count, TARGETING::TargetHandleList & o_list)
         {
             TargetHandleList tmp;
-            TARGETING::getAllChiplets(tmp, TYPE_MBA);
+
+            // Need to determine whether we are using MBA or MCBIST
+            fapi2::TargetType type = getMdiaTargetType();
+            if (fapi2::TARGET_TYPE_MBA_CHIPLET == type)
+            {
+                TARGETING::getAllChiplets(tmp, TYPE_MBA);
+            }
+            else
+            {
+                TARGETING::getAllChiplets(tmp, TYPE_MCBIST);
+            }
 
             TargetHandleList::iterator it = tmp.end();
 
