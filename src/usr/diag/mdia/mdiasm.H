@@ -32,38 +32,39 @@
 
 #include <vector>
 #include <util/threadpool.H>
-//#include <utility_procedures/mss_maint_cmds.H> TODO RTC 145132
+#include <lib/mcbist/memdiags.H>
 #include "sys/sync.h"
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
+#include <targeting/namedtarget.H>
 
 namespace MDIA
 {
 
 //MBA timeout value - 30 secs
-static const uint64_t MBA_TIMEOUT = 30000000000;
+static const uint64_t MAINT_CMD_TIMEOUT = 30000000000;
 
 //Longer MBA timeout to be used when continuous tracing is enabled - 30 min
-static const uint64_t MBA_TIMEOUT_LONG = 1800000000000;
+static const uint64_t MAINT_CMD_TIMEOUT_LONG = 1800000000000;
 
 //Commit an info log for SW timeout every 10 mins
-static const uint64_t MBA_TIMEOUT_LOG =
-          ( 10 * 60000000000 ) / MBA_TIMEOUT;
+static const uint64_t MAINT_CMD_TIMEOUT_LOG =
+          ( 10 * 60000000000 ) / MAINT_CMD_TIMEOUT;
 
 /**
  * @brief work flow phases
  */
 enum WorkFlowPhase
 {
-    START_PATTERN_0 = 0, //mss_MaintCmd::PATTERN_0, TODO RTC 145132
-    START_PATTERN_1 = 1, //mss_MaintCmd::PATTERN_1, TODO RTC 145132
-    START_PATTERN_2 = 2, //mss_MaintCmd::PATTERN_2, TODO RTC 145132
-    START_PATTERN_3 = 3, //mss_MaintCmd::PATTERN_3, TODO RTC 145132
-    START_PATTERN_4 = 4, //mss_MaintCmd::PATTERN_4, TODO RTC 145132
-    START_PATTERN_5 = 5, //mss_MaintCmd::PATTERN_5, TODO RTC 145132
-    START_PATTERN_6 = 6, //mss_MaintCmd::PATTERN_6, TODO RTC 145132
-    START_PATTERN_7 = 7, //mss_MaintCmd::PATTERN_7, TODO RTC 145132
-    START_RANDOM_PATTERN,
+    START_PATTERN_0 = mss::mcbist::PATTERN_0,
+    START_PATTERN_1 = mss::mcbist::PATTERN_1,
+    START_PATTERN_2 = mss::mcbist::PATTERN_2,
+    START_PATTERN_3 = mss::mcbist::PATTERN_3,
+    START_PATTERN_4 = mss::mcbist::PATTERN_4,
+    START_PATTERN_5 = mss::mcbist::PATTERN_5,
+    START_PATTERN_6 = mss::mcbist::PATTERN_6,
+    START_PATTERN_7 = mss::mcbist::PATTERN_7,
+    START_RANDOM_PATTERN = mss::mcbist::PATTERN_RANDOM,
     DUMMY_SYNC_PHASE,
     DUMMY_ASYNC_PHASE,
     RESTORE_DRAM_REPAIRS,
@@ -71,6 +72,13 @@ enum WorkFlowPhase
     CLEAR_HW_CHANGED_STATE,
     ANALYZE_IPL_MNFG_CE_STATS,
 };
+
+/**
+ * @brief determine whether the TargetType should be MBA or MCBIST
+ *
+ * @retval either TARGET_TYPE_MBA_CHIPLET or TARGET_TYPE_MCBIST
+ */
+fapi2::TargetType getMdiaTargetType();
 
 /**
  * @brief memory diagnostics step state machine

@@ -35,8 +35,8 @@
 #include <errl/errlmanager.H>
 #include <stdio.h>
 #include <hbotcompid.H>
-//#include <fapi.H>  TODO RTC 145132
-//#include <fapiPlatHwpInvoker.H>  TODO RTC 145132
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
 #include <diag/prdf/prdfMain.H>
 #include <devicefw/userif.H>
 #include <targeting/common/utilFilter.H>
@@ -44,6 +44,7 @@
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
+#include <targeting/namedtarget.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -162,16 +163,38 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
     // collect these traces for timeout debugging
     io_log->collectTrace("MDIA_FAST",512);
     io_log->collectTrace(PRDF_COMP_NAME,512);
-//    io_log->collectTrace(FAPI_TRACE_NAME,512);  TODO RTC 145132
-//    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);  TODO RTC 145132
+    io_log->collectTrace(FAPI_TRACE_NAME,512);
+    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);
 
 }
+
+fapi2::TargetType getMdiaTargetType()
+{
+    fapi2::TargetType targetType;
+
+    // we need to check the model of the master core
+    // if it is Cumulus then we will use TARGET_TYPE_MBA_CHIPLET for targetType
+    // else it is Nimbus so then we will use TARGET_TYPE_MCBIST for targetType
+    const TARGETING::Target* masterCore = TARGETING::getMasterCore();
+
+    if ( TARGETING::MODEL_CUMULUS ==
+            masterCore->getAttr<TARGETING::ATTR_MODEL>() )
+    {
+        targetType = fapi2::TARGET_TYPE_MBA_CHIPLET;
+    }
+    else
+    {
+        targetType = fapi2::TARGET_TYPE_MCBIST;
+    }
+
+    return targetType;
+}
+
 // Do the setup for CE thresholds
 errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 {
     errlHndl_t err = NULL;
-/* TODO RTC 145132
-    ecmdDataBufferBase buffer(64);
+    fapi2::buffer<uint64_t> buffer;
 
     do
     {
@@ -181,12 +204,13 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         uint64_t addr = ( ( 0 == i_mba->getAttr<TARGETING::ATTR_CHIP_UNIT>()) ?
                        MEM_MBA0_MBSTR : MEM_MBA1_MBSTR );
 
-        fapi::Target fapiMb(TARGET_TYPE_MEMBUF_CHIP, membuf);
-        ReturnCode fapirc = fapiGetScom( fapiMb, addr , buffer);
 
-        err = fapiRcToErrl(fapirc);
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiMb(membuf);
+        fapi2::ReturnCode fapirc = fapi2::getScom( fapiMb, addr, buffer );
 
-        if(err)
+        err = fapi2::rcToErrl( fapirc );
+
+        if( NULL != err )
         {
             MDIA_FAST("ceErrorSetup: fapiGetScom on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(membuf));
@@ -200,28 +224,27 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         // and hard CEs ( set 55, 56, 57 bits ).
         // First clear starting 52 bits and than set relevant bits.
 
-        uint64_t data = ( buffer.getDoubleWord(0) & 0x0000000000000fff )
+        uint64_t data = ( uint64_t(buffer) & 0x0000000000000fff )
                         | 0xf0010010010011c0;
 
-        if( ECMD_DBUF_SUCCESS != buffer.setDoubleWord(0, data) )
+        if( fapi2::FAPI2_RC_SUCCESS != buffer.set(data) )
         {
-            MDIA_FAST("ceErrorSetup: setDoubleWord for 0x%08X failed"
+            MDIA_FAST("ceErrorSetup: set() for 0x%08X failed"
                       " HUID:0x%08X data:0x%16X",
                       addr, get_huid(membuf), data);
             break;
         }
 
-        fapirc = fapiPutScom( fapiMb, addr , buffer);
-        err = fapiRcToErrl(fapirc);
+        fapirc = fapi2::putScom( fapiMb, addr , buffer );
+        err = fapi2::rcToErrl( fapirc );
 
-        if(err)
+        if( NULL != err )
         {
             MDIA_FAST("ceErrorSetup: fapiPutScom on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(i_mba));
             break;
         }
     } while(0);
-*/
 
     return err;
 }

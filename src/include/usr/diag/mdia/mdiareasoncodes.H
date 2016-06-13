@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,9 +57,11 @@ enum ModuleId
  */
 enum ReasonCode
 {
-    INVALID_REASONCODE           = MDIA_COMP_ID | 0x00,   // Invalid Reasoncode
-    MAINT_COMMAND_HW_TIMED_OUT   = MDIA_COMP_ID | 0x01,   // timeout due to HW
-    MAINT_COMMAND_SW_TIMED_OUT   = MDIA_COMP_ID | 0x02,   // timeout due to SW
+    INVALID_REASONCODE           = MDIA_COMP_ID | 0x00,  // Invalid Reasoncode
+    MAINT_COMMAND_HW_TIMED_OUT   = MDIA_COMP_ID | 0x01,  // timeout due to HW
+    MCBIST_COMMAND_HW_TIMED_OUT  = MDIA_COMP_ID | 0x01,  // timeout due to HW
+    MAINT_COMMAND_SW_TIMED_OUT   = MDIA_COMP_ID | 0x02,  // timeout due to SW
+    MCBIST_COMMAND_SW_TIMED_OUT  = MDIA_COMP_ID | 0x02,  // timeout due to SW
 };
 
 }
