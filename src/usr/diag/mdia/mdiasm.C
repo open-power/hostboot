@@ -238,11 +238,9 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
     MDIA_FAST("sm: processCommandTimeout");
-/*  TODO RTC 145132
+
     WorkFlowProperties *wkflprop = NULL;
     errlHndl_t err = nullptr;
-
-    vector<mss_MaintCmd *> stopCmds;
 
     mutex_lock(&iv_mutex);
 
@@ -256,36 +254,50 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
         {
             if((*wit)->timer == *monitorIt)
             {
-                TargetHandle_t target = getTarget(**wit);
+                TargetHandle_t target   = getTarget(**wit);
+                TYPE           trgtType = target->getAttr<ATTR_TYPE>();
 
                 uint64_t firData = 0;
                 uint64_t mskData = 0;
                 size_t sz_uint64 = sizeof(uint64_t);
 
+                // Init data for MCBIST.
+                uint64_t firAddr = MCBIST_FIR;
+                uint64_t mskAddr = MCBIST_FIR_MASK;
+                uint64_t bitMask = 0x0020000000000000;
+
+                // Change if target type is MBA.
+                if ( TYPE_MBA == trgtType )
+                {
+                    firAddr = MBA01_SPA;
+                    mskAddr = MBA01_SPA_MASK;
+                    bitMask = 0x8080000000000000; // bits 0 or 8
+                }
+
                 // Check for command complete. If set, don't time out.
                 err = deviceRead( target, &firData, sz_uint64,
-                                  DEVICE_SCOM_ADDRESS(MBA01_SPA) );
+                                  DEVICE_SCOM_ADDRESS(firAddr) );
                 if ( nullptr != err )
                 {
                     MDIA_FAST("sm: deviceRead on 0x%08X failed HUID:0x%08X",
-                              MBA01_SPA, get_huid(target));
+                              firAddr, get_huid(target));
                     //commit locally and let it timeout
                     errlCommit(err, MDIA_COMP_ID);
                 }
                 else
                 {
-                    firData &= 0x8080000000000000;
+                    firData &= bitMask;
                 }
 
                 if ( 0 != firData )
                 {
                     err = deviceRead( target, &mskData, sz_uint64,
-                                      DEVICE_SCOM_ADDRESS(MBA01_SPA_MASK) );
+                                      DEVICE_SCOM_ADDRESS(mskAddr) );
                     if ( nullptr != err )
                     {
                         MDIA_FAST("sm: deviceRead on 0x%08X failed "
                                   "HUID:0x%08X",
-                                  MBA01_SPA_MASK, get_huid(target));
+                                  mskAddr, get_huid(target));
                         //commit locally and let it timeout
                         errlCommit(err, MDIA_COMP_ID);
                     }
@@ -295,12 +307,12 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 if(firData & ~mskData)
                 {
                     // Committing an info log to help debug SW timeout
-                    if((*wit)->timeoutCnt >= MBA_TIMEOUT_LOG)
+                    if((*wit)->timeoutCnt >= MAINT_CMD_TIMEOUT_LOG)
                     {
                         MDIA_FAST("sm: committing a SW timed out info log "
                                   "for %x", get_huid(target));
 
-                        / *@
+                        /*@
                          * @errortype
                          * @reasoncode       MDIA::MAINT_COMMAND_SW_TIMED_OUT
                          * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
@@ -308,7 +320,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                          * @userData1        Associated memory diag work item
                          * @userData2        Target HUID
                          * @devdesc          A maint command SW timed out
-                         * /
+                         */
                         err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                             PROCESS_COMMAND_TIMEOUT,
                                             MAINT_COMMAND_SW_TIMED_OUT,
@@ -316,7 +328,6 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                                             get_huid(target));
 
                         // collect ffdc
-
                         addTimeoutFFDC(target, err);
 
                         errlCommit(err, MDIA_COMP_ID);
@@ -335,15 +346,55 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                               get_huid(target), (*wit)->timeoutCnt);
                     // register a new timeout monitor
                     uint64_t monitorId =
-                        getMonitor().addMonitor(MBA_TIMEOUT);
+                        getMonitor().addMonitor(MAINT_CMD_TIMEOUT);
                     (*wit)->timer = monitorId;
 
                     break;
                 }
 
                 // If maint cmd complete bit is not on, time out
+                MDIA_FAST("sm: stopping command: %p", target);
+                //target type is MBA
+                if ( TYPE_MBA == trgtType )
+                {
+                    //TODO RTC 155857
+                    //no longer have the mss_MaintCmd class at the moment
+                    //will need to update once we have Cumulus support
 
-                stopCmds.push_back(static_cast<mss_MaintCmd *>((*wit)->data));
+                    //fapi2::ReturnCode fapirc =
+                    //    static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd();
+                    //err = fapi2::rcToErrl(fapirc);
+
+                    //if( nullptr != err )
+                    //{
+                    //    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+                    //    errlCommit(err, MDIA_COMP_ID);
+                    //}
+
+                    //fapirc =
+                    //    static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd();
+                    //err = fapi2::rcToErrl(fapirc);
+
+                    //if( nullptr != err )
+                    //{
+                    //    MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+                    //    errlCommit(err, MDIA_COMP_ID);
+                    //}
+                }
+                //target type is MCBIST
+                else
+                {
+                    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
+                    fapi2::ReturnCode fapirc = memdiags::stop(fapiMcbist);
+                    err = fapi2::rcToErrl(fapirc);
+
+                    if ( nullptr != err )
+                    {
+                        MDIA_ERR("sm: memdiags::stop failed");
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
+                }
+
                 (*wit)->data = NULL;
 
                 (*wit)->status = COMMAND_TIMED_OUT;
@@ -351,11 +402,11 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 // log a timeout event
                 MDIA_ERR("sm: command %p: %d HW timed out on: %x",
-                        stopCmds.back(),
+                        target,
                         *((*wit)->workItem),
                         get_huid(target));
 
-                / *@
+                /* @
                  * @errortype
                  * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -363,7 +414,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                  * @userData1        Associated memory diag work item
                  * @userData2        Target HUID
                  * @devdesc          A maint command HW timed out
-                 * /
+                 */
                 err = new ErrlEntry(
                         ERRL_SEV_UNRECOVERABLE,
                         PROCESS_COMMAND_TIMEOUT,
@@ -400,37 +451,6 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
     }
 
     mutex_unlock(&iv_mutex);
-
-    // try and stop the commands that timed out.
-
-    for(vector<mss_MaintCmd *>::iterator cit = stopCmds.begin();
-            cit != stopCmds.end();
-            ++cit)
-    {
-        MDIA_FAST("sm: stopping command: %p", *cit);
-
-        ReturnCode fapirc = (*cit)->stopCmd();
-        err = fapiRcToErrl(fapirc);
-
-        if(err)
-        {
-            MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-            errlCommit(err, MDIA_COMP_ID);
-        }
-
-        fapirc = (*cit)->cleanupCmd();
-
-        err = fapiRcToErrl(fapirc);
-
-        if(err)
-        {
-            MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-            errlCommit(err, MDIA_COMP_ID);
-        }
-
-        delete (*cit);
-    }
-*/
 }
 
 errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
