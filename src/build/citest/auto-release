@@ -59,7 +59,7 @@ function build {
     ### Push tag to gerrit, create track and checkin files
     git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
     git checkout gerrit/master || exit -1
-    hbRelease pre-release --level $RELEASE_NAME --release $FIPS_RELEASE --checkInDir $CMVC_DIR || exit -1
+    hbRelease pre-release --level $RELEASE_NAME --release $FIPS_RELEASE --checkInDir $CMVC_DIR --released $PREVIOUS_RELEASE|| exit -1
     # Check if feature was successfully created and if so set $FEATURE
     if [ -f $CMVC_FEATURE_FILE ]; then
         FEATURE=`cat $CMVC_FEATURE_FILE`;
