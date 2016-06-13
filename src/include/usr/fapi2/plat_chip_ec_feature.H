@@ -36,6 +36,9 @@
 #ifndef PLATCHIPECFEATURE_H_
 #define PLATCHIPECFEATURE_H_
 
-// Currently empty because no specialzation for Hostboot
+#include <plat_attr_override_sync.H>
+
+#define PLAT_GET_CHIP_EC_FEATURE_OVERRIDE(ID, PTARGET, VAL) \
+        AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)
 
 #endif // PLATCHIPECFEATURE_H_
