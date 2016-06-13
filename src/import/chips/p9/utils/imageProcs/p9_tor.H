@@ -61,6 +61,7 @@ typedef struct
 } TorPpeBlock_t;
 
 
+
 #define IMGBUILD_TGR_RING_FOUND                        0
 #define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
 #define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image.
@@ -140,12 +141,16 @@ typedef enum SbeTorId
     N3_CPLT =   4,
     XB_CPLT =   5,
     MC_CPLT =   6,
-    PCI0_CPLT = 7,
-    PCI1_CPLT = 8,
-    PCI2_CPLT = 9,
-    EQ_CPLT   = 10,
-    EC_CPLT   = 11,
-    SBE_NOOF_CHIPLETS =   12
+    OB0_CPLT =  7,
+    OB1_CPLT =  8,
+    OB2_CPLT =  9,
+    OB3_CPLT =  10,
+    PCI0_CPLT = 11,
+    PCI1_CPLT = 12,
+    PCI2_CPLT = 13,
+    EQ_CPLT   = 14,
+    EC_CPLT   = 15,
+    SBE_NOOF_CHIPLETS =   16
 } SbeTorId_t;
 typedef enum CmeTorId
 {
@@ -224,8 +229,7 @@ int tor_get_ring(  void*
                    RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
                    void**          io_ringBlockPtr,  // Addr of ring buffer
                    uint32_t&       io_ringBlockSize, // size of ring data
-                   char*           o_ringName        // Ring name
-                );
+                   char*           o_ringName);        // Ring name
 
 int tor_get_single_ring ( void*
                           i_ringSectionPt,     // Ring address Ptr any of .rings, .overrides and .overlays.
@@ -247,8 +251,7 @@ int tor_get_block_of_rings ( void*
                              RingVariant_t i_RingVariant,    // base,cache,etc
                              uint8_t       i_instanceId,     // Chiplet Instance ID
                              void**        io_ringBlockPtr,  // Addr of ring buffer
-                             uint32_t&     io_ringBlockSize  // size of ring data
-                           );
+                             uint32_t&     io_ringBlockSize);  // size of ring data
 };
 
 #endif //_P9_TOR_H_

@@ -161,12 +161,41 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
                 ring_id_list_instance = (GenRingIdList*) MC::RING_ID_LIST_INSTANCE;
                 break;
 
+            case OB0_CPLT :
+                l_cpltData  = OB0::g_ob0Data;
+                iv_num_variant  = (uint8_t)sizeof(OB0::RingVariants) / sizeof(uint16_t);
+                ring_id_list_common = (GenRingIdList*) OB0::RING_ID_LIST_COMMON;
+                ring_id_list_instance = (GenRingIdList*) OB0::RING_ID_LIST_INSTANCE;
+                break;
+
+            case OB1_CPLT :
+                l_cpltData  = OB1::g_ob1Data;
+                iv_num_variant  = (uint8_t)sizeof(OB1::RingVariants) / sizeof(uint16_t);
+                ring_id_list_common = (GenRingIdList*) OB1::RING_ID_LIST_COMMON;
+                ring_id_list_instance = (GenRingIdList*) OB1::RING_ID_LIST_INSTANCE;
+                break;
+
+            case OB2_CPLT :
+                l_cpltData  = OB2::g_ob2Data;
+                iv_num_variant  = (uint8_t)sizeof(OB2::RingVariants) / sizeof(uint16_t);
+                ring_id_list_common = (GenRingIdList*) OB2::RING_ID_LIST_COMMON;
+                ring_id_list_instance = (GenRingIdList*) OB2::RING_ID_LIST_INSTANCE;
+                break;
+
+            case OB3_CPLT :
+                l_cpltData  = OB3::g_ob3Data;
+                iv_num_variant  = (uint8_t)sizeof(OB3::RingVariants) / sizeof(uint16_t);
+                ring_id_list_common = (GenRingIdList*) OB3::RING_ID_LIST_COMMON;
+                ring_id_list_instance = (GenRingIdList*) OB3::RING_ID_LIST_INSTANCE;
+                break;
+
             case PCI0_CPLT :
                 l_cpltData  =  PCI0::g_pci0Data;
                 iv_num_variant  = (uint8_t)sizeof(PCI0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI0::RING_ID_LIST_INSTANCE;
                 break;
+
 
             case PCI1_CPLT :
                 l_cpltData =  PCI1::g_pci1Data;
@@ -1183,6 +1212,21 @@ int tor_get_ring(  void*
                     l_sbeTorId = MC_CPLT;
                     break;
 
+                case 9 :
+                    l_sbeTorId = OB0_CPLT;
+                    break;
+
+                case 10 :
+                    l_sbeTorId = OB1_CPLT;
+                    break;
+
+                case 11 :
+                    l_sbeTorId = OB2_CPLT;
+                    break;
+
+                case 12 :
+                    l_sbeTorId = OB3_CPLT;
+                    break;
 
                 case 13 :
                     l_sbeTorId = PCI0_CPLT;
