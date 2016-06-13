@@ -711,19 +711,11 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     const char* todNodeName = "chiptod";
     const char* pciNodeName = "pbcq";
 
-    // Grab a system object to work with
-    TARGETING::Target* sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
-
-    uint64_t l_xscomBaseAddr =
-      sys->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-
     /**********************************************************/
     /*                   Xscom node                           */
     /**********************************************************/
-    //@todo-Fix for P9-RTC:128077
-    uint64_t l_xscomAddr = l_xscomBaseAddr +
-      (static_cast<uint64_t>(i_chipid) << XSCOM_CHIP_SHIFT);
+    uint64_t l_xscomAddr =
+      i_pProc->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
 
     dtOffset_t xscomNode = i_dt->addNode(i_parentNode, xscomNodeName,
                                          l_xscomAddr);
