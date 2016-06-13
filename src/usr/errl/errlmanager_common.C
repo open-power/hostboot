@@ -552,9 +552,12 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         // two pass algorithm to find the highest priority callout
         // then send SELs for only the highest priority callouts
         std::vector< HWAS::callout_ud_t* > l_callouts;
+        HWAS::callout_ud_t l_calloutToAdd; // used for EIBUS error
         HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
         if (i_sendSels)
         {
+            bool l_busCalloutEncountered = false; // flag bus callout
+
             // look thru the errlog for any Callout UserDetail sections
             // to later determine the sensor information for each SEL
             // create a vector of callouts during the first pass
@@ -572,6 +575,14 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                     HWAS::callout_ud_t *l_ud =
                         reinterpret_cast<HWAS::callout_ud_t*>((*it)->iv_pData);
 
+                    // create a "fill in" procedure callout for all bus callouts
+                    if (l_ud->type == HWAS::BUS_CALLOUT)
+                    {
+                        l_busCalloutEncountered = true;
+                        l_calloutToAdd.type = HWAS::PROCEDURE_CALLOUT;
+                        l_calloutToAdd.procedure = HWAS::EPUB_PRC_EIBUS_ERROR;
+                    }
+
                     // if this callout is higher than any previous callout
                     if (l_ud->priority > l_priority)
                     {
@@ -588,6 +599,22 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                     l_callouts.push_back(l_ud);
                 } // if callout
             } // for each SectionVector
+            if (l_busCalloutEncountered)
+            {
+                // add EIBUS error procedure callout
+                // doing push_back after the loop and not during ensures that:
+                // 1) the iterator is not invalidated by the push_back
+                // 2) the push_back is done only once, even when there are
+                //    multiple bus callouts (which is often). This would not
+                //    be a major concern though since duplicates are removed
+                //    in the next loop below.
+                l_callouts.push_back(&l_calloutToAdd);
+                // need to also consider this callout as a modifier of others
+                l_modifier.considerCallout(&l_calloutToAdd);
+                // our added callout always takes the highest priority seen
+                // so that it will not be dropped
+                l_calloutToAdd.priority = l_priority;
+            }
         } // if i_sendSels
 
         //Add additional user detail section to pel data after hw and procedure
