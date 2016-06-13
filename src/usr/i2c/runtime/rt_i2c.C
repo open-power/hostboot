@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -282,6 +282,13 @@ errlHndl_t i2cDisableSensorCache ( TARGETING::Target * i_target,
 
     do
     {
+        // There must be a 30ms window between the last time the cache
+        //  was enabled and the next time it is disabled.  Since we
+        //  have no way to easily track the last enablement, we will
+        //  just take the hit inside every disable call.
+        TRACDCOMP( g_trac_i2c, "Delaying 30ms before disable" );
+        nanosleep(0,30 * NS_PER_MSEC);
+
         uint64_t scacData = 0x0;
         size_t dataSize = sizeof(scacData);
 
@@ -334,6 +341,11 @@ errlHndl_t i2cEnableSensorCache ( TARGETING::Target * i_target )
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cEnableSensorCache()" );
+
+    // There must be a 2ms window where the cache is disabled to avoid
+    //  some thrashing in the Centaur logic.
+    TRACDCOMP( g_trac_i2c, "Delaying 2ms before enable" );
+    nanosleep(0,2 * NS_PER_MSEC);
 
     uint64_t scacData = SCAC_ENABLE_MSK;
     size_t dataSize = sizeof(scacData);
