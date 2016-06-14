@@ -36,6 +36,7 @@
 #ifndef _MSS_CONST_H_
 #define _MSS_CONST_H_
 
+#include <cstdint>
 
 namespace mss
 {
@@ -244,6 +245,11 @@ enum test_type
 
 } // namespace mcbist
 
+enum class shmoo_edge : std::size_t
+{
+    LEFT,
+    RIGHT
+};
 
-}
+} // namespace mss
 #endif
