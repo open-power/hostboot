@@ -32,6 +32,20 @@ OBJS += $(patsubst %.C,%.o,$(MSS_UT_SOURCE))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CATCH_UNIT_TESTS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(SQLITE3_INCLUDE_DIR))
-$(WRAPPER)_DEPLIBS+=mss p9_mss_ddr_phy_reset p9_mss_draminit p9_mss_draminit_training p9_mss_draminit_mc p9_mss_scrub p9_mss_freq p9_mss_eff_config p9_mss_memdiag p9_mss_freq_system p9_mss_volt p9_mss_freq_drift
+
+$(WRAPPER)_DEPLIBS+=mss
+$(WRAPPER)_DEPLIBS+=p9_mss_ddr_phy_reset
+$(WRAPPER)_DEPLIBS+=p9_mss_draminit
+$(WRAPPER)_DEPLIBS+=p9_mss_draminit_training
+$(WRAPPER)_DEPLIBS+=p9_mss_draminit_mc
+$(WRAPPER)_DEPLIBS+=p9_mss_scrub
+$(WRAPPER)_DEPLIBS+=p9_mss_freq
+$(WRAPPER)_DEPLIBS+=p9_mss_eff_config
+$(WRAPPER)_DEPLIBS+=p9_mss_memdiag
+$(WRAPPER)_DEPLIBS+=p9_mss_freq_system
+$(WRAPPER)_DEPLIBS+=p9_mss_volt
+$(WRAPPER)_DEPLIBS+=p9_mss_freq_drift
+$(WRAPPER)_DEPLIBS+=p9_mss_scominit
+
 $(WRAPPER)_LDFLAGS+= -Wl,-rpath=$(SQLITE3_LIB_DIR) -L$(SQLITE3_LIB_DIR) -lsqlite3 -lrt
 $(call BUILD_WRAPPER)
