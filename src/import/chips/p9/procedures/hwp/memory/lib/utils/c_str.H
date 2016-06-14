@@ -43,6 +43,21 @@ namespace mss
     extern char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
 #endif
 
+///
+/// @brief non-target c_str general declaration
+/// @tparam T - type you want the const char * for
+/// @param[in] i_input - input you want the const char * for
+/// @return const char *
+///
+template< typename T >
+const char* c_str( const T& i_input );
+
+///
+/// @brief fapi2::Target c_str general declaration
+/// @tparam T - fapi2::TargetType you want the name for
+/// @param[in] i_target - target you want the name for
+/// @return const char *
+///
 template< fapi2::TargetType T >
 const char* c_str( const fapi2::template Target<T>& i_target )
 {
