@@ -44,6 +44,7 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/hwasPlat.H>
 #include <vpd/vpd_if.H>
+#include <console/consoleif.H>
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>

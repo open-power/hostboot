@@ -7,3 +7,10 @@ config RECONFIG_LOOP_TESTS_ENABLE
     default y
     help
         Include functions for enabling reconfig loop testing.
+config SIO_ISTEP_CONTROL
+    default n
+    depends on BMC_AST2400
+    help
+        Allows istep control via SIO scratch registers.
+        Typical usage is via mailbox (scom) scratch registers.
+
