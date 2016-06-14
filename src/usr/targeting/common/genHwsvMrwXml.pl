@@ -3384,12 +3384,6 @@ sub generate_proc
     printf( "        <default>0x%016X</default>\n", $psiBase );
     printf( "    </attribute>\n" );
 
-    #HDAT consumes INTP_BASE_ADDR. leaving for now. TODO RTC:140452
-    printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0003FFFF80000000 + 0x400000*$lognode + 0x100000*$logid );
-    printf( "    </attribute>\n" );
-
     #PHB 64 bit MMIO address (PHB0-PHB5)
     printf( "    <attribute><id>PHB_MMIO_ADDRS_64</id>\n" );
     printf( "        <default>\n" );
