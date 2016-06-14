@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,5 +22,4 @@
 
 PROCEDURE=p9_mss_volt
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)

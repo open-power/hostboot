@@ -33,14 +33,14 @@
 #include <fapi2.H>
 #include <mss.H>
 
-#include <phy/ddr_phy.H>
-#include <phy/read_cntrl.H>
-#include <phy/phy_cntrl.H>
-#include <phy/apb.H>
+#include <lib/phy/ddr_phy.H>
+#include <lib/phy/read_cntrl.H>
+#include <lib/phy/phy_cntrl.H>
+#include <lib/phy/apb.H>
 
-#include <utils/bit_count.H>
-#include <utils/dump_regs.H>
-#include <utils/scom.H>
+#include <lib/utils/bit_count.H>
+#include <lib/utils/dump_regs.H>
+#include <lib/utils/scom.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;

@@ -28,8 +28,8 @@
 
 #include <fapi2.H>
 #include <mss.H>
-#include <eff_config/eff_config.H>
-#include <eff_config/timing.H>
+#include <lib/eff_config/eff_config.H>
+#include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 

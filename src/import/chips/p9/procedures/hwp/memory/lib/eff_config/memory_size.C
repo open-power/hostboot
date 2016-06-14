@@ -28,7 +28,7 @@
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
-#include <mss_attribute_accessors.H>
+#include <lib/mss_attribute_accessors.H>
 
 #include <lib/shared/mss_const.H>
 #include <lib/eff_config/memory_size.H>

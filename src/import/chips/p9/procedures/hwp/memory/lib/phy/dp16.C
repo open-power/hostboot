@@ -33,14 +33,14 @@
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-#include <mss_attribute_accessors.H>
+#include <lib/mss_attribute_accessors.H>
 
-#include <phy/dp16.H>
-#include <phy/write_cntrl.H>
+#include <lib/phy/dp16.H>
+#include <lib/phy/write_cntrl.H>
 
-#include <utils/scom.H>
-#include <utils/pos.H>
-#include <utils/c_str.H>
+#include <lib/utils/scom.H>
+#include <lib/utils/pos.H>
+#include <lib/utils/c_str.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;

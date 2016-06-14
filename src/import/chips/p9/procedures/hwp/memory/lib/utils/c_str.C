@@ -28,7 +28,7 @@
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
-#include <mss_attribute_accessors.H>
+#include <lib/mss_attribute_accessors.H>
 #include <lib/utils/c_str.H>
 
 using fapi2::TARGET_TYPE_MCBIST;

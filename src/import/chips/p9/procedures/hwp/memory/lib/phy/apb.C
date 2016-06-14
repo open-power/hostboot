@@ -28,7 +28,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include <phy/apb.H>
+#include <lib/phy/apb.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/c_str.H>
 #include <lib/utils/index.H>

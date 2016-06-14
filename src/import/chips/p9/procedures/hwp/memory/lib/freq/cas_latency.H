@@ -35,7 +35,7 @@
 #include <cstdint>
 
 #include <fapi2.H>
-#include <spd/spd_decoder.H>
+#include <lib/spd/spd_decoder.H>
 
 namespace mss
 {

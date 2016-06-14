@@ -31,7 +31,7 @@
 #define _MSS_DDR_PHY_H_
 
 #include <fapi2.H>
-#include <mss_attribute_accessors.H>
+#include <lib/mss_attribute_accessors.H>
 
 // Helper macro to condense the checking for PLL lock
 #define CHECK_PLL( __target, __register, __buffer, __mask )             \

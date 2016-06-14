@@ -33,9 +33,9 @@
 #include <fapi2.H>
 #include <mss.H>
 #include <lib/spd/spd_decoder.H>
-#include <utils/conversions.H>
-#include <utils/find.H>
-#include <utils/fake_spd.H>
+#include <lib/utils/conversions.H>
+#include <lib/utils/find.H>
+#include <lib/utils/fake_spd.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

@@ -31,7 +31,7 @@
 
 #include <fapi2.H>
 #include <mss.H>
-#include <freq/sync.H>
+#include <lib/freq/sync.H>
 #include <lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_DIMM;
