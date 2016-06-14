@@ -14,10 +14,10 @@ config START_OCC_DURING_BOOT
     help
         Activates all the OCCs during IPL
 
-config PALMETTO_VDDR
+config OPENPOWER_MEM_VOLT
     default n
     help
-        Enable the Hostboot DRAM VDDR function for Palmetto
+        Enable Hostboot post-poweron memory voltage control for OpenPOWER systems
 
 config PCA95X_8BIT
     default n

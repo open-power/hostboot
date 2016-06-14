@@ -73,7 +73,7 @@ OBJS += port.o
 
 
 
-OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o,hbVddrMsg.o)
+OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
 
 include ${ROOTPATH}/procedure.rules.mk

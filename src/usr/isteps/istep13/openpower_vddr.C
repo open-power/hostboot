@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep13/palmetto_vddr.C $                      */
+/* $Source: src/usr/isteps/istep13/openpower_vddr.C $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -209,7 +209,7 @@ static errlHndl_t pca95xGpioSetBit(TARGETING::Target * i_target,
         size_t dataLen = sizeof(data);
 
         // Might want to make this an attribute;
-        // However, This is already a palmetto only object
+        // However, This is already an OpenPOWER only object
         uint64_t deviceType = GPIO::PCA95X_GPIO;
 
         err = DeviceFW::deviceOp
@@ -348,14 +348,6 @@ static errlHndl_t disableVddrViaGpioPinStrategy(Target *centaur)
 }
 
 // External interfaces
-
-errlHndl_t platform_enable_vspd()
-{
-    // GPIO pin not implemented on palmetto
-    // VSPD voltage hardwired.
-    return NULL;
-}
-
 errlHndl_t platform_enable_vddr()
 {
     return for_each_vddr_domain_with_functional_memory(
@@ -370,7 +362,7 @@ errlHndl_t platform_disable_vddr()
 
 errlHndl_t platform_adjust_vddr_post_dram_init()
 {
-    // Not supported on palmetto
+    // Not supported on OpenPOWER
     return NULL;
 }
 
