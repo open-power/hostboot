@@ -45,6 +45,10 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACD(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
 #define SBE_TRACU(args...)
+#define SBE_TRACFBIN(printf_string,args...) \
+    TRACFBIN(g_trac_sbeio,"fifodd: " printf_string,##args)
+#define SBE_TRACDBIN(printf_string,args...) \
+    TRACDBIN(g_trac_sbeio,"fifodd: " printf_string,##args)
 /* replace for unit testing
 #define SBE_TRACU(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
@@ -112,6 +116,8 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
         uint32_t * l_pSent    = i_pFifoRequest; //advance as words sent
         uint64_t   l_addr     = SBE_FIFO_UPFIFO_DATA_IN;
         uint32_t   l_cnt      = *l_pSent;
+        SBE_TRACDBIN("Write Request in SBEIO",i_pFifoRequest,
+                     l_cnt*sizeof(*l_pSent));
         for (uint32_t i=0;i<l_cnt;i++)
         {
             // Wait for room to write into fifo
@@ -248,7 +254,11 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
             // has been sent. If not EOT, then data ready to receive.
             uint32_t l_status = 0;
             errl = waitDnFifoReady(i_target,l_status);
-            if ( l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
+            if ( (l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) &&
+                 // @TODO-RTC:156194 - EOT should not be set until FIFO empty
+                 //                    so once fixed, we can remove this next
+                 //                    line
+                 (!(l_status & DNFIFO_STATUS_FIFO_ENTRY_COUNT)) )
             {
                 l_EOT = true;
                 // ignore EOT dummy word
@@ -274,6 +284,7 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
             *l_pReceived = l_last; //copy to returned output buffer
             l_pReceived++; //advance to next position
             l_recWords++;  //count word received
+            SBE_TRACD("Read a byte from data reg: 0x%.8X",l_last);
         }
         while (1); // exit check in middle of loop
         if (errl) break;
@@ -329,10 +340,15 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
              (l_last      > (l_recWords)) )
         {
             SBE_TRACF(ERR_MRK "readResponse: invalid status distance "
-                      " cmd=0x%08x distance=%d response size=%d",
+                      "cmd=0x%08x distance=%d allocated response size=%d "
+                      "recieved word size=%d" ,
                       i_pFifoRequest[1],
                       l_last,
-                      i_responseSize);
+                      i_responseSize,
+                      l_recWords);
+
+            SBE_TRACFBIN("Invalid Response from SBE",
+                         o_pFifoResponse,l_recWords*sizeof(l_last));
 
             //TODO RTC 149454 implement error recovery and ffdc
             // Consider a new callout for SBE problems.
@@ -450,10 +466,16 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
         errl = readFsi(i_target,l_addr,&o_status);
         if (errl) break;
 
-        if ( !(o_status & DNFIFO_STATUS_FIFO_EMPTY) ||
+        if (  (!(o_status & DNFIFO_STATUS_FIFO_EMPTY)) ||
               (o_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) )
         {
+            SBE_TRACD("Read a word from status register: 0x%.8X",o_status);
             break;
+        }
+        else
+        {
+            SBE_TRACD("SBE status reg returned fifo empty or dequeued eot flag 0x%.8X",
+                      o_status);
         }
 
         // time out if wait too long
