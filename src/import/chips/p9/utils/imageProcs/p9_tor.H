@@ -61,7 +61,6 @@ typedef struct
 } TorPpeBlock_t;
 
 
-
 #define IMGBUILD_TGR_RING_FOUND                        0
 #define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
 #define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image.
