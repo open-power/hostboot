@@ -28,5 +28,4 @@
 
 PROCEDURE=p9_mss_freq
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)
