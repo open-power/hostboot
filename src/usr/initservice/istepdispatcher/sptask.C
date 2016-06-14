@@ -236,7 +236,7 @@ void    splessComm( void *  io_msgQ )
             "splessComm : readybit set." );
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-#ifdef CONFIG_BMC_AST2400
+#ifdef CONFIG_SIO_ISTEP_CONTROL
     const char* l_input = "SIO";
 #else
     const char* l_input = "CFAM";

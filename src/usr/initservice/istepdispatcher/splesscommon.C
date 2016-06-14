@@ -95,7 +95,7 @@ void    readCmdSts( SPLessCmd   &io_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-#ifdef CONFIG_BMC_AST2400
+#ifdef CONFIG_SIO_ISTEP_CONTROL
     errlHndl_t err = NULL;
     INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
     memset (&istepCtl, 0x0, sizeof(istepCtl));
@@ -143,7 +143,7 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-#ifdef CONFIG_BMC_AST2400
+#ifdef CONFIG_SIO_ISTEP_CONTROL
     errlHndl_t err = NULL;
     INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
     memset (&istepCtl, 0x0, sizeof(istepCtl));
