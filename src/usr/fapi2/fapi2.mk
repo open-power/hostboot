@@ -54,6 +54,7 @@ OBJS += plat_mvpd_access.o
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
 OBJS += ffdc.o
+OBJS += fapi2_utils.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
