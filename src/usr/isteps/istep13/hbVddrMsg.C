@@ -740,13 +740,6 @@ void HBVddrMsg::createErrLog(errlHndl_t& io_err,
 }
 
 // External interfaces
-
-errlHndl_t platform_enable_vspd()
-{
-    // noop on FSP based system
-    return NULL;
-}
-
 errlHndl_t platform_enable_vddr()
 {
     errlHndl_t l_err = NULL;

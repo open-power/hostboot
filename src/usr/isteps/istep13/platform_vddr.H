@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -29,12 +29,6 @@
 #define PLATFORM_VDDR_H__
 
 #include <usr/errl/errlentry.H>
-
-/**
- * @brief Enable vspd on DIMMS
- * @return NULL | error handle on error
- */
-errlHndl_t platform_enable_vspd();
 
 /**
  * @brief Enable vddr on DIMMS
