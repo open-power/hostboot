@@ -161,7 +161,7 @@
         <id>ATTR_PFET_OFF_CONTROLS</id>
     </attribute> 
     <attribute>
-        <id>ATTR_HANG_COUNTER6_SETUP</id>
+        <id>ATTR_N3_FLUSH_MODE</id>
     </attribute>
     <attribute>
         <id>ATTR_VITL_CLK_SETUP</id>

@@ -595,14 +595,6 @@ Firmware shares some code with the processor, so the attribute is named so they 
 </attribute>
 
 <attribute>
-    <id>ATTR_HANG_COUNTER6_SETUP</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Hang counter 6 setup</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-</attribute>
-
-<attribute>
     <id>ATTR_OBUS_RATIO_VALUE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Holds Obus ratio value</description>
@@ -652,6 +644,14 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_N3_FLUSH_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>DD1 update : Flush mode not for N3</description>
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
