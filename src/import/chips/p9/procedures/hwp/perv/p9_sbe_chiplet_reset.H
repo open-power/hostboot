@@ -88,7 +88,8 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     HW_NS_DELAY = 200000, // unit is nano seconds
     SIM_CYCLE_DELAY = 10000, // unit is cycles
     HANG_PULSE_0X12 = 0x12,
-    HANG_PULSE_0X1C = 0x1C
+    HANG_PULSE_0X1C = 0x1C,
+    HANG_PULSE_0X05 = 0x05
 };
 }
 
