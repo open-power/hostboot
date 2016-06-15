@@ -167,9 +167,9 @@ inline fapi2::ReturnCodes _insert(const unit_type* i_source,
 /// @note Variable buffers are not (presently) declared as std::bitset
 /// as bitsets' size is fixed at runtime. It is not clear if this is
 /// acceptable for variable_buffers at this time.
-/// @note Variable buffers are implemented as a std::vecor of uint32_t
+/// @note Variable buffers are implemented as a std::vector of uint32_t
 /// as this keeps simple compatibility with ecmdDataBuffers. Cronus (at
-//least) need to interwork the two.
+//  least) needs to interwork the two.
 class variable_buffer
 {
 
@@ -788,7 +788,7 @@ class variable_buffer
         /// @param[in] i_targetStart The position in this where the copy starts
         /// @param[in] i_len How many bits to copy
         /// @param[in] i_sourceStart The start positon in i_data, defaults to 0
-        /// @return FAPI2_RC_SUCCESS on success, FAPi2_RC_OVERFLOW otherwise
+        /// @return FAPI2_RC_SUCCESS on success, FAPI2_RC_OVERFLOW otherwise
         ///
         template<typename OT>
         inline fapi2::ReturnCodes insert(const OT& i_data,
@@ -796,6 +796,10 @@ class variable_buffer
                                          bits_type i_len = ~0,
                                          bits_type i_sourceStart = 0)
         {
+            // Compile time check to make sure OT is integral
+            static_assert( std::is_integral<OT>::value,
+                           "Input must be an integral type" );
+
             // _insert likes 32-bit sources. So lets make our source 32 bits.
             uint32_t l_source = static_cast<uint32_t>(i_data);
             bits_type l_sourceStart = i_sourceStart +
@@ -1007,7 +1011,7 @@ inline fapi2::ReturnCodes variable_buffer::insert(const uint64_t& i_source,
                    i_sourceStart, i_targetStart, i_len);
 }
 
-// Insert another variable_bufer
+// Insert another variable_buffer
 template<>
 inline fapi2::ReturnCodes variable_buffer::insert(
     const variable_buffer& i_data,
