@@ -1,0 +1,38 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_query_stop_state.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- *HWP HWP Owner:Brian Vanderpool <vanderp@us.ibm.com>                      -->
+<!-- *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>                -->
+<!-- *HWP Team: PM                                                          -->
+<!-- *HWP Level: 2                                                          -->
+<!-- *HWP Consumed by:  FSP:HS                                       -->
+
+<!-- Error definitions for p9_pm_dts_read procedure -->
+<!-- ********************************************************************   -->
+<hwpErrors>
+  <hwpError>
+    <rc>RC_P9_QUERY_STOP_STATE_INCONSISTENT</rc>
+    <description>
+   The Core and Stop States are inconsistent
+    </description>
+    <ffdc>QSSHSRC</ffdc>
+    <ffdc>C0SSHSRC</ffdc>
+    <ffdc>C1SSHSRC</ffdc>
+  </hwpError>
+</hwpErrors>
