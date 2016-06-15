@@ -145,7 +145,7 @@ namespace HBPM
         tS.getTopLevelTarget( sysTarget );
         assert( sysTarget != NULL );
 
-        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB_MHZ>();
+        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
 
         config_data->version = HBPM::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;
@@ -251,17 +251,22 @@ namespace HBPM
                        l_pImageIn);
 
             ImageType_t l_imgType;
-            void *l_buffer = (void*)malloc(HW_IMG_RING_SIZE);
+            void *l_buffer0 = (void*)malloc(HW_IMG_RING_SIZE);
+            void *l_buffer1 = (void*)malloc(HW_IMG_RING_SIZE);
 
             FAPI_INVOKE_HWP( l_errl,
                              p9_hcode_image_build,
                              l_fapiTarg,
-                             l_pImageIn,
-                             i_pImageOut,
+                             l_pImageIn, //reference image
+                             i_pImageOut, //homer image buffer
+                             NULL, //default is no ring overrides
                              (HBRT_PM_LOAD == i_mode)
                                  ? PHASE_IPL : PHASE_REBUILD,
                              l_imgType,
-                             l_buffer );
+                             l_buffer0,
+                             HW_IMG_RING_SIZE,
+                             l_buffer1,
+                             HW_IMG_RING_SIZE );
 
             if (l_errl)
             {
@@ -279,6 +284,10 @@ namespace HBPM
                       "pImageOut=%p",i_pImageOut);
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "lidSize=%d",lidSize);
+
+            /* TODO RTC: 155384
+                Many of these structures moved around and this needs to be
+                refactored
 
             // Log some info from the headers
             Homerlayout_t* pChipHomer = (Homerlayout_t*)i_pImageOut;
@@ -322,6 +331,9 @@ namespace HBPM
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "PGPE -- Location: %p",
                       pPgpeLayout);
+
+        **/
+
         } while(0);
 /* end @TODO RTC: 148935 */
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
