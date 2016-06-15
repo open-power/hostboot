@@ -69,7 +69,8 @@ void* call_mss_draminit_training (void *io_pArgs)
 
         fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
-        FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training, l_fapi_mcbist_target);
+            //TODO 134081
+//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training, l_fapi_mcbist_target);
 
         if (l_err)
         {
