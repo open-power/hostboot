@@ -327,22 +327,20 @@ void* host_build_stop_image (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
-    // allocate a temporary buffer
-    void* l_temp_buffer = malloc(FIXED_RING_BUF_SIZE);
-
+    // allocate two temporary work buffer
+    void* l_temp_buffer0 = malloc(FIXED_RING_BUF_SIZE);
+    void* l_temp_buffer1 = malloc(FIXED_RING_BUF_SIZE);
 
     do  {
         // Get the node-offset for our instance by looking at the HRMOR
         uint64_t l_memBase = cpu_spr_value(CPU_SPR_HRMOR);
         // mask off the secureboot offset
         l_memBase = 0xFFFFF00000000000 & l_memBase;
-
         // Now offset up to our hardcoded region
         l_memBase += VMM_HOMER_REGION_START_ADDR;
 
         //  Get a chunk of real memory big enough to store all the possible
         //  HCODE images. (4MB is size of HOMER)
-
         assert(VMM_HOMER_REGION_SIZE <= (P9_MAX_PROCS * (4 * MEGABYTE)),
                "host_build_stop_image: Unsupported HOMER Region size");
 
@@ -356,7 +354,6 @@ void* host_build_stop_image (void *io_pArgs)
         }
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "HOMER base = %x", l_memBase);
-
         l_pRealMemBase = reinterpret_cast<void * const>(l_memBase );
 
         //Convert the real memory pointer to a pointer in virtual memory
@@ -369,7 +366,7 @@ void* host_build_stop_image (void *io_pArgs)
                    l_pVirtMemBase  );
 
         //  Continue, build hcode images
-
+        //
         //Load the reference image from PNOR
         l_errl  =   loadHcodeImage(  l_pHcodeImage );
         if ( l_errl )
@@ -377,11 +374,9 @@ void* host_build_stop_image (void *io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_build_stop_image ERROR : errorlog PLID=0x%x",
                       l_errl->plid() );
-
             // drop out of do block with errorlog.
             break;
         }
-
 
         //  Loop through all functional Procs and generate images for them.
         TARGETING::TargetHandleList l_procChips;
@@ -395,12 +390,10 @@ void* host_build_stop_image (void *io_pArgs)
         for (const auto & l_procChip: l_procChips)
         {
             do  {
-
                 // write the HUID of the core we are writing to
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "Build STOP image for proc "
                         "target HUID %.8X", TARGETING::get_huid(l_procChip));
-
 
                 //  calculate size and location of the HCODE output buffer
                 uint32_t    l_procNum =
@@ -420,7 +413,7 @@ void* host_build_stop_image (void *io_pArgs)
                 uint32_t    l_sizeImageOut  =
                   ((P9_MAX_PROCS * (4 * MEGABYTE)));
 
-                //  set default values, p9_hcode_build will provide actual size
+                //Set default values, p9_hcode_build will provide actual size
                 l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_ADDR>
                                                         ( l_procRealMemAddr );
                 l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_SIZE>
@@ -432,21 +425,27 @@ void* host_build_stop_image (void *io_pArgs)
                            l_procRealMemAddr,
                            l_pImageOut);
 
-                // cast OUR type of target to a FAPI2 type of target.
+                //Cast OUR type of target to a FAPI2 type of target.
                 const fapi2::Target<TARGET_TYPE_PROC_CHIP>
                 l_fapiCpuTarget( const_cast<TARGETING::Target*>(l_procChip));
 
+                //Default constructor sets the appropriate settings
                 ImageType_t img_type;
 
                 //Call p9_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
                                  p9_hcode_image_build,
-                                 l_fapiCpuTarget, //Proc chip target.
+                                 l_fapiCpuTarget,
                                  reinterpret_cast<void*>(l_pHcodeImage),
-                                 l_pImageOut,
-                                 PHASE_IPL, //sys_Phase
+                                 l_pImageOut, //homer image buffer
+                                 NULL, //default is no ring overrides
+                                 PHASE_IPL,
                                  img_type,
-                                 l_temp_buffer)
+                                 l_temp_buffer0,
+                                 FIXED_RING_BUF_SIZE,
+                                 l_temp_buffer1,
+                                 FIXED_RING_BUF_SIZE );
+
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -511,7 +510,8 @@ void* host_build_stop_image (void *io_pArgs)
     }
 
     // delete working buffers
-    if( l_temp_buffer ) { free(l_temp_buffer); }
+    if( l_temp_buffer0 ) { free(l_temp_buffer0); }
+    if( l_temp_buffer1 ) { free(l_temp_buffer1); }
 
     if(l_pVirtMemBase)
     {

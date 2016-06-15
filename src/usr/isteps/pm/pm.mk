@@ -29,7 +29,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
@@ -38,6 +37,8 @@ HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 EXTRAINCDIR += ${HWP_PATH}
 HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${HWP_XIP_PATH}
+HWP_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${HWP_IMAGEPROCS_PATH}
 
 ## pointer to already consumed procedures.
 
@@ -48,12 +49,16 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 OBJS += pm_common.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${HWP_PATH} ${HWP_XIP_PATH}
+VPATH += ${HWP_PATH} ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 include $(HWP_PATH)/p9_hcode_image_build.mk
 include $(HWP_PATH)/p9_pm_pba_bar_config.mk
 include $(HWP_PATH)/p9_pm_init.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
+include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
+include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
+include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
+
 
 include ${ROOTPATH}/config.mk
