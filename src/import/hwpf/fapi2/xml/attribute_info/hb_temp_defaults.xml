@@ -169,34 +169,34 @@
         <id>ATTR_PIBMEM_REPAIR2</id>
     </attribute>
     <attribute>
-        <id>ATTR_L2_IS_SCOMABLE</id>
+        <id>ATTR_L2_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_L3_IS_SCOMABLE</id>
+        <id>ATTR_L3_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_C0_EXEC_IS_SCOMABLE</id>
+        <id>ATTR_C0_EXEC_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_C1_EXEC_IS_SCOMABLE</id>
+        <id>ATTR_C1_EXEC_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_C0_PC_IS_SCOMABLE</id>
+        <id>ATTR_C0_PC_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_C1_PC_IS_SCOMABLE</id>
+        <id>ATTR_C1_PC_HASCLOCKS</id>
     </attribute>
     <attribute>
-        <id>ATTR_L2_IS_SCANABLE</id>
+        <id>ATTR_L2_HASPOWER</id>
     </attribute>
     <attribute>
-        <id>ATTR_L3_IS_SCANABLE</id>
+        <id>ATTR_L3_HASPOWER</id>
     </attribute>
     <attribute>
-        <id>ATTR_C0_IS_SCANABLE</id>
+        <id>ATTR_C0_HASPOWER</id>
     </attribute>
     <attribute>
-        <id>ATTR_C1_IS_SCANABLE</id>
+        <id>ATTR_C1_HASPOWER</id>
     </attribute>
     <attribute>
         <id>ATTR_ECID</id>

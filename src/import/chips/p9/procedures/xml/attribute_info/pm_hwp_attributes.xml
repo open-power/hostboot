@@ -116,7 +116,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_L2_IS_SCOMABLE</id>
+       <id>ATTR_L2_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the L2 region has clocks running and scommable
        </description>
@@ -125,7 +125,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_L3_IS_SCOMABLE</id>
+       <id>ATTR_L3_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the L3 region has clocks running and scommable
        </description>
@@ -134,7 +134,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C0_EXEC_IS_SCOMABLE</id>
+       <id>ATTR_C0_EXEC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the execution units in core 0 have clocks running and scommable
        </description>
@@ -143,7 +143,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C1_EXEC_IS_SCOMABLE</id>
+       <id>ATTR_C1_EXEC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the execution units in core 1 have clocks running and scommable
        </description>
@@ -152,7 +152,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C0_PC_IS_SCOMABLE</id>
+       <id>ATTR_C0_PC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the core pervasive unit in core 0 has clocks running and scommable
        </description>
@@ -161,7 +161,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C1_PC_IS_SCOMABLE</id>
+       <id>ATTR_C1_PC_HASCLOCKS</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates the core pervasive unit in core 1 has clocks running and scommable
        </description>
@@ -170,7 +170,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_L2_IS_SCANABLE</id>
+       <id>ATTR_L2_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates L2 has power and has valid latch state that could be scanned
        </description>
@@ -179,7 +179,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_L3_IS_SCANABLE</id>
+       <id>ATTR_L3_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates L3 has power and has valid latch state that could be scanned
        </description>
@@ -188,7 +188,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C0_IS_SCANABLE</id>
+       <id>ATTR_C0_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates core 0 has power and has valid latch state that could be scanned
        </description>
@@ -197,7 +197,7 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-       <id>ATTR_C1_IS_SCANABLE</id>
+       <id>ATTR_C1_HASPOWER</id>
        <targetType>TARGET_TYPE_EX</targetType>
        <description>Indicates core 1 has power and has valid latch state that could be scanned
        </description>
