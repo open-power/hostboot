@@ -24,7 +24,7 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -69,7 +69,8 @@ extern "C"
 
             mss::poll_parameters l_poll_parameters;
             bool l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
-                                            [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+                                            [&l_status](const size_t poll_remaining,
+                                                    const fapi2::buffer<uint64_t>& stat_reg) -> bool
             {
                 FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
                 l_status = stat_reg;

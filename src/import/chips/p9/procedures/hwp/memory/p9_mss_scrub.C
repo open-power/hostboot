@@ -65,7 +65,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     }
 
     // TK do we want these to be arguments to the wrapper?
-    return memdiags::background_scrub(i_target, mss::mcbist::stop_conditions::NO_STOP_ON_ERROR, mss::mcbist::thresholds(),
+    return memdiags::background_scrub(i_target, mss::mcbist::stop_conditions(),
                                       mss::mcbist::speed::LUDICROUS, mss::mcbist::address());
 
 fapi_try_exit:

@@ -616,11 +616,12 @@ class program
             iv_addr_gen.insertFromRight<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(0b0000);
 
             // By default if there's an error, we stop after the errored address
-            iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(
-                stop_conditions::STOP_AFTER_ADDRESS);
+            iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE,
+                                      TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(end_boundary::STOP_AFTER_ADDRESS);
 
             // All mcbist attentions are host attentions, special attention bit is already clear
             iv_config.setBit<TT::CFG_ENABLE_HOST_ATTN>();
+
         }
 
         ///
@@ -636,12 +637,63 @@ class program
 
         ///
         /// @brief Change the mcbist thresholds
-        /// @param[in] i_thresholds the new thresholds
+        /// @param[in] i_thresholds the new thresholds/stop conditions
         /// @return void
         ///
-        inline void change_thresholds( const thresholds& i_thresholds )
+        inline void change_thresholds( const stop_conditions& i_thresholds )
         {
             iv_thresholds = i_thresholds;
+            return;
+        }
+
+        ///
+        /// @brief Change the forced pause state
+        /// @param[in] i_end the end_boundary to pause at
+        /// @return void
+        ///
+        inline void change_forced_pause( const end_boundary& i_end )
+        {
+            if (i_end == end_boundary::DONT_CHANGE)
+            {
+                return;
+            }
+
+            // Clear all the forced pause bits so we don't stack pauses
+            iv_config.clearBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR>();
+            iv_config.clearBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>();
+            iv_config.clearBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST>();
+            iv_addr_gen.clearBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>();
+
+            switch (i_end)
+            {
+                case end_boundary::STOP_AFTER_ADDRESS:
+                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR>();
+                    break;
+
+                case end_boundary::STOP_AFTER_SLAVE_RANK:
+                    iv_config.setBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>();
+                    iv_addr_gen.setBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>();
+                    break;
+
+                case end_boundary::STOP_AFTER_MASTER_RANK:
+                    iv_config.setBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>();
+                    iv_addr_gen.clearBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>();
+                    break;
+
+                case end_boundary::STOP_AFTER_SUBTEST:
+                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST>();
+                    break;
+
+                // None is all set, we cleared the bits above
+                case end_boundary::NONE:
+                    break;
+
+                // Default is a no forced pause (as we cleared all the bits)
+                default:
+                    FAPI_INF("no forced pause state - end state %d unknown", i_end);
+                    break;
+            };
+
             return;
         }
 
@@ -706,70 +758,33 @@ class program
         }
 
         ///
-        /// @brief Change MCBIST Stop conditions
-        /// @param[in] i_stops the stop conditions
-        /// @param[in] i_only_if_error forces the stop conditions to only be in effect if there is an error
-        /// if there is not an error the subtest continues. Defaults to mss::NO, meaning these are forced conditions
-        /// @return FAPI2_RC_SUCCSS iff ok
+        /// @brief Change MCBIST Stop-on-error conditions (end boundaries)
+        /// @param[in] i_end the end boundary
         /// @note By default the MCBIST is programmed to always stop after an errored address. This API
         /// allows the caller to force a stop at a boundary or to force no stopping on errors
         ///
-        inline void change_stops( const stop_conditions i_stops, const bool i_only_if_error = mss::NO )
-        {
-            // If there's no change, just get outta here
-            if (i_stops == DONT_CHANGE)
-            {
-                goto fapi_try_exit;
-            }
-
-            // If these conditions only take effect when there's an error, set that up in the ERROR_MODE field
-            // NO_STOP_ON_ERROR is specific to the ERROR MODE field, so set that up here too
-            if ((i_only_if_error == mss::YES) || (i_stops == NO_STOP_ON_ERROR))
-            {
-                iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_stops);
-                goto fapi_try_exit;
-            }
-
-            // Otherwise, these are forced conditions and they need to be put in their specific fields
-            switch(i_stops)
-            {
-                case STOP_AFTER_ADDRESS:
-                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR>();
-                    break;
-
-                case STOP_AFTER_RANK:
-                    iv_config.setBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>();
-                    break;
-
-                case STOP_AFTER_SUBTEST:
-                    iv_config.setBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST>();
-                    break;
-
-                // Same as don't-change
-                default:
-                    break;
-            };
-
-        fapi_try_exit:
-            FAPI_INF("load MCBIST stops: 0x%016lx (0x%016lx)", i_stops, iv_config);
-
-            return;
-        }
-
-        ///
-        /// @brief Change MCBIST End boundaries
-        /// @param[in] i_end the end boundary
-        /// @return FAPI2_RC_SUCCSS iff ok
-        /// @note this really is just deciding if the stop conditions are master or slave rank boundaries
-        ///
         inline void change_end_boundary( const end_boundary i_end )
         {
-            // This is a little funny ... the hardware has one bit representing 'master' and 'slave'
-            // So, NONE really represents a stop condition. We probably should combine the two, but the
-            // API doc from PRD asks for them separate.
-            uint64_t l_detect_slave = i_end == end_boundary::SLAVE_RANK ? 1 : 0;
+            // Which bit in the end boundary which siginifies this is a slave rank detect situation
+            constexpr uint64_t SLAVE_RANK_INDICATED_BIT = 61;
+
+            // If there's no change, just get outta here
+            if (i_end == DONT_CHANGE)
+            {
+                return;
+            }
+
+            // The values of the enum were crafted so that we can simply insertFromRight into the register.
+            // We take note of whether to set the slave or master rank indicator and set that as well.
+            // The hardware has to have a 1 or a 0 - so there is no choice for the rank detection. So it
+            // doesn't matter that we're processing other end boundaries here - they'll just look like we
+            // asked for a master rank detect.
+            iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_end);
+
+            FAPI_INF("i_end 0x%016lx", i_end);
+            uint64_t l_detect_slave = fapi2::buffer<uint64_t>(i_end).getBit<SLAVE_RANK_INDICATED_BIT>();
+            iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>( l_detect_slave );
             FAPI_INF("load MCBIST end boundaries: detect slave?  %s", (l_detect_slave == 1 ? "yes" : "no") );
-            iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>(l_detect_slave);
         }
 
         ///
@@ -1139,8 +1154,8 @@ class program
         // The pattern for the pattern generator
         uint64_t                    iv_pattern;
 
-        // The error thresholds for the program
-        thresholds                  iv_thresholds;
+        // The error stop conditions, thresholds for the program
+        stop_conditions             iv_thresholds;
 };
 
 ///

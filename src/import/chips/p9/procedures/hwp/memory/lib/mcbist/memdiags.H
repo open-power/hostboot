@@ -43,7 +43,6 @@ namespace memdiags
 // Map some of the mcbist namespace here to make it easier for users of memdiags
 // This is an intentional using statement in a header which is typically
 // disallowed - I am intentionally pulling these into this namespace for all callers.
-using mss::mcbist::thresholds;
 using mss::mcbist::constraints;
 using mss::mcbist::speed;
 using mss::mcbist::end_boundary;
@@ -291,6 +290,9 @@ struct targeted_scrub_operation : public operation<T>
 
         // We're a single-port operation
         o_rc = this->single_port_init();
+
+        // Targeted scrub needs to force a pause and the end boundary. So we make sure that happens here.
+        this->iv_program.change_forced_pause( i_const.iv_end_boundary );
     }
 
     targeted_scrub_operation() = delete;
@@ -314,37 +316,36 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
 /// @note Uses broadcast mode if possible
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
+/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
-                           const stop_conditions i_stop,
-                           const thresholds& i_thresholds );
+                           const stop_conditions& i_stop,
+                           const end_boundary i_end = end_boundary::STOP_AFTER_ADDRESS );
 
 ///
 /// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_address mcbist::address representing the address from which to start.
+/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
-                           const stop_conditions i_stop,
-                           const thresholds& i_thresholds,
-                           const mss::mcbist::address& i_address );
+                           const stop_conditions& i_stop,
+                           const mss::mcbist::address& i_address,
+                           const end_boundary i_end = end_boundary::STOP_AFTER_ADDRESS );
 
 ///
 /// @brief Scrub - continuous scrub all memory behind the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the address from which to start.
 /// @return FAPI2_RC_SUCCESS iff everything ok
@@ -353,8 +354,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
-                                    const stop_conditions i_stop,
-                                    const thresholds& i_thresholds,
+                                    const stop_conditions& i_stop,
                                     const speed i_speed,
                                     const mss::mcbist::address& i_address );
 
@@ -362,7 +362,6 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
 /// @brief Scrub - targeted scrub all memory described by the input address (rank, slave, etc.)
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the address from which to start.
 /// @param[in] i_end whether to end, and where
@@ -372,8 +371,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
-                                  const stop_conditions i_stop,
-                                  const thresholds& i_thresholds,
+                                  const stop_conditions& i_stop,
                                   const speed i_speed,
                                   const mss::mcbist::address& i_address,
                                   const end_boundary i_end );
@@ -384,7 +382,7 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
 /// and finish the current master or slave rank.
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target
-/// @param[in] i_end whether to end, and where (default = don't stop at end of rank)
+/// @param[in] i_end whether to end, and where (default - don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
 /// @param[in] i_speed the speed to scrub (default - NO_CHANGE meaning leave speed untouched)
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -392,28 +390,8 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T >
 fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
                                 const end_boundary i_end = end_boundary::NONE,
-                                const stop_conditions i_stop = stop_conditions::DONT_CHANGE,
+                                const stop_conditions& i_stop = stop_conditions(),
                                 const speed i_speed = speed::SAME_SPEED );
-
-///
-/// @brief Continue current command on next address - change thresholds
-/// The current commaand has paused on an error, so we can record the address of the error
-/// and finish the current master or slave rank.
-/// @tparam T the fapi2::TargetType of the target
-/// @param[in] i_target the target
-/// @param[in] i_thresholds new thresholds
-/// @param[in] i_end whether to end, and where (default = don't stop at end of rank)
-/// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
-/// @param[in] i_speed the speed to scrub (default - NO_CHANGE meaning leave speed untouched)
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
-                                const thresholds& i_thresholds,
-                                const end_boundary i_end = end_boundary::NONE,
-                                const stop_conditions i_stop = stop_conditions::DONT_CHANGE,
-                                const speed i_speed = speed::SAME_SPEED );
-
 
 } // namespace
 

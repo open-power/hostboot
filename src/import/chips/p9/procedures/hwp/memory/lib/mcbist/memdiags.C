@@ -117,14 +117,11 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::base_init()
     // Load pattern
     FAPI_TRY( iv_program.change_pattern(iv_const.iv_pattern) );
 
-    // Load stop conditions
-    iv_program.change_stops(iv_const.iv_stop);
-
     // Load end boundaries
     iv_program.change_end_boundary(iv_const.iv_end_boundary);
 
     // Load thresholds
-    iv_program.change_thresholds(iv_const.iv_thresholds);
+    iv_program.change_thresholds(iv_const.iv_stop);
 
     // Setup the requested speed
     FAPI_TRY( iv_program.change_speed(iv_target, iv_const.iv_speed) );
@@ -428,19 +425,19 @@ fapi_try_exit:
 /// @note Uses broadcast mode if possible
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
+/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
 template<>
 fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                           const stop_conditions i_stop,
-                           const thresholds& i_thresholds )
+                           const stop_conditions& i_stop,
+                           const end_boundary i_end )
 {
     FAPI_INF("superfast read start");
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_thresholds);
+    constraints l_const(i_stop, speed::LUDICROUS, i_end, mss::mcbist::address());
     sf_read_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
@@ -457,21 +454,21 @@ fapi_try_exit:
 /// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_address mcbist::address representing the port, dimm, rank
+/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
 template<>
 fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                           const stop_conditions i_stop,
-                           const thresholds& i_thresholds,
-                           const mss::mcbist::address& i_address )
+                           const stop_conditions& i_stop,
+                           const mss::mcbist::address& i_address,
+                           const end_boundary i_end )
 {
     FAPI_INF("superfast read - end of port");
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_thresholds, i_address);
+    constraints l_const(i_stop, speed::LUDICROUS, i_end, i_address);
     sf_read_eop_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
@@ -488,7 +485,6 @@ fapi_try_exit:
 /// @brief Scrub - continuous scrub all memory behind the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the port, dimm, rank
 /// @return FAPI2_RC_SUCCESS iff everything ok
@@ -496,15 +492,14 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode background_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                                    const stop_conditions i_stop,
-                                    const thresholds& i_thresholds,
+                                    const stop_conditions& i_stop,
                                     const speed i_speed,
                                     const mss::mcbist::address& i_address )
 {
     FAPI_INF("continuous (background) scrub");
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_thresholds, i_speed, end_boundary::NONE, i_address);
+    constraints l_const(i_stop, i_speed, end_boundary::NONE, i_address);
     continuous_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
@@ -521,7 +516,6 @@ fapi_try_exit:
 /// @brief Scrub - targeted scrub all memory behind the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
-/// @param[in] i_thresholds thresholds
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the port, dimm, rank
 /// @param[in] i_end whether to end, and where
@@ -530,22 +524,21 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                                  const stop_conditions i_stop,
-                                  const thresholds& i_thresholds,
+                                  const stop_conditions& i_stop,
                                   const speed i_speed,
                                   const mss::mcbist::address& i_address,
                                   const end_boundary i_end )
 {
     FAPI_INF("targeted scrub");
 
-    if (i_stop == memdiags::stop_conditions::DONT_STOP)
+    if (i_end == end_boundary::NONE)
     {
-        FAPI_ERR("targeted scrub must have stop conditions");
+        FAPI_ERR("targeted scrub must have end boundaries");
         return FAPI2_RC_INVALID_PARAMETER;
     }
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_thresholds, i_speed, i_end, i_address);
+    constraints l_const(i_stop, i_speed, i_end, i_address);
     targeted_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
@@ -559,11 +552,10 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Continue current command on next address - change thresholds
+/// @brief Continue current command on next address
 /// The current commaand has paused on an error, so we can record the address of the error
 /// and finish the current master or slave rank.
 /// @param[in] i_target the target
-/// @param[in] i_thresholds new thresholds
 /// @param[in] i_end whether to end, and where (default = don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
 /// @param[in] i_speed the speed to scrub (default - NO_CHANGE meaning leave speed untouched)
@@ -572,9 +564,8 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                                const thresholds& i_thresholds,
                                 const end_boundary i_end,
-                                const stop_conditions i_stop,
+                                const stop_conditions& i_stop,
                                 const speed i_speed )
 {
     // Too long, make shorter
@@ -589,37 +580,44 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     // TODO RTC:155518 Check for stop or in progress before allowing continue. Not critical
     // as the caller should know and can check the in-progress bit in the event they don't
 
-    // This is OK as because the i_end is optional, for the caller to specify a
-    // stop condition other than DONT_CHANGE, they'd have to specify the end too
-    // It doean't make any sense to have a 'don't stop' in the end boundaries as
-    // you need to tell the stop conditions that.
-    if (i_stop != stop_conditions::DONT_CHANGE)
+    if (i_end != end_boundary::DONT_CHANGE)
     {
         // Before we go too far, check to see if we're already stopped at the boundary we are asking to stop at
         bool l_stopped_at_boundary = false;
         uint64_t l_error_mode = 0;
+        bool l_detect_slave = false;
 
-        FAPI_TRY( mss::getScom(i_target, MCBIST_MCBCFGQ, l_program.iv_config) );
+        FAPI_TRY( mss::getScom(i_target, TT::CFGQ_REG, l_program.iv_config) );
+        FAPI_TRY( mss::getScom(i_target, TT::MCBAGRAQ_REG, l_program.iv_addr_gen) );
         l_program.iv_config.extractToRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(l_error_mode);
+        l_detect_slave = l_program.iv_addr_gen.getBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>();
 
-        switch (i_stop)
+        switch (i_end)
         {
-            case stop_conditions::STOP_AFTER_ADDRESS:
+            case end_boundary::STOP_AFTER_ADDRESS:
                 l_stopped_at_boundary =
                     l_program.iv_config.getBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR>() ||
-                    l_error_mode == stop_conditions::STOP_AFTER_ADDRESS;
+                    l_error_mode == end_boundary::STOP_AFTER_ADDRESS;
                 break;
 
-            case stop_conditions::STOP_AFTER_RANK:
+            case end_boundary::STOP_AFTER_SLAVE_RANK:
+                // Note: we really want STOP_AFTER_MASTER_RANK here even though we're in the slave
+                // case because MASTER_RANK has the a 0 so that l_error_mode will check correctly
                 l_stopped_at_boundary =
                     l_program.iv_config.getBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>() ||
-                    l_error_mode == stop_conditions::STOP_AFTER_RANK;
+                    ((l_error_mode == end_boundary::STOP_AFTER_MASTER_RANK) && (l_detect_slave == false));
                 break;
 
-            case stop_conditions::STOP_AFTER_SUBTEST:
+            case end_boundary::STOP_AFTER_MASTER_RANK:
+                l_stopped_at_boundary =
+                    l_program.iv_config.getBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>() ||
+                    ((l_error_mode == end_boundary::STOP_AFTER_MASTER_RANK) && (l_detect_slave == true));
+                break;
+
+            case end_boundary::STOP_AFTER_SUBTEST:
                 l_stopped_at_boundary =
                     l_program.iv_config.getBit<TT::MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST>() ||
-                    l_error_mode == stop_conditions::STOP_AFTER_SUBTEST;
+                    l_error_mode == end_boundary::STOP_AFTER_SUBTEST;
                 break;
 
             // By default we're not stopped at a boundary we're going to continue from
@@ -635,8 +633,6 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
         // Read-modify-write the fields in the program.
         FAPI_TRY( mss::getScom(i_target, TT::MCBAGRAQ_REG, l_program.iv_addr_gen) );
 
-        l_program.change_stops(i_stop);
-
         l_program.change_end_boundary(i_end);
 
         FAPI_TRY( mss::mcbist::load_addr_gen(i_target, l_program) );
@@ -645,7 +641,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     }
 
     // Thresholds
-    FAPI_TRY( mss::mcbist::load_thresholds(i_target, i_thresholds) );
+    FAPI_TRY( mss::mcbist::load_thresholds(i_target, i_stop) );
 
     // Setup speed
     FAPI_TRY( l_program.change_speed(i_target, i_speed) );
@@ -660,35 +656,5 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Continue current command on next address
-/// The current commaand has paused on an error, so we can record the address of the error
-/// and finish the current master or slave rank.
-/// @param[in] i_target the target
-/// @param[in] i_end where to end, if stop conditions change (defaults to Master Rank)
-/// @param[in] i_stop stop conditions (default - DONT_CHANGE meaning 'don't change conditions')
-/// @param[in] i_speed the speed to scrub (default - SAM_SPEED meaning leave speed untouched)
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                                const end_boundary i_end,
-                                const stop_conditions i_stop,
-                                const speed i_speed )
-{
-    FAPI_INF("continue_cmd - no change thresholds");
-
-    // Read current thresholds and pass them as if they're changed.
-    fapi2::buffer<uint64_t> i_thresholds;
-    FAPI_TRY( mss::getScom(i_target, mss::mcbist::mcbistTraits<TARGET_TYPE_MCBIST>::THRESHOLD_REG, i_thresholds) );
-
-    return continue_cmd( i_target, thresholds(i_thresholds), i_end, i_stop, i_speed );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
 
 }
