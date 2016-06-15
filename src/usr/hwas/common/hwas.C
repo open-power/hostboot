@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -465,6 +465,10 @@ errlHndl_t discoverTargets()
                 HWAS::theDeconfigGard().setXABusEndpointDeconfigured(true);
             }
         }
+
+        //Now that all proc's are created and functional, we need to
+        //calculate the system EFFECTIVE_EC
+        calculateEffectiveEC();
 
         // PR keyword processing - potentially reduce the number of ex/core
         //  units that are functional based on what's in the PR keyword.
@@ -1557,5 +1561,50 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         } // switch
     } // while
 } // presentByAssoc
+
+void calculateEffectiveEC()
+{
+    HWAS_INF("calculateEffectiveEC entry");
+
+    do
+    {
+        //true => FSP present. Only run this on non-FSP systems
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        TARGETING::SpFunctions spfuncs;
+        if( sys &&
+            sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
+            spfuncs.baseServices )
+        {
+            break;
+        }
+
+        //Get all functional chips
+        TARGETING::TargetHandleList l_procList;
+        getAllChips(l_procList, TYPE_PROC);
+
+        //Assume lowest EC among all functional processor chips is 0xFF
+        TARGETING::ATTR_EC_type l_lowestEC = 0xFF;
+
+        //Loop through all functional procs and find the lowest EC
+        for(TargetHandleList::const_iterator proc = l_procList.begin();
+            proc != l_procList.end(); ++proc)
+        {
+            if((*proc)->getAttr<TARGETING::ATTR_EC>() < l_lowestEC)
+            {
+                l_lowestEC = (*proc)->getAttr<TARGETING::ATTR_EC>();
+            }
+        }
+
+        HWAS_INF("Lowest functional proc chip EC = 0x%llx",l_lowestEC);
+
+        sys->setAttr<TARGETING::ATTR_EFFECTIVE_EC>(l_lowestEC);
+
+    }while(0);
+
+    HWAS_INF("calculateEffectiveEC exit");
+    return;
+
+} //calculateEffectiveEC
 
 };   // end namespace

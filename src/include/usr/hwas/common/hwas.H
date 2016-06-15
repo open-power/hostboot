@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -176,6 +176,13 @@ void invokePresentByAssoc();
  */
 void presentByAssoc(TargetInfoVector& io_funcTargets,
                     TargetInfoVector& o_targToDeconfig);
+
+/**
+ * @brief Find the ATTR_EC for all processors and calculate the EFFECTIVE_EC
+ *        (the lowest EC found)
+ *
+ */
+void calculateEffectiveEC();
 
 };   // end namespace
 
