@@ -182,7 +182,7 @@ PMFir<Ftype>::PMFir(
 /// @param [in] <FIRTYPE_OCC_LFIR>  FIR Type for OCC
 /// @param [in] i_target            Chip Target
 ///
-template <>
+template <> inline
 PMFir<FIRTYPE_OCC_LFIR>::PMFir(
     const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target)
 {
@@ -203,7 +203,7 @@ PMFir<FIRTYPE_OCC_LFIR>::PMFir(
 /// @param [in] <FIRTYPE_PBA_LFIR>  FIR Type for PBA
 /// @param [in] i_target            Chip Target
 ///
-template <>
+template <> inline
 PMFir<FIRTYPE_PBA_LFIR>::PMFir(
     const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target)
 {
@@ -235,7 +235,7 @@ PMFir<Ftype>::PMFir(
 /// @param [in] <FIRTYPE_CME_LFIR>  FIR Type for CME
 /// @param [in] i_target            EX Target
 ///
-template <>
+template <> inline
 PMFir<FIRTYPE_CME_LFIR>::PMFir(
     const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target)
 {
@@ -274,7 +274,7 @@ PMFir<Ftype>::PMFir(
 /// @param [in] <FIRTYPE_PPM_LFIR>  FIR Type for PPM
 /// @param [in] i_target            EQ Target
 ///
-template <>
+template <> inline
 PMFir<FIRTYPE_PPM_LFIR>::PMFir(
     const fapi2::Target < fapi2::TARGET_TYPE_EQ >& i_target)
 {
@@ -310,7 +310,7 @@ PMFir<Ftype>::PMFir(
 /// @param [in] <FIRTYPE_PPM_LFIR>  FIR Type for PPM
 /// @param [in] i_target            Core Target
 ///
-template <>
+template <> inline
 PMFir<FIRTYPE_PPM_LFIR>::PMFir(
     const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target)
 {
@@ -691,7 +691,7 @@ fapi2::ReturnCode PMFir<Ftype>::saveMask()
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::saveMask()
 {
     uint32_t l_mask;
@@ -709,7 +709,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::saveMask()
 {
     uint32_t l_mask;
@@ -726,7 +726,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::saveMask()
 {
     uint32_t l_mask;
@@ -743,7 +743,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::saveMask()
 {
     uint32_t l_mask;
@@ -782,7 +782,7 @@ fapi2::ReturnCode PMFir<Ftype>::restoreSavedMask()
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
 {
     uint32_t l_mask;
@@ -805,7 +805,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
 {
     uint32_t l_mask;
@@ -828,7 +828,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::restoreSavedMask()
 {
     uint32_t l_mask;
@@ -851,7 +851,7 @@ fapi_try_exit:
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code
 ///
-template <>
+template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::restoreSavedMask()
 {
     uint32_t l_mask;
