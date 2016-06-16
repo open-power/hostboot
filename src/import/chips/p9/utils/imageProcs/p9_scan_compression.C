@@ -593,7 +593,6 @@ rs4_compress(CompressedScanData** o_data,
     nibbles = (((((i_length + 3) / 4) + 14) / 15) * 17) + 2;
     bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
     bytes = ((bytes + 7) / 8) * 8;
-    printf(" Byte %d Nibble %d \n", bytes, nibbles);
     *o_data = (CompressedScanData*)malloc(bytes);
 
     if (*o_data == 0)
