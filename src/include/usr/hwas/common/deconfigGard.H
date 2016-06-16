@@ -155,6 +155,10 @@ public:
             DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA,
 
         CONFIGURED_BY_RESOURCE_RECOVERY,        // BASE | 0x0E
+        //
+        DECONFIGURED_BY_EQ_DECONFIG,            // BASE | 0x0F
+        DECONFIGURED_BY_EX_DECONFIG,            // BASE | 0x10
+        DECONFIGURED_BY_CORE_DECONFIG,          // BASE | 0x11
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
@@ -584,6 +588,21 @@ private:
      */
     static void _clearFCODeconfigure(
                 TARGETING::ConstTargetHandle_t i_nodeTarget);
+
+    /**
+     *  @brief Return functional state of children
+     *
+     *  Called by _deconfigureByAssoc().
+     *  This function gets list of all children. if state of any
+     *  child is functional then returns true.
+     *
+     *  @param[in] Pointer parent target id
+     *
+     *  @return true if any child state is functional.
+     *
+     */
+    bool anyChildFunctional(
+                TARGETING::Target &  i_parent);
 
 public:
 
