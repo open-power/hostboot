@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+//Error handling and tracing
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -34,6 +36,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 
+//From Import Directory (EKB Repository)
 #include "istep13consts.H"
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
@@ -75,8 +78,7 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
 
-            //TODO 134081
-//          FAPI_INVOKE_HWP(l_err, p9_mss_ddr_phy_reset, l_fapi_mcbist_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_ddr_phy_reset, l_fapi_mcbist_target);
 
         if (l_err)
         {
@@ -96,9 +98,11 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  p9_mss_ddr_phy_reset HWP( )" );
+                       "SUCCESS running p9_mss_ddr_phy_reset HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
         }
-    } // end l_mcbistNum loop
+
+    } // end l_mcbist loop
 
 //  TODO: RTC 155373 Need to remove hack that is setting IS_SIMULATION to 1 for this substep
     sys->setAttr<TARGETING::ATTR_IS_SIMULATION>(0);
