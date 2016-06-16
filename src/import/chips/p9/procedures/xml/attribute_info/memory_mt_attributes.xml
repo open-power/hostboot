@@ -27,6 +27,7 @@
         <id>ATTR_VPD_MT_0_VERSION_LAYOUT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -39,6 +40,7 @@
         <id>ATTR_VPD_MT_1_VERSION_DATA</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -51,6 +53,7 @@
         <id>ATTR_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -63,6 +66,7 @@
         <id>ATTR_VPD_MT_CKE_PRI_MAP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -76,6 +80,7 @@
         <id>ATTR_VPD_MT_CKE_PWR_MAP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -89,6 +94,7 @@
         <id>ATTR_VPD_MT_DIMM_RCD_IBT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -102,6 +108,7 @@
         <id>ATTR_VPD_MT_DIMM_RCD_OUTPUT_TIMING</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -115,6 +122,7 @@
         <id>ATTR_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -128,6 +136,7 @@
         <id>ATTR_VPD_MT_DRAM_RTT_NOM</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -141,6 +150,7 @@
         <id>ATTR_VPD_MT_DRAM_RTT_PARK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -154,6 +164,7 @@
         <id>ATTR_VPD_MT_DRAM_RTT_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -167,6 +178,7 @@
         <id>ATTR_VPD_MT_MC_DRV_IMP_ADDR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -180,6 +192,7 @@
         <id>ATTR_VPD_MT_MC_DRV_IMP_CLK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -193,6 +206,7 @@
         <id>ATTR_VPD_MT_MC_DRV_IMP_CNTL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -206,6 +220,7 @@
         <id>ATTR_VPD_MT_MC_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -219,6 +234,7 @@
         <id>ATTR_VPD_MT_MC_DRV_IMP_SPCKE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -232,6 +248,7 @@
         <id>ATTR_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -245,6 +262,7 @@
         <id>ATTR_VPD_MT_MC_SLEW_RATE_ADDR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -258,6 +276,7 @@
         <id>ATTR_VPD_MT_MC_SLEW_RATE_CLK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -271,6 +290,7 @@
         <id>ATTR_VPD_MT_MC_SLEW_RATE_CNTL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -284,6 +304,7 @@
         <id>ATTR_VPD_MT_MC_SLEW_RATE_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -297,6 +318,7 @@
         <id>ATTR_VPD_MT_MC_SLEW_RATE_SPCKE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -310,6 +332,7 @@
         <id>ATTR_VPD_MT_ODT_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -323,6 +346,7 @@
         <id>ATTR_VPD_MT_ODT_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -336,6 +360,7 @@
         <id>ATTR_VPD_MT_OFFSET_GPO</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -349,6 +374,7 @@
         <id>ATTR_VPD_MT_OFFSET_RLO</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -362,6 +388,7 @@
         <id>ATTR_VPD_MT_OFFSET_WLO</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -375,6 +402,7 @@
         <id>ATTR_VPD_MT_VREF_DRAM_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -388,6 +416,7 @@
         <id>ATTR_VPD_MT_VREF_MC_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -401,6 +430,7 @@
         <id>ATTR_VPD_MT_WINDAGE_RD_CTR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits></mssUnits>
