@@ -244,6 +244,102 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
     return o_targetingType;
 }
 
+///
+/// @brief This function takes in a TARGETING Type and returns the corresponding
+///         FAPI::Target type
+///
+/// @param[in] i_fapi2Type
+///
+/// @returns TARGETTING::Type equivelent to fapi2 type
+inline fapi2::TargetType  convertTargetingTypeToFapi2(TARGETING::TYPE i_T)
+{
+    fapi2::TargetType o_targetingType = fapi2::TARGET_TYPE_NONE;
+
+   switch (i_T)
+    {
+        case TARGETING::TYPE_NA:
+            o_targetingType = fapi2::TARGET_TYPE_NONE;
+            break;
+        case TARGETING::TYPE_SYS:
+            o_targetingType = fapi2::TARGET_TYPE_SYSTEM;
+            break;
+        case TARGETING::TYPE_DIMM:
+            o_targetingType = fapi2::TARGET_TYPE_DIMM;
+            break;
+        case TARGETING::TYPE_PROC:
+            o_targetingType = fapi2::TARGET_TYPE_PROC_CHIP;
+            break;
+        case TARGETING::TYPE_MEMBUF:
+            o_targetingType = fapi2::TARGET_TYPE_MEMBUF_CHIP;
+            break;
+        case TARGETING::TYPE_EX:
+            o_targetingType = fapi2::TARGET_TYPE_EX;
+            break;
+        case TARGETING::TYPE_MBA:
+            o_targetingType = fapi2::TARGET_TYPE_MBA;
+            break;
+        case TARGETING::TYPE_MCS:
+            o_targetingType = fapi2::TARGET_TYPE_MCS;
+            break;
+        case TARGETING::TYPE_XBUS:
+            o_targetingType = fapi2::TARGET_TYPE_XBUS;
+            break;
+        case TARGETING::TYPE_ABUS:
+            o_targetingType = fapi2::TARGET_TYPE_ABUS;
+            break;
+        case TARGETING::TYPE_L4:
+            o_targetingType = fapi2::TARGET_TYPE_L4;
+            break;
+        case TARGETING::TYPE_CORE:
+            o_targetingType = fapi2::TARGET_TYPE_CORE;
+            break;
+        case TARGETING::TYPE_EQ:
+            o_targetingType = fapi2::TARGET_TYPE_EQ;
+            break;
+        case TARGETING::TYPE_MCA:
+            o_targetingType = fapi2::TARGET_TYPE_MCA;
+            break;
+        case TARGETING::TYPE_MCBIST:
+            o_targetingType = fapi2::TARGET_TYPE_MCBIST;
+            break;
+        case TARGETING::TYPE_MI:
+            o_targetingType = fapi2::TARGET_TYPE_MI;
+            break;
+        case TARGETING::TYPE_CAPP:
+            o_targetingType = fapi2::TARGET_TYPE_CAPP;
+            break;
+        case TARGETING::TYPE_DMI:
+            o_targetingType = fapi2::TARGET_TYPE_DMI;
+            break;
+        case TARGETING::TYPE_OBUS:
+            o_targetingType = fapi2::TARGET_TYPE_OBUS;
+            break;
+        case TARGETING::TYPE_NV:
+            o_targetingType = fapi2::TARGET_TYPE_NV;
+            break;
+        case TARGETING::TYPE_SBE:
+            o_targetingType = fapi2::TARGET_TYPE_SBE;
+            break;
+        case TARGETING::TYPE_PPE:
+            o_targetingType = fapi2::TARGET_TYPE_PPE;
+            break;
+        case TARGETING::TYPE_PERV:
+            o_targetingType = fapi2::TARGET_TYPE_PERV;
+            break;
+        case TARGETING::TYPE_PEC:
+            o_targetingType = fapi2::TARGET_TYPE_PEC;
+            break;
+        case TARGETING::TYPE_PHB:
+            o_targetingType = fapi2::TARGET_TYPE_PHB;
+            break;
+        default:
+            o_targetingType = fapi2::TARGET_TYPE_NONE;
+            break;
+    }
+
+    return o_targetingType;
+}
+
 
 ///
 /// @brief Get this target's immediate parent
