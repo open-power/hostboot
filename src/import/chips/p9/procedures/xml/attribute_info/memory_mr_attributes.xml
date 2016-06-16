@@ -21,6 +21,7 @@
         <id>ATTR_VPD_MR_0_VERSION_LAYOUT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>num</mssUnits>
@@ -33,6 +34,7 @@
         <id>ATTR_VPD_MR_1_VERSION_DATA</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>num</mssUnits>
@@ -45,6 +47,7 @@
         <id>ATTR_VPD_MR_2_SIGNATURE_FREQ_DROP</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>MR Keyword type, nibble 0 = freq bin (0 = 1600, 1 = 1866, 2 = 2133, 3 = 2400, 4 = 2667, 5 = 2933, 6 = 3200), nibble 1 = num dimms per port (1 = single drop, 2 = dual drop)</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>encode</mssUnits>
@@ -57,6 +60,7 @@
         <id>ATTR_VPD_MR_DRAM_2N_MODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -70,6 +74,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -83,6 +88,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A01</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -96,6 +102,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A02</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -109,6 +116,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A03</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -122,6 +130,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A04</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -135,6 +144,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A05</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -148,6 +158,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A06</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -161,6 +172,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A07</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -174,6 +186,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A08</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -187,6 +200,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A09</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -200,6 +214,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A10</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -213,6 +228,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A11</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -226,6 +242,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A12</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -239,6 +256,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A13</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -252,6 +270,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A17</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -265,6 +284,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -278,6 +298,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -291,6 +312,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -304,6 +326,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -317,6 +340,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -330,6 +354,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -343,6 +368,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C2</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -356,6 +382,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -369,6 +396,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -382,6 +410,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -395,6 +424,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -408,6 +438,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ACTN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -421,6 +452,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -434,6 +466,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -447,6 +480,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -460,6 +494,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_PAR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -473,6 +508,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -486,6 +522,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -499,6 +536,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE2</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -512,6 +550,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE3</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -525,6 +564,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -538,6 +578,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -551,6 +592,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN2</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -564,6 +606,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN3</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -577,6 +620,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -590,6 +634,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -603,6 +648,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT2</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -616,6 +662,7 @@
         <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -629,6 +676,7 @@
         <id>ATTR_VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -642,6 +690,7 @@
         <id>ATTR_VPD_MR_TSYS_ADR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
@@ -655,6 +704,7 @@
         <id>ATTR_VPD_MR_TSYS_DATA</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description></description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>

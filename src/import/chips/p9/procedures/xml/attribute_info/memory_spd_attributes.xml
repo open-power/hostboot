@@ -29,6 +29,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
         <writeable/>
@@ -47,6 +48,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
         <writeable/>
@@ -64,6 +66,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum> NONE = 0, NVDIMM = 1</enum>
         <writeable/>
@@ -81,6 +84,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
         <writeable/>
@@ -101,6 +105,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -120,6 +125,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -140,6 +146,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -158,6 +165,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -177,6 +185,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -195,6 +204,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum> SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
         <writeable/>
@@ -210,6 +220,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
         <writeable/>
@@ -226,6 +237,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
         <writeable/>
@@ -245,6 +257,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -263,6 +276,7 @@
           creator: eff_config
           consumer: various
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -281,6 +295,7 @@
           creator: mss_eff_cnfg_timing
           consumer: various
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -300,6 +315,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -323,6 +339,7 @@
         creator: eff_config
         consumer: various
         firmware notes: none</description>
+    <initToZero></initToZero>
       <valueType>uint16</valueType>
       <writeable/>
       <array> 2 </array>
@@ -346,6 +363,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -369,6 +387,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -392,6 +411,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -412,6 +432,7 @@
           Consumer:various
           Firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
         <writeable/>
@@ -431,6 +452,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -450,6 +472,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -469,6 +492,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -489,6 +513,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <array> 2 </array>

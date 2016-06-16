@@ -28,6 +28,7 @@
             consumer: mss_eff_cnfg, others
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
         <mssAccessorName>volt</mssAccessorName>
@@ -43,6 +44,7 @@
             consumer: mss_eff_cnfg, others
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
         <mssAccessorName>volt_vpp</mssAccessorName>
@@ -59,6 +61,7 @@
           The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
           Otherwise, this is the system frequency.
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <enum>AUTO = 0</enum>
         <writeable/>
@@ -76,6 +79,7 @@
             consumer: mss_eff_cnfg, others
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <!-- We rely on these being their actual MT/s for freq/time conversions -->
         <enum>
@@ -101,6 +105,7 @@
             VALID Values: (TBD % to TBD %) (Tuleta) (TBD % to TBD %) (Glacier)
             Set by: PLL settings written by Dave Cadigan
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <mssAccessorName>freq_bias_percentage</mssAccessorName>
@@ -110,6 +115,7 @@
         <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -127,6 +133,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -143,6 +150,7 @@
            Created in mss_eff_cnfg
            Use this attribute if you need to know if the Centaur is on the DIMM instead of on a planar.
        </description>
+       <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
@@ -160,6 +168,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
         <mssUnit>bits</mssUnit>
@@ -178,6 +187,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>SYMMETRICAL = 0, ASYMMETICAL = 1</enum>
         <mssUnit>bits</mssUnit>
@@ -194,6 +204,7 @@
             creator: mss_eff_cnfg consumer: various firmware notes: load from spd
             OBSOLETE: Use ATTR_VPD_DIMM_SPARE
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
         <writeable/>
@@ -213,6 +224,7 @@
             This is the nominal value
             This is for DDR3
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <enum>
             VDD420 = 420,
@@ -260,6 +272,7 @@
             Enables for which VREF to use on the WR Schmoo.
             The LSB corresponds to the highest WR Vref
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2</array>
@@ -273,6 +286,7 @@
             Enables for which VREF to use on the WR Schmoo.
             The LSB corresponds to the highest WR Vref
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2</array>
@@ -285,6 +299,7 @@
         <description>
             DIMM Size, in GB Used in various locations and is computed in mss_eff_cnfg.
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -303,6 +318,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
         <writeable/>
@@ -320,6 +336,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -337,6 +354,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2</enum>
         <writeable/>
@@ -355,6 +373,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -372,6 +391,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
         <writeable/>
@@ -390,6 +410,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NORMAL= 0, TEST = 1</enum>
         <writeable/>
@@ -408,6 +429,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
@@ -426,6 +448,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>SLOWEXIT = 0, FASTEXIT = 1</enum>
         <writeable/>
@@ -444,6 +467,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>ENABLE = 0, DISABLE = 1</enum>
         <writeable/>
@@ -462,6 +486,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -480,6 +505,7 @@
             creator: mss_eff_cnfg
             consumer: various
             firmware notes: none</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>ENABLE = 0, DISABLE = 1</enum>
         <writeable/>
@@ -498,6 +524,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>
             FULL = 0,
@@ -525,6 +552,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>SRT = 0, ASR = 1</enum>
         <writeable/>
@@ -543,6 +571,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, EXTEND = 1</enum>
         <writeable/>
@@ -561,6 +590,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -578,6 +608,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -599,6 +630,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -617,6 +649,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -634,6 +667,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -650,6 +684,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -667,6 +702,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -684,6 +720,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -700,6 +737,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -719,6 +757,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -732,6 +771,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -745,6 +785,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -758,6 +799,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -771,6 +813,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -784,6 +827,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -797,6 +841,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -810,6 +855,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -823,6 +869,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -836,6 +883,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -849,6 +897,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -862,6 +911,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
        <valueType>uint8</valueType>
        <writeable/>
        <array> 2 2</array>
@@ -875,6 +925,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -888,6 +939,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -901,6 +953,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -914,6 +967,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -927,6 +981,7 @@
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -944,6 +999,7 @@
           consumer: mss_dram_init
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -961,6 +1017,7 @@
           consumer: mss_dram_init
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -978,6 +1035,7 @@
           consumer: mss_dram_init
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
         <writeable/>
@@ -995,6 +1053,7 @@
             consumer: mss_dram_init
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>OFF = 0, ON = 1</enum>
         <writeable/>
@@ -1006,6 +1065,7 @@
         <id>ATTR_EFF_SCHMOO_MODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo mode to use during draminit_train_adv.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
         <writeable/>
@@ -1017,6 +1077,7 @@
         <id>ATTR_EFF_SCHMOO_ADDR_MODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo mode to use during draminit_train_adv</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
         <writeable/>
@@ -1028,6 +1089,7 @@
         <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo test to run during draminit_train_adv. Bit wise.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>
             NONE = 0x00,
@@ -1046,6 +1108,7 @@
         <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo parameters to use during draminit_train_adv. Bit wise.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>
             PARAM_NONE = 0x00,
@@ -1065,6 +1128,7 @@
         <id>ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1075,6 +1139,7 @@
         <id>ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1085,6 +1150,7 @@
         <id>ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1095,6 +1161,7 @@
         <id>ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1105,6 +1172,7 @@
         <id>ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1115,6 +1183,7 @@
         <id>ATTR_EFF_MEMCAL_INTERVAL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the memcal interval in clocks.</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <enum>DISABLE = 0</enum>
         <writeable/>
@@ -1126,6 +1195,7 @@
         <id>ATTR_EFF_ZQCAL_INTERVAL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the zqcal interval in clocks.</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <enum>DISABLE = 0</enum>
         <writeable/>
@@ -1137,6 +1207,7 @@
         <id>ATTR_EFF_IBM_TYPE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the memory topology type. See centaur workbook.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>
             UNDEFINED = 0,
@@ -1176,6 +1247,7 @@
         <id>ATTR_EFF_NUM_DROPS_PER_PORT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of DIMM dimensions that are valid per port. </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>EMPTY = 0, SINGLE = 1, DUAL = 2</enum>
         <writeable/>
@@ -1187,6 +1259,7 @@
         <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of master ranks per DIMM.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1197,6 +1270,7 @@
         <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of DRAM packages per rank.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1207,6 +1281,7 @@
         <id>ATTR_EFF_PRIM_DIE_COUNT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of DRAM dies per package.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1220,6 +1295,7 @@
           This is the throttled N commands per window
           of M DRAM clocks setting for cfg_nm_n_per_port.
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1236,6 +1312,7 @@
           consumer: mc_config
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1246,6 +1323,7 @@
         <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>This is the throttle numerator setting for cfg_nm_n_per_slot</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1262,6 +1340,7 @@
           consumer: mss_eff_config.
           firmware notes: none.
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1273,6 +1352,7 @@
         <id>ATTR_MSS_MASTER_PWR_SLOPE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Master Power slope value for dimm</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1283,6 +1363,7 @@
         <id>ATTR_MSS_SUPPLIER_PWR_SLOPE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Supplier Power slope value for dimm</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1293,6 +1374,7 @@
         <id>ATTR_MSS_MASTER_PWR_INTERCEPT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Master Power intercept value for dimm</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1303,6 +1385,7 @@
         <id>ATTR_MSS_SUPPLIER_PWR_INTERCEPT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Supplier Power intercept value for dimm</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1313,6 +1396,7 @@
         <id>ATTR_MSS_DIMM_MAXBANDWIDTH_GBS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Bandwidth in GBs output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1323,6 +1407,7 @@
         <id>ATTR_MSS_DIMM_MAXBANDWIDTH_MRS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Bandwidth in MRs output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1333,6 +1418,7 @@
         <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Bandwidth in GBs output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1343,6 +1429,7 @@
         <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Bandwidth MRs output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1353,6 +1440,7 @@
         <id>ATTR_MSS_DIMM_MAXPOWER</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Power output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -1363,6 +1451,7 @@
         <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Power output from thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1376,6 +1465,7 @@
           Runtime throttled N commands per
           M DRAM clocks setting for cfg_nm_n_per_port.
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1386,6 +1476,7 @@
         <id>ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime for M DRAM clocks setting for cfg_nm_m</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1396,6 +1487,7 @@
         <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime throttle numerator setting for cfg_nm_n_per_slot</description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -1415,6 +1507,7 @@
             Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
             This factors in functionality
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1433,6 +1526,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>MANUAL_NORMAL =0, MANUAL_REDUCED = 1, MANUAL_EXTENDED = 2, ASR = 3</enum>
         <writeable/>
@@ -1451,6 +1545,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>PG0 = 0, PG1 = 1, PG2 = 2, PG3 = 3</enum>
         <writeable/>
@@ -1470,6 +1565,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>HALF =0, QUARTER=1</enum>
         <writeable/>
@@ -1489,6 +1585,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1508,6 +1605,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1526,6 +1624,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>4NCK = 4, 5NCK = 5, 6NCK = 6</enum>
         <writeable/>
@@ -1545,6 +1644,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2, RESERVED_TEMP= 3</enum>
         <writeable/>
@@ -1564,6 +1664,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1582,6 +1683,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1601,6 +1703,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1620,6 +1723,7 @@
             consumer: various
             firmware notes: none
     </description>
+    <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
         <writeable/>
@@ -1639,6 +1743,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1656,6 +1761,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1673,6 +1779,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>1NCLK = 1, 2NCLK = 2</enum>
         <writeable/>
@@ -1690,6 +1797,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>1NCLK = 1, 2NCLK = 2</enum>
         <writeable/>
@@ -1707,6 +1815,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, PL4 = 4, PL5 = 5, PL6 = 6, PL8 = 8</enum>
         <writeable/>
@@ -1724,6 +1833,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>CLEAR = 0, ERROR = 1</enum>
         <writeable/>
@@ -1741,6 +1851,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>CLEAR = 0, ERROR = 1</enum>
         <writeable/>
@@ -1758,6 +1869,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DEACTIVATED = 0, ACTIVATED = 1</enum>
         <writeable/>
@@ -1775,6 +1887,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
         <writeable/>
@@ -1792,6 +1905,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1809,6 +1923,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1826,6 +1941,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1843,6 +1959,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1860,6 +1977,7 @@
             Consumer:various
             Firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2 4</array>
@@ -1876,6 +1994,7 @@
             Consumer:various
             Firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>RANGE1 = 0, RANGE2 = 1</enum>
         <writeable/>
@@ -1893,6 +2012,7 @@
             Consumer:various
             Firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1911,6 +2031,7 @@
             Consumer:various
             Firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -1936,6 +2057,7 @@
             [10]:[15] Reserved for future use
             COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
         </description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
@@ -1952,6 +2074,7 @@
             Computed and sent to the correct data blocks in phy_reset.
             Also used in advanced training
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 4 4</array>
@@ -1968,6 +2091,7 @@
             Computed and sent to the correct data blocks in phy_reset.
             Also used in advanced training
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 4 4</array>
@@ -1978,6 +2102,7 @@
         <id>ATTR_SCHMOO_MULTIPLE_SETUP_CALL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>MCBIST for multiple setup</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -1992,6 +2117,7 @@
             Additional buffer latency in the case of RDIMMs and LRDIMMs.
             It is expected that this value will come from the VPD
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -2002,6 +2128,7 @@
         <id>ATTR_EFF_LRDIMM_WORD_X</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Additional buffer control word for LRDIMM building of the BCW</description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -2016,6 +2143,7 @@
             DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance for all ranks.
             Eff config should set this up.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -2031,6 +2159,7 @@
             F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
             Eff config should set this up
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
         <array> 2 2</array>
@@ -2043,6 +2172,7 @@
         <description>
           LRDIMM rank multiplication mode.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, 2X_MULT = 2, 4X_MULT = 4</enum>
         <writeable/>
@@ -2054,6 +2184,7 @@
         <id>ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>RAS weight to use for memory throttle control - set in thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -2064,6 +2195,7 @@
         <id>ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>CAS weight to use for memory throttle control - set in thermal procedures</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
@@ -2076,6 +2208,7 @@
         <description>
         The lowest VPD Version of the DIMMs attached to the MBA. Comes directly (in ASCII) of the VINI VZ keyword
     </description>
+    <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
@@ -2091,6 +2224,7 @@
             the MRW to determine what frequency to boot the fabric (nest) if it can.
             There are two values: 8G and 9.6G
         </description>
+        <initToZero></initToZero>
         <valueType>uint64</valueType>
         <enum>8_0G = 1, 9_6G = 2</enum>
         <writeable/>
@@ -2104,6 +2238,7 @@
           Possible DRAM voltage override.
           Firmware notes: Default should be NONE (0x00).
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_120 = 0x02</enum>
         <writeable/>
@@ -2114,6 +2249,7 @@
         <id>ATTR_MSS_VDDR_OVERIDE_SPD</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>Possible VDDR voltage override.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_1350 = 0x01, VOLT_1200 = 0x02</enum>
         <writeable/>
@@ -2124,6 +2260,7 @@
         <id>ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>Maximum number of installed DIMMs per VMEM regulator for all VMEM regulators in the system.</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>vmem_regulator_max_dimm_count</mssAccessorName>
@@ -2137,6 +2274,7 @@
           creator: f/w
           consumer: mss_utils_to_throttle
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
@@ -2153,6 +2291,7 @@
           Nimbus workbook (Power and Thermal Controls).
           creator: mss_utils_to_throttle
         </description>
+        <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2 2</array>
@@ -2169,6 +2308,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint16</valueType>
         <enum>UNTESTED = 0, 700K = 700, 600K = 600, 500K = 500, 400K = 400, 300K = 300, 200K = 200,  UNLIMITED = 8</enum>
         <writeable/>
@@ -2183,6 +2323,7 @@
             This value comes from the VPD keyword MT byte 60 bits 4:7 for the Logical DIMM associated with port A.
             Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>2</array>
         <mssAccessorName>vpd_rlo</mssAccessorName>
@@ -2196,6 +2337,7 @@
             This value comes from the VPD keyword MT byte 60 bits 0:3 for the Logical DIMM associated with port A.
             Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>2</array>
         <mssAccessorName>vpd_wlo</mssAccessorName>
@@ -2212,6 +2354,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <mssUnit>bits</mssUnit>
         <valueType>uint8</valueType>
         <writeable/>
@@ -2223,6 +2366,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC00</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW00 Host Interface DQ RTT_NOM Control</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2233,6 +2377,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC01</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW01 Host Interface DQ RTT_WR Control</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2243,6 +2388,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC02</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW02 Host Interface DQ RTT_PARK Control</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2253,6 +2399,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC03</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW03 Host Interface DQ Driver Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2263,6 +2410,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC04</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW04 DRAM Interface MDQ RTT Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2273,6 +2421,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC05</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW05 DRAM Interface MDQ Driver Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2283,6 +2432,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC06</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW06 Command Space Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2293,6 +2443,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC07</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW07 Rank Presence Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2303,6 +2454,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC08</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW08 RankSelection Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2313,6 +2465,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC09</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW09 Power Saving Settings Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2323,6 +2476,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0A</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0A LRDIMM Operating Speed </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2333,6 +2487,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0B</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0B Operating Voltage Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2343,6 +2498,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0C</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0C Buffer Training Mode Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2353,6 +2509,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0D</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0D Reserved for future use</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2363,6 +2520,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0E</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0E Parity Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2373,6 +2531,7 @@
         <id>ATTR_EFF_DIMM_DDR4_BC0F</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW0F Error Status Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2383,6 +2542,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BC1x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW1x Buffer Configuration Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2393,6 +2553,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC2x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW2x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2403,6 +2564,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC3x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW3x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2413,6 +2575,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC4x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW4x Lower Nibble MDQS Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2423,6 +2586,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC5x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW5x Upper Nibble MDQS Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2433,6 +2597,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BC6x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCW6x Fine Granularity Frequency Operating Speed Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2443,6 +2608,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F70BC7x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F70BCW7x Function Space Selector Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2453,6 +2619,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC8x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW8x Lower Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2463,6 +2630,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BC9x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCW9x Upper Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2473,6 +2641,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BCAx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCWAx Lower Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2483,6 +2652,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F30BCBx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F30BCWBx Upper Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2493,6 +2663,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BCCx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 0</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2503,6 +2674,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BCDx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2513,6 +2685,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BCEx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2523,6 +2696,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F0BCFx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F0BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 2</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2533,6 +2707,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F1BCCx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F1BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 1</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2542,6 +2717,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F1BCDx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F1BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 1</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2551,6 +2727,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F1BCEx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F1BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2560,6 +2737,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F1BCFx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F1BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2570,6 +2748,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC0x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW0x MRS0 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2580,6 +2759,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC1x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW1x MRS1 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2590,6 +2770,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC2x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW2x MRS2 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2600,6 +2781,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC3x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW3x MRS3 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2610,6 +2792,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC4x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW4x MRS4 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2620,6 +2803,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC5x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW5x MRS5 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2630,6 +2814,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F4BC6x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F4BCW6x MRS6 snooped settings</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2640,6 +2825,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC0x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW0x Upper and Lower MPR bits[7:0] for U0</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2650,6 +2836,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC1x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW1x Upper and Lower MPR bits[15:8] for U1</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2660,6 +2847,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC2x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW2x Upper and Lower MPR bits[23:16] for U2</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2670,6 +2858,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC3x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW3x Upper and Lower MPR bits[31:24] for U3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2680,6 +2869,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC5x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW5x Host Interface Vref Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2690,6 +2880,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F5BC6x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F5BCW6x DRAM Interface Vref Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2700,6 +2891,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC0x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW0x Upper and Lower MPR bits[39:32] for U4</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2710,6 +2902,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC1x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW1x Upper and Lower MPR bits[47:40] for U5</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2720,6 +2913,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC2x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW2x Upper and Lower MPR bits[55:48] for U6</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2730,6 +2924,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC3x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW3x Upper and Lower MPR bits[63:56] for U7</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2740,6 +2935,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC4x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW4x Buffer Training Configuration Control Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2750,6 +2946,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F6BC5x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F6BCW5x Buffer Training Status Word</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2760,6 +2957,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BC8x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCW8x MDQ0/4 -Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2770,6 +2968,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BC9x</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCW9x MDQ1/5 -Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2780,6 +2979,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCAx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWAx MDQ2/6 -Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2790,6 +2990,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCBx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWBx MDQ3/7 -Read Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2800,6 +3001,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCCx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWCx MDQ0/4-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2810,6 +3012,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCDx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWDx MDQ1/5-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2820,6 +3023,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCEx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWEx MDQ2/6-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2830,6 +3034,7 @@
         <id>ATTR_EFF_DIMM_DDR4_F74BCFx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>F74BCWFx MDQ3/7-MDQS Write Delay Control Word for ranks 0 to 3</description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable />
         <array> 2 2 </array>
@@ -2845,6 +3050,7 @@
         creator: eff_config
         consumer: various and initfiles
         firmware notes: none</description>
+    <initToZero></initToZero>
       <valueType>uint8</valueType>
       <array>2 2 4</array>
       <writeable/>
@@ -2860,6 +3066,7 @@
         Creator: mss_eff_config
         consumer: various and initfile
         firmware notes: none</description>
+    <initToZero></initToZero>
       <valueType>uint8</valueType>
       <array>2 2 4</array>
       <writeable/>
@@ -2874,6 +3081,7 @@
             Used in various locations and comes from the MT keyword of the VPD
             OHM48 is for DDR4.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
         <array>2 2</array>
@@ -2888,6 +3096,7 @@
             DRAM Rtt_Nom.
             Used in various locations and comes from the MT keyword of the VPD
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>
           DISABLE = 0,
@@ -2914,6 +3123,7 @@
             DRAM Rtt_WR.
             Used in various locations and comes from the MT keyword of the VPD
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
         <array>2 2 4</array>
@@ -2928,6 +3138,7 @@
           This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
           associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>2</array>
         <writeable/>
@@ -2945,6 +3156,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
@@ -2961,6 +3173,7 @@
         consumer: various
         firmware notes: none
       </description>
+      <initToZero></initToZero>
       <valueType>uint16</valueType>
       <writeable/>
       <array> 2 </array>
@@ -2980,6 +3193,7 @@
             consumer: various
             firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -2998,6 +3212,7 @@
         creator: eff_config
         consumer: various
         firmware notes: none</description>
+    <initToZero></initToZero>
       <valueType>uint8</valueType>
       <writeable/>
       <array> 2 </array>
@@ -3017,6 +3232,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -3035,6 +3251,7 @@
           consumer: various
           firmware notes: none
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
@@ -3051,6 +3268,7 @@
             the value of this attribute will be returned to callers of
             fapi2::getVPD() instead of the actual VPD contents.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>255</array>
         <platInit/>
@@ -3063,6 +3281,7 @@
         <description>
             Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MT.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <platInit/>
         <overrideOnly/>
@@ -3077,6 +3296,7 @@
             the value of this attribute will be returned to callers of
             fapi2::getVPD() instead of the actual VPD contents.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>255</array>
         <platInit/>
@@ -3089,6 +3309,7 @@
         <description>
             Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MR.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <platInit/>
         <overrideOnly/>
@@ -3103,6 +3324,7 @@
             the value of this attribute will be returned to callers of
             fapi2::getVPD() instead of the actual VPD contents.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>255</array>
         <platInit/>
@@ -3115,6 +3337,7 @@
         <description>
             Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MW.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <platInit/>
         <overrideOnly/>
@@ -3129,6 +3352,7 @@
             the value of this attribute will be returned to callers of
             fapi2::getSPD() instead of the actual SPD contents.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <array>512</array>
         <platInit/>
@@ -3141,6 +3365,7 @@
         <description>
             Set equal to 1 to activate the use of ATTR_SPD_OVERRIDE.
         </description>
+        <initToZero></initToZero>
         <valueType>uint8</valueType>
         <platInit/>
         <overrideOnly/>
