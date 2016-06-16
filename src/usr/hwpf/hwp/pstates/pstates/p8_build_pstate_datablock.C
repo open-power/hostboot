@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,12 +23,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.C,v 1.46 2015/06/01 18:50:36 stillgs Exp $
+// $Id: p8_build_pstate_datablock.C,v 1.48 2016/06/24 15:57:57 thi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_build_pstate_datablock.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! OWNER NAME:  Jim Yacynych         Email: jimyac@us.ibm.com
 // *! BACKUP NAME: Greg Still           Email: stillgs@us.ibm.com
@@ -1039,7 +1038,7 @@ extern "C" {
             // for voltage, get the max for use for the chip
 
             l_rc = fapiGetChildChiplets (i_target, TARGET_TYPE_EX_CHIPLET, l_exChiplets,
-                                         TARGET_STATE_PRESENT);
+                                         TARGET_STATE_FUNCTIONAL);  // @bug this was present SW350603
 
             if (l_rc)
             {
@@ -2053,7 +2052,8 @@ extern "C" {
         int        rc       = 0;
         uint32_t   freq_khz = 0;
         Pstate     pstate   = 0;
-
+        char       str_pstate[8];
+        
         do
         {
             // ----------------------------------------------------------------------------
@@ -2061,8 +2061,9 @@ extern "C" {
             // ----------------------------------------------------------------------------
 #define DATABLOCK_RESCLK(attr_name, ps_name) \
         freq_khz = attr_list->attr_name; \
-        FAPI_INF("Converting %s (%u khz) to Pstate", #attr_name, freq_khz); \
         rc = freq2pState(&(pss->gpst), freq_khz, &pstate); \
+        sprintf(str_pstate, "%X", pstate); \
+        FAPI_INF("Converted %s (%u khz) to Pstate (0x%s)", #attr_name, freq_khz, str_pstate); \
         if ((rc) && (rc != -PSTATE_LT_PSTATE_MIN)) break; \
         rc = pstate_minmax_chk(&(pss->gpst), &pstate); \
         if (rc == -GPST_PSTATE_GT_GPST_PMAX) { \

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: lab_pstates.c,v 1.12 2015/06/01 19:02:17 stillgs Exp $
+// $Id: lab_pstates.c,v 1.13 2016/06/15 13:51:41 stillgs Exp $
 
 /// \file lab_pstates.c
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -333,13 +333,13 @@ gpst_print(FILE *stream, GlobalPstateTable *gpst)
     char evid_vcs_eff_str[FORMAT_10UV_STRLEN];
     char maxreg_vdd_str[FORMAT_10UV_STRLEN];
     char maxreg_vcs_str[FORMAT_10UV_STRLEN];
-    char* ivrm_max_ps_str;
-    char* ultraturbo_ps_str;
-    char* turbo_ps_str;
-    char* nominal_ps_str; 
-    char* powersave_ps_str;
+    char ivrm_max_ps_str[32];
+    char ultraturbo_ps_str[32];
+    char turbo_ps_str[32];
+    char nominal_ps_str[32];
+    char powersave_ps_str[32];
 
-    
+
     // Get endian-corrected scalars
 
     options = revle32(gpst->options.options);
@@ -379,10 +379,10 @@ gpst_print(FILE *stream, GlobalPstateTable *gpst)
     fprintf(stream, "Pstate Step Size %u, VRM Range %u, VRM Delay %u\n",
             pstate_stepsize, vrm_stepdelay_range, vrm_stepdelay_value);
     fprintf(stream, "Pvsafe %d, Psafe %d\n", pvsafe, psafe);
-    
-    fprintf(stream, "iVRM Maximum Pstate %d, Number of GPST entries (from Psafe) where iVRMs are enabled: %d\n", 
+
+    fprintf(stream, "iVRM Maximum Pstate %d, Number of GPST entries (from Psafe) where iVRMs are enabled: %d\n",
             gpst->ivrm_max_ps, gpst->ivrm_entries);
-    
+
 
     if (options == 0) {
         fprintf(stream, "No Options\n");
@@ -436,27 +436,27 @@ gpst_print(FILE *stream, GlobalPstateTable *gpst)
     sprintf_ivid(maxreg_vcs_str, maxreg_vcs);
 
     pstate = gpst_pmin(gpst) + i;
-    
-    ultraturbo_ps_str = "";
+
+    strcpy(ultraturbo_ps_str, "");
     if (pstate == 0 && gpst->turbo_ps != 0)
-        ultraturbo_ps_str = " <--- UltraTurbo";
-    
-    turbo_ps_str = "";
+        strcpy(ultraturbo_ps_str," <--- UltraTurbo");
+
+    strcpy(turbo_ps_str, "");
     if (pstate == gpst->turbo_ps)
-        turbo_ps_str = " <--- Turbo";
-    
-    nominal_ps_str = "";
+        strcpy(turbo_ps_str," <--- Turbo");
+
+    strcpy(nominal_ps_str, "");
     if (pstate == gpst->nominal_ps)
-        nominal_ps_str = " <--- Nominal";   
-        
-    powersave_ps_str = "";
+        strcpy(nominal_ps_str," <--- Nominal");
+
+    strcpy(powersave_ps_str, "");
     if (pstate == gpst->powersave_ps)
-        powersave_ps_str = " <--- PowerSave";   
-    
-    ivrm_max_ps_str = "";
+        strcpy(powersave_ps_str," <--- PowerSave");
+
+    strcpy(ivrm_max_ps_str, "");
     if (pstate == gpst->ivrm_max_ps)
-        ivrm_max_ps_str = " <--- iVRM Maximum";
-       
+        strcpy(ivrm_max_ps_str," <--- iVRM Maximum");
+
     fprintf(stream,
         "%3d %+4d    "
         "%4d  "
@@ -758,53 +758,53 @@ vidmod_print(FILE* stream, WOFElements* wof, vidmod_rails rail)
 {
     char line_str[256];
     char entry_str[128];
-    
+
     uint8_t evid;
     char evid_str[FORMAT_10UV_STRLEN];
-    
+
     strcpy(entry_str, "");
     strcpy(line_str, "   Active Cores->");
-    for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j) 
+    for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j)
     {
         sprintf(entry_str, "      %2d      ", j+1);
-        strcat(line_str, entry_str);  
-    }    
-    fprintf(stream, "%s\n", line_str);   
-       
+        strcat(line_str, entry_str);
+    }
+    fprintf(stream, "%s\n", line_str);
+
     strcpy(entry_str, "");
     strcpy(line_str, "    Index Pstate  ");
-    for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j) 
+    for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j)
     {
-        if (rail == VDD) 
+        if (rail == VDD)
             sprintf(entry_str, " evid_vdd(V)  ");
         else
             sprintf(entry_str, " evid_vcs(V)  ");
-        strcat(line_str, entry_str);  
-    }    
+        strcat(line_str, entry_str);
+    }
     fprintf(stream, "%s\n", line_str);
-    
-    for (int i = wof->ut_vid_mod.ut_segment_pstates; i >= 0; --i) 
-    {      
-    
-        sprintf(line_str, "    %2d    %+4d    ",                          
+
+    for (int i = wof->ut_vid_mod.ut_segment_pstates; i >= 0; --i)
+    {
+
+        sprintf(line_str, "    %2d    %+4d    ",
                         i,
                         -wof->ut_vid_mod.ut_segment_pstates+i);
 
-        for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j) 
+        for (int j=0; j < wof->ut_vid_mod.ut_max_cores; ++j)
         {
-            if (rail == VDD) 
+            if (rail == VDD)
                 evid = wof->ut_vid_mod.ut_segment_vdd_vid[i][j];
             else
-                evid = wof->ut_vid_mod.ut_segment_vcs_vid[i][j];                        
-            
+                evid = wof->ut_vid_mod.ut_segment_vcs_vid[i][j];
+
             sprintf_vrm11(evid_str, evid);
             strcpy(entry_str, "");
-            sprintf(entry_str, "0x%02x %s  ",                          
+            sprintf(entry_str, "0x%02x %s  ",
                         evid, evid_str);
-            strcat(line_str, entry_str);                        
+            strcat(line_str, entry_str);
 
-        } 
-        fprintf(stream, "%s\n", line_str);    
+        }
+        fprintf(stream, "%s\n", line_str);
     }
     return;
 }
@@ -819,12 +819,12 @@ void
 wof_print(FILE* stream, WOFElements* wof)
 {
     const char     *vpd_point_str[VPD_PV_POINTS] = VPD_PV_ORDER_STR;
-    
+
     char vpd_vdd_str[FORMAT_10UV_STRLEN];
     char vpd_vcs_str[FORMAT_10UV_STRLEN];
     char vpd_idd_str[FORMAT_IMA_STRLEN];
     char vpd_ics_str[FORMAT_IMA_STRLEN];
-        
+
     uint32_t vdd, vcs, idd, ics;
 
     fprintf(stream,
@@ -832,16 +832,16 @@ wof_print(FILE* stream, WOFElements* wof)
     fprintf(stream, "Workload Optimized Frequency (WOF) elements @ %p\n", wof);
     fprintf(stream,
         "---------------------------------------------------------------------------------------------------------\n");
- 
+
     fprintf(stream, "WOF Enabled\t: %d\n", wof->wof_enabled);
-    
+
     if (!wof->wof_enabled)
     {
          fprintf(stream, "  >>>> With WOF Disabled, relevant content in the Pstate SuperStructure is not populated <<<<\n");
     }
 
-    fprintf(stream, "VPD Points (biased without System Distribution Elements)\n"); 
-    for (int i=0; i < VPD_PV_POINTS; ++i) 
+    fprintf(stream, "VPD Points (biased without System Distribution Elements)\n");
+    for (int i=0; i < VPD_PV_POINTS; ++i)
     {
 
         vdd = wof->operating_points[i].vdd_5mv * 5 * 1000;
@@ -862,11 +862,11 @@ wof_print(FILE* stream, WOFElements* wof)
             vpd_vdd_str,
             vpd_idd_str,
             vpd_vcs_str,
-            vpd_ics_str           
-            );           
+            vpd_ics_str
+            );
     }
 
-    fprintf(stream, "System Distribution Elements\n"); 
+    fprintf(stream, "System Distribution Elements\n");
     fprintf(stream, "   VDD loadline            : %d uOhm\n", wof->vdd_sysparm.loadline_uohm);
     fprintf(stream, "   VCS loadline            : %d uOhm\n", wof->vcs_sysparm.loadline_uohm);
     fprintf(stream, "   VDD distribution loss   : %d uOhm\n", wof->vdd_sysparm.distloss_uohm);
@@ -874,21 +874,21 @@ wof_print(FILE* stream, WOFElements* wof)
     fprintf(stream, "   VDD distribution offset : %d uV\n",   wof->vdd_sysparm.distoffset_uv);
     fprintf(stream, "   VCS distribution offset : %d uV\n",   wof->vcs_sysparm.distoffset_uv);
 
-    fprintf(stream, "WOF Factors\n"); 
+    fprintf(stream, "WOF Factors\n");
     fprintf(stream, "   TDP to RDP factor        0x%X   --> %0.2f%% \n", wof->tdp_rdp_factor, (double)wof->tdp_rdp_factor/100);
-    
-    fprintf(stream, "Pstates from Turbo to UltraTurbo (inclusive) : %d  (from %-2d to %-2d)\n", 
-            wof->ut_vid_mod.ut_segment_pstates+1,       // +1 is for inclusivity 
+
+    fprintf(stream, "Pstates from Turbo to UltraTurbo (inclusive) : %d  (from %-2d to %-2d)\n",
+            wof->ut_vid_mod.ut_segment_pstates+1,       // +1 is for inclusivity
             0,
             -(wof->ut_vid_mod.ut_segment_pstates));
-            
 
-    fprintf(stream, "Turbo<>UltraTurbo VID Modification - VDD\n");    
+
+    fprintf(stream, "Turbo<>UltraTurbo VID Modification - VDD\n");
     vidmod_print(stream, wof, VDD);
-        
-    fprintf(stream, "Turbo<>UltraTurbo VID Modification - VCS\n");       
+
+    fprintf(stream, "Turbo<>UltraTurbo VID Modification - VCS\n");
     vidmod_print(stream, wof, VCS);
-       
+
     fprintf(stream,
         "---------------------------------------------------------------------------------------------------------\n");
 }
@@ -905,17 +905,17 @@ pss_print(FILE* stream, PstateSuperStructure* pss)
 {
     fprintf(stream,
         "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-    fprintf(stream, "PstateSuperStructure @ %p;   Size: %d bytes\n", pss, sizeof(PstateSuperStructure));
+    fprintf(stream, "PstateSuperStructure @ %p;   Size: %lu bytes\n", pss, sizeof(PstateSuperStructure));
     fprintf(stream,
         "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
     gpst_print(stream, &(pss->gpst));
     lpsa_print(stream, &(pss->lpsa));
-    cpmrange_print(stream, &(pss->cpmranges));   
+    cpmrange_print(stream, &(pss->cpmranges));
     resclk_print(stream, &(pss->resclk));
     wof_print(stream, &(pss->wof));
     iddq_print(stream, &(pss->iddq));
-   
+
     fprintf(stream,
         "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 }
