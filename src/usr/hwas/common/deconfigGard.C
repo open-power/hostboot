@@ -839,7 +839,9 @@ errlHndl_t DeconfigGard::deconfigureTarget(
             // TODO RTC 88471: use attribute vs hardcoded list.
             if (!((target_type == TYPE_MEMBUF) ||
                   (target_type == TYPE_NX) ||
+                  (target_type == TYPE_EQ) ||
                   (target_type == TYPE_EX) ||
+                  (target_type == TYPE_CORE) ||
                   (target_type == TYPE_PORE)))
             {
                 HWAS_INF("Skipping deconfigureTarget: atRuntime with unexpected target %.8X type %d -- SKIPPING",
@@ -1312,7 +1314,6 @@ void DeconfigGard::_deconfigureByAssoc(
     {
         TargetHandle_t pChild = *pChild_it;
 
-        HWAS_INF("_deconfigureByAssoc CHILD: %.8X", get_huid(pChild));
         _deconfigureTarget(*pChild, i_errlEid, NULL,
                 i_deconfigRule);
         // Deconfigure other Targets by association
@@ -1349,9 +1350,78 @@ void DeconfigGard::_deconfigureByAssoc(
 
         // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
+        // chip  (TYPE_EQ, TYPE_EX, TYPE_CORE)
         // deconfigureByAssociation rules
+
         switch (i_target.getAttr<ATTR_TYPE>())
         {
+            case TYPE_CORE:
+            {
+                //
+                // In Fused Core Mode, Cores must be de-configureed
+                // in pairs
+                //
+                // In Normal Core Mode if both cores are non-functional
+                // EX should be deconfigured
+                //
+                // First get parent i.e EX
+                TargetHandleList pParentExList;
+                getParentAffinityTargetsByState(pParentExList, &i_target,
+                        CLASS_UNIT, TYPE_EX, UTIL_FILTER_PRESENT);
+                HWAS_ASSERT((pParentExList.size() == 1),
+                    "HWAS _deconfigureByAssoc: pParentExList != 1");
+                Target *l_parentEX = pParentExList[0];
+
+                if (isFunctional(l_parentEX))
+                {
+                    // Fused Core Mode
+                    if (is_fused_mode())
+                    {
+                        // If parent is functional, deconfigure it
+                        _deconfigureTarget(*l_parentEX,
+                           i_errlEid, NULL,i_deconfigRule);
+                        _deconfigureByAssoc(*l_parentEX,
+                          i_errlEid,i_deconfigRule);
+                        // After deconfiguring EX the other EX of EQ
+                        // is non-functional, case TYPE_EX takes care
+                    }
+                    // Normal Core Mode
+                    // if both cores of EX non-functional, de-config EX
+                    else if (!anyChildFunctional(*l_parentEX))
+                    {
+                       // If parent is functional, deconfigure it
+                       _deconfigureTarget(*l_parentEX,
+                          i_errlEid, NULL, i_deconfigRule);
+                       _deconfigureByAssoc(*l_parentEX,
+                          i_errlEid,i_deconfigRule);
+                    } // is_fused
+                } // isFunctional
+                break;
+            } // TYPE_CORE
+
+            case TYPE_EX:
+            {
+                //
+                // EQ with no good EX should be de-configured
+                //
+                TargetHandleList pEqList;
+                getParentAffinityTargetsByState(pEqList,
+                        &i_target, CLASS_UNIT, TYPE_EQ,
+                        UTIL_FILTER_PRESENT);
+
+                HWAS_ASSERT((pEqList.size() == 1),
+                    "HWAS _deconfigureByAssoc: pEqList != 1");
+                Target *l_targetEq = pEqList[0];
+
+                if (!anyChildFunctional(*l_targetEq))
+                {
+                    _deconfigureTarget(*l_targetEq, i_errlEid, NULL,
+                                    i_deconfigRule);
+                }
+
+                break;
+            } // TYPE_EX
+
             case TYPE_MEMBUF:
             {
                 //  get parent MCS
@@ -1764,8 +1834,7 @@ void DeconfigGard::_deconfigureTarget(
 //******************************************************************************
 void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
-
-    // Placeholder for any necessary deconfigure actions
+ // Placeholder for any necessary deconfigure actions
 
 
 #ifdef CONFIG_BMC_IPMI
@@ -2447,6 +2516,39 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
         }
     }
 }
+//******************************************************************************
+
+bool DeconfigGard::anyChildFunctional(Target & i_parent)
+{
+    bool retVal = false;
+    do
+    {
+        TargetHandleList pChildList;
+        PredicateHwas isFunctional;
+        isFunctional.functional(true);
+        if (isFunctional(&i_parent))
+        {
+            // find all CHILD targets
+            // if any of them are functional return true
+            // if all of them are non-functional return false
+            targetService().getAssociated(pChildList, &i_parent,
+                TargetService::CHILD, TargetService::ALL, &isFunctional);
+            for (TargetHandleList::iterator pChild_it = pChildList.begin();
+                 pChild_it != pChildList.end();
+                 ++pChild_it)
+            {
+                if (isFunctional(*pChild_it))
+                {
+                   retVal = true;
+                   break;
+                }
+            }
+        }
+    }while(0);
+    return retVal;
+} //anyChildFunctional
+
+
 #endif
 } // namespce HWAS
 
