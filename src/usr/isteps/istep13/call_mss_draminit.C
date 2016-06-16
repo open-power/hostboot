@@ -22,30 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+//Error handling and tracing
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <isteps/hwpisteperror.H>
-#include <istepHelperFuncs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <plat_trace.H>
 
-//  targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/util.H>
-#include <targeting/common/utilFilter.H>
+//Istep 13 framework
+#include <istepHelperFuncs.H>
 #include "istep13consts.H"
 #include "platform_vddr.H"
 
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_mss_draminit.H>
+// targeting support
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 
-using   namespace   ERRORLOG;
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   TARGETING;
+// fapi2 HWP invoker
+#include  <fapi2/plat_hwp_invoker.H>
+
+//From Import Directory (EKB Repository)
+#include  <fapi2.H>
+#include  <p9_mss_draminit.H>
+
+using namespace ERRORLOG;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace TARGETING;
 
 namespace ISTEP_13
 {
@@ -79,20 +86,20 @@ void   mss_post_draminit( IStepError & l_stepError )
 //         TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
 //         TARGETING::ATTR_VMEM_ID>();
 
-    if(l_err)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
-            "ERROR 0x%08X: setMemoryVoltageDomainOffsetVoltage for VDDR domain",
-            l_err->reasonCode());
-        l_stepError.addErrorDetails(l_err);
-        errlCommit(l_err,HWPF_COMP_ID);
-        break;
-    }
-    else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "mss_post_draminit: mss_volt_vddr_offset(): SUCCESS");
-    }
+//     if(l_err)
+//     {
+//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
+//             "ERROR 0x%08X: setMemoryVoltageDomainOffsetVoltage for VDDR domain",
+//             l_err->reasonCode());
+//         l_stepError.addErrorDetails(l_err);
+//         errlCommit(l_err,HWPF_COMP_ID);
+//         break;
+//     }
+//     else
+//     {
+//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+//                    "mss_post_draminit: mss_volt_vddr_offset(): SUCCESS");
+//     }
 
     // Call HWSV to call POWR code
     // This fuction has compile-time binding for different platforms
@@ -141,8 +148,7 @@ void* call_mss_draminit (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
 
-            //TODO 134081
-//          FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
 
         if (l_err)
         {
@@ -162,7 +168,8 @@ void* call_mss_draminit (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  mss_draminit HWP( )" );
+                       "SUCCESS running p9_mss_draminit HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
         }
 
     }   // endfor   mcbist's

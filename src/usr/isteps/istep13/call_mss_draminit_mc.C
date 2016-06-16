@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+//Error handling and tracing
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -32,18 +34,23 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+
+// Istep 13 framework
 #include "istep13consts.H"
 
-#include    <config.h>
-#include    <fapi2.H>
-#include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_mss_draminit_mc.H>
+// fapi2 HWP invoker
+#include  <fapi2/plat_hwp_invoker.H>
+
+//From Import Directory (EKB Repository)
+#include  <config.h>
+#include  <fapi2.H>
+#include  <p9_mss_draminit_mc.H>
 
 
-using   namespace   ERRORLOG;
-using   namespace   ISTEP;
-using   namespace   ISTEP_ERROR;
-using   namespace   TARGETING;
+using namespace ERRORLOG;
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace TARGETING;
 
 namespace ISTEP_13
 {
@@ -74,8 +81,7 @@ void* call_mss_draminit_mc (void *io_pArgs)
 
         fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
             (l_mcbist_target);
-            //TODO 134081
-//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_mc, l_fapi_mcbist_target);
+        FAPI_INVOKE_HWP(l_err, p9_mss_draminit_mc, l_fapi_mcbist_target);
 
         if (l_err)
         {
@@ -95,7 +101,8 @@ void* call_mss_draminit_mc (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  p9_mss_draminit_mc HWP( )" );
+                       "SUCCESS running p9_mss_draminit_mc HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
         }
 
     } // End; memBuf loop

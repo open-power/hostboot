@@ -28,23 +28,25 @@ MODULE = istep13
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 #Add all the extra include paths
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
-
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
 
+
+# from src/usr/isteps/istep13
 OBJS += call_host_disable_memvolt.o
 OBJS += call_mem_pll_reset.o
 OBJS += call_mem_pll_initf.o
@@ -58,6 +60,7 @@ OBJS += call_mss_draminit_training.o
 OBJS += call_mss_draminit_trainadv.o
 OBJS += call_mss_draminit_mc.o
 
+#From import/chips/p9/procedures/hwp/memory/lib
 OBJS += rank.o
 OBJS += c_str.o
 OBJS += ccs.o
@@ -70,27 +73,29 @@ OBJS += dp16.o
 OBJS += xlate.o
 OBJS += port.o
 
-
-
-
 OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
-
+#HWP build tool
 include ${ROOTPATH}/procedure.rules.mk
 
+# PLL HWPs
 include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_initf.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mca_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
+include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
+include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_reset.mk
+
+#Start Memclocks
+include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
+
+#Scom init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
 
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mca_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcs_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcbist_scom.mk
 
-include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_mem_pll_setup.mk
-
-
+#Dram init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk

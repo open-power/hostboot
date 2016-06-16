@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+//Error handling and tracing
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -29,17 +31,16 @@
 #include <initservice/isteps_trace.H>
 
 //HWP Invoker
-#include    <fapi2/plat_hwp_invoker.H>
-
+#include <fapi2/plat_hwp_invoker.H>
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/util.H>
-#include    <targeting/common/utilFilter.H>
-#include    <fapi2/target.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
+#include <fapi2/target.H>
 
 //From Import Directory (EKB Repository)
-#include    <p9_mem_startclocks.H>
+#include <p9_mem_startclocks.H>
 
 
 using   namespace   ERRORLOG;
@@ -65,21 +66,21 @@ void* call_mem_startclocks (void *io_pArgs)
     {
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running cen_mem_startclocks HWP on "
+                "Running p9_mem_startclocks HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
           l_fapi2_procChip( l_procChip);
 
-//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
+
         //  call the HWP with each fapi::Target
-//          FAPI_INVOKE_HWP(l_err, p9_mem_startclocks, l_fapi2_procChip);
+        FAPI_INVOKE_HWP(l_err, p9_mem_startclocks, l_fapi2_procChip);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: cen_mem_startclocks HWP returns error",
-                      l_err->reasonCode());
+                    "ERROR 0x%.8X: p9_mem_startclocks HWP returns error",
+                    l_err->reasonCode());
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
@@ -94,7 +95,8 @@ void* call_mem_startclocks (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  cen_mem_startclocks HWP( )" );
+                       "SUCCESS running p9_mem_startclocks HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_procChip));
         }
     }
 

@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+//Error handling and tracing
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
@@ -33,10 +35,12 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
-#include    <config.h>
-#include    <fapi2.H>
+// fapi2 HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
+//From Import Directory (EKB Repository)
+#include    <config.h>
+#include    <fapi2.H>
 #include    <p9_mss_scominit.H>
 #include    <p9_throttle_sync.H>
 
@@ -94,7 +98,8 @@ void* call_mss_scominit (void *io_pArgs)
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  p9_mss_scominit HWP( )" );
+                           "SUCCESS running p9_mss_scominit HWP on "
+                           "target HUID %.8X", TARGETING::get_huid(l_target));
             }
         }
         if (!l_stepError.isNull())
@@ -138,7 +143,8 @@ void* call_mss_scominit (void *io_pArgs)
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  p9_throttle_sync HWP( )" );
+                           "SUCCESS running p9_throttle_sync HWP on "
+                           "target HUID %.8X", TARGETING::get_huid(l_procChip));
             }
         }
 
