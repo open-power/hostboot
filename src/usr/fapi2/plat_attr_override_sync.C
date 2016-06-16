@@ -45,6 +45,9 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributeTank.H>
+#include <fapi2AttrSyncData.H>
+#include <fapi2_attribute_service.H>
+#include <util/utilmbox_scratch.H>
 
 namespace fapi2
 {
@@ -487,6 +490,49 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
 }
 
 //******************************************************************************
+void AttrOverrideSync::sendFapiAttrSyncs()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    const uint32_t MAILBOX_CHUNK_SIZE = 4096;
+
+    // Send Hostboot Attributes to Sync to the debug channel
+    std::vector<TARGETING::AttributeTank::AttributeSerializedChunk>
+      l_attributes;
+
+    iv_syncTank.serializeAttributes(
+                                    TARGETING::AttributeTank::ALLOC_TYPE_MALLOC,
+                                    MAILBOX_CHUNK_SIZE, l_attributes);
+
+    // Send Attributes through the mailbox chunk by chunk.
+    std::vector<TARGETING::AttributeTank::AttributeSerializedChunk>::iterator
+        l_itr;
+    for (l_itr = l_attributes.begin(); l_itr != l_attributes.end(); ++l_itr)
+    {
+        // Send the message and wait for tool to recieve
+        // address to go to zero (means that Cronus/debug framework has
+        // consumed
+        uint64_t l_addr = reinterpret_cast<uint64_t>((*l_itr).iv_pAttributes);
+        Util::writeDebugCommRegs(Util::MSG_TYPE_ATTRDUMP,
+                                 l_addr,
+                                 (*l_itr).iv_size);
+
+        // Freed the chunk data
+        free((*l_itr).iv_pAttributes);
+        (*l_itr).iv_pAttributes = NULL;
+
+    }
+
+    //Let the tool know we are finished syncing with magic address
+    Util::writeDebugCommRegs(Util::MSG_TYPE_ATTRDUMP,
+                             0xFFFFCAFE, 0);
+
+    // Clear Sync tank
+    l_attributes.clear();
+    iv_syncTank.clearAllAttributes();
+#endif
+}
+
+//******************************************************************************
 void AttrOverrideSync::getAttrOverridesFromFsp()
 {
 #ifndef __HOSTBOOT_RUNTIME
@@ -624,6 +670,83 @@ void AttrOverrideSync::setAttrActions(const AttributeId i_attrId,
                 l_node, 0, i_size, i_pVal);
         }
     }
+}
+
+//******************************************************************************
+void AttrOverrideSync::triggerAttrSync()
+{
+    //Walk through all HB targets and see if there is a matching FAPI target
+    //If so then get the list of ATTR for FAPI target and add to sync list
+    for (TARGETING::TargetIterator target = TARGETING::targetService().begin();
+         target != TARGETING::targetService().end();
+         ++target)
+    {
+        // Get the Target pointer
+        TARGETING::Target * l_pTarget = *target;
+
+        //Get FAPI target
+        TARGETING::TYPE l_type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+        fapi2::TargetType l_fType = convertTargetingTypeToFapi2(l_type);
+
+        if(l_fType == fapi2::TARGET_TYPE_NONE)
+        {
+            //Didn't allocate fapi2 target, don't need to free
+            continue; //not a FAPI2 target -- skip to next target
+        }
+
+        TARGETING::EntityPath phys_path_ptr =
+          l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        FAPI_INF("triggerAttrSync: HUID 0x%X, fapi type[%x] [%s]",
+                 TARGETING::get_huid(l_pTarget), l_fType,
+                 phys_path_ptr.toString());
+
+        //Need a generic fapi target to use later
+        fapi2::Target<TARGET_TYPE_ALL> l_fapiTarget( l_pTarget);
+
+        //Determine the target location info
+        uint16_t l_pos = 0;
+        uint8_t l_unitPos = 0;
+        uint8_t l_node = 0;
+        l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
+
+        //Loop on all fapi targets under this target type
+        size_t l_elems = 0;
+        const AttributeSyncInfo * l_attrs =
+                            get_fapi_target_attr_array(l_fType, l_elems);
+
+        //If NULL, nothing there to sync
+        if(!l_attrs)
+        {
+            continue;
+        }
+
+        for(size_t i = 0; i < l_elems; i++)
+        {
+            // Write the attribute to the SyncAttributeTank to sync to Cronus
+            size_t l_bytes =
+              l_attrs[i].iv_attrElemSizeBytes * l_attrs[i].iv_dims[0] *
+              l_attrs[i].iv_dims[1] * l_attrs[i].iv_dims[2] *
+              l_attrs[i].iv_dims[3];
+
+            //Get the data
+            uint8_t l_buf[l_bytes];
+            ReturnCode l_rc =
+              rawAccessAttr(
+                        static_cast<fapi2::AttributeId>(l_attrs[i].iv_attrId),
+                        l_fapiTarget, &l_buf[0]);
+
+            // Write the attribute to the SyncAttributeTank to sync to Cronus
+            if(l_rc == FAPI2_RC_SUCCESS)
+            {
+                iv_syncTank.setAttribute(l_attrs[i].iv_attrId, l_fType,
+                                         l_pos, l_unitPos, l_node, 0,
+                                         l_bytes, l_buf);
+            }
+        }
+    }
+
+    //Now push the data to the debug tool
+    sendFapiAttrSyncs();
 }
 
 //******************************************************************************

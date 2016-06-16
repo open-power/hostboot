@@ -211,6 +211,24 @@ public:
                         const void * i_pVal);
 
     /**
+     * @brief This will force a sync of all FAPI attr to the FSP or the
+     *  debug interface using the built in attribute sync tank
+     *
+     * This is called for ALL FAPI Attributes even if they are
+     * directly backed into HB targeting
+     *
+     * - The attribute is saved to be synced to debug interface (Cronus)
+     *
+     */
+    void triggerAttrSync();
+
+    /**
+     * @brief This function actually sends the FAPI Sync tank attributes
+     *  across the debug interface
+     */
+    void sendFapiAttrSyncs();
+
+    /**
      * @brief This function performs the actions required on an attribute set
      *
      * This is a wrapper that calls setAttrActions on the AttrOverrideSync
