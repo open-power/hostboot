@@ -80,6 +80,11 @@ int main(int i_argc, char* i_argv[])
         strcpy(cronus_target, l_target);
     }
 
+    // Parse out common eCMD args like -p0, -c0, -coe, etc..
+    // Do this after parsing off tool specific arguments
+    const uint32_t l_rc  = ecmdCommandArgs(&i_argc, &i_argv);
+    mss::lab::is_ok((l_rc == ECMD_SUCCESS), "Failed parsing ecmd command args");
+
     // get ecmd target
     auto ecmd_target = std::make_shared<ecmdChipTarget>();
     rc = mss::lab::get_ecmd_target(cronus_target, ecmd_target);
