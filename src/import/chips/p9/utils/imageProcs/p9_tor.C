@@ -103,7 +103,7 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
     }
 
     // Looper for each SBE chiplet
-    for(int l = 0; l < MAX_CPLT_SBE; l++)  //MAX_CPLT_SBE
+    for(int l = 0; l < SBE_NOOF_CHIPLETS; l++)
     {
         GenRingIdList* ring_id_list_common = NULL;
         GenRingIdList* ring_id_list_instance = NULL;
@@ -112,91 +112,84 @@ int get_ring_from_sbe_image ( void*           i_ringSectionPtr, // Image pointer
 
         switch (l)
         {
-            case 0 :
+            case PERV_CPLT :
                 l_cpltData  =  PERV::g_pervData;
                 iv_num_variant  = (uint8_t)sizeof(PERV::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PERV::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PERV::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 1 :
+            case N0_CPLT :
                 l_cpltData  =     N0::g_n0Data;
                 iv_num_variant  = (uint8_t)sizeof(N0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N0::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 2 :
+            case N1_CPLT :
                 l_cpltData =   N1::g_n1Data;
                 iv_num_variant  = (uint8_t)sizeof(N1::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N1::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N1::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 3 :
+            case N2_CPLT :
                 l_cpltData  =    N2::g_n2Data;
                 iv_num_variant  = (uint8_t)sizeof(N2::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N2::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N2::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 4 :
+            case N3_CPLT :
                 l_cpltData =   N3::g_n3Data;
                 iv_num_variant  = (uint8_t)sizeof(N3::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) N3::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) N3::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 5 :
+            case XB_CPLT :
                 l_cpltData = XB::g_xbData;
                 iv_num_variant  = (uint8_t)sizeof(XB::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) XB::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) XB::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 6 :
+            case MC_CPLT :
                 l_cpltData = MC::g_mcData;
                 iv_num_variant  = (uint8_t)sizeof(MC::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) MC::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) MC::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 7 :
-                l_cpltData  = OB::g_obData;
-                iv_num_variant  = (uint8_t)sizeof(OB::RingVariants) / sizeof(uint16_t);
-                ring_id_list_common = (GenRingIdList*) OB::RING_ID_LIST_COMMON;
-                ring_id_list_instance = (GenRingIdList*) OB::RING_ID_LIST_INSTANCE;
-                break;
-
-            case 8 :
+            case PCI0_CPLT :
                 l_cpltData  =  PCI0::g_pci0Data;
                 iv_num_variant  = (uint8_t)sizeof(PCI0::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI0::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI0::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 9 :
+            case PCI1_CPLT :
                 l_cpltData =  PCI1::g_pci1Data;
                 iv_num_variant  = (uint8_t)sizeof(PCI1::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI1::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI1::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 10 :
+            case PCI2_CPLT :
                 l_cpltData =  PCI2::g_pci2Data;
                 iv_num_variant  = (uint8_t)sizeof(PCI2::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) PCI2::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) PCI2::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 11 :
+            case EQ_CPLT :
                 l_cpltData  =  EQ::g_eqData;
                 iv_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) EQ::RING_ID_LIST_COMMON;
                 ring_id_list_instance = (GenRingIdList*) EQ::RING_ID_LIST_INSTANCE;
                 break;
 
-            case 12 :
+            case EC_CPLT :
                 l_cpltData =  EC::g_ecData;
                 iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
                 ring_id_list_common = (GenRingIdList*) EC::RING_ID_LIST_COMMON;
@@ -1158,7 +1151,7 @@ int tor_get_ring(  void*
 
         if(i_PpeType == SBE)
         {
-            SbeTorId_t l_sbeTorId = SBEALL;
+            SbeTorId_t l_sbeTorId = SBE_NOOF_CHIPLETS;
 
             switch (io_instanceId)
             {
@@ -1190,9 +1183,6 @@ int tor_get_ring(  void*
                     l_sbeTorId = MC_CPLT;
                     break;
 
-                case 9 :
-                    l_sbeTorId = OB_CPLT;
-                    break;
 
                 case 13 :
                     l_sbeTorId = PCI0_CPLT;
@@ -1339,7 +1329,7 @@ int tor_get_ring(  void*
         }
         else if (i_PpeType == CME)
         {
-            CmeTorId_t l_cmeTorId = CMEALL;
+            CmeTorId_t l_cmeTorId = CME_NOOF_CHIPLETS;
 
             switch (io_instanceId)
             {

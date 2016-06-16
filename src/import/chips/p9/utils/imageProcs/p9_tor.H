@@ -61,7 +61,6 @@ typedef struct
 } TorPpeBlock_t;
 
 
-#define MAX_CPLT_SBE                                  13
 #define IMGBUILD_TGR_RING_FOUND                        0
 #define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
 #define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image.
@@ -141,13 +140,12 @@ typedef enum SbeTorId
     N3_CPLT =   4,
     XB_CPLT =   5,
     MC_CPLT =   6,
-    OB_CPLT =   7,
-    PCI0_CPLT = 8,
-    PCI1_CPLT = 9,
-    PCI2_CPLT = 10,
-    EQ_CPLT   = 11,
-    EC_CPLT   = 12,
-    SBEALL  =   13
+    PCI0_CPLT = 7,
+    PCI1_CPLT = 8,
+    PCI2_CPLT = 9,
+    EQ_CPLT   = 10,
+    EC_CPLT   = 11,
+    SBE_NOOF_CHIPLETS =   12
 } SbeTorId_t;
 typedef enum CmeTorId
 {
@@ -163,7 +161,7 @@ typedef enum CmeTorId
     CME9_CPLT    = 9,
     CME10_CPLT   = 10,
     CME11_CPLT   = 11,
-    CMEALL       = 12
+    CME_NOOF_CHIPLETS = 12
 } CmeTorId_t;
 ///
 /// ****************************************************************************
