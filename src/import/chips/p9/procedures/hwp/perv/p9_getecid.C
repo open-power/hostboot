@@ -53,8 +53,6 @@ fapi2::ReturnCode p9_getecid(const
     bool secure_mode = false;
     fapi2::buffer<uint64_t> l_ecid_part0_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
-    fapi2::buffer<uint64_t> l_ecid_part1_data48 = 0;
-    fapi2::buffer<uint64_t> l_local = 0;
     FAPI_INF("Entering ...");
 
     FAPI_DBG("determine if security is enabled");
@@ -75,18 +73,19 @@ fapi2::ReturnCode p9_getecid(const
     FAPI_DBG("extract and manipulate ECID data");
     FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART0_REGISTER, l_ecid_part0_data64));
     FAPI_TRY(fapi2::getScom(i_target_chip, PU_OTPROM0_ECID_PART1_REGISTER, l_ecid_part1_data64));
+
     l_ecid_part0_data64.reverse();
     l_ecid_part1_data64.reverse();
 
-    l_local.insertFromRight<0, 64>(l_ecid_part0_data64);
-    attr_data[0] = l_local;
-    l_local.insertFromRight<0, 64>(l_ecid_part1_data64);
-    attr_data[1] = l_local;
-    o_fuseString.insert(l_ecid_part0_data64, 0, 64, 0);
-    l_ecid_part1_data64.extractToRight<0, 48>(l_ecid_part1_data48);
-    o_fuseString.insert(l_ecid_part1_data48, 64, 48, 0);
+    attr_data[0] = l_ecid_part0_data64();
+    attr_data[1] = l_ecid_part1_data64();
+
+    FAPI_TRY(o_fuseString.insert(l_ecid_part0_data64(), 0, 64));
+
+    FAPI_TRY(o_fuseString.insert(l_ecid_part1_data64(), 64, 48));
 
     FAPI_DBG("push fuse string into attribute");
+
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target_chip, attr_data));
 
     FAPI_DBG("restore ECC enable setting (insecure mode only)");
@@ -106,3 +105,4 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
