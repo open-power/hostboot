@@ -256,7 +256,13 @@ rs4_compress(CompressedScanData** o_data,
 /// the decompressed string, which is the size of the original string in bits
 /// rounded up to the nearest byte.
 ///
-/// \param[in] i_stringSize The size (in bytes) of \a io_data_str.
+/// \param[in,out] io_care_str A caller-supplied data area to contain the
+/// decompressed care mask. The \a i_stringSize must be large enough to contain
+/// the decompressed care mask, which is the size of the original string in
+/// bits rounded up to the nearest byte.
+///
+/// \param[in] i_stringSize The size (in bytes) of \a io_data_str and
+/// \a io_care_str.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
 ///
@@ -270,6 +276,7 @@ rs4_compress(CompressedScanData** o_data,
 /// \returns See \ref scan_compression_codes
 int
 _rs4_decompress(uint8_t* io_data_str,
+                uint8_t* io_care_str,
                 uint32_t i_stringSize,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4);
@@ -281,9 +288,13 @@ _rs4_decompress(uint8_t* io_data_str,
 /// decompressed string. After this call the caller owns \a o_data_str and is
 /// responsible for free()-ing this data area once it is no longer required.
 ///
-/// \param[out] o_length The length of the decompressed string in \e bits.
-/// The caller may assume that \a o_data_str contains at least
-/// (\a o_length + 7) / 8 \e bytes.
+/// \param[out] o_care_str The API malloc()-s this data area to contain the
+/// decompressed care mask. After this call the caller owns \a o_care_str and
+/// is responsible for free()-ing this data area once it is no longer required.
+///
+/// \param[out] o_length The length of the decompressed string and care mask
+/// in \e bits. The caller may assume that \a o_data_str and o_care_str each
+/// contain at least (\a o_length + 7) / 8 \e bytes.
 ///
 /// \param[in] i_rs4 A pointer to the CompressedScanData header + data to be
 /// decompressed.
@@ -291,6 +302,7 @@ _rs4_decompress(uint8_t* io_data_str,
 /// \returns See \ref scan_compression_codes
 int
 rs4_decompress(uint8_t** o_data_str,
+               uint8_t** o_care_str,
                uint32_t* o_length,
                const CompressedScanData* i_rs4);
 
