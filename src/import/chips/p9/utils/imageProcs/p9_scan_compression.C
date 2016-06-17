@@ -25,11 +25,8 @@
 // Note: This file was originally named p8_scan_compression.c; See CVS archive
 // for revision history of p8_scan_compression.c.
 
-/// \file p8_scan_compression.C
-/// \brief APIs related to scan chain compression.
-///
-/// RS4 Compression Format
-/// ======================
+/// RS4 Compression Format (version 2)
+/// ==================================
 ///
 /// Scan strings are compressed using a simple run-length encoding called
 /// RS4. The string to be decompressed and scanned is the difference between
@@ -46,11 +43,17 @@
 /// The string format includes a special control/data sequence that marks the
 /// end of the string and the final bits of scan data.
 ///
-/// Runs of 0x0 nibbles (rotates) are encoded using a simple variable-length
-/// integer encoding known as a "stop code".  This code treats each nibble in
-/// a variable-length integer encoding as an octal digit (the low-order 3
-/// bits) plus a stop bit (the high-order bit).  The examples below
-/// illustrate the encoding.
+/// Special control/data sequences have been been added for RS4v2 to
+/// store pairs of care mask nibble and data nibble. This enhancement
+/// is needed to allow the scanning of significant zeros.
+/// The RS4v1 format assumed that all zeros have no meaning other than
+/// the positioning of 1 bits.
+///
+/// Runs of 0x0 nibbles as determined by the care mask (rotates) are encoded
+/// using a simple variable-length integer encoding known as a "stop code".
+/// This code treats each nibble in a variable-length integer encoding as an
+/// octal digit (the low-order 3 bits) plus a stop bit (the high-order bit).
+/// The examples below illustrate the encoding.
 ///
 ///     1xxx            - Rotate 0bxxx       nibbles (0 - 7)
 ///     0xxx 1yyy       - Rotate 0bxxxyyy    nibbles (8 - 63)
@@ -63,11 +66,11 @@
 ///
 /// Runs of non-0x0 nibbles (scans) are inserted verbatim into the compressed
 /// string after a control nibble indicating the number of nibbles of
-/// uncompressed data.  If a run is longer than 15 nibbles, the compression
+/// uncompressed data.  If a run is longer than 14 nibbles, the compression
 /// algorithm must insert a 0-length rotate and a new scan-length control
 /// before continuing with the non-0 data nibbles.
 ///
-///     xxxx - Scan 0bxxxx nibbles which follow, 0bxxxx != 0
+///     xxxx - Scan 0bxxxx nibbles which follow, 0bxxxx != 0 and 0bxxxx != 15
 ///
 /// The special case of a 0b0000 code where a scan count is expected marks the
 /// end of the string.  The end of string marker is always followed by a
@@ -77,6 +80,18 @@
 ///
 ///     0000 00nn [ttt0] - Terminate 0bnn bits, data 0bttt0 if 0bnn != 0
 ///
+/// The special case of a 0b1111 code where a scan count is expected announces
+/// a pair of care mask nibble and data nibble containing significant zeros.
+/// Only a single pair can be stored this way, and longer sequences of such
+/// pairs require resynchronization using zero rotates and special scan count
+/// 0b1111 to be inserted.
+///
+/// Termination with care mask and data is accomplished by a special
+/// terminal data count:
+///
+///     0000 10nn [ccc0] [ttt0] - Terminate
+///                               0bnn bits care mask and 0bnn bits data,
+///                               care mask 0bccc0 and data 0bttt0 if 0bnn != 0
 ///
 /// BNF Grammar
 /// ===========
@@ -91,34 +106,56 @@
 ///
 /// \code
 ///
-/// <rs4_string>        ::= <rotate> <terminate> |
-///                         <rotate> <scan> <rs4_string>
+/// <rs4_string>             ::= <rotate> <terminate> |
+///                              <rotate> <scan> <rs4_string>
 ///
-/// <rotate>            ::= <octal_stop> |
-///                         <octal_go> <rotate>
+/// <rotate>                 ::= <octal_stop> |
+///                              <octal_go> <rotate>
 ///
-/// <octal_go>          ::= '0x0' | ... | '0x7'
+/// <octal_go>               ::= '0x0' | ... | '0x7'
 ///
-/// <octal_stop>        ::= '0x8' | ... | '0xf'
+/// <octal_stop>             ::= '0x8' | ... | '0xf'
 ///
-/// <scan>              ::= <scan_count(N)> <data(N)>
+/// <scan>                   ::= <scan_count(N)> <data(N)> |
+///                              <scan_count(15)> <care_data>
 ///
-/// <scan_count(N)>     ::= * 0bnnnn, for N = 0bnnnn, N != 0 *
+/// <scan_count(N)>          ::= * 0bnnnn, for N = 0bnnnn, N != 0  &  N != 15 *
 ///
-/// <data(N)>           ::= * N nibbles of uncompressed data *
+/// <scan_count(15)>         ::= '0xf'
 ///
-/// <terminate>         ::= '0x0' <terminal_count(0)> |
-///                         '0x0' <terminal_count(T, T > 0)> <terminal_data(T)>
+/// <data(N)>                ::= * N nibbles of uncompressed data, 0 < N < 15 *
 ///
-/// <terminal_count(T)> ::= * 0b00nn, for T = 0bnn *
+/// <terminate>              ::=
+///              '0x0' <terminal_count(0)> |
+///              '0x0' <terminal_count(T, T > 0)> <terminal_data(T)> |
+///              '0x0' <terminal_care_count(T, T > 0)> <terminal_care_data(T)>
 ///
-/// <terminal_data(1)>  ::= '0x0' | '0x8'
+/// <terminal_count(T)>      ::= * 0b00nn, for T = 0bnn *
 ///
-/// <terminal_data(2)>  ::= '0x0' | '0x4' | '0x8' | '0xc'
+/// <terminal_care_count(T)> ::= * 0b10nn, for T = 0bnn  &  T != 0 *
 ///
-/// <terminal_data(3)>  ::= '0x0' | '0x2' | '0x4' | ... | '0xe'
+/// <terminal_data(1)>       ::= '0x0' | '0x8'
+///
+/// <terminal_data(2)>       ::= '0x0' | '0x4' | '0x8' | '0xc'
+///
+/// <terminal_data(3)>       ::= '0x0' | '0x2' | '0x4' | ... | '0xe'
+///
+/// <terminal_care_data(1)>  ::= * 0b1000 0b0000 *
+///
+/// <terminal_care_data(2)>  ::= * 0bij00 0bwx00, for
+///                                i >= w  &  j >= x  &
+///                                ij > wx *
+///
+/// <terminal_care_data(3)>  ::= * 0bijk0 0bwxy0, for
+///                                i >= w  &  j >= x  &  k >= y  &
+///                                ijk > wxy *
+///
+/// <care_data>              ::= * 0bijkl 0bwxyz, for
+///                                i >= w  &  j >= x  &  k >= y  &  l >= z  &
+///                                ijkl > wxyz *
 ///
 /// \endcode
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -291,17 +328,23 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
 
 // RS4 compression algorithm notes:
 //
-// RS4 compression processes i_string as a string of nibbles.  Final
-// special-case code handles the 0-3 remaining terminal bits.
+// RS4 compression processes i_data_str/i_care_str as a strings of nibbles.
+// Final special-case code handles the 0-3 remaining terminal bits.
 //
 // There is a special case for 0x0 nibbles embedded in a string of non-0x0
 // nibbles. It is more efficient to encode a single 0x0 nibble as part of a
 // longer string of non 0x0 nibbles.  However it is break-even (actually a
-// slight statistical advantage) to break a scan seqeunce for 2 0x0 nibbles.
+// slight statistical advantage) to break a scan sequence for 2 0x0 nibbles.
 //
-// If a run of 15 scan nibbles is found the scan is terminated and we return
-// to the rotate state.  Runs of more than 15 scans will always include a
+// If a run of 14 scan nibbles is found the scan is terminated and we return
+// to the rotate state.  Runs of more than 14 scans will always include a
 // 0-length rotate between the scan sequences.
+//
+// The ability to store a 15th consecutive scan nibble was given up for an
+// enhancement of the compression algorithm:
+// The scan count 15 has a special meaning and is reserved for handling
+// single nibbles that come with a care mask, that is, an extra nibble that
+// determines the significance of scan bits, including both 1 and 0 bits.
 //
 // Returns a scan compression return code.
 
@@ -315,7 +358,7 @@ __rs4_compress(CompressedScanData* o_data,
     int state;                  /* 0 : Rotate, 1 : Scan */
     uint32_t n;                 /* Number of whole nibbles in i_data */
     uint32_t r;                 /* Number of reminaing bits in i_data */
-    uint32_t i;                 /* Nibble index in i_string */
+    uint32_t i;                 /* Nibble index in i_data_str/i_care_str */
     uint32_t j;                 /* Nibble index in data */
     uint32_t k;                 /* Location to place <scan_count(N)> */
     uint32_t count;             /* Counts rotate/scan nibbles */
@@ -390,7 +433,7 @@ __rs4_compress(CompressedScanData* o_data,
                     //   current AND next nibble (or next nibble might be last).
                     rs4_set_nibble(data, k, count);
                     count = 0;
-                    state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+                    state = 0;
                 }
                 else
                 {
@@ -418,14 +461,14 @@ __rs4_compress(CompressedScanData* o_data,
                 //   sequence of one-data nibbles.
                 rs4_set_nibble(data, k, count);
                 count = 0;
-                state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+                state = 0;
             }
 
             if ((state == 1) && (count == 14))
             {
                 rs4_set_nibble(data, k, 14);
                 count = 0;
-                state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+                state = 0;
             }
         }
         else // state==2
@@ -440,7 +483,7 @@ __rs4_compress(CompressedScanData* o_data,
             i++;
             j++;
             count = 0;
-            state = 0; // Lets go to rotate section to insert a zero rotate + stop.
+            state = 0;
         }
     } // End of while (i<n)
 
