@@ -49,8 +49,7 @@
 fapi2::ReturnCode
 p9_hcd_cache_stopclocks(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions,
-    const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex)
+    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions)
 {
     FAPI_INF(">>p9_hcd_cache_stopclocks");
 

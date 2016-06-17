@@ -38,8 +38,7 @@
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_hcd_cache_stopclocks_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>&,
-    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS,
-    const p9hcd::P9_HCD_EX_CTRL_CONSTANTS);
+    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS);
 
 extern "C"
 {
@@ -47,13 +46,11 @@ extern "C"
 /// @brief Quad Clock Stop
 /// @param [in] i_target TARGET_TYPE_EQ target
 /// @param [in] i_skip_regions select clk regions to skip on stopclocks
-/// @param [in] i_skip_ex select ex, odd and/or even, to skip on stopclocks
 /// @return FAPI2_RC_SUCCESS if success, else error code
     fapi2::ReturnCode
     p9_hcd_cache_stopclocks(
         const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-        const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions,
-        const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex);
+        const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions);
 
 }
 
