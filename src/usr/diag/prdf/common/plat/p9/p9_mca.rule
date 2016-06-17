@@ -122,23 +122,23 @@ chip p9_mca
     register DDRPHYFIR
     {
         name        "P9 MCA target DDRPHYFIR";
-        scomaddr    0x800200900701103F;
-        reset       (&, 0x800200910701103F);
-        mask        (|, 0x800200950701103F);
+        scomaddr    0x07011000;
+        reset       (&, 0x07011001);
+        mask        (|, 0x07011005);
         capture     group default;
     };
 
     register DDRPHYFIR_MASK
     {
         name        "P9 MCA target DDRPHYFIR MASK";
-        scomaddr    0x800200930701103F;
+        scomaddr    0x07011003;
         capture     group default;
     };
 
     register DDRPHYFIR_ACT0
     {
         name        "P9 MCA target DDRPHYFIR ACT0";
-        scomaddr    0x800200960701103F;
+        scomaddr    0x07011006;
         capture     group default;
         capture     req nonzero("DDRPHYFIR");
     };
@@ -146,7 +146,7 @@ chip p9_mca
     register DDRPHYFIR_ACT1
     {
         name        "P9 MCA target DDRPHYFIR ACT1";
-        scomaddr    0x800200970701103F;
+        scomaddr    0x07011007;
         capture     group default;
         capture     req nonzero("DDRPHYFIR");
     };
