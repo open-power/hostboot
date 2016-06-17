@@ -719,18 +719,20 @@ rs4_compress(CompressedScanData** o_data,
 
 static int
 __rs4_decompress(uint8_t* io_data_str,
+                 uint8_t* io_care_str,
                  const uint8_t* i_rs4_str,
                  const uint32_t i_length)
 {
     int rc;
     int state;                  /* 0 : Rotate, 1 : Scan */
     uint32_t i;                 /* Nibble index in i_rs4_str */
-    uint32_t j;                 /* Nibble index in io_data_str */
+    uint32_t j;                 /* Nibble index in io_data_str/io_care_str */
     uint32_t k;                 /* Loop index */
     uint32_t bits;              /* Number of output bits decoded so far */
     uint32_t count;             /* Count of rotate nibbles */
     uint32_t nibbles;           /* Rotate encoding or scan nibbles to process */
     int r;                      /* Remainder bits */
+    int masked;                 /* if a care mask is available */
 
     rc = 0;
     i = 0;
@@ -755,11 +757,9 @@ __rs4_decompress(uint8_t* io_data_str,
             i += nibbles;
             bits += (4 * count);
 
-            for (k = 0; k < count; k++)
-            {
-                rs4_set_nibble(io_data_str, j, 0);
-                j++;
-            }
+            // keep 'count' zero care and data nibbles
+            // as initialised by memset in calling function
+            j += count;
 
             state = 1;
         }
@@ -773,16 +773,20 @@ __rs4_decompress(uint8_t* io_data_str,
                 break;
             }
 
-            if ((bits + (4 * nibbles)) > i_length)
+            masked = (nibbles == 15 ? 1 : 0);
+            nibbles = (masked ? 1 : nibbles);
+            bits += 4 * nibbles;
+
+            if (bits > i_length)
             {
                 rc = BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
                 break;
             }
 
-            bits += (4 * nibbles);
-
             for (k = 0; k < nibbles; k++)
             {
+                rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
+                i = (masked ? i + 1 : i);
                 rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
                 i++;
                 j++;
@@ -797,8 +801,11 @@ __rs4_decompress(uint8_t* io_data_str,
 
     if (!rc)
     {
-        r = rs4_get_nibble(i_rs4_str, i);
+        nibbles = rs4_get_nibble(i_rs4_str, i);
         i++;
+
+        masked = nibbles & 0x8;
+        r = nibbles & 0x3;
 
         if (r != 0)
         {
@@ -809,6 +816,8 @@ __rs4_decompress(uint8_t* io_data_str,
             else
             {
                 bits += r;
+                rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
+                i = (masked ? i + 1 : i);
                 rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
             }
         }
@@ -832,6 +841,7 @@ __rs4_decompress(uint8_t* io_data_str,
 
 int
 _rs4_decompress(uint8_t* io_data_str,
+                uint8_t* io_care_str,
                 uint32_t i_stringSize,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4)
@@ -857,8 +867,9 @@ _rs4_decompress(uint8_t* io_data_str,
         }
 
         memset(io_data_str, 0, bytes);
+        memset(io_care_str, 0, bytes);
 
-        rc = __rs4_decompress(io_data_str,
+        rc = __rs4_decompress(io_data_str, io_care_str,
                               (uint8_t*)i_rs4 + sizeof(CompressedScanData),
                               *o_length);
     }
@@ -870,6 +881,7 @@ _rs4_decompress(uint8_t* io_data_str,
 
 int
 rs4_decompress(uint8_t** o_data_str,
+               uint8_t** o_care_str,
                uint32_t* o_length,
                const CompressedScanData* i_rs4)
 {
@@ -886,15 +898,17 @@ rs4_decompress(uint8_t** o_data_str,
 
         length = htobe32(i_rs4->iv_length);
         bytes = (length + 7) / 8;
-        *o_data_str = (uint8_t*)malloc(bytes);
 
-        if (*o_data_str == 0)
+        *o_data_str = (uint8_t*)malloc(bytes);
+        *o_care_str = (uint8_t*)malloc(bytes);
+
+        if (*o_data_str == 0 || *o_care_str == 0)
         {
             rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
             break;
         }
 
-        rc = _rs4_decompress(*o_data_str, bytes, o_length, i_rs4);
+        rc = _rs4_decompress(*o_data_str, *o_care_str, bytes, o_length, i_rs4);
 
     }
     while (0);
