@@ -60,6 +60,7 @@
 #define FAPI_INVOKE_HWP(ERRHNDL, FUNC, _args_...) \
     {\
         fapi2::ReturnCode l_rc; \
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;\
         FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(l_rc);\
         if( ERRHNDL ) {\
