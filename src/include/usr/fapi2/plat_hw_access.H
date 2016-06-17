@@ -178,6 +178,20 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
                        const RingID i_ringID,
                        const RingMode i_ringMode);
 
+//--------------------------------------------------------------------------
+// Operational Mode Error Functions
+//--------------------------------------------------------------------------
+
+/// @brief Sets the operational mode
+/// @param[in]  i_mode     The new mode
+void platSetOpMode(const OpModes i_mode);
+
+/// @brief Gets the operational mode
+/// @return the operational mode
+OpModes platGetOpMode(void);
+
+extern OpModes opMode;
+
 // --------------------------------------------------------------------------
 // NOTE:
 // No spy access interface as HB doesn't allow spy access.

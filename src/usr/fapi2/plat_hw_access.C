@@ -55,6 +55,9 @@ const uint32_t CFAM_ENGINE_OFFSET = 0xFE00;
 // Function prototypes
 uint64_t platGetDDScanMode(const uint32_t i_ringMode);
 
+//TODO RTC:147599 Make this thread_local
+OpModes opMode = NORMAL;
+
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
 //------------------------------------------------------------------------------
@@ -871,6 +874,22 @@ uint64_t platGetDDScanMode(const uint32_t i_ringMode)
 
     return l_scanMode;
 }
+
+//--------------------------------------------------------------------------
+// Operational Mode Error Functions
+//--------------------------------------------------------------------------
+
+void platSetOpMode(const OpModes i_mode)
+{
+    opMode = i_mode;
+    return;
+}
+
+OpModes platGetOpMode(void)
+{
+    return opMode;
+}
+
 
 // --------------------------------------------------------------------------
 // NOTE:

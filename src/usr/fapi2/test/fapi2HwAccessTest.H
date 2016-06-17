@@ -171,6 +171,18 @@ void test_fapi2HwAccess()
             numFails++;
         }
 
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_opmodetest_getsetopmode);
+        if(l_errl)
+        {
+            TS_FAIL("p9_opmodetest_getsetopmode !!");
+            numFails++;
+            delete l_errl; // delete unexpected error log so we dont get
+                           // a false negative on the next case
+        }
+
+
 #if 0 // TODO-RTC:151428 - need simics support for these to pass
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_fail, fapi2_procTarget);
