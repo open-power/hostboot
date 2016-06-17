@@ -72,6 +72,7 @@ fapi2::ReturnCode p9_cfamtest_getcfam_pass(
 fapi2::ReturnCode p9_cfamtest_putcfam_pass(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+fapi2::ReturnCode p9_opmodetest_getsetopmode();
 
 /////////////
 //

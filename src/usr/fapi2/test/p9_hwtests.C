@@ -28,9 +28,17 @@
 /// @brief These procedures test the fapi2 hw_access interfaces.
 //-----------------------------------------------------------------------------
 
+#include <cxxtest/TestSuite.H>
 #include <fapi2.H>
 #include <fapi2_hw_access.H>
+#include <errl/errlentry.H>
+#include <plat_hwp_invoker.H>
 
+//This function does nothing, it is used to call FAPI_INVOKE on
+fapi2::ReturnCode empty_function(void)
+{
+    return fapi2::current_err;
+}
 
 fapi2::ReturnCode p9_scomtest_getscom_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
@@ -293,3 +301,42 @@ fapi2::ReturnCode p9_ringtest_modring_pass(
     return fapi2::current_err;
 
 }
+
+fapi2::ReturnCode p9_opmodetest_getsetopmode()
+{
+    FAPI_INF("Ensure that getOpMode return NORMAL initially");
+    do
+    {
+        fapi2::OpModes mode = fapi2::getOpMode();
+        if(mode != fapi2::NORMAL)
+        {
+            TS_FAIL("p9_opmodetest_getsetopmode>> Expected fapi2::getOpMode to return fapi2::NORMAL (0x0) but instead returned %x", mode);
+            break;
+        }
+
+        FAPI_INF("Setting opMode to IGNORE_HW_ERROR (0x1) and checking that we get it back with getOpMode");
+
+        fapi2::setOpMode(fapi2::IGNORE_HW_ERROR);
+        mode = fapi2::getOpMode();
+        if(mode != fapi2::IGNORE_HW_ERROR)
+        {
+            TS_FAIL("p9_opmodetest_getsetopmode>> Expected fapi2::getOpMode to return fapi2::IGNORE_HW_ERROR (0x1) but instead returned %x", mode);
+            break;
+        }
+
+        //Call FAPI_INVOKE on an empty function to test if it resets the opMode
+        errlHndl_t l_errl = NULL;
+        FAPI_INVOKE_HWP(l_errl,empty_function);
+
+        mode = fapi2::getOpMode();
+        if(mode != fapi2::NORMAL)
+        {
+            TS_FAIL("p9_opmodetest_getsetopmode>> Expected fapi2::getOpMode to return fapi2::NORMAL (0x0) but instead returned %x , FAPI_INVOKE failed to reset opmode", mode);
+            break;
+        }
+
+    }while(0);
+
+    return fapi2::current_err;
+}
+

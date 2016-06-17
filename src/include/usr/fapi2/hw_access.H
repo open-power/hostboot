@@ -65,16 +65,18 @@ inline uint8_t getPIBErrorMask(void)
 // Operational Mode Error Functions
 //--------------------------------------------------------------------------
 
+//The operational mode, or opMode is a thread local variable that allows the
+//fapi2 interface to call getScom or putScom with special settings. Examples
+//of their use cases are disabling the abiility for a scom to wakeup or core
+//or ignore hardware errors. The opMode is reset on every FAPI_INVOKE call
+//and is therefore reset each HWP.
+
 /// @brief Sets the operational mode
 /// @param[in]  i_mode     The new mode
 // note: this can be moved  to a C file if desired
 inline void setOpMode(const OpModes i_mode)
 {
-    // Keeps the compiler from complaining about the unused i_mode
-    static_cast<void>(i_mode);
-    //TODO: RTC 124195 FAPI2 - PIB error mask and Operation mode supports
-    // No-op for now. Should set thread-local operational mode
-    return;
+    return platSetOpMode(i_mode);
 }
 
 /// @brief Gets the operational mode
@@ -82,9 +84,7 @@ inline void setOpMode(const OpModes i_mode)
 // note: this can be moved  to a C file if desired
 inline OpModes getOpMode(void)
 {
-    //TODO: RTC 124195 FAPI2 - PIB error mask and Operation mode supports
-    // No-op for now. Should read thread-local operational mode
-    return NORMAL;
+    return platGetOpMode();
 }
 
 //------------------------------------------------------------------------------
