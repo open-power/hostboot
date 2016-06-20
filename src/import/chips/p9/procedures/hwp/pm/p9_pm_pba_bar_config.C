@@ -202,7 +202,7 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
                  "Final work_size: 0x%016llX", i_pba_bar_size, l_work_size);
     }
 
-    l_finalMask = l_work_size - 1;
+    l_finalMask = (l_work_size - 1) << 20; //shift to align mask 1MB
 
     FAPI_DBG("bar mask: 0x%016llX", l_finalMask);
 
