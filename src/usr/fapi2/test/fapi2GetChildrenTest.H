@@ -289,7 +289,7 @@ void test_fapi2GetChildren()
                  { return i_perv.getChildren<fapi2::TARGET_TYPE_CAPP>(
                    TARGET_STATE_PRESENT).size(); } },
 
-            // NV pervasive has 2 NV children
+            // NV pervasive has 1 NV children
             {PERV_NV_CHILDREN,
              [](TARGETING::ATTR_CHIP_UNIT_type i_unit)
                   { return (i_unit == NV_RANGE); },

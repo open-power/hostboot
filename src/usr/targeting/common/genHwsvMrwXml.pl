@@ -79,15 +79,15 @@ use constant
     MAX_MCS_PER_PROC => 4,
     MAX_MCA_PER_PROC => 8,
     MAX_MCBIST_PER_PROC => 2,
-    MAX_PEC_PER_PROC => 3,
-    MAX_PHB_PER_PROC => 6,
+    MAX_PEC_PER_PROC => 3,    # PEC is same as PBCQ
+    MAX_PHB_PER_PROC => 6,    # PHB is same as PCIE
     MAX_MBA_PER_MEMBUF => 2,
     MAX_OBUS_PER_PROC => 4,
     MAX_PPE_PER_PROC => 51,   #Only 21, but they are sparsely populated
     MAX_PERV_PER_PROC => 56,  #Only 42, but they are sparsely populated
     MAX_CAPP_PER_PROC => 2,
     MAX_SBE_PER_PROC => 1,
-    MAX_NV_PER_PROC => 2,
+    MAX_NV_PER_PROC => 1,     # FW only for GARD purposes
     MAX_MI_PER_PROC => 4,
 };
 
@@ -1856,12 +1856,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
                       \%fapiPosH);
 
         generate_occ($proc, $proc_ordinal_id);
-
         generate_nx($proc,$proc_ordinal_id,$node);
-
-        #TODO-RTC:149326-Finish up the rest of the misc units
-        #generate_pcies($proc,$proc_ordinal_id);
-        #generate_pore($proc,$proc_ordinal_id,$node);
+        generate_nv($proc,$proc_ordinal_id,$node);
 
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
@@ -2993,8 +2989,6 @@ sub calcAndAddFapiPos
         $typeToLimit{"pec"}    = ARCH_LIMIT_PEC_PER_PROC;
         $typeToLimit{"phb"}    = ARCH_LIMIT_PHB_PER_PEC;
 
-        #TODO RTC 149326 Add calcAndAddFapiPos logic for NV unit
-        # when generate_nv is available
     }
 
     my $parentFapiPos = 0;
@@ -3752,8 +3746,6 @@ sub getPervasiveForUnit
         {
             $unitToPervasive{"phb$phb"} = 13 + ($phb>0) + ($phb>2);
         }
-        #TODO: RTC 149326 add calls to addPervasiveParentLink for nv
-        # in the generate_nv function when it gets created
         for my $nv (0..MAX_NV_PER_PROC-1)
         {
             $unitToPervasive{"nv$nv"} = 5;
@@ -4746,94 +4738,72 @@ sub generate_sbe
 ";
 }
 
-sub generate_pcies
+sub generate_nv
 {
     my ($proc,$ordinalId) = @_;
     my $proc_name = "n${node}:p${proc}";
-    print "\n<!-- $SYSNAME n${node}p${proc} PCI units -->\n";
-    my $max_index = 2;
+    print "\n<!-- $SYSNAME n${node}p${proc} NV units -->\n";
 
-    # TODO RTC: 116091
-    # Note: Originally the MRW parser created 3 PCI targets for every processor
-    # using a hard coded max_index value of 2.  Defect SW238553 added logic to
-    # differentiate the number of targets based on processor type (3 for Murano,
-    # 4 for Brazos).  This was erroneous, but by the time the problem was
-    # caught, it was too late in the release process to fix because the change
-    # would end up renumbering the HUID space.  Since the extra target is
-    # benign, it was decided to leave the bad code in for the remainder of P8.
-    # This issue should be fixed in the first release of P9.  If the number of
-    # PCI targets will be fixed across all P9 processors, simply remove the
-    # dynamic selection code in favor of a hard coded value.  Otherwise, make
-    # the computation data driven by reading the # of PCI targets from
-    # appropriate MRW processor part.
-    if ($CHIPNAME eq "venice")
+    for my $i ( 0 .. MAX_NV_PER_PROC-1 )
     {
-        $max_index = 3;
-    }
-
-    my $max_pcie = $max_index+1;
-
-    for my $i ( 0 .. $max_index )
-    {
-        generate_a_pcie( $proc, $i, $max_pcie, ($ordinalId*$max_pcie)+$i );
+        generate_a_nv( $proc, $i, MAX_NV_PER_PROC,
+            ($ordinalId*MAX_NV_PER_PROC)+$i );
     }
 }
 
-my $phbInit = 0;
-my %phbList = ();
-sub generate_phb
+my $nvIpathInit = 0;
+my %nvList = ();
+sub generate_nv_ipath
 {
-    my $targets_file = open_mrw_file($::mrwdir, "${sysname}-targets.xml");
-    my $phbTargets = parse_xml_file($targets_file);
-
-    #get the PHB details
-    foreach my $Target (@{$phbTargets->{target}})
+    #get the nv ipath detail using previously computed $eTargets
+    foreach my $Target (@{$eTargets->{target}})
     {
-        if($Target->{'ecmd-common-name'} eq "phb")
+        #get the nv ipath detail
+        #@TODO-RTC:156600
+        if($Target->{'ecmd-common-name'} eq "nvbus")
         {
-            my $node     = $Target->{'node'};
-            my $proc     = $Target->{'position'};
+            my $node = $Target->{'node'};
+            my $position = $Target->{'position'};
             my $chipUnit = $Target->{'chip-unit'};
-            my $ipath    = $Target->{'instance-path'};
+            my $ipath = $Target->{'instance-path'};
 
-
-            $phbList{$node}{$proc}{$chipUnit} = {
-                'node'        => $node,
-                'proc'        => $proc,
-                'phbChipUnit' => $chipUnit,
-                'phbIpath'    => $ipath,
+            $nvList{$node}{$position}{$chipUnit} = {
+                'node'         => $node,
+                'position'     => $position,
+                'nvChipUnit'   => $chipUnit,
+                'nvIpath'      => $ipath,
             }
         }
     }
 }
 
-sub generate_a_pcie
+sub generate_a_nv
 {
-    my ($proc, $phb, $max_pcie, $ordinalId) = @_;
-    my $uidstr = sprintf("0x%02X10%04X",${node},$proc*$max_pcie + $phb);
+    my ($proc, $nv, $max_nv, $ordinalId) = @_;
+    my $uidstr = sprintf("0x%02X29%04X",${node},$proc*$max_nv + $nv);
 
-    # Get the PHB info
-    if ($phbInit == 0)
+    # Get the NV info
+    if ($nvIpathInit == 0)
     {
-        generate_phb;
-        $phbInit = 1;
+        generate_nv_ipath;
+        $nvIpathInit = 1;
     }
 
-    my $fapi_name = "NA"; # pcie not FAPI target
+    my $fapi_name = "NA"; # NV not FAPI target
 
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}pci${phb}</id>
-    <type>unit-pci-power9</type>
+    <id>sys${sys}node${node}proc${proc}nv${nv}</id>
+    <type>unit-nv-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/nv-$nv</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/nv-$nv</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4841,41 +4811,26 @@ sub generate_a_pcie
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
-        <default>instance:$phbList{$node}{$proc}{$phb}->{'phbIpath'}</default>
+        <default>instance:$nvList{$node}{$proc}{$nv}->{'nvIpath'}</default>
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$phb</default>
+        <default>$nv</default>
     </attribute>";
 
-    # call to do any fsp per-pcie attributes
-    do_plugin('fsp_pcie', $proc, $phb, $ordinalId );
+    addPervasiveParentLink($sys,$node,$proc,$nv,"nv");
 
     print "
 </targetInstance>
 ";
 }
 
-my $poreNxInit = 0;
-my %poreList = ();
+my $nxInit = 0;
 my %nxList = ();
-sub generate_pore_nx_ipath
+sub generate_nx_ipath
 {
-    #get the PORE ipath detail using previously computed $eTargets
     foreach my $Target (@{$eTargets->{target}})
     {
-        if($Target->{'ecmd-common-name'} eq "pore")
-        {
-            my $ipath = $Target->{'instance-path'};
-            my $node = $Target->{node};
-            my $position = $Target->{position};
-
-            $poreList{$node}{$position} = {
-                'node'         => $node,
-                'position'     => $position,
-                'instancePath' => $ipath,
-            }
-        }
         #get the nx ipath detail
         if($Target->{'ecmd-common-name'} eq "nx")
         {
@@ -4897,11 +4852,11 @@ sub generate_nx
     my ($proc, $ordinalId, $node) = @_;
     my $uidstr = sprintf("0x%02X1E%04X",${node},$proc);
 
-    # Get the nx and PORE info
-    if ($poreNxInit == 0)
+    # Get the nx info
+    if ($nxInit == 0)
     {
-        generate_pore_nx_ipath;
-        $poreNxInit = 1;
+        generate_nx_ipath;
+        $nxInit = 1;
     }
 
     my $ipath = $nxList{$node}{$proc}->{'instancePath'};
@@ -4942,62 +4897,6 @@ sub generate_nx
 
     # call to do any fsp per-nx attributes
     do_plugin('fsp_nx', $proc, $ordinalId );
-
-    print "
-</targetInstance>
-";
-}
-
-sub generate_pore
-{
-    my ($proc, $ordinalId, $node) = @_;
-    my $uidstr = sprintf("0x%02X1F%04X",${node},$proc);
-
-    # Get the nx and PORE info
-    if ($poreNxInit == 0)
-    {
-        generate_pore_nx_ipath;
-        $poreNxInit = 1;
-    }
-
-    my $ipath = $poreList{$node}{$proc}->{'instancePath'};
-    my $mruData = get_mruid($ipath);
-    my $fapi_name = "NA"; # pore not FAPI target
-
-    print "\n<!-- $SYSNAME n${node}p$proc PORE units -->\n";
-    print "
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}pore0</id>
-    <type>unit-pore-power9</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/pore-0</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>$mruData</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/pore-0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>$ordinalId</default>
-    </attribute>
-    <compileAttribute>
-        <id>INSTANCE_PATH</id>
-        <default>instance:$ipath</default>
-    </compileAttribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>";
-
-    # call to do any fsp per-pore attributes
-    do_plugin('fsp_pore', $proc, $ordinalId );
 
     print "
 </targetInstance>

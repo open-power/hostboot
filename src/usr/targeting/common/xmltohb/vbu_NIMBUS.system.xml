@@ -2502,7 +2502,7 @@
 <targetInstance>
     <id>sys0node0proc0nv0</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0300</default></attribute>
+    <attribute><id>HUID</id><default>0x00290000</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
@@ -2515,49 +2515,12 @@
         <default>affinity:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-5</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0nv1</id>
-    <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x002E0301</default></attribute>
-    <attribute>
-        <id>FAPI_NAME</id><default>NA</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nv-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/nv-1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
