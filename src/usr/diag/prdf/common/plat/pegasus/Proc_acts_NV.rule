@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -433,7 +433,7 @@ group gNpuFir filter singlebit
     /** NPUFIR[31]
      *  LMD Stomp/CRC Error
      */
-    (NpuFir, bit(31)) ? SelfMedThr32PerDay;
+    (NpuFir, bit(31)) ? thresholdAndMask_self;
 
     /** NPUFIR[32]
      *  CQ Parity Error Fatal Error
