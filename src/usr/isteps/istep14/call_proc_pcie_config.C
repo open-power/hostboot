@@ -68,7 +68,7 @@ void* call_proc_pcie_config (void *io_pArgs)
                 "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
         //  call the HWP with each fapi::Target
-//         FAPI_INVOKE_HWP( l_errl, p9_pcie_config, l_fapi_cpu_target );
+        FAPI_INVOKE_HWP( l_errl, p9_pcie_config, l_fapi_cpu_target );
 
         if ( l_errl )
         {
