@@ -33,7 +33,7 @@
 //
 #include "p9_tor.H"
 #include "p9_xip_image.h"
-#include <fapi2.H>
+#include "p9_infrastruct_help.H"
 
 namespace P9_TOR
 {

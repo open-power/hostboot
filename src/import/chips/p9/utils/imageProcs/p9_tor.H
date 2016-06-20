@@ -21,7 +21,6 @@
 
 #include "p9_ring_identification.H"
 #include "p9_ringId.H"
-#include "p9_infrastruct_help.H"
 
 namespace P9_TOR
 {
