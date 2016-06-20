@@ -232,7 +232,11 @@ enum XCR_DEFS
     HARD_RESET         = 6,
     FORCE_HALT         = 7
 };
-
+enum SLAVE_CONFIG_DEFS
+{
+    CFG_PM_DISABLE     = 6,
+    CFG_PM_MUX_DISABLE = 7
+};
 
 } // END OF NAMESPACE p9hcd
 
