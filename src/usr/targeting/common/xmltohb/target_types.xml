@@ -3059,8 +3059,8 @@
 </targetType>
 
 <!-- NV
-     Nimbus : 2 per chip
-     Cumulus: 2  -->
+     Nimbus : 1 per chip
+     Cumulus: 1 per chip -->
 <targetType>
     <id>unit-nv-power9</id>
     <parent>unit</parent>

@@ -312,6 +312,89 @@ class TargetingTestSuite : public CxxTest::TestSuite
         TS_TRACE(EXIT_MRK "testSignedAttribute");
     }
 
+    void testPciPhbTarget()
+    {
+        TS_TRACE(ENTER_MRK "testPciPhbTarget" );
+
+        using namespace ERRORLOG;
+        using namespace TARGETING;
+
+        TargetHandleList l_targs;
+
+        getAllChiplets( l_targs, TYPE_PCI);
+
+        // There is no PCI target in P9, ensure we got 0 back
+        if(l_targs.size() != 0)
+        {
+            TS_FAIL("TYPE_PCIE target incorrectly returned non-zero size: %d",
+                    l_targs.size());
+        }
+
+        // The PCI target is actually the PHB target in P9
+        getAllChiplets( l_targs, TYPE_PHB);
+        if(l_targs.size() == 0)
+        {
+            TS_FAIL("TYPE_PHB target incorrectly returned zero size");
+        }
+        else
+        {
+            TS_TRACE("Correctly returned non-zero number of PHB units: %d",
+                     l_targs.size());
+        }
+
+        for (auto l_targ : l_targs)
+        {
+            // Do a basic validation of PHB target by reading HUID
+            uint32_t l_huid = get_huid(l_targ);
+            if(l_huid == 0)
+            {
+                TS_FAIL("Failed to read HUID for a PHB target");
+            }
+            else
+            {
+                TS_TRACE("PHB HUID:0x%.8X",l_huid);
+            }
+        }
+
+        TS_TRACE(EXIT_MRK "testPciPhbTarget");
+    }
+
+    void testNvTarget()
+    {
+        TS_TRACE(ENTER_MRK "testNvTarget" );
+
+        using namespace ERRORLOG;
+        using namespace TARGETING;
+
+        TargetHandleList l_targs;
+
+        getAllChiplets( l_targs, TYPE_NV);
+        if(l_targs.size() == 0)
+        {
+            TS_FAIL("TYPE_NV target incorrectly returned zero size");
+        }
+        else
+        {
+            TS_TRACE("Correctly returned non-zero number of NV units: %d",
+                     l_targs.size());
+        }
+
+        for (auto l_targ : l_targs)
+        {
+            // Do a basic validation of NV target by reading HUID
+            uint32_t l_huid = get_huid(l_targ);
+            if(l_huid == 0)
+            {
+                TS_FAIL("Failed to read HUID for a NV target");
+            }
+            else
+            {
+                TS_TRACE("NV HUID:0x%.8X",l_huid);
+            }
+        }
+
+        TS_TRACE(EXIT_MRK "testNvTarget");
+    }
 };
 
 #endif // End __TARGETING_TESTTARGETING_H
