@@ -360,7 +360,7 @@ my $addRO_Section_VerPage = 0;
 if( !($cfgImgOutputDir =~ "none") )
 {
     #Version page will be added only if the script is called in with the flag
-    #--version-flag
+    #--version-page
     if ($cfgAddVersionPage)
     {
         $addRO_Section_VerPage = 1;
@@ -5000,13 +5000,13 @@ sub generateTargetingImage {
     # Virtual memory addresses corresponding to the start of the targeting image
     # PNOR/heap sections
     my $pnorRoBaseAddress    = getPnorBaseAddress($vmmConstsFile);
-    my $pnorRwBaseAddress    = $pnorRoBaseAddress    + $vmmSectionOffset;
-    my $heapPnorInitBaseAddr = $pnorRwBaseAddress    + $vmmSectionOffset;
+    my $heapPnorInitBaseAddr = $pnorRoBaseAddress    + $vmmSectionOffset;
     my $heapZeroInitBaseAddr = $heapPnorInitBaseAddr + $vmmSectionOffset;
     my $hbHeapZeroInitBaseAddr = $heapZeroInitBaseAddr + $vmmSectionOffset;
+    my $pnorRwBaseAddress    = $hbHeapZeroInitBaseAddr    + $vmmSectionOffset;
 
     # Split "fsp" into additional sections
-    my $fspP0DefaultedFromZeroBaseAddr   = $hbHeapZeroInitBaseAddr + $vmmSectionOffset;
+    my $fspP0DefaultedFromZeroBaseAddr   = $pnorRwBaseAddress + $vmmSectionOffset;
     my $fspP0DefaultedFromP3BaseAddr  = $fspP0DefaultedFromZeroBaseAddr + $vmmSectionOffset;
     my $fspP3RoBaseAddr         = $fspP0DefaultedFromP3BaseAddr + $vmmSectionOffset;
     my $fspP3RwBaseAddr         = $fspP3RoBaseAddr + $vmmSectionOffset;
@@ -5830,30 +5830,28 @@ sub generateTargetingImage {
     $sectionHoH{ pnorRo }{ type   } = 0;
     $sectionHoH{ pnorRo }{ size   } = sizeBlockAligned($offset,$blockSize,1);
 
-    $sectionHoH{ pnorRw }{ offset } =
-        $sectionHoH{pnorRo}{offset} + $sectionHoH{pnorRo}{size};
-    $sectionHoH{ pnorRw }{ type   } = 1;
-    $sectionHoH{ pnorRw }{ size   } = sizeBlockAligned($rwOffset,$blockSize,1);
-
-    $sectionHoH{ heapPnorInit }{ offset } =
-        $sectionHoH{pnorRw}{offset} + $sectionHoH{pnorRw}{size};
+    $sectionHoH{ heapPnorInit }{ offset } = $sectionHoH{pnorRo}{offset}
+                                            + $sectionHoH{pnorRo}{size};
     $sectionHoH{ heapPnorInit }{ type   } = 2;
     $sectionHoH{ heapPnorInit }{ size   } =
         sizeBlockAligned($heapPnorInitOffset,$blockSize,1);
 
-    $sectionHoH{ heapZeroInit }{ offset } =
-        $sectionHoH{heapPnorInit}{offset} + $sectionHoH{heapPnorInit}{size};
+    $sectionHoH{ heapZeroInit }{ offset } = $sectionHoH{heapPnorInit}{offset}
+                                            + $sectionHoH{heapPnorInit}{size};
     $sectionHoH{ heapZeroInit }{ type   } = 3;
     $sectionHoH{ heapZeroInit }{ size   } =
         sizeBlockAligned($heapZeroInitOffset,$blockSize,1);
 
     # zeroInitSection occupies no space in the binary, so set the
     # Hostboot section address to that of the zeroInitSection
-    $sectionHoH{ hbHeapZeroInit }{ offset } =
-        $sectionHoH{heapZeroInit}{ offset };
+    $sectionHoH{ hbHeapZeroInit }{ offset } = $sectionHoH{heapZeroInit}{offset};
     $sectionHoH{ hbHeapZeroInit }{ type } = 10;
     $sectionHoH{ hbHeapZeroInit }{ size } =
         sizeBlockAligned($hbHeapZeroInitOffset,$blockSize,1);
+
+    $sectionHoH{ pnorRw }{ offset } = $sectionHoH{hbHeapZeroInit}{offset};
+    $sectionHoH{ pnorRw }{ type   } = 1;
+    $sectionHoH{ pnorRw }{ size   } = sizeBlockAligned($rwOffset,$blockSize,1);
 
     # Split "fsp" into additional sections
     if($cfgIncludeFspAttributes)
@@ -5861,7 +5859,7 @@ sub generateTargetingImage {
         # zeroInitSection occupies no space in the binary, so set the FSP
         # section address to that of the zeroInitSection
         $sectionHoH{ fspP0DefaultedFromZero }{ offset } =
-             $sectionHoH{heapZeroInit}{offset};
+             $sectionHoH{pnorRw}{offset} + $sectionHoH{pnorRw}{size};
         $sectionHoH{ fspP0DefaultedFromZero }{ type } = 4;
         $sectionHoH{ fspP0DefaultedFromZero }{ size } =
             sizeBlockAligned($fspP0DefaultedFromZeroOffset,$blockSize,1);
@@ -5918,7 +5916,7 @@ sub generateTargetingImage {
     $headerBinData .= pack4byte($offsetToSections);
 
     # Split "fsp" into additional sections
-    my @sections = ("pnorRo","pnorRw","heapPnorInit","heapZeroInit", "hbHeapZeroInit");
+    my @sections = ("pnorRo","heapPnorInit","heapZeroInit", "hbHeapZeroInit", "pnorRw");
     if($cfgIncludeFspAttributes)
     {
         push(@sections,"fspP0DefaultedFromZero");
@@ -6001,15 +5999,15 @@ sub generateTargetingImage {
 
     $outFile .= pack ("@".($sectionHoH{pnorRo}{size} - $offset));
 
-    # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
-    $outFile .= $rwAttrBinData;
-    $outFile .= pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
-
     # Serialize PNOR initiated heap section to multiple of 4k page size (pad if
     # necessary)
     $outFile .= $heapPnorInitBinData;
     $outFile .= pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
+
+    # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
+    $outFile .= $rwAttrBinData;
+    $outFile .= pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
 
     # Serialize FSP section to multiple of 4k page size (pad if
     # necessary)
@@ -7159,5 +7157,3 @@ a PNOR targeting image binary to facilitate compiling and configuring host boot
 respectively.
 
 =cut
-
-
