@@ -101,9 +101,13 @@ void addFruCallouts(TARGETING::Target* i_target,
         else if (i_target->getAttr<TARGETING::ATTR_TYPE>() ==
                     TARGETING::TYPE_PROC)
         {
-            //check for PCI range
-            if( ((i_scomAddr & 0xFF000000) == 0x09000000)
-                && ((i_scomAddr & 0x00FF0000) != 0x000F0000) )
+            //check for addresses inside the PCI range
+            // note: ideally we could use the logic from scomtrans.C, but
+            //  that is a lot of overhead for a few simple checks
+            if( (   ((i_scomAddr & 0xFF000000) == 0x0D000000) //PCI0
+                 || ((i_scomAddr & 0xFF000000) == 0x0E000000) //PCI1
+                 || ((i_scomAddr & 0xFF000000) == 0x0F000000))//PCI2
+                && ((i_scomAddr & 0x00FF0000) != 0x000F0000) )//skip perv regs
             {
                 io_errl->addClockCallout(i_target,
                                          HWAS::OSCPCICLK_TYPE,
