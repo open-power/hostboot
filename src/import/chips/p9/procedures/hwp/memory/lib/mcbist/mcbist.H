@@ -144,6 +144,7 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             MCBIST_START = MCBIST_MCB_CNTLQ_START,
             MCBIST_STOP = MCBIST_MCB_CNTLQ_STOP,
             MCBIST_RESUME = MCBIST_MCB_CNTLQ_RESUME_FROM_PAUSE,
+            MCBIST_RESET_ERRORS = MCBIST_MCB_CNTLQ_RESET_ERROR_LOGS,
 
             MCBIST_IN_PROGRESS = MCBIST_MCB_CNTLSTATQ_IP,
             MCBIST_DONE = MCBIST_MCB_CNTLSTATQ_DONE,
@@ -1383,6 +1384,25 @@ inline fapi2::ReturnCode resume( const fapi2::Target<T>& i_target )
 
     FAPI_TRY( mss::getScom(i_target, TT::CNTLQ_REG, l_buf) );
     FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESUME>()) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the MCBIST error logs
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode reset_errors( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_buf;
+
+    FAPI_TRY( mss::getScom(i_target, TT::CNTLQ_REG, l_buf) );
+    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG, l_buf.setBit<TT::MCBIST_RESET_ERRORS>()) );
 
 fapi_try_exit:
     return fapi2::current_err;

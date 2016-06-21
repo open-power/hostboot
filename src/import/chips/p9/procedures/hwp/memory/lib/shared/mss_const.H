@@ -44,6 +44,7 @@ enum sizes
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
     MAX_PRIMARY_RANKS_PER_PORT = 4,
+    MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM
     DEFAULT_POLL_LIMIT = 10,       ///< the number of poll attempts in the event we can't calculate another
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type

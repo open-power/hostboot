@@ -32,9 +32,36 @@
 
 #include <fapi2.H>
 #include <utility>
+#include <lib/ecc/ecc_traits.H>
 
 namespace mss
 {
+
+namespace ecc
+{
+
+namespace fwms
+{
+
+///
+/// @class address
+/// @brief Converts Firmware Mark Store ADDRESS field into mcbist::address
+/// @tparam T fapi2 Target Type defaults to fapi2::TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to eccTraits<T>
+/// @note template argument defaults are in forward declaration in lib/mcbist/address.H
+/// @note 12 = dimm
+/// @note 13:14 = mrank
+/// @note 15:17 = srank
+/// @note 18:19 = bank group
+/// @note 20:22 = bank
+///
+// See declaration below
+template< fapi2::TargetType T, typename TT = eccTraits<T> >
+class address;
+
+} // close namespace fwms
+} // close namespace ecc
+
 namespace mcbist
 {
 
@@ -86,6 +113,28 @@ class address
         address( const uint64_t i_value ):
             iv_address(i_value << MAGIC_PAD)
         {
+        }
+
+        ///
+        /// @brief Construct an address from an ecc::fwms::address
+        /// @tparam T fapi2 Target Type
+        /// @param[in] i_address representing an address field from a firmware mark store register
+        ///
+        template< fapi2::TargetType T >
+        address( const ecc::fwms::address<T>& i_address )
+        {
+            fapi2::buffer<uint64_t> l_value = uint64_t(i_address);
+            uint64_t l_temp = 0;
+            l_value.extractToRight<ecc::fwms::address<T>::DIMM.first, ecc::fwms::address<T>::DIMM.second>(l_temp);
+            this->set_field<DIMM>(l_temp);
+            l_value.extractToRight<ecc::fwms::address<T>::MRANK.first, ecc::fwms::address<T>::MRANK.second>(l_temp);
+            this->set_field<MRANK>(l_temp);
+            l_value.extractToRight<ecc::fwms::address<T>::SRANK.first, ecc::fwms::address<T>::SRANK.second>(l_temp);
+            this->set_field<SRANK>(l_temp);
+            l_value.extractToRight<ecc::fwms::address<T>::BANK_GROUP.first, ecc::fwms::address<T>::BANK_GROUP.second>(l_temp);
+            this->set_field<BANK_GROUP>(l_temp);
+            l_value.extractToRight<ecc::fwms::address<T>::BANK.first, ecc::fwms::address<T>::BANK.second>(l_temp);
+            this->set_field<BANK>(l_temp);
         }
 
         ///
@@ -372,8 +421,64 @@ class address
         fapi2::buffer<uint64_t> iv_address;
 };
 
-} // namespace
+} // close namespace mcbist
 
-} // namespace
+// Documented above in its declaration.
+template< fapi2::TargetType T, typename TT >
+class ecc::fwms::address
+{
+    public:
+        // first is the start bit of the field, second is the length
+        typedef std::pair<uint64_t, uint64_t> field;
+
+        constexpr static field DIMM = {TT::FIRMWARE_MS_ADDRESS, 1};
+        constexpr static field MRANK = {TT::FIRMWARE_MS_ADDRESS + 1, 2};
+        constexpr static field SRANK = {TT::FIRMWARE_MS_ADDRESS + 3, 3};
+        constexpr static field BANK_GROUP = {TT::FIRMWARE_MS_ADDRESS + 6, 2};
+        constexpr static field BANK = {TT::FIRMWARE_MS_ADDRESS + 8, 3};
+        constexpr static field LAST_VALID = BANK;
+
+        address() = default;
+
+        ///
+        /// @brief Construct an address from a uint64_t (scom'ed value)
+        /// @param[in] i_value representing raw value from FWMS register
+        ///
+        address( const uint64_t& i_value ):
+            iv_value(i_value)
+        {
+        }
+
+        ///
+        /// @brief Construct an address from an mcbist::address
+        /// @param[in] i_mcbist_address mcbist formatted address
+        /// @note Construction of mcbist::address from ecc::fwms::address
+        /// @note located in mcbist::address class
+        ///
+        address( const mcbist::address& i_mcbist_address )
+        {
+            iv_value.insertFromRight<DIMM.first, DIMM.second>(i_mcbist_address.get_field<mcbist::address::DIMM>());
+            iv_value.insertFromRight<MRANK.first, MRANK.second>(i_mcbist_address.get_field<mcbist::address::MRANK>());
+            iv_value.insertFromRight<SRANK.first, SRANK.second>(i_mcbist_address.get_field<mcbist::address::SRANK>());
+            iv_value.insertFromRight<BANK_GROUP.first, BANK_GROUP.second>
+            (i_mcbist_address.get_field<mcbist::address::BANK_GROUP>());
+            iv_value.insertFromRight<BANK.first, BANK.second>(i_mcbist_address.get_field<mcbist::address::BANK>());
+        }
+
+        ///
+        /// @brief Conversion operator to uint64_t
+        ///
+        inline operator uint64_t() const
+        {
+            uint64_t l_temp = 0;
+            iv_value.extract<TT::FIRMWARE_MS_ADDRESS, TT::FIRMWARE_MS_ADDRESS_LEN, TT::FIRMWARE_MS_ADDRESS>(l_temp);
+            return l_temp;
+        }
+
+    private:
+        fapi2::buffer<uint64_t> iv_value;
+};
+
+} // close namespace mss
 
 #endif
