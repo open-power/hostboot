@@ -204,7 +204,7 @@ namespace SBE
      *
      * @param[in] i_target   Target processor
      *
-     * @param[out] i_imgPtr    Pointer to pre-allocated memory to be used
+     * @param[in] i_imgPtr     Pointer to pre-allocated memory to be used
      *                         for different operations
      *
      * @param[in] i_side          Seeprom Side to access
@@ -224,31 +224,6 @@ namespace SBE
     /******************************************/
     /*  Functions -- Helper Functions         */
     /******************************************/
-
-    /**
-     * @brief Check and Update (if necessary) the HBB Address MMIO offset
-     *        in a customized SBE Image for the current Processor
-     *
-     * @param[in] i_target      Target processor to customize
-     *
-     * @param[in/out] io_imgPtr    Pointer to SBE image in memory
-     *                          Memory for this pointer is expected to be
-     *                          pre-alloacted
-     *
-     * @param[in] i_side          Seeprom Side to access
-     *
-     * @param[in] i_pnorSideId    PNOR side to get information for
-     *
-     * @param[out] o_imageWasUpdated  Set to true if Image was updated;
-     *                                otherwise false
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
-                                   void* io_imgPtr,
-                                   sbeSeepromSide_t i_side,
-                                   PNOR::SideId i_pnorSideId,
-                                   bool& o_imageWasUpdated);
 
 #ifdef CONFIG_BMC_IPMI
     /**

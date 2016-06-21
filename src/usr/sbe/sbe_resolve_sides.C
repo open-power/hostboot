@@ -32,6 +32,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
+#include <util/crc32.H>
 #include <util/misc.H>
 #include <pnor/pnorif.H>
 #include <pnor/ecc.H>
@@ -51,15 +52,11 @@
 #include "sbe_update.H"
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiHwpExecutor.H>
-#include    <hwpf/plat/fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
 //Procedures
-#include <p8_xip_customize.H>
-#include <sbe_xip_image.h>
-#include <p8_image_help_base.H>
+#include <p9_xip_image.h>
 
 // ----------------------------------------------
 // Trace definitions
@@ -71,23 +68,11 @@ extern trace_desc_t* g_trac_sbe;
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-
 using namespace ERRORLOG;
 using namespace TARGETING;
 
 namespace SBE
 {
-    enum {
-        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
-        RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
-        //NOTE: recycling the same memory space for different
-        //steps in the process.
-        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
-        SBE_ECC_IMG_MAX_SIZE = VMM_VADDR_SBE_UPDATE_END - SBE_ECC_IMG_VADDR,
-    };
-
-/////////////////////////////////////////////////////////////////////
 errlHndl_t resolveProcessorSbeSeeproms()
 {
     errlHndl_t err = NULL;
@@ -127,7 +112,7 @@ errlHndl_t resolveProcessorSbeSeeproms()
             TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
                        "Do Nothing in SBE_UPDATE_SEQUENTIAL mode with FSP-"
                        "services enabled or running in simics");
-             break;
+            break;
         }
 #endif
 
@@ -137,7 +122,7 @@ errlHndl_t resolveProcessorSbeSeeproms()
         {
             TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
                        "Do Nothing in SBE_UPDATE_INDEPENDENT mode in simics");
-             break;
+            break;
         }
 
         // Get Target Service, and the system target.
@@ -437,7 +422,6 @@ errlHndl_t getSideActions(sbeResolveState_t& io_sideState)
                ENTER_MRK"getSideActions()" );
 
     do{
-
         // Check if PNOR is running from its GOLDEN side
         if ( io_sideState.pnor_isGolden == true )
         {
@@ -517,7 +501,6 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
     TRACUCOMP( g_trac_sbe,
                ENTER_MRK"performSideActions()" );
 
-    bool updateForHBB = false;
     size_t image_size = 0;
     sbeSeepromVersionInfo_t image_version;
 
@@ -541,6 +524,19 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                            io_sideState.actions, image_size);
                 break;
             }
+
+            // The host has booted from the golden side because the action
+            // COPY_READ_ONLY_TO_WORKING implies io_sideState.pnor_isGolden.
+            // We need the version info written to indicate that the SBE
+            // Seeprom Image originates from the golden side Seeprom.
+
+            // indicate that the version struct is the latest version
+            image_version.struct_version = STRUCT_VERSION_LATEST;
+
+            // indicate that the SBE image we are copying originates from
+            // the golden side seeprom.  This value will be read and printed
+            // in the traces each time getSeepromSideVersion is called.
+            image_version.origin = GOLDEN_SIDE;
         }
 
         if ( io_sideState.actions & CHECK_WORKING_HBB )
@@ -565,60 +561,9 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                            io_sideState.actions, image_size);
                 break;
             }
-
         }
 
-
-        if ( ( io_sideState.actions & COPY_READ_ONLY_TO_WORKING ) ||
-             ( io_sideState.actions & CHECK_WORKING_HBB ) )
-        {
-            // verify HBB
-            PNOR::SideId pnor_side = PNOR::WORKING;
-
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-            // In certain situations need info from Alternate PNOR
-            if ( io_sideState.actions & USE_PNOR_ALT_SIDE)
-            {
-                pnor_side = PNOR::ALTERNATE;
-            }
-#endif
-
-
-
-            err = resolveImageHBBaddr(io_sideState.tgt,
-                                      reinterpret_cast<void*>(SBE_IMG_VADDR),
-                                      io_sideState.update_side,
-                                      pnor_side,
-                                      updateForHBB);
-            if ( err )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK
-                           "performSideActions: Error returned from "
-                           "resolveImageHBBaddr() rc=0x%.4X, Target UID=0x%X, "
-                           "actions = 0x%X",
-                           err->reasonCode(),
-                           TARGETING::get_huid(io_sideState.tgt),
-                           io_sideState.actions);
-                break;
-            }
-
-            // Since HBB was updated, we need to re-IPL if not booting on
-            // READ_ONLY seeprom
-            if ( ( updateForHBB == true ) &&
-                 ( io_sideState.cur_side != READ_ONLY_SEEPROM ) )
-            {
-                io_sideState.actions |= REIPL;
-
-                TRACUCOMP( g_trac_sbe, ERR_MRK
-                           "performSideActions: resolveImageHBBaddr returned "
-                           "updateForHBB=%d, and not on READ_ONLY_SEEPROM so "
-                           "REIPL (actions=0x%X)",
-                           updateForHBB, io_sideState.actions);
-            }
-        }
-
-        if ( ( io_sideState.actions & COPY_READ_ONLY_TO_WORKING ) ||
-             ( updateForHBB == true ) )
+        if ( io_sideState.actions & COPY_READ_ONLY_TO_WORKING )
         {
             //  Write Seeprom Image from memory to Seeprom
             err = writeSbeImage(io_sideState.tgt,
@@ -1024,8 +969,6 @@ errlHndl_t writeSbeImage(TARGETING::Target* i_target,
 }
 
 
-
-
 /////////////////////////////////////////////////////////////////////
 errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
                                void* i_imgPtr,
@@ -1049,13 +992,13 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
              "getSbeImageSize() - i_imgPtr is not at SBE_IMG_VADDR");
 
     do{
-        // Need to read the SbeXipHeader of the image to determine size
+        // Need to read the P9XipHeader of the image to determine size
         // of the image to read out.
         // Using io_imgPtr space. First read our header+ECC from SBE
         // Seeprom and then use space after that to put header without ECC
 
 
-        size_t hdr_size = ALIGN_8(sizeof(SbeXipHeader));
+        size_t hdr_size = ALIGN_8(sizeof(P9XipHeader));
         size_t hdr_size_ECC = (hdr_size * 9)/8;
 
         uint8_t* hdr_ptr = reinterpret_cast<uint8_t*>(i_imgPtr) + hdr_size_ECC;
@@ -1063,7 +1006,7 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
         memset( i_imgPtr, 0, hdr_size_ECC + hdr_size );
 
         TRACUCOMP( g_trac_sbe, INFO_MRK"getSetSbeImage() Reading "
-                   "SbeXipHeader for Target 0x%X, Seeprom %d "
+                   "P9XipHeader for Target 0x%X, Seeprom %d "
                    "(side=%d), size_ECC=0x%X (size=0x%X)",
                    TARGETING::get_huid(i_target),
                    l_seeprom, i_side, hdr_size_ECC, hdr_size );
@@ -1079,10 +1022,10 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
         if(err)
         {
             TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeImageSize: - Error "
-                       "Reading SbeXipHeader: rc=0x%.4X, seeprom=%d (side=%d). "
+                       "Reading P9XipHeader: rc=0x%.4X, seeprom=%d (side=%d). "
                        "HUID=0x%.8X. size=0x%.8X, EEPROM offset=0x%X",
                        err->reasonCode(), l_seeprom, i_side,
-                       TARGETING::get_huid(i_target), sizeof(SbeXipHeader),
+                       TARGETING::get_huid(i_target), sizeof(P9XipHeader),
                        SBE_IMAGE_SEEPROM_ADDRESS);
             break;
         }
@@ -1146,7 +1089,7 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
                   hdr_ptr,
                   hdr_size );
 
-        o_image_size = (((SbeXipHeader*)hdr_ptr)->iv_imageSize);
+        o_image_size = (((P9XipHeader*)hdr_ptr)->iv_imageSize);
 
     }while(0);
 
@@ -1156,142 +1099,6 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
     return err;
 }
 
-
-
-/////////////////////////////////////////////////////////////////////
-errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
-                               void* io_imgPtr,
-                               sbeSeepromSide_t i_side,
-                               PNOR::SideId  i_pnorSideId,
-                               bool& o_imageWasUpdated )
-{
-    errlHndl_t err = NULL;
-    uint64_t data = 0;
-    int rc = 0;
-    bool rc_fail_on_get = false; // 1=get failed, 0=set failed
-
-    o_imageWasUpdated = false;
-
-    TRACUCOMP( g_trac_sbe,
-               ENTER_MRK"resolveImageHBBaddr() - tgt=0x%X, i_side=%d, "
-               "i_pnorSideId=%d",
-               TARGETING::get_huid(i_target), i_side, i_pnorSideId);
-
-    do{
-
-        // Get info from PNOR
-        PNOR::SideInfo_t pnor_side_info;
-        err = PNOR::getSideInfo (i_pnorSideId, pnor_side_info);
-        if ( err )
-        {
-            TRACFCOMP( g_trac_sbe, ERR_MRK
-                       "resolveImageHBBaddr() - Error returned "
-                       "from PNOR::getSideInfo() rc=0x%.4X, Target UID=0x%X "
-                       "i_pnorSideId",
-                       err->reasonCode(),
-                       TARGETING::get_huid(i_target), i_pnorSideId);
-            break;
-        }
-
-        // Only Need to Check/Update if PNOR has Other Side
-        if ( pnor_side_info.hasOtherSide == true )
-        {
-            // Read the MMIO offset associated with the HBB address
-            // from the image
-            rc = sbe_xip_get_scalar( io_imgPtr,
-                                     "standalone_mbox2_value",
-                                     &data);
-            if ( rc != 0 )
-            {
-                rc_fail_on_get = true; // get failed
-
-                TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
-                           "sbe_xip_get_scalar() failed rc = 0x%X (%d)",
-                           rc, rc_fail_on_get);
-                break;
-            }
-
-            if ( pnor_side_info.hbbMmioOffset == data )
-            {
-                TRACUCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
-                           "offset = 0x%X that matches PNOR MMIO="
-                           "0x%X for HBB Address=0x%X",
-                           data, pnor_side_info.hbbMmioOffset,
-                           pnor_side_info.hbbAddress);
-            }
-            else
-            {
-                TRACFCOMP( g_trac_sbe, "resolveImageHBBaddr: Image has MMIO "
-                           "offset = 0x%X does NOT match PNOR MMIO="
-                           "0x%X for HBB Address=0x%X. Updating Image",
-                           data, pnor_side_info.hbbMmioOffset,
-                           pnor_side_info.hbbAddress);
-
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: data", &data, 8 );
-
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: hbbMmioOffset",
-                          &pnor_side_info.hbbMmioOffset, 8 );
-                TRACDBIN (g_trac_sbe, "resolveImageHBBaddr: hbbAddress",
-                          &pnor_side_info.hbbAddress, 8);
-
-                rc = sbe_xip_set_scalar( io_imgPtr, "standalone_mbox2_value",
-                                         pnor_side_info.hbbMmioOffset);
-
-                if ( rc != 0 )
-                {
-                    rc_fail_on_get = false; // set failed
-
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"resolveImageHBBaddr() - "
-                               "sbe_xip_set_scalar() failed rc = 0x%X (%d)",
-                               rc, rc_fail_on_get);
-                    break;
-                }
-                o_imageWasUpdated = true;
-            }
-
-        }
-        else
-        {
-              // pnor_side_info.hasOtherSide is false
-              TRACUCOMP( g_trac_sbe, "resolveImageHBBaddr: PNOR only has "
-                         "1 side - No Update Required");
-        }
-
-    }while(0);
-
-
-    if ( ( err == NULL ) && ( rc != 0) )
-    {
-        // We failed on get/set cmd above (already traced)
-
-        /*@
-         * @errortype
-         * @moduleid     SBE_RESOLVE_HBB_ADDR
-         * @reasoncode   SBE_IMAGE_GET_SET_SCALAR_FAIL
-         * @userdata1    Return Code of failed operation
-         * @userdata2    True/False if Get (true) or Set (false) Op failed
-         * @devdesc      sbe_xip_get/set_scalar() failed when accessing the
-                         HBB Address MMIO offset in 'standalone_mbox2_value'
-         * @custdesc     A problem occurred while updating processor
-         *               boot code.
-         */
-        err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                            SBE_RESOLVE_HBB_ADDR,
-                            SBE_IMAGE_GET_SET_SCALAR_FAIL,
-                            TO_UINT64(rc),
-                            TO_UINT64(rc_fail_on_get),
-                            true /*Add HB SW Callout*/ );
-
-        err->collectTrace(SBE_COMP_NAME);
-    }
-
-
-    TRACUCOMP( g_trac_sbe,
-               EXIT_MRK"resolveImageHBBaddr() - o_imageWasUpdated = %d",
-               o_imageWasUpdated);
-
-    return err;
-}
 
 #ifdef CONFIG_BMC_IPMI
 /////////////////////////////////////////////////////////////////////
