@@ -62,7 +62,7 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 {
     fapi2::buffer<uint64_t> l_data;
 
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
         FAPI_DBG("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
@@ -87,7 +87,7 @@ fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 #if 0
     fapi2::buffer<uint64_t> l_data;
 
-    const auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
+    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
     //
     // 4. Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset and enable the internal impedance controller.
@@ -145,7 +145,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     FAPI_DBG("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
 
     // Might as well do this for all the ports while we're here.
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
         FAPI_TRY( mss::getScom(p, MCA_MBA_FARB5Q, l_data) );
 
@@ -187,7 +187,7 @@ fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i
     FAPI_DBG("Write 0x4000 into the PC Resets Regs. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active");
 
     l_data.setBit<MCA_DDRPHY_PC_RESETS_P0_SYSCLK_RESET>();
-    FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), MCA_DDRPHY_PC_RESETS_P0, l_data) );
+    FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, l_data) );
 
     //
     // Wait at least 1 millisecond to allow the PLLs to lock. Otherwise, poll the PC DP18 PLL Lock Status
@@ -267,41 +267,134 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setup the phase rotator control registers
+/// @brief Change the continuous update mode of the PR CNTL registers
+/// @note Will take the SYSCLK control out of reset, too
 /// @param[in] i_target the mcbist target
-/// @param[in] i_data the value for the registers
+/// @param[in] i_state, mss::ON if you want to be in continuous mode, mss::OFF to turn it off
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-        const fapi2::buffer<uint64_t>& i_data )
+        const states i_state )
 {
-    FAPI_DBG("Write 0x%lx into the ADR SysClk Phase Rotator Control Regs and the DP18 SysClk Phase Rotator Control Regs",
-             i_data);
+    uint8_t is_sim = 0;
+
+    // Per Bialas, we don't want to do true alignment in the cycle sim as we have
+    // a chance of being off one-tick (which is detrimental.) Per his recomendations,
+    // we write 0's to the control registers and then configure them with 0x8080. We'll
+    // over write l_update's values with a getScom to the correct h/w initiialized values
+    // if we're not in sim
+
+    fapi2::buffer<uint64_t> l_update( i_state == mss::ON ? 0x0 : 0x8080 );
+    const auto l_mca = find_targets<TARGET_TYPE_MCA>(i_target);
 
     std::vector<uint64_t> addrs(
     {
         MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0, MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1,
     } );
 
-    // Need to set these up for proper non-sim values, move to dp16 reset when it's written BRS
-    // MCA_DDRPHY_DP16_WRCLK_PR_P0_0, MCA_DDRPHY_DP16_WRCLK_PR_P0_1,
-    // MCA_DDRPHY_DP16_WRCLK_PR_P0_2, MCA_DDRPHY_DP16_WRCLK_PR_P0_3, MCA_DDRPHY_DP16_WRCLK_PR_P0_4,
+    if (l_mca.size() == 0)
+    {
+        // No MCA, no problem
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
-    FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), addrs, i_data) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    if (! is_sim)
+    {
+        // All the MCA (and both registers) will be in the same state, so we can get the first and use it to create the
+        // values for the others.
+        FAPI_TRY( mss::getScom(l_mca[0], MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0, l_update) );
+        l_update.setBit<MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_ADR0_PHASE_EN>();
+        l_update.writeBit<MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_ADR0_CONTINUOUS_UPDATE>(i_state);
+    }
+
+    FAPI_INF("Write 0x%lx into the ADR SysClk Phase Rotator Control Regs", l_update);
+
+    // WRCLK Phase rotators are taken care of in the phy initfile. BRS 6/16.
+
+    FAPI_TRY( mss::scom_blastah(l_mca, addrs, l_update) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Deassetr the sys clk reset
+/// @brief Deassert the sys clk reset
 /// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_DBG("Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.");
-    FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), MCA_DDRPHY_PC_RESETS_P0, 0) );
+    FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, 0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if the bang bang lock has succeeded
+/// @param[in] i_target a MCBIST target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    fapi2::buffer<uint64_t> l_read;
+    uint8_t is_sim = 0;
+
+    // On each port there are 5 DP16's which have lock registers.
+    static const std::vector<uint64_t> l_addresses =
+    {
+        MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0,
+        MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_1,
+        MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_2,
+        MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_3,
+        MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4,
+    };
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    // There's nothing going on in sim ...
+    if (is_sim)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    {
+        // Check the ADR lock bit
+        // Little duplication - makes things more clear and simpler, and allows us to callout the
+        // bugger which first caused a problem.
+
+        FAPI_TRY( mss::getScom(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, l_read) );
+        FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>() == mss::ON,
+                     fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(0),
+                     "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 0,
+                     MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, l_read );
+
+        FAPI_TRY( mss::getScom(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, l_read) );
+        FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1_ADR1_BB_LOCK>() == mss::ON,
+                     fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(1),
+                     "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 1,
+                     MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, l_read );
+
+        // Pop thru the registers on the ports and see if all the sysclks are locked.
+        // FFDC regiser collection will collect interesting information so we only need
+        // to catch the first fail.
+        for (const auto r : l_addresses)
+        {
+            FAPI_TRY( mss::getScom(p, r, l_read) );
+
+            FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0>() == mss::ON,
+                         fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(0),
+                         "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 0, r, l_read );
+
+            FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK1>() == mss::ON,
+                         fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(1),
+                         "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 1, r, l_read );
+        }
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -324,7 +417,7 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
     l_data.setBit<48>().setBit<58>();
     l_mask.setBit<48>().setBit<58>();
 
-    const auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
+    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
     for (const auto& p : l_ports)
     {
@@ -339,76 +432,6 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
     {
         FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, 0, l_mask) );
     }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Lock dphy_gckn and sysclk
-/// @param[in] i_target a port target
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode bang_bang_lock( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
-{
-    fapi2::buffer<uint64_t> l_start_update(0x8024);
-    fapi2::buffer<uint64_t> l_stop_update(0x8020);
-
-    // Per Bialas, we don't want to do true alignment in the cycle sim as we have
-    // a chnace of being off one-tick (which is detremental.) Per his recomendations,
-    // we write 0's to the control registers and then configure them with x8080.
-    uint8_t is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
-
-    if (is_sim)
-    {
-        l_start_update = 0x0;
-        l_stop_update = 0x8080;
-    }
-
-    // 9.
-    FAPI_TRY( mss::setup_phase_rotator_control_registers(i_target, l_start_update),
-              "set up of phase rotator controls failed (in to cont update) %s", mss::c_str(i_target) );
-
-    //
-    // 10.Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment.
-    // wait 2000 simcycles per Ed Maj,
-    FAPI_DBG("Wait at least 5932 memory clock cycles to allow the clock alignment circuit to perform initial alignment");
-    FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 5932), 2000) );
-
-    //
-    // 11.Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset
-    //                                                (SCOM Addr: 0x8000C00E0301143F, 0x8001C00E0301143F, 0x8000C00E0301183F, 0x8001C00E0301183F)
-    FAPI_TRY( mss::deassert_sysclk_reset(i_target), "deassert_sysclk_reset failed for %s", mss::c_str(i_target) );
-
-    // 12.
-    FAPI_TRY( mss::setup_phase_rotator_control_registers(i_target, l_stop_update),
-              "set up of phase rotator controls failed (out of cont update) %s", mss::c_str(i_target) );
-
-    // 13.
-    FAPI_DBG("Wait at least 32 memory clock cycles");
-    FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 32), mss::cycles_to_simcycles(32)) );
-
-    // TODO RTC: 153954 implement bang-bang lock and other analog type things we can't do in sim
-#ifdef BANG_BANG_LOCK_IMPLEMENTED
-
-    // Check for BB lock.
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
-    {
-        FAPI_DBG("Wait for BB lock in status register, bit %u",
-                 MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK);
-
-        FAPI_ASSERT( mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, mss::poll_parameters(DELAY_100NS),
-                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-        {
-            FAPI_DBG("stat_reg 0x%llx, remaining: %d", stat_reg, poll_remaining);
-            return stat_reg.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>();
-        }),
-        fapi2::MSS_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p),
-        "MCA %s failed bang-bang alignment", mss::c_str(p) );
-    }
-
-#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -430,7 +453,7 @@ fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA
     fapi2::buffer<uint64_t> l_rank;
     uint64_t l_rank_on_dimm;
 
-    const auto l_dimms = i_target.getChildren<TARGET_TYPE_DIMM>();
+    const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
 
     // Sanity check the rank pair
     FAPI_INF("%s rank pair: %d", mss::c_str(i_target), i_rp);
@@ -741,7 +764,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     FAPI_TRY( mss::dp16::reset_io_tx_config0(i_target) );
     FAPI_TRY( mss::dp16::reset_dll_vreg_config1(i_target) );
 
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
         // The following registers must be configured to the correct operating environment:
 

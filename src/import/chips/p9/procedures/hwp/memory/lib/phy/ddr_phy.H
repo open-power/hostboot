@@ -92,13 +92,14 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_
 fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
-/// @brief Setup the phase rotator control registers
+/// @brief Change the continuous update mode of the PR CNTL registers
+/// @note Will take the SYSCLK control out of reset, too
 /// @param[in] i_target the mcbist target
-/// @param[in] i_data the value for the registers
+/// @param[in] i_state, mss::ON if you want to be in continuous mode, mss::OFF to turn it off
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-        const fapi2::buffer<uint64_t>& i_data );
+        const states i_state );
 
 ///
 /// @brief Deassetr the sys clk reset
@@ -122,11 +123,11 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
 fapi2::ReturnCode reset_delay_values( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
-/// @brief Lock dphy_gckn and sysclk
+/// @brief Check if the bang bang lock has succeeded
 /// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
-fapi2::ReturnCode bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Configure the DP16 sysclk

@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,17 @@
 <!-- -->
 
 <hwpErrors>
+
+<registerFfdc>
+    <id>REG_FFDC_BANG_BANG_REGS</id>
+    <scomRegister>MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0</scomRegister>
+    <scomRegister>MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_1</scomRegister>
+    <scomRegister>MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_2</scomRegister>
+    <scomRegister>MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_3</scomRegister>
+    <scomRegister>MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4</scomRegister>
+    <scomRegister>MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0</scomRegister>
+    <scomRegister>MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1</scomRegister>
+</registerFfdc>
 
 <hwpError>
   <rc>RC_MSS_DP16_PLL_FAILED_TO_LOCK</rc>
@@ -85,10 +96,44 @@
 </hwpError>
 
 <hwpError>
-  <rc>RC_MSS_BANG_BANG_FAILED_TO_LOCK</rc>
+  <rc>RC_MSS_DP16_BANG_BANG_FAILED_TO_LOCK</rc>
   <description>
-    p9_mss_ddr_phy_reset: phy clock and sysclk failed to align.
+    p9_mss_ddr_phy_reset: DP16 phy clock and sysclk failed to align.
   </description>
+  <ffdc>ROTATOR</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_BANG_BANG_REGS</id>
+    <target>MCA_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MCA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <hw>
+      <hwid>MEM_REF_CLOCK</hwid>
+      <refTarget>MCA_IN_ERROR</refTarget>
+    </hw>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ADR_BANG_BANG_FAILED_TO_LOCK</rc>
+  <description>
+    p9_mss_ddr_phy_reset: ADR phy clock and sysclk failed to align.
+  </description>
+  <ffdc>ADR</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_BANG_BANG_REGS</id>
+    <target>MCA_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>MCA_IN_ERROR</target>
     <priority>HIGH</priority>
