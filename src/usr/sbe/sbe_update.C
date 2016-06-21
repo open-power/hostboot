@@ -55,15 +55,11 @@
 #include "sbe_resolve_sides.H"
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiHwpExecutor.H>
-#include    <hwpf/plat/fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
 
 //Procedures
-#include <p8_xip_customize.H>
-#include <sbe_xip_image.h>
-#include <p8_image_help_base.H>
+#include <p9_xip_customize.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -75,7 +71,6 @@ TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, KILOBYTE );
 // Macros for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
-
 
 // ----------------------------------------
 // Global Variables for MBOX Ipl Query
@@ -90,17 +85,6 @@ using namespace TARGETING;
 
 namespace SBE
 {
-    enum {
-        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
-        RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
-        //NOTE: recycling the same memory space for different
-        //steps in the process.
-        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
-        SBE_ECC_IMG_MAX_SIZE = VMM_VADDR_SBE_UPDATE_END - SBE_ECC_IMG_VADDR,
-    };
-
-/////////////////////////////////////////////////////////////////////
     errlHndl_t updateProcessorSbeSeeproms(sbeUpdateCheckType i_check_type)
     {
         errlHndl_t err = NULL;
@@ -209,7 +193,7 @@ namespace SBE
             g_mbox_query_done   = false;
             g_mbox_query_result = false;
 
-            // Create VMM space for p8_xip_customize() procedure
+            // Create VMM space for p9_xip_customize() procedure
             err = createSbeImageVmmSpace();
             if (err)
             {
@@ -272,7 +256,7 @@ namespace SBE
 
                 TRACUCOMP( g_trac_sbe, "updateProcessorSbeSeeproms(): "
                            "Main Loop: tgt=0x%X, i=%d",
-                           TARGETING::get_huid(sbeState.target), i)
+                           TARGETING::get_huid(sbeState.target), i);
 
                 // Check to see if current target is master processor
                 if ( sbeState.target == masterProcChipTargetHandle)
@@ -713,7 +697,8 @@ namespace SBE
             //  it includes a SBE Header
             if (pnorInfo.sha512perEC)
             {
-                TRACFCOMP(g_trac_sbe,INFO_MRK"findSBEInPnor: sha512perEC Found in %s", pnorInfo.name);
+                TRACFCOMP(g_trac_sbe,INFO_MRK"findSBEInPnor: sha512perEC "
+                          "Found in %s", pnorInfo.name);
                 // Advance PNOR pointer 4k to move it past header page to the
                 // start of the non-customized SBE image
                 o_imgPtr = reinterpret_cast<void*>
@@ -751,14 +736,10 @@ namespace SBE
                                    void* io_imgPtr,
                                    size_t& o_actImgSize)
     {
+        // @TODO RTC:158044 Code removed after earlier review comment may still
+        //                  be needed.  Use Story 158044 to replace.
         errlHndl_t err = NULL;
-        fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
-        uint32_t coreMask = 0x0000FFFF;
-        size_t maxCores = P8_MAX_EX_PER_PROC;
-        int coreCount = 0;
-        uint32_t procIOMask = 0;
         uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-        bool procedure_success = false;
 
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"procCustomizeSbeImg(): uid=0x%X, i_sbePnorPtr= "
@@ -769,358 +750,44 @@ namespace SBE
         do{
 
             // cast OUR type of target to a FAPI type of target.
-            const fapi::Target
-              l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
-                         (const_cast<TARGETING::Target*>(i_target)));
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapiTarg(i_target);
 
-            // NOTE: The p8_xip_customize_procedure uses SBE_IMAGE_OFFSET
-            // attribute for HBB address value.  Purpsely leaving this
-            // attribute as-is for now and will do the check for HBB address
-            // later.
+            FAPI_INVOKE_HWP( err,
+                             p9_xip_customize,
+                             l_fapiTarg,
+                             i_sbePnorPtr, //image in
+                             tmpImgSize,
+                             0,  //IPL
+                             (void*)RING_BUF1_VADDR,
+                             (uint32_t)FIXED_RING_BUF_SIZE,
+                             (void*)RING_BUF2_VADDR,
+                             (uint32_t)FIXED_RING_BUF_SIZE );
 
-            // The p8_xip_customize() procedure tries to include as much core
-            // information as possible, but is limited by SBE Image size
-            // constraints.
-            // First, maximize core mask for the target
-            // Then loop on the procedure call, where the loop is designed to
-            // remove the number of cores passed into p8_xip_customize() until
-            // an image can be created successfully.
-
-            // Maximize Core mask for this target
-            err = selectBestCores(i_target,
-                                  maxCores,
-                                  coreMask);
-            if(err)
+            if ( err )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "selectBestCores() failed rc=0x%X. "
-                           "MaxCores=0x%.8X. HUID=0x%X. Aborting "
-                           "Customization of SBE Image",
-                           err->reasonCode(), maxCores,
-                           TARGETING::get_huid(i_target));
+                TRACFCOMP(g_trac_sbe,
+                          ERR_MRK"procCustomizeSbeImg() - "
+                          "p9_xip_customize HWP failed rc=0x%X. "
+                          "HUID=0x%X. Aborting Customization of SBE Image",
+                          err->reasonCode(),
+                          TARGETING::get_huid(i_target));
+
+                // There was an error, so break here
                 break;
             }
 
-            // setup loop parameters
-            coreCount = __builtin_popcount(coreMask);
-            procIOMask = coreMask;
-
-            while( coreCount >= 0 )
-            {
-
-                FAPI_EXEC_HWP( rc_fapi,
-                               p8_xip_customize,
-                               l_fapiTarg,
-                               i_sbePnorPtr, //image in
-                               io_imgPtr,    //image out
-                               tmpImgSize,
-                               0,  //IPL
-                               0, //HB/IPL
-                               (void*)RING_BUF1_VADDR,
-                               (uint32_t)FIXED_RING_BUF_SIZE,
-                               (void*)RING_BUF2_VADDR,
-                               (uint32_t)FIXED_RING_BUF_SIZE,
-                               procIOMask);
-
-                // Check the return code
-                if ( !rc_fapi )
-                {
-                    // Procedure was successful
-                    procedure_success = true;
-
-                    o_actImgSize = static_cast<size_t>(tmpImgSize);
-
-                    TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
-                               "p8_xip_customize success=%d, procIOMask=0x%X "
-                               "o_actImgSize=0x%X, rc_fapi=0x%X",
-                               procedure_success, procIOMask, o_actImgSize,
-                               uint32_t(rc_fapi));
-
-                    // exit loop
-                    break;
-                }
-                else
-                {
-                    // Look for a specific return code
-                    if ( static_cast<uint32_t>(rc_fapi) ==
-                         fapi::RC_PROC_XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS
-                       )
-                    {
-                        // This is a specific return code from p8_xip_customize
-                        // where the cores sent in couldn't fit, but possibly
-                        // a different procIOMask would work
-
-                        TRACFCOMP( g_trac_sbe,
-                              ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
-                              "p8_xip_customize) returned rc=0x%X, "
-                              "XIPC_OVERFLOW_BEFORE_REACHING_MINIMUM_EXS-Retry "
-                              "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
-                              "procIOMask=0x%.8X. coreCount=%d",
-                              uint32_t(rc_fapi), maxCores,
-                              TARGETING::get_huid(i_target),
-                              coreMask, procIOMask, coreCount);
-
-                        // Setup for next loop - update coreMask
-                        err = selectBestCores(i_target,
-                                              --coreCount,
-                                              procIOMask);
-
-                        if ( err )
-                        {
-                            TRACFCOMP(g_trac_sbe,
-                                      ERR_MRK"procCustomizeSbeImg() - "
-                                      "selectBestCores() failed rc=0x%X. "
-                                      "coreCount=0x%.8X. HUID=0x%X. Aborting "
-                                      "Customization of SBE Image",
-                                      err->reasonCode(), coreCount,
-                                      TARGETING::get_huid(i_target));
-
-                            // break from while loop
-                            break;
-                        }
-
-                        TRACFCOMP( g_trac_sbe, "procCustomizeSbeImg(): for "
-                                   "next loop: procIOMask=0x%.8X, coreMask="
-                                   "0x%.8X, coreCount=%d",
-                                   procIOMask, coreMask, coreCount);
-
-                        // No break - keep looping
-                    }
-                    else
-                    {
-                        // Unexpected return code - create err and fail
-                        TRACFCOMP( g_trac_sbe,
-                              ERR_MRK"procCustomizeSbeImg(): FAPI_EXEC_HWP("
-                              "p8_xip_customize) failed with rc=0x%X, "
-                              "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
-                              "procIOMask=0x%.8X. coreCount=%d. Create "
-                              "err and break loop",
-                              uint32_t(rc_fapi), maxCores,
-                              TARGETING::get_huid(i_target),
-                              coreMask, procIOMask, coreCount);
-
-                        err = fapiRcToErrl(rc_fapi);
-
-                        ERRORLOG::ErrlUserDetailsTarget(i_target,
-                                                        "Proc Target")
-                                                       .addToLog(err);
-                        err->collectTrace(SBE_COMP_NAME, 256);
-
-                        // break from while loop
-                        break;
-                    }
-                }
-            }  // end of while loop
-
-
-            if(err)
-            {
-                // There was a previous error, so break here
-                break;
-            }
-
-            if ( procedure_success == false )
-            {
-                // No err, but exit from while loop before successful
-                TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
-                           "Failure to successfully complete p8_xip_customize()"
-                           ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
-                           " procIOMask=0x%.8X, maxCores=0x%X",
-                           TARGETING::get_huid(i_target), uint32_t(rc_fapi),
-                           coreCount, coreMask, procIOMask, maxCores);
-                /*@
-                 * @errortype
-                 * @moduleid          SBE_CUSTOMIZE_IMG
-                 * @reasoncode        SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL
-                 * @userdata1[0:31]   procIOMask in/out parameter
-                 * @userdata1[32:63]  rc of procedure
-                 * @userdata2[0:31]   coreMask of target
-                 * @userdata2[32:63]  coreCount - updated on the loops
-                 * @devdesc      Unsuccessful in creating Customized SBE Image
-                 * @custdesc     A problem occurred while updating processor
-                 *               boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_CUSTOMIZE_IMG,
-                                    SBE_P8_XIP_CUSTOMIZE_UNSUCCESSFUL,
-                                    TWO_UINT32_TO_UINT64(procIOMask,
-                                                         uint32_t(rc_fapi)),
-                                    TWO_UINT32_TO_UINT64(coreMask,
-                                                          coreCount));
-
-                ErrlUserDetailsTarget(i_target
-                                      ).addToLog(err);
-                err->collectTrace("FAPI", 256);
-                err->collectTrace(SBE_COMP_NAME, 256);
-                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-            }
+            o_actImgSize = static_cast<size_t>(tmpImgSize);
 
         }while(0);
 
         TRACUCOMP( g_trac_sbe,
                    EXIT_MRK"procCustomizeSbeImg(): io_imgPtr=%p, "
-                   "o_actImgSize=0x%X, rc_fapi=0x%X, procedure_success=%d",
-                   io_imgPtr, o_actImgSize, uint32_t(rc_fapi),
-                   procedure_success );
+                   "o_actImgSize=0x%X, RC=0x%X",
+                   io_imgPtr, o_actImgSize, ERRL_GETRC_SAFE(err) );
 
         return err;
     }
-
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t selectBestCores(TARGETING::Target* i_target,
-                               size_t i_maxExs,
-                               uint32_t& o_exMask)
-    {
-        TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"selectBestCores(i_maxCores=0x%.8X)",
-                   i_maxExs);
-
-        errlHndl_t err = NULL;
-        uint32_t manGuardExs = 0x00000000;
-        uint32_t remainingExs = 0x00000000;
-        uint32_t exCount = 0;
-        uint32_t deconfigByEid = 0;
-
-        o_exMask = 0x00000000;
-
-        do{
-
-            // Special case: if i_maxExs == 0 don't loop through EXs
-            if (unlikely(i_maxExs == 0 ))
-            {
-                break;
-            }
-
-            // find all EX chiplets of the proc
-            TARGETING::TargetHandleList l_exTargetList;
-            TARGETING::getChildChiplets( l_exTargetList,
-                                         i_target,
-                                         TARGETING::TYPE_EX,
-                                         false); // return all
-
-            //Sort through cores
-            for ( TargetHandleList::const_iterator
-                  l_iterEX = l_exTargetList.begin();
-                  l_iterEX != l_exTargetList.end();
-                  ++l_iterEX )
-            {
-                //  make a local copy of the EX target
-                const TARGETING::Target*  l_ex_target = *l_iterEX;
-
-                if( !(l_ex_target->
-                      getAttr<TARGETING::ATTR_HWAS_STATE>().present) )
-                {
-                    // not present, so skip and continue
-                    continue;
-                }
-
-
-                uint8_t chipUnit = l_ex_target->
-                  getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-                if(l_ex_target->
-                     getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-                {
-                    o_exMask |= (0x00008000 >> chipUnit);
-                    exCount++;
-                }
-                else
-                {
-                    //If non-functional due to FCO or Manual gard,
-                    //add it to list of exs to include if
-                    //more are needed
-
-                    deconfigByEid = l_ex_target->
-                                      getAttr<TARGETING::ATTR_HWAS_STATE>().
-                                      deconfiguredByEid;
-                    if(
-                       // FCO
-                       (deconfigByEid ==
-                        HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
-                       || // Manual GARD
-                       (deconfigByEid ==
-                        HWAS::DeconfigGard::DECONFIGURED_BY_MANUAL_GARD)
-                       )
-                    {
-                        manGuardExs |= (0x00008000 >> chipUnit);
-                    }
-                    // Add it to the 'remaining' list in case
-                    // more are needed
-                    else
-                    {
-                        remainingExs |= (0x00008000 >> chipUnit);
-                    }
-
-                }
-            }   // end ex target loop
-
-            if(exCount == i_maxExs)
-            {
-                //We've found the exact amount, break out of function
-                break;
-            }
-
-            else if(exCount > i_maxExs)
-            {
-                //We have too many, so need to trim
-                o_exMask = trimBitMask(o_exMask,
-                                       i_maxExs);
-                break;
-            }
-
-            else
-            {
-                // We need to add 'other' cores
-                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: non-functional "
-                           "cores needed for bit mask: exCount=%d, i_maxExs=%d,"
-                           " o_exMask=0x%.8X, manGuardExs=0x%.8X, "
-                           "remainingExs=0x%.8X",
-                           exCount, i_maxExs, o_exMask, manGuardExs,
-                           remainingExs );
-            }
-
-            // Add more 'good' exs.
-            manGuardExs = trimBitMask(manGuardExs,
-                        i_maxExs-exCount);
-            o_exMask |= manGuardExs;
-            exCount = __builtin_popcount(o_exMask);
-            TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
-                       "manGuardExs=0x%.8X", manGuardExs);
-
-            if(exCount >= i_maxExs)
-            {
-                //We've found enough, break out of function
-                break;
-            }
-
-            // If we still need more, add 'remaining' exs
-            // Get Target Service
-            // System target check done earlier, so no assert check necessary
-            TargetService& tS = targetService();
-            TARGETING::Target* sys = NULL;
-            (void) tS.getTopLevelTarget( sys );
-
-            uint32_t min_exs = sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_EXS>();
-            if ( exCount < min_exs )
-            {
-                remainingExs = trimBitMask(remainingExs,
-                                           min_exs-exCount);
-                o_exMask |= remainingExs;
-                TRACUCOMP( g_trac_sbe,INFO_MRK"selectBestCores: trimBitMask "
-                           "remainingExs=0x%.8X, min_exs=%d",
-                           remainingExs, min_exs);
-            }
-
-        }while(0);
-
-        TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"selectBestCores(o_exMask=0x%.8X)",
-                   o_exMask);
-
-        return err;
-    }
-
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSetMVPDVersion(TARGETING::Target* i_target,
@@ -1621,7 +1288,6 @@ namespace SBE
         uint8_t * tmp_data_ECC = static_cast<uint8_t*>(
                                         malloc(sbeInfoSize_ECC));
 
-
         do{
 
             /***********************************************/
@@ -1670,8 +1336,7 @@ namespace SBE
                        eccStatus, o_info.struct_version, o_info.data_crc);
 
 
-            if ( ( o_info.struct_version == 1 ) ||
-                   o_info.struct_version == 2 )
+            if ( STRUCT_VERSION_CHECK(o_info.struct_version) )
             {
                 // Supported Versions - set size variable to remove ECC
                 sbeInfoSize = SBE_SEEPROM_STRUCT_SIZES[o_info.struct_version];
@@ -1695,16 +1360,15 @@ namespace SBE
                                          reinterpret_cast<uint8_t*>(&o_info),
                                          sbeInfoSize);
 
-            TRACUCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
-                       "sizeof o_info/sI=%d, sI_ECC=%d",
-                       eccStatus, sbeInfoSize, sbeInfoSize_ECC);
+            TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
+                       "sizeof o_info/sI=%d, sI_ECC=%d, origin golden=%i",
+                       eccStatus, sbeInfoSize, sbeInfoSize_ECC, o_info.origin);
 
             // Handle Uncorrectable ECC - no error log:
             // clear data and set o_seeprom_ver_ECC_fail=true
             if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
             {
-
-                TRACFCOMP( g_trac_sbe,ERR_MRK"getSeepromSideVersion() - ECC "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - ECC "
                            "ERROR: Handled. eccStatus=%d, side=%d, sizeof "
                            "o_info/sI=%d, sI_ECC=%d",
                            eccStatus, i_seepromSide, sbeInfoSize,
@@ -1780,11 +1444,12 @@ namespace SBE
             /*************************************************************/
 
             // Create Invalid Version struct (which is always 8-byte aligned)
-            for ( uint8_t i = 0; i < (sbeInfoSize)/8; i++ )
+            uint8_t* sbeInfoEnd = sbeInfo_data + sbeInfoSize;
+            for (uint64_t* p = reinterpret_cast<uint64_t*>(sbeInfo_data);
+                 p < reinterpret_cast<uint64_t*>(sbeInfoEnd);
+                 p++)
             {
-                memcpy(&sbeInfo_data[i*8],
-                       &SBE_SEEPROM_STRUCT_INVALID,
-                       sizeof(uint64_t));
+                *p = SBE_SEEPROM_STRUCT_INVALID;
             }
 
             // Inject ECC to Data
@@ -2170,7 +1835,7 @@ namespace SBE
 
             // Check if in simics
             if ( ( io_sbeState.seeprom_0_ver.struct_version ==
-                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                   STRUCT_VERSION_SIMICS )
                  && ( Util::isSimicsRunning() )
                )
             {
@@ -2220,7 +1885,7 @@ namespace SBE
 
             // Check if in simics
             if ( ( io_sbeState.seeprom_1_ver.struct_version ==
-                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                   STRUCT_VERSION_SIMICS )
                  && ( Util::isSimicsRunning() )
                )
             {
@@ -2334,10 +1999,11 @@ namespace SBE
                 memset(&(io_sbeState.new_seeprom_ver),
                        0x0,
                        sizeof(sbeSeepromVersionInfo_t));
-
+                // the above memset also has the side effect of setting the
+                // origin field to WORKING_SIDE which is the default
 
                 io_sbeState.new_seeprom_ver.struct_version =
-                                            SBE_SEEPROM_STRUCT_VERSION;
+                                            STRUCT_VERSION_LATEST;
 
                 memcpy( &(io_sbeState.new_seeprom_ver.image_version),
                         &(io_sbeState.pnorVersion),
@@ -2538,7 +2204,7 @@ namespace SBE
                                "NOT Booting READ_ONLY SEEPROM. Check for update"
                                " on cur side=%d ",
                                TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side)
+                               io_sbeState.cur_seeprom_side);
 
                     // Check for clean vs. dirty only on cur side
                     if ( i_system_situation & SITUATION_CUR_IS_DIRTY )
@@ -2995,6 +2661,24 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
+    void setNestFreqAttributes(uint32_t i_nestFreq)
+    {
+        // @TODO RTC:138226 need interface, but content may change
+
+        // Call targeting function to update NEST_FREQ
+        TargetService& tS = targetService();
+        TARGETING::Target* sys = NULL;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "setNestFreqAttributes() system target is NULL");
+
+        TRACFCOMP(g_trac_sbe, "setNestFreqAttributes(): "
+                  "UPDATE_NEST_FREQ to %d ",
+                  i_nestFreq);
+
+        TARGETING::setFrequencyAttributes(sys, i_nestFreq);
+    }
+
+/////////////////////////////////////////////////////////////////////
     errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
     {
         TRACUCOMP( g_trac_sbe,
@@ -3016,19 +2700,8 @@ namespace SBE
             // This can only be set with Golden/READ-ONLY Seeprom situation
             if (l_actions & UPDATE_NEST_FREQ)
             {
-                // Call targeting function to update NEST_FREQ
-                TargetService& tS = targetService();
-                TARGETING::Target* sys = NULL;
-                (void) tS.getTopLevelTarget( sys );
-                assert(sys, "performUpdateActions() system target is NULL");
-
-                TRACFCOMP( g_trac_sbe, "performUpdateActions(): "
-                           "UPDATE_NEST_FREQ to %d ",
-                           io_sbeState.mproc_nest_freq_mhz);
-
-                TARGETING::setFrequencyAttributes(
-                                       sys,
-                                       io_sbeState.mproc_nest_freq_mhz);
+                // update nest frequency attributes
+                setNestFreqAttributes(io_sbeState.mproc_nest_freq_mhz);
 
                 // This opeation only done by itself and does not need
                 // an informational error log
@@ -3161,29 +2834,6 @@ namespace SBE
 
     }
 
-
-
-/////////////////////////////////////////////////////////////////////
-    uint32_t trimBitMask(uint32_t i_mask,
-                         size_t i_maxBits)
-    {
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"trimBitMask(i_mask=0x%.8X, i_maxBits=0x%.8X)",
-                   i_mask, i_maxBits);
-        uint32_t retMask = i_mask;
-
-        while(__builtin_popcount(retMask) >  static_cast<int32_t>(i_maxBits))
-        {
-            retMask ^= (0x80000000 >>
-                        static_cast<uint32_t>(__builtin_clz(retMask)));
-        }
-
-        TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"trimBitMask(): retMask=0x%.8X",
-                   retMask);
-
-        return retMask;
-    }
 
 
 /////////////////////////////////////////////////////////////////////
@@ -4089,7 +3739,8 @@ namespace SBE
         o_mismatch = false;
 
         // Check Seeprom
-        if ( i_struct_version == 2 )
+        if ( STRUCT_VERSION_CHECK(i_struct_version) &&
+             i_seeprom_nest_freq != 0 )
         {
             // Only version that tracks the nest freq when the image was
             // customized
@@ -4117,7 +3768,7 @@ namespace SBE
 
         else
         {
-            // Either old version (like 1), unitialized, simics, corrupted, etc
+            // Either uninitialized, simics, corrupted, etc
             // Assume SBE image created with the module's default frequency
             if ( g_current_nest_freq == i_default_nest_freq )
             {
@@ -4155,10 +3806,10 @@ namespace SBE
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState)
     {
         TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"checkNestFreqSettings");
+                   ENTER_MRK"checkNestFreqSettings(): HUID:0x%08X",
+                   TARGETING::get_huid(io_sbeState.target));
 
         errlHndl_t err = NULL;
-
         uint32_t default_nest_freq = 0;
 
         do{
@@ -4167,13 +3818,21 @@ namespace SBE
             io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch = false;
             io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch = false;
 
-            // Get DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
+            // Get MRW DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
+            // @TODO RTC:138226 "We need to investigate if we can avoid needing
+            //                   this hack in P9"
             default_nest_freq = io_sbeState.target->getAttr<
                          TARGETING::ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ>();
 
-            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ "
+            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
                        "=%d, ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ=%d",
                        g_current_nest_freq, default_nest_freq);
+            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): "
+                       "seeprom0 ver=%d freq=%d seeprom1 ver=%d freq=%d",
+                       io_sbeState.seeprom_0_ver.struct_version,
+                       io_sbeState.seeprom_0_ver.nest_freq_mhz,
+                       io_sbeState.seeprom_1_ver.struct_version,
+                       io_sbeState.seeprom_1_ver.nest_freq_mhz);
 
             // Check Seeprom 0
             checkSeepromNestFreq(io_sbeState.target,
@@ -4210,7 +3869,9 @@ namespace SBE
 
                 if (tmp_cur_side == SBE_SEEPROM0)
                 {
-                    if ( io_sbeState.seeprom_0_ver.struct_version == 2 )
+                    if ( STRUCT_VERSION_CHECK(
+                             io_sbeState.seeprom_0_ver.struct_version) &&
+                         io_sbeState.seeprom_0_ver.nest_freq_mhz != 0 )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_0_ver.nest_freq_mhz;
@@ -4223,7 +3884,9 @@ namespace SBE
                 }
                 else if ( tmp_cur_side == SBE_SEEPROM1 )
                 {
-                    if ( io_sbeState.seeprom_1_ver.struct_version == 2 )
+                    if ( STRUCT_VERSION_CHECK(
+                             io_sbeState.seeprom_1_ver.struct_version) &&
+                         io_sbeState.seeprom_1_ver.nest_freq_mhz != 0 )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_1_ver.nest_freq_mhz;

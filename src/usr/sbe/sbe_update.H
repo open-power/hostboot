@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,21 +43,30 @@ namespace SBE
     // Using only first 20 bytes of 64-byte sbe_image_version
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
-    // Version of Struct stored in SEEPROM
-    const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000002;
-    const uint32_t SBE_SEEPROM_STRUCT_SIMICS_VERSION = 0x5A5A5A5A;
-
     // Number of versions supported
-    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x03;
+    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x02;
 
     // Size of supported versions - must be 8-byte aligned
     const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
                       {
-                        0,   // ver0: uninitialized - no size
-                        72,  // ver1: size of struct is 72 bytes
-                        80,  // ver2: size of struct is 80 bytes
+                         0,   // ver0: uninitialized - no size
+                         80,  // ver1: size of struct is 80 bytes
                       };
 
+    // This enum provides the struct versions for sbeSeepromVersionInfo_t
+    // Each numeric version is named after the key feature it introduces.
+    enum sbeSeepromStructVersionInfo_t {
+        STRUCT_VERSION_FIRST  = 0x1,
+        STRUCT_VERSION_LATEST = 0x1,
+        STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
+    };
+
+    #define STRUCT_VERSION_CHECK(version) (((version) >= STRUCT_VERSION_FIRST) \
+                                        && ((version) <= STRUCT_VERSION_LATEST))
+
+    // Nest frequencies
+    const uint32_t NEST_FREQ_2000 = 2000;
+    const uint32_t NEST_FREQ_2400 = 2400;
 
     // Constant written to SBE SEEPROM version struct to invalidate the
     // struct and the image - 'INVALID\0'
@@ -112,6 +121,19 @@ namespace SBE
     /******************************************/
     /*  Enums                                 */
     /******************************************/
+    enum {
+        FIXED_SEEPROM_WORK_SPACE = 128 * 1024,
+        FIXED_RING_BUF_SIZE = 60000,
+        MAX_SEEPROM_IMAGE_SIZE  =   56 * 1024,
+        SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
+        RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
+        RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
+        //NOTE: recycling the same memory space for different
+        //steps in the process.
+        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
+        SBE_ECC_IMG_MAX_SIZE = VMM_VADDR_SBE_UPDATE_END - SBE_ECC_IMG_VADDR,
+    };
+
     // Used for MVPD function
     enum opType_t
     {
@@ -142,6 +164,14 @@ namespace SBE
         UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
+    // Values used to indicate whether an SBE Seeprom image originates from the
+    // golden side SBE Seeprom or not
+    enum sbeOrigin_t
+    {
+        WORKING_SIDE = 0,
+        GOLDEN_SIDE = 1,
+    };
+
     /******************************************/
     /*  Structs                               */
     /******************************************/
@@ -151,8 +181,7 @@ namespace SBE
      *
      * NOTE: For ECC purposes, this must be 8-byte aligned,
      *       so pad data if necessary
-     *       struct_version 1: size = 4+4+64 = 72 (aligned)
-     *       struct_version 2: size = 4+4+64+4+4 = 80 (aligned)
+     *       struct_version 1: size = 4+4+64+4+1+3 = 80 (aligned)
      */
     struct sbeSeepromVersionInfo_t
     {
@@ -160,14 +189,14 @@ namespace SBE
         uint32_t  struct_version;
         uint32_t  data_crc;
         uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
-
-        // New parameters for version 2: nest_freq_mhz and uin32_t/reserved
         uint32_t  nest_freq_mhz;
-        uint32_t  reserved;      // reserved; added for alignment
+        uint8_t   origin;        // set if SBE came from golden side
+        uint8_t   unused[3];     // unused space; added for alignment
     } PACKED;
 
-    // This line forces a compile fail if struct is NOT 8-byte-alaigned
-    CPPASSERT(0 == (sizeof(sbeSeepromVersionInfo_t) % 8));
+    // This line forces a compile fail if struct is NOT 8-byte-aligned
+    static_assert(0 == (sizeof(sbeSeepromVersionInfo_t) % 8),
+                  "sbeSeepromVersionInfo_t is not 8-byte-aligned");
 
 
     /**
@@ -494,44 +523,6 @@ namespace SBE
      * @return      void
      */
     errlHndl_t cleanupSbeImageVmmSpace(void);
-
-    /**
-     * @brief Select best cores to include in SBE Image.
-     *        The output is used to indicate to p8_xip_customize which cores
-     *        should be included in the SBE image.
-     *
-     * @param[in] i_target   Target processor to use for core selection
-     *
-     * @param[in] i_maxCores  Maximum number of cores to select for inclusion
-     *                        in the SBE Image
-     *
-     * @param[out] o_coreMask  Core Mask for the target that does not exceed
-     *                         the maximum number of cores
-     *                         NOTE: bits 16:31 = EX0:EX15
-     *                         This value is used as input into
-     *                         p8_xip_customize.C
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t selectBestCores(TARGETING::Target* i_target,
-                               size_t i_maxCores,
-                               uint32_t& o_coreMask);
-
-
-    /**
-     * @brief Reduces bits set in a bit mask until there is a
-     *        a maximum number of bits set.
-     *        NOTE: bits removed left-to-right
-     *
-     * @param[in] i_mask      Starting mask to be reduced
-     *
-     * @param[in] i_maxBits   Maximum number of bits that the
-     *                        returned Bit Mask can contain
-     *
-     * @return uint32_t       Bit Mask
-     */
-    uint32_t trimBitMask(uint32_t i_mask,
-                         size_t i_maxBits);
 
 
     /**
