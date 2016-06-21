@@ -99,8 +99,10 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
                      "Running p9_smp_link_layer HWP on processor target %.8X",
                      TARGETING::get_huid(l_cpu_target) );
 
-// @TODO RTC:134079 Integrate L2 HWPs for istep 9
-//         FAPI_INVOKE_HWP(l_errl,p9_smp_link_layer, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_errl, p9_smp_link_layer,
+                        l_fapi2_proc_target,
+                        true,  // train electrical - XBUS
+                        true); // train optical - ABUS
         if(l_errl)
         {
           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
