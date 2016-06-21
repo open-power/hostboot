@@ -624,7 +624,49 @@ typedef struct runtimeInterfaces
                      const char** argv,
                      char** o_outString );
 
+    /**
+     *  @brief Verify integrity of a secure container
+     *  @param[in] i_pContainer Pointer to a valid secure container,
+     *      Must not be NULL.  Container is assumed to be stripped of any ECC
+     *      and must start with a valid secure header (which contains the
+     *      container size information)
+     *  @param[in] i_pHwHashKey Pointer to a valid hardware hash key.
+     *      Must not be NULL.
+     *  @param[in] i_hwHashKeySize Size of the hardware hash key.
+     *      A value which incorrectly states the size of the hardware hash key
+     *      will be detected as a verification error or worse, an illegal memory
+     *      access.  Must not be 0.
+     *  @note If secureboot is compiled out, the function pointer will be set to
+     *      NULL.  If caller's secureboot support is compiled in and secureboot
+     *      is enabled by policy, then caller should treat a NULL pointer as a
+     *      verification failure.
+     *  @return Integer error code indicating success or failure
+     *  @retval 0 Container verified correctly
+     *  @retval !0 API error or otherwise failed to verify container
+     *  @platform FSP, OpenPOWER
+     */
+    int (*verify_container)(
+        const void*  i_pContainer,
+        const void*  i_pHwHashKey,
+              size_t i_hwHashKeySize);
+
     // Reserve some space for future growth.
+    // do NOT ever change this number, even if you add functions.
+    //
+    // The value of 32 was somewhat arbitrarily chosen.
+    //
+    // If either side modifies the interface.h file we're suppose to be able to
+    // tolerate the other side not supporting the function yet.  The function
+    // pointer can be NULL.  So if we require a new interface from OPAL, like
+    // "read_iic", we need to be able to tolerate that function pointer being
+    // NULL and do something sane (and erroring out is not consider sane).
+    //
+    // The purpose of this is to give us the ability to update Hostboot and
+    // OPAL independently.  It is pretty rare that we both have function ready
+    // at the same time.  The "reserve" is there so that the structures are
+    // allocated with sufficient space and populated with NULL function
+    // pointers.  32 is big enough that we should not likely add that many
+    // functions from either direction in between any two levels of support.
     void (*reserved[32])(void);
 
 } runtimeInterfaces_t;
