@@ -2299,6 +2299,7 @@
     <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
     <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
     <!-- End proc_fbc_eff_config_links -->
+    <attribute><id>FSI_GP_SHADOWS_OVERWRITE</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
@@ -2776,6 +2777,11 @@
     <attribute><id>VPD_MT_VREF_DRAM_WR</id></attribute>
     <attribute><id>VPD_MT_VREF_MC_RD</id></attribute>
     <attribute><id>VPD_MT_WINDAGE_RD_CTR</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DQ_CTLE_CAP</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DQ_CTLE_RES</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>EFF_DRAM_GEN</id></attribute>

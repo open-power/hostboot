@@ -10136,6 +10136,576 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--TODO RTC: 154455 Move attributes to EC attribute xml file-->
+<attribute>
+    <id>FSI_GP_SHADOWS_OVERWRITE</id>
+    <description>
+        DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers
+    </description>
+    <simpleType>
+        <uint8_t>
+        <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_IS_SCANABLE</id>
+    <description>
+        Indicates core 1 has power and has valid latch state that could be scanned
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_IS_SCANABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_IS_SCANABLE</id>
+    <description>
+        Indicates core 0 has power and has valid latch state that could be scanned
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_IS_SCANABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_IS_SCANABLE</id>
+    <description>
+        Indicates L3 has power and has valid latch state that could be scanned
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_IS_SCANABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_IS_SCANABLE</id>
+    <description>
+        Indicates L2 has power and has valid latch state that could be scanned
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_IS_SCANABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_PC_IS_SCOMABLE</id>
+    <description>
+        Indicates the core pervasive unit in core 1 has clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_PC_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_PC_IS_SCOMABLE</id>
+    <description>
+        Indicates the core pervasive unit in core 0 has clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_PC_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_EXEC_IS_SCOMABLE</id>
+    <description>
+        Indicates the execution units in core 1 have clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_EXEC_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_EXEC_IS_SCOMABLE</id>
+    <description>
+        Indicates the execution units in core 0 have clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_EXEC_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_IS_SCOMABLE</id>
+    <description>
+        Indicates the L3 region has clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_IS_SCOMABLE</id>
+    <description>
+        Indicates the L2 region has clocks running and scommable
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_IS_SCOMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OBUS_RATIO_VALUE</id>
+    <description>
+        Holds Obus ratio value
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OBUS_RATIO_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--TODO RTC: 154455 Move attributes to EC attribute xml file-->
+<attribute>
+    <id>VITL_CLK_SETUP</id>
+    <description>
+        Used to tell the p9_sbe_chiplet_reset hwp to either
+        adjust clock setting for PRESENT targets if this is 1
+        or else set it for FUNCTIONAL targets. Nimbus DD1.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VITL_CLK_SETUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>N3_FLUSH_MODE</id>
+    <description>
+        DD1 update : If this attribute is 1 then dd1s will be
+        flushed without N3
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_N3_FLUSH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CME_LOCAL_FIRMASK</id>
+    <description>
+    The FIR mask value that has to be restored to the CME FIR
+    register. This value will be stored during the reset phase when the
+    FIRMASK will be cleared as part of the cleanup action.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CME_LOCAL_FIRMASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>QUAD_PPM_ERRMASK</id>
+    <description>
+    The error mask value that has to be restored to the PPM
+    ERRMASK register for the Quad. This value will be stored during the
+    reset phase when the ERRMASK will be cleared as part of the
+    cleanup action.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_QUAD_PPM_ERRMASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CORE_PPM_ERRMASK</id>
+    <description>
+    The error mask value that has to be restored to the PPM
+    ERRMASK register for the CORE. This value will be stored during the
+    reset phase when the ERRMASK will be cleared as part of the
+    cleanup action.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CORE_PPM_ERRMASK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SPD_OVERRIDE_ENABLE</id>
+    <description>
+    Set equal to 1 to activate the use of ATTR_SPD_OVERRIDE.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SPD_OVERRIDE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SPD_OVERRIDE</id>
+    <description>
+    Byte-for-byte override for the bucket of data that would
+    normally come from SPD.  If ATTR_SPD_OVERRIDE_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getSPD() instead of the actual SPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>512</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SPD_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MW_ENABLE</id>
+    <description>
+        Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MW.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MW_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MW</id>
+    <description>
+    Byte-for-byte override for the bucket of MW data that would
+    normally come from VPD.  If ATTR_VPD_OVERRIDE_MW_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getVPD() instead of the actual VPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>255</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MW</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MR_ENABLE</id>
+    <description>
+        Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MR.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MR</id>
+    <description>
+    Byte-for-byte override for the bucket of MR data that would
+    normally come from VPD.  If ATTR_VPD_OVERRIDE_MR_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getVPD() instead of the actual VPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>255</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MT_ENABLE</id>
+    <description>
+    Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MT.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MT_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_MT</id>
+    <description>
+    Byte-for-byte override for the bucket of MT data that would
+    normally come from VPD.  If ATTR_VPD_OVERRIDE_MT_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getVPD() instead of the actual VPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>255</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_MT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--TOOD RTC: 151938 Make sure that these are set up by parseMRW script-->
+<attribute>
+    <id>MEMVPD_FREQS_MHZ</id>
+    <description>
+    List of memory frequencies supported by the current system.
+    </description>
+    <simpleType>
+        <uint32_t>
+        <default>1866,2133,2400,2667</default>
+        </uint32_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMVPD_FREQS_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--TOOD RTC: 151938 Make sure that these are set up by parseMRW script-->
+<attribute>
+    <id>MEMVPD_POS</id>
+    <description>
+    The position of the MCA target's VPD selector data, relative to the EEPROM
+    that contains its data. For systems with a single EEPROM for all chips,
+    this should be equivalent to ATTR_FAPI_POS (the logical MCA position).
+    For systems with an EEPROM per chip, this value should be equivalent to
+    ATTR_CHIP_UNIT_POS.
+    </description>
+    <simpleType>
+        <uint8_t>
+        <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEMVPD_POS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SDISN_SETUP</id>
+    <description>
+        Sdis_n set or clear : flushing LCBES condition workaround
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SDISN_SETUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PBA_LFIR</id>
+    <description>
+    The attribute stores the Local FIR value of PBA taken
+    during the reset phase.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PBA_LFIR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>OCC_LFIR</id>
+    <description>
+    The attribute stores the Local FIR value of OCC taken
+    during the reset phase.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_OCC_LFIR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
     <id>MSS_ALLOW_SINGLE_PORT</id>
     <description>
@@ -28796,5 +29366,107 @@ DEPRECATED!!!!
 </attribute>
 
 <!--- TODO: End RTC 155880 workaround -->
+
+<attribute>
+  <id>MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
+  <description>
+    Selects the number of enabled pullup branches during READ mode.
+    ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected),
+    0x06 = b00000110 (2 branches selected)
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>2, 2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id>
+  <description>
+  Selects the number of enabled pulldown branches during WRITE mode.
+  ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected),
+  0x06 = b00000110 (2 branches selected)
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>2, 2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id>
+  <description>
+    Selects the number of enabled pullup branches during WRITE mode.
+    ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected),
+    0x06 = b00000110 (2 branches selected)
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>2, 2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MT_MC_DQ_CTLE_CAP</id>
+  <description>
+    Sets the capacitance value in the RC source degeneration for
+    [PORT#][DP16 BLOCK#]. ONLY set range 0-3. (0x00 = No capacitor selected,
+    0x01 = more caps selected, 0x02 = even more caps selected,
+    0x03 = maximum capacitors selected)
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>2, 5</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MT_MC_DQ_CTLE_RES</id>
+  <description>
+    Sets the resistance value in the RC source degeneration for
+    [PORT#][DP16 BLOCK#]. Also defines the CTLE's DC Gain.
+    ONLY set range 0-7. (0x00 = max resistance, 0x01 to 0x06 = decreasing resistance,
+    0x07 = min resistance)
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>2, 5</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
