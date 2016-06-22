@@ -59,7 +59,8 @@
 
 #include <config.h>
 
-//#include <p9_chiplet_scominit.H> //TODO-RTC:149687
+// HWP
+#include <p9_chiplet_scominit.H>
 #include <p9_psi_scominit.H>
 
 namespace   ISTEP_08
@@ -97,8 +98,7 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
             "Running p9_chiplet_scominit HWP on "
             "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
 
-        //TODO-RTC:149687
-        //FAPI_INVOKE_HWP(l_err, p9_chiplet_scominit, l_fapi2_proc_target);
+        FAPI_INVOKE_HWP(l_err, p9_chiplet_scominit, l_fapi2_proc_target);
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
@@ -109,6 +109,7 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
 
             // Create IStep error log and cross ref to error that occurred
             l_StepError.addErrorDetails( l_err );
+
             // We want to continue to the next target instead of exiting,
             // Commit the error log and move on
             // Note: Error log should already be deleted and set to NULL
@@ -124,7 +125,7 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
-             "proc_psi_scominit HWP returns error.  target HUID %.8X",
+             "p9_psi_scominit HWP returns error.  target HUID %.8X",
                     l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
 
             ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );

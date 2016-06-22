@@ -60,7 +60,7 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-//#include <p9_io_xbus_scominit.H> // TODO-RTC:149687 - enable when ready
+#include <p9_io_xbus_scominit.H>
 
 namespace   ISTEP_08
 {
@@ -69,6 +69,11 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+
+// Defines
+// The HWP currently supports XBUS0 and XBUS1 groups
+// -- see ENUM_ATTR_XBUS_GROUP_0,1 in p9_io_xbus_scominit.C
+#define XBUS_GROUP_COUNT 2
 
 //******************************************************************************
 // wrapper function to call proc_xbus_scominit
@@ -122,35 +127,44 @@ void* call_proc_xbus_scominit( void *io_pArgs )
                 l_connectedXbusFapi2Target(
                 (const_cast<TARGETING::Target*>(l_connectedXbusTarget)));
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Running p9_io_xbus_scominit HWP on "
-                     "This XBUS target %.8X - Connected XBUS target %.8X",
-                     TARGETING::get_huid(l_thisXbusTarget),
-                     TARGETING::get_huid(l_connectedXbusTarget) );
-
-            // TODO-RTC:149687
-            //FAPI_INVOKE_HWP(l_err, p9_io_xbus_scominit,
-            //               l_thisXbusFapi2Target, l_connectedXbusFapi2Target);
-            if (l_err)
+            for (uint8_t group = 0; group < XBUS_GROUP_COUNT; group++)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "Running p9_io_xbus_scominit HWP on "
+                         "This XBUS target %.8X - Connected XBUS target %.8X, "
+                         "group %d",
+                         TARGETING::get_huid(l_thisXbusTarget),
+                         TARGETING::get_huid(l_connectedXbusTarget), group );
+
+                FAPI_INVOKE_HWP(l_err, p9_io_xbus_scominit,
+                    l_thisXbusFapi2Target, l_connectedXbusFapi2Target, group);
+
+                if (l_err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "ERROR 0x%.8X : proc_xbus_scominit HWP returned error. "
-                        "This XBUS target %.8X - Connected XBUS target  %.8X",
+                        "This XBUS target %.8X - Connected XBUS target  %.8X "
+                        " group %d",
                         l_err->reasonCode(),
                         TARGETING::get_huid(l_thisXbusTarget),
-                        TARGETING::get_huid(l_connectedXbusTarget) );
+                        TARGETING::get_huid(l_connectedXbusTarget),
+                        group );
 
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_thisXbusTarget).addToLog( l_err );
-                ErrlUserDetailsTarget(l_connectedXbusTarget).addToLog( l_err );
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_thisXbusTarget).addToLog(l_err);
+                    ErrlUserDetailsTarget(l_connectedXbusTarget).
+                                                            addToLog(l_err);
 
-                // Create IStep error log and cross ref to error that occurred
-                l_StepError.addErrorDetails( l_err );
-                // We want to continue to the next target instead of exiting,
-                // Commit the error log and move on
-                // Note: Error log should already be deleted and set to NULL
-                // after committing
-                errlCommit(l_err, HWPF_COMP_ID);
+                    // Create IStep error log and cross ref to error
+                    // that occurred
+                    l_StepError.addErrorDetails( l_err );
+                    // We want to continue to the next target
+                    // instead of exiting,
+                    // Commit the error log and move on
+                    // Note: Error log should already be deleted and set to NULL
+                    // after committing
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
             }
         } // end of going through pairs
 
