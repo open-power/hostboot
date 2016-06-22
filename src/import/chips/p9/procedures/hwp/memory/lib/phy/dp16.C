@@ -49,6 +49,20 @@ using fapi2::TARGET_TYPE_SYSTEM;
 namespace mss
 {
 
+// Definition of the DP16 DLL Config registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is app caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_CNTL0_P0_0, MCA_DDRPHY_DP16_DLL_CNTL1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_CNTL0_P0_1, MCA_DDRPHY_DP16_DLL_CNTL1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_CNTL0_P0_2, MCA_DDRPHY_DP16_DLL_CNTL1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_CNTL0_P0_3, MCA_DDRPHY_DP16_DLL_CNTL1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_CNTL0_P0_4, MCA_DDRPHY_DP16_DLL_CNTL1_P0_4 },
+};
+
+
 namespace dp16
 {
 
@@ -288,7 +302,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode reset_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
-    std::vector< std::pair<uint64_t, uint64_t> > l_addrs(
+    static const std::vector< std::pair<uint64_t, uint64_t> > l_addrs(
     {
         {MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_0},
         {MCA_DDRPHY_DP16_SYSCLK_PR0_P0_1, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_1},
@@ -392,7 +406,6 @@ fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<TARGET_TYPE_MCBIST
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 } // close namespace dp16
 } // close namespace mss

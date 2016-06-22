@@ -41,6 +41,156 @@
     <scomRegister>MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1</scomRegister>
 </registerFfdc>
 
+<registerFfdc>
+  <id>REG_FFDC_DLL_REGS</id>
+  <scomRegister>MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_DAC_LOWER_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_DAC_LOWER_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_DAC_UPPER_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_DAC_UPPER_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_EXTRA_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_EXTRA_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SLAVE_VREG_LOWER_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SLAVE_VREG_LOWER_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SLAVE_VREG_UPPER_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SLAVE_VREG_UPPER_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SW_CONTROL_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_SW_CONTROL_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_COARSE_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_COARSE_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_CONTROL_P0_ADR32S0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_DLL_VREG_CONTROL_P0_ADR32S1</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CNTL1_P0_4</scomRegister>
+
+  <!-- No CONFIG0 it appears -->
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CONFIG1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CONFIG1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CONFIG1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CONFIG1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_CONFIG1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_EXTRA1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_4</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_4</scomRegister>
+</registerFfdc>
+
 <hwpError>
   <rc>RC_MSS_DP16_PLL_FAILED_TO_LOCK</rc>
   <description>
@@ -144,6 +294,27 @@
       <refTarget>MCA_IN_ERROR</refTarget>
     </hw>
     <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DLL_FAILED_TO_CALIBRATE</rc>
+  <description>
+    DLL failed to calibrate
+  </description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_DLL_REGS</id>
+    <target>MCA_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MCA_IN_ERROR</target>
+    <priority>HIGH</priority>
   </callout>
   <deconfigure>
     <target>MCA_IN_ERROR</target>

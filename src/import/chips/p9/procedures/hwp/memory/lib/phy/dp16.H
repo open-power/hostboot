@@ -35,6 +35,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
+#include <lib/utils/scom.H>
 
 namespace mss
 {
@@ -106,10 +107,100 @@ class dp16Traits<fapi2::TARGET_TYPE_MBA>
 template<>
 class dp16Traits<fapi2::TARGET_TYPE_MCA>
 {
+
+    public:
+        // Number of DP instances
+        static constexpr uint64_t DP_COUNT = 5;
+
+        // Number of instances of the DLL per DP16. Used for checking parameters, the rest of the
+        // code assumes 2 DLL per DP16. There are no DLL in Centaur so we don't need to worry about
+        // any of this for some time.
+        static constexpr uint64_t DLL_PER_DP16 = 2;
+
+        // Vector of the DLL configuration registers. The pair represents the two DLL in per DP16
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
+
+        enum
+        {
+            DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
+        };
 };
 
 namespace dp16
 {
+
+///
+/// @brief Read DLL_CNTL
+/// @tparam I DP16 instance
+/// @tparam D DLL instance in the specified DP16
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_dll_cntl( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
+
+    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL regiters
+    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
+
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+    FAPI_INF("dll_cntl dp16<%d, %d>: 0x%016lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Write DLL_CNTL
+/// @tparam I DP16 instance
+/// @tparam D DLL instance in the specified DP16
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_dll_cntl( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
+
+    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL regiters
+    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
+
+    FAPI_INF("dll_cntl dp16<%d,%d>: 0x%016lx", I, D, i_data);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+//
+// Reseting the DLL registers TODO RTC:156518
+//
+
+///
+/// @brief Set the DLL cal reset (begins DLL cal operations)
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @note Default state is 'low' as writing a 0 forces the cal to begin.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_dll_cal_reset( fapi2::buffer<uint64_t>& o_data, const states i_state = mss::LOW )
+{
+    FAPI_INF("set_dll_cal_reset %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::DLL_CNTL_INIT_RXDLL_CAL_RESET>(i_state);
+}
 
 
 ///

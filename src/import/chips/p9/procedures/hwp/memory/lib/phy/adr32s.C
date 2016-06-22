@@ -16,3 +16,29 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file adr32s.C
+/// @brief Subroutines for the PHY ADR32S registers
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/phy/adr32s.H>
+
+namespace mss
+{
+
+// Definition of the ADR32S DLL Config registers
+const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::DLL_CNFG_REG =
+{
+    MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0,
+    MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1
+};
+
+}
+

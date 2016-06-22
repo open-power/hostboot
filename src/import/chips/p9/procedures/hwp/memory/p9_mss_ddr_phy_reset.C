@@ -77,6 +77,17 @@ extern "C"
         FAPI_TRY( mss::deassert_pll_reset(i_target) );
 
         //
+        // DLL calibration
+        //
+
+        // 14. Begin DLL calibrations by setting INIT_RXDLL_CAL_RESET=0 in the DDRPHY_DP16_DLL_CNTL{0:1} registers
+        // and DDRPHY_ADR_DLL_CNTL registers
+        // 15. Monitor the DDRPHY_PC_DLL_ZCAL_CAL_STATUS register to determine when calibration is
+        // complete. One of the 3 bits will be asserted for ADR and DP16.
+        FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
+        FAPI_TRY( mss::dll_calibration(i_target) );
+
+        //
         // Start bang-bang-lock
         //
 

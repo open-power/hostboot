@@ -67,6 +67,7 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
         // MCA phy control registers
         static const uint64_t PC_ERROR_STATUS0_REG = MCA_DDRPHY_PC_ERROR_STATUS0_P0;
         static const uint64_t PC_INIT_CAL_ERROR_REG = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0;
+        static const uint64_t PC_DLL_ZCAL_CAL_STATUS_REG = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0;
 
         enum
         {
@@ -88,6 +89,15 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             // How many bits are in the field running from INIT_CAL_ERROR_WR_LEVEL to INIT_CAL_ERROR_VREF
             // Needed to pull the entire field out of the register.
             CAL_ERROR_FIELD_LEN = 11,
+
+            DLL_CAL_STATUS_DP_GOOD = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_DP_GOOD,
+            DLL_CAL_STATUS_DP_ERROR = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_DP_ERROR,
+            DLL_CAL_STATUS_DP_ERROR_FINE = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_DP_ERROR_FINE,
+            DLL_CAL_STATUS_ADR_GOOD = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_ADR_GOOD,
+            DLL_CAL_STATUS_ADR_ERROR = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_ADR_ERROR,
+            DLL_CAL_STATUS_ADR_ERROR_FINE = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_ADR_ERROR_FINE,
+            ZCAL_CAL_STATUS_DONE = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_DONE,
+
         };
 
 };
@@ -95,6 +105,65 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
 namespace pc
 {
 
+
+///
+/// @brief read MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_dll_zcal_status( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_DLL_ZCAL_CAL_STATUS_REG, o_data) );
+    FAPI_INF("pc_dll_zcal_status: 0x%016llx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get DP DLL Cal Status
+/// Combine the processing of Good, Error and Error Fine into one functional interface
+/// @param[in] fapi2::buffer representing the status register to interrogate
+/// @return mss::states; YES == success, NO == fail, INVALID == still running
+/// @note Since the these indicators are a summary of all DLLs, all must be started to make
+/// them valid.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
+{
+    const bool l_dp_good =  i_data.getBit<TT::DLL_CAL_STATUS_DP_GOOD>();
+    const bool l_dp_error = i_data.getBit<TT::DLL_CAL_STATUS_DP_ERROR>();
+    const bool l_dp_error_fine = i_data.getBit<TT::DLL_CAL_STATUS_DP_ERROR_FINE>();
+
+    FAPI_INF("pc_dll_status: 0x%016llx", i_data);
+
+    // Full calibration is still going on in at least 1 DLL while all 3 signals are 0.
+    if ((l_dp_good == mss::LOW) && (l_dp_error == mss::LOW) && (l_dp_error_fine == mss::LOW))
+    {
+        return mss::INVALID;
+    }
+
+    // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
+    if ((l_dp_good == mss::HIGH) && (l_dp_error == mss::LOW) && (l_dp_error_fine == mss::LOW))
+    {
+        return mss::YES;
+    }
+
+    // Full calibration failed in at least 1 DLL if either CAL_ERROR or CAL_ERROR_FINE are 1.
+    // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
+    if ((l_dp_error == mss::HIGH) || (l_dp_error_fine == mss::HIGH))
+    {
+        return mss::NO;
+    }
+
+    // Not reached ... right?
+    FAPI_ERR("pc_dll_cal_status: 0x%016llx unable to calculate state", i_data);
+    fapi2::Assert(false);
+    return mss::NO;
+}
+
+// MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS is read-only
 
 ///
 /// @brief read PC_ERROR_STATUS0
@@ -106,7 +175,7 @@ template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data) );
-    FAPI_DBG("pc_error_status0: 0x%016llx", o_data);
+    FAPI_INF("pc_error_status0: 0x%016llx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -121,7 +190,7 @@ template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("pc_error_status0: 0x%016llx", i_data);
+    FAPI_INF("pc_error_status0: 0x%016llx", i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data) );
 fapi_try_exit:
     return fapi2::current_err;
@@ -151,7 +220,7 @@ template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_init_cal_error( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data) );
-    FAPI_DBG("pc_init_cal_error: 0x%016llx", o_data);
+    FAPI_INF("pc_init_cal_error: 0x%016llx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -166,7 +235,7 @@ template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode write_init_cal_error( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_DBG("pc_init_cal_error: 0x%016llx", i_data);
+    FAPI_INF("pc_init_cal_error: 0x%016llx", i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data) );
 fapi_try_exit:
     return fapi2::current_err;

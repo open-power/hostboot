@@ -37,8 +37,10 @@
 #include <lib/phy/read_cntrl.H>
 #include <lib/phy/phy_cntrl.H>
 #include <lib/phy/apb.H>
+#include <lib/phy/adr32s.H>
 
 #include <lib/utils/bit_count.H>
+#include <lib/utils/find.H>
 #include <lib/utils/dump_regs.H>
 #include <lib/utils/scom.H>
 
@@ -48,6 +50,7 @@ using fapi2::TARGET_TYPE_SYSTEM;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_DIMM;
+using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
@@ -176,91 +179,15 @@ fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i
 {
     fapi2::buffer<uint64_t> l_data;
 
-#ifdef KNOW_ADR_DLL_PROCESS
-    static const uint64_t dp16_lock_mask = 0x000000000000FFFE;
-    static const uint64_t ad_lock_mask = fapi2::buffer<uint64_t>().setBit<48>().setBit<49>();
-#endif
-
     //
     // Write 0x4000 into the PC Resets Registers. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active
-    //                                                (SCOM Addr: 0x8000C00E0301143F, 0x8001C00E0301143F, 0x8000C00E0301183F, 0x8001C00E0301183F)
+    //
+    // TODO RTC:156693 Do we need to do this on Nimbus? BRS
     FAPI_DBG("Write 0x4000 into the PC Resets Regs. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active");
 
     l_data.setBit<MCA_DDRPHY_PC_RESETS_P0_SYSCLK_RESET>();
     FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, l_data) );
 
-    //
-    // Wait at least 1 millisecond to allow the PLLs to lock. Otherwise, poll the PC DP18 PLL Lock Status
-    //    and the PC AD32S PLL Lock Status to determine if all PLLs have locked.
-    //    PC DP18 PLL Lock Status should be 0xF800:  (SCOM Addr: 0x8000C0000301143F, 0x8001C0000301143F, 0x8000C0000301183F, 0x8001C0000301183F)
-    //    PC AD32S PLL Lock Status should be 0xC000: (SCOM Addr: 0x8000C0010301143F, 0x8001C0010301143F, 0x8000C0010301183F, 0x8001C0010301183F)
-
-#ifdef KNOW_ADR_DLL_PROCESS
-    // Poll for lock bits
-    FAPI_DBG("Poll until DP18 and AD32S PLLs have locked");
-
-    do
-    {
-        // Set in the CHECK_PLL macro
-        done_polling = true;
-
-        fapi2::delay(DELAY_1US, cycles_to_simcycles(us_to_cycles(i_target, 1)));
-
-        // Note: in the latest scomdef this is DP16 BRS
-        // Note: Not sure what the proper registers here are. I took the following old addresses from Ed's
-        // version of the code and mapped the addresses to the latests mc_scom_addresses.H. This needs to
-        // be fixed up when the extended addressing is fixed up. BRS
-
-        // CONST_UINT64_T(DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0_0x8000C0000701143F,                  ULL(0x8000C0000701143F) );
-        CHECK_PLL( l_target_proc, MCA_0_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0, l_data, dp16_lock_mask );
-
-        // CONST_UINT64_T(DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1_0x8001C0000701143F,                  ULL(0x8001C0000701143F) );
-        CHECK_PLL( l_target_proc, MCA_1_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1, l_data, dp16_lock_mask );
-
-        // CONST_UINT64_T(DDRPHY_PC_DP18_PLL_LOCK_STATUS_P2_0x8000C0000701183F,                  ULL(0x8000C0000701183F) );
-        CHECK_PLL( l_target_proc, MCA_2_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P2, l_data, dp16_lock_mask );
-
-        // CONST_UINT64_T(DDRPHY_PC_DP18_PLL_LOCK_STATUS_P3_0x8001C0000701183F,                  ULL(0x8001C0000701183F) );
-        CHECK_PLL( l_target_proc, MCA_3_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P3, l_data, dp16_lock_mask );
-
-        // CONST_UINT64_T( DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0_0x8000C0010701143F,        ULL(0x8000C0010701143F) );
-        CHECK_PLL( l_target_proc, MCA_0_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0, l_data, ad_lock_mask );
-
-        // CONST_UINT64_T( DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1_0x8001C0010701143F,        ULL(0x8001C0010701143F) );
-        CHECK_PLL( l_target_proc, MCA_1_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1, l_data, ad_lock_mask );
-
-        // CONST_UINT64_T( DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P2_0x8000C0010701183F,        ULL(0x8000C0010701183F) );
-        CHECK_PLL( l_target_proc, MCA_2_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P2, l_data, ad_lock_mask );
-
-        // CONST_UINT64_T( DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P3_0x8001C0010701183F,        ULL(0x8001C0010701183F) );
-        CHECK_PLL( l_target_proc, MCA_3_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P3, l_data, ad_lock_mask );
-    }
-    while (!done_polling && --max_poll_loops);
-
-    // If we ran out of iterations, report we have a pll lock failure.
-    if (max_poll_loops == 0)
-    {
-        FAPI_ERR("DDR PHY PLL failed to lock for %s", mss::c_str(i_target));
-        FFDC_PLL( l_target_proc, MCA_0_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P0, l_data, dp16_lock_mask,
-                  fapi2::MSS_DP16_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_1_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P1, l_data, dp16_lock_mask,
-                  fapi2::MSS_DP16_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_2_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P2, l_data, dp16_lock_mask,
-                  fapi2::MSS_DP16_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_3_DDRPHY_PC_DP18_PLL_LOCK_STATUS_P3, l_data, dp16_lock_mask,
-                  fapi2::MSS_DP16_PLL_FAILED_TO_LOCK() );
-
-        FFDC_PLL( l_target_proc, MCA_0_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P0, l_data, ad_lock_mask,
-                  fapi2::MSS_AD32S_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_1_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P1, l_data, ad_lock_mask,
-                  fapi2::MSS_AD32S_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_2_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P2, l_data, ad_lock_mask,
-                  fapi2::MSS_AD32S_PLL_FAILED_TO_LOCK() );
-        FFDC_PLL( l_target_proc, MCA_3_DDRPHY_PC_AD32S_PLL_LOCK_STATUS_P3, l_data, ad_lock_mask,
-                  fapi2::MSS_AD32S_PLL_FAILED_TO_LOCK() );
-    }
-
-#endif
 fapi_try_exit:
     return fapi2::current_err;
 
@@ -1102,6 +1029,99 @@ fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_DBG("seq_rd_wr 0x%llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA0_P0, l_data) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA1_P0, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Start the DLL calibration, monitor for fails.
+/// @param[in] i_target the target associated with this DLL cal
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    uint8_t is_sim = 0;
+    fapi2::buffer<uint64_t> l_status;
+    constexpr uint64_t l_dll_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
+    const auto& l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    // Nothing works here in cycle sim ...
+    if (is_sim)
+    {
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // If we don't have any MCA, we can go
+    if (l_mca.size() == 0)
+    {
+        return FAPI2_RC_SUCCESS;
+    }
+
+    // 14. Begin DLL calibrations by setting INIT_RXDLL_CAL_RESET=0 in the DDRPHY_DP16_DLL_CNTL{0:1} registers
+    // and DDRPHY_ADR_DLL_CNTL registers
+    for (const auto& p : l_mca)
+    {
+        // Note: Keep INIT_RXDLL_CAL_UPDATE at 0 to ensure PC CAL_GOOD indicator is accurate.
+        // Read, modify, write the DLL_RESET in the ADR_DLL registers
+        {
+            std::vector<fapi2::buffer<uint64_t>> i_read;
+
+            FAPI_TRY(mss::scom_suckah(p, adr32sTraits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+            std::for_each( i_read.begin(), i_read.end(),
+                           [](fapi2::buffer<uint64_t>& b)
+            {
+                adr32s::set_dll_cal_reset(b);
+            } );
+            FAPI_TRY(mss::scom_blastah(p, adr32sTraits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+        }
+
+        // Read, modify, write the DLL_RESET in the DP16_DLL registers
+        {
+            std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > i_read;
+
+            FAPI_TRY(mss::scom_suckah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+            std::for_each( i_read.begin(), i_read.end(),
+                           [](std::pair< fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& b)
+            {
+                dp16::set_dll_cal_reset(b.first);
+                dp16::set_dll_cal_reset(b.second);
+            } );
+            FAPI_TRY(mss::scom_blastah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+        }
+    }
+
+    // The [delay value] gives software a reasonable amount of time to wait for an individual
+    // DLL to calibrate starting from when it is taken out of reset. As some internal state machine transitions
+    // between steps may not have been counted, software should add some margin.
+    // 32,772 dphy_nclk cycles from Reset=0 to VREG Calibration to exhaust all values
+    // 37,382 dphy_nclk cycles for full calibration to start and fail (“worst case”)
+    // More or less a fake value for sim delay as this isn't executed in sim.
+    fapi2::delay(mss::cycles_to_ns(i_target, 37382), DELAY_1US);
+
+    // 15. Monitor the DDRPHY_PC_DLL_ZCAL_CAL_STATUS register to determine when calibration is
+    // complete. One of the 3 bits will be asserted for ADR and DP16.
+    // To keep things simple, we'll poll for the change in one of the bits. Once that's completed, we'll
+    // check the others. If any one has failed, or isn't notifying complete, we'll pop out an error
+    mss::poll(l_mca[0], l_dll_status_reg, poll_parameters(),
+              [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("phy control dll/zcal stat 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        l_status = stat_reg;
+        return mss::pc::get_dll_cal_status(l_status) == mss::YES;
+    });
+
+    for (const auto& p : l_mca)
+    {
+        fapi2::buffer<uint64_t> l_read;
+        FAPI_TRY( mss::getScom(p, l_dll_status_reg, l_read) );
+        FAPI_ASSERT(mss::pc::get_dll_cal_status(l_read) == mss::YES,
+                    fapi2::MSS_DLL_FAILED_TO_CALIBRATE().set_MCA_IN_ERROR(p),
+                    "dll fapiled to calibrate: %s", mss::c_str(p));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -223,6 +223,31 @@ template<>
 fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
+/// @brief Perform the DLL calibration
+/// @tparam T the target type of the MCBIST
+/// @param[in] i_target the target associated with this DLL cal
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode dll_calibration( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Perform the DLL calibration
+/// @param[in] i_target the target associated with this DLL cal
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Setup seq_rd_wr_data
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
 /// @brief Setup the PC CONFIG0 register
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)
