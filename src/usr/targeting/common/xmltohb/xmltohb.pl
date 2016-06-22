@@ -365,16 +365,42 @@ if( !($cfgImgOutputDir =~ "none") )
     {
         $addRO_Section_VerPage = 1;
     }
-    #Pass the $addRO_Section_VerPage into the sub rotuine
-    my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t,
-                                      $addRO_Section_VerPage);
 
+    # Different portions of the targeting data split up.
+    my $combinedData;
+    my $protectedData;
+    my $unprotectedData;
+    #Pass the $addRO_Section_VerPage into the sub rotuine
+    generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t,
+                           $addRO_Section_VerPage,
+                           \$combinedData,
+                           \$protectedData,
+                           \$unprotectedData);
+
+    # Generate combined targeting file (FSP-only)
     open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
       or fatal ("Targeting image file: \"$cfgImgOutputDir"
         . "$cfgImgOutputFile\" could not be opened.");
     binmode(PNOR_TARGETING_FILE);
-    print PNOR_TARGETING_FILE "$Data";
+    print PNOR_TARGETING_FILE "$combinedData";
     close(PNOR_TARGETING_FILE);
+
+    # Generate protected payload file
+    open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.protected")
+      or fatal ("Targeting image file: \"$cfgImgOutputDir"
+        . "$cfgImgOutputFile.protected\" could not be opened.");
+    binmode(PNOR_TARGETING_FILE);
+    print PNOR_TARGETING_FILE "$protectedData";
+    close(PNOR_TARGETING_FILE);
+
+    # Generate unprotected payload file
+    open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.unprotected")
+      or fatal ("Targeting image file: \"$cfgImgOutputDir"
+        . "$cfgImgOutputFile.unprotected\" could not be opened.");
+    binmode(PNOR_TARGETING_FILE);
+    print PNOR_TARGETING_FILE "$unprotectedData";
+    close(PNOR_TARGETING_FILE);
+
     if ($CfgSMAttrFile ne "")
     {
         generateXMLforSM();
@@ -4992,7 +5018,8 @@ sub serializeAssociations
 ################################################################################
 
 sub generateTargetingImage {
-    my($vmmConstsFile, $attributes, $Target_t,$addRO_Section_VerPage) = @_;
+    my($vmmConstsFile, $attributes, $Target_t,$addRO_Section_VerPage,
+       $combinedDataRef, $protectedDataRef, $unprotectedDataRef) = @_;
 
     # 128 MB virtual memory offset between sections
     my $vmmSectionOffset = 128 * 1024 * 1024; # 128MB
@@ -5943,6 +5970,7 @@ sub generateTargetingImage {
             . "than allocated amount of $headerSize.");
     }
 
+    # Handle splitting up data into different files for secure signing purposes
     my $outFile;
 
     #HB Targeting binary file will contain <Version Page>+<Targeting Header>+
@@ -6005,6 +6033,11 @@ sub generateTargetingImage {
     $outFile .= pack("@".($sectionHoH{heapPnorInit}{size}
         - $heapPnorInitOffset));
 
+    # Handle read-only data
+    ${$protectedDataRef} = $outFile;
+    ${$combinedDataRef} = $outFile;
+    $outFile = "";
+
     # Serialize PNOR RW section to multiple of 4k page size (pad if necessary)
     $outFile .= $rwAttrBinData;
     $outFile .= pack("@".($sectionHoH{pnorRw}{size} - $rwOffset));
@@ -6038,6 +6071,10 @@ sub generateTargetingImage {
             - $fspP1DefaultedFromP3Offset));
     }
 
+    # Handle read-write data
+    ${$unprotectedDataRef} = $outFile;
+    ${$combinedDataRef} .= $outFile;
+
     if(defined $cfgBiosXmlFile)
     {
         unless (-e $cfgBiosXmlFile)
@@ -6068,8 +6105,6 @@ sub generateTargetingImage {
             \%attributeDefCache,\$attributes,\%biosData,%targetPhysicalPath);
         $bios->export();
     }
-
-    return $outFile;
 }
 
 sub generateXMLforSM {

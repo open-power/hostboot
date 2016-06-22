@@ -19,3 +19,5 @@ errlparser
 test_signed_container
 secureboot_signed_container
 secureboot_hash_page_table_container
+*.protected
+*.unprotected

@@ -45,6 +45,7 @@
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
+#include <config.h>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -259,11 +260,23 @@ namespace TARGETING
 
         do
         {
+            #ifdef CONFIG_SECUREBOOT
+            // Securely load HB_DATA section
+            l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
+            if (l_errl)
+            {
+                break;
+            }
+            #endif
+
             // Locate attribute section in PNOR.
             PNOR::SectionInfo_t l_pnorSectionInfo;
             l_errl = PNOR::getSectionInfo(PNOR::HB_DATA,
                                           l_pnorSectionInfo);
-            if (l_errl) break;
+            if (l_errl)
+            {
+                break;
+            }
 
             // Find attribute section header.
             TargetingHeader* l_header =
