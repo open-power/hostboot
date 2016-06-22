@@ -42,11 +42,10 @@
 
 enum P9_SBE_COMMON_Private_Constants
 {
-    CLK_REGION_VALUE = 0x498000000000E000,
-    EXPECTED_CLOCK_STATUS = 0xF07FDFFFFFFFFFFF,
     NS_DELAY = 100000, // unit in nano seconds
     SIM_CYCLE_DELAY = 1000, // unit in cycles
-    CPLT_ALIGN_CHECK_POLL_COUNT = 10 // count to wait for chiplet aligned
+    CPLT_ALIGN_CHECK_POLL_COUNT = 10, // count to wait for chiplet aligned
+    CPLT_OPCG_DONE_DC_POLL_COUNT = 10 // count to wait for chiplet opcg done
 };
 
 /// @brief --For all chiplets exit flush
@@ -342,57 +341,6 @@ fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
 
 }
 
-/// @brief --Setting Clock Region Register
-/// --Reading Clock status
-///
-/// @param[in]     i_anychiplet   Reference to TARGET_TYPE_PERV target
-/// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p9_sbe_common_clock_start_allRegions(const
-        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_anychiplet)
-{
-    fapi2::buffer<uint64_t> l_sl_clock_status;
-    fapi2::buffer<uint64_t> l_nsl_clock_status;
-    fapi2::buffer<uint64_t> l_ary_clock_status;
-    FAPI_INF("Entering ...");
-
-    FAPI_DBG("Start remaining pervasive clocks (beyond PIB & NET)");
-    //Setting CLK_REGION register value
-    //CLK_REGION = CLK_REGION_VALUE
-    FAPI_TRY(fapi2::putScom(i_anychiplet, PERV_CLK_REGION, CLK_REGION_VALUE));
-
-    FAPI_DBG("Check for clocks running (SL , NSL , ARY)");
-    //Getting CLOCK_STAT_SL register value
-    FAPI_TRY(fapi2::getScom(i_anychiplet, PERV_CLOCK_STAT_SL,
-                            l_sl_clock_status)); //l_sl_clock_status = CLOCK_STAT_SL
-    //Getting CLOCK_STAT_NSL register value
-    FAPI_TRY(fapi2::getScom(i_anychiplet, PERV_CLOCK_STAT_NSL,
-                            l_nsl_clock_status)); //l_nsl_clock_status = CLOCK_STAT_NSL
-    //Getting CLOCK_STAT_ARY register value
-    FAPI_TRY(fapi2::getScom(i_anychiplet, PERV_CLOCK_STAT_ARY,
-                            l_ary_clock_status)); //l_ary_clock_status = CLOCK_STAT_ARY
-
-    FAPI_ASSERT(l_sl_clock_status == EXPECTED_CLOCK_STATUS,
-                fapi2::SL_ERR()
-                .set_READ_CLK_SL(l_sl_clock_status),
-                "CLOCK RUNNING STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED VALUES");
-
-    FAPI_ASSERT(l_nsl_clock_status == EXPECTED_CLOCK_STATUS,
-                fapi2::NSL_ERR()
-                .set_READ_CLK_NSL(l_nsl_clock_status),
-                "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR NSL TYPE");
-
-    FAPI_ASSERT(l_ary_clock_status == EXPECTED_CLOCK_STATUS,
-                fapi2::ARY_ERR()
-                .set_READ_CLK_ARY(l_ary_clock_status),
-                "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR ARRAY TYPE");
-
-    FAPI_INF("Exiting ...");
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}
-
 /// @brief -- Utility function that can be used to start clocks for a specific input regions
 /// -- i_regions is to input regions
 ///
@@ -425,6 +373,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     bool l_reg_nsl = false;
     bool l_reg_ary = false;
     fapi2::buffer<uint64_t> l_data64;
+    int l_timeout = 0;
     FAPI_INF("Entering ...");
 
     i_regions.extractToRight<53, 11>(l_regions);
@@ -474,6 +423,33 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     //CLK_REGION.SEL_THOLD_ALL = l_reg_all
     l_data64.insertFromRight<48, 3>(l_reg_all);
     FAPI_TRY(fapi2::putScom(i_target, PERV_CLK_REGION, l_data64));
+
+    // To wait until OPCG Done - CPLT_STAT0.cc_cplt_opcg_done_dc = 1
+    FAPI_DBG("Poll OPCG done bit to check for completeness");
+    l_data64.flush<0>();
+    l_timeout = CPLT_OPCG_DONE_DC_POLL_COUNT;
+
+    while (l_timeout != 0)
+    {
+        //Getting CPLT_STAT0 register value
+        FAPI_TRY(fapi2::getScom(i_target, PERV_CPLT_STAT0, l_data64));
+        bool l_poll_data =
+            l_data64.getBit<PERV_1_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>();
+
+        if (l_poll_data == 1)
+        {
+            break;
+        }
+
+        fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
+        --l_timeout;
+    }
+
+    FAPI_DBG("Loop Count after CPLT_OPCG_DONE_DC polling:%d", l_timeout);
+
+    FAPI_ASSERT(l_timeout > 0,
+                fapi2::CPLT_OPCG_DONE_NOT_SET_ERR(),
+                "ERROR:CHIPLET OPCG DONE NOT SET AFTER CLOCK START STOP CMD");
 
     //To do do checking only for chiplets that dont have Master-slave mode enabled
 

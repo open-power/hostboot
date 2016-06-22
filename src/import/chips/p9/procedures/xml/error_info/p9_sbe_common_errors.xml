@@ -46,6 +46,11 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_CPLT_OPCG_DONE_NOT_SET_ERR</rc>
+    <description>Chiplet OPCG_DONE not set after clock start/stop command</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_NEST_ARY_ERR</rc>
     <description>ary_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_ARY</ffdc>
