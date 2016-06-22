@@ -29,15 +29,15 @@
 
 typedef fapi2::ReturnCode (*p9_xip_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-    void*     i_image,
+    void*     io_image,
     uint32_t& io_imageSize,
-    void*     i_ringSectionBuf,
+    void*     io_ringSectionBuf,
     uint32_t& io_ringSectionBufSize,
     uint8_t   i_sysPhase,
     uint8_t   i_modeBuild,
-    void*     i_ringBuf1,
+    void*     io_ringBuf1,
     uint32_t  i_ringBufSize1,
-    void*     i_ringBuf2,
+    void*     io_ringBuf2,
     uint32_t  i_ringBufSize2,
     uint32_t& io_bootCoreMask);
 
@@ -47,7 +47,7 @@ extern "C"
 ///        mailbox attributes, VPD rings and other stuff.
 ///
 /// @param[in] i_proc_target             => P9 proc chip target
-/// @param[in] i_image                   => Pointer to an in-memory image
+/// @param[in/out] io_image              => Pointer to an in-memory image
 ///                                         HB_SBE:
 ///                                             In:  SBE image
 ///                                             Out: Seeprom image
@@ -61,7 +61,7 @@ extern "C"
 ///                                         RT_{CME,SGPE}:
 ///                                             In:  Size of HW image
 ///                                             Out: Unchanged
-/// @param[in] i_ringSectionBuf          => Pointer to an in-memory ring section
+/// @param[in/out] io_ringSectionBuf     => Pointer to an in-memory ring section
 ///                                         buffer
 ///                                         HB_SBE:
 ///                                             Used as temporary image work buffer
@@ -79,31 +79,32 @@ extern "C"
 ///                                             Out: Final size
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
 /// @param[in] i_modeBuild               => ={IPL, REBUILD}
-/// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
+/// @param[in/out] io_ringBuf1           => Caller supplied in-memory buffer
 ///                                         for uncompressed VPD rings in
 /// @param[in] i_ringBufSize1            => Max size of VPD ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
-/// @param[in] i_ringBuf2                => Caller supplied in-memory buffer
+/// @param[in/out] io_ringBuf2           => Caller supplied in-memory buffer
 ///                                         for uncompressed overlay rings
 /// @param[in] i_ringBufSize2            => Max size of overlay ring buffer
 ///                                         (Should equal MAX_RING_BUF_SIZE)
 /// @param[in/out] io_bootCoreMask       => In: Mask of the desired boot cores
 ///                                         Out: Actual boot cores
 ///                                         (Only used in HB_SBE sysPhase)
+///                                         (Bits(8:31) = EC00:EC23)
 ///
 /// @return FAPI_RC_SUCCESS if the customization was successful
 ///
     fapi2::ReturnCode p9_xip_customize (
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-        void*     i_image,
+        void*     io_image,
         uint32_t& io_imageSize,
-        void*     i_ringSectionBuf,
+        void*     io_ringSectionBuf,
         uint32_t& io_ringSectionBufSize,
         uint8_t   i_sysPhase,
         uint8_t   i_modeBuild,
-        void*     i_ringBuf1,
+        void*     io_ringBuf1,
         uint32_t  i_ringBufSize1,
-        void*     i_ringBuf2,
+        void*     io_ringBuf2,
         uint32_t  i_ringBufSize2,
         uint32_t& io_bootCoreMask);
 
