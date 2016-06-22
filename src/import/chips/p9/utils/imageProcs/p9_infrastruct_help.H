@@ -36,11 +36,17 @@
 //
 //@FIXME: CMO: get rid of FIXED_RING_BUF_SIZE when ring_apply no longer uses it.
 const uint32_t  FIXED_RING_BUF_SIZE     = 60000; // Fixed ring buf size for _fixed.
-const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * 56 * 1024; // Max Seeprom size, excl ECC bits (4 banks).
+const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * 56 * 1024 - 256; // Max Seeprom size, excl ECC bits (4 banks).
 const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size.
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides section size.
 const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section size.
+
+//@FIXME: CMO: Aren't these defined somewhere else?
+#define NUM_OF_CORES    24
+#define NUM_OF_CMES     12
+#define NUM_OF_QUADS     6
+#define CORES_PER_QUAD  (NUM_OF_CORES/NUM_OF_QUADS)
 
 enum SYSPHASE
 {
