@@ -30,6 +30,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 # Local Objects
 OBJS += scom.o
 OBJS += scomtrans.o
+OBJS += errlud_pib.o
 
 # Objects From Import Directory
 OBJS += p9_scominfo.o
