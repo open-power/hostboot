@@ -24,6 +24,13 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE = p9_xip_customize
 lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
+lib$(PROCEDURE)_DEPLIBS+=p9_ring_identification
+lib$(PROCEDURE)_DEPLIBS+=p9_scan_compression
+lib$(PROCEDURE)_DEPLIBS+=p9_get_mvpd_ring
+lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
+lib$(PROCEDURE)_DEPLIBS+=p9_tor
+lib$(PROCEDURE)_DEPLIBS+=p9_ringId
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/tools/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/utils/imageProcs)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/accessors/)
 $(call BUILD_PROCEDURE)
