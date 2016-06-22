@@ -438,7 +438,7 @@ rule MbaFir
     RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
 };
 
-group gMbaFir filter singlebit, secondarybits( 15, 16 )
+group gMbaFir filter singlebit, secondarybits(0,1,2,4,9,10,11,12,13,14,15,16)
 {
     /** MBAFIR[0]
      *  MBAFIRQ_INVALID_MAINT_CMD
@@ -560,7 +560,7 @@ rule MbaDdrPhyFir
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
 };
 
-group gMbaDdrPhyFir filter singlebit, secondarybits( 53 )
+group gMbaDdrPhyFir filter singlebit, secondarybits(50,53,54,55,58)
 {
     /** MBADDRPHYFIR[48]
      *  DDRPHY_FIR_REG_DDR0_FSM_CKSTP
@@ -638,7 +638,7 @@ rule MbaCalFir
 # bits 4 and 7 given priority to check for RCD parity error before potential
 # side effects in bits 2 and 17
 group gMbaCalFir filter priority( 4, 7 ),
-                 secondarybits( 10, 14, 19, 20, 21, 24, 25 )
+                 secondarybits(3,10,12,14,16,19,20,21,22,23,24,25)
 {
     /** MBACALFIR[0]
      *  MBACALFIRQ_MBA_RECOVERABLE_ERROR

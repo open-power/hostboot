@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1243,41 +1243,70 @@ int32_t handleSingleMbaCalParityErr( ExtensibleChip * i_membChip,
 //------------------------------------------------------------------------------
 
 /**
- * @brief Handles MBACALFIR RCD Parity error bits, if they exist.
- *
- * @param  i_membChip   The Centaur chip.
- * @param  i_sc         ServiceDataCollector.
- *
- * @return SUCCESS if MBACALFIR Parity error is present and properly
- *         handled, FAIL otherwise.
+ * @brief  MBSFIR[4] - Internal Timeout error.
+ * @param  i_mbChip The Centaur chip
+ * @param  i_sc     Step code data struct
+ * @return Non-SUCCESS if analysis fails. SUCCESS otherwise.
  */
-int32_t handleMbaCalParityErr( ExtensibleChip * i_membChip,
-                               STEP_CODE_DATA_STRUCT & i_sc )
+int32_t internalTimeout( ExtensibleChip * i_mbChip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
 {
-    #define PRDF_FUNC "[handleMbaCalParityErr] "
+    #define PRDF_FUNC "[internalTimeout] "
 
-    // We will return FAIL from this function if MBACALFIR parity error bits are
-    // not set. If MBACALFIR parity error bits are set, we will try to analyze
-    // the MBACALFIR. If MBACALFIR is not analyzed properly, we will return
-    // FAIL. This will trigger rule code to execute alternate resolution.
+    int32_t o_rc = SUCCESS;
 
-    int32_t l_rc;
-
-    // We will loop through to check all MBA if necessary until one is found
-    // with parity error bits set
-    for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++)
+    do
     {
-        l_rc = SUCCESS;
+        // First, check if there are any MBACALFIR parity errors.
+        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++)
+        {
+            o_rc = handleSingleMbaCalParityErr( i_mbChip, i_sc, i );
 
-        l_rc = handleSingleMbaCalParityErr( i_membChip, i_sc, i );
+            // If SUCCESS is returned, then there was a parity error and
+            // analysis was successful.
+            if ( SUCCESS == o_rc ) break;
+        }
+        if ( SUCCESS == o_rc ) break; // nothing more to do.
 
-        if ( SUCCESS == l_rc ) break;
-    }
+        // Next, check if there was an MBSFIR external timeout.
+        SCAN_COMM_REGISTER_CLASS * fir = i_mbChip->getRegister("MBSFIR");
+        o_rc  = fir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "failed to read MBSFIR on 0x%08x",
+                      i_mbChip->GetId() );
+            break;
+        }
 
-    return l_rc;
+        if ( fir->IsBitSet(3) )
+        {
+            if ( CHECK_STOP == i_sc.service_data->getPrimaryAttnType() )
+            {
+                // In this case, we do not want the internal timeout to be
+                // blamed as the root cause of the checkstop. So move onto the
+                // next FIR bit.
+                o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+            }
+            else
+            {
+                // Make the callout of the external timeout error.
+                i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
+                                               MRU_MED, NO_GARD );
+            }
+        }
+        else
+        {
+            // The internal timeout error is on by itself.
+            i_sc.service_data->SetCallout( i_mbChip->GetChipHandle(), MRU_MED );
+        }
+
+    } while (0);
+
+    return o_rc;
+
     #undef PRDF_FUNC
 
-} PRDF_PLUGIN_DEFINE( Membuf, handleMbaCalParityErr );
+} PRDF_PLUGIN_DEFINE( Membuf, internalTimeout );
 
 //------------------------------------------------------------------------------
 
