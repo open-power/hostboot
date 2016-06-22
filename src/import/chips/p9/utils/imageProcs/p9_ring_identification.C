@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <p9_ring_identification.H>
 
-const RingIdList RING_ID_LIST_PG[] =
+const RingIdList RING_ID_LIST_PDG[] =
 {
     /* ringName           ringId  chipletId  vpdKeyword    */
     /*                            min   max                 */
@@ -109,7 +109,7 @@ const RingIdList RING_ID_LIST_PG[] =
     {"ec_time",             226, 0x20, 0xFF, VPD_KEYWORD_PDG, VPD_RING_CLASS_EC},  // x20,x37: multicast group 1
 };
 
-const RingIdList RING_ID_LIST_PR[] =
+const RingIdList RING_ID_LIST_PDR[] =
 {
     /* ringName           ringId  chipletId  vpdKeyword    */
     /*                            min   max                 */
@@ -140,18 +140,18 @@ const RingIdList RING_ID_LIST_PR[] =
     {"pci0_repr",           159, 0x0D, 0x0D, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"pci1_repr",           165, 0x0E, 0x0E, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"pci2_repr",           171, 0x0F, 0x0F, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
-    {"eq_repr",             220, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EQ},
-    {"ex_l3_refr_time",     185, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX},
-    {"ex_l3_repr",          221, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX},
-    {"ex_l2_repr",          222, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX},
-    {"ex_l3_refr_repr",     223, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX},
-    {"ec_repr",             228, 0x20, 0x37, VPD_KEYWORD_PDR, VPD_RING_CLASS_EC},
+    {"eq_repr",             220, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EQ_INS},
+    {"ex_l3_refr_time",     185, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX_INS},
+    {"ex_l3_repr",          221, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX_INS},
+    {"ex_l2_repr",          222, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX_INS},
+    {"ex_l3_refr_repr",     223, 0x10, 0x15, VPD_KEYWORD_PDR, VPD_RING_CLASS_EX_INS},
+    {"ec_repr",             228, 0x20, 0x37, VPD_KEYWORD_PDR, VPD_RING_CLASS_EC_INS},
 };
 
 const VPDRingList ALL_VPD_RINGS[NUM_OF_VPD_TYPES] =
 {
-    {RING_ID_LIST_PG,  (sizeof(RING_ID_LIST_PG) / sizeof(RING_ID_LIST_PG[0]))},
-    {RING_ID_LIST_PR,  (sizeof(RING_ID_LIST_PR) / sizeof(RING_ID_LIST_PR[0]))},
+    {RING_ID_LIST_PDG,  (sizeof(RING_ID_LIST_PDG) / sizeof(RING_ID_LIST_PDG[0]))},
+    {RING_ID_LIST_PDR,  (sizeof(RING_ID_LIST_PDR) / sizeof(RING_ID_LIST_PDR[0]))},
 
 };
 
