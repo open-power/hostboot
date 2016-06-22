@@ -94,23 +94,25 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk
 # Cummulus only -- p9_enable_osclite.mk not defined yet
 
 # proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
-#TODO-RTC:149687 - HWP requires p9_fbc_scom.H
-#include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
+include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
-#include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_psi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioe_dl_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_tl_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_dl_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_no_hp_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioe_tl_scom.mk
 
 # proc_xbus_scominit : Apply scom inits to Xbus
-# TODO-RTC:149687
-# Now missing p9_io_regs.H, p9_xbus_g0_scom.H and p9_xbus_g1_scom.H
-#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g0_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g1_scom.mk
 
 # proc_abus_scominit : Apply scom inits to Abus
 # HWP not found - p9_abus_scominit.mk not defined
 
 # proc_obus_scominit : Apply scom inits to Obus
-# TODO-RTC:149687 - Missing p9_io_regs.H
-#include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
 
 # proc_npu_scominit : Apply scom inits to NPU bus
 include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk

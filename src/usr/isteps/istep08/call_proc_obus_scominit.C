@@ -60,7 +60,7 @@
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-//#include <p9_io_obus_scominit.H> // TODO-RTC:149687
+#include <p9_io_obus_scominit.H>
 
 namespace   ISTEP_08
 {
@@ -129,9 +129,8 @@ void* call_proc_obus_scominit( void *io_pArgs )
                      TARGETING::get_huid(l_thisObusTarget),
                      TARGETING::get_huid(l_connectedObusTarget) );
 
-            //TODO-RTC:149687
-            //FAPI_INVOKE_HWP(l_err, p9_io_obus_scominit,
-            //      l_thisObusFapi2Target, l_connectedObusFapi2Target);
+            FAPI_INVOKE_HWP(l_err, p9_io_obus_scominit,
+                  l_thisObusFapi2Target, l_connectedObusFapi2Target);
 
             if(l_err)
             {
