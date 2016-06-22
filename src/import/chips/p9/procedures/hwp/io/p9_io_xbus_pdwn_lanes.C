@@ -52,11 +52,11 @@
 // ----------------------------------------------------------------------------
 fapi2::ReturnCode rx_pdwn_lanes(
     const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t i_clock_group,
+    const uint8_t& i_clock_group,
     const std::vector< uint8_t >& i_bad_lanes);
 fapi2::ReturnCode tx_pdwn_lanes(
     const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t i_clock_group,
+    const uint8_t& i_clock_group,
     const std::vector< uint8_t >& i_bad_lanes);
 
 
