@@ -1,0 +1,260 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_xip_customize_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_INVALID_INPUT_BUFFER_PARM</rc>
+    <description>Caller bug: Caller supplied one or more invalid input buffer pointers</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>IMAGE_BUF</ffdc>
+    <ffdc>RING_SECTION_BUF</ffdc>
+    <ffdc>RING_BUF1</ffdc>
+    <ffdc>RING_BUF2</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_INVALID_INPUT_BUFFER_SIZE_PARM</rc>
+    <description>Caller bug: Caller supplied one or more invalid input buffer sizes</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>IMAGE_BUF_SIZE</ffdc>
+    <ffdc>RING_SECTION_BUF_SIZE</ffdc>
+    <ffdc>RING_BUF_SIZE1</ffdc>
+    <ffdc>RING_BUF_SIZE2</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_INVALID_SYSPHASE_PARM</rc>
+    <description>Caller bug: Caller supplied unsupported sysPhase</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SYSPHASE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_INVALID_VPD_KEYWORD</rc>
+    <description>Code bug: Unsupported value of vpdKeyword</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>VPD_KEYWORD</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_CHIPLET_ID_MESS</rc>
+    <description>VPD ring's chipletId doesn't match requested chipletId</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>MVPD_CHIPLET_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_RING_SIZE_MESS</rc>
+    <description>VPD ring's size exceeds max ring buffer size</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>RING_BUFFER_SIZE</ffdc>
+    <ffdc>MVPD_RING_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_RING_SIZE_TOO_BIG</rc>
+    <description>VPD ring's size exceed allowed ring buffer space</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>RING_BUFFER_SIZE</ffdc>
+    <ffdc>MVPD_RING_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_INVALID_RECORD_DATA</rc>
+    <description>VPD ring's record data is invalid</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RS4_REDUNDANT_ERROR</rc>
+    <description>rs4_redundant() failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_TOR_APPEND_RING_FAILED</rc>
+    <description>tor_append_ring() failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOR_RC</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_SECTION_REMOVAL_ERROR</rc>
+    <description>p9_xip_delete_section() failed to remove an XIP section</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_SECTION</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_XIP_API_MISC_ERROR</rc>
+    <description>An XIP API call failed with a non-categorized error</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW</rc>
+    <description>
+      Ran out of image buffer space trying to append a ring to the .rings section
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW_ADDL_INFO</rc>
+    <description>
+      Additional FFDC info for RC_XIPC_IMAGE_WOULD_OVERFLOW error
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
+    <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS</rc>
+    <description>
+      Image buffer would overflow before reaching minimum number of boot cores
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
+    <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
+    <ffdc>MIN_REQD_ECS</ffdc>
+    <ffdc>ACTUAL_EC_COUNT</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_SECTION_SIZING</rc>
+    <description>Code bug: Ring section size would exceed max ring section size</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_SECTION_SIZE</ffdc>
+    <ffdc>MAX_RING_SECTION_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_IMAGE_SIZING</rc>
+    <description>Code bug: Image size would exceed max image size</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>IMAGE_SIZE_WITHOUT_RINGS</ffdc>
+    <ffdc>RING_SECTION_SIZE</ffdc>
+    <ffdc>MAX_IMAGE_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_IMAGE_TOO_LARGE</rc>
+    <description>Incremental image size exceeds max allowed image size</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>IMAGE_SIZE</ffdc>
+    <ffdc>MAX_IMAGE_SIZE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
