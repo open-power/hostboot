@@ -70,6 +70,9 @@ namespace HBPM
         // FIR Master
         NOT_FIR_MASTER = 0x00000000,
         IS_FIR_MASTER  = 0x00000001,
+
+        // Mask off bit zero
+        PHYSICAL_ADDR_MASK = 0x7FFFFFFFFFFFFFFF,
     };
 
     /**

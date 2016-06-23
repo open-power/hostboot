@@ -480,11 +480,13 @@ namespace HBPM
                        i_occImgPaddr,
                        HOMER_INSTANCE_SIZE_IN_MB);
 
+            // Remove bit 0, may be set for physical addresses
+            uint64_t l_occ_addr = i_occImgPaddr & PHYSICAL_ADDR_MASK;
             FAPI_INVOKE_HWP( l_errl,
                              p9_pm_pba_bar_config,
                              l_fapiTarg,
                              0,
-                             i_occImgPaddr,
+                             l_occ_addr,
                              HOMER_INSTANCE_SIZE_IN_MB,
                              p9pba::LOCAL_NODAL,
                              0xFF );
@@ -509,11 +511,13 @@ namespace HBPM
                        i_commonPhysAddr,
                        OCC_HOST_AREA_SIZE_IN_MB);
 
+            // Remove bit 0, may be set for physical addresses
+            uint64_t l_common_addr = i_commonPhysAddr & PHYSICAL_ADDR_MASK;
             FAPI_INVOKE_HWP( l_errl,
                              p9_pm_pba_bar_config,
                              l_fapiTarg,
                              2,
-                             i_commonPhysAddr,
+                             l_common_addr,
                              OCC_HOST_AREA_SIZE_IN_MB,
                              p9pba::LOCAL_NODAL,
                              0xFF );
