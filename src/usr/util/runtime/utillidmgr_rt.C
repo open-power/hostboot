@@ -225,8 +225,15 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
 
     //if it's in PNOR, it's not technically lid, so use a slightly
     //different extension.
+    if (g_hostInterfaces->pnor_read)
+    {
+        iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
+    }
+    else
+    {
+        iv_isLidInPnor = false;
+    }
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
-    iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
     iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);
 }
 
