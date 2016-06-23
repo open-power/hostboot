@@ -39,6 +39,30 @@
 
 namespace fapi2
 {
+
+#if defined(MINIMUM_FFDC) && !defined(FAPI2_NO_FFDC)
+// convert generic type to uint64_t
+template<typename T>
+inline uint64_t convertType( T& i_value )
+{
+    // for simplicity sake, all FFDC chunks from the SBE
+    // are going to be sent as a uint64_t
+    return static_cast<uint64_t>(i_value);
+};
+
+// convert platform target handle to a uint64_t
+template<fapi2::TargetType T>
+inline uint64_t convertType( const fapi2::Target<T>& i_value)
+{
+    // send the target type and instance as ffdc they will be used
+    // to instantiate a target before logging the ffdc data
+    return static_cast<uint64_t>((static_cast<uint64_t>(
+                                      (i_value.get().getFapiTargetType())) << 32) |
+                                 i_value.get().getTargetInstance());
+};
+#endif
+
+#if !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)
 // forward fapi2::Assert()
 extern void Assert(bool);
 
@@ -489,7 +513,6 @@ struct ErrorInfo
     // Vector of traces to collect
     std::vector<std::shared_ptr<ErrorInfoCollectTrace> > iv_traces;
 };
-
 ///
 /// @brief Structure representing a single ErrorInfo entry.
 ///
@@ -658,6 +681,6 @@ struct ErrorInfoEntry
         return;
     }
 };
+#endif //  !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)
 }
-
 #endif // FAPI2_ERRORINFO_H_
