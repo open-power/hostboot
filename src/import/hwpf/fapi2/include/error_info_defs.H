@@ -33,51 +33,103 @@
 
 #include <stdint.h>
 #include <target.H>
-#include <variable_buffer.H>
-#include <utility>
 
+#if !defined(MINIMUM_FFDC) && !defined(FAPI2_NO_FFDC)
+    #include <variable_buffer.H>
+    #include <utility>
+#endif
 namespace fapi2
 {
+
+// $TEMP - funciton temp function to pass compiling
+template<TargetType T>
+Target<T>* getTarget(TargetType type, uint8_t instance)
+{
+    static_cast<void>(type);
+    static_cast<void>(instance);
+    return new Target<T>(0);
+}
+
+///
+/// @brief Type to hold the ffdc data to be sent to hostboot
+///
+/// Note: Typical data sent seems to be register/addresss info
+///       rather than use extra space converting stuff just
+///       send a uint64 always
+///
+struct sbeFfdc_t
+{
+    uint32_t  size;
+    uint64_t  data;
+};
+
+// 10 entries limits the size of SbeFfdcData_t to 128 bytes
+enum
+{
+    MAX_SBE_FFDC_ENTRIES = 10
+};
+
+// Data type for SBE ffdc buffer sent through fifo
+typedef struct
+{
+    uint32_t  fapiRc;      // Return code from failure
+    uint32_t  ffdcLength;  // length of Fapi FFDC data (in bytes)
+    struct sbeFfdc_t ffdcData[MAX_SBE_FFDC_ENTRIES]; // fapi FFDC data
+} SbeFfdcData_t; // 128 bytes
+
 ///
 /// @brief Type to hold the ffdc element in the ffdc class
 /// Needed so that the size can be squirled away before the
 /// macro is called.
 ///
+struct ffdc_struct
+{
+    const void* ptr;
+    int16_t size;
+};
+
+
 class ffdc_t
 {
     public:
         ffdc_t(void)
         {}
 
+        void operator=(const ffdc_t& i )
+        {
+            iv_value.ptr  = i.ptr();
+            iv_value.size = i.size();
+        }
+
         operator const void* () const
         {
-            return iv_value.first;
+            return iv_value.ptr;
         }
         operator uint8_t() const
         {
-            return *(reinterpret_cast<const uint8_t*>(iv_value.first));
+            return *(reinterpret_cast<const uint8_t*>(iv_value.ptr));
         }
 
         int16_t size(void) const
         {
-            return iv_value.second;
+            return iv_value.size;
         }
         int16_t& size(void)
         {
-            return iv_value.second;
+            return iv_value.size;
         }
 
         const void* ptr(void) const
         {
-            return iv_value.first;
+            return iv_value.ptr;
         }
         const void*& ptr(void)
         {
-            return iv_value.first;
+            return iv_value.ptr;
         }
 
     private:
-        std::pair<const void*, int16_t> iv_value;
+        struct ffdc_struct iv_value;
 };
 
 ///
@@ -117,6 +169,7 @@ enum ErrorInfoType
     EI_LAST_TYPE              = EI_TYPE_COLLECT_TRACE + 1,
 };
 
+#ifndef MINIMUM_FFDC
 ///
 /// @enum HwCallout
 ///
@@ -205,7 +258,35 @@ enum CollectTrace
     MBOX             = 4,
 };
 }
+#endif
 
+// NOTE - this assumes no buffer_t or variable_buffers are passed
+//        data is converted to a uint64_t when placed into the sbe ffdc
+//        buffer
+inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc )
+{
+    fapi2::ffdc_t temp;
+
+    // passed in size is a uint32_t but, needs to be uint16_t
+    temp.size() = static_cast<uint16_t>(i_sbeFfdc.size);
+
+    if(temp.size() == EI_FFDC_SIZE_TARGET)
+    {
+        uint64_t targetData = i_sbeFfdc.data;
+        fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 32);
+        uint8_t instance = static_cast<uint8_t>(targetData & 0xFFFFFFFF);
+        // call hostboot to get the fapi2 target reference
+        temp.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, instance));
+    }
+    else
+    {
+        // adjust the pointer based on the data size.
+        temp.ptr() = static_cast<void*>(reinterpret_cast<uint8_t*>(&i_sbeFfdc.data) +
+                                        (sizeof(uint64_t) - i_sbeFfdc.size));
+    }
+
+    return temp;
+}
 ///
 /// @brief Get FFDC Size
 ///
@@ -225,7 +306,7 @@ inline uint16_t getErrorInfoFfdcSize(const T&)
                   "FFDC too large to capture");
     return sizeof(T);
 }
-
+#if !defined(MINIMUM_FFDC) && !defined(FAPI2_NO_FFDC)
 ///
 /// @brief Compile error if caller tries to get the FFDC size of a pointer
 ///
@@ -236,7 +317,7 @@ inline uint16_t getErrorInfoFfdcSize(const T*)
                   "pointer passed to getErrorInfoFfdcSize");
     return 0;
 }
-
+#endif
 ///
 /// @brief Get FFDC Size specialization for fapi2::Target
 ///
@@ -246,6 +327,7 @@ inline uint16_t getErrorInfoFfdcSize(const fapi2::Target<T, V>&)
     return EI_FFDC_SIZE_TARGET;
 }
 
+#if !defined(MINIMUM_FFDC) && !defined(FAPI2_NO_FFDC)
 ///
 /// @brief Get FFDC Size specialization for variable buffers
 ///
@@ -256,7 +338,7 @@ inline uint16_t getErrorInfoFfdcSize(const fapi2::variable_buffer& i_thing)
     return std::min(static_cast<uint32_t>(EI_FFDC_MAX_SIZE),
                     i_thing.getLength<uint8_t>());
 }
-
+#endif
 };
 
 #endif // FAPI2_ERRORINFO_DEFS_H_
