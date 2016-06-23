@@ -153,6 +153,34 @@ enum voltages : uint64_t
     DDR4_VPP_VOLTAGE = 2500,
 };
 
+
+enum port_select
+{
+    // Port selects for MCBIST and CCS
+    // Select for 1 port
+    PORT0            = 0b1000,
+    PORT1            = 0b0100,
+    PORT2            = 0b0010,
+    PORT3            = 0b0001,
+    // Selects for 2 port combinations
+    PORT01           = PORT0 | PORT1,
+    PORT02           = PORT0 | PORT2,
+    PORT03           = PORT0 | PORT3,
+    PORT12           = PORT1 | PORT2,
+    PORT13           = PORT1 | PORT3,
+    PORT23           = PORT2 | PORT3,
+    // Selects for 3 port combinations
+    PORT012          = PORT0 | PORT1 | PORT2,
+    PORT013          = PORT0 | PORT1 | PORT3,
+    PORT023          = PORT0 | PORT2 | PORT3,
+    PORT123          = PORT1 | PORT2 | PORT3,
+    // Select all
+    PORT0123         = PORT0 | PORT1 | PORT2 | PORT3,
+    // Maybe a better name for disabling all
+    PORT_NONE        = 0b0000,
+};
+
+
 namespace mcbist
 {
 enum data_mode
@@ -189,6 +217,7 @@ enum op_type
     // Refresh only cmd if bits 9:11 (Data Mode bits) /= 000
     GOTO_SUBTEST_N = 0b0111,
 };
+
 
 enum test_type
 {
@@ -246,6 +275,7 @@ enum test_type
     W_INFINITE = 51,
     R_INFINITE = 52,
 };
+
 
 } // namespace mcbist
 
