@@ -688,7 +688,6 @@
     <attribute><id>PAYLOAD_KIND</id></attribute>
     <attribute><id>PAYLOAD_BASE</id></attribute>
     <attribute><id>PAYLOAD_ENTRY</id></attribute>
-    <attribute><id>NEST_FREQ_MHZ</id></attribute>
     <attribute><id>MFG_TRACE_ENABLE</id></attribute>
     <attribute><id>ENABLED_THREADS</id></attribute>
     <attribute><id>ISTEP_MODE</id></attribute>

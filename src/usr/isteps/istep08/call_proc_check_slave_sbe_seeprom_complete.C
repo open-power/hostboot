@@ -108,20 +108,9 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             continue;
         }
 
-        // TODO-RTC:138226
-        /*
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Processor target HUID %.8X",
                 TARGETING::get_huid(l_cpu_target));
-
-        l_errl = SBE::findSBEInPnor(l_cpu_target,sbeImgPtr,sbeImgSize);
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : proc_check_slave_sbe_seeprom_complete "
-                  "Can't find SBE image in pnor");
-        } */
-
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
@@ -208,35 +197,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 
-/* TODO-RTC:138226
-        // check for re ipl request
-        if(static_cast<uint32_t>(rc_fapi) ==
-           fapi::RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY)
-        {
-            l_errl = fapi::fapiRcToErrl(rc_fapi);
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
-
-            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
-
-            errlCommit( l_errl, HWPF_COMP_ID );
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : proc_extract_sbe_rc requesting reIPL:"
-                      " Calling INITSERVICE::doShutdown() with "
-                      "SBE_EXTRACT_RC_REQUEST_REIPL = 0x%x",
-                      INITSERVICE::SBE_EXTRACT_RC_REQUEST_REIPL);
-
-            INITSERVICE::doShutdown
-                ( INITSERVICE::SBE_EXTRACT_RC_REQUEST_REIPL);
-            // doShutdown does not return
-        }
-        else
-        {
-            l_errl = fapi::fapiRcToErrl(rc_fapi);
-        }
-*/
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

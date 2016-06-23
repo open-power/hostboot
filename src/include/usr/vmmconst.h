@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,9 +87,9 @@
 /** PNOR Resource Provider is at 2GB */
 #define VMM_VADDR_PNOR_RP  (2 * GIGABYTE)
 
-/** SBE Update process is at 3GB, uses 256KB */
+/** SBE Update process is at 3GB, uses 512KB */
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
-#define VMM_SBE_UPDATE_SIZE (256*KILOBYTE)
+#define VMM_SBE_UPDATE_SIZE (512 * KILOBYTE)
 #define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
 
 /** Attribute Resource Provider */

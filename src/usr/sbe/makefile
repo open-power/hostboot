@@ -33,14 +33,29 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
+HWP_CUSTOMIZE_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
+EXTRAINCDIR += ${HWP_CUSTOMIZE_PATH}/
+HWP_ACCESSORS_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
+EXTRAINCDIR += ${HWP_ACCESSORS_PATH}/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
+UTILS_PATH  += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${UTILS_PATH}/
 
 OBJS += sbe_update.o
 OBJS += sbe_resolve_sides.o
 
 SUBDIRS += test.d
+
+##  NOTE: add a new directory onto the vpaths when you add a new HWP
+VPATH += ${HWP_CUSTOMIZE_PATH} ${HWP_ACCESSORS_PATH} ${UTILS_PATH}
+
+include ${ROOTPATH}/procedure.rules.mk
+
+#include ${HWP_CUSTOMIZE_PATH}/p9_xip_customize.mk @TODO RTC:158044
+#include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk @TODO RTC:158044
+#include ${HWP_ACCESSORS_PATH}/p9_mvpd_ring_funcs.mk @TODO RTC:158044
+#include ${UTILS_PATH}/p9_scan_compression.mk @TODO RTC:158044
 
 include ${ROOTPATH}/config.mk

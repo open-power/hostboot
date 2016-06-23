@@ -69,8 +69,7 @@ void* call_host_slave_sbe_update (void *io_pArgs)
 
         // Call to check state of Processor SBE SEEPROMs and
         // make any necessary updates
-        // @TODO RTC:138226 add it after SBE is ported to fapi2
-        //l_errl = SBE::updateProcessorSbeSeeproms();
+        l_errl = SBE::updateProcessorSbeSeeproms();
 
         if (l_errl)
         {

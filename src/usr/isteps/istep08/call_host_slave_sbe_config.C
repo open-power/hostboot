@@ -161,8 +161,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     } // end of cycling through all processor chips
 
     // Resolve the side characteristics of the Processor SBE Seeproms
-#if 0
-    //@TODO-RTC:138226
     errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
     if ( err )
     {
@@ -172,7 +170,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         // Commit Error
         errlCommit( err, ISTEP_COMP_ID );
     }
-#endif
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_host_slave_sbe_config exit" );
 

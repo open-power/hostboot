@@ -1245,6 +1245,7 @@ sub setEepromAttributes
                "PHYS_PATH");
     my $mem  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "MEMORY_SIZE_IN_KB");
+    my $count  = 4; # @TODO RTC: 138226 Need place to get a chip count
     my $cycle  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "WRITE_CYCLE_TIME");
     my $page  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
@@ -1258,6 +1259,7 @@ sub setEepromAttributes
     $targetObj->setAttributeField($target, $name, "engine", $engine);
     $targetObj->setAttributeField($target, $name, "byteAddrOffset", $offset);
     $targetObj->setAttributeField($target, $name, "maxMemorySizeKB", $mem);
+    $targetObj->setAttributeField($target, $name, "chipCount", $count);
     $targetObj->setAttributeField($target, $name, "writePageSize", $page);
     $targetObj->setAttributeField($target, $name, "writeCycleTime", $cycle);
 

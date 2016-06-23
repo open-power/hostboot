@@ -65,12 +65,12 @@
 // Trace definitions
 // ----------------------------------------------
 trace_desc_t* g_trac_sbe = NULL;
-TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, KILOBYTE );
+TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, 4*KILOBYTE );
 
 // ------------------------
 // Macros for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...)  TRACFCOMP(args) // @TODO RTC: 138226
+//#define TRACUCOMP(args...)
 
 // ----------------------------------------
 // Global Variables for MBOX Ipl Query
@@ -160,7 +160,9 @@ namespace SBE
                 {
                     TRACFCOMP(g_trac_sbe,
                               ERR_MRK"updateProcessorSbeSeeproms::isGoldenSide "
-                                     "returned an error");
+                                     "returned an error, RC=0x%X, PLID=0x%lX",
+                              ERRL_GETRC_SAFE(err),
+                              ERRL_GETPLID_SAFE(err));
                     errlCommit( l_err, SBE_COMP_ID );
                     l_isGoldenSide = true;
                 }
@@ -239,7 +241,10 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - "
                            "queryMasterProcChipTargetHandle returned error. "
                            "Commit here and continue.  Check below against "
-                           "masterProcChipTargetHandle=NULL is ok");
+                           "masterProcChipTargetHandle=NULL is ok, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                  errlCommit( err, SBE_COMP_ID );
                  err = NULL;
             }
@@ -346,7 +351,7 @@ namespace SBE
                         // flag, if necessary
                         if (sbeState.update_actions & IPL_RESTART)
                         {
-                            l_restartNeeded   = true;
+                            l_restartNeeded = true;
                         }
                     }
 
@@ -521,7 +526,7 @@ namespace SBE
             }
             else
             {
-                // Unsopported target type was passed in
+                // Unsupported target type was passed in
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Unsupported "
                            "target type was passed in: uid=0x%X, type=0x%X",
                            TARGETING::get_huid(i_target),
@@ -728,7 +733,6 @@ namespace SBE
     }
 
 
-
 /////////////////////////////////////////////////////////////////////
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
                                    void* i_sbePnorPtr,
@@ -753,17 +757,25 @@ namespace SBE
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
 
-#if 0 //temporary removal to allow ekb merge
+#if 0 //temporary removal p9_xip_customize HWP fails
+            uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
+            uint32_t l_bootCoreMask = 0xFFFFFFFF;
+            uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
             FAPI_INVOKE_HWP( err,
                              p9_xip_customize,
                              l_fapiTarg,
                              i_sbePnorPtr, //image in
                              tmpImgSize,
-                             0,  //IPL
+                             (void*)l_ringSectionBuf,
+                             l_ringSectionBufSize,
+                             SYSPHASE_HB_SBE,
+                             MODEBUILD_IPL,
                              (void*)RING_BUF1_VADDR,
-                             (uint32_t)FIXED_RING_BUF_SIZE,
+                             (uint32_t)MAX_RING_BUF_SIZE,
                              (void*)RING_BUF2_VADDR,
-                             (uint32_t)FIXED_RING_BUF_SIZE );
+                             (uint32_t)MAX_RING_BUF_SIZE,
+                             l_bootCoreMask );
+                             /* @TODO RTC:138226 */
 #endif
 
             if ( err )
@@ -824,8 +836,8 @@ namespace SBE
             if(vpdSize != MVPD_SB_RECORD_SIZE)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSetMVPDVersion() - MVPD SB "
-                           "keyword wrong length HUID=0x%.8X, length=0x.2X, "
-                           "expected=0x.2x",
+                           "keyword wrong length HUID=0x%.8X, length=0x%.2X, "
+                           "expected=0x%.2x",
                            TARGETING::get_huid(i_target), vpdSize,
                            MVPD_SB_RECORD_SIZE);
                 /*@
@@ -1016,9 +1028,11 @@ namespace SBE
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
                            "reading SBE VITAL REG (0x%.8X) from Target :"
-                           "HUID=0x%.8X",
+                           "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
                            SBE_VITAL_REG_0x0005001C,
-                           TARGETING::get_huid(l_target));
+                           TARGETING::get_huid(l_target),
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
             if(scomData & SBE_BOOT_SELECT_MASK)
@@ -1061,21 +1075,24 @@ namespace SBE
             /*  Get SEEPROM A SBE Version Information  */
             /*******************************************/
             err = getSeepromSideVersion(io_sbeState.target,
-                                       EEPROM::SBE_PRIMARY,
-                                       io_sbeState.seeprom_0_ver,
-                                       io_sbeState.seeprom_0_ver_ECC_fail);
+                                        EEPROM::SBE_PRIMARY,
+                                        io_sbeState.seeprom_0_ver,
+                                        io_sbeState.seeprom_0_ver_ECC_fail);
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                           "getting SBE Information from SEEPROM A (0x%X)",
-                EEPROM::SBE_PRIMARY);
+                           "getting SBE Information from SEEPROM A (0x%X), "
+                           "RC=0x%X, PLID=0x%lX",
+                           EEPROM::SBE_PRIMARY,
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
-            TRACDBIN(g_trac_sbe, "getSbeInfoState-spA",
+            TRACFBIN(g_trac_sbe, "getSbeInfoState-spA",
                      &(io_sbeState.seeprom_0_ver),
-                     sizeof(sbeSeepromVersionInfo_t));
+                     sizeof(sbeSeepromVersionInfo_t)); // @TODO RTC:138226 D->F
 
 
             /*******************************************/
@@ -1089,14 +1106,17 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                           "getting SBE Information from SEEPROM B (0x%X)",
-                           EEPROM::SBE_BACKUP);
+                           "getting SBE Information from SEEPROM B (0x%X), "
+                           "RC=0x%X, PLID=0x%lX",
+                           EEPROM::SBE_BACKUP,
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
-            TRACDBIN(g_trac_sbe, "getSbeInfoState-spB",
+            TRACFBIN(g_trac_sbe, "getSbeInfoState-spB",
                      &(io_sbeState.seeprom_1_ver),
-                    sizeof(sbeSeepromVersionInfo_t));
+                     sizeof(sbeSeepromVersionInfo_t)); // @TODO RTC:138226 D->F
 
 
             // Check NEST_FREQ settings
@@ -1105,7 +1125,10 @@ namespace SBE
             if (err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error returned from checkNestFreqSettings() ");
+                           "Error returned from checkNestFreqSettings(), "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
             else if ((i_check_type == SBE_UPDATE_ONLY_CHECK_NEST_FREQ) &&
@@ -1124,7 +1147,6 @@ namespace SBE
                 skip_customization = true;
             }
 
-
             /*******************************************/
             /*  Get PNOR SBE Version Information       */
             /*******************************************/
@@ -1140,8 +1162,17 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error getting SBE Version from PNOR");
+                           "Error getting SBE Version from PNOR, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
+                           "sbePnorPtr=%p, sbePnorImageSize=0x%08X (%d)",
+                           sbePnorPtr, sbePnorImageSize, sbePnorImageSize);
             }
 
             // copy tmp_pnorVersion to the main structure
@@ -1168,7 +1199,10 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error from procCustomizeSbeImg()");
+                           "Error from procCustomizeSbeImg(), "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
@@ -1183,8 +1217,6 @@ namespace SBE
                        FIXED_SEEPROM_WORK_SPACE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
 
-
-
             /*******************************************/
             /*  Get MVPD SBE Version Information       */
             /*******************************************/
@@ -1195,7 +1227,10 @@ namespace SBE
             {
                 //If MVPD is bad, commit the error and move to the next proc
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error reading version from MVPD");
+                           "Error reading version from MVPD, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
@@ -1220,9 +1255,14 @@ namespace SBE
             err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error returned from getSbeBootSeeprom()");
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error returned from getSbeBootSeeprom(), "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
+
             io_sbeState.cur_seeprom_side = tmp_cur_side;
             if (io_sbeState.cur_seeprom_side == SBE_SEEPROM0)
             {
@@ -1308,14 +1348,17 @@ namespace SBE
 
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - Error "
-                "reading SBE Version from Seeprom 0x%X, HUID=0x%.8X",
-                i_seepromSide, TARGETING::get_huid(i_target));
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - "
+                           "Error reading SBE Version from Seeprom 0x%X, "
+                           "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
+                           i_seepromSide, TARGETING::get_huid(i_target),
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
             TRACDBIN(g_trac_sbe,
-                     "getSeepromSideVersion()- tmp_data_ECC",
+                     "getSeepromSideVersion() - tmp_data_ECC",
                      tmp_data_ECC,
                      sbeInfoSize_ECC);
 
@@ -1324,14 +1367,14 @@ namespace SBE
             memset( &o_info, 0, sizeof(o_info) );
 
 
-
             // Initially only look at the first 8-Bytes which should include
             // the struct version value
             // Remove ECC
-            eccStatus = PNOR::ECC::removeECC(
-                                         tmp_data_ECC,
-                                         reinterpret_cast<uint8_t*>(&o_info),
-                                         8);
+            eccStatus = removeECC(tmp_data_ECC,
+                                  reinterpret_cast<uint8_t*>(&o_info),
+                                  8,
+                                  SBE_VERSION_SEEPROM_ADDRESS,
+                                  SBE_SEEPROM_SIZE);
 
             TRACUCOMP( g_trac_sbe, "getSeepromSideVersion(): First 8-Bytes: "
                        "eccStatus=%d, version=0x%X, data_crc=0x%X",
@@ -1351,16 +1394,17 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): Unsupported "
                            "Struct Version=0x%X, ignoring any eccStatus=%d",
                            o_info.struct_version, eccStatus);
+
                 break;
             }
 
-
             // Remove ECC for full SBE Version struct
             eccStatus = PNOR::ECC::CLEAN;
-            eccStatus = PNOR::ECC::removeECC(
-                                         tmp_data_ECC,
-                                         reinterpret_cast<uint8_t*>(&o_info),
-                                         sbeInfoSize);
+            eccStatus = removeECC(tmp_data_ECC,
+                                  reinterpret_cast<uint8_t*>(&o_info),
+                                  sbeInfoSize,
+                                  SBE_VERSION_SEEPROM_ADDRESS,
+                                  SBE_SEEPROM_SIZE);
 
             TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
                        "sizeof o_info/sI=%d, sI_ECC=%d, origin golden=%i",
@@ -1456,7 +1500,11 @@ namespace SBE
 
             // Inject ECC to Data
             memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
-            PNOR::ECC::injectECC(sbeInfo_data, sbeInfoSize, sbeInfo_data_ECC);
+            injectECC(sbeInfo_data,
+                      sbeInfoSize,
+                      SBE_VERSION_SEEPROM_ADDRESS,
+                      SBE_SEEPROM_SIZE,
+                      sbeInfo_data_ECC);
 
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Invalid Info",
                       sbeInfo_data, sbeInfoSize);
@@ -1472,9 +1520,12 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
-                           "Writing SBE Version Info: HUID=0x%.8X, side=%d",
+                           "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
+                           "RC=0x%X, PLID=0x%lX",
                            TARGETING::get_huid(io_sbeState.target),
-                           io_sbeState.seeprom_side_to_update);
+                           io_sbeState.seeprom_side_to_update,
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
@@ -1496,9 +1547,11 @@ namespace SBE
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                                "Reading Back SBE Version Info: HUID=0x%.8X, "
-                               "side=%d",
+                               "side=%d, RC=0x%X, PLID=0x%lX",
                                TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.seeprom_side_to_update);
+                               io_sbeState.seeprom_side_to_update,
+                               ERRL_GETRC_SAFE(err),
+                               ERRL_GETPLID_SAFE(err));
                     break;
                 }
 
@@ -1508,9 +1561,11 @@ namespace SBE
                                                  sbeInfoSize_ECC);
 
                 // Remove ECC
-                eccStatus = PNOR::ECC::removeECC( sbeInfo_data_ECC_readBack,
-                                                  sbeInfo_data_readBack,
-                                                  sbeInfoSize);
+                eccStatus = removeECC( sbeInfo_data_ECC_readBack,
+                                       sbeInfo_data_readBack,
+                                       sbeInfoSize,
+                                       SBE_VERSION_SEEPROM_ADDRESS,
+                                       SBE_SEEPROM_SIZE);
 
                 TRACUCOMP( g_trac_sbe, "updateSeepromSide(): eccStatus=%d, "
                            "sizeof sI=%d, sI_ECC=%d, rc_ECC=%d",
@@ -1584,47 +1639,20 @@ namespace SBE
             // The Customized Image For This Target Still Resides In
             // The SBE Update VMM Space: SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE
 
-#ifdef CONFIG_SBE_UPDATE_INDEPENDENT
-            // Ensure HBB address value in the customized image is correct
-            // for this side
-            bool imageWasUpdated=false;
-
-            err = resolveImageHBBaddr ( io_sbeState.target,
-                                        reinterpret_cast<void*>(SBE_IMG_VADDR),
-                                        ((io_sbeState.seeprom_side_to_update ==
-                                         EEPROM::SBE_PRIMARY ) ?
-                                                 SBE_SEEPROM0 :
-                                                 SBE_SEEPROM1  ),
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-                                        ((io_sbeState.seeprom_side_to_update ==
-                                         EEPROM::SBE_PRIMARY ) ?
-                                                 PNOR::WORKING :
-                                                 PNOR::ALTERNATE  ),
-#else
-                                        PNOR::WORKING,
-#endif
-                                        imageWasUpdated );
-
-            if (imageWasUpdated == true )
-            {
-                TRACUCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - "
-                           "HBB Address's MMIO Offset Updated in Image");
-            }
-
-#endif
-
             // Inject ECC
             // clear out back half of page block to use as temp space
             // for ECC injected SBE Image.
             rc = mm_remove_pages(RELEASE,
-                                 reinterpret_cast<void*>
-                                 (SBE_ECC_IMG_VADDR),
+                                 reinterpret_cast<void*>(SBE_ECC_IMG_VADDR),
                                  SBE_ECC_IMG_MAX_SIZE);
             if( rc )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
-                           "from mm_remove_pages : rc=%d,  HUID=0x%.8X.",
-                           rc, TARGETING::get_huid(io_sbeState.target) );
+                           "from mm_remove_pages : rc=%d,  HUID=0x%.8X, "
+                           "ECC_VADDR=0x%.16X, eccSize=0x%.8X.",
+                           rc, TARGETING::get_huid(io_sbeState.target),
+                           SBE_ECC_IMG_VADDR,
+                           SBE_ECC_IMG_MAX_SIZE );
                 /*@
                  * @errortype
                  * @moduleid     SBE_UPDATE_SEEPROMS
@@ -1654,24 +1682,35 @@ namespace SBE
 
             //align size, calculate ECC size
             size_t sbeImgSize = ALIGN_8(io_sbeState.customizedImage_size);
-            size_t sbeEccImgSize = static_cast<size_t>(sbeImgSize*9/8);
+            size_t sbeEccImgSize = setECCSize(sbeImgSize);
 
+            // Check if assert below will fail and values should be traced
+            if(sbeEccImgSize > SBE_ECC_IMG_MAX_SIZE)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide(): assert "
+                           "values eccSize=0x%.8X <= ECC_MAX_SIZE=0x%.8X",
+                           sbeEccImgSize,
+                           SBE_ECC_IMG_MAX_SIZE );
+            }
 
             assert(sbeEccImgSize <= SBE_ECC_IMG_MAX_SIZE,
                    "updateSeepromSide() SBE Image with ECC too large");
 
             TRACUCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): "
                        "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
-                       "eccSize=0x%.8X",
+                       "eccSize=0x%.8X, UPDATE_END=0x%.16X, UPDATE_SIZE=0x%.8X",
                        SBE_IMG_VADDR,
                        SBE_ECC_IMG_VADDR,
                        sbeImgSize,
-                       sbeEccImgSize );
+                       sbeEccImgSize,
+                       VMM_VADDR_SBE_UPDATE_END,
+                       VMM_SBE_UPDATE_SIZE );
 
-            PNOR::ECC::injectECC(reinterpret_cast<uint8_t*>(SBE_IMG_VADDR),
-                                 sbeImgSize,
-                                 reinterpret_cast<uint8_t*>
-                                 (SBE_ECC_IMG_VADDR));
+            injectECC(reinterpret_cast<uint8_t*>(SBE_IMG_VADDR),
+                      sbeImgSize,
+                      SBE_IMAGE_SEEPROM_ADDRESS,
+                      SBE_SEEPROM_SIZE,
+                      reinterpret_cast<uint8_t*>(SBE_ECC_IMG_VADDR));
 
             TRACDBIN(g_trac_sbe,"updateSeepromSide()-start of IMG - no ECC",
                      reinterpret_cast<void*>(SBE_IMG_VADDR), 0x80);
@@ -1687,8 +1726,7 @@ namespace SBE
 
             //Write image to indicated side
             err = deviceWrite(io_sbeState.target,
-                              reinterpret_cast<void*>
-                              (SBE_ECC_IMG_VADDR),
+                              reinterpret_cast<void*>(SBE_ECC_IMG_VADDR),
                               sbeEccImgSize,
                               DEVICE_EEPROM_ADDRESS(
                                             io_sbeState.seeprom_side_to_update,
@@ -1699,14 +1737,15 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
                            "writing new SBE image to size=%d. HUID=0x%.8X."
                            "SBE_VADDR=0x%.16X, ECC_VADDR=0x%.16X, size=0x%.8X, "
-                           "eccSize=0x%.8X, EEPROM offset=0x%X",
+                           "eccSize=0x%.8X, EEPROM offset=0x%X, "
+                           "RC=0x%X, PLID=0x%lX",
                            io_sbeState.seeprom_side_to_update,
                            TARGETING::get_huid(io_sbeState.target),
                            SBE_IMG_VADDR, SBE_ECC_IMG_VADDR, sbeImgSize,
-                           sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS);
+                           sbeEccImgSize, SBE_IMAGE_SEEPROM_ADDRESS,
+                           ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
                 break;
             }
-
 
             /*******************************************/
             /*  Update SBE Version Information         */
@@ -1717,7 +1756,11 @@ namespace SBE
 
             // Inject ECC to Data
             memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
-            PNOR::ECC::injectECC(sbeInfo_data, sbeInfoSize, sbeInfo_data_ECC);
+            injectECC(sbeInfo_data,
+                      sbeInfoSize,
+                      SBE_VERSION_SEEPROM_ADDRESS,
+                      SBE_SEEPROM_SIZE,
+                      sbeInfo_data_ECC);
 
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Info",
                       sbeInfo_data, sbeInfoSize);
@@ -1733,9 +1776,12 @@ namespace SBE
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
-                           "Writing SBE Version Info: HUID=0x%.8X, side=%d",
+                           "Writing SBE Version Info: HUID=0x%.8X, side=%d, "
+                           "RC=0x%X, PLID=0x%lX",
                            TARGETING::get_huid(io_sbeState.target),
-                           io_sbeState.seeprom_side_to_update);
+                           io_sbeState.seeprom_side_to_update,
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
                 break;
             }
 
@@ -3093,8 +3139,11 @@ namespace SBE
                 o_reIplRequest = false;
                 TRACFCOMP(g_trac_sbe, ERR_MRK"isIplFromReIplRequest(): "
                           "Error sending MBOX msg. Commit error, and assume "
-                          "IPL wasn't requested from us: o_reIplRequest=%d",
-                          o_reIplRequest);
+                          "IPL wasn't requested from us: o_reIplRequest=%d, "
+                          "RC=0x%X, PLID=0x%lX",
+                          o_reIplRequest,
+                          ERRL_GETRC_SAFE(err),
+                          ERRL_GETPLID_SAFE(err));
 
                 errlCommit(err, SBE_COMP_ID);
                 break;
@@ -3807,7 +3856,7 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState)
     {
-        TRACDCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    ENTER_MRK"checkNestFreqSettings(): HUID:0x%08X",
                    TARGETING::get_huid(io_sbeState.target));
 
@@ -3823,8 +3872,9 @@ namespace SBE
             // Get MRW DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
             // @TODO RTC:138226 "We need to investigate if we can avoid needing
             //                   this hack in P9"
-            default_nest_freq = io_sbeState.target->getAttr<
-                         TARGETING::ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ>();
+            default_nest_freq = 2400 /* io_sbeState.target->getAttr<
+                         TARGETING::ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ>()
+                         @TODO RTC:157890 */ ;
 
             TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
                        "=%d, ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ=%d",
@@ -3861,7 +3911,10 @@ namespace SBE
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"checkNestFreqSettings() - "
-                               "Error returned from getSbeBootSeeprom()");
+                               "Error returned from getSbeBootSeeprom(), "
+                               "RC=0x%X, PLID=0x%lX",
+                               ERRL_GETRC_SAFE(err),
+                               ERRL_GETPLID_SAFE(err));
 
                     // Assume it was default frequency for this module
                     io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
@@ -3916,13 +3969,160 @@ namespace SBE
         }while(0);
 
 
-        TRACDCOMP( g_trac_sbe,
+        TRACFCOMP( g_trac_sbe,
                    EXIT_MRK"checkNestFreqSettings");
 
         return err;
 
     }
 
+
+/////////////////////////////////////////////////////////////////////
+    size_t setECCSize(size_t i_srcSz,
+                      const uint64_t i_offset,
+                      const uint64_t i_boundary)
+    {
+        // Assert that source size is a multiple of 8
+        assert((i_srcSz % 8) == 0);
+
+        // Calculate size with ECC. but without padding
+        size_t l_eccSz = (i_srcSz * 9) / 8;
+
+        // Determine padding at each boundary
+        size_t l_padSz = i_boundary % 9;
+
+        // Calculate number of boundary crossings
+        // Only use portion of offset beyond last boundary it crosses
+        // Exactly reaching a boundary is not counted as a crossing
+        uint64_t l_boundaryCrossings =
+            (l_eccSz + (i_offset % i_boundary) - 1) / (i_boundary - l_padSz);
+
+        // Calculate total padding
+        size_t l_totalPadding = l_boundaryCrossings * l_padSz;
+
+        return (l_eccSz + l_totalPadding);
+    }
+
+
+/////////////////////////////////////////////////////////////////////
+    void injectECC(const uint8_t* i_src,
+                   size_t i_srcSz,
+                   const uint64_t i_offset,
+                   const uint64_t i_boundary,
+                   uint8_t* o_dst)
+    {
+        // Initialize local size variables for inject loop
+        size_t l_completeSz = 0;
+        size_t l_completeEccSz = 0;
+        size_t l_padSz = i_boundary % 9;
+        size_t l_injectSz =
+            ((i_boundary - l_padSz - (i_offset % i_boundary)) * 8) / 9;
+        if(l_injectSz > i_srcSz)
+        {
+            l_injectSz = i_srcSz;
+        }
+
+        // Loop through injection of ECC
+        while(l_completeSz < i_srcSz)
+        {
+            // Assert that injection size is a multiple of 8
+            assert((l_injectSz % 8) == 0);
+
+            // Inject ECC
+            PNOR::ECC::injectECC(i_src + l_completeSz,
+                                 l_injectSz,
+                                 o_dst + l_completeEccSz);
+
+            // Adjust local size variables
+            l_completeSz += l_injectSz;
+            l_completeEccSz += ((l_injectSz * 9) / 8);
+
+            // Determine next size for ECC injection
+            if((i_srcSz - l_completeSz) >= (((i_boundary - l_padSz) * 8) / 9))
+            {
+                // Set up size to go to next device boundary
+                l_injectSz = ((i_boundary - l_padSz) * 8) / 9;
+            }
+            else
+            {
+                // Set up size to finish ECC injection
+                l_injectSz = i_srcSz - l_completeSz;
+            }
+
+            // Determine if ECC injection is not finished
+            if(l_injectSz > 0)
+            {
+                // Pad to device boundary if some ECC injection is left
+                memset(o_dst + l_completeEccSz,
+                       '\0',
+                       l_padSz);
+                l_completeEccSz += l_padSz;
+            }
+        } // while (l_completeSz < i_srcSz)
+    }
+
+
+/////////////////////////////////////////////////////////////////////
+    PNOR::ECC::eccStatus removeECC(uint8_t* io_src,
+                                   uint8_t* o_dst,
+                                   size_t i_dstSz,
+                                   const uint64_t i_offset,
+                                   const uint64_t i_boundary)
+    {
+        PNOR::ECC::eccStatus l_status = PNOR::ECC::CLEAN;
+
+        // Initialize local size variables for remove loop
+        size_t l_completeSz = 0;
+        size_t l_completeEccSz = 0;
+        size_t l_padSz = i_boundary % 9;
+        size_t l_removeSz =
+            ((i_boundary - l_padSz - (i_offset % i_boundary)) * 8) / 9;
+        if(l_removeSz > i_dstSz)
+        {
+            l_removeSz = i_dstSz;
+        }
+
+        // Loop through removal of ECC
+        while(l_completeSz < i_dstSz)
+        {
+            // Assert that removal size is a multiple of 8
+            assert((l_removeSz % 8) == 0);
+
+            // remove ECC
+            l_status = PNOR::ECC::removeECC(io_src + l_completeEccSz,
+                                            o_dst + l_completeSz,
+                                            l_removeSz);
+            if (l_status == PNOR::ECC::UNCORRECTABLE)
+            {
+                break;
+            }
+
+            // Adjust local size variables
+            l_completeSz += l_removeSz;
+            l_completeEccSz += ((l_removeSz * 9) / 8);
+
+            // Determine next size for ECC removal
+            if((i_dstSz - l_completeSz) >= (((i_boundary - l_padSz) * 8) / 9))
+            {
+                // Set up size to go to next device boundary
+                l_removeSz = ((i_boundary - l_padSz) * 8) / 9;
+            }
+            else
+            {
+                // Set up size to finish ECC removal
+                l_removeSz = i_dstSz - l_completeSz;
+            }
+
+            // Determine if ECC removal is not finished
+            if(l_removeSz > 0)
+            {
+                // Skip pad at device boundary if some ECC removal is left
+                l_completeEccSz += l_padSz;
+            }
+        } // while (l_completeSz < i_dstSz)
+
+        return l_status;
+    }
 
 
 } //end SBE Namespace

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -252,6 +254,8 @@ namespace DeviceFW
             // Follow first level (access type), verify.
             if (0 == routeMap[i_accessType].offset)
             {
+                TRACDCOMP(g_traceBuffer, "findDeviceRoute did not verify first "
+                          "level: i_accessType=%d", i_accessType );
                 break;
             }
 
@@ -280,6 +284,9 @@ namespace DeviceFW
                                     targets[i_devType].offset];
                     break;
                 }
+
+                TRACDCOMP(g_traceBuffer, "findDeviceRoute did not find "
+                          "wildcard registration match" );
             }
 
             // Check op type = i_opType registrations.
@@ -304,6 +311,9 @@ namespace DeviceFW
                                     targets[i_devType].offset];
                     break;
                 }
+
+                TRACDCOMP(g_traceBuffer, "findDeviceRoute did not find "
+                          "i_opType=%d registration match", i_opType );
             }
         } while(0);
 

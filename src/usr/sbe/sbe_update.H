@@ -30,9 +30,11 @@
 #include <builtins.h>
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
+#include <pnor/ecc.H>
 #include <vmmconst.h>
 #include <targeting/common/targetservice.H>
 #include <i2c/eepromif.H>
+#include <p9_infrastruct_help.H>
 
 namespace SBE
 {
@@ -73,8 +75,15 @@ namespace SBE
     const uint64_t SBE_SEEPROM_STRUCT_INVALID = 0x494E56414C494400;
 
     // Used for locations of SBE_Version and SBE Image on a SEEPROM
-    const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x400; // 1KB
-    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 0x300; // 1KB - 256B
+    const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x00;          // 0
+    const uint64_t SBE_VERSION_SPACE_WITH_ECC   = (256 * 9) / 8; // 256B + ECC
+    const uint64_t SBE_SEEPROM_SIZE             = 64*KILOBYTE;   // 64KB
+    const uint64_t SBE_SEEPROM_ECC_PAD          = SBE_SEEPROM_SIZE % 9;
+    // SBE Version (with ECC) kept at end of fourth 64KB memory
+    // Adjust end of usable memory with ECC to be a multiple of 9 bytes
+    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 4*SBE_SEEPROM_SIZE
+                                                - SBE_SEEPROM_ECC_PAD
+                                                - SBE_VERSION_SPACE_WITH_ECC;
 
     //Used to read SBE Boot Side from processor
     const uint64_t SBE_VITAL_REG_0x0005001C = 0x005001C;
@@ -87,7 +96,7 @@ namespace SBE
     const uint32_t SUPPORTED_TOC_VER = 0x00000001;
 
     // MVPD SB Keyword contants
-    const size_t  MVPD_SB_RECORD_SIZE = 49;
+    const size_t  MVPD_SB_RECORD_SIZE = 129;
 
     // PERMANENT FLAG - bit 0: 0x0 -> indicates 0 is permanent.
     const uint8_t PERMANENT_FLAG_MASK             = 0x80;
@@ -123,15 +132,13 @@ namespace SBE
     /******************************************/
     enum {
         FIXED_SEEPROM_WORK_SPACE = 128 * 1024,
-        FIXED_RING_BUF_SIZE = 60000,
-        MAX_SEEPROM_IMAGE_SIZE  =   56 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
         RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
-        SBE_ECC_IMG_VADDR = RING_BUF1_VADDR,
-        SBE_ECC_IMG_MAX_SIZE = VMM_VADDR_SBE_UPDATE_END - SBE_ECC_IMG_VADDR,
+        SBE_ECC_IMG_VADDR = VMM_VADDR_SBE_UPDATE + (VMM_SBE_UPDATE_SIZE / 2),
+        SBE_ECC_IMG_MAX_SIZE = (MAX_SEEPROM_IMAGE_SIZE * 9 / 8),
     };
 
     // Used for MVPD function
@@ -233,6 +240,10 @@ namespace SBE
 
         uint32_t seeprom_1_data_crc;
         uint8_t seeprom_1_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
+        uint8_t mvpdSbPad[MVPD_SB_RECORD_SIZE - sizeof(flags)
+                          - sizeof(seeprom_0_data_crc)
+                          - sizeof(seeprom_1_data_crc)
+                          - (SBE_MVPD_SHORT_IMAGE_VERSION_SIZE * 2)];
     } PACKED;
 
 
@@ -541,6 +552,73 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState);
+
+
+    /**
+     * @brief Calculates ECC size for a block of code or data allowing for
+     *        padding at device boundaries so 9-byte segment (8 bytes of code
+     *        or data and 1 byte of ECC) does not straddle the boundary.
+     *
+     * @param[in]  i_srcSz    Size of source code or data
+     *
+     * @param[in]  i_offset   Offset into device for storing destination
+     *
+     * @param[in]  i_boundary Device boundary
+     *
+     * @return Size of source code or data with ECC and padding
+     */
+    size_t setECCSize(size_t i_srcSz,
+                      const uint64_t i_offset = SBE_IMAGE_SEEPROM_ADDRESS,
+                      const uint64_t i_boundary = SBE_SEEPROM_SIZE);
+
+
+    /**
+     * @brief Injects ECC into a block of code or data.  Pads output at device
+     *        boundaries so 9-byte segment (8 bytes of code or data and 1 byte
+     *        of ECC) does not straddle the boundary.
+     *
+     * @param[in]  i_src      Location of source code or data without ECC
+     *
+     * @param[in]  i_srcSz    Size of source code or data
+     *
+     * @param[in]  i_offset   Offset into device for storing destination
+     *
+     * @param[in]  i_boundary Device boundary
+     *
+     * @param[out] o_dst      Location of destination code or data with ECC
+     *
+     * @return void
+     */
+    void injectECC(const uint8_t* i_src,
+                   size_t i_srcSz,
+                   const uint64_t i_offset,
+                   const uint64_t i_boundary,
+                   uint8_t* o_dst);
+
+
+    /**
+     * @brief Removes ECC from a block of code or data.  Removes padding at
+     *        device boundaries where 9-byte segment (8 bytes of code or data
+     *        and 1 byte of ECC) was moved to next device so as to not straddle
+     *        the boundary.
+     *
+     * @param[in/out] io_src  Location of source code or data with ECC
+     *
+     * @param[out] o_dst      Location of destination code or data without ECC
+     *
+     * @param[in]  i_dstSz    Size of destination code or data
+     *
+     * @param[in]  i_offset   Offset into device where source was stored
+     *
+     * @param[in]  i_boundary Device boundary
+     *
+     * @return     eccStatus  ECC status from removing ECC.
+     */
+    PNOR::ECC::eccStatus removeECC(uint8_t* io_src,
+                                   uint8_t* o_dst,
+                                   size_t i_dstSz,
+                                   const uint64_t i_offset,
+                                   const uint64_t i_boundary);
 
 
 } //end namespace SBE

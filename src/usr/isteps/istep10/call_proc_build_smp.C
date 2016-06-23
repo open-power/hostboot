@@ -27,6 +27,8 @@
 #include    <errl/errlmanager.H>
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
+#include    <fsi/fsiif.H>
+
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -156,21 +158,76 @@ void* call_proc_build_smp (void *io_pArgs)
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_master_proc (l_masterProc);
 
-
-    FAPI_INVOKE_HWP( l_errl, p9_build_smp,
-        l_procList,
-        l_fapi2_master_proc,
-        SMP_ACTIVATE_PHASE1 );
-
-    if(l_errl)
+    do
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR : call p9_build_smp, PLID=0x%x", l_errl->plid() );
-        // Create IStep error log and cross reference error that occurred
-        l_StepError.addErrorDetails(l_errl);
-        // Commit error
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
+
+        FAPI_INVOKE_HWP( l_errl, p9_build_smp,
+                         l_procList,
+                         l_fapi2_master_proc,
+                         SMP_ACTIVATE_PHASE1 );
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call p9_build_smp, PLID=0x%x", l_errl->plid() );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails(l_errl);
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            break;
+        }
+
+        // At the point where we can now change the proc chips to use
+        // XSCOM rather than SBESCOM which is the default.
+
+        TARGETING::TargetHandleList procChips;
+        getAllChips(procChips, TYPE_PROC);
+
+        TARGETING::TargetHandleList::iterator curproc = procChips.begin();
+
+        // Loop through all proc chips
+        while(curproc != procChips.end())
+        {
+            TARGETING::Target*  l_proc_target = *curproc;
+
+            // If the proc chip supports xscom..
+            if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
+                .supportsXscom)
+            {
+                ScomSwitches l_switches =
+                  l_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
+
+                // If Xscom is not already enabled.
+                if ((l_switches.useXscom != 1) || (l_switches.useSbeScom != 0))
+                {
+                    l_switches.useSbeScom = 0;
+                    l_switches.useXscom = 1;
+
+                    // Turn off SBE scom and turn on Xscom.
+                    l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+
+                    // Reset the FSI2OPB logic on the new chips
+                    l_errl = FSI::resetPib2Opb(l_proc_target);
+                    if(l_errl)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "ERROR : resetPib2Opb on %.8X",
+                                  TARGETING::get_huid(l_proc_target));
+                        // Create IStep error log and
+                        // cross reference error that occurred
+                        l_StepError.addErrorDetails(l_errl);
+                        // Commit error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        break;
+                    }
+                }
+            }
+
+            ++curproc;
+        }
+
+    } while (0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_build_smp exit" );

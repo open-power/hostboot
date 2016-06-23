@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -203,6 +205,7 @@ public:
         // 1 byte   : Address Size
         // 8 bytes  : Write Page Size
         // 8 bytes  : Device Size (in KB)
+        // 8 bytes  : Chip Count
         // 8 bytes  : Write Cycle Time
 
         uint8_t op = TO_UINT8(l_databuf);
@@ -244,6 +247,12 @@ public:
         i_parser.PrintNumber("Device Size (in KB)","%.16lX",
                              TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);
+        if(i_version >= 2)
+        {
+            i_parser.PrintNumber("Chip Count","%.16lX",
+                                 TO_UINT64(l_databuf));
+            l_databuf += sizeof(uint64_t);
+        }
         i_parser.PrintNumber("Write Cycle Time","%.16lX",TO_UINT64(l_databuf));
         l_databuf += sizeof(uint64_t);
 
