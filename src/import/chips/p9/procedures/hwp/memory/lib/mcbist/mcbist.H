@@ -1754,6 +1754,38 @@ class program
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief checks if two programs are equal
+        /// @param[in] i_rhs program to compare
+        /// @return bool true if equal
+        ///
+        inline bool operator==( const program<T>& i_rhs ) const
+        {
+            //checks the vector first, to save time if they're not equal (no sense in checking everything else)
+            if(iv_subtests != i_rhs.iv_subtests)
+            {
+                return false;
+            }
+
+            //checks everything else
+            bool l_equal = iv_parameters == i_rhs.iv_parameters;
+            l_equal &= iv_addr_gen == i_rhs.iv_addr_gen;
+            l_equal &= iv_test_type == i_rhs.iv_test_type;
+            l_equal &= iv_poll == i_rhs.iv_poll;
+            l_equal &= iv_addr_map0 == i_rhs.iv_addr_map0;
+            l_equal &= iv_addr_map1 == i_rhs.iv_addr_map1;
+            l_equal &= iv_addr_map2 == i_rhs.iv_addr_map2;
+            l_equal &= iv_addr_map3 == i_rhs.iv_addr_map3;
+            l_equal &= iv_config == i_rhs.iv_config;
+            l_equal &= iv_control == i_rhs.iv_control;
+            l_equal &= iv_async == i_rhs.iv_async;
+            l_equal &= iv_pattern == i_rhs.iv_pattern;
+            l_equal &= iv_thresholds == i_rhs.iv_thresholds;
+
+            //returns result
+            return  l_equal;
+        }
+
         // Vector of subtests. Note the MCBIST subtests are spread across
         // 8 registers - 4 subtests fit in one 64b register
         // (16 bits/test, 4 x 16 == 64, 4x8 = 32 subtests)
