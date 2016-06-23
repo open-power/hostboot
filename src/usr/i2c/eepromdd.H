@@ -68,6 +68,7 @@ typedef struct
     TARGETING::EntityPath i2cMasterPath;
     uint64_t writePageSize;  // in bytes
     uint64_t devSize_KB;     // in kilobytes
+    uint64_t chipCount;      // number of chips making up eeprom device
     uint64_t writeCycleTime;  // in milliseconds
 } eeprom_addr_t;
 
@@ -76,7 +77,8 @@ typedef struct
  */
 enum
 {
-    EEPROM_PAGE_SIZE = 0x100
+    EEPROM_PAGE_SIZE = 0x100,
+    EEPROM_DEVADDR_INC = 2
 };
 
 /**

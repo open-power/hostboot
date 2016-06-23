@@ -111,33 +111,6 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
     do {
 
-    // Check if the system can support multiple nest frequencies
-    // and if so, see if an SBE Update is required
-    TARGETING::Target* l_sys = NULL;
-    targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != NULL, "call_fabric_erepair: sys target is NULL" );
-    MRW_NEST_CAPABLE_FREQUENCIES_SYS l_mrw_nest_capable;
-    l_mrw_nest_capable =
-               l_sys->getAttr<ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
-    if ( l_mrw_nest_capable ==
-               MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ_OR_2400_MHZ )
-    {
-        // Call to check Processor SBE SEEPROM Images against NEST_FREQ_MHZ
-        // attributes and make any necessary updates
-        // TODO-RTC:138226 - add it after SBE is ported to fapi2
-        //l_errl = SBE::updateProcessorSbeSeeproms(
-        //                SBE::SBE_UPDATE_ONLY_CHECK_NEST_FREQ);
-
-        if (l_errl)
-        {
-            // Create IStep error log and cross reference error that occurred
-            l_StepError.addErrorDetails( l_errl );
-            // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
-            break;
-        }
-    }
-
     std::vector<uint8_t> l_endp1_txFaillanes;
     std::vector<uint8_t> l_endp1_rxFaillanes;
     std::vector<uint8_t> l_endp2_txFaillanes;

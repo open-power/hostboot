@@ -65,8 +65,8 @@ trace_desc_t* g_trac_eepromr = NULL;
 TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
 
 // Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#define TRACUCOMP(args...)  TRACFCOMP(args) // @TODO RTC: 138226
+//#define TRACUCOMP(args...)
 
 // ----------------------------------------------
 // Defines
@@ -134,6 +134,10 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
     bool scacDisabled = false;
 #endif //__HOSTBOOT_RUNTIME
 
+    void * l_pBuffer        = io_buffer;
+    size_t l_currentOpLen   = io_buflen;
+    size_t l_remainingOpLen = io_buflen;
+
     do
     {
         // Read Attributes needed to complete the operation
@@ -144,6 +148,9 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
         {
             break;
         }
+
+        size_t l_snglChipSize = (i2cInfo.devSize_KB * KILOBYTE)
+                                / i2cInfo.chipCount;
 
         // Check to see if we need to find a new target for
         // the I2C Master
@@ -194,6 +201,27 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
             break;
         }
 
+        // Adjust offset and devAddr to the correct starting chip
+        while( i2cInfo.offset >= l_snglChipSize )
+        {
+            i2cInfo.offset -= l_snglChipSize;
+            i2cInfo.devAddr += EEPROM_DEVADDR_INC;
+        }
+
+        // Keep first op length within a chip
+        if( ( i2cInfo.offset + io_buflen ) > l_snglChipSize )
+        {
+            l_currentOpLen = l_snglChipSize - i2cInfo.offset;
+        }
+
+        TRACFCOMP( g_trac_eeprom,
+                   "eepromPerformOp():  i_opType=%d "
+                   "C-p/e/dA=%d-%d/%d/0x%X, offset=0x%X, len=0x%X, "
+                   "snglChipKB=0x%X, chipCount=0x%X, devSizeKB=0x%X", i_opType,
+                   i2cInfo.chip, i2cInfo.port, i2cInfo.engine, i2cInfo.devAddr,
+                   i2cInfo.offset, io_buflen, l_snglChipSize,
+                   i2cInfo.chipCount, i2cInfo.devSize_KB);
+
 #ifdef __HOSTBOOT_RUNTIME
         // Disable Sensor Cache if the I2C master target is MEMBUF
         if( i2cMasterTarget->getAttr<TARGETING::ATTR_TYPE>() ==
@@ -208,57 +236,77 @@ errlHndl_t eepromPerformOp( DeviceFW::OperationType i_opType,
 #endif //__HOSTBOOT_RUNTIME
 
         // Do the read or write
-        if( i_opType == DeviceFW::READ )
+        while(l_remainingOpLen > 0)
         {
-            err = eepromRead( i2cMasterTarget,
-                              io_buffer,
-                              io_buflen,
-                              i2cInfo );
+            if( i_opType == DeviceFW::READ )
+            {
+                err = eepromRead( i2cMasterTarget,
+                                  l_pBuffer,
+                                  l_currentOpLen,
+                                  i2cInfo );
+            }
+            else if( i_opType == DeviceFW::WRITE )
+            {
+                err = eepromWrite( i2cMasterTarget,
+                                   l_pBuffer,
+                                   l_currentOpLen,
+                                   i2cInfo );
+            }
+            else
+            {
+                TRACFCOMP( g_trac_eeprom,
+                           ERR_MRK"eepromPerformOp(): "
+                           "Invalid EEPROM Operation!");
+
+                /*@
+                 * @errortype
+                 * @reasoncode     EEPROM_INVALID_OPERATION
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       EEPROM_PERFORM_OP
+                 * @userdata1      Operation Type
+                 * @userdata2      Chip to Access
+                 * @devdesc        Invalid operation type.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               EEPROM_PERFORM_OP,
+                                               EEPROM_INVALID_OPERATION,
+                                               i_opType,
+                                               i2cInfo.chip,
+                                               true /*Add HB SW Callout*/ );
+
+                err->collectTrace( EEPROM_COMP_NAME );
+            }
 
             if ( err )
             {
                 break;
             }
 
-        }
-        else if( i_opType == DeviceFW::WRITE )
-        {
-            err = eepromWrite( i2cMasterTarget,
-                               io_buffer,
-                               io_buflen,
-                               i2cInfo );
+            // Adjust the buffer pointer and remaining op length
+            l_pBuffer = (void *)(reinterpret_cast<uint64_t>(l_pBuffer)
+                                 + l_currentOpLen);
+            l_remainingOpLen -= l_currentOpLen;
 
-            if ( err )
+            if( l_remainingOpLen > l_snglChipSize )
             {
+                // Keep next op length within a chip
+                l_currentOpLen = l_snglChipSize;
+            }
+            else if( l_remainingOpLen > 0 )
+            {
+                // Set next op length to what is left to do
+                l_currentOpLen = l_remainingOpLen;
+            }
+            else
+            {
+                // Break if there is nothing left to do
                 break;
             }
 
-        }
-        else
-        {
-            TRACFCOMP( g_trac_eeprom,
-                       ERR_MRK"eepromPerformOp(): Invalid EEPROM Operation!");
-
-            /*@
-             * @errortype
-             * @reasoncode     EEPROM_INVALID_OPERATION
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       EEPROM_PERFORM_OP
-             * @userdata1      Operation Type
-             * @userdata2      Chip to Access
-             * @devdesc        Invalid operation type.
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           EEPROM_PERFORM_OP,
-                                           EEPROM_INVALID_OPERATION,
-                                           i_opType,
-                                           i2cInfo.chip,
-                                           true /*Add HB SW Callout*/ );
-
-            err->collectTrace( EEPROM_COMP_NAME );
-
-            break;
-        }
+            // Prepare the address at the start of next EEPROM
+            i2cInfo.offset = 0;
+            i2cInfo.devAddr += EEPROM_DEVADDR_INC;
+        } // Do the read or write
     } while( 0 );
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -527,7 +575,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
                                                        l_pageTwoBuflen,
                                                        i_i2cInfo );
 
-        // Set addressing parameters
+       // Set addressing parameters
         err = eepromPrepareAddress( i_target,
                                     &byteAddr,
                                     byteAddrSize,
@@ -632,11 +680,9 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
         }
 
 
-
-
         TRACUCOMP( g_trac_eepromr,
                    "EEPROM READ  END   : Chip: %02d : Offset %.2X : Len %d : %016llx",
-                   i_i2cInfo.chip, l_originalOffset, i_buflen,
+                   i_i2cInfo.chip, i_i2cInfo.offset, i_buflen,
                    *((uint64_t*)o_buffer) );
 
     } while( 0 );
@@ -1046,12 +1092,13 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             }
 
 
-
+            if(0 == total_bytes_written) { // @TODO RTC:138226
             TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop: %d/%d/0x%X "
-                "loop=%d, writeBuflen=%d, offset=0x%X, bAS=%d, diffs=%d/%d",
+                "writeBuflen=%d, offset=0x%X, bAS=%d, diffs=%d/%d",
                 i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr,
-                i, l_writeBuflen, i_i2cInfo.offset, byteAddrSize,
+                l_writeBuflen, i_i2cInfo.offset, byteAddrSize,
                 data_left, diff_wps);
+            } // @TODO RTC:138226
 
 
             // Perform the requested write operation
@@ -1068,7 +1115,7 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                 // there was an error, so no update to total_bytes_written
                 // for this loop
                 TRACFCOMP(g_trac_eeprom,
-                        "Failed writing data: original eeprom write");
+                         "Failed writing data: original eeprom write");
                 break;
             }
 
@@ -1082,11 +1129,12 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             // Update offset
             i_i2cInfo.offset += l_writeBuflen;
 
-            TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop %d End: "
+            if(total_bytes_written >= io_buflen) { // @TODO RTC:138226
+            TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop End: "
                       "writeBuflen=%d, offset=0x%X, t_b_w=%d, io_buflen=%d",
-                      i, l_writeBuflen, i_i2cInfo.offset,
+                      l_writeBuflen, i_i2cInfo.offset,
                       total_bytes_written, io_buflen);
-
+            } // @TODO RTC:138226
         } // end of write for-loop
 
         // Release mutex lock
@@ -1545,6 +1593,7 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
         o_i2cInfo.i2cMasterPath  = eepromData.i2cMasterPath;
         o_i2cInfo.writePageSize  = eepromData.writePageSize;
         o_i2cInfo.devSize_KB     = eepromData.maxMemorySizeKB;
+        o_i2cInfo.chipCount      = eepromData.chipCount;
         o_i2cInfo.writeCycleTime = eepromData.writeCycleTime;
 
         // Convert attribute info to eeprom_addr_size_t enum
@@ -1597,12 +1646,12 @@ errlHndl_t eepromReadAttributes ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACUCOMP(g_trac_eeprom,"eepromReadAttributes() tgt=0x%X, %d/%d/0x%X "
-              "wpw=0x%X, dsKb=0x%X, aS=%d (%d), wct=%d",
+              "wpw=0x%X, dsKb=0x%X, chpCnt=%d, aS=%d (%d), wct=%d",
               TARGETING::get_huid(i_target),
               o_i2cInfo.port, o_i2cInfo.engine, o_i2cInfo.devAddr,
               o_i2cInfo.writePageSize, o_i2cInfo.devSize_KB,
-              o_i2cInfo.addrSize, eepromData.byteAddrOffset,
-              o_i2cInfo.writeCycleTime);
+              o_i2cInfo.chipCount, o_i2cInfo.addrSize,
+              eepromData.byteAddrOffset, o_i2cInfo.writeCycleTime);
 
 
     TRACDCOMP( g_trac_eeprom,
@@ -1882,6 +1931,7 @@ void add_to_list( std::list<EepromInfo_t>& i_list,
         eep_info.devAddr = eepromData.devAddr;
         eep_info.device = eep_type;
         eep_info.assocTarg = i_targ;
+        eep_info.chipCount = eepromData.chipCount;
         eep_info.sizeKB = eepromData.maxMemorySizeKB;
         eep_info.addrBytes = eepromData.byteAddrOffset;
         //one more lookup for the speed

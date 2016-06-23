@@ -676,7 +676,7 @@ errlHndl_t readSbeImage(TARGETING::Target* i_target,
         /*****************************************/
         /*  Do Actual Read                       */
         /*****************************************/
-        image_size_ECC = (o_image_size*9)/8;
+        image_size_ECC = setECCSize(o_image_size);
 
         assert(image_size_ECC <= SBE_ECC_IMG_MAX_SIZE,
                "getSetSbeImage() SBE Image with ECC too large");
@@ -713,11 +713,11 @@ errlHndl_t readSbeImage(TARGETING::Target* i_target,
         memset( o_imgPtr, 0, MAX_SEEPROM_IMAGE_SIZE );
 
         // Remove ECC
-        eccStatus = PNOR::ECC::removeECC(reinterpret_cast<uint8_t*>
-                                             (SBE_ECC_IMG_VADDR),
-                                         reinterpret_cast<uint8_t*>
-                                             (o_imgPtr),
-                                         o_image_size);
+        eccStatus = removeECC(reinterpret_cast<uint8_t*>(SBE_ECC_IMG_VADDR),
+                              reinterpret_cast<uint8_t*>(o_imgPtr),
+                              o_image_size,
+                              SBE_IMAGE_SEEPROM_ADDRESS,
+                              SBE_SEEPROM_SIZE);
 
         // Fail if uncorrectable ECC
         if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
@@ -884,15 +884,16 @@ errlHndl_t writeSbeImage(TARGETING::Target* i_target,
         }
 
         // Inject ECC
-        PNOR::ECC::injectECC(reinterpret_cast<uint8_t*>(i_imgPtr),
-                             i_image_size,
-                             reinterpret_cast<uint8_t*>
-                                 (SBE_ECC_IMG_VADDR));
+        injectECC(reinterpret_cast<uint8_t*>(i_imgPtr),
+                  i_image_size,
+                  SBE_IMAGE_SEEPROM_ADDRESS,
+                  SBE_SEEPROM_SIZE,
+                  reinterpret_cast<uint8_t*>(SBE_ECC_IMG_VADDR));
 
         /*****************************************/
         /*  Do Actual Write of Image             */
         /*****************************************/
-        image_size_ECC = (i_image_size*9)/8;
+        image_size_ECC = setECCSize(i_image_size);
 
         assert(image_size_ECC <= SBE_ECC_IMG_MAX_SIZE,
                "writeSbeImage() SBE Image with ECC too large");
@@ -934,8 +935,11 @@ errlHndl_t writeSbeImage(TARGETING::Target* i_target,
 
         // Inject ECC
         memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
-        PNOR::ECC::injectECC(reinterpret_cast<uint8_t*>(&io_version),
-                             sbeInfoSize, sbeInfo_data_ECC);
+        injectECC(reinterpret_cast<uint8_t*>(&io_version),
+                  sbeInfoSize,
+                  SBE_VERSION_SEEPROM_ADDRESS,
+                  SBE_SEEPROM_SIZE,
+                  sbeInfo_data_ECC);
 
         TRACDBIN( g_trac_sbe, "writeSbeImage: Version with ECC",
                   sbeInfo_data_ECC, sbeInfoSize_ECC);
@@ -999,7 +1003,7 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
 
 
         size_t hdr_size = ALIGN_8(sizeof(P9XipHeader));
-        size_t hdr_size_ECC = (hdr_size * 9)/8;
+        size_t hdr_size_ECC = setECCSize(hdr_size);
 
         uint8_t* hdr_ptr = reinterpret_cast<uint8_t*>(i_imgPtr) + hdr_size_ECC;
 
@@ -1037,10 +1041,11 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
                  hdr_size_ECC );
 
         // Remove ECC
-        eccStatus = PNOR::ECC::removeECC(
-                                     reinterpret_cast<uint8_t*>(i_imgPtr),
-                                     hdr_ptr,
-                                     hdr_size);
+        eccStatus = removeECC(reinterpret_cast<uint8_t*>(i_imgPtr),
+                              hdr_ptr,
+                              hdr_size,
+                              SBE_IMAGE_SEEPROM_ADDRESS,
+                              SBE_SEEPROM_SIZE);
 
         // Fail if uncorrectable ECC
         if ( eccStatus == PNOR::ECC::UNCORRECTABLE )

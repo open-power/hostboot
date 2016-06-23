@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -177,7 +179,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
 {
     // Set up Ud instance variables
     iv_CompId = EEPROM_COMP_ID;
-    iv_Version = 1;
+    iv_Version = 2;
     iv_SubSection = EEPROM_UDT_PARAMETERS;
 
     //***** Memory Layout *****
@@ -193,6 +195,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     // 1 byte   : Address Size
     // 8 bytes  : Write Page Size
     // 8 bytes  : Device Size (in KB)
+    // 8 bytes  : Chip Count
     // 8 bytes  : Write Cycle Time
 
     char * l_pBuf = reinterpret_cast<char *>(
@@ -200,7 +203,7 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
                                         +sizeof(uint32_t)
                                         +sizeof(uint64_t)*6
                                         +sizeof(uint8_t)
-                                        +sizeof(uint64_t)*3 ));
+                                        +sizeof(uint64_t)*4 ));
 
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
@@ -262,6 +265,10 @@ UdEepromParms::UdEepromParms( uint8_t i_opType,
     l_pBuf += sizeof(tmp64);
 
     tmp64 = i_i2cInfo.devSize_KB;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_i2cInfo.chipCount;
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 

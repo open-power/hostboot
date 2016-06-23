@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,7 @@ const   TaskInfo    g_istep10[]  =   {
 const DepModInfo g_istep10Dependancies = {
     {
         DEP_LIB(libistep10.so),
+        DEP_LIB(libsbe.so),
         NULL
     }
 };

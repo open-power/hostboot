@@ -1512,6 +1512,18 @@ my @I2CHotPlug;
 foreach my $i (@{$i2cBus->{'i2c-device'}})
 {
 
+    my $dev_addr = $i->{'address'};
+    my $max_mem_size = "0x80";
+    my $chip_count = "0x02";
+
+    if( ($i->{'content-type'} eq 'PRIMARY_SBE_VPD') ||
+        ($i->{'content-type'} eq 'REDUNDANT_SBE_VPD') )
+    {
+        $dev_addr = "A8";
+        $max_mem_size = "0x100";
+        $chip_count = "0x04";
+    }
+
     push @I2Cdevices, {
          'i2cm_name'=>$i->{'i2c-master'}->{target}->{name},
          'i2cm_node'=>$i->{'i2c-master'}->{target}->{node},
@@ -1520,13 +1532,14 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_content_type'=>$i->{'content-type'},
          'i2c_part_id'=>$i->{'part-id'},
          'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
-         'i2c_devAddr'=>$i->{'address'},
+         'i2c_devAddr'=>$dev_addr,
          'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
          'i2c_speed'=>$i->{'speed'},
          'i2c_size'=>$i->{'size'},
 # @todo RTC 119382 - will eventually read these values from this file
          'i2c_byte_addr_offset'=> "0x02",
-         'i2c_max_mem_size' => "0x40",
+         'i2c_max_mem_size' => $max_mem_size,
+         'i2c_chip_count' => $chip_count,
          'i2c_write_page_size' =>"0x80",
          'i2c_write_cycle_time' => "0x05" };
 
@@ -6299,6 +6312,9 @@ sub addEepromsProc
         print "            <field><id>maxMemorySizeKB</id><value>",
                           "$I2Cdevices[$i]{i2c_max_mem_size}",
                           "</value></field>\n";
+        print "            <field><id>chipCount</id><value>",
+                          "$I2Cdevices[$i]{i2c_chip_count}",
+                          "</value></field>\n";
         print "            <field><id>writePageSize</id><value>",
                           "$I2Cdevices[$i]{i2c_write_page_size}",
                           "</value></field>\n";
@@ -6477,6 +6493,9 @@ sub addEepromsCentaur
         print "            <field><id>maxMemorySizeKB</id><value>",
                           "$I2Cdevices[$i]{i2c_max_mem_size}",
                           "</value></field>\n";
+        print "            <field><id>chipCount</id><value>",
+                          "$I2Cdevices[$i]{i2c_chip_count}",
+                          "</value></field>\n";
         print "            <field><id>writePageSize</id><value>",
                           "$I2Cdevices[$i]{i2c_write_page_size}",
                           "</value></field>\n";
@@ -6595,7 +6614,8 @@ sub addI2cBusSpeedArray
         $tmp_offset = ($tmp_engine * 3) + $tmp_port;
 
         # @todo RTC 153696 - Default everything off except TPM until MRW is correct and simics model is complete
-        if ($tmp_engine == 2 && $tmp_port == 0) {
+        # @todo RTC 138226 - Also except SBE SEEPROM until MRW is correct and simics model is complete
+        if (($tmp_engine == 2 || $tmp_engine == 0) && $tmp_port == 0) {
             $tmp_speed  = 400;
         } else {
             $tmp_speed = 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,10 +65,11 @@ struct EepromInfo_t
     uint64_t port; //< I2C port (relative to engine)
     uint64_t busFreq; //< Bus speed in Hz
     uint64_t devAddr; //< I2C device address (relative to port)
-    uint64_t sizeKB; //< Size in KB
+    uint64_t sizeKB; //< Total eeprom size in KB
+    uint64_t chipCount; //< Number of chips making up eeprom device
     uint64_t addrBytes; //< Number of bytes required for addressing
     eeprom_chip_types_t device; //< Identifies role of eeprom
-    TARGETING::Target* assocTarg; //< Target associated with this device    
+    TARGETING::Target* assocTarg; //< Target associated with this device
 };
 
 /**
