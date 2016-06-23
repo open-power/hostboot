@@ -101,6 +101,24 @@ struct poll_parameters
     // The count of polls to make
     uint64_t iv_poll_count;
 
+    ///
+    /// @brief checks if two poll_parameters are equal
+    /// @param[in] i_rhs poll_parameters to compare
+    /// @return bool true if equal
+    ///
+    inline bool operator==( const poll_parameters& i_rhs ) const
+    {
+        //checks equality
+        bool l_equal = iv_initial_delay == i_rhs.iv_initial_delay;
+        l_equal &= iv_initial_sim_delay == i_rhs.iv_initial_sim_delay;
+        l_equal &= iv_delay == i_rhs.iv_delay;
+        l_equal &= iv_sim_delay == i_rhs.iv_sim_delay;
+        l_equal &= iv_poll_count == i_rhs.iv_poll_count;
+
+        //returns the result
+        return l_equal;
+    }
+
     poll_parameters( const uint64_t i_initial_delay = DELAY_10NS,
                      const uint64_t i_initial_sim_delay = 200,
                      const uint64_t i_delay = DELAY_10NS,
