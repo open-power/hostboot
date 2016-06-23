@@ -211,6 +211,84 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
 
             UE_COUNT = MCBIST_MBSEC1Q_UE_COUNT,
             UE_COUNT_LEN = MCBIST_MBSEC1Q_UE_COUNT_LEN,
+
+            CFG_AMAP_DIMM_SELECT = MCBIST_MCBAMR0A0Q_CFG_AMAP_DIMM_SELECT,
+            CFG_AMAP_DIMM_SELECT_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_DIMM_SELECT_LEN,
+            CFG_AMAP_MRANK0 = MCBIST_MCBAMR0A0Q_CFG_AMAP_MRANK0,
+            CFG_AMAP_MRANK0_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_MRANK0_LEN,
+            CFG_AMAP_MRANK1 = MCBIST_MCBAMR0A0Q_CFG_AMAP_MRANK1,
+            CFG_AMAP_MRANK1_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_MRANK1_LEN,
+            CFG_AMAP_SRANK0 = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK0,
+            CFG_AMAP_SRANK0_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK0_LEN,
+            CFG_AMAP_SRANK1 = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK1,
+            CFG_AMAP_SRANK1_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK1_LEN,
+            CFG_AMAP_SRANK2 = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK2,
+            CFG_AMAP_SRANK2_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_SRANK2_LEN,
+            CFG_AMAP_BANK2 = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK2,
+            CFG_AMAP_BANK2_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK2_LEN ,
+            CFG_AMAP_BANK1 = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK1,
+            CFG_AMAP_BANK1_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK1_LEN ,
+            CFG_AMAP_BANK0 = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK0,
+            CFG_AMAP_BANK0_LEN = MCBIST_MCBAMR0A0Q_CFG_AMAP_BANK0_LEN ,
+
+            CFG_AMAP_BANK_GROUP1 = MCBIST_MCBAMR1A0Q_CFG_AMAP_BANK_GROUP1,
+            CFG_AMAP_BANK_GROUP1_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_BANK_GROUP1_LEN ,
+            CFG_AMAP_BANK_GROUP0 = MCBIST_MCBAMR1A0Q_CFG_AMAP_BANK_GROUP0,
+            CFG_AMAP_BANK_GROUP0_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_BANK_GROUP0_LEN ,
+            CFG_AMAP_ROW17 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW17,
+            CFG_AMAP_ROW17_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW17_LEN,
+            CFG_AMAP_ROW16 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW16,
+            CFG_AMAP_ROW16_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW16_LEN,
+            CFG_AMAP_ROW15 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW15,
+            CFG_AMAP_ROW15_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW15_LEN,
+            CFG_AMAP_ROW14 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW14,
+            CFG_AMAP_ROW14_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW14_LEN,
+            CFG_AMAP_ROW13 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW13,
+            CFG_AMAP_ROW13_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW13_LEN,
+            CFG_AMAP_ROW12 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12,
+            CFG_AMAP_ROW12_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12_LEN,
+            CFG_AMAP_ROW11 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW11,
+            CFG_AMAP_ROW11_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW11_LEN,
+            CFG_AMAP_ROW10 = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW10,
+            CFG_AMAP_ROW10_LEN = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW10_LEN,
+
+            CFG_AMAP_ROW9 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW9,
+            CFG_AMAP_ROW9_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW9_LEN,
+            CFG_AMAP_ROW8 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW8,
+            CFG_AMAP_ROW8_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW8_LEN,
+            CFG_AMAP_ROW7 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW7,
+            CFG_AMAP_ROW7_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW7_LEN,
+            CFG_AMAP_ROW6 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW6,
+            CFG_AMAP_ROW6_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW6_LEN,
+            CFG_AMAP_ROW5 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW5,
+            CFG_AMAP_ROW5_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW5_LEN,
+            CFG_AMAP_ROW4 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW4,
+            CFG_AMAP_ROW4_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW4_LEN,
+            CFG_AMAP_ROW3 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW3,
+            CFG_AMAP_ROW3_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW3_LEN,
+            CFG_AMAP_ROW2 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW2,
+            CFG_AMAP_ROW2_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW2_LEN,
+            CFG_AMAP_ROW1 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW1,
+            CFG_AMAP_ROW1_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW1_LEN,
+            CFG_AMAP_ROW0 = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW0,
+            CFG_AMAP_ROW0_LEN = MCBIST_MCBAMR2A0Q_CFG_AMAP_ROW0_LEN,
+
+            CFG_AMAP_COL9 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL9,
+            CFG_AMAP_COL9_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL9_LEN,
+            CFG_AMAP_COL8 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL8,
+            CFG_AMAP_COL8_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL8_LEN,
+            CFG_AMAP_COL7 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL7,
+            CFG_AMAP_COL7_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL7_LEN,
+            CFG_AMAP_COL6 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL6,
+            CFG_AMAP_COL6_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL6_LEN,
+            CFG_AMAP_COL5 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL5,
+            CFG_AMAP_COL5_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL5_LEN,
+            CFG_AMAP_COL4 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL4,
+            CFG_AMAP_COL4_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL4_LEN,
+            CFG_AMAP_COL3 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL3,
+            CFG_AMAP_COL3_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL3_LEN,
+            CFG_AMAP_COL2 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2,
+            CFG_AMAP_COL2_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2_LEN,
         };
 
 };
@@ -239,7 +317,6 @@ class subtest_t
         ///
         /// @brief Complement the data for the first subcommand
         /// @param[in] i_state the desired state (mss::ON or mss::OFF)
-        /// @return void
         ///
         inline void change_compliment_1st_cmd( const mss::states i_state )
         {
@@ -558,6 +635,105 @@ inline subtest_t<T> read_subtest()
 }
 
 ///
+/// @brief Return a read write subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> read_write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0010 - we want subtest type to be a Read Write (RW)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read write read subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> read_write_read_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0100 - we want subtest type to be a Read Write Read (RWR)          7
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ_WRITE_READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a random subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> random_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0110 - we want subtest type to be a Random Seq, a randomly chosen read or write
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::RAND_SEQ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
 /// @brief Return a goto subtest - configured simply
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
@@ -671,6 +847,408 @@ class program
             // All mcbist attentions are host attentions, special attention bit is already clear
             iv_config.setBit<TT::CFG_ENABLE_HOST_ATTN>();
 
+        }
+
+        /// @brief Change the DIMM select in the address mapping
+        /// @param[in] i_bitmap DIMM select bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_dimm_select_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_DIMM_SELECT, TT::CFG_AMAP_DIMM_SELECT_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the MRANK0 address mapping when not in 5D mode
+        /// @param[in] i_bitmap MRANK0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_mrank0_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_MRANK0, TT::CFG_AMAP_MRANK0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the MRANK0 address mapping when in 5D mode
+        /// @param[in] i_bitmap MRANK0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_mrank0_bit_5d( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the MRANK1 address mapping when not in 5D mode
+        /// @param[in] i_bitmap MRANK1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_mrank1_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_MRANK1, TT::CFG_AMAP_MRANK1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the MRANK1 address mapping when in 5D mode
+        /// @param[in] i_bitmap MRANK1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_mrank1_bit_5d( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the MRANK2 address mapping when in 5D mode
+        /// @param[in] i_bitmap MRANK2 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_mrank2_bit_5d( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the SRANK0 address mapping when in 5D mode
+        /// @param[in] i_bitmap SRANK0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_srank0_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK0, TT::CFG_AMAP_SRANK0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the SRANK1 address mapping
+        /// @param[in] i_bitmap SRANK1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_srank1_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK1, TT::CFG_AMAP_SRANK1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the SRANK2 address mapping
+        /// @param[in] i_bitmap SRANK2 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_srank2_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_SRANK2, TT::CFG_AMAP_SRANK2_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the BANK2 address mapping
+        /// @param[in] i_bitmap BANK2 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_bank2_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK2, TT::CFG_AMAP_BANK2_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the BANK1 address mapping
+        /// @param[in] i_bitmap BANK1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_bank1_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK1, TT::CFG_AMAP_BANK1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the BANK0 address mapping
+        /// @param[in] i_bitmap BANK0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_bank0_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK0, TT::CFG_AMAP_BANK0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the BANK_GROUP1 address mapping
+        /// @param[in] i_bitmap BANK_GROUP1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_bank_group1_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_BANK_GROUP1, TT::CFG_AMAP_BANK_GROUP1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the BANK_GROUP0 address mapping
+        /// @param[in] i_bitmap BANK_GROUP0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_bank_group0_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_BANK_GROUP0, TT::CFG_AMAP_BANK_GROUP0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW17 address mapping
+        /// @param[in] i_bitmap ROW17 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row17_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW17, TT::CFG_AMAP_ROW17_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW16 address mapping
+        /// @param[in] i_bitmap ROW16 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row16_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW16, TT::CFG_AMAP_ROW16_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW15 address mapping
+        /// @param[in] i_bitmap ROW15 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row15_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW15, TT::CFG_AMAP_ROW15_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW14 address mapping
+        /// @param[in] i_bitmap ROW14 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row14_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW14, TT::CFG_AMAP_ROW14_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW13 address mapping
+        /// @param[in] i_bitmap ROW13 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_row13_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW13, TT::CFG_AMAP_ROW13_LEN>(i_bitmap);
+            return;
+        }
+
+        ///CFG_AMAP_ROW12     = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12     ,
+        /// @brief Change the ROW12 address mapping
+        /// @param[in] i_bitmap ROW12 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row12_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW12, TT::CFG_AMAP_ROW12_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW11 address mapping
+        /// @param[in] i_bitmap ROW11 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row11_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW11, TT::CFG_AMAP_ROW11_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW10 address mapping
+        /// @param[in] i_bitmap ROW10 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row10_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW10, TT::CFG_AMAP_ROW10_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW9 address mapping
+        /// @param[in] i_bitmap ROW9 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row9_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW9, TT::CFG_AMAP_ROW9_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW8 address mapping
+        /// @param[in] i_bitmap ROW8 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row8_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW8, TT::CFG_AMAP_ROW8_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW7 address mapping
+        /// @param[in] i_bitmap ROW7 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row7_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW7, TT::CFG_AMAP_ROW7_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW6 address mapping
+        /// @param[in] i_bitmap ROW6 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row6_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW6, TT::CFG_AMAP_ROW6_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW5 address mapping
+        /// @param[in] i_bitmap ROW5 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row5_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW5, TT::CFG_AMAP_ROW5_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW4 address mapping
+        /// @param[in] i_bitmap ROW4 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row4_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW4, TT::CFG_AMAP_ROW4_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW3 address mapping
+        /// @param[in] i_bitmap ROW3 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row3_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW3, TT::CFG_AMAP_ROW3_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW2 address mapping
+        /// @param[in] i_bitmap ROW2 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row2_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW2, TT::CFG_AMAP_ROW2_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW1 address mapping
+        /// @param[in] i_bitmap ROW1 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row1_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW1, TT::CFG_AMAP_ROW1_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the ROW0 address mapping
+        /// @param[in] i_bitmap ROW0 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_row0_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map2.insertFromRight<TT::CFG_AMAP_ROW0, TT::CFG_AMAP_ROW0_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL9 address mapping
+        /// @param[in] i_bitmap COL9 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col9_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL9, TT::CFG_AMAP_COL9_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL8 address mapping
+        /// @param[in] i_bitmap COL8 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col8_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL8, TT::CFG_AMAP_COL8_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL7 address mapping
+        /// @param[in] i_bitmap COL7 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col7_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL7, TT::CFG_AMAP_COL7_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL6 address mapping
+        /// @param[in] i_bitmap COL6 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col6_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL6, TT::CFG_AMAP_COL6_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL5 address mapping
+        /// @param[in] i_bitmap COL5 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col5_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL5, TT::CFG_AMAP_COL5_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL4 address mapping
+        /// @param[in] i_bitmap COL4 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col4_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL4, TT::CFG_AMAP_COL4_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL3 address mapping
+        /// @param[in] i_bitmap COL3 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col3_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL3, TT::CFG_AMAP_COL3_LEN>(i_bitmap);
+            return;
+        }
+
+        /// @brief Change the COL2 address mapping
+        /// @param[in] i_bitmap COL2 bit map in the address counter
+        /// @note Assumes data is right-aligned
+        ///
+        inline void change_col2_bit( const uint64_t i_bitmap )
+        {
+            iv_addr_map3.insertFromRight<TT::CFG_AMAP_COL2, TT::CFG_AMAP_COL2_LEN>(i_bitmap);
+            return;
         }
 
         ///
@@ -961,6 +1539,18 @@ class program
         }
 
         ///
+        /// @brief Get the fixed width address config
+        /// @note Assumes data is right aligned
+        /// @return the fixed width address config
+        ///
+        inline uint64_t get_fixed_width()
+        {
+            uint64_t l_fixed_width = 0;
+            iv_addr_gen.extractToRight<TT::FIXED_WIDTH, TT::FIXED_WIDTH_LEN>(l_fixed_width);
+            return l_fixed_width;
+        }
+
+        ///
         /// @brief Enable or disable address counting mode for address config 0
         /// @param[in] i_mode mss::ON to enable
         /// @note Assumes data is right-aligned
@@ -1186,10 +1776,15 @@ class program
 
         // Address Map Registers
         // We might want to refactor to a vector ... BRS
-        uint64_t                    iv_addr_map0;
-        uint64_t                    iv_addr_map1;
-        uint64_t                    iv_addr_map2;
-        uint64_t                    iv_addr_map3;
+        // uint64_t                 iv_addr_map0;
+        // uint64_t                 iv_addr_map1;
+        // uint64_t                 iv_addr_map2;
+        // uint64_t                 iv_addr_map3;
+        //Perhaps this isn't the right approach, we can discuss and change if needed, leaving the above comments for now
+        fapi2::buffer<uint64_t>     iv_addr_map0;
+        fapi2::buffer<uint64_t>     iv_addr_map1;
+        fapi2::buffer<uint64_t>     iv_addr_map2;
+        fapi2::buffer<uint64_t>     iv_addr_map3;
 
         // Config register
         fapi2::buffer<uint64_t>     iv_config;
@@ -1490,10 +2085,10 @@ fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::p
     FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
 
     FAPI_INF("load MCBIST address map register 2: 0x%016lx", i_program.iv_addr_map2);
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map2) );
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR2A0Q_REG, i_program.iv_addr_map2) );
 
     FAPI_INF("load MCBIST address map register 3: 0x%016lx", i_program.iv_addr_map3);
-    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map3) );
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR3A0Q_REG, i_program.iv_addr_map3) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1625,7 +2220,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 }
 
 ///
-/// @brief Load MCBIST Threshold Register
+/// @brief Load MCBIST Thre load_addr_gen
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
