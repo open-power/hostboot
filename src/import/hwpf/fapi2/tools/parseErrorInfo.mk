@@ -36,11 +36,12 @@ TARGETS += hwp_error_info.H
 TARGETS += hwp_ffdc_classes.H
 TARGETS += collect_reg_ffdc.H
 TARGETS += set_sbe_error.H
+TARGETS += collect_reg_ffdc_regs.C
 
 CLEAN_TARGETS += $(GENPATH)/hwp_return_codes.H
 CLEAN_TARGETS += $(GENPATH)/hwp_error_info.H
 CLEAN_TARGETS += $(GENPATH)/hwp_ffdc_classes.H
-CLEAN_TARGETS += $(GENPATH)/collect_reg_ffdc.H
+CLEAN_TARGETS += $(GENPATH)/collect_reg_ffdc_regs.C
 CLEAN_TARGETS += $(GENPATH)/set_sbe_error.H
 
 define parseErrorInfo_RUN
