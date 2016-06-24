@@ -1043,6 +1043,85 @@
     <attribute><id>PROC_HTM_BAR_SIZES</id></attribute>
 <!-- End TODO: RTC 156244 -->
 
+    <!-- Processor characteristics for HDAT -->
+    <attribute>
+        <id>DATA_CACHE_SIZE</id>
+        <default>32</default><!-- 32KB -->
+    </attribute>
+    <attribute>
+        <id>L3_CACHE_SIZE</id>
+        <default>10240</default><!-- 10MB -->
+    </attribute>
+    <attribute>
+        <id>ICACHE_ASSOC_SETS</id>
+        <default>8</default><!-- 8-way associativity -->
+    </attribute>
+    <attribute>
+        <id>TLB_DATA_ENTRIES</id>
+        <default>1024</default>
+    </attribute>
+    <attribute>
+        <id>TLB_INSTR_ENTRIES</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>TLB_DATA_ASSOC_SETS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>TLB_INSTR_ASSOC_SETS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>TLB_RESERVE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>DATA_CACHE_LINE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>L3_CACHE_LINE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>DCACHE_LINE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>DCACHE_ASSOC_SETS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>ICACHE_BLOCK_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>ICACHE_SIZE</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>ICACHE_LINE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>CPU_ATTR</id>
+        <default>0x0000001D</default>
+    </attribute>
+    <attribute>
+        <id>L2_CACHE_LINE_SIZE</id>
+        <default>128</default>
+    </attribute>
+    <attribute>
+        <id>L2_CACHE_SIZE</id>
+        <default>512</default>
+    </attribute>
+    <attribute>
+        <id>L2_CACHE_ASSOC_SETS</id>
+        <default>8</default>
+    </attribute>
+    <!-- End processor characteristics for HDAT -->
+
 </targetType>
 
 <!-- chip-processor-nimbus -->
