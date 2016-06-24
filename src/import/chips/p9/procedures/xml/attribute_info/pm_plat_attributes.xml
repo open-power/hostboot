@@ -223,12 +223,11 @@
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
     <writeable/>
   </attribute>
     <!-- ********************************************************************* -->
@@ -241,12 +240,12 @@
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -258,12 +257,11 @@
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->

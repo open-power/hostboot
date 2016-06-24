@@ -36,15 +36,28 @@
 extern "C"
 {
 
+/// @typedef VoltageConfigActions_t
+/// enum of the two actions this hwp can perform
+/// it can either compute default voltage settings
+/// otherwise it can apply voltage setting to the system
+    typedef enum
+    {
+        COMPUTE_VOLTAGE_SETTINGS,
+        APPLY_VOLTAGE_SETTINGS
+    } VoltageConfigActions_t;
+
 /// @typedef p9_setup_evid_FP_t
 /// function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode (*p9_setup_evid_FP_t) (
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const VoltageConfigActions_t);
 
 /// @brief Read attributes containing part's boot voltages(VDD,VCS and VDN)
 /// and set these voltage using the AVSBUS interface (VDD, VDN and VCS).
 ///
 /// @param [in] i_target TARGET_TYPE_PROC_CHIP
+/// @param [in] i_action Describes whether you wish to COMPUTE voltage settings
+///                      during the step or if you would like to APPLY them.
 /// @attr
 /// @attritem  ATTR_VCS_BOOT_VOLTAGE  - 1mV grandularity setting for VCS rail
 /// @attritem  ATTR_VDD_BOOT_VOLTAGE  - 1mV grandularity setting for VDD rail
@@ -58,7 +71,8 @@ extern "C"
 ///
 /// @retval FAPI_RC_SUCCESS
     fapi2::ReturnCode
-    p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const VoltageConfigActions_t i_action);
 
 
 } // extern C

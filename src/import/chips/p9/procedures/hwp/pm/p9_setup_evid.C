@@ -174,7 +174,8 @@ struct avsbus_attrs_t
 //@return   Return code void
 fapi2::ReturnCode
 avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                  avsbus_attrs_t* attrs)
+                  avsbus_attrs_t* attrs,
+                  const VoltageConfigActions_t i_action)
 {
 
     attrs->vdd_bus_num = DEFAULT_VDD_BUS_NUMBER;
@@ -203,60 +204,71 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target,
                            attrs->vdn_voltage_mv));
 
-    // If attribute values are zero, use the default values (hardcoded)
 
-    // check VDD VID
-    if (attrs->vdd_voltage_mv == 0)
+    //We only wish to compute voltage setting defaults if the action
+    //inputed to the HWP tells us to
+    if(i_action == COMPUTE_VOLTAGE_SETTINGS)
     {
-        // Default voltage if mailbox value is not set
+        // If attribute values are zero, use the default values (hardcoded)
+        // check VDD VID
+        if (attrs->vdd_voltage_mv == 0)
+        {
+            // Default voltage if mailbox value is not set
 
-        // @todo L3 - Eventually, this should replaced with an error point
-        // to indicate that the mailbox -> attributes haven't been setup
+            // @todo L3 - Eventually, this should replaced with an error point
+            // to indicate that the mailbox -> attributes haven't been setup
 
-        attrs->vdd_voltage_mv  = DEFAULT_BOOT_VDD_VOLTAGE_MV;
-        FAPI_INF("VDD boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                 attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-    }
-    else
-    {
-        FAPI_INF("VDD boot voltage = %d mV (%x)",
-                 attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-    }
+            attrs->vdd_voltage_mv  = DEFAULT_BOOT_VDD_VOLTAGE_MV;
+            FAPI_INF("VDD boot voltage not set in attributes. Setting to default of %d mV (%x)",
+                     attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target,
+                                   attrs->vdd_voltage_mv));
+        }
+        else
+        {
+            FAPI_INF("VDD boot voltage = %d mV (%x)",
+                     attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
+        }
 
-    // check VCS VID
-    if (attrs->vcs_voltage_mv == 0)
-    {
-        // Default voltage if mailbox value is not set
+        // check VCS VID
+        if (attrs->vcs_voltage_mv == 0)
+        {
+            // Default voltage if mailbox value is not set
 
-        // @todo L3 - Eventually, this should replaced with an error point
-        // to indicate that the mailbox -> attributes haven't been setup
+            // @todo L3 - Eventually, this should replaced with an error point
+            // to indicate that the mailbox -> attributes haven't been setup
 
-        attrs->vcs_voltage_mv  = DEFAULT_BOOT_VCS_VOLTAGE_MV;
-        FAPI_INF("VCS boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                 attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
-    }
-    else
-    {
-        FAPI_INF("VCS boot voltage = %d mV (%x)",
-                 attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
-    }
+            attrs->vcs_voltage_mv  = DEFAULT_BOOT_VCS_VOLTAGE_MV;
+            FAPI_INF("VCS boot voltage not set in attributes. Setting to default of %d mV (%x)",
+                     attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target,
+                                   attrs->vcs_voltage_mv));
+        }
+        else
+        {
+            FAPI_INF("VCS boot voltage = %d mV (%x)",
+                     attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
+        }
 
-    // check VDN VID
-    if (attrs->vdn_voltage_mv == 0)
-    {
-        // Default voltage if mailbox value is not set
+        // check VDN VID
+        if (attrs->vdn_voltage_mv == 0)
+        {
+            // Default voltage if mailbox value is not set
 
-        // @todo -L3  Eventually, this should replaced with an error point
-        // to indicate that the mailbox -> attributes haven't been setup
+            // @todo -L3  Eventually, this should replaced with an error point
+            // to indicate that the mailbox -> attributes haven't been setup
 
-        attrs->vdn_voltage_mv  = DEFAULT_BOOT_VDN_VOLTAGE_MV;
-        FAPI_INF("VDN boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                 attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
-    }
-    else
-    {
-        FAPI_INF("VDN boot voltage = %d mV (%x)",
-                 attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
+            attrs->vdn_voltage_mv  = DEFAULT_BOOT_VDN_VOLTAGE_MV;
+            FAPI_INF("VDN boot voltage not set in attributes. Setting to default of %d mV (%x)",
+                     attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target,
+                                   attrs->vdn_voltage_mv));
+        }
+        else
+        {
+            FAPI_INF("VDN boot voltage = %d mV (%x)",
+                     attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
+        }
     }
 
 fapi_try_exit:
@@ -265,58 +277,62 @@ fapi_try_exit:
 
 
 fapi2::ReturnCode
-p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const VoltageConfigActions_t i_action)
 {
 
     // AVSBus configuration variables
     avsbus_attrs_t attrs;
 
     // Read attribute -
-    FAPI_TRY(avsInitAttributes(i_target, &attrs));
+    FAPI_TRY(avsInitAttributes(i_target, &attrs, i_action));
 
-    // Initialize the buses
-    FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                      p9avslib::AVSBUSVDD, BRIDGE_NUMBER),
-             "Initializing avsBus VDD, bridge %d", BRIDGE_NUMBER);
-    FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                      p9avslib::AVSBUSVDN, BRIDGE_NUMBER),
-             "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
+    //We only wish to apply settings if i_action says to
+    if(i_action == APPLY_VOLTAGE_SETTINGS)
+    {
+        // Initialize the buses
+        FAPI_TRY(avsInitExtVoltageControl(i_target,
+                                          p9avslib::AVSBUSVDD, BRIDGE_NUMBER),
+                 "Initializing avsBus VDD, bridge %d", BRIDGE_NUMBER);
+        FAPI_TRY(avsInitExtVoltageControl(i_target,
+                                          p9avslib::AVSBUSVDN, BRIDGE_NUMBER),
+                 "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
-    // Should not be needed, as same AVSBus and different rails
-    // should share same initialization information
-    //FAPI_TRY(avsInitExtVoltageControl(i_target,
-    //         p9avslib::AVSBUSVCS, BRIDGE_NUMBER),
-    //         "Initializing avsBus VCS, bridge %d", BRIDGE_NUMBER);
+        // Should not be needed, as same AVSBus and different rails
+        // should share same initialization information
+        //FAPI_TRY(avsInitExtVoltageControl(i_target,
+        //         p9avslib::AVSBUSVCS, BRIDGE_NUMBER),
+        //         "Initializing avsBus VCS, bridge %d", BRIDGE_NUMBER);
 
-    // Set Boot VDD Voltage
-    FAPI_TRY(avsVoltageWrite(i_target,
-                             attrs.vdd_bus_num,
-                             BRIDGE_NUMBER,
-                             attrs.vdd_rail_select,
-                             (uint32_t)attrs.vdd_voltage_mv),
-             "Setting VDD voltage via AVSBus %d, Bridge %d",
-             attrs.vdd_bus_num,
-             BRIDGE_NUMBER);
+        // Set Boot VDD Voltage
+        FAPI_TRY(avsVoltageWrite(i_target,
+                                 attrs.vdd_bus_num,
+                                 BRIDGE_NUMBER,
+                                 attrs.vdd_rail_select,
+                                 (uint32_t)attrs.vdd_voltage_mv),
+                 "Setting VDD voltage via AVSBus %d, Bridge %d",
+                 attrs.vdd_bus_num,
+                 BRIDGE_NUMBER);
 
-    // Set Boot VDN Voltage
-    FAPI_TRY(avsVoltageWrite(i_target,
-                             attrs.vdn_bus_num,
-                             BRIDGE_NUMBER,
-                             attrs.vdn_rail_select,
-                             (uint32_t)attrs.vdn_voltage_mv),
-             "Setting VDN voltage via AVSBus %d, Bridge %d",
-             attrs.vdn_bus_num,
-             BRIDGE_NUMBER);
+        // Set Boot VDN Voltage
+        FAPI_TRY(avsVoltageWrite(i_target,
+                                 attrs.vdn_bus_num,
+                                 BRIDGE_NUMBER,
+                                 attrs.vdn_rail_select,
+                                 (uint32_t)attrs.vdn_voltage_mv),
+                 "Setting VDN voltage via AVSBus %d, Bridge %d",
+                 attrs.vdn_bus_num,
+                 BRIDGE_NUMBER);
 
-    // Set Boot VCS Voltage
-    FAPI_TRY(avsVoltageWrite(i_target,
-                             attrs.vcs_bus_num,
-                             BRIDGE_NUMBER,
-                             attrs.vcs_rail_select,
-                             (uint32_t)attrs.vcs_voltage_mv),
-             "Setting VCS voltage via AVSBus %d, Bridge %d",
-             attrs.vcs_bus_num,
-             BRIDGE_NUMBER);
+        // Set Boot VCS Voltage
+        FAPI_TRY(avsVoltageWrite(i_target,
+                                 attrs.vcs_bus_num,
+                                 BRIDGE_NUMBER,
+                                 attrs.vcs_rail_select,
+                                 (uint32_t)attrs.vcs_voltage_mv),
+                 "Setting VCS voltage via AVSBus %d, Bridge %d",
+                 attrs.vcs_bus_num,
+                 BRIDGE_NUMBER);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
