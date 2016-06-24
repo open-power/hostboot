@@ -1046,7 +1046,7 @@ XIP_STATIC int
 xipHashCollision(P9XipHashedToc* i_fixedToc, size_t i_entries)
 {
     int rc;
-    int i, j;
+    size_t i, j;
 
     rc = 0;
 
@@ -1057,7 +1057,7 @@ xipHashCollision(P9XipHashedToc* i_fixedToc, size_t i_entries)
             if (i_fixedToc[i].iv_hash == i_fixedToc[j].iv_hash)
             {
                 rc = TRACE_ERRORX(P9_XIP_HASH_COLLISION,
-                                  "Hash collision at index %d\n",
+                                  "Hash collision at index %zd\n",
                                   i);
                 break;
             }
