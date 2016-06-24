@@ -126,8 +126,8 @@ cp_hbfiles: .SPECTARG
 	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
 	dd if=${HBRT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
 	cat ${HBRT_IMAGE} >> ${TEMP_IMAGE}
-	# HBRT partition size w/o ECC = 2MB (2048K)
-	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=2048K conv=sync
+	# HBRT partition size w/o ECC = 4MB (4096K)
+	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=4096K conv=sync
 	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
 	# Add version header w/ HBI sha hash
 	echo -en VERSION\\0 > ${EXT_SHA_IMAGE}
@@ -187,7 +187,7 @@ cp_hbfiles: .SPECTARG
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${CVPD_ECC_IMAGE} --p8
 	# PAYLOAD partition
-	dd if=/dev/zero bs=20480K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+	dd if=/dev/zero bs=19456K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${PAYLOAD_ECC_IMAGE} --p8
 	rm ${TEMP_IMAGE}
         # Remove offset from start of Bootloader image for HBBL partition
