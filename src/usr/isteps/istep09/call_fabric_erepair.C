@@ -63,9 +63,8 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <errl/errlmanager.H>
 
-//@TODO RTC:134079 Re-enable for l2 story
 // HWP procedure
-// #include <p9_io_xbus_restore_erepair.H>
+#include <p9_io_xbus_restore_erepair.H>
 
 namespace   ISTEP_09
 {
@@ -191,7 +190,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
             l_endp1_rxFaillanes.clear();
             l_endp2_txFaillanes.clear();
             l_endp2_rxFaillanes.clear();
-/* TODO-RTC:134079 - L2 HWP enablement
+/* TODO-RTC:156849 - Enable this section
             l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
                                           l_endp1_txFaillanes,
                                           l_endp1_rxFaillanes,
@@ -334,36 +333,30 @@ uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
 
     // clock group is either 0 or 1
     // need to train both groups and allow for them to differ
-    uint8_t l_this_group = 0;
-    uint8_t l_connected_group = 0;
     uint8_t l_group_loop = 0;
-    for (l_group_loop = 0; l_group_loop < 4; l_group_loop++)
+    for (l_group_loop = 0; l_group_loop < 2; l_group_loop++)
     {
-        l_this_group = l_group_loop / 2;      // 0, 0, 1, 1
-        l_connected_group = l_group_loop % 2; // 0, 1, 1, 0
 
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "Running p9_io_xbus_restore_erepair HWP on "
-                 "this %C-BUS target %.8X (groups %d and %d)",
+                 "this %C-BUS target %.8X (group %d)",
                  (l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT) ? 'X':'O',
                  TARGETING::get_huid(i_target),
-                 l_this_group, l_connected_group );
+                 l_group_loop );
 
         /*
          * A HWP that runs Restore eRepair.
          * This procedure should update the
          * bad lane vector and power down the bad lanes.
          */
-//@TODO RTC:134079 Re-enable for l2 story
-//         FAPI_INVOKE_HWP(l_errl,
-//                         p9_io_xbus_restore_erepair,
-//                         i_target,
-//                         l_this_group,
-//                         i_rx_bad_lanes,
-//                         i_target,
-//                         l_connected_group,
-//                         i_tx_bad_lanes);
+// TODO-RTC:156849 - Enable this section
+//        FAPI_INVOKE_HWP(l_errl,
+//                        p9_io_xbus_restore_erepair,
+//                        i_target,
+//                        l_group_loop,
+//                        i_rx_bad_lanes,
+//                        i_tx_bad_lanes);
 
         if (l_errl)
         {

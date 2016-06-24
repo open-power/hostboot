@@ -48,11 +48,9 @@ VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 
 include ${ROOTPATH}/procedure.rules.mk
 
-#@TODO RTC:134079 Re-enable for l2 story
-# -- waiting for ekb fix for p9_io_xbus_restore_erepair.mk
 # fabric_erepair
-#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
-#include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
 
 # fabric_io_dccal
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
