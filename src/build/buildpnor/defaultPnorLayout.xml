@@ -165,19 +165,19 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (3.375MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
         <eyeCatch>HBRT</eyeCatch>
         <physicalOffset>0xA35000</physicalOffset>
-        <physicalRegionSize>0x360000</physicalRegionSize>
+        <physicalRegionSize>0x480000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
-        <description>Payload (22.5MB)</description>
+        <description>Payload (21.375MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0xD95000</physicalOffset>
-        <physicalRegionSize>0x1680000</physicalRegionSize>
+        <physicalOffset>0xEB5000</physicalOffset>
+        <physicalRegionSize>0x1560000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
