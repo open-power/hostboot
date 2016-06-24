@@ -32,12 +32,14 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/include/registers
 
 OBJS += call_host_slave_sbe_config.o
 OBJS += call_host_setup_sbe.o
@@ -57,10 +59,13 @@ OBJS += call_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
 OBJS += call_proc_chiplet_enable_ridi.o
 OBJS += call_host_rng_bist.o
+OBJS += call_host_set_voltages.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
 VPATH += ${PROCEDURES_PATH}/hwp/sbe/
+VPATH += ${PROCEDURES_PATH}/hwp/pm/
+VPATH += ${PROCEDURES_PATH}/hwp/lib
 
 
 include ${ROOTPATH}/procedure.rules.mk
@@ -131,5 +136,12 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 
 # host_rng_bist : Trigger Built In Self Test
 # HWP not ready - p9_trigger_rng_bist.mk
+
+# p9_setup_evid : apply voltage settings
+include ${PROCEDURES_PATH}/hwp/pm/p9_setup_evid.mk
+include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
+
+MODULE=istep08
+
 
 include ${ROOTPATH}/config.mk

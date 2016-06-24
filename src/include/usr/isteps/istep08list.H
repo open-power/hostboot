@@ -270,6 +270,17 @@ void*    call_proc_chiplet_enable_ridi( void    *io_pArgs );
  */
 void*    call_host_rng_bist( void    *io_pArgs );
 
+/**
+ *  @brief host_set_voltages
+ *
+ *  param[in,out]   -  pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_host_set_voltages( void   *io_pArgs );
+
+
 };   // end namespace
 
 
@@ -313,9 +324,9 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,07,"host_set_voltages"),       // @TODO-RTC:144620
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(08,07,"host_set_voltages"),
+                ISTEP_08::call_host_set_voltages,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(08,08,"host_p9_fbc_eff_config"),
