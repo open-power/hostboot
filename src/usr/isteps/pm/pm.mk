@@ -29,6 +29,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
@@ -52,9 +54,29 @@ OBJS += pm_common.o
 VPATH += ${HWP_PATH} ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
-include $(HWP_PATH)/p9_hcode_image_build.mk
-include $(HWP_PATH)/p9_pm_pba_bar_config.mk
-include $(HWP_PATH)/p9_pm_init.mk
+include ${HWP_PATH}/p9_pm_pba_bar_config.mk
+include ${HWP_PATH}/p9_pm_pba_init.mk
+include ${HWP_PATH}/p9_pm_pba_firinit.mk
+include ${HWP_PATH}/p9_pm_utils.mk
+include ${HWP_PATH}/p9_pm_ocb_init.mk
+include ${HWP_PATH}/p9_pm_ocb_indir_setup_linear.mk
+include ${HWP_PATH}/p9_pm_ocb_indir_access.mk
+include ${HWP_PATH}/p9_pm_init.mk
+include ${HWP_PATH}/p9_pm_occ_control.mk
+include ${HWP_PATH}/p9_pm_occ_firinit.mk
+include ${HWP_PATH}/p9_pm_corequad_init.mk
+include ${HWP_PATH}/p9_pm_firinit.mk
+include ${HWP_PATH}/p9_pm_pss_init.mk
+include ${HWP_PATH}/p9_pm_cme_firinit.mk
+include ${HWP_PATH}/p9_hcode_image_build.mk
+include ${HWP_PATH}/p9_pm_stop_gpe_init.mk
+include ${HWP_PATH}/p9_pm_pfet_init.mk
+include ${HWP_PATH}/p9_pm_reset.mk
+include ${HWP_PATH}/p9_cpu_special_wakeup.mk
+include ${HWP_PATH}/p9_pm_occ_sram_init.mk
+include ${HWP_PATH}/p9_pm_occ_gpe_init.mk
+include ${HWP_PATH}/p9_pm_ppm_firinit.mk
+include ${HWP_PATH}/p9_pm_ocb_indir_setup_circular.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
