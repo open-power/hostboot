@@ -139,41 +139,56 @@ enum P9_HCD_DELAY_CONSTANTS
     CLK_PERIOD_CORE2REF   = 40
 };
 
-// FAPI2 Target Constants
-enum P9_HCD_TARGET_CONSTANTS
+// Chip Position Constants
+enum P9_HCD_CHIP_POS_CONSTANTS
 {
     PERV_TO_EQ_POS_OFFSET   = 0x10,
     PERV_TO_CORE_POS_OFFSET = 0x20
 };
 
-// Multicast Group Constants
-enum P9_HCD_MULTICAST_GROUP_CONSTANTS
+// EX Constants
+enum P9_HCD_EX_CTRL_CONSTANTS
 {
-    MULTICAST_GROUP_4       = 4,  // QUAD
-    MULTICAST_GROUP_5       = 5,  // EX0
-    MULTICAST_GROUP_6       = 6,  // EX1
+    ODD_EX                  = 1,
+    EVEN_EX                 = 2,
+    BOTH_EX                 = 3,
     QCSR_MASK_EX0           = (BIT64(0) | BIT64(2) | BIT64(4) |
                                BIT64(6) | BIT64(8) | BIT64(10)),
     QCSR_MASK_EX1           = (BIT64(1) | BIT64(3) | BIT64(5) |
                                BIT64(7) | BIT64(9) | BIT64(11))
 };
 
+// Multicast Constants
+enum P9_HCD_MULTICAST_CONSTANTS
+{
+    MULTICAST_GROUP_4       = 4, // QUAD
+    MULTICAST_GROUP_5       = 5, // EX0
+    MULTICAST_GROUP_6       = 6  // EX1
+};
+
 // Clock Control Constants
-enum P9_HCD_COMMON_CLK_CTRL_CONSTANTS
+enum P9_HCD_CLK_CTRL_CONSTANTS
 {
     CLK_STOP_CMD                             = BIT64(0),
     CLK_START_CMD                            = BIT64(1),
     CLK_REGION_ANEP                          = BIT64(10),
     CLK_REGION_DPLL                          = BIT64(14),
-    CLK_REGION_ALL_BUT_EX_ANEP_DPLL          = BITS64(4, 2) | BIT64(11),
+    CLK_REGION_REFR                          = BITS64(12, 2),
+    CLK_REGION_L3_REFR                       = BITS64(6, 2) | BITS64(12, 2),
     CLK_REGION_EX0_L2_L3_REFR                = BIT64(6) | BIT64(8) | BIT64(12),
     CLK_REGION_EX1_L2_L3_REFR                = BIT64(7) | BIT64(9) | BIT64(13),
+    CLK_REGION_ALL_BUT_L3_REFR               = BITS64(4, 2) | BITS64(8, 4) | BIT64(14),
+    CLK_REGION_ALL_BUT_L3_REFR_DPLL          = BITS64(4, 2) | BITS64(8, 4),
+    CLK_REGION_ALL_BUT_EX                    = BITS64(4, 2) | BITS64(10, 2) | BIT64(14),
+    CLK_REGION_ALL_BUT_EX_DPLL               = BITS64(4, 2) | BITS64(10, 2),
+    CLK_REGION_ALL_BUT_EX_ANEP_DPLL          = BITS64(4, 2) | BIT64(11),
     CLK_REGION_ALL_BUT_PLL                   = BITS64(4, 10),
+    CLK_REGION_ALL                           = BITS64(4, 11),
     CLK_THOLD_ALL                            = BITS64(48, 3)
 };
 
 // Scan Flush Constants
-enum P9_HCD_COMMON_SCAN0_CONSTANTS
+enum P9_HCD_SCAN0_CONSTANTS
 {
     SCAN0_REGION_ALL                         = 0x7FF,
     SCAN0_REGION_ALL_BUT_PLL                 = 0x7FE,
