@@ -182,6 +182,23 @@ void test_fapi2HwAccess()
                            // a false negative on the next case
         }
 
+        numTests++;
+        uint8_t failed = 0;
+        FAPI_INVOKE_HWP(l_errl,
+                        p9_opmodetest_ignorehwerr,
+                        fapi2_procTarget,
+                        failed );
+
+        if(l_errl || failed)
+        {
+            TS_FAIL("p9_opmodetest_ignorehwerr returned an error!!");
+            numFails++;
+            if(l_errl)
+            {
+                errlCommit(l_errl,FAPI2_COMP_ID);
+            }
+        }
+
 
 #if 0 // TODO-RTC:151428 - need simics support for these to pass
         numTests++;

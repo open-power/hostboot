@@ -88,13 +88,24 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
     l_err = deviceRead(l_target,
                        &o_data(),
                        l_size,
-                       DEVICE_SCOM_ADDRESS(i_address));
+                       DEVICE_SCOM_ADDRESS(i_address, opMode));
+
+    //Todo RTC: 156704  Possible room for improvement detecting opMode
+    //                  err skips at lower level
     if (l_err)
     {
-        FAPI_ERR("platGetScom: deviceRead returns error!");
-        FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        if(opMode & static_cast<uint8_t>(fapi2::IGNORE_HW_ERROR))
+        {
+            delete l_err;
+            l_err = nullptr;
+        }
+        else
+        {
+            FAPI_ERR("platGetScom: deviceRead returns error!");
+            FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
+                     l_targName, i_address);
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        }
     }
 
     if (l_traceit)
@@ -137,13 +148,21 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
     l_err = deviceWrite(l_target,
                         &l_data,
                         l_size,
-                        DEVICE_SCOM_ADDRESS(i_address));
+                        DEVICE_SCOM_ADDRESS(i_address, opMode));
     if (l_err)
     {
-        FAPI_ERR("platPutScom: deviceRead returns error!");
-        FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
-                  l_targName, i_address);
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        if(opMode & fapi2::IGNORE_HW_ERROR)
+        {
+            delete l_err;
+            l_err = nullptr;
+        }
+        else
+        {
+            FAPI_ERR("platPutScom: deviceRead returns error!");
+            FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
+                     l_targName, i_address);
+                     l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        }
     }
 
     if (l_traceit)
@@ -188,11 +207,17 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
         l_err = deviceRead(l_target,
                            &l_data,
                            l_size,
-                           DEVICE_SCOM_ADDRESS(i_address));
-        if (l_err)
+                           DEVICE_SCOM_ADDRESS(i_address,opMode));
+        if (l_err && !(opMode & fapi2::IGNORE_HW_ERROR))
         {
             FAPI_ERR("platPutScomUnderMask: deviceRead returns error!");
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+            break;
+        }
+        else if(l_err)
+        {
+            delete l_err;
+            l_err = nullptr;
             break;
         }
 
@@ -210,12 +235,19 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
         l_err = deviceWrite(l_target,
                             &l_data,
                             l_size,
-                            DEVICE_SCOM_ADDRESS(i_address));
-        if (l_err)
+                            DEVICE_SCOM_ADDRESS(i_address,opMode));
+        if (l_err && !(opMode & fapi2::IGNORE_HW_ERROR))
         {
             FAPI_ERR("platPutScomUnderMask: deviceWrite returns error!");
             l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
+        }
+        else if (l_err)
+        {
+            delete l_err;
+            l_err = nullptr;
+            break;
+
         }
 
     } while (0);
@@ -881,7 +913,10 @@ uint64_t platGetDDScanMode(const uint32_t i_ringMode)
 
 void platSetOpMode(const OpModes i_mode)
 {
-    opMode = i_mode;
+    FAPI_INF("Setting fapi2::opMode to be 0x%x", i_mode);
+    opMode = static_cast<OpModes>(
+                static_cast<uint8_t>(opMode) | static_cast<uint8_t>(i_mode)
+                );
     return;
 }
 

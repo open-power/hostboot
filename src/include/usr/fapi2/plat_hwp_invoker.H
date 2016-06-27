@@ -42,6 +42,7 @@
 #define PLATHWPINVOKER_H_
 
 #include <return_code.H>
+#include <hw_access_def.H>
 #include <plat_utils.H>
 
 /**
