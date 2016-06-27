@@ -197,7 +197,9 @@ ReturnCode getTargetingAttr(
 
         if (!l_success)
         {
-            FAPI_ERR("getTargetingAttr: Error from _tryGetAttr");
+            FAPI_ERR("getTargetingAttr: Error from getTargetingAttrHelper "
+                     "for target 0x%.8X and attribute 0x%x",
+                     TARGETING::get_huid(l_pTargTarget), i_targAttrId);
         }
     }
     return l_rc;
@@ -247,7 +249,9 @@ ReturnCode setTargetingAttr(
 
         if (!l_success)
         {
-            FAPI_ERR("setTargetingAttr: Error from _trySetAttr");
+            FAPI_ERR("setTargetingAttr: Error from setTargetingAttrHelper "
+                     "for target 0x%.8X and attribute 0x%x",
+                     TARGETING::get_huid(l_pTargTarget), i_targAttrId);
         }
     }
     return l_rc;
