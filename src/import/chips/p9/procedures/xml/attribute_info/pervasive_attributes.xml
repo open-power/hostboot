@@ -35,7 +35,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Clock Mux#0 settings</description>
   <valueType>uint8</valueType>
-  <writeable/> 
+  <platInit/> 
 </attribute>
 
 <attribute>
@@ -349,8 +349,9 @@
   <id>ATTR_ECID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
-Created from running the mss_get_cen_ecid.C
-Firmware shares some code with the processor, so the attribute is named so they can point at a target and have common function.</description>
+  Created from running the mss_get_cen_ecid.C
+  Firmware shares some code with the processor, 
+  so the attribute is named so they can point at a target and have common function.</description>
   <valueType>uint64</valueType>
   <writeable/>
   <odmVisable/>
@@ -652,6 +653,30 @@ Firmware shares some code with the processor, so the attribute is named so they 
     <id>ATTR_N3_FLUSH_MODE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>DD1 update : Flush mode not for N3</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CP_FILTER_BYPASS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>To skip the locking sequence and check for lock of CP PLL</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SS_FILTER_BYPASS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>To skip the locking sequence and check for lock of SS PLL</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_IO_FILTER_BYPASS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>To skip the locking sequence and check for lock of IO PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>

@@ -229,6 +229,15 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
     </attribute>
+    <attribute>
+        <id>ATTR_SS_FILTER_BYPASS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_CP_FILTER_BYPASS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_IO_FILTER_BYPASS</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
