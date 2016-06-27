@@ -35,15 +35,21 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_FILTER_PLL_LOCK_ERR</rc>
-    <description>Filter PLL not locked</description>
-    <ffdc>FILTER_PLL_READ</ffdc>
+    <rc>RC_CP_FILTER_PLL_LOCK_ERR</rc>
+    <description>CP Filter PLL not locked</description>
+    <ffdc>CP_FILTER_PLL_READ</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_NEST_PLL_ERR</rc>
     <description>Nest PLL not locked</description>
     <ffdc>NEST_PLL_READ</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_IO_FILTER_PLL_LOCK_ERR</rc>
+    <description>IO Filter PLL not locked</description>
+    <ffdc>IO_FILTER_PLL_READ</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
