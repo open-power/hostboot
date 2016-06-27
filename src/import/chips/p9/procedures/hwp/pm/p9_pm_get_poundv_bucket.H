@@ -34,11 +34,12 @@
 namespace fapi2
 {
 
-//Represents the data contained within a single #V (version=2) bucket
+//Represents the data contained within a single #V (version=3) bucket
 //Note: This structure should not be assumed to be binary identical
 //to the contents of the VPD itself.
 //Pack the struct so that we can get a consistent size with no
 //extra padding
+//Version 2 does not use the last 10 bytes of data.
 typedef struct __attribute__((__packed__))  voltageBucketData
 {
     // bucket Id
@@ -72,7 +73,12 @@ typedef struct __attribute__((__packed__))  voltageBucketData
     uint16_t VdnPbVltg;
     uint16_t IdnPbCurr;
     uint16_t VcsPbVltg;
-    uint16_t IcsPbCurr;
+    uint16_t IcsPbCurr; // End of version 2
+    //Sort Power
+    uint16_t SortPowerNorm;
+    uint16_t SortPowerTurbo;
+    //Extra
+    uint8_t reserved[6];
 } voltageBucketData_t;
 
 }

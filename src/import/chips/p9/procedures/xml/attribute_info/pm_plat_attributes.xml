@@ -971,7 +971,7 @@
       </description>
       <valueType>uint8</valueType>
       <initToZero/>
-      <array>51</array>
+      <array>61</array>
       <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

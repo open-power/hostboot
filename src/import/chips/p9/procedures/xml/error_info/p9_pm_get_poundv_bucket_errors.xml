@@ -35,4 +35,42 @@
     <ffdc>POUNDV_VERSION</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_INVALID_MATCHING_FREQ_NUMBER</rc>
+    <description>
+    Number of buckets with matching pbFreq is not equal to one
+    </description>
+    <ffdc>MATCHES_FOUND</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_INVALID_EQ_CHIP_POS</rc>
+    <description>
+    Encountered an invalid value for EQ chip position
+    </description>
+    <ffdc>EQ_POSITION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_INVALID_BUCKET_ID</rc>
+    <description>
+    Encountered an invalid Bucket Id. Valid values are 1-6 inclusive.
+    </description>
+    <ffdc>BUCKET_ID</ffdc>
+    <callout>
+        <target>TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

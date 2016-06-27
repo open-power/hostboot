@@ -31,6 +31,17 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
+enum bucketParms
+{
+    POUNDV_VERSION_2      = 0x2,
+    POUNDV_VERSION_3      = 0x3,
+    POUNDV_BUCKET_OFFSET  = 0x4,
+    NUM_BUCKETS           = 0x6,
+    VERSION_2_BUCKET_SIZE = 0x33,
+    VERSION_3_BUCKET_SIZE = 0x3D,
+};
+
+
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_get_poundv_bucket_attr_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>&,
@@ -44,7 +55,7 @@ extern "C" {
 ///        will pass out array of bytes as they are read from the VPD
 ///        NOTE: This might be incorrect endianness
 /// @param[in] i_target EQ chiplet target
-/// @param[in] o_data bytes read from #V keyword of an LRP record
+/// @param[out] o_data bytes read from #V keyword of an LRP record
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
