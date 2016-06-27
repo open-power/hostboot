@@ -90,18 +90,13 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
 
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
-    // if opMode is not specified as an argument va_arg
-    // will return NULL which is 0
-    uint64_t l_opMode = va_arg(i_args,uint64_t);
-
 
     l_err = checkIndirectAndDoScom(i_opType,
                                    i_target,
                                    io_buffer,
                                    io_buflen,
                                    i_accessType,
-                                   l_scomAddr,
-                                   l_opMode);
+                                   l_scomAddr);
 
     return l_err;
 }
@@ -119,18 +114,13 @@ errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
 
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
-    // if opMode is not specified as an argument va_arg
-    // will return NULL which is 0
-    uint64_t l_opMode = va_arg(i_args,uint64_t);
-
 
     l_err = checkIndirectAndDoScom(i_opType,
                                    i_target,
                                    io_buffer,
                                    io_buflen,
                                    i_accessType,
-                                   l_scomAddr,
-                                   l_opMode);
+                                   l_scomAddr);
 
     // Check for ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
     // if ATTR set and MBSECCQ being read then set bit 16
@@ -174,8 +164,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   void* io_buffer,
                                   size_t& io_buflen,
                                   int64_t i_accessType,
-                                  uint64_t i_addr,
-                                  uint64_t i_opMode)
+                                  uint64_t i_addr)
 {
 
     errlHndl_t l_err = NULL;

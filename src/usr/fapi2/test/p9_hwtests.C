@@ -340,3 +340,61 @@ fapi2::ReturnCode p9_opmodetest_getsetopmode()
     return fapi2::current_err;
 }
 
+fapi2::ReturnCode p9_opmodetest_ignorehwerr(
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                uint8_t o_fail)
+{
+    FAPI_INF("Entering p9_opmodetest_ignorehwerr...");
+    //Count the number of scoms we do so we can tell that we ran all of them.
+    //Putting in this test so we know opMode isnt getting reset on FAPI_TRY
+    uint8_t scomCount = 0;
+    const uint8_t EXPECTED_NUMBER_OF_SCOMS = 4;
+
+    do{
+        FAPI_INF("Setting opMode to IGNORE_HW_ERROR (0x1)");
+
+        fapi2::setOpMode(fapi2::IGNORE_HW_ERROR);
+        fapi2::buffer<uint64_t> l_scomdata1 = 0xFF00FF00;
+        fapi2::buffer<uint64_t> l_scomdata2 = 0xFF00FF00;
+
+        fapi2::buffer<uint64_t> l_scomresult1 = 0x0;
+        fapi2::buffer<uint64_t> l_scomresult2 = 0x0;
+
+
+        FAPI_INF("Attempting 1st putScom, this should fail but because of opMode we skip the err");
+        FAPI_TRY(fapi2::putScom(i_target,
+                                0xDEADBEEF,
+                                l_scomdata1));
+        scomCount++;
+
+        FAPI_INF("Attempting 2nd putScom this should fail but because of opMode we skip the err");
+        FAPI_TRY(fapi2::getScom(i_target,
+                                0xCABBABEF,
+                                l_scomdata2));
+        scomCount++;
+
+        FAPI_INF("Attempting 1st getScom, this should fail but because of opMode we skip the err");
+        FAPI_TRY(fapi2::getScom(i_target,
+                                0xDEADBEEF,
+                                l_scomresult1));
+        scomCount++;
+
+        FAPI_INF("Attempting 2nd getScom,  this should fail but because of opMode we skip the err");
+        FAPI_TRY(fapi2::getScom(i_target,
+                                0xCABBABEF,
+                                l_scomresult2));
+        scomCount++;
+
+    }while(0);
+
+fapi_try_exit:
+
+    if(scomCount != EXPECTED_NUMBER_OF_SCOMS)
+    {
+        o_fail = 1;
+    }
+    FAPI_INF("Exiting p9_opmodetest_ignorehwerr...");
+
+    return fapi2::current_err;
+}
+

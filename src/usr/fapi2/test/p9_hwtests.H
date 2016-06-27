@@ -74,6 +74,10 @@ fapi2::ReturnCode p9_cfamtest_putcfam_pass(
 
 fapi2::ReturnCode p9_opmodetest_getsetopmode();
 
+fapi2::ReturnCode p9_opmodetest_ignorehwerr(
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                uint8_t fail);
+
 /////////////
 //
 // TODO-RTC:151428 - need simics support for these ring functions to pass

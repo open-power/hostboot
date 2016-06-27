@@ -162,7 +162,6 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
  * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
  *                              @see usr/devicefw/userif.H
  * @param[in]   i_addr          Scom Address Value.
- * @param[in]   i_opMode        the fapi2::OpMode for this scom operation
  *
  * @return  errlHndl_t
  */
@@ -171,8 +170,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   void* io_buffer,
                                   size_t& io_buflen,
                                   int64_t i_accessType,
-                                  uint64_t i_addr,
-                                  uint64_t i_opMode);
+                                  uint64_t i_addr);
 
 /**
  * @brief Performs a SCom operation
