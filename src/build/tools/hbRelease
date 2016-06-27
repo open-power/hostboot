@@ -2548,7 +2548,7 @@ sub execute_cmvc_reqs
         {
             if($coreq ne "")
             {
-                run_system_command("coreqTracks -r $release -t $feature -t2 $coreq -e $globals{email}");
+                run_system_command("/esw/bin/coreqTracks -r $release -t $feature -t2 $coreq -e $globals{email}");
             }
         }
 
@@ -2557,7 +2557,7 @@ sub execute_cmvc_reqs
         {
             if($prereq ne "")
             {
-                run_system_command("prereqTracks -r $release -t $prereq -t2 $feature -e $globals{email}");
+                run_system_command("/esw/bin/prereqTracks -r $release -t $prereq -t2 $feature -e $globals{email}");
             }
         }
     }
