@@ -65,6 +65,7 @@ package Hostboot::Istep;
 use Exporter;
 our @EXPORT_OK = ('main');
 use File::Temp ('tempfile');
+use Data::Dumper;
 
 #------------------------------------------------------------------------------
 #   Constants
@@ -104,6 +105,10 @@ my  @inList;
 
 my  $THREAD         =   "0";
 
+my $g_attr_fname = "";
+my $g_attr_fh;
+
+
 
 ##  --------------------------------------------------------------------------
 ##  get any environment variables
@@ -118,12 +123,13 @@ my  $hbCount =   $ENV{'HB_COUNT'};
 if ( !defined( $hbCount ) || ( $hbCount eq "" ) )
 {
     ##  set default
-    $hbCount    =   0xffffffff;     ##  effectively infinite ...
+    $hbCount    =   0xff;     ##  default that should work for all env
 }
 
 ## init global variables
 my  $ShutDownFlag   =   "";
 my  $ShutDownSts    =   "";
+
 
 
 
@@ -363,47 +369,118 @@ sub showHelp
 }
 
 ##  ---------------------------------------------------------------------------
-##  Check to see if there are trace buffers avail
-##  if so, extract and write them out
+##  Check to see if there are debug bufs avail avail
+##  if so, extract type and call correct subroutine to handle
 ##  ---------------------------------------------------------------------------
-sub checkContTrace
+sub checkDebugBuf
 {
     my  $SCRATCH_MBOX1  =   0x00050038;
     my  $SCRATCH_MBOX2  =   0x00050039;
-    my  $contTrace      =   "";
-    my  $ctName         =   "tracMERG.cont";
+    my  $MSG_TYPE_MASK  =   0xFF00000000000000;
+    my  $MSG_TYPE_TRACE =   0x0000000000000000;
+    my  $MSG_TYPE_ATTR  =   0x0100000000000000;
+    my  $dbgAddr      =   "";
+    my  $dbgSize      =   "";
 
-    $contTrace  =   ::readScom( $SCRATCH_MBOX1, 8 );
-    if ( $contTrace != 0  )
+    $dbgAddr  =   ::readScom( $SCRATCH_MBOX1, 8 );
+    if ( $dbgAddr != 0  )
     {
-        my $fh;
-        my $fname;
-        my  $contFile;
-        ($fh,$fname) = tempfile();
-        open ($contFile, '>>', $ctName) or die "Can't open '$ctName' $!";
-        binmode($fh);
+        #There is something to do.  Get the dbgSize to determine the type
+        $dbgSize  =   ::readScom( $SCRATCH_MBOX2, 8 );
 
         #contTrace has the buffer, address MBOX_SCRATCH2 has size
         #MBOX Scratch regs are only valid from 0:31, shift to give a num
-        my $buffAddr = $contTrace >> 32;
-        my $buffSize = ::readScom($SCRATCH_MBOX2, 8) >> 32;
+        my $buffAddr = $dbgAddr  >> 32;
+        my $buffSize = ($dbgSize & (~$MSG_TYPE_MASK)) >> 32;
+        my $msgType = $dbgSize & $MSG_TYPE_MASK;
 
-        print $fh (::readData($buffAddr, $buffSize));
+        #::userDisplay   ".";
+        #::userDisplay   "DebugBuf addr[", sprintf("0x%x", $buffAddr),
+        #                "] type[", sprintf("0x%x", $msgType),
+        #                "] size[" , sprintf("0x%x",$buffSize), "]\n";
+
+        if ($msgType == $MSG_TYPE_TRACE)
+        {
+            handleContTrace($buffAddr, $buffSize);
+        }
+        elsif ($msgType == $MSG_TYPE_ATTR)
+        {
+            handleAttrDump($buffAddr, $buffSize);
+        }
 
         #Write 0 to let HB know we extracted buf and it can continue
         ::writeScom($SCRATCH_MBOX1, 8, 0x0);
-
-        open TRACE, ("fsp-trace -s ".::getImgPath().
-          "hbotStringFile $fname |") || die;
-        while (my $line = <TRACE>)
-        {
-            ::userDisplay $line;
-            print $contFile $line;
-        }
-
-        unlink $fname;
     }
 }
+
+##  ---------------------------------------------------------------------------
+##  Check to see if there are trace buffers avail
+##  if so, extract and write them out
+##  ---------------------------------------------------------------------------
+sub handleContTrace
+{
+    my  $buffAddr      =   shift;
+    my  $buffSize      =   shift;
+    my  $ctName         =   "tracMERG.cont";
+
+    my $fh;
+    my $fname;
+    my  $contFile;
+    ($fh,$fname) = tempfile();
+    open ($contFile, '>>', $ctName) or die "Can't open '$ctName' $!";
+    binmode($fh);
+
+    print $fh (::readData($buffAddr, $buffSize));
+
+    open TRACE, ("fsp-trace -s ".::getImgPath().
+                 "hbotStringFile $fname |") || die;
+    while (my $line = <TRACE>)
+    {
+        ::userDisplay $line;
+        print $contFile $line;
+    }
+
+    unlink $fname;
+}
+
+
+##  ---------------------------------------------------------------------------
+##  Extract an ATTR dump bin, when complete, call tool to parse.
+##  ---------------------------------------------------------------------------
+sub handleAttrDump
+{
+    my  $buffAddr      =   shift;
+    my  $buffSize      =   shift;
+    my  $txtName         =   "hbAttrDump.txt";
+
+    #If there is an empty filename, need to create one, otherwise just append
+    if ($g_attr_fname eq "")
+    {
+        ($g_attr_fh,$g_attr_fname) = tempfile();
+        binmode($g_attr_fh);
+    }
+
+    # Check to see if magic "done" address has been sent,
+    # if so call tool to parse
+    if ($buffAddr == 0xFFFFCAFE)
+    {
+        #::userDisplay "Got done, processing bin file[$g_attr_fname]\n";
+        close $g_attr_fh ;
+
+        ##Call the FapiAttr tool module
+        $Hostboot::_DebugFramework::toolOpts{'attrbin'} = $g_attr_fname;
+        ::callToolModule("FapiAttr");
+
+        unlink $g_attr_fname;
+        $g_attr_fname = "";
+
+    }
+    else # Write data to bin temp file
+    {
+        print $g_attr_fh (::readData($buffAddr, $buffSize));
+    }
+}
+
 
 ##  ---------------------------------------------------------------------------
 ##  Dump environment variable specified.
@@ -677,7 +754,7 @@ sub getSyncStatus( )
 
 
         ##  check to see if we need to dump trace - no-op in simics
-        checkContTrace();
+        checkDebugBuf();
 
         $result     = getStatus();
         $running    =   ( ( $result & 0x2000000000000000 ) >> 61 );
@@ -940,9 +1017,9 @@ sub setMode( $ )
         ##  sequence number to see if it has changed.  rinse and repeat.
         ::executeInstrCycles( $hbDefaultCycles, NOSHOW );
 
-        if ( $opt_debug )   {   ::userDisplay   "=== checkContTrace\n";   }
+        if ( $opt_debug )   {   ::userDisplay   "=== checkDebugBuf\n";   }
         ## check to see if it's time to dump trace - no-op in simics
-        checkContTrace();
+        checkDebugBuf();
 
         if ( $opt_debug )   {   ::userDisplay   "=== isShutDown\n";       }
         ## check for system crash
