@@ -112,9 +112,17 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
 
     do
     {
+        // Ensure Downstream Max Transfer Counter is 0 since
+        // hostboot has no need for it (non-0 can cause
+        // protocol issues)
+        uint64_t l_addr       = SBE_FIFO_DNFIFO_MAX_TSFR;
+        uint32_t l_data       = 0;
+        errl = writeFsi(i_target,l_addr,&l_data);
+        if (errl) break;
+
         //The first uint32_t has the number of uint32_t words in the request
+        l_addr                = SBE_FIFO_UPFIFO_DATA_IN;
         uint32_t * l_pSent    = i_pFifoRequest; //advance as words sent
-        uint64_t   l_addr     = SBE_FIFO_UPFIFO_DATA_IN;
         uint32_t   l_cnt      = *l_pSent;
         SBE_TRACDBIN("Write Request in SBEIO",i_pFifoRequest,
                      l_cnt*sizeof(*l_pSent));
@@ -137,7 +145,7 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
         if (errl) break;
 
         l_addr = SBE_FIFO_UPFIFO_SIG_EOT;
-        uint32_t l_data = FSB_UPFIFO_SIG_EOT;
+        l_data = FSB_UPFIFO_SIG_EOT;
         errl = writeFsi(i_target,l_addr,&l_data);
         if (errl) break;
 
@@ -254,11 +262,8 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
             // has been sent. If not EOT, then data ready to receive.
             uint32_t l_status = 0;
             errl = waitDnFifoReady(i_target,l_status);
-            if ( (l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) &&
-                 // @TODO-RTC:156194 - EOT should not be set until FIFO empty
-                 //                    so once fixed, we can remove this next
-                 //                    line
-                 (!(l_status & DNFIFO_STATUS_FIFO_ENTRY_COUNT)) )
+
+            if (l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
             {
                 l_EOT = true;
                 // ignore EOT dummy word

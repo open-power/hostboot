@@ -317,6 +317,7 @@ namespace SBEIO
         SBE_FIFO_DNFIFO_STATUS     = 0x00002444,
         SBE_FIFO_DNFIFO_RESET      = 0x00002450,
         SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002454,
+        SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002458,
     };
 
     enum sbeFifoUpstreamStatus
