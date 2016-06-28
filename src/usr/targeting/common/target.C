@@ -501,7 +501,21 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                      (l_element.type == TYPE_MCS) ||
                      (l_element.type == TYPE_MBA) ||
                      (l_element.type == TYPE_XBUS) ||
-                     (l_element.type == TYPE_ABUS))
+                     (l_element.type == TYPE_ABUS) ||
+                     (l_element.type == TYPE_CORE) ||
+                     (l_element.type == TYPE_EQ) ||
+                     (l_element.type == TYPE_MCA) ||
+                     (l_element.type == TYPE_MCBIST) ||
+                     (l_element.type == TYPE_MI) ||
+                     (l_element.type == TYPE_CAPP) ||
+                     (l_element.type == TYPE_DMI) ||
+                     (l_element.type == TYPE_OBUS) ||
+                     (l_element.type == TYPE_NV) ||
+                     (l_element.type == TYPE_SBE) ||
+                     (l_element.type == TYPE_PPE) ||
+                     (l_element.type == TYPE_PERV) ||
+                     (l_element.type == TYPE_PEC) ||
+                     (l_element.type == TYPE_PHB))
             {
                 o_unitPos = l_element.instance;
             }
