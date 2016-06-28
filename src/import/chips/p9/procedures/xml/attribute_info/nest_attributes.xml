@@ -1031,6 +1031,7 @@
      16_MB = 0x0000000001000000,
       ZERO = 0x0000000000000000
   </enum>
+  <initToZero/>
   <writeable/>
   <persistRuntime/>
 </attribute>
