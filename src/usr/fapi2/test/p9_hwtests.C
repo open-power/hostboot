@@ -32,6 +32,7 @@
 #include <fapi2.H>
 #include <fapi2_hw_access.H>
 #include <errl/errlentry.H>
+#include <xscom/piberror.H>
 #include <plat_hwp_invoker.H>
 
 //This function does nothing, it is used to call FAPI_INVOKE on
@@ -336,6 +337,48 @@ fapi2::ReturnCode p9_opmodetest_getsetopmode()
         }
 
     }while(0);
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode p9_piberrmask_getsettest()
+{
+    FAPI_INF("Entering p9_piberrmask_getsettest...");
+
+    FAPI_INF("Ensure that getPIBErrorMask return 0 initially");
+
+    uint8_t mask = fapi2::getPIBErrorMask();
+    do
+    {
+        if(mask != 0)
+        {
+            TS_FAIL("p9_piberrmask_getsettest>> Expected fapi2::getPIBErrorMask to return (0x0) but instead returned 0x%x", mask);
+            break;
+        }
+
+        FAPI_INF("Setting pib_err_mask to PIB_CHIPLET_OFFLINE (0x2) and checking that we get it back with getPIBErrorMask");
+
+        fapi2::setPIBErrorMask((uint8_t)PIB::PIB_CHIPLET_OFFLINE);
+        mask = fapi2::getPIBErrorMask();
+        if(mask != PIB::PIB_CHIPLET_OFFLINE)
+        {
+            TS_FAIL("p9_piberrmask_getsettest>> Expected fapi2::getPIBErrorMask to return 0x2 but instead returned 0x%x", mask);
+            break;
+        }
+
+        //Call FAPI_INVOKE on an empty function to test if
+        //it resets the pib err mask
+        errlHndl_t l_errl = NULL;
+        FAPI_INVOKE_HWP(l_errl,empty_function);
+
+        mask = fapi2::getPIBErrorMask();
+        if(mask != 0)
+        {
+            TS_FAIL("p9_piberrmask_getsettest>> Expected fapi2::getPIBErrorMask to return PIB_NO_ERROR (0x0) but instead returned %x , FAPI_INVOKE failed to reset pib_err_mask", mask);
+            break;
+        }
+
+    FAPI_INF("Exiting p9_piberrmask_getsettest...");
+    }while(0);
 
     return fapi2::current_err;
 }
@@ -398,3 +441,42 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+fapi2::ReturnCode p9_piberrmask_masktest(
+                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+
+    FAPI_INF("Entering p9_piberrmask_masktest...");
+
+    uint8_t completionCheck = 0;
+
+    //Ideally we would like this test case to test errors 1-7 but
+    // I am not sure if we can simulate some of the errors
+
+    fapi2::buffer<uint64_t> l_scomdata = 0xFF00FF00;
+
+    //Set the mask to ignore invalid address errors ()
+    fapi2::setPIBErrorMask(static_cast<uint8_t>(PIB::PIB_INVALID_ADDRESS));
+
+    //Attempt writing to a bad address
+    FAPI_TRY(fapi2::putScom(i_target,
+                            0xDEADBEEF,
+                            l_scomdata));
+
+    //try another scom, this time a get to make sure that
+    // FAPI_TRY does not reset the mask
+    FAPI_TRY(fapi2::getScom(i_target,
+                            0xDEADBEEF,
+                            l_scomdata));
+
+    completionCheck = 1;
+
+
+ fapi_try_exit:
+
+    if(completionCheck != 1)
+    {
+        FAPI_ERR("Pib Err Mask is not removing errors and is causing FAPI_TRY to fail");
+    }
+    FAPI_INF("Exiting p9_piberrmask_masktest...");
+    return fapi2::current_err;
+}

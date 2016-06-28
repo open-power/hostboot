@@ -37,7 +37,9 @@
 #include <hw_access_def.H>
 #include <plat_utils.H>
 #include <hwpf_fapi2_reasoncodes.H>
+#include <scom/scomreasoncodes.H>
 #include <fapi2/plat_hw_access.H>
+#include <scom/errlud_pib.H>
 
 #include <scan/scanif.H>
 #include <hw_access_def.H>
@@ -57,6 +59,9 @@ uint64_t platGetDDScanMode(const uint32_t i_ringMode);
 
 //TODO RTC:147599 Make this thread_local
 OpModes opMode = NORMAL;
+
+//TODO RTC:147599 Make pib_err_mask thread local
+uint8_t pib_err_mask = 0x00;
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
@@ -90,11 +95,17 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
                        l_size,
                        DEVICE_SCOM_ADDRESS(i_address, opMode));
 
-    //Todo RTC: 156704  Possible room for improvement detecting opMode
-    //                  err skips at lower level
+    //If an error occured durring the device read and a pib_err_mask is set,
+    // then we will check if the err matches the mask, if it does we
+    // ignore the error
+    if(l_err && (pib_err_mask != 0x00))
+    {
+        checkPibMask(l_err);
+    }
+
     if (l_err)
     {
-        if(opMode & static_cast<uint8_t>(fapi2::IGNORE_HW_ERROR))
+        if(opMode & fapi2::IGNORE_HW_ERROR)
         {
             delete l_err;
             l_err = nullptr;
@@ -149,6 +160,15 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
                         &l_data,
                         l_size,
                         DEVICE_SCOM_ADDRESS(i_address, opMode));
+
+    //If an error occured durring the device write and a pib_err_mask is set,
+    // then we will check if the err matches the mask, if it does we
+    // ignore the error
+    if(l_err && (pib_err_mask != 0x00))
+    {
+        checkPibMask(l_err);
+    }
+
     if (l_err)
     {
         if(opMode & fapi2::IGNORE_HW_ERROR)
@@ -252,6 +272,11 @@ ReturnCode platPutScomUnderMask(const Target<TARGET_TYPE_ALL>& i_target,
 
     } while (0);
 
+    if(l_err && (pib_err_mask != 0x00))
+    {
+        checkPibMask(l_err);
+    }
+
     if (l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
        FAPI_ERR("platPutScomUnderMask failed - Target %s, Addr %.16llX",
@@ -308,6 +333,27 @@ errlHndl_t verifyCfamAccessTarget(const TARGETING::Target* i_target,
     }
 
     return l_err;
+}
+
+/// @brief takes in an error log and looks for user details sections
+///        with a compId of SCOM_COMP_ID. If one of those is found and
+///        the pib err attatched to it matches the pib_err_mask, then
+///        we delete the err.
+void checkPibMask(errlHndl_t& io_errLog )
+{
+    //Delete the error if the mask matches the pib err
+    for(auto section : io_errLog->getUDSections(SCOM_COMP_ID))
+    {
+        if((section->subSect() == SCOM::SCOM_UDT_PIB) &&
+        (reinterpret_cast<SCOM::UdPibInfo *>(section)->iv_pib_err == pib_err_mask))
+        {
+            FAPI_ERR( "Ignoring error %.8X due to pib_err_mask=%.1X", io_errLog->plid(), pib_err_mask );
+            delete io_errLog;
+            io_errLog = NULL;
+            break;
+        }
+    }
+    return;
 }
 
 /// @brief Internal function that gets the chip target for cfam access
@@ -923,6 +969,22 @@ void platSetOpMode(const OpModes i_mode)
 OpModes platGetOpMode(void)
 {
     return opMode;
+}
+
+//--------------------------------------------------------------------------
+// PIB Error Mask Functions
+//--------------------------------------------------------------------------
+
+void platSetPIBErrorMask(const uint8_t i_mask)
+{
+    assert(i_mask <= 7, "PIB Err Mask must be between 0 and 7");
+    pib_err_mask = i_mask;
+    return;
+}
+
+uint8_t platGetPIBErrorMask(void)
+{
+    return pib_err_mask;
 }
 
 

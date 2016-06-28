@@ -1657,5 +1657,22 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
     return rc;
 }
 
+//@brief Return the list of User Detail sections
+//NOTE: You can pass COMP_ID 0 into this function for wildcard
+std::vector<ErrlUD*> ErrlEntry::getUDSections(compId_t i_compId)
+{
+    std::vector<ErrlUD*> copy_vector;
+
+    for(auto const & section : iv_SectionVector)
+    {
+        if((section->compId() == i_compId) || (i_compId == 0))
+        {
+            copy_vector.push_back(section);
+        }
+    }
+
+    return copy_vector;
+}
+
 } // End namespace
 

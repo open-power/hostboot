@@ -199,6 +199,23 @@ void test_fapi2HwAccess()
             }
         }
 
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_piberrmask_getsettest);
+        if(l_errl)
+        {
+            TS_FAIL("p9_piberrmask_getsettest returned an error!");
+            numFails++;
+            errlCommit(l_errl,FAPI2_COMP_ID);
+        }
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_piberrmask_masktest, fapi2_procTarget);
+        if(l_errl)
+        {
+            TS_FAIL("p9_piberrmask_masktest returned an error!");
+            numFails++;
+            errlCommit(l_errl,FAPI2_COMP_ID);
+        }
 
 #if 0 // TODO-RTC:151428 - need simics support for these to pass
         numTests++;

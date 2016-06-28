@@ -56,6 +56,8 @@ class UdPibInfo : public ERRORLOG::ErrlUserDetails
      */
     virtual ~UdPibInfo();
 
+    uint8_t iv_pib_err;
+
     UdPibInfo(UdPibInfo &) = delete;
     UdPibInfo & operator=(UdPibInfo &) = delete;
 };

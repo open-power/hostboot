@@ -38,6 +38,7 @@
 #include <errl/errlmanager.H>
 #include "scom.H"
 #include <scom/scomreasoncodes.H>
+#include <scom/errlud_pib.H>
 #include <ibscom/ibscomreasoncodes.H>
 #include <sys/time.h>
 #include <xscom/piberror.H>
@@ -405,6 +406,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                 //  to blame hardware
                 if( scomout.piberr == PIB::PIB_RESOURCE_OCCUPIED )
                 {
+                    SCOM::UdPibInfo(scomout.piberr).addToLog(l_err);
                     l_err->addHwCallout( i_target,
                                          HWAS::SRCI_PRIORITY_HIGH,
                                          HWAS::NO_DECONFIG,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -62,6 +62,31 @@ class ErrlSctn
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
     friend class ErrlTest;
 
+public:
+    /**
+    *  @brief Get section's version
+    *
+    *  @return Section version (uint8_t)
+    *
+    */
+    uint8_t sctnVer() const;
+
+    /**
+    *  @brief Get section's subsection type
+    *
+    *  @return Subsection type (uint8_t)
+    *
+    */
+    uint8_t subSect() const;
+
+    /**
+    *  @brief Get section's component Id
+    *
+    *  @return Component Id of the section creator
+    *
+    */
+    compId_t compId() const;
+
 protected:
 
     /**
@@ -104,6 +129,31 @@ protected:
     ErrlSctnHdr   iv_header;
 
 };
+
+//-----------------------------------------------------------------------
+// In-line functions
+//-----------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint8_t ErrlSctn::sctnVer() const
+{
+    return iv_header.iv_ver;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline uint8_t ErrlSctn::subSect() const
+{
+    return iv_header.iv_sst;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline compId_t ErrlSctn::compId() const
+{
+    return iv_header.iv_compId;
+}
 
 
 
