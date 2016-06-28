@@ -803,6 +803,40 @@ class PnorRpTest : public CxxTest::TestSuite
         delete [] l_goodData;
         delete [] l_readData;
     };
+
+    /**
+     *  @brief Tests loading and unloading a secure section
+     */
+    void test_loadUnloadSecureSection()
+    {
+        // @RTC 156118 Right now these tests just ensure the
+        // APIs are callable; they should return success always
+        // until 156118 implements the real support.  At that time
+        // this testcase should be updated.
+        errlHndl_t pError=NULL;
+
+        do {
+
+        pError = PNOR::loadSecureSection(PNOR::SBE_IPL);
+        if(pError != NULL)
+        {
+            TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                "loadSecureSection returned an error");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        pError = PNOR::unloadSecureSection(PNOR::SBE_IPL);
+        if(pError != NULL)
+        {
+            TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                "unloadSecureSection returned an error");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        } while (0);
+    }
 };
 
 
