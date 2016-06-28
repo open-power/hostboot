@@ -48,6 +48,7 @@
 #include <mbox/mboxif.H>
 #include <config.h>
 #include <console/consoleif.H>
+#include <util/utilmbox_scratch.H>
 
 namespace TRACE
 {
@@ -115,7 +116,8 @@ namespace TRACEDAEMON
                                            INITSERVICE::LOWEST_PRIORITY);
 
         // Clear scratch register.
-        writeScratchReg(0, 0);
+        Util::writeScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG1, 0);
+        Util::writeScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG2, 0);
 
         // Loop handling messages.
         while (msg_t* msg = iv_service->iv_daemon->wait())
@@ -476,14 +478,10 @@ namespace TRACEDAEMON
             else
             {
                 // Write scratch register indicating is available.
-                writeScratchReg(reinterpret_cast<uint64_t>(i_buffer) << 32,
-                                i_size << 32);
-
-                // Wait for tools to extract the buffer.
-                while(0 != readScratchReg())
-                {
-                    task_yield();
-                }
+                uint64_t l_addr = reinterpret_cast<uint64_t>(i_buffer);
+                Util::writeDebugCommRegs(Util::MSG_TYPE_TRACE,
+                                         l_addr,
+                                         i_size);
                 free(i_buffer);
             }
         }
@@ -776,50 +774,6 @@ namespace TRACEDAEMON
         sendExtractBuffer(NULL, 0);
 
     }
-
-    void Daemon::writeScratchReg(uint64_t i_value1, uint64_t i_value2)
-    {
-        size_t l_size = sizeof(uint64_t);
-
-        errlHndl_t l_errl =
-            deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                        &i_value1, l_size,
-                        DEVICE_SCOM_ADDRESS(MB_SCRATCH_REGISTER_1));
-
-        if (l_errl)
-        {
-            errlCommit(l_errl, TRACE_COMP_ID);
-        }
-
-        l_errl =
-            deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                        &i_value2, l_size,
-                        DEVICE_SCOM_ADDRESS(MB_SCRATCH_REGISTER_2));
-
-        if (l_errl)
-        {
-            errlCommit(l_errl, TRACE_COMP_ID);
-        }
-    }
-
-    uint64_t Daemon::readScratchReg()
-    {
-        size_t l_size = sizeof(uint64_t);
-        uint64_t value = 0;
-
-        errlHndl_t l_errl =
-            deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                       &value, l_size,
-                       DEVICE_SCOM_ADDRESS(MB_SCRATCH_REGISTER_1));
-
-        if (l_errl)
-        {
-            errlCommit(l_errl, TRACE_COMP_ID);
-        }
-
-        return value;
-    }
-
 }
 
 // Define an entry point for the trace daemon module.
