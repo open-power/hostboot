@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/cstddef $                                         */
+/* $Source: src/include/cstdlib $                                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,16 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __CSTDDEF_H
-#define __CSTDDEF_H
+#ifndef _CSTDLIB_H
+#define _CSTDLIB_H
 
-#include <stddef.h>
+#include <stdlib.h>
 
-namespace std
-{
-    typedef decltype(nullptr) nullptr_t;
+namespace std {
+    // Types
     using ::size_t;
-}
 
-#endif
-/* vim: set filetype=cpp : */
+    // Memory Management (just reuse stdlib.h functions)
+    using ::malloc;
+    using ::free;
+    using ::realloc;
+    using ::calloc;
+} // namespace std
+
+#endif /* _CSTDLIB_H */
+
