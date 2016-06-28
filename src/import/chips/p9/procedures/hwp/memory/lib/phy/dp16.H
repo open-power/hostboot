@@ -117,12 +117,15 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         // any of this for some time.
         static constexpr uint64_t DLL_PER_DP16 = 2;
 
-        // Vector of the DLL configuration registers. The pair represents the two DLL in per DP16
+        // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
+        static const std::vector< uint64_t > DATA_BIT_DIR1;
 
         enum
         {
             DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
+            FLUSH = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_FLUSH,
+            INIT_IO = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_INIT_IO,
         };
 };
 
@@ -189,7 +192,7 @@ fapi_try_exit:
 
 ///
 /// @brief Set the DLL cal reset (begins DLL cal operations)
-/// @tparam T fapi2 Target Type - derived
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] o_data the value of the register
 /// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
@@ -201,6 +204,82 @@ inline void set_dll_cal_reset( fapi2::buffer<uint64_t>& o_data, const states i_s
     FAPI_INF("set_dll_cal_reset %s", (i_state == mss::LOW ? "low" : "high"));
     o_data.writeBit<TT::DLL_CNTL_INIT_RXDLL_CAL_RESET>(i_state);
 }
+
+
+///
+/// @brief Read DATA_BIT_DIR1
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_data_bit_dir1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::DATA_BIT_DIR1[I], o_data) );
+    FAPI_INF("data_bit_dir1 dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Write DATA_BIT_DIR1
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_data_bit_dir1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("data_bit_dir1 dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::DATA_BIT_DIR1[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Set the output flush
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @note Default state is 'low' as writing a 0 forces the cal to begin.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_output_flush( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_output_flush %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::FLUSH>(i_state);
+}
+
+///
+/// @brief Set the init io state
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @note Default state is 'low' as writing a 0 forces the cal to begin.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_init_io( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_init_io %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::INIT_IO>(i_state);
+}
+
 
 
 ///

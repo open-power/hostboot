@@ -52,7 +52,7 @@ namespace mss
 // Definition of the DP16 DLL Config registers
 // DP16 DLL registers all come in pairs - DLL per 8 bits
 // 5 DLL per MCA gives us 10 DLL Config Registers.
-// All-caps (as opposed to the others) as it's really in the dp16Traits class which is app caps <shrug>)
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
 const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG =
 {
     { MCA_DDRPHY_DP16_DLL_CNTL0_P0_0, MCA_DDRPHY_DP16_DLL_CNTL1_P0_0 },
@@ -62,6 +62,16 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_DLL_CNTL0_P0_4, MCA_DDRPHY_DP16_DLL_CNTL1_P0_4 },
 };
 
+// Definition of the DP16 Data Bit Dir1 registers
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1 =
+{
+    MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0,
+    MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_1,
+    MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_2,
+    MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_3,
+    MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_4,
+};
 
 namespace dp16
 {

@@ -40,5 +40,12 @@ const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::DLL_CNFG_REG =
     MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1
 };
 
+// Definition of the ADR32S output driver registers
+const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::OUTPUT_DRIVER_REG =
+{
+    MCA_DDRPHY_ADR_OUTPUT_DRIVER_FORCE_VALUE0_P0_ADR32S0,
+    MCA_DDRPHY_ADR_OUTPUT_DRIVER_FORCE_VALUE0_P0_ADR32S1
+};
+
 }
 

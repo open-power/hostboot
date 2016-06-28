@@ -74,6 +74,7 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
 
         // MCA ADR32S control registers all come in pairs.
         static const std::vector<uint64_t> DLL_CNFG_REG;
+        static const std::vector<uint64_t> OUTPUT_DRIVER_REG;
 
         enum
         {
@@ -92,6 +93,9 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
             DLL_CNTL_CAL_GOOD = MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0_ADR0_CAL_GOOD,
             DLL_CNTL_CAL_ERROR = MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0_ADR0_CAL_ERROR,
             DLL_CNTL_CAL_ERROR_FINE = MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0_ADR0_CAL_ERROR_FINE,
+
+            FLUSH = MCA_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0_ADR0_FLUSH,
+            INIT_IO = MCA_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0_ADR0_INIT_IO,
 
         };
 
@@ -144,7 +148,7 @@ fapi_try_exit:
 
 ///
 /// @brief Set the DLL cal reset (begins DLL cal operations)
-/// @tparam T fapi2 Target Type - derived
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to adr32sTraits<T>
 /// @param[in] o_data the value of the register
 /// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
@@ -155,6 +159,74 @@ inline void set_dll_cal_reset( fapi2::buffer<uint64_t>& o_data, const states i_s
 {
     FAPI_INF("set_dll_cal_reset %s", (i_state == mss::LOW ? "low" : "high"));
     o_data.writeBit<TT::DLL_CNTL_INIT_RXDLL_CAL_RESET>(i_state);
+}
+
+///
+/// @brief Read OUTPUT_DRVIER register
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode read_output_driver( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+    FAPI_TRY( mss::getScom(i_target, TT::OUTPUT_DRIVER_REG[I], o_data) );
+    FAPI_INF("output_driver adrs32%d: 0x%016lx", I, o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write OUTPUT_DRIVER
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode write_output_driver( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+    FAPI_INF("output_driver adr32s%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::OUTPUT_DRIVER_REG[I], i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the output flush
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @note Default state is 'low' as writing a 0 forces the cal to begin.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = adr32sTraits<T> >
+inline void set_output_flush( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_output_flush %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::FLUSH>(i_state);
+}
+
+///
+/// @brief Set the init io state
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+/// @note Default state is 'low' as writing a 0 forces the cal to begin.
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = adr32sTraits<T> >
+inline void set_init_io( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_init_io %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::INIT_IO>(i_state);
 }
 
 } // close namespace adr

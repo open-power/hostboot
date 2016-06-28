@@ -90,13 +90,6 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<fap
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
-/// @brief Flush the DDR PHY
-/// @param[in] i_target the mcbist target
-/// @return FAPI2_RC_SUCCES iff ok
-///
-fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
-
-///
 /// @brief Reset the training delay configureation
 /// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
@@ -219,6 +212,23 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<T>& i_target );
 ///
 template<>
 fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Flush the output drivers
+/// @tparam T the target type of the MCBIST
+/// @param[in] i_target the target associated with the phy reset sequence
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode flush_output_drivers( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Flush the output drivers
+/// @param[in] i_target the target associated with the phy reset sequence
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Setup seq_rd_wr_data

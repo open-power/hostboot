@@ -79,6 +79,15 @@ extern "C"
         FAPI_TRY( mss::change_resetn(i_target, mss::LOW), "change_resetn for %s failed", mss::c_str(i_target) );
 
         //
+        // Flush output drivers
+        //
+
+        // 8. Set FLUSH=1 and INIT_IO=1 in the DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL and DDRPHY_DP16_DATA_BIT_DIR1 register
+        // 9. Wait at least 32 dphy_gckn clock cycles.
+        // 10. Set FLUSH=0 and INIT_IO=0 in the DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL register
+        FAPI_TRY( mss::flush_output_drivers(i_target), "unable to flush output drivers for %s", mss::c_str(i_target) );
+
+        //
         // ZCTL Enable
         //
 
@@ -139,8 +148,6 @@ extern "C"
         //      "mss_slew_cal Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
         // slew cal successful
 //    FAPI_TRY( mss::slew_cal(i_target), "slew_cal for %s failed", mss::c_str(i_target));
-
-        FAPI_TRY( mss::ddr_phy_flush(i_target), "ddr_phy_flush failed for %s", mss::c_str(i_target) );
 
 #ifdef LEAVES_OUTPUT_TO_DIMM_TRISTATE
         // Per J. Bialas, force_mclk_low can be dasserted.

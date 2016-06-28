@@ -306,43 +306,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Flush the DDR PHY
-/// @param[in] i_target the mcbist target
-/// @return FAPI2_RC_SUCCES iff ok
-///
-fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
-{
-    fapi2::buffer<uint64_t> l_data;
-    fapi2::buffer<uint64_t> l_mask;
-
-    FAPI_INF( "Performing mss_ddr_phy_flush routine" );
-
-    FAPI_INF("ADR/DP18 FLUSH: 1) set PC_POWERDOWN_1 register, powerdown enable(48), flush bit(58)");
-    // set MASTER_PD_CNTL bit set WR_FIFO_STAB bit
-    l_data.setBit<48>().setBit<58>();
-    l_mask.setBit<48>().setBit<58>();
-
-    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
-
-    for (const auto& p : l_ports)
-    {
-        FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, l_data, l_mask) );
-    }
-
-    fapi2::delay(DELAY_100NS, cycles_to_simcycles(ns_to_cycles(i_target, 100)));
-
-    FAPI_INF("ADR/DP18 FLUSH: 2) clear PC_POWERDOWN_1 register, powerdown enable(48), flush bit(58)");
-
-    for (const auto& p : l_ports)
-    {
-        FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, 0, l_mask) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Return the DIMM target for the primary rank in the specificed rank pair
 /// @param[in] i_target the MCA target
 /// @param[in] i_rp the rank pair
@@ -1105,5 +1068,51 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Flush the output drivers
+/// @param[in] i_target the target associated with the phy reset sequence
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+{
+    fapi2::buffer<uint64_t> l_adr_data;
+    fapi2::buffer<uint64_t> l_dp16_data;
+
+    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
+    const auto& l_force_atest_reg = adr32sTraits<TARGET_TYPE_MCA>::OUTPUT_DRIVER_REG;
+    const auto& l_data_dir_reg = dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1;
+
+    // 8. Set FLUSH=1 and INIT_IO=1 in the DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL and DDRPHY_DP16_DATA_BIT_DIR1 register
+    {
+        mss::adr32s::set_output_flush( l_adr_data, mss::HIGH );
+        mss::adr32s::set_init_io( l_adr_data, mss::HIGH);
+        FAPI_TRY( mss::scom_blastah(l_ports, l_force_atest_reg, l_adr_data) );
+
+        mss::dp16::set_output_flush( l_dp16_data, mss::HIGH );
+        mss::dp16::set_init_io( l_dp16_data, mss::HIGH);
+        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_adr_data) );
+    }
+
+    // 9. Wait at least 32 dphy_gckn clock cycles.
+    fapi2::delay(mss::cycles_to_ns(i_target, 32), mss::cycles_to_simcycles(1024));
+
+    // 10. Set FLUSH=0 and INIT_IO=0 in the DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL register and
+    // DDRPHY_DP16_DATA_BIT_DIR1 register
+    {
+        mss::adr32s::set_output_flush( l_adr_data, mss::LOW );
+        mss::adr32s::set_init_io( l_adr_data, mss::LOW);
+        FAPI_TRY( mss::scom_blastah(l_ports, l_force_atest_reg, l_adr_data) );
+
+        mss::dp16::set_output_flush( l_dp16_data, mss::LOW );
+        mss::dp16::set_init_io( l_dp16_data, mss::LOW);
+        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_adr_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
+
+} // ns mss
+
 
