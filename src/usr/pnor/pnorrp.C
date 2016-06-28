@@ -90,6 +90,29 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 }
 
 /**
+ *  @brief Loads requested PNOR section to secure virtual address space
+ */
+errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
+{
+    //@TODO RTC 156118
+    // Replace with call to secure provider to load the section
+    errlHndl_t pError=NULL;
+    return pError;
+}
+
+/**
+ *  @brief Flushes any applicable pending writes and unloads requested PNOR
+ *      section from secure virtual address space
+ */
+errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
+{
+    //@TODO RTC 156118
+    // Replace with call to secure provider to load the section
+    errlHndl_t pError=NULL;
+    return pError;
+}
+
+/**
  * @brief  Clear pnor section
  */
 errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
