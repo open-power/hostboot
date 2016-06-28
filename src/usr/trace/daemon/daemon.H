@@ -96,13 +96,6 @@ namespace TRACEDAEMON
             /** Locklessly move a trace entry from one location to another. */
             void replaceEntry(TRACE::Entry* from, TRACE::Entry* to);
 
-            /** Write mailbox scratch 1 & 2 registers to a values.
-             *  scratch 1 contains the trace buffer address
-             *  scratch 2 contains the trace buffer size */
-            void writeScratchReg(uint64_t i_value1, uint64_t i_value2);
-            /** Read mailbox scratch 1 register. */
-            uint64_t readScratchReg();
-
                 /** Client-service object. */
             TRACE::Service* iv_service;
 
