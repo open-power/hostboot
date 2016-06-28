@@ -70,6 +70,7 @@ OBJS += mrs_load_ddr4.o
 OBJS += rcd_load_ddr4.o
 OBJS += ddr_phy.o
 OBJS += dp16.o
+OBJS += adr32s.o
 OBJS += xlate.o
 OBJS += port.o
 
