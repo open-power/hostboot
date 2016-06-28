@@ -57,9 +57,11 @@
 #include    <config.h>
 
 #include    <isteps/spless_255list.H>       // Non istep commands
+#include    <fapi2/plat_attr_override_sync.H> //Attr dump
 
 #include    "istepdispatcher.H"
 #include    "splesscommon.H"
+
 
 
 namespace   INITSERVICE
@@ -108,6 +110,10 @@ void handleControlCmd( SPLessCmd & io_cmd )
 
     case FLUSH_TRACE_BUFS:
         TRAC_FLUSH_BUFFERS();
+        break;
+
+    case DUMP_FAPI_ATTR:
+        fapi2::theAttrOverrideSync().triggerAttrSync();
         break;
 
     default:
