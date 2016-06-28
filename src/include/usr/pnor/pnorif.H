@@ -80,6 +80,37 @@ errlHndl_t getSideInfo (SideId i_side, SideInfo_t& o_info);
  */
 errlHndl_t getSectionInfo( SectionId i_section,
                            SectionInfo_t& o_info );
+
+/**
+ *  @brief Loads requested PNOR section to secure virtual address space
+ *
+ *  @par Detailed Description:
+ *      Loads requested PNOR section to secure virtual address space.  If secure
+ *      mode is enabled, the load will fully validate the section before
+ *      placing it in the address space.  Returns error if the requested
+ *      section does not have secure space support.
+ *
+ *  @param[in] i_section PNOR section to load. Section must not already be
+ *      loaded.
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval NULL Successfully loaded PNOR section
+ *  @retval !NULL Failed to load PNOR section
+ */
+errlHndl_t loadSecureSection(SectionId i_section);
+
+/**
+ *  @brief Flushes any applicable pending writes and unloads requested PNOR
+ *      section from secure virtual address space
+ *
+ *  @param[in] i_section PNOR section to unload.  No-op if already unloaded.
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval NULL Successfully unloaded PNOR section
+ *  @retval !NULL Failed to unload PNOR section
+ */
+errlHndl_t unloadSecureSection(SectionId i_section);
+
 /**
  * @brief  Write the data back from hostboot memory to PNOR of a given section
  *         of PNOR
