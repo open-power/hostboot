@@ -55,6 +55,7 @@ namespace fapi2
         MOD_FAPI2_GET_TARGETING_ATTR                = 0x0C,
         MOD_FAPI2_SET_TARGETING_ATTR                = 0x0D,
         MOD_FAPI2_PLAT_GET_VPD                      = 0x0E,
+        MOD_FAPI2_PIB_ERR_MASK                      = 0x0F,
     };
 
     /**
@@ -71,6 +72,7 @@ namespace fapi2
         RC_NULL_FAPI_TARGET            = HWPF_COMP_ID | 0x0A,
         RC_LOOKING_FOR_TYPE_NA         = HWPF_COMP_ID | 0x0B,
         RC_INCORRECT_TARGET            = HWPF_COMP_ID | 0x0C,
+        RC_FAILED_MASKING_ERROR        = HWPF_COMP_ID | 0x12,
 
         // MVPD generated errors
         RC_INVALID_RECORD              = HWPF_COMP_ID | 0x0D,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -581,6 +581,17 @@ public:
      * @return Status  0==SUCCESS
      */
     uint64_t unflatten( const void * i_buffer, uint64_t i_len);
+
+    /**
+    * @brief Return the list of User Detail sections
+    *
+    * @param[in] i_compId Component id associated with the sections to return
+    *
+    *            NOTE: You can pass COMP_ID 0 into this function for wildcard
+    *
+    * @return vector of user details sections of specific component id
+    */
+    std::vector<ErrlUD*> getUDSections(compId_t i_compId);
 
 private:
 

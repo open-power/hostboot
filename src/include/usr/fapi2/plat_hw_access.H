@@ -192,6 +192,29 @@ OpModes platGetOpMode(void);
 
 extern OpModes opMode;
 
+//--------------------------------------------------------------------------
+// PIB Error Mask Functions
+//--------------------------------------------------------------------------
+//
+// See hw_access.H for more detail on pib error mask
+
+/// @brief Sets the pib error mask
+/// @param[in]  i_mask     The new mask
+void platSetPIBErrorMask(const uint8_t i_mask);
+
+/// @brief Gets the pib error mask
+/// @return the pib error mask
+uint8_t platGetPIBErrorMask(void);
+
+/// @brief takes in an error log and looks for user details sections
+///        with a compId of COMP_SCOM_ID. If one of those is found and
+///        the pib err attatched to it matches the pib_err_mask, then
+///        we delete the err.
+/// @param[in/out] io_errLog Error log that we would like the check the piberr
+///                mask against
+/// @return void
+void checkPibMask(errlHndl_t& io_errLog );
+
 // --------------------------------------------------------------------------
 // NOTE:
 // No spy access interface as HB doesn't allow spy access.

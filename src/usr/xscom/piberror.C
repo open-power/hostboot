@@ -35,6 +35,7 @@
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <targeting/common/targetservice.H>
+#include <scom/errlud_pib.H>
 
 namespace PIB
 {
@@ -48,6 +49,8 @@ void addFruCallouts(TARGETING::Target* i_target,
                     uint64_t i_scomAddr,
                     errlHndl_t& io_errl)
 {
+   // add user details section to error log that describes the pib err
+   SCOM::UdPibInfo(i_pibErrStatus).addToLog(io_errl);
 
    switch (i_pibErrStatus)
    {

@@ -44,6 +44,7 @@
 #include <return_code.H>
 #include <hw_access_def.H>
 #include <plat_utils.H>
+#include <xscom/piberror.H>
 
 /**
  * @brief HWP Invoker macro
@@ -63,6 +64,7 @@
         fapi2::ReturnCode l_rc; \
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;\
         fapi2::opMode = fapi2::NORMAL;\
+        fapi2::setPIBErrorMask(0);\
         FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(l_rc);\
         if( ERRHNDL ) {\

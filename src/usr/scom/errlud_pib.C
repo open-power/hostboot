@@ -45,7 +45,7 @@ UdPibInfo::UdPibInfo( uint8_t i_pibErr )
     iv_Version = 1;
     iv_SubSection = SCOM_UDT_PIB;
 
-
+    iv_pib_err = i_pibErr;
     //***** Memory Layout *****
     // 1 byte  :  PIB
     auto l_pBuf = reallocUsrBuf(sizeof(uint8_t));

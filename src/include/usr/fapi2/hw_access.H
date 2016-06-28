@@ -39,17 +39,20 @@ namespace fapi2
 
 //--------------------------------------------------------------------------
 // PIB Error Functions
+//
+// The pib err mask can be set in order
+// to ignore specific pib errors returned by a scom. The mask
+// is a thread local variable and will be reset to 0 during every
+// FAPI_INVOKE call before the function is executed, therefore
+// it will reset on HWP calls.
 //--------------------------------------------------------------------------
 
 /// @brief Sets the PIB error mask - platform dependant
 /// @param[in]  i_mask     The new error mask
 // note: this can be moved  to a C file if desired
-inline void setPIBErrorMask(uint8_t i_mask)
+inline void setPIBErrorMask(const uint8_t i_mask)
 {
-    // Keeps the compiler from complaining about the unused i_mask
-    static_cast<void>(i_mask);
-    //TODO: RTC 124195 FAPI2 - PIB error mask and Operation mode supports
-    return;
+    return platSetPIBErrorMask(i_mask);
 }
 
 /// @brief Gets the PIB error mask - platform dependant
@@ -57,8 +60,7 @@ inline void setPIBErrorMask(uint8_t i_mask)
 // note: this can be moved  to a C file if desired
 inline uint8_t getPIBErrorMask(void)
 {
-    //TODO: RTC 124195 FAPI2 - PIB error mask and Operation mode supports
-    return 0;
+    return platGetPIBErrorMask();
 }
 
 //--------------------------------------------------------------------------
