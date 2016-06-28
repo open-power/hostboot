@@ -68,6 +68,7 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
         static const uint64_t PC_ERROR_STATUS0_REG = MCA_DDRPHY_PC_ERROR_STATUS0_P0;
         static const uint64_t PC_INIT_CAL_ERROR_REG = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0;
         static const uint64_t PC_DLL_ZCAL_CAL_STATUS_REG = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0;
+        static const uint64_t PC_RESETS_REG = MCA_DDRPHY_PC_RESETS_P0;
 
         enum
         {
@@ -98,6 +99,9 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             DLL_CAL_STATUS_ADR_ERROR_FINE = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_ADR_ERROR_FINE,
             ZCAL_CAL_STATUS_DONE = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0_DONE,
 
+            SYSCLK_RESET = MCA_DDRPHY_PC_RESETS_P0_SYSCLK_RESET,
+            PVT_OVERRIDE = MCA_DDRPHY_PC_RESETS_P0_PVT_OVERRIDE,
+            ENABLE_ZCAL = MCA_DDRPHY_PC_RESETS_P0_ENABLE_ZCAL,
         };
 
 };
@@ -164,6 +168,18 @@ inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
 }
 
 // MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS is read-only
+
+///
+/// @brief Get ZCAL Cal Status
+/// @param[in] fapi2::buffer representing the status register to interrogate
+/// @return mss::states; YES == success, NO == fail
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline mss::states get_zcal_status( fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_INF("zcal_status: 0x%016lx", i_data);
+    return (i_data.getBit<TT::ZCAL_CAL_STATUS_DONE>() == true) ? mss::YES : mss::NO;
+}
 
 ///
 /// @brief read PC_ERROR_STATUS0
@@ -268,6 +284,48 @@ inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief read PC_RESETS
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_resets( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_RESETS_REG, o_data) );
+    FAPI_INF("pc_resets: 0x%016llx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC_RESETS
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_resets( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_INF("pc_resets: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_RESETS_REG, i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set ENABLE_ZCAL in PC_RESETS
+/// @param[out] o_data the value of the register
+/// @param[in] i_state mss::HIGH or mss::LOW
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
+inline void set_enable_zcal( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_enable_zcal %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::ENABLE_ZCAL>(i_state);
 }
 
 } // close namespace pc

@@ -33,25 +33,6 @@
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
 
-// Helper macro to condense the checking for PLL lock
-#define CHECK_PLL( __target, __register, __buffer, __mask )             \
-    FAPI_TRY(mss::getScom( __target, __register, __buffer));          \
-    if ((__buffer & __mask) != __mask)                                  \
-    {                                                                   \
-        FAPI_INF("PLL 0x%lx failed to lock 0x%lx", __register, __buffer); \
-        done_polling = false;                                           \
-        continue;                                                       \
-    }
-
-// Helper macro to condense the checking for PLL lock
-#define FFDC_PLL( __target, __register, __buffer, __mask, __ffdc_object ) \
-    FAPI_ASSERT( ((__buffer & __mask) == __mask),                       \
-                 __ffdc_object.set_EXPECTED_STATUS(__mask)              \
-                 .set_ACTUAL_STATUS(__buffer)                           \
-                 .set_REGISTER(__register)                              \
-                 .set_MCBIST_IN_ERROR(__target),                        \
-                 "PLL 0x%llx failed to lock 0x%llx", __register, __buffer);
-
 namespace mss
 {
 
@@ -71,11 +52,11 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i
 fapi2::ReturnCode change_resetn( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, states i_state );
 
 ///
-/// @brief perform the zctl toggle process
+/// @brief perform the zctl enable process
 /// @param[in] i_target the mcbist for the reset recover
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode toggle_zctl( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+fapi2::ReturnCode enable_zctl( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 /// @brief Change mclk low
 /// @param[in] i_target mcbist target

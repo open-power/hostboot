@@ -79,43 +79,45 @@ fapi_try_exit:
 }
 
 ///
-/// @brief perform the zctl toggle process
+/// @brief Perform the zctl enable process
 /// @param[in] i_target the mcbist for the reset recover
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
-// With model 31 (Drop X) this became unecessary. Not removing it as it's unclear what
-// the final algorithm(s) will be. BRS
-#if 0
     fapi2::buffer<uint64_t> l_data;
-
     const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
+    constexpr uint64_t l_zcal_reset_reg = pcTraits<TARGET_TYPE_MCA>::PC_RESETS_REG;
 
-    //
-    // 4. Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset and enable the internal impedance controller.
-    // (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
-    FAPI_DBG("Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset");
-    l_data.setBit<59>();
-    FAPI_TRY( mss::scom_blastah(l_ports, MCA_DDRPHY_PC_IO_PVT_FET_CONTROL_P0, l_data) );
+    uint8_t is_sim = 0;
 
-    //
-    // 5. Write 0x0018 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset while impedance controller is still enabled.
-    //    (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
-    FAPI_DBG("Write 0x0018 to PC IO PVT N/P FET driver control registers to deassert ZCTL reset.");
-    l_data.setBit<59>().setBit<60>();
-    FAPI_TRY( mss::scom_blastah(l_ports, MCA_DDRPHY_PC_IO_PVT_FET_CONTROL_P0, l_data) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
-    //
-    // 6. Write 0x0008 to PC IO PVT N/P FET driver control registers to deassert the impedance controller.
-    //    (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
+    if (is_sim)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
-    FAPI_DBG("Write 0x0008 to PC IO PVT N/P FET driver control registers to deassert the impedance controller");
-    l_data.clearBit<59>().setBit<60>();
-    FAPI_TRY( mss::scom_blastah(l_ports, MCA_DDRPHY_PC_IO_PVT_FET_CONTROL_P0, l_data) );
+    // 11. Assert the ZCNTL enable to the internal impedance controller in DDRPHY_PC_RESETS register
+    mss::pc::set_enable_zcal(l_data, mss::HIGH);
+    FAPI_TRY( mss::scom_blastah(l_ports, l_zcal_reset_reg, l_data) );
+
+    // 12. Wait at least 1024 dphy_gckn cycles
+    fapi2::delay(mss::cycles_to_ns(i_target, 1024), mss::cycles_to_simcycles(1024));
+
+    // 13. Deassert the ZCNTL impedance controller enable, Check for DONE in DDRPHY_PC_DLL_ZCAL
+    mss::pc::set_enable_zcal(l_data, mss::LOW);
+    FAPI_TRY( mss::scom_blastah(l_ports, l_zcal_reset_reg, l_data) );
+
+    for (const auto& p : l_ports)
+    {
+        FAPI_TRY( mss::pc::read_dll_zcal_status(p, l_data) );
+        FAPI_ASSERT(mss::pc::get_zcal_status(l_data) == mss::YES,
+                    fapi2::MSS_ZCNTL_FAILED_TO_COMPLETE().set_MCA_IN_ERROR(p),
+                    "zctl enable failed: %s", mss::c_str(p));
+    }
 
 fapi_try_exit:
-#endif
     return fapi2::current_err;
 }
 
@@ -167,30 +169,6 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
 
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-
-///
-/// @brief Unset the PLL and check to see that the PLL's have started
-/// @param[in] i_target the mcbist target
-/// @return FAPI2_RC_SUCCES iff ok
-///
-fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
-{
-    fapi2::buffer<uint64_t> l_data;
-
-    //
-    // Write 0x4000 into the PC Resets Registers. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active
-    //
-    // TODO RTC:156693 Do we need to do this on Nimbus? BRS
-    FAPI_DBG("Write 0x4000 into the PC Resets Regs. This deasserts the PLL_RESET and leaves the SYSCLK_RESET bit active");
-
-    l_data.setBit<MCA_DDRPHY_PC_RESETS_P0_SYSCLK_RESET>();
-    FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-
 }
 
 ///

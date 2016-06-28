@@ -69,12 +69,14 @@ extern "C"
         // 3. Deassert reset_n
         FAPI_TRY( mss::change_resetn(i_target, mss::LOW), "change_resetn for %s failed", mss::c_str(i_target) );
 
-        // 4, 5, 6.
-        FAPI_TRY( mss::toggle_zctl(i_target), "toggle_zctl for %s failed", mss::c_str(i_target) );
+        //
+        // ZCTL Enable
+        //
 
-        // 7, 8.
-        FAPI_INF("deassert_pll_reset for %s", mss::c_str(i_target));
-        FAPI_TRY( mss::deassert_pll_reset(i_target) );
+        // 11. Assert the ZCNTL enable to the internal impedance controller in DDRPHY_PC_RESETS register
+        // 12. Wait at least 1024 dphy_gckn cycles
+        // 13. Deassert the ZCNTL impedance controller enable, Check for DONE in DDRPHY_PC_DLL_ZCAL
+        FAPI_TRY( mss::enable_zctl(i_target), "enable_zctl for %s failed", mss::c_str(i_target) );
 
         //
         // DLL calibration
@@ -95,8 +97,8 @@ extern "C"
         FAPI_INF("set up of phase rotator controls %s", mss::c_str(i_target) );
         FAPI_TRY( mss::setup_phase_rotator_control_registers(i_target, mss::ON) );
 
-        // 17. Wait at least 5932 dphy_nclk clock cycles to allow the dphy_nclk/SysClk alignment circuit to perform initial
-        // alignment.
+        // 17. Wait at least 5932 dphy_nclk clock cycles to allow the dphy_nclk/SysClk alignment circuit to
+        // perform initial alignment.
         FAPI_INF("Wait at least 5932 memory clock cycles for clock alignment circuit to perform initial alignment %s",
                  mss::c_str(i_target));
         FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 5932), 2000) );

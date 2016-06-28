@@ -42,6 +42,11 @@
 </registerFfdc>
 
 <registerFfdc>
+  <id>REG_FFDC_ZCNTL_REGS</id>
+  <scomRegister>MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0</scomRegister>
+</registerFfdc>
+
+<registerFfdc>
   <id>REG_FFDC_DLL_REGS</id>
   <scomRegister>MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0</scomRegister>
 
@@ -310,6 +315,27 @@
   </description>
   <collectRegisterFfdc>
     <id>REG_FFDC_DLL_REGS</id>
+    <target>MCA_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MCA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_ZCNTL_FAILED_TO_COMPLETE</rc>
+  <description>
+    ZCAL failed to complete
+  </description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_ZCNTL_REGS</id>
     <target>MCA_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
