@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -20,52 +20,41 @@
 /// @file p9_npu_scominit.C
 /// @brief Apply SCOM overrides for the NPU unit via an init file
 ///
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_npu_scominit.H>
+#include <p9_npu_scom.H>
 
-extern "C"
-{
 
 ///
 /// p9_npu_scominit HWP entry point (Defined in .H file)
 ///
-    fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                      & i_target)
+fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                  & i_target)
+{
+    fapi2::ReturnCode l_rc;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_DBG("Entering ...");
+    FAPI_DBG("Invoking p9.npu.scom.initfile...");
+    FAPI_EXEC_HWP(l_rc, p9_npu_scom, i_target, FAPI_SYSTEM);
+
+    if (l_rc)
     {
-        //Mark Entry
-        FAPI_DBG("Entering ...");
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        // uint8_t l_capi_mode;
-        // uint8_t l_opt_mode [4];
-        //basically what we need to know is which of the 6 possible NPU bricks are connected to GPUs in the system.
-        //From that information we know which of the 3 NPU Powerbus ramps to activate.
-
-        //Level of NPU involvement is determined from the below 4 pieces of information
-        FAPI_DBG("Collecting system information to determine npu state");
-        //Powerbus Epsilon setting
-        //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CAPI_MODE, FAPI_SYSTEM, l_capi_mode));
-        //Gives information on link type for powerbus snooping setup
-        //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_OPT_MODE, FAPI_SYSTEM, l_opt_mode));
-        //Attribute for GPUs in System
-        //"Link Enable" reflected in targeting mode
-
-        //NPU snoop configuration using above information
-        //scom FIR initialization in initfile
-
-        //Mark Exit
-        FAPI_DBG("Exiting ...");
-
-        //fapi_try_exit:
-        return fapi2::current_err;
+        FAPI_ERR("Error from p9.npu.scom.initfile");
+        fapi2::current_err = l_rc;
+        goto fapi_try_exit;
     }
 
-} // extern "C"
-/* End: */
+fapi_try_exit:
+    FAPI_DBG("Exiting ...");
+    return fapi2::current_err;
+}
+

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -20,10 +20,10 @@
 /// @file p9_npu_scominit.C
 /// @brief Apply SCOM overrides for the NPU unit via an init file
 ///
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB
 
 #ifndef _PROC_NPU_SCOMINIT_H_
@@ -32,21 +32,20 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi2.H>
 
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_npu_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_npu_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 extern "C"
 {
-//------------------------------------------------------------------------------
-// Hardware Procedure
-//------------------------------------------------------------------------------
+
 ///
 /// @brief Apply SCOM overrides for the NPU unit via an init file
 /// @param[in] i_target Reference to processor chip target
