@@ -63,6 +63,7 @@ namespace   INITSERVICE
     const   uint8_t     CTL_CONT_TRACE_DISABLE =   0x00;
     const   uint8_t     CTL_CONT_TRACE_ENABLE  =   0x01;
     const   uint8_t     FLUSH_TRACE_BUFS       =   0x02;
+    const   uint8_t     DUMP_FAPI_ATTR         =   0x03;
 
 
     const   TaskInfo    g_istep255[]  =   {
@@ -78,6 +79,11 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(255,2, "flush_trace_bufs"),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(255,3, "dump_fapi_attr"),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
