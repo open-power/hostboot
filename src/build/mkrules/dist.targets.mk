@@ -215,6 +215,7 @@ fsp.tar_CONTENTS = \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
     $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
+    $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/hb_plat_attr_srvc.H \

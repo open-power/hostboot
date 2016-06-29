@@ -90,6 +90,7 @@ SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
 SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a
 SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
 VPO_FAKE_MVPD = vpo_sysmvpd.dat
+VPO_FAKE_DJVPD = vpo_djvpd.dat
 
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
@@ -146,6 +147,10 @@ cp_hbfiles: .SPECTARG
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
 	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
+        .if(${FAKEPNOR} != "")
+	dd if=${EXT_IMAGE} of=${EXT_FAKE_IMAGE} ibs=5120k conv=sync
+        .endif
+
 
 	# Test signed container, SIGNING_DIR set by env variable
 	.if(${SECUREBOOT} && ${SIGNING_DIR})
@@ -175,7 +180,7 @@ cp_hbfiles: .SPECTARG
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
         .if(${FAKEPNOR} != "")
-	dd if=/dev/zero bs=32K count=1 | tr "\000" "\377" > ${DJVPD_IMAGE}
+	dd if=${${VPO_FAKE_DJVPD}:P} bs=32K count=1 > ${DJVPD_IMAGE}
         .endif
 	# MVPD partition
 	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}

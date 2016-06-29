@@ -43,6 +43,7 @@ BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
 BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:eb8d6b178c16415da16c8edcd9b61bbd61129e3a
 BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:b3b907c2e80b68ffe96e924b9cb0db6735fe4532
+BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:cb2c6de3ad46cdd53605d156e22c4bda8d637a42
 
 
 #Update to Centaur DD2.0 for CCIN 31E8
