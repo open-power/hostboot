@@ -38,7 +38,8 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-build_all: cp_hbfiles inject_ecc build_sbe_partitions build_pnor_images
+build_all: cp_hbfiles gen_default_images
+install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
 #Some useful search paths
 HBFW_OBJPATH = ${.PATH:M*obj*}
@@ -52,6 +53,7 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 #################################################
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
+EXT_FINAL_IMAGE = HBI.bin
 HBRT_IMAGE = hostboot_runtime.bin
 HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
 HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
@@ -62,19 +64,40 @@ BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
 BASE_SHA_IMAGE = hostboot.sha.bin
 TEMP_IMAGE = hostboot.temp.bin
-ALL_HB_IMAGES = ${BASE_IMAGES} \
-                ${BASE_W_HEADER_IMAGE} \
-                ${BASE_ECC_IMAGE}\
-                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE}\
-                ${HBRT_SHA_IMAGE} \
+# Zero filled sections final bin names
+TEST_IMAGE = TEST.bin
+TESTRO_IMAGE = TESTRO.bin
+HBEL_IMAGE = HBEL.bin
+GUARD_IMAGE = GUARD.bin
+GLOBAL_IMAGE = GLOBAL.bin
+DJVPD_IMAGE = DJVPD.bin
+MVPD_IMAGE = MVPD.bin
+CVPD_IMAGE = CVPD.bin
+PAYLOAD_IMAGE = PAYLOAD.bin
+ZERO_FILL_IMAGES = ${TEST_IMAGE} ${TESTRO_IMAGE} ${HBEL_IMAGE} ${GUARD_IMAGE} \
+                   ${GLOBAL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} ${CVPD_IMAGE} \
+                   ${PAYLOAD_IMAGE}
+ALL_HB_IMAGES = ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} ${BASE_ECC_IMAGE}\
+                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE} ${HBRT_SHA_IMAGE} \
                 ${HBRT_HEADER_IMAGE} ${HBRT_ECC_HEADER_IMAGE} \
-                ${TESTDATA} ${TESTDATA_ECC} \
-                ${HBEL_ECC_IMAGE} ${GUARD_ECC_IMAGE} ${GLOBAL_ECC_IMAGE} \
-                ${DJVPD_ECC_IMAGE} ${MVPD_ECC_IMAGE} ${CVPD_ECC_IMAGE} \
-                ${PAYLOAD_ECC_IMAGE}
+                ${EXT_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
+
+# Script to manipulate bin files to prepare for buildpnor (install_all phase)
+GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
+# Paramemter passed into GEN_PNOR_IMAGE_SCRIPT. Note zero filled images pass
+# EMPTY as their file name. This is so the script knows it needs to generate
+# them, rather than use an input.
+GEN_DEFAULT_BIN_FILES = HBI=${EXT_IMAGE},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY
+DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
+
+################################################################################
+# build_all start
+################################################################################
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
+
+gen_default_images: cp_hbfiles
 	echo "00000000001800000000000008000000000000000007EF80" | xxd -r -ps - sbe.header
 	# add version header w/ HBB sha hash
 	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
@@ -94,12 +117,20 @@ cp_hbfiles: .SPECTARG
 	# HBRT partition
 	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=3072K conv=sync
 	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
-
+	# Eventually use genPnorImages for every default image
+	# HBI Partition and ZERO_FILL_IMAGES
+	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
+		${SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT}
 	rm ${TEMP_IMAGE}
 
-clobber_cp_hbfiles:
+clobber_gen_default_images:
 	rm -f ${ALL_HB_IMAGES} \
 	      sbe.header secureboot.header hb.footer hostboot.stage.bin
+
+################################################################################
+# install_all start
+################################################################################
 
 #################################################
 ###  SAMPLE for building an SBE Partition with multiple ECs
@@ -123,7 +154,6 @@ SBE_PART_INFO = \
   s1SbePartition.bin:13=${S1_EC13_BIN},20=${S1_EC20_BIN},21=${S1_EC21_BIN} \
   p8SbePartition.bin:10=${P8_EC10_BIN},20=${P8_EC20_BIN} \
   centSbePartition.bin:10=${CENT_EC10_BIN},20=${CENT_EC20_BIN}
-
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
 	@${MAKE:T:R} BUILD_SPECIFIC_SBEPART \
@@ -172,8 +202,8 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE}
-
+ZERO_FILL_SECTIONS = TEST=${TEST_IMAGE},TESTRO=${TESTRO_IMAGE},HBEL=${HBEL_IMAGE},GUARD=${GUARD_IMAGE},GLOBAL=${GLOBAL_IMAGE},PAYLOAD=${PAYLOAD_IMAGE},CVPD=${CVPD_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_FINAL_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},${ZERO_FILL_SECTIONS}
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
@@ -202,7 +232,7 @@ SBEC_IMG = centSbePartition.bin
 SBEC_IMG_ECC = centSbePartition.bin.ecc
 TEMP_IMG = temp.bin
 
-inject_ecc: build_sbe_partitions
+gen_system_specific_images: build_sbe_partitions
 	# cp file with full path to one with local path
 	cp ${MURANO_SLW_IMG} ${MURANO_LOCAL_SLW_IMG}
 	cp ${NAPLES_SLW_IMG} ${NAPLES_LOCAL_SLW_IMG}
@@ -243,7 +273,15 @@ PNOR_IMG_INFO = \
    venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
 
-__IMAGE_BUILD/% : .SPECTARG .PMAKE cp_hbfiles inject_ecc
+# Added a different dependency chain for hostboot standalone so we can compile
+# faster and call one rule in dist.targets.mk 'update_images_for_sandbox'
+.if( ${HB_STANDALONE} == 1)
+__IMAGE_BUILD/% : .SPECTARG .PMAKE gen_default_images gen_system_specific_images
+# In FSP this is run at install_all phase, so it's assumed all build_all rules
+# have completed. If build_all rule dependencies are added they will run again.
+.else
+__IMAGE_BUILD/% : .SPECTARG .PMAKE gen_system_specific_images
+.endif
 	@${MAKE:T:R} BUILD_SPECIFIC_IMAGE \
 	    "IMAGE_PARAMS=${.TARGET:s/__IMAGE_BUILD\///:s/:/ /g}"
 
@@ -261,13 +299,11 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BINARIES ${IMAGE_BINS}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
-# @TODO RTC:155374 remove --refactor-supported
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp" \
-			--binDir ${PWD} --refactor-supported ${SECUREBOOT:b--secureboot}
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
 	.endif
 .endif
 
@@ -276,6 +312,9 @@ build_pnor_images:.SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}
 clobber_build_pnor_images:
 	${PNOR_IMG_INFO:@image@${pnorimg:!rm -f ${image:s/:/ /g:xs/ .*//};!e}@}
 
+################################################################################
+# Special rule used for hb standalone simics
+################################################################################
 
 #################################################
 #Special target to copy images to flash dir for simics
@@ -283,11 +322,10 @@ clobber_build_pnor_images:
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
 
-update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
+update_images_for_sandbox: gen_default_images gen_system_specific_images build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Copy pnor images to flash dir
 	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || [ "${PNOR}" == "" ]; then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
 .endif
-

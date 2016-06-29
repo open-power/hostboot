@@ -47,4 +47,4 @@ export SIGNING_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-si
 export DEV_KEY_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/dev_keys"
 # --secureboot to trigger HBI hash page table creation and proper container
 # header creation.
-hbDistribute --test --secureboot || exit -1
+hbDistribute --test --secureboot --hb-standalone || exit -1

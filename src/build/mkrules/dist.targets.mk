@@ -77,6 +77,8 @@ COPY_FILES = \
     src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
     src/build/buildpnor/buildpnor.pl:openpower \
+    src/build/buildpnor/genPnorImages.pl:openpower \
+    src/build/buildpnor/PnorUtils.pm:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
     src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
@@ -171,7 +173,7 @@ simics.tar_CONTENTS = \
     src/build/debug/simics-debug-framework.py \
     src/build/debug/simics-debug-framework.pl \
     $(addsuffix :Hostboot/, \
-	$(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm)) \
+    $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm)) \
     img/hbicore$(UNDERSCORE_TEST).syms \
     img/hbicore$(UNDERSCORE_TEST).list.bz2 \
     img/hbicore$(UNDERSCORE_TEST).bin.modinfo \
@@ -201,6 +203,8 @@ fsp.tar_CONTENTS = \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
+    src/build/buildpnor/genPnorImages.pl \
+    src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \

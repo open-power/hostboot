@@ -86,6 +86,10 @@ do
             SECUREBOOT=1
         ;;
 
+        "--hb-standalone")
+            HB_STANDALONE=1
+        ;;
+
         --*)
             echo "ERROR: Unknown option: $ARG"
             exit
@@ -125,6 +129,6 @@ mkdir -p $TARGET_DIR
 export TARGET_TEST
 export TARGET_DIR
 export SECUREBOOT
+export HB_STANDALONE
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
-
