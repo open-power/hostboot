@@ -31,17 +31,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_slot</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>Machine Readable Workbook Thermal Memory Power Limit</description>

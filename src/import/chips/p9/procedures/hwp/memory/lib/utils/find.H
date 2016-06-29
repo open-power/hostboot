@@ -105,7 +105,7 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
     // At this time, fapi2 (cronus?) doesn't seem to recognize a DIMM is the child of an MCS.
-    for (auto p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
     {
         auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>() );
         l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
@@ -120,12 +120,12 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
-        fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
-    for (auto p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
     {
         auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>() );
         l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
@@ -141,13 +141,13 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
 /// @note Cronus should support MCS children of an MCBIST - so this might be temporary
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets( const
-        fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > l_mcses;
 
     // At this time, fapi2 (cronus?) doesn't seem to recognize a MCS is the child of an MCBIST
-    for (auto p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
     {
         fapi2::Target<fapi2::TARGET_TYPE_MCS> l_mcs = p.getParent<fapi2::TARGET_TYPE_MCS>();
 
@@ -170,11 +170,34 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets( const
 /// @return a vector of fapi2::TARGET_TYPE_MCA
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets( const
-        fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
 }
+///
+/// @brief find all the MCA connected to an MCS
+/// @param[in] i_target a fapi2::Target MCS
+/// @return a vector of fapi2::TARGET_TYPE_MCA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+}
+
+///
+/// @brief find the MCS given a MCA
+/// @param[in] i_target the fapi2 target MCA
+/// @return a MCS target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_MCS>();
+}
+
 
 ///
 /// @brief find all the DIMM connected to an MCA
@@ -182,8 +205,8 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets( const
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
-        fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     return i_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
 }

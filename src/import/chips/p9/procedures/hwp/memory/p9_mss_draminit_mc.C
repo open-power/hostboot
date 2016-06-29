@@ -51,15 +51,13 @@ extern "C"
         // No need to check to see if we have ports - this loop will just be skipped
         for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
         {
-            mss::mc<TARGET_TYPE_MCS> l_mc;
-
             // Don't do this yet - leverage the sim inits for the moment
 #if 0
             // All the scominit for this MCA
             l_mc.scominit(p);
 #endif
             // Setup the MC port/dimm address translation registers
-            FAPI_TRY( l_mc.setup_xlate_map(p) );
+            FAPI_TRY( mss::mc::setup_xlate_map(p) );
 
             // Setup the read_pointer_delay
             // TK: Do we need to do this in general or is this a place holder until the

@@ -38,10 +38,9 @@ extern "C"
 {
 ///
 /// @brief configure and start the OCC and thermal cache
-/// @param[in] i_target the controller target
+/// @param[in] i_target the controller target (MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
 }
-
 #endif

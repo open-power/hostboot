@@ -143,36 +143,33 @@ enum
     MAX_TRANSLATIONS = 31,
 };
 
-///
-/// @class mss::mc
-/// @brief The memory controller class
-/// @tparam T the fapi2::TargetType of the controller
-///
-template< fapi2::TargetType T >
-class mc
+namespace mc
 {
 
-    public:
-        ///
-        /// @brief Perform initializations for the MC
-        /// @tparam T the fapi2::TargetType
-        /// @param[in] i_target the target which has the MCs to initialize
-        /// @return FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode scominit(const fapi2::Target<T>& i_target);
+///
+/// @brief safemode throttle values defined from MRW attributes
+/// @param[in] i_target the MCA target
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note sets safemode values for emergency mode and regular throttling
+///
+fapi2::ReturnCode thermal_throttle_scominit (const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+///
+/// @brief Disable emergency mode throttle for thermal_init
+/// @param[in] i_target the MCS target
+/// @return FAPI_RC_SUCCESS iff ok
+/// @note Clears MCMODE0_ENABLE_EMER_THROTTLE bit in MCSMODE0
+///
+fapi2::ReturnCode disable_emergency_throttle (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
-        ///
-        /// @brief Perform initializations of the MC translation
-        /// @tparam P the fapi2::TargetType of the port
-        /// @tparam TT the typename of the traits
-        /// @param[in] i_target the target which has the MCA to map
-        /// @return FAPI2_RC_SUCCESS iff ok
-        ///
-        template< fapi2::TargetType P, typename TT = mcTraits<T> >
-        fapi2::ReturnCode setup_xlate_map(const fapi2::Target<P>& i_target);
-
-};
-
-}
-
+///
+/// @brief Perform initializations of the MC translation
+/// @tparam P the fapi2::TargetType of the port
+/// @tparam TT the mcTraits associated with P
+/// @param[in] i_target the target which has the MCA to map
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType P,  typename TT = mcTraits<P> >
+fapi2::ReturnCode setup_xlate_map(const fapi2::Target<P>& i_target);
+} //mc
+} //mss
 #endif

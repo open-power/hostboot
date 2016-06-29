@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -16,6 +16,8 @@
 # deposited with the U.S. Copyright Office.
 #
 # IBM_PROLOG_END_TAG
+-include 00common.mk
 
 PROCEDURE=p9_mss_thermal_init
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
