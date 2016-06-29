@@ -31,7 +31,7 @@
 // *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : IO
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : FSP:HB
 //----------------------------------------------------------------------------
 
@@ -66,10 +66,10 @@ extern "C" {
      * Should be called for all valid/connected XBUS endpoints
      *
      * @param[in] i_target           Reference to XBUS chiplet target
-     *            i_connected_target Reference to connected XBUS chiplet target
+     * @param[in] i_connected_target Reference to connected XBUS chiplet target
      *                                    - p9.xbus.g0.scom.initfile
      *                                    - p9.xbus.g1.scom.initfile
-     *            i_group            Reference to XBUS group-0/1
+     * @param[in] i_group            Reference to XBUS group-0/1
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
