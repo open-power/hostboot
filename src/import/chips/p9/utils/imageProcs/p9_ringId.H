@@ -163,20 +163,21 @@ enum RingID
     xb_io2_gptr = 85,
     xb_io2_time = 86,
     xb_pll_gptr = 87,
-    xb_pll_bndy  = 89,
-    xb_pll_bndy_bucket_1 = 90,
-    xb_pll_bndy_bucket_2 = 91,
-    xb_pll_bndy_bucket_3 = 92,
-    xb_pll_bndy_bucket_4 = 93,
-    xb_pll_bndy_bucket_5 = 94,
-    xb_pll_func = 95,
+    xb_pll_bndy  = 88,
+    xb_pll_bndy_bucket_1 = 89,
+    xb_pll_bndy_bucket_2 = 90,
+    xb_pll_bndy_bucket_3 = 91,
+    xb_pll_bndy_bucket_4 = 92,
+    xb_pll_bndy_bucket_5 = 93,
+    xb_pll_func = 94,
 
     // X-Bus Chiplet Rings
     // X0, X1 and X2 instance specific Rings
-    xb_repr = 96,
-    xb_io0_repr = 97,
-    xb_io1_repr = 98,
-    xb_io2_repr = 99,
+    xb_repr = 95,
+    xb_io0_repr = 96,
+    xb_io1_repr = 97,
+    xb_io2_repr = 98,
+    // values 99 unused
     // values 100 unused
 
     // MC Chiplet Rings
@@ -1088,17 +1089,18 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {XB::xb_io2_gptr,               "xb_io2_gptr"},  // 85
     {XB::xb_io2_time,               "xb_io2_time"},  // 86
     {XB::xb_pll_gptr,               "xb_pll_gptr"},  // 87
-    {XB::xb_pll_bndy,               "xb_pll_bndy"},  // 89
-    {XB::xb_pll_bndy_bucket_1,      "xb_pll_bndy_bucket_1"}, // 90
-    {XB::xb_pll_bndy_bucket_2,      "xb_pll_bndy_bucket_2"}, // 91
-    {XB::xb_pll_bndy_bucket_3,      "xb_pll_bndy_bucket_3"}, // 92
-    {XB::xb_pll_bndy_bucket_4,      "xb_pll_bndy_bucket_4"}, // 93
-    {XB::xb_pll_bndy_bucket_5,      "xb_pll_bndy_bucket_5"}, // 94
-    {XB::xb_pll_func,               "xb_pll_func"},  // 95
-    {XB::xb_repr,                   "xb_repr"},     // 96
-    {XB::xb_io0_repr,               "xb_io0_repr"}, // 97
-    {XB::xb_io1_repr,               "xb_io1_repr"}, // 98
-    {XB::xb_io2_repr,               "xb_io2_repr"}, // 99
+    {XB::xb_pll_bndy,               "xb_pll_bndy"},  // 88
+    {XB::xb_pll_bndy_bucket_1,      "xb_pll_bndy_bucket_1"}, // 89
+    {XB::xb_pll_bndy_bucket_2,      "xb_pll_bndy_bucket_2"}, // 90
+    {XB::xb_pll_bndy_bucket_3,      "xb_pll_bndy_bucket_3"}, // 91
+    {XB::xb_pll_bndy_bucket_4,      "xb_pll_bndy_bucket_4"}, // 92
+    {XB::xb_pll_bndy_bucket_5,      "xb_pll_bndy_bucket_5"}, // 93
+    {XB::xb_pll_func,               "xb_pll_func"},  // 94
+    {XB::xb_repr,                   "xb_repr"},     // 95
+    {XB::xb_io0_repr,               "xb_io0_repr"}, // 96
+    {XB::xb_io1_repr,               "xb_io1_repr"}, // 97
+    {XB::xb_io2_repr,               "xb_io2_repr"}, // 98
+    {INVALID_RING,                  ""}, // 99 // for future.
     {INVALID_RING,                  ""}, // 100 // for future.
 
     // MC Ring
@@ -1347,17 +1349,18 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {XB::xb_io2_gptr,           XB_TYPE},  // 85
     {XB::xb_io2_time,           XB_TYPE},  // 86
     {XB::xb_pll_gptr,           XB_TYPE},  // 87
-    {XB::xb_pll_bndy,           XB_TYPE},  // 89
-    {XB::xb_pll_bndy_bucket_1,  XB_TYPE}, // 90
-    {XB::xb_pll_bndy_bucket_2,  XB_TYPE}, // 91
-    {XB::xb_pll_bndy_bucket_3,  XB_TYPE}, // 92
-    {XB::xb_pll_bndy_bucket_4,  XB_TYPE}, // 93
-    {XB::xb_pll_bndy_bucket_5,  XB_TYPE}, // 94
-    {XB::xb_pll_func,           XB_TYPE},  // 95
-    {XB::xb_repr,               XB_TYPE},     // 96
-    {XB::xb_io0_repr,           XB_TYPE}, // 97
-    {XB::xb_io1_repr,           XB_TYPE}, // 98
-    {XB::xb_io2_repr,           XB_TYPE}, // 99
+    {XB::xb_pll_bndy,           XB_TYPE},  // 88
+    {XB::xb_pll_bndy_bucket_1,  XB_TYPE}, // 89
+    {XB::xb_pll_bndy_bucket_2,  XB_TYPE}, // 90
+    {XB::xb_pll_bndy_bucket_3,  XB_TYPE}, // 91
+    {XB::xb_pll_bndy_bucket_4,  XB_TYPE}, // 92
+    {XB::xb_pll_bndy_bucket_5,  XB_TYPE}, // 93
+    {XB::xb_pll_func,           XB_TYPE},  // 94
+    {XB::xb_repr,               XB_TYPE},     // 95
+    {XB::xb_io0_repr,           XB_TYPE}, // 96
+    {XB::xb_io1_repr,           XB_TYPE}, // 97
+    {XB::xb_io2_repr,           XB_TYPE}, // 98
+    {INVALID_RING,              XB_TYPE}, // 99  // for future.
     {INVALID_RING,              XB_TYPE}, // 100  // for future.
 
     // MC Ring
