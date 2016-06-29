@@ -950,6 +950,7 @@
     <attribute><id>PFET_OFF_CONTROLS</id></attribute>
     <attribute><id>MC_SYNC_MODE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+    <attribute><id>OBUS_RATIO_VALUE</id></attribute>
     <!-- proc_fbc_eff_config_links -->
     <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
     <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
