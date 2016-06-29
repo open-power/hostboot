@@ -31,7 +31,7 @@
 // *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : IO
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : FSP:HB
 //----------------------------------------------------------------------------
 //
@@ -159,16 +159,46 @@ fapi2::ReturnCode p9_io_xbus_scominit(
             FAPI_INF("Group 0:Invoke FAPI procedure core: input_target");
             FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_target, l_system_target);
 
+            if( rc )
+            {
+                FAPI_ERR( "P9 Xbus G0 Main Target Scominit Failed" );
+                fapi2::current_err = rc;
+                break;
+            }
+
             FAPI_INF("Group 0:Invoke FAPI procedure core: connected_target");
             FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_connected_target, l_system_target);
+
+            if( rc )
+            {
+                FAPI_ERR( "P9 Xbus G0 Connected Target Scominit Failed" );
+                fapi2::current_err = rc;
+                break;
+            }
+
             break;
 
         case ENUM_ATTR_XBUS_GROUP_1:
             FAPI_INF("Group 1:Invoke FAPI procedure core: input_target");
             FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_target, l_system_target);
 
+            if( rc )
+            {
+                FAPI_ERR( "P9 Xbus G1 Main Target Scominit Failed" );
+                fapi2::current_err = rc;
+                break;
+            }
+
             FAPI_INF("Group 1:Invoke FAPI procedure core: connected_target");
             FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_connected_target, l_system_target);
+
+            if( rc )
+            {
+                FAPI_ERR( "P9 Xbus G1 Connected Target Scominit Failed" );
+                fapi2::current_err = rc;
+                break;
+            }
+
             break;
     }
 
