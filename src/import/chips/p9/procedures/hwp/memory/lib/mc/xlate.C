@@ -53,20 +53,20 @@ using fapi2::TARGET_TYPE_DIMM;
 
 using fapi2::FAPI2_RC_SUCCESS;
 
-
 namespace mss
 {
+namespace mc
+{
 
-///
+
 /// @brief Perform initializations of the MC translation
-/// @tparm P, the fapi2::TargetType of the port
-/// @tparm TT, the typename of the traits
+/// @tparm P the fapi2::TargetType of the port
+/// @tparm TT the typename of the traits
 /// @param[in] i_target, the target which has the MCA to map
 /// @return FAPI2_RC_SUCCESS iff ok
-///
+
 template<>
-template<>
-fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
+fapi2::ReturnCode setup_xlate_map(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
     fapi2::buffer<uint64_t> l_xlate;
     fapi2::buffer<uint64_t> l_xlate1;
@@ -175,7 +175,6 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
     // Row 16,17 bit maps are ignored.
     // Row 15 maps to Port Address bit 6
 
-
     // Drop down the column assignments
     l_xlate1.insertFromRight<MCS_PORT02_MCP0XLT1_COL4_BIT_MAP,
                              MCS_PORT02_MCP0XLT1_COL4_BIT_MAP_LEN>(0b01101);
@@ -218,6 +217,5 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-
-} // namespace
+} // namespace mc
+} // namespace mss
