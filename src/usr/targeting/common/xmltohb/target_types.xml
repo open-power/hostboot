@@ -724,6 +724,7 @@
     <attribute><id>PFET_VCS_VOFF_SEL</id></attribute>
     <attribute><id>SYSTEM_IPL_PHASE</id></attribute>
     <attribute><id>FREQ_CORE_CEILING_MHZ</id></attribute>
+    <attribute><id>ULTRA_TURBO_FREQ_MHZ</id></attribute>
     <attribute><id>PROC_FABRIC_A_BUS_WIDTH</id></attribute>
     <attribute><id>PROC_FABRIC_X_BUS_WIDTH</id></attribute>
     <attribute><id>PROC_FABRIC_CCSM_MODE</id></attribute>
@@ -934,7 +935,14 @@
     <attribute><id>NODE_POS</id></attribute>
     <attribute><id>BOOT_FREQ</id></attribute>
     <attribute><id>VCS_BOOT_VOLTAGE</id></attribute>
+    <attribute><id>VDN_BOOT_VOLTAGE</id></attribute>
     <attribute><id>VDD_BOOT_VOLTAGE</id></attribute>
+    <attribute><id>VDD_AVSBUS_RAIL</id></attribute>
+    <attribute><id>VDD_AVSBUS_BUSNUM</id></attribute>
+    <attribute><id>VDN_AVSBUS_RAIL</id></attribute>
+    <attribute><id>VDN_AVSBUS_BUSNUM</id></attribute>
+    <attribute><id>VCS_AVSBUS_RAIL</id></attribute>
+    <attribute><id>VCS_AVSBUS_BUSNUM</id></attribute>
     <attribute><id>CHIP_POS</id></attribute>
     <attribute><id>CLOCK_PLL_MUX</id></attribute>
     <attribute><id>CLOCK_PLL_MUX0</id></attribute>

@@ -19460,9 +19460,8 @@ DEPRECATED!!!!
         <id>ATTR_VDD_AVSBUS_BUSNUM</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19484,9 +19483,8 @@ DEPRECATED!!!!
         <id>ATTR_VDN_AVSBUS_BUSNUM</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19509,9 +19507,8 @@ DEPRECATED!!!!
         <id>ATTR_VDD_AVSBUS_RAIL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19534,9 +19531,55 @@ DEPRECATED!!!!
         <id>ATTR_VDN_AVSBUS_RAIL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VCS_AVSBUS_RAIL</id>
+    <description>
+      Defines the AVSBus rail selector number (0 - 15) for the VCS VRM on the bus
+      defined by ATTR_AVSBUS_VCS_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers:
+      p9_set_avsbus_voltage (tool);
+                  p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VCS_AVSBUS_RAIL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>VCS_AVSBUS_BUSNUM</id>
+    <description>
+      Defines the AVSBus (0 or 1) which has the core VCS rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                p9_set_voltage (tool);
+                p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VCS_AVSBUS_BUSNUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 <attribute>
@@ -21650,7 +21693,7 @@ DEPRECATED!!!!
   <simpleType>
     <uint32_t>
 <!--TODO RTC:151649 Remove default value when data is pulled from MVPD #V -->
-      <default>4800</default>
+        <default>4800</default>
     </uint32_t>
   </simpleType>
   <persistency>volatile</persistency>
