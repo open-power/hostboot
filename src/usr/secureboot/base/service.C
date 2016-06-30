@@ -43,25 +43,21 @@ namespace SECUREBOOT
         do
         {
 
-// Don't blind purge in VPO
-#ifndef CONFIG_P9_VPO_COMPILE
-
             // Load original secureboot header.
             if (enabled())
             {
                 Singleton<Header>::instance().loadBaseHeader();
             }
 
-            // Run dcbz on the entire 10MB cache
-            assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
-#else
             // Extend memory footprint into lower portion of cache.
             assert(0 == mm_extend(MM_EXTEND_PARTIAL_CACHE));
 
-#endif
-
-// Disable SecureROM in VPO
+            // Don't extend more than 1/2 cache in VPO as fake PNOR is there
+            // Don't enable SecureROM in VPO
 #ifndef CONFIG_P9_VPO_COMPILE
+            // Run dcbz on the entire 10MB cache
+            assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
+
             // Initialize the Secure ROM
             l_errl = initializeSecureROM();
             if (l_errl)
