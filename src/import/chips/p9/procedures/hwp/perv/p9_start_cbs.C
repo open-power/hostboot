@@ -32,10 +32,13 @@
 
 //## auto_generated
 #include "p9_start_cbs.H"
+//## auto_generated
+#include "p9_const_common.H"
 
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
-
+#include <p9_perv_scom_addresses_fixes.H>
+#include <p9_perv_scom_addresses_fld_fixes.H>
 
 enum P9_START_CBS_Private_Constants
 {
@@ -49,7 +52,10 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                & i_target_chip,
                                const bool i_sbe_start)
 {
+    fapi2::buffer<uint32_t> l_read_reg ;
+    bool l_read_vdn_pgood_status = false;
     bool l_sbe_start_value = false;
+    bool l_fsi2pib_status = false;
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     int l_timeout = 0;
@@ -66,6 +72,17 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     l_data32_cbs_cs.writeBit<3>(l_sbe_start_value);
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
+
+    FAPI_DBG("check for VDN_PGOOD");
+    //Getting PERV_CBS_ENVSTAT register value
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_ENVSTAT_FSI,
+                                    l_data32));
+    l_read_vdn_pgood_status =
+        l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>();  //l_read_vdn_pgood_status = PERV_CBS_ENVSTAT.PERV_CBS_ENVSTAT_C4_VDN_GPOOD
+
+    FAPI_ASSERT(l_read_vdn_pgood_status,
+                fapi2::VDN_PGOOD_NOT_SET(),
+                "ERROR:VDN PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
 
     FAPI_DBG("Resetting CFAM Boot Sequencer (CBS) to flush value");
     //Setting CBS_CS register value
@@ -107,7 +124,18 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
 
     FAPI_ASSERT(l_timeout > 0,
                 fapi2::CBS_CS_INTERNAL_STATE(),
-                "ERROR:STATE NOT SET , CBS_CS BIT 30 NOT SET");
+                "ERROR: CBS_CS_INTERNAL_STATE_VECTOR HAS NOT REACHED IDLE STATE VALUE 0x002 ");
+
+    FAPI_DBG("check for VDD status");
+    //Getting FSI2PIB_STATUS register value
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_FSI2PIB_STATUS_FSI,
+                                    l_data32));
+    //l_fsi2pib_status = CFAM.FSI2PIB_STATUS.VDD_NEST_OBSERVE
+    l_fsi2pib_status = l_data32.getBit<PERV_FSI2PIB_STATUS_VDD_NEST_OBSERVE>();
+
+    FAPI_ASSERT(l_fsi2pib_status,
+                fapi2::VDD_NEST_OBSERVE(),
+                "ERROR:VDD OFF, FSI2PIB  BIT 16 NOT SET");
 
     FAPI_INF("Exiting ...");
 
