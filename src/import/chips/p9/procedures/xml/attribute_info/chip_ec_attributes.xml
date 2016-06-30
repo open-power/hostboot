@@ -85,4 +85,77 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_VITL_CLK_SETUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 for differentiating present/functional targets. True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FSI_GP_SHADOWS_OVERWRITE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers. True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_N3_FLUSH_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 update : Flush mode not initiated for N3. True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SDISN_SETUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Sdis_n set or clear : flushing LCBES condition woraround. True if:
+      Nimbus EC less than 20
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>

@@ -553,14 +553,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_SDISN_SETUP</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Sdis_n set or clear : flushing LCBES condition woraround</description>
-  <valueType>uint8</valueType>
-  <platInit/>
-</attribute>
-
-<attribute>
   <id>ATTR_SECURITY_ENABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Holds the state of Security Access Bit (SAB)</description>
@@ -585,14 +577,6 @@
   <description>To disable force pfet off control from fuse status</description>
   <valueType>uint32</valueType>
   <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_VITL_CLK_SETUP</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Nimbus DD1</description>
-    <valueType>uint8</valueType>
-    <platInit/>    
 </attribute>
 
 <attribute>
@@ -639,22 +623,6 @@
   <description>IPL for skew adjust and duty cycle adjust</description>
   <valueType>uint8</valueType>
   <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-</attribute>
-
-<attribute>
-    <id>ATTR_N3_FLUSH_MODE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>DD1 update : Flush mode not for N3</description>
-    <valueType>uint8</valueType>
-    <platInit/>
 </attribute>
 
 <attribute>

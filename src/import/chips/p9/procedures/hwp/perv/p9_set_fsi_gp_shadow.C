@@ -44,7 +44,7 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
     fapi2::buffer<uint8_t> l_read_attr;
     FAPI_INF("Entering ...");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FSI_GP_SHADOWS_OVERWRITE, i_target_chip,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_FSI_GP_SHADOWS_OVERWRITE, i_target_chip,
                            l_read_attr));
 
     if ( l_read_attr )
