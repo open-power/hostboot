@@ -50,14 +50,14 @@ chip p9_nimbus
     register GLOBAL_CS_FIR
     {
         name        "Global Checkstop Attention FIR";
-        scomaddr    0x570F001C;
+        scomaddr    0x500F001C;
         capture     group default;
     };
 
     register GLOBAL_RE_FIR
     {
         name        "Global Recoverable Attention FIR";
-        scomaddr    0x570F001B;
+        scomaddr    0x500F001B;
         capture     group default;
     };
 
@@ -68,7 +68,7 @@ chip p9_nimbus
     register GLOBAL_UCS_FIR
     {
         name        "Global Unit Checkstop FIR";
-        scomaddr    0x57040018;
+        scomaddr    0x50040018;
         capture     group default;
     };
 
@@ -79,7 +79,7 @@ chip p9_nimbus
     register GLOBAL_HA_FIR
     {
         name        "Global Host Attention FIR";
-        scomaddr    0x57040009;
+        scomaddr    0x50040009;
         capture     group default;
     };
 
