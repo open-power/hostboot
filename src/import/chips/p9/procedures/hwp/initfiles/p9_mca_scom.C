@@ -29,7 +29,6 @@
 
 using namespace fapi2;
 
-constexpr auto literal_0b000000 = 0b000000;
 constexpr auto literal_0b0100 = 0b0100;
 constexpr auto literal_0x1 = 0x1;
 constexpr auto literal_4 = 4;
@@ -76,27 +75,6 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
     do
     {
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            l_rc = fapi2::getScom( TGT0, 0x5010823ull, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x5010823ull)");
-                break;
-            }
-
-            {
-                l_scom_buffer.insert<uint64_t> (literal_0b000000, 28, 6, 58 );
-            }
-
-            l_rc = fapi2::putScom(TGT0, 0x5010823ull, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x5010823ull)");
-                break;
-            }
-        }
         {
             l_rc = fapi2::getScom( TGT0, 0x5010824ull, l_scom_buffer );
 
