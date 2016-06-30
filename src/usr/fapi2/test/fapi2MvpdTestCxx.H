@@ -317,7 +317,9 @@ public:
 
   } //testMvpdValidate
 
-  void testMvpdGetPoundVBucket(void)
+//@TODO RTC:157185 Re-enable testmvpdgetpoundvbucket test case
+//                 after version 3 of #v is merged into HB
+  void _testMvpdGetPoundVBucket(void)
   {
       int numTests = 0;
       int numFails = 0;
