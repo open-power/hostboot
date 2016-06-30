@@ -92,7 +92,7 @@ inline T freq_to_ps(const T i_transfer_rate)
     T l_dimm_freq = i_transfer_rate / 2;
 
     // ps per clock (note value is rounded down)
-    return CONVERT_PS_IN_A_US / l_dimm_freq;
+    return CONVERT_PS_IN_A_US / ((l_dimm_freq == 0) ? 1 : l_dimm_freq);
 }
 
 ///
@@ -107,7 +107,7 @@ inline T ps_to_freq(const T i_time_in_ps)
     // reverse of freq_to_ps function, solving for freq
     // since running at DDR, data is transferred on both rising & falling edges
     // hence the 2X factor
-    return (2 * CONVERT_PS_IN_A_US) / i_time_in_ps;
+    return (2 * CONVERT_PS_IN_A_US) / ((i_time_in_ps == 0) ? 1 : i_time_in_ps);
 }
 
 ///
@@ -140,7 +140,7 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 
     // Hoping the compiler figures out how to do these together.
     l_divisor = freq_to_ps(l_freq);
-    l_quotient = i_ps / l_divisor;
+    l_quotient = i_ps / ((l_divisor == 0) ? 1 : l_divisor);
     l_remainder = i_ps % l_divisor;
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
@@ -222,7 +222,7 @@ inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t 
 {
     // Hoping the compiler figures out how to do these together.
     uint64_t l_dividend = cycles_to_ps(i_target, i_cycles);
-    uint64_t l_quotient = l_dividend / D;
+    uint64_t l_quotient = l_dividend / ((D == 0) ? 1 : D);
     uint64_t l_remainder = l_dividend % D;
 
     // Make sure we add time if there wasn't an even number of cycles

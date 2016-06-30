@@ -32,6 +32,7 @@
 #include <p9_mca_scom.H>
 #include <p9_mcbist_scom.H>
 #include <p9_ddrphy_scom.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -50,8 +51,20 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
     fapi2::ReturnCode l_rc;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("... skipping mss_scominit %s - no DIMM ...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     for (auto l_mca_target : l_mca_targets )
     {
+        if (mss::count_dimm(l_mca_target) == 0)
+        {
+            FAPI_INF("... skipping mca_scominit %s - no DIMM ...", mss::c_str(l_mca_target));
+            continue;
+        }
+
         FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target, i_target, l_mca_target.getParent<fapi2::TARGET_TYPE_MCS>(),
                       FAPI_SYSTEM );
 

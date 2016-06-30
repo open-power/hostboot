@@ -36,6 +36,7 @@
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/sim.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -53,6 +54,15 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
     // If we're running in the simulator, we want to only touch the addresses which training touched
     uint8_t is_sim = 0;
+
+    // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+    // attributes for the PHY, etc.
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("... skipping scrub for %s - no DIMM ...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
     if (is_sim)

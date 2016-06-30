@@ -31,6 +31,7 @@
 #include <mss.H>
 
 #include <p9_mss_draminit_training.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -49,6 +50,14 @@ extern "C"
         fapi2::buffer<uint16_t> l_cal_steps_enabled = i_special_training;
 
         FAPI_INF("Start draminit training");
+
+        // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+        // attributes for the PHY, etc.
+        if (mss::count_dimm(i_target) == 0)
+        {
+            FAPI_INF("... skipping draminit_training %s - no DIMM ...", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         uint8_t l_reset_disable = 0;
         FAPI_TRY( mss::mrw_draminit_reset_disable(l_reset_disable) );

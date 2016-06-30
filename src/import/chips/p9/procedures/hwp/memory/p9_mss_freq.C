@@ -81,8 +81,12 @@ extern "C"
                      "Failed check for freq_override()");
 
 #endif
-            // Default values for initialization as well as empty dimm list case
-            uint64_t l_min_dimm_freq = 0;
+            // We set this to a non-0 so we avoid divide-by-zero errors in the conversions which
+            // go from clocks to time (and vice versa.) We have other bugs if there was really
+            // no mt/s determined and there really is a DIMM installed, so this is ok.
+            // We pick the maximum frequency supported by the system as the default.
+            // TK remove this when we can ask the MRW for the fastest the system supports
+            uint64_t l_min_dimm_freq = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
             uint64_t l_desired_cas_latency = 0;
 
             if(l_cas_latency.iv_dimm_list_empty)
@@ -109,13 +113,14 @@ extern "C"
 
                 FAPI_INF("Selected DIMM speed from supported speeds: %d", l_min_dimm_freq);
 
-                // Set attributes
-                FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
-                         "Failed set_freq_attrs()");
-
-                FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
-                         "Failed set_CL_attr()");
             }// end else
+
+            // Set attributes
+            FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
+                     "Failed set_freq_attrs()");
+
+            FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
+                     "Failed set_CL_attr()");
 
             FAPI_INF( "Final Chosen Frequency: %d",  l_min_dimm_freq);
             FAPI_INF( "Final Chosen CL: %d",  l_desired_cas_latency);

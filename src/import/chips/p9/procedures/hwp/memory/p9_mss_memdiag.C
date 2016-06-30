@@ -31,6 +31,7 @@
 #include <p9_mss_memdiag.H>
 
 #include <lib/utils/poll.H>
+#include <lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
@@ -49,6 +50,14 @@ extern "C"
     fapi2::ReturnCode p9_mss_memdiag( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
         FAPI_INF("Start memdiag");
+
+        // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+        // attributes for the PHY, etc.
+        if (mss::count_dimm(i_target) == 0)
+        {
+            FAPI_INF("... skipping mem_diags %s - no DIMM ...", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         // Unmask the memdiags FIR
         FAPI_TRY( mss::unmask_memdiags_errors(i_target) );

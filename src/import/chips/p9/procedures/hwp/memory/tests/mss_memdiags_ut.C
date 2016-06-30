@@ -40,6 +40,7 @@
 #include <lib/eff_config/memory_size.H>
 
 #include <lib/utils/poll.H>
+#include <lib/utils/count_dimm.H>
 #include <tests/target_fixture.H>
 
 using fapi2::FAPI2_RC_SUCCESS;
@@ -265,6 +266,14 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 REQUIRE( 0xfffffffffe00067f == l_t );
             }
         }
+
+
+        // If there are no DIMM we don't need to bother.
+        if (mss::count_dimm(i_target) == 0)
+        {
+            return 0;
+        }
+
 
         // Note that the testing of the memdiags operations leverages the helper directly
         // is it is more flexible allowing better control over simulation environments.

@@ -34,6 +34,7 @@
 #include <mss.H>
 
 #include <p9_mss_ddr_phy_reset.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
@@ -48,6 +49,14 @@ extern "C"
     fapi2::ReturnCode p9_mss_ddr_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
     {
         FAPI_INF("********* %s start *********", __func__);
+
+        // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+        // attributes for the PHY, etc.
+        if (mss::count_dimm(i_target) == 0)
+        {
+            FAPI_INF("... skipping ddr_phy_reset %s - no DIMM ...", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         // Initialize via scoms. Could be put in to p9_mss_scominit.C if that ever exists BRS.
         FAPI_TRY( mss::phy_scominit(i_target) );

@@ -34,6 +34,7 @@
 
 #include <p9_mss_freq_system.H>
 #include <lib/utils/find.H>
+#include <lib/utils/count_dimm.H>
 #include <lib/freq/sync.H>
 
 using fapi2::TARGET_TYPE_SYSTEM;
@@ -51,6 +52,23 @@ extern "C"
     fapi2::ReturnCode p9_mss_freq_system( const std::vector< fapi2::Target<TARGET_TYPE_MCBIST> >& i_targets )
     {
         FAPI_INF("----- In p9_mss_freq_system ----");
+
+        // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+        // attributes for the PHY, etc. If there is even one DIMM on any of this list of MCBIST,
+        // we do the right thing.
+        uint64_t l_dimm_count = 0;
+        std::for_each( i_targets.begin(), i_targets.end(),
+                       [&l_dimm_count](const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
+        {
+            l_dimm_count += mss::count_dimm(i_target);
+        }
+                     );
+
+        if (l_dimm_count == 0)
+        {
+            FAPI_INF("... skipping freq_system - no DIMM ...");
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         std::map< fapi2::Target<TARGET_TYPE_MCBIST>, uint64_t > l_freq_map;
         uint32_t l_nest_freq = 0;
