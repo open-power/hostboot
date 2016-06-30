@@ -129,14 +129,15 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Extended image (5.625MB)</description>
+        <description>Hostboot Extended image (5.5MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x29D000</physicalOffset>
-        <physicalRegionSize>0x5A0000</physicalRegionSize>
+        <physicalRegionSize>0x630000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
+    <!-- @fixme - Put this back later (RTC:154286)
     <section>
         <description>Centaur SBE (576K)</description>
         <eyeCatch>SBEC</eyeCatch>
@@ -146,6 +147,7 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
+    -->
     <section>
         <description>SBE-IPL (Staging Area) (288K)</description>
         <eyeCatch>SBE</eyeCatch>

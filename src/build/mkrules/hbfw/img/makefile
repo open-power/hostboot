@@ -134,14 +134,14 @@ cp_hbfiles: .SPECTARG
 	sha512sum ${EXT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${EXT_SHA_IMAGE}
 	dd if=${EXT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
 	cat ${EXT_IMAGE} >> ${TEMP_IMAGE}
-	# HBI partition size w/o ECC = 5MB (5120K)
-	# If "--test" flag set do not pad to ibs=5120k, as the test HBI images is
+	# HBI partition size w/o ECC = 5.5MB (5632K)
+	# If "--test" flag set do not pad to ibs=5632k, as the test HBI images is
 	# possibly larger than parition size and does not need to be fully padded.
 	# Size adjustments made in buildpnor.pl
 	.if(${TARGET_TEST})
 		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
 	.else
-		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
+		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5632k conv=sync
 	.endif
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
@@ -293,15 +293,17 @@ inject_ecc: build_sbe_partitions
 	# SBE partition
 	dd if=${${NIMBUS_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_SBE_IMG_ECC} --p8; \
+        #@fixme - put this back after we adjust the layout (RTC:154286)
 	# SBEC partition
-	dd if=${${SBEC_IMG}:P} of=${TEMP_IMG} ibs=512k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${SBEC_IMG_ECC} --p8; \
+	#dd if=${${SBEC_IMG}:P} of=${TEMP_IMG} ibs=512k conv=sync; \
+	#ecc --inject ${TEMP_IMG} --output ${SBEC_IMG_ECC} --p8; \
 	# WINK partition
 	dd if=${${NIMBUS_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_LOCAL_SLW_IMG_ECC} --p8; \
 	rm ${TEMP_IMG}
 
-NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NIMBUS_LOCAL_SLW_IMG_ECC}
+#@fixme - Put SBEC back (RTC:154286)  "SBEC=${SBEC_IMG_ECC},"
+NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},WINK=${NIMBUS_LOCAL_SLW_IMG_ECC}
 FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE},WINK=${NIMBUS_LOCAL_SLW_IMG}
 
 # To build fake PNOR, set FAKEPNOR to filename of file to build,
