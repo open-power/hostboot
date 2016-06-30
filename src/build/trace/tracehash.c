@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -471,14 +471,7 @@ void create_sections(bfd* inFile, asection* s, void* param)
             // for this section to point to the group
             // symbol
             // Binutils 2.24 BFD requires an offset of 176
-            // Binutils 2.22 BFD requires an offset of 168
-            // So we're just going to key off a define that's only in 2.24
-            // TODO RTC 123492
-#ifdef bfd_find_nearest_line_discriminator
             uint32_t offset = 176;
-#else
-            uint32_t offset = 168;
-#endif
             void *ptr_sym_offset = s->used_by_bfd + offset;
             asymbol **tsym = (asymbol **)ptr_sym_offset;
             *tsym = gsym;
