@@ -1970,6 +1970,7 @@
         <default>PERV</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+    <attribute><id>PG</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PG</id><default>5</default></attribute>
 </targetType>
