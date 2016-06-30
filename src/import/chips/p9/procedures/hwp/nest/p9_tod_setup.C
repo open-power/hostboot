@@ -420,6 +420,13 @@ extern "C"
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X7_SEL;
                 break;
 
+            case(ABUS0):
+            case(ABUS1):
+            case(ABUS2):
+                FAPI_ASSERT((i_tod_node->i_bus_rx != ABUS0 && i_tod_node->i_bus_rx != ABUS1 && i_tod_node->i_bus_rx != ABUS2),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_rx is set to ABUS");
+                break;
+
             case(NONE):
                 break; //MDMT has no rx
         }
@@ -544,9 +551,16 @@ extern "C"
                     data2.setBit<TOD_PORT_CTRL_REG_TX_X7_EN>();
                     break;
 
+                case(ABUS0):
+                case(ABUS1):
+                case(ABUS2):
+                    FAPI_ASSERT((tod_node->i_bus_tx != ABUS0 && tod_node->i_bus_tx != ABUS1 && tod_node->i_bus_tx != ABUS2),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_tx is set to ABUS");
+                    break;
+
                 case(NONE):
                     FAPI_ASSERT((tod_node->i_bus_tx != NONE),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_rx is set to NONE");
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_tx is set to NONE");
                     break;
             }
         }
@@ -893,6 +907,13 @@ extern "C"
                     data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
                     bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
                     bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    break;
+
+                case(ABUS0):
+                case(ABUS1):
+                case(ABUS2):
+                    FAPI_ASSERT((i_tod_node->i_bus_rx != ABUS0 && i_tod_node->i_bus_rx != ABUS1 && i_tod_node->i_bus_rx != ABUS2),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_freq_x), "i_tod_node->i_bus_rx is set to ABUS");
                     break;
 
                 case(NONE):

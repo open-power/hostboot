@@ -272,7 +272,14 @@ extern "C" {
         XBUS4,
         XBUS5,
         XBUS6,
-        XBUS7
+        XBUS7,
+        //TODO These were added for Manish and the HWSV code since it has dependency on these enums.
+        //Manish is waiting until the specifications of multi-node systems are there and then
+        //he will modify his code and I will remove these. The ABUSes are not for FAPI consumption.
+        ABUS0,
+        ABUS1,
+        ABUS2,
+        BUS_MAX = ABUS2
     };
 
     enum tod_action
