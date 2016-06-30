@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -283,6 +283,7 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
                     case_PROCEDURE(EPUB_PRC_HB_CODE)
                     case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
                     case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
+                    case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
                     default:
                         i_parser.PrintNumber( "Procedure", "UNKNOWN: 0x%X",
                                         ntohl(pData->procedure) );
