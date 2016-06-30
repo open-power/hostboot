@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ enum epubProcedureID
     EPUB_PRC_HB_CODE                = 0x55,
     EPUB_PRC_TOD_CLOCK_ERR          = 0x56,
     EPUB_PRC_COOLING_SYSTEM_ERR     = 0x5C,
+    EPUB_PRC_FW_VERIFICATION_ERR    = 0x5D,
 };
 
 // from srci/fsp/srci.H
