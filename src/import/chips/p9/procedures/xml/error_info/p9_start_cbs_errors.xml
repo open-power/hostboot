@@ -33,4 +33,14 @@
     <description>CBS is not in IDLE state</description>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_VDN_PGOOD_NOT_SET</rc>
+    <description>VDN_PGOOD not set to 1</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_VDD_NEST_OBSERVE</rc>
+    <description>VDD bit not set</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
