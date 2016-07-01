@@ -362,6 +362,14 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 /// string.
 #define SCAN_COMPRESSION_BUFFER_OVERFLOW (uint8_t)4
 
+/// Inconsistent input data
+///
+/// 1 in data is masked by 0 in care mask
+#define SCAN_COMPRESSION_INPUT_ERROR 5
+
+/// Invalid transition in state machine
+#define SCAN_COMPRESSION_STATE_ERROR 6
+
 /// @}
 
 #endif  //  __P9_SCAN_COMPRESSION_H__
