@@ -130,11 +130,11 @@
 #include <stdio.h>
 
 
-#define BUG(rc)                                                 \
-    ({                                                          \
-        fprintf(stderr,"%s:%d : Trapped rc = %d" BUG_NEWLINE,   \
-                __FILE__, __LINE__, (rc));                      \
-        (rc);                                                   \
+#define BUG(rc)                                     \
+    ({                                              \
+        fprintf(stderr,"%s:%d : Trapped rc = %d\n", \
+                __FILE__, __LINE__, (rc));          \
+        (rc);                                       \
     })
 
 #define BUGX(rc, ...)                           \
@@ -778,7 +778,7 @@ __rs4_decompress(uint8_t* o_string,
         if (bits != i_length)
         {
             rc = BUGX(SCAN_DECOMPRESSION_SIZE_ERROR,
-                      "bits = %zu, i_length = %zu\n",
+                      "bits = %u, i_length = %u\n",
                       bits, i_length);
         }
     }
