@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,6 +132,11 @@ class MdiaCommandMonitorTest: public CxxTest::TestSuite
             l_sm.addMonitor(l_monID6);
             l_monID7 = l_cm.addMonitor(l_mntCmdTime);
             l_sm.addMonitor(l_monID7);
+
+            TS_TRACE("Monitor ID's: l_monID1=%d, l_modID2=%d, l_modID3=%d, "
+                     "l_modID4=%d, l_modID5=%d, l_modID6=%d, l_modID7=%d",
+                     l_monID1, l_monID2, l_monID3, l_monID4, l_monID5,
+                     l_monID6, l_monID7);
 
             //Remove 4 of the 7 monIDs
             l_cm.removeMonitor(l_monID1);

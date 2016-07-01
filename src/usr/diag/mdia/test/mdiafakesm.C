@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -67,6 +69,12 @@ void FakeStateMachine1::processCommandTimeout(
         }
         else
             iv_contentsEqual = true;
+    }
+    else
+    {
+        MDIA_FAST("Contents of monitorIDs of size %d is not equal"
+                  "to contents of iv_totalExpectedMons of size %d",
+                  monitorIDs.size(), iv_totalExpectedMons);
     }
 
     //Expected number of monitorIDs have timedout.
