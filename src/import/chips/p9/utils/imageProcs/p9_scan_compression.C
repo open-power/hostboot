@@ -303,10 +303,11 @@ stop_decode(uint32_t* o_count, const uint8_t* i_string, const uint32_t i_i)
 // to the rotate state.  Runs of more than 15 scans will always include a
 // 0-length rotate between the scan sequences.
 //
-// Returns the number of nibbles in the compressed string.
+// Returns a scan compression return code.
 
-static uint32_t
+static int
 __rs4_compress(CompressedScanData* o_data,
+               uint32_t* o_nibbles,
                const uint8_t* i_data_str,
                const uint8_t* i_care_str,
                const uint32_t i_length)
@@ -343,8 +344,8 @@ __rs4_compress(CompressedScanData* o_data,
 
         if (~care_nibble & data_nibble)
         {
-            printf("__rs4_compress(): Data error in nibble[%d]: We can't have '1' in data where care has '0'\n", i);
-            exit(1);
+            return BUGX(SCAN_COMPRESSION_INPUT_ERROR,
+                        "Conflicting data and mask bits in nibble %d\n", i);
         }
 
         if (state == 0)
@@ -457,8 +458,8 @@ __rs4_compress(CompressedScanData* o_data,
     }
     else
     {
-        printf("__rs4_compress(): Code error: state==2 not allowed at this point\n");
-        exit(1);
+        return BUGX(SCAN_COMPRESSION_STATE_ERROR,
+                    "Termination can not immediately follow masked data\n");
     }
 
     // Indicate termination start
@@ -479,8 +480,8 @@ __rs4_compress(CompressedScanData* o_data,
 
         if (~care_nibble & data_nibble)
         {
-            printf("__rs4_compress(): Data error in nibble[%d]: We can't have '1' in data where care has '0'\n", n);
-            exit(1);
+            return BUGX(SCAN_COMPRESSION_INPUT_ERROR,
+                        "Conflicting data and mask bits in nibble %d\n", i);
         }
 
         if ((care_nibble ^ data_nibble) == 0)
@@ -503,8 +504,9 @@ __rs4_compress(CompressedScanData* o_data,
         }
     }
 
-    // Return the number of nibbles in the compressed string.
-    return j;
+    *o_nibbles = j;
+
+    return SCAN_COMPRESSION_OK;
 }
 
 
@@ -572,6 +574,8 @@ rs4_max_compressed_bytes(uint32_t nibbles)
 // We always require the worst-case amount of memory including the header and
 // any rounding required to guarantee that the data size is a multiple of 8
 // bytes. The final image size is also rounded up to a multiple of 8 bytes.
+//
+// Returns a scan compression return code.
 
 int
 _rs4_compress(CompressedScanData* io_data,
@@ -591,7 +595,6 @@ _rs4_compress(CompressedScanData* io_data,
 
     do
     {
-
         if (i_dataSize < bytes)
         {
             rc = BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
@@ -600,7 +603,13 @@ _rs4_compress(CompressedScanData* io_data,
 
         memset(io_data, 0, bytes);
 
-        nibbles = __rs4_compress(io_data, i_data_str, i_care_str, i_length);
+        rc = __rs4_compress(io_data, &nibbles, i_data_str, i_care_str, i_length);
+
+        if (rc != SCAN_COMPRESSION_OK)
+        {
+            break;
+        }
+
         bytes = rs4_max_compressed_bytes(nibbles);
 
         io_data->iv_magic             = htobe32(RS4_MAGIC);
@@ -614,9 +623,6 @@ _rs4_compress(CompressedScanData* io_data,
         io_data->iv_chipletId         = i_chipletId;
 
         *o_imageSize = bytes;
-
-        rc = SCAN_COMPRESSION_OK;
-
     }
     while (0);
 
@@ -628,6 +634,8 @@ _rs4_compress(CompressedScanData* io_data,
 // and any rounding required to guarantee that the allocated length is a
 // multiple of 8 bytes.  The final size is also rounded up to a multiple of 8
 // bytes.
+//
+// Returns a scan compression return code.
 
 int
 rs4_compress(CompressedScanData** o_data,
