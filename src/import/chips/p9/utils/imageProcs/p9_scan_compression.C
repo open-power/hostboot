@@ -155,8 +155,8 @@
 // unique names to support concurrent update.  Most routines defined here have
 // some variant of 'rs4' in their names; others should be inherently unique.
 
-#if COMPRESSED_SCAN_DATA_VERSION != 1
-    #error This code assumes CompressedScanData structure version 1 layout
+#if COMPRESSED_SCAN_DATA_VERSION != 2
+    #error This code assumes CompressedScanData structure version 2 layout
 #endif
 
 void
