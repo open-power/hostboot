@@ -314,7 +314,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 ///
 /// This constant is required to be a #define to guarantee consistency between
 /// the header format and cmopiled code.
-#define COMPRESSED_SCAN_DATA_VERSION 1
+#define COMPRESSED_SCAN_DATA_VERSION 2
 
 /// The size of the CompressedScanData  structure
 #define COMPRESSED_SCAN_DATA_SIZE (uint8_t)24
@@ -325,7 +325,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 /// @ {
 
 /// RS4 Magic
-#define RS4_MAGIC (uint32_t)0x52533401       /* "RS4" + Version 0x01 */
+#define RS4_MAGIC (uint32_t)0x52533402       /* "RS4" + Version 0x02 */
 
 /// @}
 
