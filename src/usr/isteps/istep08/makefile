@@ -121,6 +121,8 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
 # proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
 
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcs_scom.mk
+
 # proc_scomoverride_chiplets : Apply sequenced scom inits
 include ${PROCEDURES_PATH}/hwp/nest/p9_scomoverride_chiplets.mk
 
