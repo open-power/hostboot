@@ -31,11 +31,13 @@
 #include <vector>
 
 #include <fapi2.H>
-#include <mss.H>
+#include <fapi2_spd_access.H>
+
+#include <lib/utils/checker.H>
+#include <lib/utils/c_str.H>
 #include <lib/spd/spd_decoder.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
-#include <lib/utils/fake_spd.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -741,7 +743,7 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
         for( const auto& l_dimm : l_mca.getChildren<TARGET_TYPE_DIMM>() )
         {
             size_t l_size = 0;
-            FAPI_TRY( getSPD(l_dimm, nullptr, l_size) );
+            FAPI_TRY( fapi2::getSPD(l_dimm, nullptr, l_size) );
 
             {
                 // "Container" for SPD data
@@ -749,7 +751,7 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
                 l_spd.resize(l_size);
 
                 // Retrive SPD data
-                FAPI_TRY( getSPD(l_dimm, l_spd.data(), l_size)) ;
+                FAPI_TRY( fapi2::getSPD(l_dimm, l_spd.data(), l_size)) ;
 
                 // Retrieve factory object instance & populate spd data for that instance
                 FAPI_TRY( factory(l_dimm, l_spd, l_pDecoder) );

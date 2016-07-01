@@ -35,7 +35,6 @@
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/cycle_time.H>
 #include <lib/utils/conversions.H>
-#include <lib/utils/fake_spd.H>
 #include <lib/eff_config/timing.H>
 #include <lib/utils/find.H>
 
