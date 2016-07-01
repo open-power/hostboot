@@ -508,11 +508,70 @@ __rs4_compress(CompressedScanData* o_data,
 }
 
 
-// The worst-case compression for RS4 requires 2 nibbles of control overhead
-// per 15 nibbles of data (17/15), plus a maximum of 2 nibbles of termination.
-// We always require this worst-case amount of memory including the header and
+// The worst-case compression for RS4 v2 occurs if all data nibbles
+// contain significant zeros as specified by corresponding care nibbles,
+// and if the raw ring length is a whole multiple of four.
+//
+// In general, each data and care nibble pair, which are one nibble
+// in terms of input string length, are compressed into 4 nibbles:
+//
+// 1. a special data count nibble that indicates special case with care mask
+// 2. a care mask nibble
+// 3. a data nibble
+// 4. a rotate nibble
+//
+// Then, if the raw ring length is a whole multiple of four (worst case),
+// the last raw nibble also requires those RS4 four nibbles, and it is
+// followed by 2 additional nibbles that terminate the compressed data.
+// So a total of six nibbles to account for the last input nibble:
+//
+// 5. a '0x0' terminate nibble
+// 6. a terminal count(0) nibble
+//
+// If on the other hand the last input nibble is partial, then that requires
+// only four output nibbles because the terminate tag and data are combined
+// in the encoding of <terminate>:
+//
+// 1. a '0x0' terminate nibbel
+// 2. a terminal count nibble for masked data
+// 3. a care mask nibble
+// 4. a data nibble
+//
+// Besides there is always a rotate nibble at the begin of the compressed
+// data:
+//
+// 0. rotate
+
+static inline uint32_t
+rs4_max_compressed_nibbles(const uint32_t i_length)
+{
+    uint32_t nibbles_raw, nibbles_rs4;
+
+    nibbles_raw = (i_length + 3) / 4;    // bits rounded up to full nibbles
+    nibbles_rs4 = 1                      // initial rotate nibble
+                  + nibbles_raw * 4      // worst case whole nibble encoding
+                  + 1                    // terminate nibble
+                  + 1;                   // zero terminal count nibble
+
+    return nibbles_rs4;
+}
+
+static inline uint32_t
+rs4_max_compressed_bytes(uint32_t nibbles)
+{
+    uint32_t bytes;
+
+    bytes  = ((nibbles + 1) / 2);        // nibbles rounded up to full bytes
+    bytes += sizeof(CompressedScanData); // plus rs4 header
+    bytes  = ((bytes + 7) / 8) * 8;      // rounded up to multiple of 8 bytes
+
+    return bytes;
+}
+
+
+// We always require the worst-case amount of memory including the header and
 // any rounding required to guarantee that the data size is a multiple of 8
-// bytes.  The final image size is also rounded up to a multiple of 8 bytes.
+// bytes. The final image size is also rounded up to a multiple of 8 bytes.
 
 int
 _rs4_compress(CompressedScanData* io_data,
@@ -527,11 +586,8 @@ _rs4_compress(CompressedScanData* io_data,
               const uint8_t i_flushOptimization)
 {
     int rc;
-    uint32_t nibbles, bytes;
-
-    nibbles = (((((i_length + 3) / 4) + 14) / 15) * 17) + 2;
-    bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
-    bytes = ((bytes + 7) / 8) * 8;
+    uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
+    uint32_t bytes   = rs4_max_compressed_bytes(nibbles);
 
     do
     {
@@ -545,8 +601,7 @@ _rs4_compress(CompressedScanData* io_data,
         memset(io_data, 0, bytes);
 
         nibbles = __rs4_compress(io_data, i_data_str, i_care_str, i_length);
-        bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
-        bytes = ((bytes + 7) / 8) * 8;
+        bytes = rs4_max_compressed_bytes(nibbles);
 
         io_data->iv_magic             = htobe32(RS4_MAGIC);
         io_data->iv_size              = htobe32(bytes);
@@ -569,9 +624,7 @@ _rs4_compress(CompressedScanData* io_data,
 }
 
 
-// The worst-case compression for RS4 requires 2 nibbles of control overhead
-// per 15 nibbles of data (17/15), plus a maximum of 2 nibbles of termination.
-// We always allocate this worst-case amount of memory including the header
+// We always allocate the worst-case amount of memory including the header
 // and any rounding required to guarantee that the allocated length is a
 // multiple of 8 bytes.  The final size is also rounded up to a multiple of 8
 // bytes.
@@ -588,11 +641,9 @@ rs4_compress(CompressedScanData** o_data,
              const uint8_t i_flushOptimization)
 {
     int rc;
-    uint32_t nibbles, bytes;
+    uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
+    uint32_t bytes   = rs4_max_compressed_bytes(nibbles);
 
-    nibbles = (((((i_length + 3) / 4) + 14) / 15) * 17) + 2;
-    bytes = ((nibbles + 1) / 2) + sizeof(CompressedScanData);
-    bytes = ((bytes + 7) / 8) * 8;
     *o_data = (CompressedScanData*)malloc(bytes);
 
     if (*o_data == 0)
