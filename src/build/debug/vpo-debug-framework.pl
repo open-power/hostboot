@@ -460,7 +460,6 @@ sub stopInstructions
         print "--- stopInstructions: run $command\n";
     }
 
-    die "ERROR: cannot stop instructions" if (system("$command") != 0);
 }
 
 # Start instructions

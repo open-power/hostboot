@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +32,7 @@ our @EXPORT_OK = ('main');
 
 use constant PAGEMGR_INSTANCE_NAME =>
                 "Singleton<PageManager>::instance()::instance";
-use constant PAGEMGR_CORE_OFFSET => 3 * 8;
+use constant PAGEMGR_CORE_OFFSET => 5 * 8;
 use constant PAGEMGR_PAGES_AVAIL_OFFSET => 0;
 use constant PAGEMGR_BUCKETS_OFFSET => 8;
 use constant PAGEMGR_NUMBER_OF_BUCKETS => 16;
@@ -102,7 +104,8 @@ sub countItemsInStack
 
     return 0 if (0 == $stack);
 
-    return 1 + countItemsInStack(::read64($stack));
+    #only read bottom 32 bits of ptr to handle AbaPtr
+    return 1 + countItemsInStack(::read32($stack + 4));
 }
 
 sub showPagesInStack
@@ -115,7 +118,8 @@ sub showPagesInStack
     ::userDisplay(sprintf "..mem=0x%.16X..0x%.16X : %d\n",
                   $stack, $stack+4096*$bucketsize, $bucketsize );
 
-    return 1 + showPagesInStack(::read64($stack),$bucketsize);
+    #only read bottom 32 bits of ptr to handle AbaPtr
+    return 1 + showPagesInStack(::read32($stack+4),$bucketsize);
 }
 
 sub helpInfo
