@@ -35,7 +35,11 @@ class CpuManager
     public:
         enum
         {
+#ifdef CONFIG_P9_VPO_COMPILE // VPO has constrained mem env -> check sooner
+            CPU_PERIODIC_CHECK_MEMORY = 64,
+#else
             CPU_PERIODIC_CHECK_MEMORY = 128,    // Is this even needed anymore?
+#endif
             CPU_PERIODIC_FLUSH_PAGETABLE = 256,
             CPU_PERIODIC_DEFRAG = 949,  // TODO Any bigger not currently hit
         };

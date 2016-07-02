@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,7 +185,11 @@ class PageManager
         {
             KERNEL_HEAP_RESERVED_PAGES = 4,
 
+#ifdef CONFIG_P9_VPO_COMPILE // VPO has constrained mem env -> higher threshold
+            LOWMEM_NORM_LIMIT = 32,
+#else
             LOWMEM_NORM_LIMIT = 16,
+#endif
             LOWMEM_CRIT_LIMIT = 5,
         };
 

@@ -97,7 +97,7 @@ COPY_RENAME_FILES = \
     makefile:src/build/mkrules/hbfw/makefile:fsp\
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
-    img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower \
+    img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,vpo \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
