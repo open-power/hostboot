@@ -42,6 +42,7 @@
 #include "p9_stop_util.H"
 #include "p9_ringId.H"
 #include "p9_tor.H"
+#include "p9_misc_scom_addresses.H"
 
 using namespace stopImageSection;
 extern "C"
@@ -78,7 +79,6 @@ extern "C"
                      .set_HW_IMG_BUF_PTR( i_pImageIn )
                      .set_HOMER_IMG_BUF_PTR( i_pImageOut ),
                      "Bad pointer to HW Image or HOMER Image" );
-
         l_rc = p9_xip_image_size( i_pImageIn, &hwImagSize );
 
         FAPI_DBG("size is 0x%08x; xip_image_size RC is 0x%02x HARDWARE_IMG_SIZE 0x%08x  Sz 0x%08x",
@@ -90,7 +90,6 @@ extern "C"
                      .set_HW_IMG_SIZE( hwImagSize )
                      .set_MAX_HW_IMG_SIZE( HARDWARE_IMG_SIZE ),
                      "Hardware image size found out of range" );
-
         FAPI_ASSERT( (( i_phase  > PHASE_NA ) && ( i_phase < PHASE_END )),
                      fapi2::HCODE_INVALID_PHASE()
                      .set_SYS_PHASE( i_phase ),
@@ -169,7 +168,7 @@ extern "C"
      * @brief   updates various CPMR fields which are not associated with scan rings.
      * @param   i_pChipHomer    points to start of P9 HOMER.
      */
-    void updateCpmrHeaderCME( Homerlayout_t* i_pChipHomer)
+    void updateCpmrHeaderCME( Homerlayout_t* i_pChipHomer )
     {
         FAPI_INF("> updateCpmrHeaderCME");
 
@@ -219,6 +218,15 @@ extern "C"
         pCpmrHdr->cmeCommonRingLength    =  pCmeHdr->g_cme_common_ring_length;
         pCpmrHdr->coreSpecRingOffset     =  SWIZZLE_4_BYTE(CME_INST_SPEC_RING_START);
         pCpmrHdr->coreSpecRingLength     =  pCmeHdr->g_cme_max_spec_ring_length; // already swizzled
+
+        //FIXME Populating headers fields with max possible values for now. This is to keep things in line with CME
+        //bootloader design. CME bootloader doesn't expect a hole within image layout how ever due to current design of
+        //hcode image build there are holes between various section of image say common and instance ring.
+        pCpmrHdr->cmeImgLength            =     SWIZZLE_4_BYTE( CME_HCODE_SIZE );
+        pCpmrHdr->cmeCommonRingLength     =     SWIZZLE_4_BYTE( CORE_COMMON_RING_SIZE );
+        pCpmrHdr->cmePstateLength         =     SWIZZLE_4_BYTE( QUAD_PSTATE_SIZE);
+        pCpmrHdr->cmePstateOffset         =     SWIZZLE_4_BYTE(i_pChipHomer->cpmrRegion.quadPstateArea -
+                                                (uint8_t*)&i_pChipHomer->cpmrRegion);
 
         FAPI_INF("CPMR CME Scan Rings");
         FAPI_INF("  CME CMN Ring Offset     = 0x%08x", SWIZZLE_4_BYTE(pCpmrHdr->cmeCommonRingOffset) );
@@ -276,6 +284,15 @@ extern "C"
         uint32_t rc = IMG_BUILD_SUCCESS;
 
         QpmrHeaderLayout_t* pQpmrHdr = ( QpmrHeaderLayout_t*) & (i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader);
+
+        //FIXME Populating headers fields with max possible values for now. This is to keep things in line with SGPE
+        //bootloader design. SGPE bootloader doesn't expect a hole in image layout how ever due to current design of
+        //hcode image build there are holes between various section of image say common and instance ring.
+
+        pQpmrHdr->sgpeImgLength         =   SWIZZLE_4_BYTE(SGPE_HCODE_SIZE);
+        pQpmrHdr->quadCommonRingOffset  =   SWIZZLE_4_BYTE(SGPE_COMMON_RING);
+        pQpmrHdr->quadSpecRingLength    =   SWIZZLE_4_BYTE(CACHE_INST_SPECIFIC_SIZE);
+
         memcpy( pQpmrHdr, &io_qpmrHdr, sizeof( QpmrHeaderLayout_t ) );
         pQpmrHdr->quadCommonRingOffset = (uint8_t*) i_pChipHomer->qpmrRegion.sgpeRegion.commonRings -
                                          (uint8_t*) &i_pChipHomer->qpmrRegion.sgpeRegion;
@@ -315,6 +332,10 @@ extern "C"
             uint32_t rcTemp = 0;
             //Let us find XIP Header for SGPE
             P9XipSection ppeSection;
+
+            FAPI_INF("Size of SGP Hdr 0x%08x", sizeof(sgpeHeader_t));
+            FAPI_INF("Size of QPMR Hdr Hdr 0x%08x", sizeof(QpmrHeaderLayout_t));
+            FAPI_INF("Size of CPMR Hdr 0x%08x", sizeof(cpmrHeader_t));
             uint8_t* pSgpeImg = NULL;
 
             if(!i_imgType.sgpeHcodeBuild )
@@ -555,7 +576,7 @@ extern "C"
      * @return IMG_BUILD_SUCCESS if function succeeds, error code otherwise.
      */
     uint32_t buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipHomer,
-                            ImageType_t i_imgType )
+                            ImageType_t i_imgType, uint64_t i_cpmrPhyAdd )
     {
         uint32_t retCode = IMG_BUILD_SUCCESS;
 
@@ -606,6 +627,9 @@ extern "C"
                 pImgHdr->g_cme_common_ring_offset =  SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_offset) +
                                                      SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_length);
                 pImgHdr->g_cme_common_ring_offset =  SWIZZLE_4_BYTE(pImgHdr->g_cme_common_ring_offset);
+                pImgHdr->g_cme_cpmr_PhyAddr             = SWIZZLE_8_BYTE(i_cpmrPhyAdd | CPMR_OFFSET);
+                pImgHdr->g_cme_scom_offset              = 0;
+                pImgHdr->g_cme_scom_length              = 0;
                 pImgHdr->g_cme_common_ring_length       = 0;
                 pImgHdr->g_cme_pstate_region_offset     = 0;
                 pImgHdr->g_cme_pstate_region_length     = 0;
@@ -613,15 +637,16 @@ extern "C"
                 pImgHdr->g_cme_max_spec_ring_length     = 0;    // multiple of 32B blocks
 
                 FAPI_INF("CME Header");
-                FAPI_INF("  Magic Num = 0x%16lX", SWIZZLE_8_BYTE(pImgHdr->g_cme_magic_number));
-                FAPI_INF("  HC Offset = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_offset));
-                FAPI_INF("  HC Size   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_length));
-                FAPI_INF("  CR Offset = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_common_ring_offset));
-                FAPI_INF("  CR Size   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_common_ring_length));
-                FAPI_INF("  PS Offset = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_pstate_region_offset));
-                FAPI_INF("  PS Size   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_pstate_region_length));
-                FAPI_INF("  SR Offset = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_core_spec_ring_offset));
-                FAPI_INF("  SR Size   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_cme_max_spec_ring_length));
+                FAPI_INF("  Magic Num       = 0x%16lX", SWIZZLE_8_BYTE(pImgHdr->g_cme_magic_number));
+                FAPI_INF("  HC Offset       = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_offset));
+                FAPI_INF("  HC Size         = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_length));
+                FAPI_INF("  CR Offset       = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_common_ring_offset));
+                FAPI_INF("  CR Size         = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_common_ring_length));
+                FAPI_INF("  CPMR Phy Add    = 0x%016lX", SWIZZLE_8_BYTE(pImgHdr->g_cme_cpmr_PhyAddr));
+                FAPI_INF("  PS Offset       = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_pstate_region_offset));
+                FAPI_INF("  PS Size         = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_pstate_region_length));
+                FAPI_INF("  SR Offset       = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_core_spec_ring_offset));
+                FAPI_INF("  SR Size         = 0x%08X",  SWIZZLE_4_BYTE(pImgHdr->g_cme_max_spec_ring_length));
             }
         }
         while(0);
@@ -770,6 +795,7 @@ extern "C"
                                          i_instanceId,
                                          &i_pBuf1,
                                          tempBufLength );
+
             FAPI_INF("Ring type 0x%08x instance 0x%08x  buf len 0x%08x", ringType, i_instanceId, tempBufLength );
 
             if( rc )
@@ -1092,6 +1118,18 @@ extern "C"
                     pSgpeImgHdr->g_sgpe_spec_ring_occ_offset =
                         SWIZZLE_4_BYTE(SWIZZLE_4_BYTE(pSgpeImgHdr->g_sgpe_cmn_ring_occ_offset) +
                                        SWIZZLE_4_BYTE(o_qpmr.quadCommonRingLength));
+
+                    //FIXME Assigning maximum size for now to facilitate bootloader. Eventually design shall be changed
+                    //to eliminate max size allocation for each section say hcode or rings. Each section shall be
+                    //packed next to each other.
+
+                    o_qpmr.quadSpecRingOffset   =  i_pChipHomer->qpmrRegion.sgpeRegion.cacheSpecificRing -
+                                                   (uint8_t*)&i_pChipHomer->qpmrRegion;
+                    o_qpmr.quadSpecRingLength   =  CACHE_INST_SPECIFIC_SIZE;
+
+                    o_qpmr.quadSpecRingOffset   =  SWIZZLE_4_BYTE(o_qpmr.quadSpecRingOffset);
+                    o_qpmr.quadSpecRingLength   =  SWIZZLE_4_BYTE(o_qpmr.quadSpecRingLength);
+
                 }
             }
             else if( PLAT_CME == i_platId )
@@ -1323,6 +1361,9 @@ extern "C"
                     //Instance Specific ring needs to be copied at an offset which is a multiple of 32B. This offset
                     //will become an SBASE value of CME's BCE. Doing this math here to keep CME hcode simple.
                     pCmeImgHdr->g_cme_core_spec_ring_offset = tempLength;
+                    pCmeImgHdr->g_cme_scom_offset = SWIZZLE_4_BYTE(SWIZZLE_4_BYTE(pCmeImgHdr->g_cme_core_spec_ring_offset) +
+                                                    SWIZZLE_4_BYTE(pCmeImgHdr->g_cme_max_spec_ring_length));
+                    pCmeImgHdr->g_cme_scom_length = SWIZZLE_4_BYTE(SCOM_AREA_PER_CME);
                 }
             }
         }
@@ -1331,6 +1372,36 @@ extern "C"
         FAPI_INF( "< copyRingsFromHwImage");
 
         return rc;
+    }
+    //---------------------------------------------------------------------------
+    /**
+     * @brief updates the IVPR attributes for SGPE, PGPE.
+     * @brief   i_pChipHomer points to start of HOMER
+     */
+    fapi2::ReturnCode updateGpeAttributes( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i_procTgt )
+    {
+        QpmrHeaderLayout_t* pQpmrHdr = (QpmrHeaderLayout_t*)i_pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader;
+
+        uint32_t attrVal = SWIZZLE_4_BYTE(pQpmrHdr->bootCopierOffset);
+        attrVal |= (0x80000000 | ONE_MB);
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET,
+                               i_procTgt,
+                               attrVal ),
+                 "Error from FAPI_ATTR_SET for attribute ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET");
+
+        FAPI_DBG("Set ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08x", attrVal );
+
+        attrVal = (uint8_t*)(i_pChipHomer->ppmrRegion.l1BootLoader) - (uint8_t*)(i_pChipHomer);
+        attrVal |= 0x80000000;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET,
+                               i_procTgt,
+                               attrVal ),
+                 "Error from FAPI_ATTR_SET for attribute ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET");
+
+        FAPI_DBG("Set ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08x", attrVal );
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 
     //---------------------------------------------------------------------------
@@ -1403,7 +1474,14 @@ extern "C"
 
             // copy sections pertaining to CME
             FAPI_INF("CPMR / CME building");
-            ppeImgRc = buildCmeImage( i_pImageIn, pChipHomer, i_imgType );
+            uint64_t cpmrPhyAdd = 0;
+            fapi2::buffer<uint64_t> regData;
+            regData.flush<0>();
+            FAPI_TRY(getScom(i_procTgt, PU_PBABAR0, regData ));
+            regData.extract<0, 64>(cpmrPhyAdd);
+            FAPI_DBG("HOMER base address 0x%016lX", cpmrPhyAdd );
+            ppeImgRc = buildCmeImage( i_pImageIn, pChipHomer, i_imgType, cpmrPhyAdd );
+
             ppeImgRc = IMG_BUILD_SUCCESS;
 
             FAPI_ASSERT( ( IMG_BUILD_SUCCESS == ppeImgRc ),
@@ -1422,7 +1500,7 @@ extern "C"
                          "Failed to copy PGPE section in HOMER" );
             FAPI_INF("PGPE built");
 
-            //Update CPMR Header area n HOMER with CME Image related information.
+            //Update CPMR Header area in HOMER with CME Image related information.
             updateCpmrHeaderCME( pChipHomer );
 
             uint8_t ecLevel = 0;
@@ -1430,7 +1508,9 @@ extern "C"
                                               i_procTgt,
                                               ecLevel),
                      "Error from for attribute ATTR_EC");
-#if 0
+
+            FAPI_INF("CORE_RESERVE_SIZE 0x%08x ( %d )", CORE_RESERVE_SIZE );
+#if 1
             ppeImgRc = copyRingsFromHwImage( i_pImageIn,
                                              i_pRingOverride,
                                              i_pHomerImage,
@@ -1475,26 +1555,13 @@ extern "C"
             updateQpmrHeader( pChipHomer, qpmrHdr );
 
             //Finally update the attributes storing PGPE and SGPE's boot copier offset.
-            QpmrHeaderLayout_t* pQpmrHdr = (QpmrHeaderLayout_t*)pChipHomer->qpmrRegion.sgpeRegion.qpmrHeader;
+            retCode = updateGpeAttributes( pChipHomer, i_procTgt );
 
-            uint32_t attrVal = SWIZZLE_4_BYTE(pQpmrHdr->bootCopierOffset);
-            attrVal |= (0x80000000 | ONE_MB);
-
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET,
-                                   i_procTgt,
-                                   attrVal ),
-                     "Error from FAPI_ATTR_SET for attribute ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET");
-
-            FAPI_DBG("Set ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08x", attrVal );
-
-            attrVal = (uint8_t*)(pChipHomer->ppmrRegion.l1BootLoader) - (uint8_t*)(pChipHomer);
-            attrVal |= 0x80000000;
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET,
-                                   i_procTgt,
-                                   attrVal ),
-                     "Error from FAPI_ATTR_SET for attribute ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET");
-
-            FAPI_DBG("Set ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET to 0x%08x", attrVal );
+            if( retCode )
+            {
+                FAPI_ERR("Failed to update SGPE/PGPE IVPR attributes");
+                break;
+            }
         }
         while(0);
 
