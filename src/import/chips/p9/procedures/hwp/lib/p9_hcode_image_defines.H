@@ -47,121 +47,7 @@ namespace p9_hcodeImageBuild
 {
 #endif //__PPE_PLAT
 
-/**
- * @brief   summarizes constants associated with hcode image build.
- */
-enum
-{
-    ONE_KB                      = 1024,
-    ONE_MB                      = 1024 * 1024,
-    HARDWARE_IMG_SIZE           = ONE_MB,
-    OCC_HOST_AREA_SIZE          = ONE_MB,
-    HOMER_OCC_REGION_NUM        = 0,
-    HOMER_QPMR_REGION_NUM       = 1,
-    HOMER_CMPR_REGION_NUM       = 2,
-    HOMER_PPMR_REGION_NUM       = 3,
-    MAX_CORES_PER_CHIP          = 24,
-    MAX_CME_PER_CHIP            = 12,
-    CORE0_CHIPLET_ID            = 0x20,
-    PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
-    PPE_RESERVE_AREA            = 0x200,
-    FUSE_STATE                  =  0xAA,
-    UNFUSE_STATE                =  0xBB,
-
-    // QPMR
-    QPMR_OFFSET                 = HOMER_QPMR_REGION_NUM * ONE_MB,
-    SGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
-    SGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
-    SGPE_INT_VECT               = 384,
-    SGPE_IMG_HEADER             = 64,
-    SGPE_DBG_PTR_AREA_SIZE      = 36,
-    SGPE_HCODE_SIZE             = 40 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
-    SGPE_COMMON_RING            = 2  * ONE_KB,
-    CACHE_SCOM_RESTORE_SIZE     = 6  * ONE_KB,
-    CACHE_INST_SPECIFIC_SIZE    = 4  * ONE_KB,
-    MAX_CACHE_CHIPLET           = 6,
-    CACH0_CHIPLET_ID            = 0x10,
-
-    SGPE_MAX_AREA_SIZE          = 64 * ONE_KB,
-    SGPE_RESV_CMN_RING          = 8,
-
-    // CPMR
-    CPMR_OFFSET                 = HOMER_CMPR_REGION_NUM * ONE_MB,
-    THREAD_LAUNCHER_SIZE        = 256,
-    CORE_INT_AREA               = 8 * ONE_KB,
-    SELF_REST_SIZE              = CORE_INT_AREA + THREAD_LAUNCHER_SIZE,
-    CORE_RESTORE_SIZE           = 192 * ONE_KB,
-    CORE_SCOM_START             = (256 * ONE_KB),
-    CORE_SCOM_RES_SIZE          = 6 * ONE_KB,
-    CME_INT_VECTOR_SIZE         = 384,
-    CME_IMG_HEADER_SIZE         = 64,
-    CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_HCODE_SIZE              = 32 * ONE_KB,  ////FIXME RTC 155018 Revisit after Hcode size optimization
-    CORE_COMMON_RING_SIZE       = 6  * ONE_KB,
-    CORE_SPECIFIC_RING          = 2  * ONE_KB,
-    CME_SRAM_HCODE_OFFSET       = 0x00,
-    QUAD_PSTATE_SIZE            = 2  * ONE_KB,
-    CORE_RESERVE_SIZE           =
-        CORE_SCOM_START - ( CORE_RESTORE_SIZE + CME_HCODE_SIZE + CORE_COMMON_RING_SIZE + QUAD_PSTATE_SIZE  ),
-
-    CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_INST_SPEC_RING_START    =  (360 * ONE_KB ) ,    //FIXME RTC 155018 Revisit after Hcode size optimization
-    RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
-                                     CME_HCODE_SIZE +
-                                     CORE_COMMON_RING_SIZE +
-                                     QUAD_PSTATE_SIZE)),
-    CME_BLOCK_READ_LEN          =  32,
-    CME_BLK_SIZE_SHIFT          =  0x05,
-    CACHE_SCOM_START            =  128 * ONE_KB,
-
-    // PPMR
-    PPMR_OFFSET                 = HOMER_PPMR_REGION_NUM * ONE_MB,
-    PGPE_LVL_1_BOOT_LOAD_SIZE   =  ONE_KB,
-    PGPE_LVL_2_BOOT_LOAD_SIZE   =  ONE_KB,
-    PGPE_IMG_HEADER             =  64,   // need to get confirmation on this
-    PGPE_INT_VECTOR             =  384,
-    PGPE_HCODE_SIZE             =  16 * ONE_KB,
-    PGPE_PARAM_BLOCK_SIZE       =  8 * ONE_KB,
-    PSTATE_OUTPUT_TABLE         =  8 * ONE_KB,
-    IGNORE_CHIPLET_INSTANCE     = 0xFF,
-};
-
-/**
- * @brief   enumerates all return codes associated with hcode image build.
- */
-enum ImgBldRetCode_t
-{
-    IMG_BUILD_SUCCESS           =   0,
-    BUILD_FAIL_SGPE_IMAGE       =   1,
-    BUILD_FAIL_SELF_REST_IMAGE  =   2,
-    BUILD_FAIL_CME_IMAGE        =   3,
-    BUILD_FAIL_PGPE_IMAGE       =   4,
-    BUILD_FAIL_SGPE_QPMR        =   5,
-    BUILD_FAIL_SGPE_BL1         =   6,
-    BUILD_FAIL_SGPE_BL2         =   7,
-    BUILD_FAIL_SGPE_INT_VECT    =   8,
-    BUILD_FAIL_SGPE_HDR         =   9,
-    BUILD_FAIL_SGPE_HCODE       =   10,
-    BUILD_FAIL_SGPE_CMN_RINGS   =   11,
-    BUILD_FAIL_SGPE_SPEC_RINGS  =   12,
-    BUILD_FAIL_CPMR_HDR         =   13,
-    BUILD_FAIL_SRESET_HNDLR     =   14,
-    BUILD_FAIL_THRD_LAUNCHER    =   15,
-    BUILD_FAIL_SPR_RESTORE      =   16,
-    BUILD_FAIL_SCOM_RESTORE     =   17,
-    BUILD_FAIL_CME_IMG_HDR      =   18,
-    BUILD_FAIL_CME_HCODE        =   19,
-    BUILD_FAIL_CMN_RINGS        =   20,
-    BUILD_FAIL_CME_QUAD_PSTATE  =   21,
-    BUILD_FAIL_SPEC_RINGS       =   22,
-    BUILD_FAIL_INT_VECT         =   23,
-    BUILD_FAIL_PGPE_BL1         =   24,
-    BUILD_FAIL_PGPE_BL2         =   25,
-    BUILD_FAIL_PGPE_HCODE       =   26,
-    BUILD_FAIL_OVERRIDE         =   27,
-};
-
-#endif  // __ASSEMBLER__
+#endif //__ASSEMBLER__
 
 // Constants used in both C++ and Assembler/Linker code
 CONST_UINT32_T(CPMR_HEADER_SIZE, 256);
@@ -275,6 +161,7 @@ HCD_HDR_PAD(256);
  * Image build process.
  */
 
+#define IMG_HDR_ALIGN_SIZE 32
 #ifdef __ASSEMBLER__
 .macro .sgpe_header
 .section ".sgpe_image_header" , "aw"
@@ -295,16 +182,16 @@ HCD_HDR_UINT32(g_sgpe_cmn_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_ovrd_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_spec_ring_ovrd_occ_offset, 0);
-HCD_HDR_UINT32(g_sgpe_reserve3, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_scom_offset, 0);
-HCD_HDR_PAD(64);
+HCD_HDR_UINT32(g_sgpe_reserve3, 0);
+HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
 //FIXME RTC 155018
 //Eventually SGPE Img header has been defined to be of size 96B. Next 36B would be for
 //debug pointer.Aligning SGPE image header to 64B boundary.
-} __attribute__((packed, aligned(64))) sgpeHeader_t;
+} __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) sgpeHeader_t;
 #endif
 
 
@@ -325,8 +212,6 @@ typedef struct
 {
 #endif
 HCD_HDR_UINT64(g_cme_magic_number, CME_MAGIC_NUMBER);  // CME__1.0
-HCD_HDR_UINT32(g_cme_build_date, 0);
-HCD_HDR_UINT32(g_cme_build_ver, 0);
 HCD_HDR_UINT32(g_cme_hcode_offset, 0);
 HCD_HDR_UINT32(g_cme_hcode_length, 0);
 HCD_HDR_UINT32(g_cme_common_ring_offset, 0);
@@ -337,17 +222,19 @@ HCD_HDR_UINT32(g_cme_pstate_region_length, 0);
 HCD_HDR_UINT32(g_cme_core_spec_ring_offset, 0);
 HCD_HDR_UINT32(g_cme_core_spec_ring_ovrd_offset, 0);
 HCD_HDR_UINT32(g_cme_max_spec_ring_length, 0);
+HCD_HDR_UINT32(g_cme_scom_offset, 0);
+HCD_HDR_UINT32(g_cme_scom_length, 0);
 HCD_HDR_UINT32(g_cme_mode_flags, 0);
 HCD_HDR_UINT32(g_cme_reserved1, 0);
-HCD_HDR_UINT64(g_cme_reserved2, 0);
-HCD_HDR_PAD(64);
+HCD_HDR_UINT64(g_cme_cpmr_PhyAddr, 0);
+HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
 //FIXME RTC 155018
 //Eventually CME Img header might be of size 96B. Next 36B would be for
 //debug pointer.Aligning CME image header to 64B boundary.
-} __attribute__((packed, aligned(64))) cmeHeader_t;
+} __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) cmeHeader_t;
 #endif
 
 #ifndef __ASSEMBLER__
@@ -357,6 +244,8 @@ typedef struct CMEImageFlags
     uint32_t fused_mode     : 1;
     uint32_t reserved0      : 31;
 } CMEImageFlags_t;
+
+#endif //__ASSEMBLER__
 
 /**
  * PGPE Header
@@ -379,7 +268,7 @@ HCD_HDR_UINT32(g_pgpe_build_date, 0);
 HCD_HDR_UINT32(g_pgpe_build_ver, 0);
 HCD_HDR_UINT32(g_pgpe_hcode_offset, 0);
 HCD_HDR_UINT32(g_pgpe_hcode_length, 0);
-HCD_HDR_PAD(64);
+HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 //FIXME Need to get info on other fields
 #ifdef __ASSEMBLER__
 .endm
@@ -387,8 +276,125 @@ HCD_HDR_PAD(64);
 //FIXME RTC 155018
 //Eventually PGPE Img header has been defined to be of size 96B. Next 36B would be for
 //debug pointer.Aligning PGPE image header to 64B boundary.
-} __attribute__((packed, aligned(64))) PgpeHeader_t;
+} __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) PgpeHeader_t;
 #endif
+
+#ifndef __ASSEMBLER__
+/**
+ * @brief   summarizes constants associated with hcode image build.
+ */
+enum
+{
+    ONE_KB                      = 1024,
+    ONE_MB                      = 1024 * 1024,
+    HALF_KB                     = 512,
+    HARDWARE_IMG_SIZE           = ONE_MB,
+    OCC_HOST_AREA_SIZE          = ONE_MB,
+    HOMER_OCC_REGION_NUM        = 0,
+    HOMER_QPMR_REGION_NUM       = 1,
+    HOMER_CMPR_REGION_NUM       = 2,
+    HOMER_PPMR_REGION_NUM       = 3,
+    MAX_CORES_PER_CHIP          = 24,
+    MAX_CME_PER_CHIP            = 12,
+    CORE0_CHIPLET_ID            = 0x20,
+    PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
+    PPE_RESERVE_AREA            = 0x200,
+    FUSE_STATE                  = 0xAA,
+    UNFUSE_STATE                = 0xBB,
+    PK_DBG_PTR_AREA_SIZE        = 64,
+
+    // QPMR
+    QPMR_OFFSET                 = HOMER_QPMR_REGION_NUM * ONE_MB,
+    SGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
+    SGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
+    SGPE_INT_VECT               = 384,
+    SGPE_IMG_HEADER             = sizeof(sgpeHeader_t),
+    SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
+    SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
+                                   SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
+    SGPE_COMMON_RING            = 13  * ONE_KB, // Common rings (10KB) + Override rings(3KB)
+    CACHE_INST_SPECIFIC_SIZE    = 19  * ONE_KB,
+    CACHE_SCOM_RESTORE_SIZE     = 6 * ONE_KB, //4488B rounded to 6KB
+    SGPE_INSTRUMENTATION_SIZE   = 2 * ONE_KB,
+    MAX_CACHE_CHIPLET           = 6,
+    CACH0_CHIPLET_ID            = 0x10,
+
+    SGPE_MAX_AREA_SIZE          = 64 * ONE_KB,
+
+    // CPMR
+    CPMR_OFFSET                 = HOMER_CMPR_REGION_NUM * ONE_MB,
+    THREAD_LAUNCHER_SIZE        = 256,
+    CORE_INT_AREA               = 8 * ONE_KB,
+    SELF_REST_SIZE              = CORE_INT_AREA + THREAD_LAUNCHER_SIZE,
+    CORE_RESTORE_SIZE           = 192 * ONE_KB,
+    CORE_SCOM_START             = (256 * ONE_KB),
+    CORE_SCOM_RES_SIZE          = 6 * ONE_KB,
+    CME_INT_VECTOR_SIZE         = 384,
+    CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_HCODE_SIZE              = (25 * ONE_KB) + HALF_KB,
+    CORE_COMMON_RING_SIZE       = 3  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
+    CORE_SPECIFIC_RING          = 2  * ONE_KB,
+    SCOM_AREA_PER_CME           =  HALF_KB, // 256(ea ) * 2( CORES PER CME)
+    QUAD_PSTATE_SIZE            = HALF_KB,
+    INSTRUMENTATION_COUNTERS    = HALF_KB,
+    CME_SRAM_HCODE_OFFSET       = 0x00,
+    CORE_RESERVE_SIZE           =
+        CORE_SCOM_START - ( CORE_RESTORE_SIZE + CME_HCODE_SIZE + CORE_COMMON_RING_SIZE + QUAD_PSTATE_SIZE  ),
+
+    CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_INST_SPEC_RING_START    =  (300 * ONE_KB ) ,
+    RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
+                                     CME_HCODE_SIZE +
+                                     CORE_COMMON_RING_SIZE +
+                                     QUAD_PSTATE_SIZE)),
+    CME_BLOCK_READ_LEN          =  32,
+    CME_BLK_SIZE_SHIFT          =  0x05,
+    CACHE_SCOM_START            =  128 * ONE_KB,
+
+    // PPMR
+    PGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
+    PGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
+    PGPE_INT_VECTOR             =  384,
+    PGPE_HCODE_SIZE             =  32 * ONE_KB,
+    PGPE_PARAM_BLOCK_SIZE       =  4 * ONE_KB,
+    PSTATE_OUTPUT_TABLE         =  4 * ONE_KB,
+    IGNORE_CHIPLET_INSTANCE     =  0xFF,
+};
+
+/**
+ * @brief   enumerates all return codes associated with hcode image build.
+ */
+enum ImgBldRetCode_t
+{
+    IMG_BUILD_SUCCESS           =   0,
+    BUILD_FAIL_SGPE_IMAGE       =   1,
+    BUILD_FAIL_SELF_REST_IMAGE  =   2,
+    BUILD_FAIL_CME_IMAGE        =   3,
+    BUILD_FAIL_PGPE_IMAGE       =   4,
+    BUILD_FAIL_SGPE_QPMR        =   5,
+    BUILD_FAIL_SGPE_BL1         =   6,
+    BUILD_FAIL_SGPE_BL2         =   7,
+    BUILD_FAIL_SGPE_INT_VECT    =   8,
+    BUILD_FAIL_SGPE_HDR         =   9,
+    BUILD_FAIL_SGPE_HCODE       =   10,
+    BUILD_FAIL_SGPE_CMN_RINGS   =   11,
+    BUILD_FAIL_SGPE_SPEC_RINGS  =   12,
+    BUILD_FAIL_CPMR_HDR         =   13,
+    BUILD_FAIL_SRESET_HNDLR     =   14,
+    BUILD_FAIL_THRD_LAUNCHER    =   15,
+    BUILD_FAIL_SPR_RESTORE      =   16,
+    BUILD_FAIL_SCOM_RESTORE     =   17,
+    BUILD_FAIL_CME_IMG_HDR      =   18,
+    BUILD_FAIL_CME_HCODE        =   19,
+    BUILD_FAIL_CMN_RINGS        =   20,
+    BUILD_FAIL_CME_QUAD_PSTATE  =   21,
+    BUILD_FAIL_SPEC_RINGS       =   22,
+    BUILD_FAIL_INT_VECT         =   23,
+    BUILD_FAIL_PGPE_BL1         =   24,
+    BUILD_FAIL_PGPE_BL2         =   25,
+    BUILD_FAIL_PGPE_HCODE       =   26,
+    BUILD_FAIL_OVERRIDE         =   27,
+};
 
 /**
  * @brief   models image section of SGPE in HOMER.
@@ -400,9 +406,10 @@ typedef struct
     uint8_t l2BootLoader[SGPE_LVL_2_BOOT_LOAD_SIZE];
     uint8_t hcodeIntVect[SGPE_INT_VECT];
     uint8_t imgHeader[sizeof(sgpeHeader_t)];
-    uint8_t hcode[SGPE_HCODE_SIZE];
+    uint8_t debugPtrs[PK_DBG_PTR_AREA_SIZE];
+    uint8_t hcode[SGPE_EXE_SIZE];
     uint8_t commonRings[SGPE_COMMON_RING];
-    uint8_t cacheSpecificRing[MAX_CACHE_CHIPLET * CACHE_INST_SPECIFIC_SIZE];
+    uint8_t cacheSpecificRing[CACHE_INST_SPECIFIC_SIZE];
 } SgpeLayout_t;
 
 typedef union CPMRSelfRestoreLayout
@@ -480,7 +487,6 @@ typedef struct
     uint8_t             qpmrReserve1[CACHE_SCOM_START - sizeof(SgpeLayout_t)];
     uint8_t             cacheScomRegion[CACHE_SCOM_RESTORE_SIZE];
 } QPMRLayout_t;
-
 
 /**
  * @brief   models layout of HOMER.
