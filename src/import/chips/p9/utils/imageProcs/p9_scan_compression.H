@@ -251,16 +251,16 @@ rs4_compress(CompressedScanData** o_data,
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
-/// \param[in,out] io_string A caller-supplied data area to contain the
+/// \param[in,out] io_data_str A caller-supplied data area to contain the
 /// decompressed string. The \a i_stringSize must be large enough to contain
 /// the decompressed string, which is the size of the original string in bits
 /// rounded up to the nearest byte.
 ///
-/// \param[in] i_stringSize The size (in bytes) of \a i_string.
+/// \param[in] i_stringSize The size (in bytes) of \a io_data_str.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
 ///
-/// \param[in] i_data A pointer to the CompressedScanData header + data to be
+/// \param[in] i_rs4 A pointer to the CompressedScanData header + data to be
 /// decompressed.
 ///
 /// This API is required for integration with PHYP which does not support
@@ -269,30 +269,30 @@ rs4_compress(CompressedScanData** o_data,
 ///
 /// \returns See \ref scan_compression_codes
 int
-_rs4_decompress(uint8_t* i_string,
+_rs4_decompress(uint8_t* io_data_str,
                 uint32_t i_stringSize,
                 uint32_t* o_length,
-                const CompressedScanData* i_data);
+                const CompressedScanData* i_rs4);
 
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
-/// \param[out] o_string The API malloc()-s this data area to contain the
-/// decompressed string. After this call the caller owns \a o_string and is
+/// \param[out] o_data_str The API malloc()-s this data area to contain the
+/// decompressed string. After this call the caller owns \a o_data_str and is
 /// responsible for free()-ing this data area once it is no longer required.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
-/// The caller may assume that \a o_string contains at least (\a o_length + 7)
-/// / 8 \e bytes.
+/// The caller may assume that \a o_data_str contains at least
+/// (\a o_length + 7) / 8 \e bytes.
 ///
-/// \param[in] i_data A pointer to the CompressedScanData header + data to be
+/// \param[in] i_rs4 A pointer to the CompressedScanData header + data to be
 /// decompressed.
 ///
 /// \returns See \ref scan_compression_codes
 int
-rs4_decompress(uint8_t** o_string,
+rs4_decompress(uint8_t** o_data_str,
                uint32_t* o_length,
-               const CompressedScanData* i_data);
+               const CompressedScanData* i_rs4);
 
 
 /// Determine if an RS4 compressed scan string is all 0
