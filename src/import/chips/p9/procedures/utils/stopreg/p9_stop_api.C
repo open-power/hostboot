@@ -171,7 +171,7 @@ StopReturnCode_t validateSprImageInputs( void*   const i_pImage,
  * @param[in]   i_Rs    Source register number
  * @param[in]   i_Ra    destination register number
  * @param[in]   i_data  16 bit immediate data
- * @return  returns 32 bit instruction representing ori instruction.
+ * @return  returns 32 bit number representing ori instruction.
  */
 uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
                             const uint16_t i_data )
@@ -203,7 +203,7 @@ uint32_t genKeyForSprLookup( const CpuReg_t i_regId )
  * @param[in] i_Rs  source register number for xor operation
  * @param[in] i_Ra  destination register number for xor operation result
  * @param[in] i_Rb source register number for xor operation
- * @return returns 32 bit instruction representing xor  immediate instruction.
+ * @return returns 32 bit number representing xor  immediate instruction.
  */
 uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
                             const uint16_t i_Rb )
@@ -221,11 +221,11 @@ uint32_t getXorInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
 //-----------------------------------------------------------------------------
 
 /**
- * @brief generates xor instruction code.
+ * @brief generates oris instruction code.
  * @param[in] i_Rs      source register number
  * @param[in] i_Ra      destination register number
  * @param[in] i_data    16 bit immediate data
- * @return returns 32 bit instruction representing xor  immediate instruction.
+ * @return returns 32 bit number representing oris  immediate instruction.
  */
 uint32_t getOrisInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
                              const uint16_t i_data )
@@ -245,7 +245,7 @@ uint32_t getOrisInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
  * @brief generates instruction for mtspr
  * @param[in] i_Rs      source register number
  * @param[in] i_Spr represents spr where data is to be moved.
- * @return returns 32 bit instruction representing mtspr instruction.
+ * @return returns 32 bit number representing mtspr instruction.
  */
 uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
 {
@@ -262,32 +262,32 @@ uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
 //-----------------------------------------------------------------------------
 
 /**
- * @brief generates xor instruction code.
+ * @brief generates rldicr instruction.
  * @param[in] i_Rs      source register number
  * @param[in] i_Ra      destination register number
- * @param[in] i_sh1     position by which contents of i_Rs are to be shifted
- * @param[in] i_MB      shift poistion start
- * @return returns 32 bit instruction representing rldimi instruction.
+ * @param[in] i_sh      bit position by which contents of i_Rs are to be shifted
+ * @param[in] i_me      bit position up to which mask should be 1.
+ * @return returns 32 bit number representing rldicr instruction.
  */
-uint32_t getRldimiInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
-                               const uint16_t i_sh1, uint16_t i_MB )
+uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
+                               const uint16_t i_sh, uint16_t i_me )
 {
-    // limited support of this instruction
-    uint32_t rldimiInstOpcode = 0;
-    rldimiInstOpcode = 0;
-    rldimiInstOpcode = ((RLDIMI_OPCODE << 26 ) | ( i_Rs << 21 ) | ( i_Ra << 16 ));
-    rldimiInstOpcode |= ( ( i_sh1 & 0x001F ) << 11 ) | (RLDIMI_CONST << 2 );
-    rldimiInstOpcode |= (( i_sh1 & 0x0020 ) >> 4);
-    rldimiInstOpcode |= (i_MB & 0x003F ) << 5;
-    return SWIZZLE_4_BYTE(rldimiInstOpcode);
+    uint32_t rldicrInstOpcode = 0;
+    rldicrInstOpcode = 0;
+    rldicrInstOpcode = ((RLDICR_OPCODE << 26 ) | ( i_Rs << 21 ) | ( i_Ra << 16 ));
+    rldicrInstOpcode |= ( ( i_sh & 0x001F ) << 11 ) | (RLDICR_CONST << 2 );
+    rldicrInstOpcode |= (( i_sh & 0x0020 ) >> 4);
+    rldicrInstOpcode |= (i_me & 0x001F ) << 6;
+    rldicrInstOpcode |= (i_me & 0x0020 );
+    return SWIZZLE_4_BYTE(rldicrInstOpcode);
 }
 
 //-----------------------------------------------------------------------------
 
 /**
- * @brief generates instruction for mtmsr instruction.
+ * @brief generates instruction for mtmsrd instruction.
  * @param[in]   i_Rs      source register number
- * @return  returns 32 bit instruction representing mtmsr instruction.
+ * @return  returns 32 bit number representing mtmsrd instruction.
  * @note    moves contents of register i_Rs to MSR register.
  */
 uint32_t getMtmsrdInstruction( const uint16_t i_Rs )
@@ -388,47 +388,58 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
             newEntry = false;
         }
 
+        //Add SPR search instruction i.e. "ori r0, r0, SPRID"
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
+        //clear GPR R0 i.e. "xor r0, r0, r0"
         tempInst = getXorInstruction( 0, 0, 0 );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = i_regData >> 48;
+        //get lower order 16 bits of SPR restore value in GPR R0
         tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = ((i_regData >> 32) & 0x0000FFFF );
+        //get bit b16-b31 of SPR restore value in GPR R0
         tempInst = getOriInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
-        tempInst = getRldimiInstruction(0, 0, 32, 0);
+        //Rotate GPR R0 to left by  32 bit position and zero lower order 32 bits.
+        //Place the result in R0
+        tempInst = getRldicrInstruction(0, 0, 32, 31);
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = ((i_regData >> 16) & 0x000000FFFF );
+        //get bit b32-b47 of SPR restore value to GPR R0
         tempInst = getOrisInstruction( 0, 0, (uint16_t)tempRegData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         tempRegData = (uint16_t)i_regData;
+        //get bit b48-b63 of SPR restore value to GPR R0
         tempInst = getOriInstruction( 0, 0, (uint16_t)i_regData );
         *i_pSprEntryLocation = tempInst;
         i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
 
         if( P9_STOP_SPR_MSR == i_regId )
         {
+            // Case MSR, move contents of GPR R0 to an MSR
             tempInst = getMtmsrdInstruction( 0 );
         }
         else if (P9_STOP_SPR_HRMOR == i_regId )
         {
+            //Case HRMOR, just move it to a placeholder GPR R0
             tempInst = SWIZZLE_4_BYTE(MR_INT);
         }
         else
         {
+            // Case other SPRs, move contents of GPR R0 to SPR
             tempInst =
                 getMtsprInstruction( 0, (uint16_t)i_regId );
         }
@@ -438,6 +449,8 @@ StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
         if( newEntry )
         {
             i_pSprEntryLocation += SIZE_PER_SPR_RESTORE_INST;
+            //at the end of SPR restore, add instruction BLR to go back to thread
+            //launcher.
             tempInst = SWIZZLE_4_BYTE(BLR_INST);
             *i_pSprEntryLocation = tempInst;
         }
