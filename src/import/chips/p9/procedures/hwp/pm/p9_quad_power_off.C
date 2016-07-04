@@ -18,43 +18,55 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_quad_power_off.C
-/// @brief Power off the EQ -- including the functional cores associatated
-///        with it.
+/// @brief Power off the EQ including the functional cores associatated with it.
 ///
-//  *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-//  *HWP HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
-//  *HWP FW Owner:  Sangeetha T S <sangeet2@in.ibm.com>
-//  *HWP Team: PM
-//  *HWP Level: 1
-//  *HWP Consumed by: FSP:HS
-///
-/// @verbatim
-/// High-level procedure flow:
-///     - for each good EC associated with the targeted EQ, power it off
-///     - power off the EQ
-/// @endverbatim
-///
+//----------------------------------------------------------------------------
+// *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 2
+// *HWP Consumed by     : OCC:CME:FSP
+//----------------------------------------------------------------------------
+//
+// @verbatim
+// High-level procedure flow:
+//     - For each good EC associated with the targeted EQ, power it off.
+//     - Power off the EQ.
+// @endverbatim
+//
 //------------------------------------------------------------------------------
 
 
 // ----------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------
-
 #include <p9_quad_power_off.H>
 
 // ----------------------------------------------------------------------
-// Procedure Function
+// Function definitions
 // ----------------------------------------------------------------------
 
-fapi2::ReturnCode
-p9_quad_power_off(
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_eq_target)
+// Procedure p9_quad_power_off entry point, comments in header
+fapi2::ReturnCode p9_quad_power_off(
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
 {
-    FAPI_INF("> p9_quad_power_off...");
+    fapi2::ReturnCode rc   = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_unit_pos     = 0;
+
+    FAPI_INF("p9_quad_power_off: Entering...");
+
+    // Get chiplet position
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    FAPI_INF("Quad power off chiplet no.%d", l_unit_pos);
+
+    // Call the procedure
+    p9_pm_pfet_control_eq(i_target,
+                          PM_PFET_TYPE_C::BOTH,
+                          PM_PFET_TYPE_C::OFF);
 
 
-//fapi_try_exit:
-    FAPI_INF("< p9_quad_power_off...");
+    FAPI_INF("p9_quad_power_off: ...Exiting");
+
+fapi_try_exit:
     return fapi2::current_err;
 }

@@ -16,19 +16,17 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-/// @file  p9_block_wakeup_intr.H
-/// @brief Set/reset the BLOCK_REG_WKUP_SOURCES bit in the PPM
-///         associated with an EX chiplet
 ///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner:  Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+/// @file p9_quad_power_off.H
+/// @brief Power off the EQ including the functional cores associatated with it.
 ///
-///-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 2
+// *HWP Consumed by     : OCC:CME:FSP
+//----------------------------------------------------------------------------
 
 #ifndef _P9_QUADPOWEROFF_H_
 #define _P9_QUADPOWEROFF_H_
@@ -36,10 +34,9 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi2.H>
 #include <p9_quad_scom_addresses.H>
-#include <p9_quad_scom_addresses_fld.H>
+#include <p9_pm_pfet_control.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -47,7 +44,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_quad_power_off_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
 
 extern "C"
 {
@@ -55,17 +52,15 @@ extern "C"
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
-
-/// @brief Power off the EQ -- including the functional cores associatated
-///        with it.
-///
-/// @param[in] i_eq_target    EQ target
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-
-    fapi2::ReturnCode
-    p9_quad_power_off(
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target);
+    /**
+     ** @brief Power off the EQ including the functional cores associatated with it.
+     **
+     ** @param[in] i_target    Targe type EQ
+     **
+     ** @return FAPI2_RC_SUCCESS if success, error otherwise
+     **/
+    fapi2::ReturnCode p9_quad_power_off (
+        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
 
 } // extern "C"
 

@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_quad_power_off
+OBJS+=p9_pm_pfet_control.o
 $(call BUILD_PROCEDURE)
