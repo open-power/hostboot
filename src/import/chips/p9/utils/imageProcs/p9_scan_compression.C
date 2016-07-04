@@ -636,23 +636,17 @@ _rs4_compress(CompressedScanData* io_data,
     uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
     uint32_t bytes   = rs4_max_compressed_bytes(nibbles);
 
-    do
+    if (i_dataSize < bytes)
     {
-        if (i_dataSize < bytes)
-        {
-            rc = BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
-            break;
-        }
+        return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
+    }
 
-        memset(io_data, 0, bytes);
+    memset(io_data, 0, bytes);
 
-        rc = __rs4_compress(io_data, &nibbles, i_data_str, i_care_str, i_length);
+    rc = __rs4_compress(io_data, &nibbles, i_data_str, i_care_str, i_length);
 
-        if (rc != SCAN_COMPRESSION_OK)
-        {
-            break;
-        }
-
+    if (rc == SCAN_COMPRESSION_OK)
+    {
         bytes = rs4_max_compressed_bytes(nibbles);
 
         io_data->iv_magic             = htobe32(RS4_MAGIC);
@@ -667,7 +661,6 @@ _rs4_compress(CompressedScanData* io_data,
 
         *o_imageSize = bytes;
     }
-    while (0);
 
     return rc;
 }
@@ -691,7 +684,6 @@ rs4_compress(CompressedScanData** o_data,
              const uint8_t i_chipletId,
              const uint8_t i_flushOptimization)
 {
-    int rc;
     uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
     uint32_t bytes   = rs4_max_compressed_bytes(nibbles);
 
@@ -699,16 +691,12 @@ rs4_compress(CompressedScanData** o_data,
 
     if (*o_data == 0)
     {
-        rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
-    }
-    else
-    {
-        rc = _rs4_compress(*o_data, bytes, o_size, i_data_str,
-                           i_care_str, i_length, i_scanSelect,
-                           i_ringId, i_chipletId, i_flushOptimization);
+        return BUG(SCAN_COMPRESSION_NO_MEMORY);
     }
 
-    return rc;
+    return _rs4_compress(*o_data, bytes, o_size, i_data_str,
+                         i_care_str, i_length, i_scanSelect,
+                         i_ringId, i_chipletId, i_flushOptimization);
 }
 
 
@@ -723,7 +711,6 @@ __rs4_decompress(uint8_t* io_data_str,
                  const uint8_t* i_rs4_str,
                  const uint32_t i_length)
 {
-    int rc;
     int state;                  /* 0 : Rotate, 1 : Scan */
     uint32_t i;                 /* Nibble index in i_rs4_str */
     uint32_t j;                 /* Nibble index in io_data_str/io_care_str */
@@ -734,7 +721,6 @@ __rs4_decompress(uint8_t* io_data_str,
     int r;                      /* Remainder bits */
     int masked;                 /* if a care mask is available */
 
-    rc = 0;
     i = 0;
     j = 0;
     bits = 0;
@@ -747,15 +733,14 @@ __rs4_decompress(uint8_t* io_data_str,
         if (state == 0)
         {
             nibbles = stop_decode(&count, i_rs4_str, i);
-
-            if ((bits + (4 * count)) > i_length)
-            {
-                rc = BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
-                break;
-            }
-
             i += nibbles;
-            bits += (4 * count);
+
+            bits += 4 * count;
+
+            if (bits > i_length)
+            {
+                return BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
+            }
 
             // keep 'count' zero care and data nibbles
             // as initialised by memset in calling function
@@ -779,8 +764,7 @@ __rs4_decompress(uint8_t* io_data_str,
 
             if (bits > i_length)
             {
-                rc = BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
-                break;
+                return BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
             }
 
             for (k = 0; k < nibbles; k++)
@@ -799,43 +783,26 @@ __rs4_decompress(uint8_t* io_data_str,
 
     // Now handle string termination
 
-    if (!rc)
+    nibbles = rs4_get_nibble(i_rs4_str, i);
+    i++;
+
+    masked = nibbles & 0x8;
+    r = nibbles & 0x3;
+    bits += r;
+
+    if (bits != i_length)
     {
-        nibbles = rs4_get_nibble(i_rs4_str, i);
-        i++;
-
-        masked = nibbles & 0x8;
-        r = nibbles & 0x3;
-
-        if (r != 0)
-        {
-            if ((bits + r) > i_length)
-            {
-                rc = BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
-            }
-            else
-            {
-                bits += r;
-                rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
-                i = (masked ? i + 1 : i);
-                rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
-            }
-        }
+        return BUG(SCAN_DECOMPRESSION_SIZE_ERROR);
     }
 
-    // Final check to insure the string was valid
-
-    if (!rc)
+    if (r != 0)
     {
-        if (bits != i_length)
-        {
-            rc = BUGX(SCAN_DECOMPRESSION_SIZE_ERROR,
-                      "bits = %u, i_length = %u\n",
-                      bits, i_length);
-        }
+        rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
+        i = (masked ? i + 1 : i);
+        rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
     }
 
-    return rc;
+    return SCAN_COMPRESSION_OK;
 }
 
 
@@ -846,36 +813,27 @@ _rs4_decompress(uint8_t* io_data_str,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4)
 {
-    int rc;
     uint32_t bytes;
 
-    do
+    if (htobe32(i_rs4->iv_magic) != RS4_MAGIC)
     {
-        if (htobe32(i_rs4->iv_magic) != RS4_MAGIC)
-        {
-            rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
-            break;
-        }
-
-        *o_length = htobe32(i_rs4->iv_length);
-        bytes = (*o_length + 7) / 8;
-
-        if (i_stringSize < bytes)
-        {
-            rc = BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
-            break;
-        }
-
-        memset(io_data_str, 0, bytes);
-        memset(io_care_str, 0, bytes);
-
-        rc = __rs4_decompress(io_data_str, io_care_str,
-                              (uint8_t*)i_rs4 + sizeof(CompressedScanData),
-                              *o_length);
+        return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
     }
-    while (0);
 
-    return rc;
+    *o_length = htobe32(i_rs4->iv_length);
+    bytes = (*o_length + 7) / 8;
+
+    if (i_stringSize < bytes)
+    {
+        return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
+    }
+
+    memset(io_data_str, 0, bytes);
+    memset(io_care_str, 0, bytes);
+
+    return __rs4_decompress(io_data_str, io_care_str,
+                            (uint8_t*)i_rs4 + sizeof(CompressedScanData),
+                            *o_length);
 }
 
 
@@ -885,103 +843,75 @@ rs4_decompress(uint8_t** o_data_str,
                uint32_t* o_length,
                const CompressedScanData* i_rs4)
 {
-    int rc;
     uint32_t length, bytes;
 
-    do
+    if (htobe32(i_rs4->iv_magic) != RS4_MAGIC)
     {
-        if (htobe32(i_rs4->iv_magic) != RS4_MAGIC)
-        {
-            rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
-            break;
-        }
-
-        length = htobe32(i_rs4->iv_length);
-        bytes = (length + 7) / 8;
-
-        *o_data_str = (uint8_t*)malloc(bytes);
-        *o_care_str = (uint8_t*)malloc(bytes);
-
-        if (*o_data_str == 0 || *o_care_str == 0)
-        {
-            rc = BUG(SCAN_COMPRESSION_NO_MEMORY);
-            break;
-        }
-
-        rc = _rs4_decompress(*o_data_str, *o_care_str, bytes, o_length, i_rs4);
-
+        return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
     }
-    while (0);
 
-    return rc;
+    length = htobe32(i_rs4->iv_length);
+    bytes = (length + 7) / 8;
+
+    *o_data_str = (uint8_t*)malloc(bytes);
+    *o_care_str = (uint8_t*)malloc(bytes);
+
+    if (*o_data_str == 0 || *o_care_str == 0)
+    {
+        return BUG(SCAN_COMPRESSION_NO_MEMORY);
+    }
+
+    return _rs4_decompress(*o_data_str, *o_care_str, bytes, o_length, i_rs4);
 }
 
 
 int
 rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
 {
-    int rc;
     uint8_t* data;
     uint32_t length, stringLength, pos;
 
-    do
+    *o_redundant = 0;
+
+    if (htobe32(i_data->iv_magic) != RS4_MAGIC)
     {
-        *o_redundant = 0;
+        return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
+    }
 
-        if (htobe32(i_data->iv_magic) != RS4_MAGIC)
+    data = (uint8_t*)i_data + sizeof(CompressedScanData);
+    stringLength = htobe32(i_data->iv_length);
+
+    // A compressed scan string is redundant if the initial rotate is
+    // followed by the end-of-string marker, and any remaining mod-4 bits
+    // are also 0.
+
+    pos = stop_decode(&length, data, 0);
+    length *= 4;
+
+    if (rs4_get_nibble(data, pos) == 0)
+    {
+        if (rs4_get_nibble(data, pos + 1) == 0)
         {
-            rc = BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
-            break;
-        }
-
-        data = (uint8_t*)i_data + sizeof(CompressedScanData);
-        stringLength = htobe32(i_data->iv_length);
-
-        // A compressed scan string is redundant if the initial rotate is
-        // followed by the end-of-string marker, and any remaining mod-4 bits
-        // are also 0.
-
-        pos = stop_decode(&length, data, 0);
-        length *= 4;
-
-        if (rs4_get_nibble(data, pos) == 0)
-        {
-
-            if (rs4_get_nibble(data, pos + 1) == 0)
-            {
-
-                *o_redundant = 1;
-
-            }
-            else
-            {
-
-                length += rs4_get_nibble(data, pos + 1);
-
-                if (rs4_get_nibble(data, pos + 2) == 0)
-                {
-
-                    *o_redundant = 1;
-                }
-            }
-        }
-
-        if ((length > stringLength) ||
-            (*o_redundant && (length != stringLength)))
-        {
-
-            rc = SCAN_DECOMPRESSION_SIZE_ERROR;
-
+            *o_redundant = 1;
         }
         else
         {
+            length += rs4_get_nibble(data, pos + 1);
 
-            rc = 0;
+            if (rs4_get_nibble(data, pos + 2) == 0)
+            {
+                *o_redundant = 1;
+            }
         }
     }
-    while (0);
 
-    return rc;
+    if ((length > stringLength) ||
+        (*o_redundant && (length != stringLength)))
+    {
+        return SCAN_DECOMPRESSION_SIZE_ERROR;
+    }
+
+    return SCAN_COMPRESSION_OK;
 }
 
 
