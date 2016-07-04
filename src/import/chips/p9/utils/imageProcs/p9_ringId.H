@@ -330,25 +330,52 @@ enum RingID
     eq_dpll_gptr = 214,
     eq_dpll_mode = 215,
     eq_ana_bndy = 216,
-    eq_ana_mode = 217,
+    eq_ana_bndy_bucket_0 = 217,
+    eq_ana_bndy_bucket_1 = 218,
+    eq_ana_bndy_bucket_2 = 219,
+    eq_ana_bndy_bucket_3 = 220,
+    eq_ana_bndy_bucket_4 = 221,
+    eq_ana_bndy_bucket_5 = 222,
+    eq_ana_bndy_bucket_6 = 223,
+    eq_ana_bndy_bucket_7 = 224,
+    eq_ana_bndy_bucket_8 = 225,
+    eq_ana_bndy_bucket_9 = 226,
+    eq_ana_bndy_bucket_10 = 227,
+    eq_ana_bndy_bucket_11 = 228,
+    eq_ana_bndy_bucket_12 = 229,
+    eq_ana_bndy_bucket_13 = 230,
+    eq_ana_bndy_bucket_14 = 231,
+    eq_ana_bndy_bucket_15 = 232,
+    eq_ana_bndy_bucket_16 = 233,
+    eq_ana_bndy_bucket_17 = 234,
+    eq_ana_bndy_bucket_18 = 235,
+    eq_ana_bndy_bucket_19 = 236,
+    eq_ana_bndy_bucket_20 = 237,
+    eq_ana_bndy_bucket_21 = 238,
+    eq_ana_bndy_bucket_22 = 239,
+    eq_ana_bndy_bucket_23 = 240,
+    eq_ana_bndy_bucket_24 = 241,
+    eq_ana_bndy_bucket_25 = 242,
+    eq_ana_bndy_l3dcc_bucket_26 = 243,
+    eq_ana_mode = 244,
 
     // Quad Chiplet Rings
     // EQ0 - EQ5 instance specific Rings
-    eq_repr = 218,
-    ex_l3_repr = 219,
-    ex_l2_repr = 220,
-    ex_l3_refr_repr = 221,
+    eq_repr = 245,
+    ex_l3_repr = 246,
+    ex_l2_repr = 247,
+    ex_l3_refr_repr = 248,
 
     // Core Chiplet Rings
     // Common - apply to all Core instances
-    ec_func = 222,
-    ec_gptr = 223,
-    ec_time = 224,
-    ec_mode = 225,
+    ec_func = 249,
+    ec_gptr = 250,
+    ec_time = 251,
+    ec_mode = 252,
 
     // Core Chiplet Rings
     // EC0 - EC23 instance specific Ring
-    ec_repr = 226,
+    ec_repr = 253,
     //***************************
     // Rings needed for SBE - End
     //***************************
@@ -922,7 +949,34 @@ enum RingOffset
     eq_dpll_gptr    = 16,
     eq_dpll_mode    = 17,
     eq_ana_bndy     = 18,
-    eq_ana_mode     = 19,
+    eq_ana_bndy_bucket_0   = 18,
+    eq_ana_bndy_bucket_1   = 19,
+    eq_ana_bndy_bucket_2   = 20,
+    eq_ana_bndy_bucket_3   = 21,
+    eq_ana_bndy_bucket_4   = 22,
+    eq_ana_bndy_bucket_5   = 23,
+    eq_ana_bndy_bucket_6   = 24,
+    eq_ana_bndy_bucket_7   = 25,
+    eq_ana_bndy_bucket_8   = 26,
+    eq_ana_bndy_bucket_9   = 27,
+    eq_ana_bndy_bucket_10  = 28,
+    eq_ana_bndy_bucket_11  = 29,
+    eq_ana_bndy_bucket_12  = 30,
+    eq_ana_bndy_bucket_13  = 31,
+    eq_ana_bndy_bucket_14  = 32,
+    eq_ana_bndy_bucket_15  = 33,
+    eq_ana_bndy_bucket_16  = 34,
+    eq_ana_bndy_bucket_17  = 35,
+    eq_ana_bndy_bucket_18  = 36,
+    eq_ana_bndy_bucket_19  = 37,
+    eq_ana_bndy_bucket_20  = 38,
+    eq_ana_bndy_bucket_21  = 39,
+    eq_ana_bndy_bucket_22  = 40,
+    eq_ana_bndy_bucket_23  = 41,
+    eq_ana_bndy_bucket_24  = 42,
+    eq_ana_bndy_bucket_25  = 43,
+    eq_ana_bndy_l3dcc_bucket_26  = 44,
+    eq_ana_mode     = 45,
     // Instance Rings
     eq_repr         = (0 | INSTANCE_RING_MARK),
     ex_l3_repr      = (1 | INSTANCE_RING_MARK),
@@ -934,7 +988,7 @@ enum RingOffset
 static const CHIPLET_DATA g_eqData =
 {
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
-    21, // 21 common rings for Quad chiplet
+    46, // 46 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
 };
 }; // end of namespace EQ
@@ -975,7 +1029,7 @@ static const uint8_t INVALID_RING = 0xFF;
 struct ringProperties_t
 {
     uint8_t iv_torOffSet;
-    char iv_name[25];
+    char iv_name[50];
     CHIPLET_TYPE iv_type;
 };
 #endif
@@ -1112,7 +1166,7 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {MC::mc_iom01_time,             "mc_iom01_time"}, // 106
     {MC::mc_iom23_fure,             "mc_iom23_fure"}, // 107
     {MC::mc_iom23_gptr,             "mc_iom23_gptr"}, // 108
-    {MC::mc_iom23_time,             "mc_iom23_time"}, // 119
+    {MC::mc_iom23_time,             "mc_iom23_time"}, // 109
     {MC::mc_pll_gptr,               "mc_pll_gptr"},   // 110
     {MC::mc_pll_bndy,               "mc_pll_bndy"},   // 111
     {MC::mc_pll_bndy_bucket_1,      "mc_pll_bndy_bucket_1"}, // 112
@@ -1231,18 +1285,45 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {EQ::eq_dpll_gptr,              "eq_dpll_gptr"},    // 214
     {EQ::eq_dpll_mode,              "eq_dpll_mode"},   // 215
     {EQ::eq_ana_bndy,               "eq_ana_bndy"}, // 216
-    {EQ::eq_ana_mode,               "eq_ana_mode"}, // 217
-    {EQ::eq_repr,                   "eq_repr"},    // 218
-    {EQ::ex_l3_repr,                "ex_l3_repr"}, // 219
-    {EQ::ex_l2_repr,                "ex_l2_repr"}, // 220
-    {EQ::ex_l3_refr_repr,           "ex_l3_refr_repr"}, // 221
+    {EQ::eq_ana_bndy_bucket_0,             "eq_ana_bndy_bucket_0"}, // 217
+    {EQ::eq_ana_bndy_bucket_1,             "eq_ana_bndy_bucket_1"}, // 218
+    {EQ::eq_ana_bndy_bucket_2,             "eq_ana_bndy_bucket_2"}, // 219
+    {EQ::eq_ana_bndy_bucket_3,             "eq_ana_bndy_bucket_3"}, // 220
+    {EQ::eq_ana_bndy_bucket_4,             "eq_ana_bndy_bucket_4"}, // 221
+    {EQ::eq_ana_bndy_bucket_5,             "eq_ana_bndy_bucket_5"}, // 222
+    {EQ::eq_ana_bndy_bucket_6,             "eq_ana_bndy_bucket_6"}, // 223
+    {EQ::eq_ana_bndy_bucket_7,             "eq_ana_bndy_bucket_7"}, // 224
+    {EQ::eq_ana_bndy_bucket_8,             "eq_ana_bndy_bucket_8"}, // 225
+    {EQ::eq_ana_bndy_bucket_9,             "eq_ana_bndy_bucket_9"}, // 226
+    {EQ::eq_ana_bndy_bucket_10,            "eq_ana_bndy_bucket_10"}, // 227
+    {EQ::eq_ana_bndy_bucket_11,            "eq_ana_bndy_bucket_11"}, // 228
+    {EQ::eq_ana_bndy_bucket_12,            "eq_ana_bndy_bucket_12"}, // 229
+    {EQ::eq_ana_bndy_bucket_13,            "eq_ana_bndy_bucket_13"}, // 230
+    {EQ::eq_ana_bndy_bucket_14,            "eq_ana_bndy_bucket_14"}, // 231
+    {EQ::eq_ana_bndy_bucket_15,            "eq_ana_bndy_bucket_15"}, // 232
+    {EQ::eq_ana_bndy_bucket_16,            "eq_ana_bndy_bucket_16"}, // 233
+    {EQ::eq_ana_bndy_bucket_17,            "eq_ana_bndy_bucket_17"}, // 234
+    {EQ::eq_ana_bndy_bucket_18,            "eq_ana_bndy_bucket_18"}, // 235
+    {EQ::eq_ana_bndy_bucket_19,            "eq_ana_bndy_bucket_19"}, // 236
+    {EQ::eq_ana_bndy_bucket_20,            "eq_ana_bndy_bucket_20"}, // 237
+    {EQ::eq_ana_bndy_bucket_21,            "eq_ana_bndy_bucket_21"}, // 238
+    {EQ::eq_ana_bndy_bucket_22,            "eq_ana_bndy_bucket_22"}, // 239
+    {EQ::eq_ana_bndy_bucket_23,            "eq_ana_bndy_bucket_23"}, // 240
+    {EQ::eq_ana_bndy_bucket_24,            "eq_ana_bndy_bucket_24"}, // 241
+    {EQ::eq_ana_bndy_bucket_25,            "eq_ana_bndy_bucket_25"}, // 242
+    {EQ::eq_ana_bndy_l3dcc_bucket_26,     "eq_ana_bndy_bucket_26"}, // 243
+    {EQ::eq_ana_mode,               "eq_ana_mode"}, // 244
+    {EQ::eq_repr,                   "eq_repr"},    // 245
+    {EQ::ex_l3_repr,                "ex_l3_repr"}, // 246
+    {EQ::ex_l2_repr,                "ex_l2_repr"}, // 247
+    {EQ::ex_l3_refr_repr,           "ex_l3_refr_repr"}, // 248
 
     // Core Ring
-    {EC::ec_func,                   "ec_func"}, // 222
-    {EC::ec_gptr,                   "ec_gptr"}, // 223
-    {EC::ec_time,                   "ec_time"}, // 224
-    {EC::ec_mode,                   "ec_mode"}, // 225
-    {EC::ec_repr,                   "ec_repr"}  // 226
+    {EC::ec_func,                   "ec_func"}, // 249
+    {EC::ec_gptr,                   "ec_gptr"}, // 250
+    {EC::ec_time,                   "ec_time"}, // 251
+    {EC::ec_mode,                   "ec_mode"}, // 252
+    {EC::ec_repr,                   "ec_repr"}  // 253
 };
 #endif
 
@@ -1372,7 +1453,7 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {MC::mc_iom01_time,         MC_TYPE}, // 106
     {MC::mc_iom23_fure,         MC_TYPE}, // 107
     {MC::mc_iom23_gptr,         MC_TYPE}, // 108
-    {MC::mc_iom23_time,         MC_TYPE}, // 119
+    {MC::mc_iom23_time,         MC_TYPE}, // 109
     {MC::mc_pll_gptr,           MC_TYPE}, // 110
     {MC::mc_pll_bndy,           MC_TYPE}, // 111
     {MC::mc_pll_bndy_bucket_1,  MC_TYPE}, // 112
@@ -1491,18 +1572,46 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
     {EQ::eq_dpll_gptr,    EQ_TYPE}, // 214
     {EQ::eq_dpll_mode,    EQ_TYPE}, // 215
     {EQ::eq_ana_bndy,     EQ_TYPE}, // 216
-    {EQ::eq_ana_mode,     EQ_TYPE}, // 217
-    {EQ::eq_repr,         EQ_TYPE}, // 218
-    {EQ::ex_l3_repr,      EQ_TYPE}, // 219
-    {EQ::ex_l2_repr,      EQ_TYPE}, // 220
-    {EQ::ex_l3_refr_repr, EQ_TYPE}, // 221
+    {EQ::eq_ana_bndy_bucket_0,   EQ_TYPE}, // 217
+    {EQ::eq_ana_bndy_bucket_1,   EQ_TYPE}, // 218
+    {EQ::eq_ana_bndy_bucket_2,   EQ_TYPE}, // 219
+    {EQ::eq_ana_bndy_bucket_3,   EQ_TYPE}, // 220
+    {EQ::eq_ana_bndy_bucket_4,   EQ_TYPE}, // 221
+    {EQ::eq_ana_bndy_bucket_5,   EQ_TYPE}, // 222
+    {EQ::eq_ana_bndy_bucket_6,   EQ_TYPE}, // 223
+    {EQ::eq_ana_bndy_bucket_7,   EQ_TYPE}, // 224
+    {EQ::eq_ana_bndy_bucket_8,   EQ_TYPE}, // 225
+    {EQ::eq_ana_bndy_bucket_9,   EQ_TYPE}, // 226
+    {EQ::eq_ana_bndy_bucket_10,  EQ_TYPE}, // 227
+    {EQ::eq_ana_bndy_bucket_11,  EQ_TYPE}, // 228
+    {EQ::eq_ana_bndy_bucket_12,  EQ_TYPE}, // 229
+    {EQ::eq_ana_bndy_bucket_13,  EQ_TYPE}, // 230
+    {EQ::eq_ana_bndy_bucket_14,  EQ_TYPE}, // 231
+    {EQ::eq_ana_bndy_bucket_15,  EQ_TYPE}, // 232
+    {EQ::eq_ana_bndy_bucket_16,  EQ_TYPE}, // 233
+    {EQ::eq_ana_bndy_bucket_17,  EQ_TYPE}, // 234
+    {EQ::eq_ana_bndy_bucket_18,  EQ_TYPE}, // 235
+    {EQ::eq_ana_bndy_bucket_19,  EQ_TYPE}, // 236
+    {EQ::eq_ana_bndy_bucket_20,  EQ_TYPE}, // 237
+    {EQ::eq_ana_bndy_bucket_21,  EQ_TYPE}, // 238
+    {EQ::eq_ana_bndy_bucket_22,  EQ_TYPE}, // 239
+    {EQ::eq_ana_bndy_bucket_23,  EQ_TYPE}, // 240
+    {EQ::eq_ana_bndy_bucket_24,  EQ_TYPE}, // 241
+    {EQ::eq_ana_bndy_bucket_25,  EQ_TYPE}, // 242
+    {EQ::eq_ana_bndy_l3dcc_bucket_26, EQ_TYPE}, // 243
+
+    {EQ::eq_ana_mode,     EQ_TYPE}, // 244
+    {EQ::eq_repr,         EQ_TYPE}, // 245
+    {EQ::ex_l3_repr,      EQ_TYPE}, // 246
+    {EQ::ex_l2_repr,      EQ_TYPE}, // 247
+    {EQ::ex_l3_refr_repr, EQ_TYPE}, // 248
 
     // Core Ring
-    {EC::ec_func,         EC_TYPE}, // 222
-    {EC::ec_gptr,         EC_TYPE}, // 223
-    {EC::ec_time,         EC_TYPE}, // 224
-    {EC::ec_mode,         EC_TYPE}, // 225
-    {EC::ec_repr,         EC_TYPE}  // 226
+    {EC::ec_func,         EC_TYPE}, // 249
+    {EC::ec_gptr,         EC_TYPE}, // 250
+    {EC::ec_time,         EC_TYPE}, // 251
+    {EC::ec_mode,         EC_TYPE}, // 252
+    {EC::ec_repr,         EC_TYPE}  // 253
 };
 #endif
 #endif
