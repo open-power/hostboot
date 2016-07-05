@@ -29,7 +29,7 @@
 #include <targeting/common/utilFilter.H>
 #include <diag/attn/attn.H>
 #include <diag/mdia/mdia.H>
-#include <targeting/namedtarget.H>
+#include <targeting/common/targetservice.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -46,11 +46,12 @@ void* call_mss_memdiag (void* io_pArgs)
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_mss_memdiag entry");
 
+    TARGETING::Target* masterproc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     // @TODO-RTC: 155065
     // update firdata inputs for OCC
-    TARGETING::Target* masterproc = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
     l_errl = HBOCC::loadHostDataToSRAM(masterproc,
                                         PRDF::ALL_PROC_MEM_MASTER_CORE);
     assert(l_errl==NULL,
@@ -60,13 +61,11 @@ void* call_mss_memdiag (void* io_pArgs)
     TARGETING::TargetHandleList l_targetList;
     TARGETING::TYPE targetType;
 
-    // we need to check the model of the master core
+    // we need to check the model of the master proc
     // if it is Cumulus then we will use TYPE_MBA for targetType
     // else it is Nimbus so then we will use TYPE_MCBIST for targetType
-    const TARGETING::Target* masterCore = TARGETING::getMasterCore();
-
     if ( TARGETING::MODEL_CUMULUS ==
-         masterCore->getAttr<TARGETING::ATTR_MODEL>() )
+         masterproc->getAttr<TARGETING::ATTR_MODEL>() )
     {
         targetType = TARGETING::TYPE_MBA;
     }

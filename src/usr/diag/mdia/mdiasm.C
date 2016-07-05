@@ -44,7 +44,6 @@
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
-#include <targeting/namedtarget.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -172,13 +171,14 @@ fapi2::TargetType getMdiaTargetType()
 {
     fapi2::TargetType targetType;
 
-    // we need to check the model of the master core
+    // we need to check the model of the master proc
     // if it is Cumulus then we will use TARGET_TYPE_MBA_CHIPLET for targetType
     // else it is Nimbus so then we will use TARGET_TYPE_MCBIST for targetType
-    const TARGETING::Target* masterCore = TARGETING::getMasterCore();
+    TARGETING::Target* masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
 
     if ( TARGETING::MODEL_CUMULUS ==
-            masterCore->getAttr<TARGETING::ATTR_MODEL>() )
+            masterProc->getAttr<TARGETING::ATTR_MODEL>() )
     {
         targetType = fapi2::TARGET_TYPE_MBA_CHIPLET;
     }
