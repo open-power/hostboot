@@ -52,6 +52,7 @@ namespace ISTEP
         MOD_THREAD_ACTIVATE                               = 0x10,
         MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE              = 0x11,
         MOD_PM_LOAD_HOST_DATA_TO_SRAM                     = 0x12,
+        MOD_VOLTAGE_CONFIG                                = 0x13,
     };
 
     /**
@@ -84,6 +85,9 @@ namespace ISTEP
         RC_NO_MASTER_CORE_TARGET                 = ISTEP_COMP_ID | 0x16,
         RC_SBE_SLAVE_TIMEOUT                     = ISTEP_COMP_ID | 0x17,
         RC_ECMD_INSERT_FAILED                    = ISTEP_COMP_ID | 0x18,
+        RC_NO_FUNCTIONAL_PROCS                   = ISTEP_COMP_ID | 0x19,
+        RC_NO_PRESENT_EQS                        = ISTEP_COMP_ID | 0x1A,
+        RC_NOMINAL_FREQ_MISMATCH                 = ISTEP_COMP_ID | 0x1B,
     };
 
 };

@@ -23,7 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
-MODULE = istep06
 
 #Add all the object files required for istep06 module
 OBJS += host_init_fsi.o
@@ -37,23 +36,34 @@ OBJS += call_host_voltage_config.o
 
 SUBDIRS	+= thread_activate.d
 
-HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
-VPATH    += ${HWP_PATH}
+NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib
+
+VPATH += ${NEST_HWP_PATH}
+VPATH += ${PM_HWP_PATH}
+VPATH += ${LIB_HWP_PATH}
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${PM_HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers
+EXTRAINCDIR += ${LIB_HWP_PATH}
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
 #Include all the procedure makefiles
-include $(HWP_PATH)/p9_revert_sbe_mcs_setup.mk
+include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
+include $(PM_HWP_PATH)/p9_setup_evid.mk
+include $(LIB_HWP_PATH)/p9_avsbus_lib.mk
 
+MODULE=istep06
 include ${ROOTPATH}/config.mk

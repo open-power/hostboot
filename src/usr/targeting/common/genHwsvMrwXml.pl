@@ -231,7 +231,7 @@ push @systemAttr,
     "BOOT_FREQ_MHZ", $reqPol->{'boot-frequency'}->{content},
     "FREQ_A_MHZ", $reqPol->{'proc_a_frequency'}->{content},
     "FREQ_PB_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
-    "NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
+    "ASYNC_NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
     "FREQ_PCIE_MHZ", $reqPol->{'proc_pcie_frequency'}->{content},
     "FREQ_X_MHZ", $reqPol->{'proc_x_frequency'}->{content},
 # TODO: RTC 155880

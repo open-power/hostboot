@@ -49,6 +49,10 @@
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 
+
+// SBE
+#include    <sbeif.H>
+
 // HWP
 #include    <p9_mss_freq.H>
 #include    <p9_mss_freq_system.H>
@@ -68,7 +72,6 @@ void*    call_mss_freq( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = NULL;
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
     TARGETING::TargetHandleList l_membufTargetList;
@@ -109,6 +112,9 @@ void*    call_mss_freq( void *io_pArgs )
                      "SUCCESS :  mss_freq HWP");
         }
     } // End memBuf loop
+
+
+
 
     if(l_StepError.getErrorHandle() == NULL)
     {
@@ -152,6 +158,25 @@ void*    call_mss_freq( void *io_pArgs )
                    "WARNING skipping p9_mss_freq_system HWP due to error detected in p9_mss_freq HWP. An error should have been committed.");
     }
 
+/*  TODO RTC: 157659 Trigger SBE update if nest frequency changed
+    // Check to see if the nest frequency changed
+    TARGETING::targetService().getTopLevelTarget( l_sys );
+    l_newNest = l_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+    l_originalNest = l_sys->getAttr<TARGETING::ATTR_PREV_NEST_FREQ_MHZ>();
+
+    // Trigger sbe update if the nest frequency changed.
+
+    if( l_newNest != l_originalNest )
+    {
+        l_err = SBE::updateProcessorSbeSeeproms();
+
+        if( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
+        }
+    }
+*/
 
     // TODO RTC:138226
     // 3c) FW examines current synchronous mode nest freq and will customize the
