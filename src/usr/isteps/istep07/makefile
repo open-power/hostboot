@@ -48,6 +48,7 @@ OBJS += sync.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
@@ -66,6 +67,7 @@ VPATH += ${HWP_PATH} ${HWP_PATH}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
 VPATH += ${HWP_PATH}/lib ${HWP_PATH}/lib/utils ${HWP_PATH}/lib/eff_config
 VPATH += ${HWP_PATH}/lib/freq ${HWP_PATH}/lib/dimm
+VPATH += ${ROOTPATH}/src/usr/sbe
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
