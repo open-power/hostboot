@@ -18,6 +18,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "p9_ringId.H"
 #include "p9_ring_identification.H"
+#include "p9_tor.H"
 
 namespace PERV
 {
@@ -48,6 +49,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"occ_repr"         , 0x12, 0x01, 0x01, "occ_repr_ring"             , NON_VPD_RING, 0,  0x0100000000000200},
     {"perv_pibnet_repr" , 0x13, 0x01, 0x01, "perv_pibnet_repr_ring"     , NON_VPD_RING, 0,  0x0600000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace N0
 {
@@ -69,6 +71,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n0_nx_repr"       , 0x0a, 0x02, 0x02, "n0_nx_repr_ring"           , NON_VPD_RING, 0,  0x0400000000000200},
     {"n0_cxa0_repr"     , 0x0b, 0x02, 0x02, "n0_cxa0_repr_ring"         , NON_VPD_RING, 0,  0x0200000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace N1
 {
@@ -94,6 +97,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n1_ioo1_repr"     , 0x0e, 0x03, 0x03, "n1_ioo1_repr_ring"         , NON_VPD_RING, 0,  0x0080000000000200},
     {"n1_mcs23_repr"    , 0x0f, 0x03, 0x03, "n1_mcs23_repr_ring"        , NON_VPD_RING, 0,  0x0040000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace N2
 {
@@ -115,6 +119,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n2_cxa1_repr"     , 0x0a, 0x04, 0x04, "n2_cxa1_repr_ring"         , NON_VPD_RING, 0,  0x0400000000000200},
     {"n2_psi_repr"      , 0x0b, 0x04, 0x04, "n2_cxa1_repr_ring"         , NON_VPD_RING, 0,  0x0400000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace N3
 {
@@ -136,6 +141,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n3_mcs01_repr"    , 0x0a, 0x05, 0x05, "n3_mcs01_repr_ring"        , NON_VPD_RING, 0,  0x0020000000000200},
     {"n3_np_repr"       , 0x0b, 0x05, 0x05, "n3_np_repr_ring"           , NON_VPD_RING, 0,  0x0100000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace XB
 {
@@ -164,6 +170,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"xb_io1_repr"      , 0x15, 0x06, 0x06, "xb_io1_repr_ring"          , NON_VPD_RING, 0,  0x0220000000000200},
     {"xb_io2_repr"      , 0x16, 0x06, 0x06, "xb_io2_repr_ring"          , NON_VPD_RING, 0,  0x0110000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace MC
 {
@@ -192,6 +199,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"mc_iom01_repr"    , 0x11, 0x07, 0x08, "mc_iom01_repr_ring"        , NON_VPD_RING, 0,  0x0200000000000200},
     {"mc_iom23_repr"    , 0x12, 0x07, 0x08, "mc_iom23_repr_ring"        , NON_VPD_RING, 0,  0x0100000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace OB0
 {
@@ -208,6 +216,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob0_repr"          , 0x0a, 0x09, 0x09, "ob0_repr_ring"              , NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace OB1
 {
@@ -224,6 +233,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob1_repr"          , 0x0a, 0x0a, 0x0a, "ob1_repr_ring"              , NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace OB2
 {
@@ -240,6 +250,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob2_repr"          , 0x0a, 0x0b, 0x0b, "ob2_repr_ring"              , NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace OB3
 {
@@ -256,6 +267,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob3_repr"          , 0x0a, 0x0c, 0x0c, "ob3_repr_ring"              , NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace PCI0
 {
@@ -271,6 +283,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci0_repr"            , 0x05, 0x0d, 0x0d, "pci0_repr_ring"        , NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace PCI1
 {
@@ -286,6 +299,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci1_repr"            , 0x05, 0x0e, 0x0e, "pci1_repr_ring"        , NON_VPD_RING, 0,  0x0F00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace PCI2
 {
@@ -301,6 +315,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci2_repr"            , 0x05, 0x0F, 0x0F, "pci2_repr_ring"        , NON_VPD_RING, 0,  0x0F80000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
 namespace EQ
 {
@@ -362,6 +377,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"ex_l3_refr_repr"  , 0x31, 0x10, 0x15, "ex_l3_refr_repr_ring"      , NON_VPD_RING, 0,  0x0008000000000200},
     {"ex_l3_refr_time"  , 0x32, 0x10, 0x15, "ex_l3_refr_time_ring"      , NON_VPD_RING, 0,  0x0008000000000100},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::CC, P9_TOR::RL};
 };
 namespace EC
 {
@@ -377,4 +393,5 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     { "ec_repr"         , 0x04, 0x20, 0x37, "ec_repr_ring",              NON_VPD_RING, 0,  0x0E00000000000200},
 };
+const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::CC, P9_TOR::RL};
 };

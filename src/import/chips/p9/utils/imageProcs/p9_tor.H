@@ -106,7 +106,8 @@ typedef enum RingVariant   // Base variables
     RL       = 0x02,
     OVERRIDE = 0x03,
     OVERLAY  = 0x04,
-    NUM_RING_VARIANTS = 0x05
+    NUM_RING_VARIANTS = 0x05,
+    NOT_VALID = 0xff
 } RingVariant_t;
 
 

@@ -44,100 +44,122 @@ typedef struct
     uint16_t  ring_size;
 } Ring_toc_entry;
 
+typedef struct
+{
+    uint8_t  variant[3];
+} RingVariantOrder;
+
+
 namespace PERV
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace N0
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace N1
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace N2
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace N3
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace XB
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace MC
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace OB0
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace OB1
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace OB2
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace OB3
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace PCI0
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace PCI1
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace PCI2
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace EQ
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 namespace EC
 {
 extern const GenRingIdList RING_ID_LIST_COMMON[];
 extern const GenRingIdList RING_ID_LIST_INSTANCE[];
+extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
 // VPD Ring ID list structure.
