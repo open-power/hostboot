@@ -649,4 +649,34 @@
     <platInit/>
 </attribute>
 
+<attribute>
+  <id>ATTR_TARGET_HAS_POWER</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Functional Target has power</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_TARGET_HAS_CLOCK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Functional Target has clock</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_TARGET_IS_SCOMMABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Functional Target is scommable</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
 </attributes>

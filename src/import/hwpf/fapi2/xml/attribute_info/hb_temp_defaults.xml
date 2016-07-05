@@ -225,6 +225,15 @@
     <attribute>
         <id>ATTR_IO_FILTER_BYPASS</id>
     </attribute>
+    <attribute>
+        <id>ATTR_TARGET_HAS_POWER</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_TARGET_HAS_CLOCK</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_TARGET_IS_SCOMMABLE</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
