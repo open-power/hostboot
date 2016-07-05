@@ -21530,10 +21530,10 @@ DEPRECATED!!!!
   <description>Clock Mux#0 settings</description>
   <simpleType>
     <uint8_t>
+    <default>0</default>
     </uint8_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
-  <writeable/>
+  <persistency>non-volatile</persistency>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_CLOCK_PLL_MUX0</id>
@@ -29076,9 +29076,9 @@ DEPRECATED!!!!
                     x0xxxx : capture on assertion of l2_htm_llat_disp_req, i.e. loads or stores
                     x1xxxx : capture on assertion of l2_htm_llat_disp_req AND l2_llat_htm_rcdisp_ld_not_st, i.e. only loads
                     xx0xxx : capture on assertion of l2_llat_htm_pbl3hit_dval
-                    xx1xxx : no capture on assertion of l2_llat_htm_pbl3hit_dval - enable embedded timestamp 
+                    xx1xxx : no capture on assertion of l2_llat_htm_pbl3hit_dval - enable embedded timestamp
                   When htm_mode_q(1 TO 2) == 11, i.e. Direct Memory Write
-                    1xxxxx : Enable HPMC-IMA Mode         
+                    1xxxxx : Enable HPMC-IMA Mode
     </description>
     <simpleType>
       <uint32_t>
@@ -29569,7 +29569,7 @@ DEPRECATED!!!!
 
 <attribute>
     <id>HTMSC_IMA_PDBAR_ADDR</id>
-    <description>  IMA Write Physical Base Address  
+    <description>  IMA Write Physical Base Address
     </description>
     <simpleType>
       <uint64_t>
@@ -29762,6 +29762,60 @@ DEPRECATED!!!!
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CP_FILTER_BYPASS</id>
+  <description>
+    To skip the locking sequence and check for lock of CP PLL
+  </description>
+  <simpleType>
+    <uint8_t>
+    <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_CP_FILTER_BYPASS</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SS_FILTER_BYPASS</id>
+  <description>
+    To skip the locking sequence and check for lock of SS PLL
+  </description>
+  <simpleType>
+    <uint8_t>
+    <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_SS_FILTER_BYPASS</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>IO_FILTER_BYPASS</id>
+  <description>
+    To skip the locking sequence and check for lock of IO PLL
+  </description>
+  <simpleType>
+    <uint8_t>
+    <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_IO_FILTER_BYPASS</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
