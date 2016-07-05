@@ -37,6 +37,7 @@ const uint32_t  FIXED_RING_BUF_SIZE   =
 #define CHIPLET_ID_MAX            (uint8_t)0x37
 
 #if defined(__FAPI)
+    #include <fapi2.H>
     #define MY_INF(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
     #define MY_ERR(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
     #define MY_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
