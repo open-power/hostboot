@@ -72,15 +72,12 @@ VMM_CONSTS_FILE = \
 
 GENFILES = ${XMLTOHB_TARGETS}
 
-# @TODO RTC: 125229 Move these to common.mk and add header in the FSP Process
-# that indicates the size of the read-only section so secure pnorrp can handle
-# this properly. 
-XMLTOHB_SYSTEM_BINARIES += simics_MURANO_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_MURANO_targeting.bin.unprotected
-XMLTOHB_SYSTEM_BINARIES += simics_VENICE_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_VENICE_targeting.bin.unprotected
-XMLTOHB_SYSTEM_BINARIES += simics_NAPLES_targeting.bin.protected
-XMLTOHB_SYSTEM_BINARIES += simics_NAPLES_targeting.bin.unprotected
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_MURANO_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_MURANO_targeting.bin.unprotected)
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_VENICE_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_VENICE_targeting.bin.unprotected)
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_NAPLES_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES +=  $(if $(CONFIG_SECUREBOOT),simics_NAPLES_targeting.bin.unprotected)
 
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
@@ -165,4 +162,5 @@ ${GENDIR}/%_targeting.bin ${GENDIR}/%_targeting.bin.protected ${GENDIR}/%_target
         $(addprefix --fapi-attributes-xml-file=,${GENDIR}/${XMLTOHB_FAPI_XML}) \
          --src-output-dir=none --img-output-dir=$(dir $@) \
          --img-output-file=$*_targeting.bin \
-         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums
+         --vmm-consts-file=$(VMM_CONSTS_FILE) --noshort-enums \
+         $(if $(CONFIG_SECUREBOOT),--secureboot)

@@ -41,10 +41,4 @@ fi
 mkdir -p $SANDBOXBASE/img || exit -1
 
 # Copy files.
-# @TODO RTC:155374
-# Temporary development signing tools to create valid container headers
-export SIGNING_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/secure-boot-scripts/rom_new_header/sign/obj"
-export DEV_KEY_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/dev_keys"
-# --secureboot to trigger HBI hash page table creation and proper container
-# header creation.
-hbDistribute --test --secureboot --hb-standalone || exit -1
+hbDistribute --test --hb-standalone || exit -1

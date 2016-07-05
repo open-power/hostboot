@@ -120,7 +120,7 @@ gen_default_images: cp_hbfiles
 	# Eventually use genPnorImages for every default image
 	# HBI Partition and ZERO_FILL_IMAGES
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
-		${SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
+		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
 		--pnorLayout ${DEFAULT_PNOR_LAYOUT}
 	rm ${TEMP_IMAGE}
 
@@ -263,7 +263,7 @@ gen_system_specific_images: build_sbe_partitions
 	dd if=${${VENICE_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync;
 	ecc --inject ${TEMP_IMG} --output ${VENICE_LOCAL_SLW_IMG_ECC} --p8;
 	# Eventually use genPnorImages for every system specific image
-	${GEN_PNOR_IMAGE_SCRIPT} ${TARGET_TEST:b--test} ${SECUREBOOT:b--secureboot} \
+	${GEN_PNOR_IMAGE_SCRIPT} ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
 		--pnorLayout ${DEFAULT_PNOR_LAYOUT} \
 		--systemBinFiles ${GEN_MURANO_BIN_FILES} \
 		--systemBinFiles ${GEN_NAPLES_BIN_FILES} \

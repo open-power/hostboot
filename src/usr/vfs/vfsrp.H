@@ -98,8 +98,7 @@ namespace VFS
              * Ctor
              */
             VfsRp() : iv_msgQ(NULL), iv_msg(NULL), iv_pnor_vaddr(0),
-                      iv_hashPageTableOffset(0),iv_hashPageTableSize(0),
-                      iv_hashPageTableExists(false)
+                      iv_hashPageTableOffset(0),iv_hashPageTableSize(0)
             {
                 mutex_init(&iv_mutex);
             }
@@ -257,9 +256,6 @@ namespace VFS
             uint64_t iv_pnor_vaddr;  //!< virtual address of ext image in PNOR
             uint64_t iv_hashPageTableOffset; //!< virtual address of hashPageTable of ext image
             uint64_t iv_hashPageTableSize; //!< size of hashPageTable of ext image
-
-            // @TODO RTC:155374 remove workarounds.
-            bool iv_hashPageTableExists;
 
             typedef std::vector<VfsSystemModule *> ModuleList_t;
 

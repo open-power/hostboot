@@ -82,10 +82,6 @@ do
             DEBUG="-d"
         ;;
 
-        "--secureboot")
-            SECUREBOOT=1
-        ;;
-
         "--hb-standalone")
             HB_STANDALONE=1
         ;;
@@ -124,11 +120,27 @@ else
     fi
 fi
 
+# @TODO RTC:155374
+# Temporary development signing tools to create valid container headers
+export SIGNING_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/secure-boot-scripts/rom_new_header/sign/obj"
+export DEV_KEY_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/dev_keys"
+# Dynamically check config file if secureboot enabled build occurred
+if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
+    if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then
+        echo "In secure mode"
+        export CONFIG_SECUREBOOT=1
+    else
+        echo "In unsecure mode"
+    fi
+else
+    echo "File DNE ${PROJECT_ROOT}/obj/genfiles/config.h"
+    exit -1
+fi
+
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
 export TARGET_TEST
 export TARGET_DIR
-export SECUREBOOT
 export HB_STANDALONE
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET

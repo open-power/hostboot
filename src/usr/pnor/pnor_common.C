@@ -451,25 +451,30 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
 
                     // @TODO RTC:153773 move header handling to secure pnor rp
                     // Don't skip header if verification is needed.
-                    if (o_TOC[secId].version == FFS_VERS_SHA512
-                        && strcmp(cur_entry->name,"HBI") != 0)
+                    if (o_TOC[secId].version == FFS_VERS_SHA512)
                     {
-                        TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
-                                " Flash Address for SHA Header");
-
                         uint32_t l_addr = o_TOC[secId].flashAddr;
                         size_t l_headerSize = 0;
-                        if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
+                    #ifdef CONFIG_SECUREBOOT
+                        if(strcmp(cur_entry->name,"HBI") != 0)
                         {
-                            o_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
-                            l_headerSize = PAGESIZE_PLUS_ECC;
+                    #endif
+                            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
+                                                " Flash Address for SHA Header");
+
+                            if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
+                            {
+                                o_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
+                                l_headerSize = PAGESIZE_PLUS_ECC;
+                            }
+                            else
+                            {
+                                o_TOC[secId].flashAddr += PAGESIZE;
+                                l_headerSize = PAGESIZE;
+                            }
+                    #ifdef CONFIG_SECUREBOOT
                         }
-                        else
-                        {
-                            o_TOC[secId].flashAddr += PAGESIZE;
-                            l_headerSize = PAGESIZE;
-                        }
-                        o_TOC[secId].size -= PAGESIZE;
+                    #endif
 
                         l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
                                                     cv_EYECATCHER[secId]);
@@ -477,6 +482,8 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                         {
                             break;
                         }
+
+                        o_TOC[secId].size -= PAGESIZE;
                     }
 
                     if((o_TOC[secId].flashAddr + o_TOC[secId].size) >

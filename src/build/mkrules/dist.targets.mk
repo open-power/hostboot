@@ -207,14 +207,14 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/defaultPnorLayout.xml \
     img/simics_MURANO_targeting.bin \
-    img/simics_MURANO_targeting.bin.protected \
-    img/simics_MURANO_targeting.bin.unprotected \
+    $(if $(CONFIG_SECUREBOOT),img/simics_MURANO_targeting.bin.protected) \
+    $(if $(CONFIG_SECUREBOOT),img/simics_MURANO_targeting.bin.unprotected) \
     img/simics_VENICE_targeting.bin \
-    img/simics_VENICE_targeting.bin.protected \
-    img/simics_VENICE_targeting.bin.unprotected \
+    $(if $(CONFIG_SECUREBOOT),img/simics_VENICE_targeting.bin.protected) \
+    $(if $(CONFIG_SECUREBOOT),img/simics_VENICE_targeting.bin.unprotected) \
     img/simics_NAPLES_targeting.bin \
-    img/simics_NAPLES_targeting.bin.protected \
-    img/simics_NAPLES_targeting.bin.unprotected \
+    $(if $(CONFIG_SECUREBOOT),img/simics_NAPLES_targeting.bin.protected) \
+    $(if $(CONFIG_SECUREBOOT),img/simics_NAPLES_targeting.bin.unprotected) \
     obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv \

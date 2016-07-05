@@ -80,6 +80,7 @@ my $cfgAddVersionPage = 0;
 my $cfgBiosXmlFile = undef;
 my $cfgBiosSchemaFile = undef;
 my $cfgBiosOutputFile = undef;
+my $secureboot = 0;
 
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
@@ -97,7 +98,9 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "bios-output-file:s" => \$cfgBiosOutputFile,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
-           "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
+           "verbose" => \$cfgVerbose,
+           "secureboot" => \$secureboot)
+    || pod2usage(-verbose => 0);
 
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
@@ -385,21 +388,24 @@ if( !($cfgImgOutputDir =~ "none") )
     print PNOR_TARGETING_FILE "$combinedData";
     close(PNOR_TARGETING_FILE);
 
-    # Generate protected payload file
-    open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.protected")
-      or fatal ("Targeting image file: \"$cfgImgOutputDir"
-        . "$cfgImgOutputFile.protected\" could not be opened.");
-    binmode(PNOR_TARGETING_FILE);
-    print PNOR_TARGETING_FILE "$protectedData";
-    close(PNOR_TARGETING_FILE);
+    if($secureboot)
+    {
+        # Generate protected payload file
+        open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.protected")
+          or fatal ("Targeting image file: \"$cfgImgOutputDir"
+            . "$cfgImgOutputFile.protected\" could not be opened.");
+        binmode(PNOR_TARGETING_FILE);
+        print PNOR_TARGETING_FILE "$protectedData";
+        close(PNOR_TARGETING_FILE);
 
-    # Generate unprotected payload file
-    open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.unprotected")
-      or fatal ("Targeting image file: \"$cfgImgOutputDir"
-        . "$cfgImgOutputFile.unprotected\" could not be opened.");
-    binmode(PNOR_TARGETING_FILE);
-    print PNOR_TARGETING_FILE "$unprotectedData";
-    close(PNOR_TARGETING_FILE);
+        # Generate unprotected payload file
+        open(PNOR_TARGETING_FILE,">$cfgImgOutputDir"."$cfgImgOutputFile.unprotected")
+          or fatal ("Targeting image file: \"$cfgImgOutputDir"
+            . "$cfgImgOutputFile.unprotected\" could not be opened.");
+        binmode(PNOR_TARGETING_FILE);
+        print PNOR_TARGETING_FILE "$unprotectedData";
+        close(PNOR_TARGETING_FILE);
+    }
 
     if ($CfgSMAttrFile ne "")
     {
@@ -6034,7 +6040,10 @@ sub generateTargetingImage {
         - $heapPnorInitOffset));
 
     # Handle read-only data
-    ${$protectedDataRef} = $outFile;
+    if ($secureboot)
+    {
+        ${$protectedDataRef} = $outFile;
+    }
     ${$combinedDataRef} = $outFile;
     $outFile = "";
 
@@ -6072,7 +6081,10 @@ sub generateTargetingImage {
     }
 
     # Handle read-write data
-    ${$unprotectedDataRef} = $outFile;
+    if ($secureboot)
+    {
+        ${$unprotectedDataRef} = $outFile;
+    }
     ${$combinedDataRef} .= $outFile;
 
     if(defined $cfgBiosXmlFile)

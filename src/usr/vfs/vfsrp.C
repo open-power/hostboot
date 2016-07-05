@@ -45,6 +45,7 @@
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
 #include <kernel/console.H>
+#include <config.h>
 
 using namespace VFS;
 
@@ -150,21 +151,20 @@ errlHndl_t VfsRp::_init()
     {
         iv_pnor_vaddr = l_pnor_info.vaddr;
 
-        // @TODO RTC:153773 move header handling to secure pnor rp
+        #ifdef CONFIG_SECUREBOOT
+        // @TODO RTC:153773 move header handling to secure pnorrp
         SECUREBOOT::ContainerHeader l_conHdr(reinterpret_cast<void*>(iv_pnor_vaddr));
 
         // Done with the container header so increment vaddr
         iv_pnor_vaddr += PAGE_SIZE;
-        // @TODO RTC:155374 remove check
-        if(l_conHdr.isValid())
-        {
-            // @TODO RTC:153773 These variables will be set via getSectionInfo
-            iv_hashPageTableOffset = iv_pnor_vaddr;
-            TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT payload_text_size = 0x%X",
-                        l_conHdr.payloadTextSize());
-            iv_hashPageTableSize = l_conHdr.payloadTextSize()-VFS_MODULE_TABLE_SIZE;
-            iv_pnor_vaddr += iv_hashPageTableSize;
-        }
+
+        // @TODO RTC:153773 These variables will be set via getSectionInfo
+        iv_hashPageTableOffset = iv_pnor_vaddr;
+        TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT payload_text_size = 0x%X",
+                    l_conHdr.payloadTextSize());
+        iv_hashPageTableSize = l_conHdr.payloadTextSize()-VFS_MODULE_TABLE_SIZE;
+        iv_pnor_vaddr += iv_hashPageTableSize;
+        #endif
 
         rc = mm_alloc_block
             (iv_msgQ,
@@ -331,6 +331,7 @@ void VfsRp::msgHandler()
                     vaddr-=VFS_EXTENDED_MODULE_VADDR;
                     do
                     {
+                        #ifdef CONFIG_SECUREBOOT
                         if (SECUREBOOT::enabled())
                         {
                             uint64_t l_rc = verify_page(vaddr);
@@ -341,6 +342,7 @@ void VfsRp::msgHandler()
                                 break;
                             }
                         }
+                        #endif
                         memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
                                PAGE_SIZE);
                         mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
