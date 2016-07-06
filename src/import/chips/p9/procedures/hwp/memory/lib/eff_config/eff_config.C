@@ -2841,6 +2841,7 @@ fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DI
                             l_mcs,
                             UINT32_VECTOR_TO_1D_ARRAY(l_attrs_memcal_interval, PORTS_PER_MCS)),
               "Failed setting attribute for MEMCAL_INTERVAL");
+
 fapi_try_exit:
     return fapi2::current_err;
 }
