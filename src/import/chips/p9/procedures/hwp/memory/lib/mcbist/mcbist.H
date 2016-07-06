@@ -221,6 +221,15 @@ class subtest_t
         {}
 
         ///
+        /// @brief Convert to a 16 bit int
+        /// @return the subtest as a 16 bit integer, useful for testing
+        ///
+        inline operator uint16_t()
+        {
+            return uint16_t(iv_mcbmr);
+        }
+
+        ///
         /// @brief Complement the data for the first subcommand
         /// @param[in] i_state the desired state (mss::ON or mss::OFF)
         /// @return void
@@ -458,6 +467,39 @@ inline subtest_t<T> scrub_subtest()
 
     // 0:3   = 1001 - we want subtest type to be a Scrub
     l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::SCRUB_RRWR);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a steer subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> steer_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 1010 - we want subtest type to be a Steer
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::STEER_RW);
 
     // - Not a special subtest, so no other configs associated
     // 4     = 0    - we don't want to complement data for our Writes
