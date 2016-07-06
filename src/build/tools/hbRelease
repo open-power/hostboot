@@ -106,8 +106,6 @@ foreach my $arg (@ARGV)
 
 ############################## Begin Actions ##################################
 
-
-
 sub execute_define
 {
     print "Defining new level...\n";
@@ -2540,6 +2538,7 @@ sub execute_cmvc_reqs
 
     #need to get commit
     my $commits = git_commit_history($level, $released);
+    my $email = $globals{"emails"};
 
     foreach my $commit (@{$commits})
     {
@@ -2548,7 +2547,10 @@ sub execute_cmvc_reqs
         {
             if($coreq ne "")
             {
-                run_system_command("/esw/bin/coreqTracks -r $release -t $feature -t2 $coreq -e $globals{email}");
+                my $cmd = "/esw/bin/coreqTracks -r $release -t $feature -t2 $coreq -e $email";
+                print "$cmd\n";
+                my $output = `echo "y" | $cmd`;
+                print $output;
             }
         }
 
@@ -2557,11 +2559,13 @@ sub execute_cmvc_reqs
         {
             if($prereq ne "")
             {
-                run_system_command("/esw/bin/prereqTracks -r $release -t $prereq -t2 $feature -e $globals{email}");
+                my $cmd = "/esw/bin/prereqTracks -r $release -t $prereq -t2 $feature -e $email";
+                print "$cmd\n";
+                my $output = `echo "y" | $cmd`;
+                print $output
             }
         }
     }
-
 }
 
 # sub run_system_command
