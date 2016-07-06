@@ -38,6 +38,7 @@
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/settings.H>
 #include <lib/eff_config/memory_size.H>
+#include <lib/fir/memdiags_fir.H>
 
 #include <lib/utils/poll.H>
 #include <lib/utils/count_dimm.H>
@@ -803,7 +804,26 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             REQUIRE( l_poll_results == true );
         }
 
+        // Reset and check that unmasking sets all the right bits
+        {
+            REQUIRE_FALSE( mss::putScom(i_target, MCBIST_MCBISTFIRACT0, 0) );
+            REQUIRE_FALSE( mss::putScom(i_target, MCBIST_MCBISTFIRACT1, 0) );
+            REQUIRE_FALSE( mss::putScom(i_target, MCBIST_MCBISTFIRMASK_AND, 0) );
 
+            REQUIRE_FALSE( mss::unmask_memdiags_errors(i_target) );
+
+            fapi2::buffer<uint64_t> l_mcbistfir_mask;
+            fapi2::buffer<uint64_t> l_mcbistfir_action0;
+            fapi2::buffer<uint64_t> l_mcbistfir_action1;
+
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBISTFIRACT0, l_mcbistfir_action0) );
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBISTFIRACT1, l_mcbistfir_action1) );
+            REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBISTFIRMASK_AND, l_mcbistfir_mask) );
+
+            REQUIRE( 0x0020000000000000 == l_mcbistfir_action0);
+            REQUIRE( 0x0000000000000000 == l_mcbistfir_action1);
+            REQUIRE( 0xffdfffffffffffff == l_mcbistfir_mask);
+        }
         return 0;
     });
 }

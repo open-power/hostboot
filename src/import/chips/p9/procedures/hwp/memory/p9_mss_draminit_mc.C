@@ -31,6 +31,7 @@
 #include <mss.H>
 
 #include <p9_mss_draminit_mc.H>
+#include <lib/fir/memdiags_fir.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -105,9 +106,10 @@ extern "C"
 
             // Step Six: Setup Control Bit ECC
             FAPI_TRY( mss::enable_read_ecc(p) );
-
-            // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
         }
+
+        // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
+        FAPI_TRY( mss::unmask_memdiags_errors(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit MC");

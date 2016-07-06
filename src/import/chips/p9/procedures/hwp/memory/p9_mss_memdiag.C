@@ -36,8 +36,6 @@
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 
-#include <lib/fir/memdiags_fir.H>
-
 using fapi2::TARGET_TYPE_MCBIST;
 
 extern "C"
@@ -58,9 +56,6 @@ extern "C"
             FAPI_INF("... skipping mem_diags %s - no DIMM ...", mss::c_str(i_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
-
-        // Unmask the memdiags FIR
-        FAPI_TRY( mss::unmask_memdiags_errors(i_target) );
 
         FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 
