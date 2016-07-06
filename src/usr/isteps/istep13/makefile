@@ -40,6 +40,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
@@ -73,6 +74,7 @@ OBJS += dp16.o
 OBJS += adr32s.o
 OBJS += xlate.o
 OBJS += port.o
+OBJS += memdiags_fir.o
 
 OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
@@ -106,4 +108,4 @@ include ${ROOTPATH}/config.mk
 VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDURES_PATH}/hwp/perv ${PROCEDURES_PATH}/hwp/initfiles/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/ ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ ${PROCEDURES_PATH}/hwp/memory/lib/utils/ ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
-
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
