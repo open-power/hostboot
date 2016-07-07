@@ -47,7 +47,7 @@ enum
 typedef char keywordName_t [KEYWORD_BYTE_SIZE + 1];
 }
 
-typedef fapi2::ReturnCode (*p9_get_mem_vpd_keyword_t)(
+typedef fapi2::ReturnCode (*p9_get_mem_vpd_keyword_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
     const fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>&,
     const uint8_t*,
