@@ -20,7 +20,10 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_0_VERSION_LAYOUT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>MT Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
+        <description>
+            MT Keyword Layout Version Number.
+            Increases when attributes are added, removed, or redefined.  Does not reset.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -33,7 +36,11 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_1_VERSION_DATA</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>MT Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.</description>
+        <description>
+            MT Keyword Data Version Number.
+            Increases when data changes with the above layout version.
+            Resets when layout version number increments.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -46,7 +53,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_2_SIGNATURE_HASH</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.</description>
+        <description>
+            Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
+        </description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
@@ -59,7 +68,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Register Clock Driver, Input Bus Termination in tens of Ohms.</description>
+        <description>
+            Register Clock Driver, Input Bus Termination in tens of Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -74,7 +85,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>DQ and DQS Drive Impedance for [Port][DIMM][RANK].</description>
+        <description>
+            DQ and DQS Drive Impedance for [Port][DIMM][RANK].
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -89,7 +102,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_DRAM_RTT_NOM</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>DRAM side Nominal Termination Resistance in Ohms.</description>
+        <description>
+            DRAM side Nominal Termination Resistance in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -104,7 +119,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_DRAM_RTT_PARK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>DRAM side Park Termination Resistance in Ohms.</description>
+        <description>
+            DRAM side Park Termination Resistance in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -119,7 +136,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_DRAM_RTT_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>DRAM side Write Termination Resistance in Ohms.</description>
+        <description>
+            DRAM side Write Termination Resistance in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -134,7 +153,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Selects the number of enabled pullup branches during READ mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)</description>
+        <description>
+            Selects the number of enabled pullup branches during READ mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -148,7 +169,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Selects the number of enabled pulldown branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)</description>
+        <description>
+            Selects the number of enabled pulldown branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -162,7 +185,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Selects the number of enabled pullup branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)</description>
+        <description>
+            Selects the number of enabled pullup branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -176,7 +201,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Sets the capacitance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. ONLY set range 0-3. (0x00 = No capacitor selected, 0x01 = more caps selected, 0x02 = even more caps selected, 0x03 = maximum capacitors selected)</description>
+        <description>
+            Sets the capacitance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. ONLY set range 0-3. (0x00 = No capacitor selected, 0x01 = more caps selected, 0x02 = even more caps selected, 0x03 = maximum capacitors selected)
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -190,7 +217,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Sets the resistance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. Also defines the CTLE's DC Gain. ONLY set range 0-7. (0x00 = max resistance, 0x01 to 0x06 = decreasing resistance, 0x07 = min resistance)</description>
+        <description>
+            Sets the resistance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. Also defines the CTLE's DC Gain. ONLY set range 0-7. (0x00 = max resistance, 0x01 to 0x06 = decreasing resistance, 0x07 = min resistance)
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -204,7 +233,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Drive Impedance for Address Lines in Ohms.</description>
+        <description>
+            Memory Controller side Drive Impedance for Address Lines in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -219,7 +250,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Drive Impedance for Clock in Ohms.</description>
+        <description>
+            Memory Controller side Drive Impedance for Clock in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -234,7 +267,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Drive Impedance for Control Lines in Ohms.</description>
+        <description>
+            Memory Controller side Drive Impedance for Control Lines in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -249,7 +284,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Drive Impedance for Data and Data Strobe Lines in Ohms.</description>
+        <description>
+            Memory Controller side Drive Impedance for Data and Data Strobe Lines in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -264,7 +301,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Drive Impedance for Clock Enable Spare Line in Ohms.</description>
+        <description>
+            Memory Controller side Drive Impedance for Clock Enable Spare Line in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -279,7 +318,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Receiver Impedance for Data and Data Strobe Lines in Ohms.</description>
+        <description>
+            Memory Controller side Receiver Impedance for Data and Data Strobe Lines in Ohms.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -294,7 +335,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_ODT_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>READ, On Die Termination triggering bitmap.</description>
+        <description>
+            READ, On Die Termination triggering bitmap.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -308,7 +351,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_ODT_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>WRITE, On Die Termination triggering bitmap.</description>
+        <description>
+            WRITE, On Die Termination triggering bitmap.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -322,7 +367,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_VREF_DRAM_WR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>DRAM side Write Vref setting for DDR4. Bit encode is 01234567. Bit 0 is unused. Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in JEDEC.</description>
+        <description>
+            DRAM side Write Vref setting for DDR4. Bit encode is 01234567. Bit 0 is unused. Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in JEDEC.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -336,7 +383,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_VREF_MC_RD</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Memory Controller side Read Vref setting. Dividing by 1000 gives you percentage of Vdd</description>
+        <description>
+            Memory Controller side Read Vref setting. Dividing by 1000 gives you percentage of Vdd
+        </description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
@@ -351,7 +400,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MT_WINDAGE_RD_CTR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x80000023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default</description>
+        <description>
+            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x80000023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default
+        </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>

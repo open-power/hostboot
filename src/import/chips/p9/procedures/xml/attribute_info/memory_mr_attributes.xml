@@ -20,7 +20,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_0_VERSION_LAYOUT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
+        <description>
+            MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -33,7 +35,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_1_VERSION_DATA</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.</description>
+        <description>
+            MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -46,7 +50,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_2_SIGNATURE_HASH</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.</description>
+        <description>
+            Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
+        </description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
@@ -59,7 +65,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -73,7 +81,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A01</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -87,7 +97,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A02</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -101,7 +113,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A03</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -115,7 +129,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A04</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -129,7 +145,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A05</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -143,7 +161,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A06</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -157,7 +177,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A07</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -171,7 +193,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A08</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -185,7 +209,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A09</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -199,7 +225,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A10</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -213,7 +241,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A11</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -227,7 +257,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A12</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -241,7 +273,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A13</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -255,7 +289,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A17</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -269,7 +305,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -283,7 +321,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -297,7 +337,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Bank Group of BG# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Bank Group of BG# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -311,7 +353,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_BG1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Bank Group of BA# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Bank Group of BA# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -325,7 +369,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_C0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -339,7 +385,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_C1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -353,7 +401,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_C2</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -367,7 +417,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -381,7 +433,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -395,7 +449,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -409,7 +465,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -423,7 +481,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CMD_ACTN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Activate for ACTN in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Activate for ACTN in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -437,7 +497,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Column Access Strobe for CASN in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Column Access Strobe for CASN in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -451,7 +513,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Row Access Strobe for RASN in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Row Access Strobe for RASN in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -465,7 +529,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Write Enable for WEN in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Write Enable for WEN in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -479,7 +545,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CMD_PAR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of the Parity Input for PAR in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of the Parity Input for PAR in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -493,7 +561,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CKE0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -507,7 +577,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CKE1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -521,7 +593,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CKE0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -535,7 +609,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CKE1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -549,7 +625,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CSN0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -563,7 +641,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_CSN1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -577,7 +657,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CSN0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -591,7 +673,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_CSN1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -605,7 +689,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_ODT0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -619,7 +705,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D0_ODT1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -633,7 +721,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_ODT0</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -647,7 +737,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_CNTL_D1_ODT1</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.</description>
+        <description>
+            Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
@@ -661,7 +753,9 @@
     <attribute>
         <id>ATTR_MSS_VPD_MR_MC_2N_MODE_AUTOSET</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Default value for 2N Mode from Signal Integrity.</description>
+        <description>
+            Default value for 2N Mode from Signal Integrity.
+        </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
