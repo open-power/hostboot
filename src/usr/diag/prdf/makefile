@@ -40,6 +40,7 @@ include common/prdf_common_fsp_and_hb.mk
 include common/framework/prdf_framework.mk
 include common/plat/p9/prdf_plat_p9.mk
 include common/plat/cen/prdf_plat_cen.mk
+include common/plat/mem/prdf_plat_mem.mk
 include plat/p9/prdf_plat_p9_hb_only.mk
 
 VPATH += ${prd_vpath}
