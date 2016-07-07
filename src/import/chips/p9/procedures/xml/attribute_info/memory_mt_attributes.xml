@@ -21,8 +21,7 @@
         <id>ATTR_MSS_VPD_MT_0_VERSION_LAYOUT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-            MT Keyword Layout Version Number.
-            Increases when attributes are added, removed, or redefined.  Does not reset.
+            MT Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -37,9 +36,7 @@
         <id>ATTR_MSS_VPD_MT_1_VERSION_DATA</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-            MT Keyword Data Version Number.
-            Increases when data changes with the above layout version.
-            Resets when layout version number increments.
+            MT Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -91,7 +88,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>OHM34 = 0x34, OHM48 = 0x48</enum>
+        <enum>OHM34 = 34, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>10</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
@@ -154,80 +151,126 @@
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Selects the number of enabled pullup branches during READ mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+            Selects the number of enabled pullup branches during READ mode. ONLY set range 0-7. Eg. 0x02 = b010 (1 branch selected), 0x06 = b110 (2 branches selected)
+            Bit 0-2   = DP16 Block 0 (DQ Bits 0-7)
+            Bit 3-5   = DP16 Block 0 (DQ Bits 8-15)
+            Bit 6-8   = DP16 Block 1 (DQ Bits 0-7)
+            Bit 9-11  = DP16 Block 1 (DQ Bits 8-15)
+            Bit 12-14 = DP16 Block 2 (DQ Bits 0-7)
+            Bit 15-17 = DP16 Block 2 (DQ Bits 8-15)
+            Bit 18-20 = DP16 Block 3 (DQ Bits 0-7)
+            Bit 21-23 = DP16 Block 3 (DQ Bits 8-15)
+            Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
+            Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
         <mssBlobStart>42</mssBlobStart>
-        <mssBlobLength>4</mssBlobLength>
+        <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_dq_acboost_rd_up</mssAccessorName>
-        <array>2 2</array>
+        <array>2</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Selects the number of enabled pulldown branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+            Selects the number of enabled pulldown branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b010 (1 branch selected), 0x06 = b110 (2 branches selected)
+            Bit 0-2   = DP16 Block 0 (DQ Bits 0-7)
+            Bit 3-5   = DP16 Block 0 (DQ Bits 8-15)
+            Bit 6-8   = DP16 Block 1 (DQ Bits 0-7)
+            Bit 9-11  = DP16 Block 1 (DQ Bits 8-15)
+            Bit 12-14 = DP16 Block 2 (DQ Bits 0-7)
+            Bit 15-17 = DP16 Block 2 (DQ Bits 8-15)
+            Bit 18-20 = DP16 Block 3 (DQ Bits 0-7)
+            Bit 21-23 = DP16 Block 3 (DQ Bits 8-15)
+            Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
+            Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>46</mssBlobStart>
-        <mssBlobLength>4</mssBlobLength>
+        <mssBlobStart>50</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_dq_acboost_wr_down</mssAccessorName>
-        <array>2 2</array>
+        <array>2</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Selects the number of enabled pullup branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b00000010 (1 branch selected), 0x06 = b00000110 (2 branches selected)
+            Selects the number of enabled pullup branches during WRITE mode. ONLY set range 0-7. Eg. 0x02 = b010 (1 branch selected), 0x06 = b110 (2 branches selected)
+            Bit 0-2   = DP16 Block 0 (DQ Bits 0-7)
+            Bit 3-5   = DP16 Block 0 (DQ Bits 8-15)
+            Bit 6-8   = DP16 Block 1 (DQ Bits 0-7)
+            Bit 9-11  = DP16 Block 1 (DQ Bits 8-15)
+            Bit 12-14 = DP16 Block 2 (DQ Bits 0-7)
+            Bit 15-17 = DP16 Block 2 (DQ Bits 8-15)
+            Bit 18-20 = DP16 Block 3 (DQ Bits 0-7)
+            Bit 21-23 = DP16 Block 3 (DQ Bits 8-15)
+            Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
+            Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>50</mssBlobStart>
-        <mssBlobLength>4</mssBlobLength>
+        <mssBlobStart>58</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_dq_acboost_wr_up</mssAccessorName>
-        <array>2 2</array>
+        <array>2</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Sets the capacitance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. ONLY set range 0-3. (0x00 = No capacitor selected, 0x01 = more caps selected, 0x02 = even more caps selected, 0x03 = maximum capacitors selected)
+            Sets the capacitance value in the RC source degeneration. ONLY set range 0-3. (b00 = No capacitor selected, b01 = more caps selected, b10 = even more caps selected, b11 = maximum capacitors selected)
+            Bit 0-1   = DP16 Block 0 Nibble 0     Bit 16-17 = DP16 Block 2 Nibble 0     Bit 32-33 = DP16 Block 4 Nibble 0
+            Bit 2-3   = DP16 Block 0 Nibble 1     Bit 18-19 = DP16 Block 2 Nibble 1     Bit 34-35 = DP16 Block 4 Nibble 1
+            Bit 4-5   = DP16 Block 0 Nibble 2     Bit 20-21 = DP16 Block 2 Nibble 2     Bit 36-37 = DP16 Block 4 Nibble 2
+            Bit 6-7   = DP16 Block 0 Nibble 3     Bit 22-23 = DP16 Block 2 Nibble 3     Bit 38-39 = DP16 Block 4 Nibble 3
+            Bit 8-9   = DP16 Block 1 Nibble 0     Bit 24-25 = DP16 Block 3 Nibble 0
+            Bit 10-11 = DP16 Block 1 Nibble 1     Bit 26-27 = DP16 Block 3 Nibble 1
+            Bit 12-13 = DP16 Block 1 Nibble 2     Bit 28-29 = DP16 Block 3 Nibble 2
+            Bit 14-15 = DP16 Block 1 Nibble 3     Bit 30-31 = DP16 Block 3 Nibble 3
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint64</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>54</mssBlobStart>
-        <mssBlobLength>10</mssBlobLength>
+        <mssBlobStart>66</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_dq_ctle_cap</mssAccessorName>
-        <array>2 5</array>
+        <array>2</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Sets the resistance value in the RC source degeneration for [PORT#][DP16 BLOCK#]. Also defines the CTLE's DC Gain. ONLY set range 0-7. (0x00 = max resistance, 0x01 to 0x06 = decreasing resistance, 0x07 = min resistance)
+            Sets the resistance value in the RC source degeneration. Also defines the CTLE's DC Gain. ONLY set range 0-7. (b000 = max resistance, b001 to b110 = decreasing resistance, b111 = min resistance)
+            Bit 0-2   = DP16 Block 0 Nibble 0     Bit 24-26 = DP16 Block 2 Nibble 0     Bit 48-50 = DP16 Block 4 Nibble 0
+            Bit 3-5   = DP16 Block 0 Nibble 1     Bit 27-29 = DP16 Block 2 Nibble 1     Bit 51-53 = DP16 Block 4 Nibble 1
+            Bit 6-8   = DP16 Block 0 Nibble 2     Bit 30-32 = DP16 Block 2 Nibble 2     Bit 54-56 = DP16 Block 4 Nibble 2
+            Bit 9-11  = DP16 Block 0 Nibble 3     Bit 33-35 = DP16 Block 2 Nibble 3     Bit 57-59 = DP16 Block 4 Nibble 3
+            Bit 12-14 = DP16 Block 1 Nibble 0     Bit 36-38 = DP16 Block 3 Nibble 0
+            Bit 15-17 = DP16 Block 1 Nibble 1     Bit 39-41 = DP16 Block 3 Nibble 1
+            Bit 18-20 = DP16 Block 1 Nibble 2     Bit 42-44 = DP16 Block 3 Nibble 2
+            Bit 21-23 = DP16 Block 1 Nibble 3     Bit 45-47 = DP16 Block 3 Nibble 3
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint64</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>64</mssBlobStart>
-        <mssBlobLength>10</mssBlobLength>
+        <mssBlobStart>82</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_dq_ctle_res</mssAccessorName>
-        <array>2 5</array>
+        <array>2</array>
     </attribute>
 
     <attribute>
@@ -241,7 +284,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>74</mssBlobStart>
+        <mssBlobStart>98</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_drv_imp_addr</mssAccessorName>
         <array>2</array>
@@ -258,7 +301,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>76</mssBlobStart>
+        <mssBlobStart>100</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_drv_imp_clk</mssAccessorName>
         <array>2</array>
@@ -275,7 +318,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>78</mssBlobStart>
+        <mssBlobStart>102</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_drv_imp_cntl</mssAccessorName>
         <array>2</array>
@@ -292,7 +335,7 @@
         <writeable/>
         <enum>DISABLE = 0, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>80</mssBlobStart>
+        <mssBlobStart>104</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
         <array>2</array>
@@ -309,7 +352,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>82</mssBlobStart>
+        <mssBlobStart>106</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_drv_imp_spcke</mssAccessorName>
         <array>2</array>
@@ -326,7 +369,7 @@
         <writeable/>
         <enum>DISABLE = 0, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>84</mssBlobStart>
+        <mssBlobStart>108</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2</array>
@@ -342,7 +385,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>86</mssBlobStart>
+        <mssBlobStart>110</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_odt_rd</mssAccessorName>
         <array>2 2 2</array>
@@ -358,7 +401,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>94</mssBlobStart>
+        <mssBlobStart>118</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_odt_wr</mssAccessorName>
         <array>2 2 2</array>
@@ -374,7 +417,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>102</mssBlobStart>
+        <mssBlobStart>126</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_vref_dram_wr</mssAccessorName>
         <array>2</array>
@@ -391,7 +434,7 @@
         <writeable/>
         <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
         <mssUnits>percent of Vdd</mssUnits>
-        <mssBlobStart>104</mssBlobStart>
+        <mssBlobStart>128</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_vref_mc_rd</mssAccessorName>
         <array>2</array>
@@ -401,13 +444,13 @@
         <id>ATTR_MSS_VPD_MT_WINDAGE_RD_CTR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x80000023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default
+            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x8023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default
         </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits>num</mssUnits>
-        <mssBlobStart>112</mssBlobStart>
+        <mssBlobStart>136</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
         <mssAccessorName>mss_vpd_mt_windage_rd_ctr</mssAccessorName>
         <array>2</array>
