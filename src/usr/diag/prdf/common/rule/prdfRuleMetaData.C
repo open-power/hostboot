@@ -663,19 +663,41 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
             break;
 
         case Prdr::REF_RULE:
+        {
+            uint32_t idx = i_vReg->cv_value[0].i;
 
-            if (NULL == i_data.cv_regMap[i_vReg->cv_value[0].i])
+            if ( nullptr == i_data.cv_regMap[idx] )
             {
-                l_tmp32 = iv_ruleIndexes[i_vReg->cv_value[0].i];
+                // This is a special case where a rule is referencing another
+                // rule (i.e. the 'summary' construct). In this case, we will
+                // want to preserve the current resets for this rule so that we
+                // do not override them with the sub-rule.
 
-                i_data.cv_regMap[i_vReg->cv_value[0].i] =
+                // Save the current resets for this rule.
+                ResetAndMaskPair curResets = i_data.cv_currentResets;
+
+                // Clear the current resets for the sub-rule (clean slate).
+                i_data.cv_currentResets = ResetAndMaskPair();
+
+                // Store the new virtual register in cv_regMap. Afterwards,
+                // i_data.cv_currentResets will contain the current resets for
+                // the sub-rule.
+                i_data.cv_regMap[idx] =
                     createVirtualRegister(
-                        &i_data.cv_loadChip->cv_rules[l_tmp32],
-                        i_data );
+                            &i_data.cv_loadChip->cv_rules[iv_ruleIndexes[idx]],
+                            i_data );
+
+                // Store the resets for the sub-rule in cv_resets.
+                i_data.cv_resets[idx] = i_data.cv_currentResets;
+
+                // Restore the saved current resets for this rule.
+                i_data.cv_currentResets = curResets;
             }
-            l_rc = i_data.cv_regMap[i_vReg->cv_value[0].i];
+
+            l_rc = i_data.cv_regMap[idx];
 
             break;
+        }
 
         case Prdr::ATTNLINK:
 
