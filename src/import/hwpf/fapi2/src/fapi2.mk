@@ -31,7 +31,6 @@
 # Add common and generated parts to object list.
 FAPI2_MODULE_OBJS += error_info.o
 FAPI2_MODULE_OBJS += ffdc.o
-FAPI2_MODULE_OBJS += fapi2_attribute_service.o
 
 # Define common source and include paths.
 define FAPI2_MODULE_INCLUDES
