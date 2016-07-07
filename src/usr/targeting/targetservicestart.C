@@ -44,6 +44,7 @@
 #include <targeting/common/trace.H>
 #include <targeting/adapters/assertadapter.H>
 #include <initservice/taskargs.H>
+#include <util/utilmbox_scratch.H>
 
 // This component
 #include <targeting/common/targetservice.H>
@@ -54,6 +55,7 @@
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 #include <config.h>
+
 
 
 //******************************************************************************
@@ -242,33 +244,23 @@ static void initializeAttributes(TargetService& i_targetService)
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
 
-#if 0 //@fixme RTC 134431
-            errlHndl_t l_errl = NULL;
-            size_t l_size = sizeof(uint64_t);
-            uint64_t l_data;
+            // Check mbox scratch reg 3 for IPL boot options
+            // Specifically istep mode (bit 0) and MPIPL (bit 2)
+            uint64_t l_data =
+              Util::readScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG3);
 
-            // Scratch register 2 is defined as 0x00050039..
-            l_errl = DeviceFW::deviceRead(l_pMasterProcChip,
-                                          &(l_data),
-                                          l_size,
-                                          DEVICE_SCOM_ADDRESS(MBOX_SCRATCH2));
+            // Targeting data defaults to non istep, only turn "on" if bit
+            // is set so we don't tromp default setting
+            if ((l_data & Util::ISTEP_CONFIG_BIT) == Util::ISTEP_CONFIG_BIT)
+            {
+                l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(1);
+            }
 
-            if(l_errl)
+            if ((l_data & Util::MPIPL_CONFIG_BIT) == Util::MPIPL_CONFIG_BIT)
             {
-                TARG_INF("Read of scratch register failed");
-                errlCommit(l_errl,TARG_COMP_ID);
+                l_isMpipl = true;
             }
-            else
-            {
-                // bit 0 on indicates MPIPL
-                if(l_data & 0x8000000000000000ull)
-                {
-                    l_isMpipl = true;
-                }
-            }
-#endif //@fixme RTC 134431
         }
-
 
         if(l_isMpipl)
         {

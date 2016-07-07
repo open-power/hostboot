@@ -60,6 +60,11 @@ namespace Util
 
         MSG_TYPE_TRACE          =       0x00,
         MSG_TYPE_ATTRDUMP       =       0x01,
+
+
+        ISTEP_CONFIG_BIT        =       0x8000000000000000,
+        MPIPL_CONFIG_BIT        =       0x2000000000000000,
+
     };
 
     /**

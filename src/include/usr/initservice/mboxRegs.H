@@ -33,6 +33,10 @@ namespace SPLESS
     const   uint32_t    MBOX_SCRATCH_REG2               =   0x00050039;
     const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003a;
     const   uint32_t    MBOX_SCRATCH_REG4               =   0x0005003b;
+    const   uint32_t    MBOX_SCRATCH_REG5               =   0x0005003c;
+    const   uint32_t    MBOX_SCRATCH_REG6               =   0x0005003d;
+    const   uint32_t    MBOX_SCRATCH_REG7               =   0x0005003e;
+    const   uint32_t    MBOX_SCRATCH_REG8               =   0x0005003f;
 };
 };
 #endif
