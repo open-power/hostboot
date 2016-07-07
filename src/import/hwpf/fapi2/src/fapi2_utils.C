@@ -36,8 +36,7 @@ namespace fapi2
 {
 
 ReturnCode queryChipEcAndName(
-    const Target < fapi2::TARGET_TYPE_PROC_CHIP |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP > & i_target,
+    const Target < fapi2::TARGET_TYPE_ALL>& i_target,
     fapi2::ATTR_NAME_Type& o_chipName, fapi2::ATTR_EC_Type& o_chipEc )
 {
 
