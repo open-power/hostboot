@@ -118,17 +118,17 @@ Layout Description
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Attribute Data (128k)</description>
+        <description>Attribute Data (160k)</description>
         <eyeCatch>HBD</eyeCatch>
         <physicalOffset>0xCA000</physicalOffset>
-        <physicalRegionSize>0x20000</physicalRegionSize>
+        <physicalRegionSize>0x28000</physicalRegionSize>
         <side>sideless</side>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Hostboot Extended image (3MB)</description>
         <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0xEA000</physicalOffset>
+        <physicalOffset>0xF2000</physicalOffset>
         <physicalRegionSize>0x500000</physicalRegionSize>
         <side>sideless</side>
     </section>
