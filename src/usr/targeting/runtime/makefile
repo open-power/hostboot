@@ -25,8 +25,7 @@
 HOSTBOOT_RUNTIME = 1
 MODULE = targeting_rt
 
-#@TODO RTC:132750
-#SUBDIRS += test.d
+SUBDIRS += test.d
 
 TARGETING_REL_PATH = ..
 include ${TARGETING_REL_PATH}/hostboot_common.mk
@@ -39,7 +38,6 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += targplatutil.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_targeting.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrPlatOverride_rt.o
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 OBJS += ${COMMON_TARGETING_OBJS}
 OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}

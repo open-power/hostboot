@@ -27,8 +27,7 @@
 #include <runtime/rt_targeting.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/attrPlatOverride.H>
-//@TODO RTC:132750
-//#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
+#include <fapi2/plat_attr_override_sync.H>
 #include <targeting/common/trace.H>
 #include <errl/errlmanager.H>
 #include <initservice/initserviceif.H>
@@ -42,8 +41,6 @@ int apply_attr_override(uint8_t* i_data,
                         size_t i_size )
 {
     int rc = 0;
-//@TODO RTC:132750
-#if 0
     errlHndl_t l_errl = NULL;
 
     TRACFCOMP(g_trac_targeting, "enter apply_attr_override");
@@ -52,7 +49,7 @@ int apply_attr_override(uint8_t* i_data,
     // expected to be empty. The passed overrides are added, not updated
     // in place.
     AttributeTank * l_pAttributeTank =
-                    &fapi::theAttrOverrideSync().iv_overrideTank;
+                    &fapi2::theAttrOverrideSync().iv_overrideTank;
     if ((*l_pAttributeTank).attributesExist())
     {
         TRACFCOMP(g_trac_targeting, "apply_attr_override:"
@@ -87,7 +84,6 @@ int apply_attr_override(uint8_t* i_data,
     {
         TRACFCOMP(g_trac_targeting, "apply_attr_override succeed");
     }
-#endif
     return rc;
 }
 

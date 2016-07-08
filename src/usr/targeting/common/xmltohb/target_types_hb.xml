@@ -216,6 +216,9 @@
 <targetTypeExtension>
     <id>unit-ex-power9</id>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+    <attribute>
+        <id>HBRT_HYP_ID</id>
+    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
