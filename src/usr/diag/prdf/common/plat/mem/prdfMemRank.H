@@ -31,6 +31,7 @@
 #define __prdfMemRank_H
 
 #include <prdfAssert.h>
+#include <prdf_types.h>
 
 namespace PRDF
 {
