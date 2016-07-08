@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
 #include <targeting/common/trace.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/attrPlatOverride.H>
-#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 
 class TargetingTestSuite : public CxxTest::TestSuite
 {
@@ -76,7 +75,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                               targetList.end());
 
             targetList.clear();
-            getAllChiplets(targetList, TYPE_EX);
+            getAllChiplets(targetList, TYPE_CORE);
 
             allTargets.insert(allTargets.end(),
                               targetList.begin(),
@@ -109,11 +108,13 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
                 if(*pTarg != target)
                 {
-                    TS_FAIL("testHBRT_targets failed for rt_chipID %x"
-                            "target_in %p, target_out %p",
+                    TS_FAIL("testHBRT_targets failed for rt_chipID %x "
+                            "target_in %p, huid %x, target_out %p, huid %x",
                             rt_chipid,
                             *pTarg,
-                            target);
+                            get_huid(*pTarg),
+                            target,
+                            get_huid(target));
                 }
             }
         }

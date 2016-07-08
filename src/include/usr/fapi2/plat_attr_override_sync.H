@@ -55,6 +55,12 @@ namespace TARGETING
                       AttributeTank* io_tanks[AttributeTank::TANK_LAYER_LAST]);
 }
 
+namespace RT_TARG
+{
+    int apply_attr_override(uint8_t* i_data,
+                            size_t i_size );
+}
+
 namespace fapi2
 {
 
@@ -96,6 +102,9 @@ public:
                     PNOR::SectionInfo_t &i_sectionInfo,
                     TARGETING::AttributeTank*
                         io_tanks[TARGETING::AttributeTank::TANK_LAYER_LAST]);
+
+    friend int RT_TARG::apply_attr_override(uint8_t* i_data,
+                                            size_t i_size );
 
     /**
      * @brief Maximum size of a direct attribute override
