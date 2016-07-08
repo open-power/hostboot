@@ -293,7 +293,7 @@ inject_ecc: build_sbe_partitions
 	dd if=${${NIMBUS_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_TARG_IMG_ECC} --p8; \
 	#for NIMBUS fake pnor skip version header
-	dd if=${${NIMBUS_VPO_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=32 skip=1 conv=sync; \
+	dd if=${${NIMBUS_VPO_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=40 skip=1 conv=sync; \
 	# SBE partition
 	dd if=${${NIMBUS_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_SBE_IMG_ECC} --p8; \
