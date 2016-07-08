@@ -46,6 +46,8 @@ prd_rule_plugin += prdfP9Mcbist.o
 
 ifneq (${HOSTBOOT_RUNTIME},1)
 
+prd_obj += prdfMemVcm_ipl.o
+
 endif
 
 ################################################################################
@@ -53,6 +55,8 @@ endif
 ################################################################################
 
 ifeq (${HOSTBOOT_RUNTIME},1)
+
+prd_obj += prdfMemVcm_rt.o
 
 endif
 
