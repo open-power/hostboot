@@ -27,6 +27,7 @@
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
 #include <return_code_defs.H>
+#include <plat_trace.H>
 
 namespace fapi2
 {
@@ -297,7 +298,12 @@ class variable_buffer
         ///@{
 
         ///
-        /// @brief Set an OT of data in buffer
+        /// @brief Set an OT of data in buffer.
+        ///
+        /// It is possible to write the incomplete last OT of a buffer that's not
+        /// an integer multiple of OT's size in bits; in that case, the value will
+        /// be treated left aligned and truncated.
+        ///
         /// @param[in] i_value sizeof(OT) bits of data
         /// @param[in] i_offset Start OT (start word, for example) in buffer
         ///            - defaults to 0 (will by default write the left most element)
@@ -310,22 +316,30 @@ class variable_buffer
             static_assert( std::is_integral<OT>::value,
                            "Input must be an integral type" );
 
-            static const bits_type bits_in_value = parameterTraits<OT>::bit_length();
+            const bits_type bits_in_value = parameterTraits<OT>::bit_length();
+            const bits_type bit_offset = i_offset * bits_in_value;
 
-            if (((i_offset + 1 ) *  bits_in_value) > iv_perceived_bit_length)
+            if (bit_offset >= iv_perceived_bit_length)
             {
                 return FAPI2_RC_OVERFLOW;
             }
 
-            return insert<OT>( i_value, (i_offset * bits_in_value), bits_in_value, 0);
+            const bits_type available_space = iv_perceived_bit_length - bit_offset;
+
+            return insert<OT>( i_value, (i_offset * bits_in_value), std::min(available_space, bits_in_value), 0);
 
         }
 
         ///
         /// @brief Get an OT of data from buffer
+        ///
+        /// It is possible to read the incomplete last OT of a buffer that's not
+        /// an integer multiple of OT's size in bits; in that case, the return
+        /// value will contain the remaining bits left-aligned.
+        ///
         /// @tparam OT the type of the data to get
         /// @param[in] i_offset Start OT (start word, for example) in buffer
-        ///            - defaults to 0 (will by default write the left most element)
+        ///            - defaults to 0 (will by default read the left most element)
         /// @return OT
         /// @note uint8_t b = get<uint8_t>(N) <- gets the N'th left byte from the buffer
         ///
@@ -1219,9 +1233,20 @@ inline fapi2::ReturnCodes variable_buffer::shiftRight(
 template< typename OT>
 inline OT variable_buffer::get(const bits_type i_offset) const
 {
+    const bits_type bits_in_value = parameterTraits<OT>::bit_length();
+    const bits_type bit_offset = i_offset * bits_in_value;
+
+    if (bit_offset >= iv_perceived_bit_length)
+    {
+        FAPI_ERR("Overrun in variable_buffer::get<OT>() - bits_in_value=%d bit_offset=%d iv_perceived_bit_length=%d",
+                 bits_in_value, bit_offset, iv_perceived_bit_length);
+        fapi2::Assert(false);
+    }
+
     // Get is just an extract.
     OT l_tmp = OT(0);
-    extract(l_tmp, parameterTraits<OT>::bit_length() * i_offset, parameterTraits<OT>::bit_length());
+    const bits_type available_space = iv_perceived_bit_length - bit_offset;
+    extract(l_tmp, bit_offset, std::min(available_space, bits_in_value));
     return l_tmp;
 }
 }
