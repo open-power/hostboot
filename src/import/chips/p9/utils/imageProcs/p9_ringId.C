@@ -103,21 +103,21 @@ namespace N2
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"n2_fure"          , 0x00, 0x04, 0x04, "n2_fure_ring"              , NON_VPD_RING, 0,  0x0BC0000000009000},
-    {"n2_gptr"          , 0x01, 0x04, 0x04, "n2_gptr_ring"              , NON_VPD_RING, 0,  0x0BC0000000002000},
-    {"n2_time"          , 0x02, 0x04, 0x04, "n2_time_ring"              , NON_VPD_RING, 0,  0x0BC0000000000100},
+    {"n2_fure"          , 0x00, 0x04, 0x04, "n2_fure_ring"              , NON_VPD_RING, 0,  0x0B80000000009000},
+    {"n2_gptr"          , 0x01, 0x04, 0x04, "n2_gptr_ring"              , NON_VPD_RING, 0,  0x0B80000000002000},
+    {"n2_time"          , 0x02, 0x04, 0x04, "n2_time_ring"              , NON_VPD_RING, 0,  0x0B80000000000100},
     {"n2_cxa1_fure"     , 0x03, 0x04, 0x04, "n2_cxa1_fure_ring"         , NON_VPD_RING, 0,  0x0400000000009000},
     {"n2_cxa1_gptr"     , 0x04, 0x04, 0x04, "n2_cxa1_gptr_ring"         , NON_VPD_RING, 0,  0x0400000000002000},
     {"n2_cxa1_time"     , 0x05, 0x04, 0x04, "n2_cxa1_time_ring"         , NON_VPD_RING, 0,  0x0400000000000100},
-    {"n2_psi_fure"      , 0x06, 0x04, 0x04, "n2_psi_fure_ring"          , NON_VPD_RING, 0,  0x0400000000009000},
-    {"n2_psi_gptr"      , 0x07, 0x04, 0x04, "n2_psi_gptr_ring"          , NON_VPD_RING, 0,  0x0400000000002000},
-    {"n2_psi_time"      , 0x08, 0x04, 0x04, "n2_psi_time_ring"          , NON_VPD_RING, 0,  0x0400000000000100},
+    {"n2_psi_fure"      , 0x06, 0x04, 0x04, "n2_psi_fure_ring"          , NON_VPD_RING, 0,  0x0040000000009000},
+    {"n2_psi_gptr"      , 0x07, 0x04, 0x04, "n2_psi_gptr_ring"          , NON_VPD_RING, 0,  0x0040000000002000},
+    {"n2_psi_time"      , 0x08, 0x04, 0x04, "n2_psi_time_ring"          , NON_VPD_RING, 0,  0x0040000000000100},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"n2_repr"          , 0x09, 0x04, 0x04, "n2_repr_ring"              , NON_VPD_RING, 0,  0x0BC0000000000200},
+    {"n2_repr"          , 0x09, 0x04, 0x04, "n2_repr_ring"              , NON_VPD_RING, 0,  0x0B80000000000200},
     {"n2_cxa1_repr"     , 0x0a, 0x04, 0x04, "n2_cxa1_repr_ring"         , NON_VPD_RING, 0,  0x0400000000000200},
-    {"n2_psi_repr"      , 0x0b, 0x04, 0x04, "n2_cxa1_repr_ring"         , NON_VPD_RING, 0,  0x0400000000000200},
+    {"n2_psi_repr"      , 0x0b, 0x04, 0x04, "n2_cxa1_repr_ring"         , NON_VPD_RING, 0,  0x0040000000000200},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { P9_TOR::BASE, P9_TOR::RL, P9_TOR::NOT_VALID};
 };
@@ -321,24 +321,24 @@ namespace EQ
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"eq_fure"                   , 0x00, 0x10, 0x10, "eq_fure_ring"                  , NON_VPD_RING, 0,  0x0C10000000009000},
-    {"eq_gptr"                   , 0x01, 0x10, 0x10, "eq_gptr_ring"                  , NON_VPD_RING, 0,  0x0C10000000002000},
-    {"eq_time"                   , 0x02, 0x10, 0x10, "eq_time_ring"                  , NON_VPD_RING, 0,  0x0C10000000000100},
-    {"eq_mode"                   , 0x03, 0x10, 0x10, "eq_mode_ring"                  , NON_VPD_RING, 0,  0x0C10000000004000},
-    {"ex_l3_fure"                , 0x04, 0x10, 0x10, "ex_l3_fure_ring"               , NON_VPD_RING, 0,  0x0200000000009000},
-    {"ex_l3_gptr"                , 0x05, 0x10, 0x10, "ex_l3_gptr_ring"               , NON_VPD_RING, 0,  0x0200000000002000},
-    {"ex_l3_time"                , 0x06, 0x10, 0x10, "ex_l3_time_ring"               , NON_VPD_RING, 0,  0x0200000000000100},
-    {"ex_l2_mode"                , 0x07, 0x10, 0x10, "ex_l2_fure_ring"               , NON_VPD_RING, 0,  0x0080000000009000},
-    {"ex_l2_fure"                , 0x08, 0x10, 0x10, "ex_l2_fure_ring"               , NON_VPD_RING, 0,  0x0080000000009000},
-    {"ex_l2_gptr"                , 0x09, 0x10, 0x10, "ex_l2_gptr_ring"               , NON_VPD_RING, 0,  0x0080000000002000},
-    {"ex_l2_time"                , 0x0a, 0x10, 0x10, "ex_l2_time_ring"               , NON_VPD_RING, 0,  0x0080000000000100},
-    {"ex_l3_refr_fure"           , 0x0b, 0x10, 0x10, "ex_l3_refr_fure_ring"          , NON_VPD_RING, 0,  0x0008000000009000},
-    {"ex_l3_refr_gptr"           , 0x0c, 0x10, 0x10, "ex_l3_refr_gptr_ring"          , NON_VPD_RING, 0,  0x0008000000002000},
-    {"eq_ana_func"               , 0x0d, 0x10, 0x10, "eq_ana_func_ring"              , NON_VPD_RING, 0,  0x0020000000008000},
-    {"eq_ana_gptr"               , 0x0e, 0x10, 0x10, "eq_ana_gptr_ring"              , NON_VPD_RING, 0,  0x0020000000002000},
-    {"eq_dpll_func"              , 0x0f, 0x10, 0x10, "eq_dpll_func_ring"             , NON_VPD_RING, 0,  0x0002000000008000},
-    {"eq_dpll_gptr"              , 0x10, 0x10, 0x10, "eq_dpll_gptr_ring"             , NON_VPD_RING, 0,  0x0002000000002000},
-    {"eq_dpll_mode"              , 0x11, 0x10, 0x10, "eq_dpll_mode_ring"             , NON_VPD_RING, 0,  0x0002000000004000},
+    {"eq_fure"                   , 0x00, 0x10, 0x10, "eq_fure_ring"              , NON_VPD_RING, 0,  0x0C10000000009000},
+    {"eq_gptr"                   , 0x01, 0x10, 0x10, "eq_gptr_ring"              , NON_VPD_RING, 0,  0x0C10000000002000},
+    {"eq_time"                   , 0x02, 0x10, 0x10, "eq_time_ring"              , NON_VPD_RING, 0,  0x0C10000000000100},
+    {"eq_mode"                   , 0x03, 0x10, 0x10, "eq_mode_ring"              , NON_VPD_RING, 0,  0x0C10000000004000},
+    {"ex_l3_fure"                , 0x04, 0x10, 0x10, "ex_l3_fure_ring"           , NON_VPD_RING, 0,  0x0200000000009000},
+    {"ex_l3_gptr"                , 0x05, 0x10, 0x10, "ex_l3_gptr_ring"           , NON_VPD_RING, 0,  0x0200000000002000},
+    {"ex_l3_time"                , 0x06, 0x10, 0x10, "ex_l3_time_ring"           , NON_VPD_RING, 0,  0x0200000000000100},
+    {"ex_l2_mode"                , 0x07, 0x10, 0x10, "ex_l2_mode_ring"           , NON_VPD_RING, 0,  0x0080000000004000},
+    {"ex_l2_fure"                , 0x08, 0x10, 0x10, "ex_l2_fure_ring"           , NON_VPD_RING, 0,  0x0080000000009000},
+    {"ex_l2_gptr"                , 0x09, 0x10, 0x10, "ex_l2_gptr_ring"           , NON_VPD_RING, 0,  0x0080000000002000},
+    {"ex_l2_time"                , 0x0a, 0x10, 0x10, "ex_l2_time_ring"           , NON_VPD_RING, 0,  0x0080000000000100},
+    {"ex_l3_refr_fure"           , 0x0b, 0x10, 0x10, "ex_l3_refr_fure_ring"      , NON_VPD_RING, 0,  0x0008000000009000},
+    {"ex_l3_refr_gptr"           , 0x0c, 0x10, 0x10, "ex_l3_refr_gptr_ring"      , NON_VPD_RING, 0,  0x0008000000002000},
+    {"eq_ana_func"               , 0x0d, 0x10, 0x10, "eq_ana_func_ring"          , NON_VPD_RING, 0,  0x0020000000008000},
+    {"eq_ana_gptr"               , 0x0e, 0x10, 0x10, "eq_ana_gptr_ring"          , NON_VPD_RING, 0,  0x0020000000002000},
+    {"eq_dpll_func"              , 0x0f, 0x10, 0x10, "eq_dpll_func_ring"         , NON_VPD_RING, 0,  0x0002000000008000},
+    {"eq_dpll_gptr"              , 0x10, 0x10, 0x10, "eq_dpll_gptr_ring"         , NON_VPD_RING, 0,  0x0002000000002000},
+    {"eq_dpll_mode"              , 0x11, 0x10, 0x10, "eq_dpll_mode_ring"         , NON_VPD_RING, 0,  0x0002000000004000},
     {"eq_ana_bndy_bucket_0"      , 0x12, 0x10, 0x10, "eq_ana_bndy_bucket_0_ring"     , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_1"      , 0x13, 0x10, 0x10, "eq_ana_bndy_bucket_1_ring"     , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_2"      , 0x14, 0x10, 0x10, "eq_ana_bndy_bucket_2_ring"     , NON_VPD_RING, 0,  0x0020000000000080},
@@ -366,8 +366,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"eq_ana_bndy_bucket_24"     , 0x2a, 0x10, 0x10, "eq_ana_bndy_bucket_24_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_25"     , 0x2b, 0x10, 0x10, "eq_ana_bndy_bucket_25_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_26"     , 0x2c, 0x10, 0x10, "eq_ana_bndy_bucket_26_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
-    {"eq_ana_mode"               , 0x2d, 0x10, 0x10, "eq_ana_mode_ring"              , NON_VPD_RING, 0,  0x0002000000000080},
-
+    {"eq_ana_mode"               , 0x2d, 0x10, 0x10, "eq_ana_mode_ring"              , NON_VPD_RING, 0,  0x0020000000004000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
