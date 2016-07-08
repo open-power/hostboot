@@ -647,6 +647,20 @@ fapi2::ReturnCode pm_ocb_reset(
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Timer1 Register (OTR1)");
 
+    // Clear PBA Enable Marker Acknowledgement mode to remove collisions
+    // with any accesses to the OCB DCR registers (eg OSTOESR).
+    // This function is only enabled by OCC firmware and is not via
+    // hardware procedures.
+    FAPI_TRY(fapi2::getScom(i_target, PU_PBAMODE_SCOM, l_buf64),
+             "**** ERROR : Failed to fetch PBA mode control status");
+    l_buf64.clearBit<8>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_PBAMODE_SCOM, l_buf64),
+             "**** ERROR : Failed to write PBA mode control");
+
+    // Clear OCC special timeout error status register
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OSTOESR, 0),
+             "**** ERROR : Failed to write OSTESR");
+
 fapi_try_exit:
     return fapi2::current_err;
 }
