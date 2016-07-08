@@ -206,7 +206,7 @@ fapi2::ReturnCode p9_cfamtest_putcfam_pass(
 fapi2::ReturnCode p9_ringtest_getring_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    fapi2::variable_buffer l_ringdata;
+    fapi2::variable_buffer l_ringdata(64);
 
     FAPI_INF("Entering p9_ringtest_getring_fail...");
 
