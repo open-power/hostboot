@@ -110,13 +110,12 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
-	echo "00000000001800000000000008000000000000000007EF80" | xxd -r -ps - sbe.header
 	# add version header w/ HBB sha hash
 	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
 	sha512sum ${BASE_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${BASE_SHA_IMAGE}
 	dd if=${BASE_SHA_IMAGE} of=secureboot.header ibs=4k conv=sync
 	dd if=/dev/zero of=hbb.footer count=1 bs=128K
-	cat sbe.header secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
+	cat secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
 	head -c 524288  hostboot.stage.bin > ${BASE_W_HEADER_IMAGE}
 	currentsb -chain
 	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
@@ -203,7 +202,7 @@ cp_hbfiles: .SPECTARG
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_HB_IMAGES} \
-	      sbe.header secureboot.header hb.footer hostboot.stage.bin
+	      secureboot.header hb.footer hostboot.stage.bin
 
 #################################################
 ###  SAMPLE for building an SBE Partition with multiple ECs
