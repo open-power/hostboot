@@ -98,13 +98,9 @@ namespace Bootloader{
             // get hbbEcc
             bool l_hbbEcc =
                 ( bootloader_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
-            // set hbbSbeHeaderSize @TODO RTC:137480 subject to future removal
-            uint64_t l_hbbSbeHeaderSize = (l_hbbEcc)
-                                        ? (0x18 * LENGTH_W_ECC) / LENGTH_WO_ECC
-                                        : 0x18;
 
             // Copy HB base code from PNOR to working location
-            handleMMIO(l_pnorStart + l_hbbFlashOffset + l_hbbSbeHeaderSize,
+            handleMMIO(l_pnorStart + l_hbbFlashOffset,
                        (l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR,
                        (l_hbbEcc) ? (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC
                                   : l_hbbLength,
