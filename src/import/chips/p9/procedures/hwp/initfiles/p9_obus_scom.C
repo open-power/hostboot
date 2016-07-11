@@ -77,25 +77,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -117,25 +125,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -157,25 +173,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -197,25 +221,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -237,25 +269,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -277,25 +317,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -317,25 +365,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -357,25 +413,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -397,25 +461,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -437,25 +509,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -477,25 +557,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -517,25 +605,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -557,25 +653,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -597,25 +701,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -637,25 +749,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -677,25 +797,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -717,25 +845,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -757,25 +893,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -797,25 +941,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -837,25 +989,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -877,25 +1037,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -917,25 +1085,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -957,25 +1133,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -997,25 +1181,33 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF =
+                    0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF =
+                        0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                    constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON =
+                        0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_ON, 55, 1, 63 );
                 }
             }
 
@@ -1037,8 +1229,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080009010c3full, l_scom_buffer);
@@ -1059,8 +1252,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080109010c3full, l_scom_buffer);
@@ -1081,8 +1275,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080209010c3full, l_scom_buffer);
@@ -1103,8 +1298,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080309010c3full, l_scom_buffer);
@@ -1125,8 +1321,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080409010c3full, l_scom_buffer);
@@ -1147,8 +1344,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080509010c3full, l_scom_buffer);
@@ -1169,8 +1367,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080609010c3full, l_scom_buffer);
@@ -1191,8 +1390,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080709010c3full, l_scom_buffer);
@@ -1213,8 +1413,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080809010c3full, l_scom_buffer);
@@ -1235,8 +1436,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080909010c3full, l_scom_buffer);
@@ -1257,8 +1459,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080a09010c3full, l_scom_buffer);
@@ -1279,8 +1482,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080b09010c3full, l_scom_buffer);
@@ -1301,8 +1505,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080c09010c3full, l_scom_buffer);
@@ -1323,8 +1528,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080d09010c3full, l_scom_buffer);
@@ -1345,8 +1551,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080e09010c3full, l_scom_buffer);
@@ -1367,8 +1574,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000080f09010c3full, l_scom_buffer);
@@ -1389,8 +1597,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081009010c3full, l_scom_buffer);
@@ -1411,8 +1620,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081109010c3full, l_scom_buffer);
@@ -1433,8 +1643,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081209010c3full, l_scom_buffer);
@@ -1455,8 +1666,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081309010c3full, l_scom_buffer);
@@ -1477,8 +1689,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081409010c3full, l_scom_buffer);
@@ -1499,8 +1712,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081509010c3full, l_scom_buffer);
@@ -1521,8 +1735,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081609010c3full, l_scom_buffer);
@@ -1543,8 +1758,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000081709010c3full, l_scom_buffer);
@@ -5453,8 +5669,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200009010c3full, l_scom_buffer);
@@ -5475,8 +5692,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200109010c3full, l_scom_buffer);
@@ -5497,8 +5715,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200209010c3full, l_scom_buffer);
@@ -5519,8 +5738,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200309010c3full, l_scom_buffer);
@@ -5541,8 +5761,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200409010c3full, l_scom_buffer);
@@ -5563,8 +5784,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200509010c3full, l_scom_buffer);
@@ -5585,8 +5807,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200609010c3full, l_scom_buffer);
@@ -5607,8 +5830,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200709010c3full, l_scom_buffer);
@@ -5629,8 +5853,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200809010c3full, l_scom_buffer);
@@ -5651,8 +5876,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200909010c3full, l_scom_buffer);
@@ -5673,8 +5899,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200a09010c3full, l_scom_buffer);
@@ -5695,8 +5922,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200b09010c3full, l_scom_buffer);
@@ -5717,8 +5945,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200c09010c3full, l_scom_buffer);
@@ -5739,8 +5968,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200d09010c3full, l_scom_buffer);
@@ -5761,8 +5991,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200e09010c3full, l_scom_buffer);
@@ -5783,8 +6014,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002200f09010c3full, l_scom_buffer);
@@ -5805,8 +6037,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201009010c3full, l_scom_buffer);
@@ -5827,8 +6060,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201109010c3full, l_scom_buffer);
@@ -5849,8 +6083,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201209010c3full, l_scom_buffer);
@@ -5871,8 +6106,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_4_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201309010c3full, l_scom_buffer);
@@ -5893,8 +6129,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201409010c3full, l_scom_buffer);
@@ -5915,8 +6152,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201509010c3full, l_scom_buffer);
@@ -5937,8 +6175,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201609010c3full, l_scom_buffer);
@@ -5959,8 +6198,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXPACKS_5_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002201709010c3full, l_scom_buffer);
@@ -5981,8 +6221,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040009010c3full, l_scom_buffer);
@@ -6003,8 +6244,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040109010c3full, l_scom_buffer);
@@ -6025,8 +6267,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040209010c3full, l_scom_buffer);
@@ -6047,8 +6290,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040309010c3full, l_scom_buffer);
@@ -6069,8 +6313,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040409010c3full, l_scom_buffer);
@@ -6091,8 +6336,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040509010c3full, l_scom_buffer);
@@ -6113,8 +6359,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040609010c3full, l_scom_buffer);
@@ -6135,8 +6382,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040709010c3full, l_scom_buffer);
@@ -6157,8 +6405,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040809010c3full, l_scom_buffer);
@@ -6179,8 +6428,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040909010c3full, l_scom_buffer);
@@ -6201,8 +6451,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040a09010c3full, l_scom_buffer);
@@ -6223,8 +6474,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040b09010c3full, l_scom_buffer);
@@ -6245,8 +6497,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040c09010c3full, l_scom_buffer);
@@ -6267,8 +6520,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040d09010c3full, l_scom_buffer);
@@ -6289,8 +6543,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040e09010c3full, l_scom_buffer);
@@ -6311,8 +6566,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004040f09010c3full, l_scom_buffer);
@@ -6333,8 +6589,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041009010c3full, l_scom_buffer);
@@ -6355,8 +6612,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041109010c3full, l_scom_buffer);
@@ -6377,8 +6635,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041209010c3full, l_scom_buffer);
@@ -6399,8 +6658,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_4_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041309010c3full, l_scom_buffer);
@@ -6421,8 +6681,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041409010c3full, l_scom_buffer);
@@ -6443,8 +6704,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041509010c3full, l_scom_buffer);
@@ -6465,8 +6727,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041609010c3full, l_scom_buffer);
@@ -6487,8 +6750,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_TX0_TXPACKS_5_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004041709010c3full, l_scom_buffer);
@@ -6509,8 +6773,8 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 52, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_4_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_4_OFF, 52, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008000009010c3full, l_scom_buffer);
@@ -6688,8 +6952,8 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 54, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_IREF_PDWN_B_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_IREF_PDWN_B_ON, 54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008c00009010c3full, l_scom_buffer);
@@ -6710,8 +6974,9 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 60, 1, 63 );
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOO0_IOO_CPLT_RX0_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF, 60, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800b800009010c3full, l_scom_buffer);
