@@ -28,7 +28,6 @@
 
 #include <stdint.h>
 #include <fapi2.H>
-#include <p9_mc_scom_addresses.H>
 
 using fapi2::FAPI2_RC_FALSE;
 

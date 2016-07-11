@@ -49,6 +49,16 @@ typedef fapi2::ReturnCode (*p9_collect_some_ffdc_FP_t)(std::vector<std::shared_p
 
 extern "C"
 {
+///
+/// @brief Sample procedure used to demonstrate FFDC collection using
+///        collectFfdc tag in xml files
+/// @param[in] o_ffdc_data - default parameter ffdc data returned in this
+///                           vector
+///  @param[in] a - parameter passed from the SBE through the ffdc data buffer
+///  @param[in] b - parameter passed from the SBE through the ffdc data buffer
+///
+/// @return FAPI2_RC_SUCCESS iff ok
+///
     fapi2::ReturnCode p9_collect_some_ffdc(std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& o_ffdc_data, uint32_t a,
                                            uint8_t b);
 

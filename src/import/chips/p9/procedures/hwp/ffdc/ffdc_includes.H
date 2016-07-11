@@ -24,10 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __FFDC_INCLUDES_H
 #define __FFDC_INCLUDES_H
+
 /// @file ffdc_includes.H
 ///
 /// @brief main file used to export all include files for FFDC procedures
 ///
+
 #include <p9_collect_some_ffdc.H>
 
 #endif
