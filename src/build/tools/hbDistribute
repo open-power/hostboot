@@ -25,6 +25,7 @@
 # IBM_PROLOG_END_TAG
 TARGET_DIR="invalid directory"
 TARGET="fsp_TARGET"
+SBFW_DIR="invalid directory"
 TEST_TEST=0
 
 print_usage()
@@ -109,6 +110,17 @@ if [ "${TARGET_DIR}" == "invalid directory" ]; then
     fi
 fi
 
+# Verify SBFW directory or default to sandbox.
+if [ "${SBFW_DIR}" == "invalid directory" ]; then
+    if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
+        echo "ERROR: No path specified and \$SANDBOXBASE undefined."
+        print_usage
+        exit
+    else
+        SBFW_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/sbei/sbfw
+    fi
+fi
+
 # Find root of repository.
 if [ -e "src/build/tools/hbDistribute" ]; then
     REPO_ROOT="./"
@@ -122,8 +134,10 @@ fi
 
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
+mkdir -p $SBFW_DIR
 export TARGET_TEST
 export TARGET_DIR
+export SBFW_DIR
 export SECUREBOOT
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
