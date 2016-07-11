@@ -52,5 +52,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 
 include ${ROOTPATH}/config.mk

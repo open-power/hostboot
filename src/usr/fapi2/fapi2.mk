@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
@@ -66,6 +67,7 @@ include ${HWP_PATH}/hwp/accessors/p9_get_mem_vpd_keyword.mk
 OBJS += error_info.o
 OBJS += ffdc.o
 OBJS += fapi2_utils.o
+OBJS += p9_collect_some_ffdc.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
@@ -103,17 +105,11 @@ FAPI2_PLAT_INCLUDE += $(addsuffix /common/include, \
 #------------------------------------------------------------------------------
 # The PLAT HWP RC and FFDC parser file generated from Error XML files
 #------------------------------------------------------------------------------
-PLAT_HWP_ERR_PARSER_TARGET = hbfwPlatHwpErrParser.H
-PLAT_HWP_ERR_PARSER_FFDC_TARGET = hbfwPlatHwpErrParserFFDC.H
-
+PLAT_HWP_ERR_PARSER = platHwpErrParser.H
 GENDIR_PLUGINS = $(ROOTPATH)/obj/genfiles/plugins
 GENPLUGINTARGET = $(addprefix $(GENDIR_PLUGINS)/, $(1))
-GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER_TARGET}
-GENFILES_PLUGINS += ${PLAT_HWP_ERR_PARSER_FFDC_TARGET}
-
-
-$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER_TARGET}) \
-$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER_FFDC_TARGET}) : \
+GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
+$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
 	$(ROOTPATH)/src/usr/fapi2/platCreateHwpErrParser.pl ${FAPI2_ERROR_XML}
 	$< $(dir $@) ${FAPI2_ERROR_XML}
 
@@ -133,4 +129,5 @@ include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucke
 VPATH += ${HWP_PATH}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 VPATH += ${GENPATH}

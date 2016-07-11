@@ -23,6 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 BUILD_PROCEDURE = $(eval $(call __BUILD_PROCEDURE))
 
 define __BUILD_PROCEDURE
