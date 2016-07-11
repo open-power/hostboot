@@ -117,8 +117,8 @@ fapi2::ReturnCode p9_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 36, 1, 63 );
+                constexpr auto l_MCP_MCBIST_MBA_SCOMFIR_MCBCFGQ_CFG_LOG_COUNTS_IN_TRACE_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_MCP_MCBIST_MBA_SCOMFIR_MCBCFGQ_CFG_LOG_COUNTS_IN_TRACE_OFF, 36, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x70123e0ull, l_scom_buffer);
@@ -139,8 +139,8 @@ fapi2::ReturnCode p9_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                constexpr auto l_MCP_MCBIST_MBA_SCOMFIR_DBGCFG0Q_CFG_DBG_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_MCP_MCBIST_MBA_SCOMFIR_DBGCFG0Q_CFG_DBG_ENABLE_ON, 0, 1, 63 );
             }
 
             {
@@ -165,8 +165,8 @@ fapi2::ReturnCode p9_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                constexpr auto l_MCP_MCBIST_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_MCP_MCBIST_MBA_SCOMFIR_DBGCFG1Q_CFG_WAT_ENABLE_ON, 0, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x70123e9ull, l_scom_buffer);

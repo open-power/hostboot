@@ -63,8 +63,8 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0)
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 10, 1, 63 );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE1_DISABLE_FP_M_BIT_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_MC01_PBI01_SCOMFIR_MCMODE1_DISABLE_FP_M_BIT_ON, 10, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5010812ull, l_scom_buffer);

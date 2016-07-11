@@ -115,29 +115,29 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             {
                 if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x7;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 4, 1, 61 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON = 0x7;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON, 4, 1, 61 );
                 }
                 else if (((l_def_NUM_X_LINKS_CFG != literal_0) || (l_def_NUM_A_LINKS_CFG != literal_0)))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 4, 1, 61 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF, 4, 1, 61 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 16, 7, 43 );
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64, 16, 7, 43 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 23, 7, 43 );
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 43 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_42 = 0x2aaaa;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_42, 30, 6, 46 );
+                constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 46 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x501180aull, l_scom_buffer);
@@ -160,29 +160,29 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             {
                 if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x7;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 4, 1, 62 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON = 0x7;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON, 4, 1, 62 );
                 }
                 else if (((l_def_NUM_X_LINKS_CFG != literal_0) || (l_def_NUM_A_LINKS_CFG != literal_0)))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 4, 1, 62 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF, 4, 1, 62 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 16, 7, 50 );
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64, 16, 7, 50 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 23, 7, 50 );
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 50 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_42 = 0x2aaaa;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_42, 30, 6, 52 );
+                constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 52 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5011c0aull, l_scom_buffer);
@@ -1890,29 +1890,29 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             {
                 if (((l_def_NUM_X_LINKS_CFG == literal_0) && (l_def_NUM_A_LINKS_CFG == literal_0)))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x7;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 4, 1, 63 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON = 0x7;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_ON, 4, 1, 63 );
                 }
                 else if (((l_def_NUM_X_LINKS_CFG != literal_0) || (l_def_NUM_A_LINKS_CFG != literal_0)))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 4, 1, 63 );
+                    constexpr auto l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_CHIP_IS_SYSTEM_OFF, 4, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 16, 7, 57 );
+                constexpr auto l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_SP_HW_MARK_CNT_64, 16, 7, 57 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_64 = 0x102040;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_64, 23, 7, 57 );
+                constexpr auto l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64 = 0x102040;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_GP_HW_MARK_CNT_64, 23, 7, 57 );
             }
 
             {
-                constexpr auto l_scom_buffer_CNT_42 = 0x2aaaa;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_CNT_42, 30, 6, 58 );
+                constexpr auto l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42 = 0x2aaaa;
+                l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_LCL_HW_MARK_CNT_42, 30, 6, 58 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x501200aull, l_scom_buffer);

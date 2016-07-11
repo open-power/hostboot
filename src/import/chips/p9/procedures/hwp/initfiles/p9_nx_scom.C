@@ -52,28 +52,28 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 63, 1, 63 );
+                constexpr auto l_NX_DMA_CH0_EFT_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH0_EFT_ENABLE_ON, 63, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_NX_DMA_CH1_EFT_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH1_EFT_ENABLE_ON, 62, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 58, 1, 63 );
+                constexpr auto l_NX_DMA_CH2_SYM_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH2_SYM_ENABLE_ON, 58, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 57, 1, 63 );
+                constexpr auto l_NX_DMA_CH3_SYM_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH3_SYM_ENABLE_ON, 57, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 61, 1, 63 );
+                constexpr auto l_NX_DMA_CH4_GZIP_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH4_GZIP_ENABLE_ON, 61, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011041ull, l_scom_buffer);
@@ -94,58 +94,58 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                constexpr auto l_scom_buffer_MAX_13_INRD = 0xd;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MAX_13_INRD, 33, 4, 60 );
+                constexpr auto l_NX_DMA_EFTCOMP_MAX_INRD_MAX_13_INRD = 0xd;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_EFTCOMP_MAX_INRD_MAX_13_INRD, 33, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_MAX_7_INRD = 0x7;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MAX_7_INRD, 37, 4, 60 );
+                constexpr auto l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_7_INRD = 0x7;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_EFTDECOMP_MAX_INRD_MAX_7_INRD, 37, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_MAX_13_INRD = 0xd;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MAX_13_INRD, 8, 4, 60 );
+                constexpr auto l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_13_INRD = 0xd;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_GZIPCOMP_MAX_INRD_MAX_13_INRD, 8, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_MAX_7_INRD = 0x7;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MAX_7_INRD, 12, 4, 60 );
+                constexpr auto l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_7_INRD = 0x7;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_GZIPDECOMP_MAX_INRD_MAX_7_INRD, 12, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_MAX_3_INRD = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MAX_3_INRD, 25, 4, 60 );
+                constexpr auto l_NX_DMA_SYM_MAX_INRD_MAX_3_INRD = 0x3;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_SYM_MAX_INRD_MAX_3_INRD, 25, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_NX_DMA_SYM_CPB_CHECK_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_SYM_CPB_CHECK_DISABLE_OFF, 48, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 23, 1, 63 );
+                constexpr auto l_NX_DMA_EFT_COMP_PREFETCH_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_EFT_COMP_PREFETCH_ENABLE_ON, 23, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 24, 1, 63 );
+                constexpr auto l_NX_DMA_EFT_DECOMP_PREFETCH_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_EFT_DECOMP_PREFETCH_ENABLE_ON, 24, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 16, 1, 63 );
+                constexpr auto l_NX_DMA_GZIP_COMP_PREFETCH_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_GZIP_COMP_PREFETCH_ENABLE_ON, 16, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 17, 1, 63 );
+                constexpr auto l_NX_DMA_GZIP_DECOMP_PREFETCH_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_GZIP_DECOMP_PREFETCH_ENABLE_ON, 17, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 56, 1, 63 );
+                constexpr auto l_NX_DMA_EFT_SPBC_WRITE_ENABLE_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_EFT_SPBC_WRITE_ENABLE_OFF, 56, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011042ull, l_scom_buffer);
@@ -166,63 +166,63 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_4 = 0x2;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_4, 1, 4, 60 );
+                constexpr auto l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_4 = 0x2;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH0_WATCHDOG_REF_DIV_DIVIDE_BY_4, 1, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                constexpr auto l_NX_DMA_CH0_WATCHDOG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH0_WATCHDOG_TIMER_ENBL_ON, 0, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_4 = 0x2;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_4, 6, 4, 60 );
+                constexpr auto l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_4 = 0x2;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH1_WATCHDOG_REF_DIV_DIVIDE_BY_4, 6, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 5, 1, 63 );
+                constexpr auto l_NX_DMA_CH1_WATCHDOG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH1_WATCHDOG_TIMER_ENBL_ON, 5, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_4 = 0x2;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_4, 11, 4, 60 );
+                constexpr auto l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_4 = 0x2;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH2_WATCHDOG_REF_DIV_DIVIDE_BY_4, 11, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 10, 1, 63 );
+                constexpr auto l_NX_DMA_CH2_WATCHDOG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH2_WATCHDOG_TIMER_ENBL_ON, 10, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_4 = 0x2;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_4, 16, 4, 60 );
+                constexpr auto l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_4 = 0x2;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH3_WATCHDOG_REF_DIV_DIVIDE_BY_4, 16, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 15, 1, 63 );
+                constexpr auto l_NX_DMA_CH3_WATCHDOG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH3_WATCHDOG_TIMER_ENBL_ON, 15, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_4 = 0x2;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_4, 21, 4, 60 );
+                constexpr auto l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_4 = 0x2;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH4_WATCHDOG_REF_DIV_DIVIDE_BY_4, 21, 4, 60 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 20, 1, 63 );
+                constexpr auto l_NX_DMA_CH4_WATCHDOG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_CH4_WATCHDOG_TIMER_ENBL_ON, 20, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 25, 1, 63 );
+                constexpr auto l_NX_DMA_DMA_HANG_TIMER_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_DMA_HANG_TIMER_ENBL_ON, 25, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_DIVIDE_BY_32 = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DIVIDE_BY_32, 26, 4, 60 );
+                constexpr auto l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_32 = 0x3;
+                l_scom_buffer.insert<uint64_t> (l_NX_DMA_DMA_HANG_TIMER_REF_DIV_DIVIDE_BY_32, 26, 4, 60 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x201105cull, l_scom_buffer);
@@ -315,20 +315,20 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 22, 1, 63 );
+                constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_PBI_CQ_WRAP_NXCQ_SCOM_RD_GO_M_QOS_ON, 22, 1, 63 );
             }
 
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 23, 1, 63 );
+                    constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON, 23, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 23, 1, 63 );
+                    constexpr auto l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_NX_PBI_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF, 23, 1, 63 );
                 }
             }
 
@@ -463,8 +463,8 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 1, 1, 63 );
+                constexpr auto l_NX_PBI_PBI_UMAC_CRB_READS_ENBL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NX_PBI_PBI_UMAC_CRB_READS_ENBL_ON, 1, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x20110d5ull, l_scom_buffer);

@@ -132,26 +132,26 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 33, 1, 63 );
+                    constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_ON, 33, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 33, 1, 63 );
+                    constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_ADDR_BAR_MODE_OFF, 33, 1, 63 );
                 }
             }
 
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 39, 1, 63 );
+                    constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_CFG_PUMP_MODE_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_CFG_PUMP_MODE_ON, 39, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 39, 1, 63 );
+                    constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_CFG_PUMP_MODE_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_CFG_PUMP_MODE_OFF, 39, 1, 63 );
                 }
             }
 
@@ -240,17 +240,10 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                constexpr auto l_scom_buffer_SINGLE_THREAD_MODE_ST_INV = 0x70;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 20, 1, 57 );
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 24, 1, 62 );
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 26, 1, 63 );
-            }
-
-            {
-                constexpr auto l_scom_buffer_SINGLE_THREAD_MODE_ST_INV = 0x70;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 20, 1, 57 );
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 24, 1, 62 );
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 26, 1, 63 );
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 20, 1, 57 );
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 24, 1, 62 );
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 26, 1, 63 );
             }
 
             {
@@ -277,8 +270,8 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                constexpr auto l_scom_buffer_SINGLE_THREAD_MODE_ST_INV = 0x70;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 2, 2, 60 );
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 2, 2, 60 );
             }
 
             {
@@ -304,8 +297,8 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                constexpr auto l_scom_buffer_SINGLE_THREAD_MODE_ST_INV = 0x70;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 16, 1, 58 );
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 16, 1, 58 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c54ull, l_scom_buffer);
@@ -327,13 +320,13 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                constexpr auto l_scom_buffer_SINGLE_THREAD_MODE_ST_INV = 0x70;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_SINGLE_THREAD_MODE_ST_INV, 16, 1, 59 );
+                constexpr auto l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV = 0x70;
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_PIPE_THREAD_MODE_SINGLE_THREAD_MODE_ST_INV, 16, 1, 59 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 21, 1, 63 );
+                constexpr auto l_NMMU_MM_CFG_NMMU_CTL_TLB_HASH_PID_DIS_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_NMMU_MM_CFG_NMMU_CTL_TLB_HASH_PID_DIS_ON, 21, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c55ull, l_scom_buffer);

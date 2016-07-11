@@ -105,8 +105,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 62, 1, 63 );
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_CR_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_CR_OFF, 62, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer);
@@ -807,13 +807,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 38, 1, 63 );
+                constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_PARITY_AFTER_CMD_ON, 38, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 55, 1, 63 );
+                constexpr auto l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_MCP_PORT0_SRQ_MBA_FARB0Q_CFG_OE_ALWAYS_ON_ON, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x7010913ull, l_scom_buffer);

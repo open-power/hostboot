@@ -78,8 +78,8 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             {
                 if (l_def_OBUS_FBC_ENABLED)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                    constexpr auto l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_PB_IOO_LL0_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
                 }
             }
 

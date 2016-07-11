@@ -102,32 +102,32 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (l_def_OBUS0_FBC_ENABLED)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                    constexpr auto l_PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_ON, 0, 1, 63 );
                 }
             }
 
             {
                 if (l_def_OBUS1_FBC_ENABLED)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 1, 1, 63 );
+                    constexpr auto l_PB_IOO_SCOM_PB_CFG_IOO23_IS_LOGICAL_PAIR_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_PB_IOO_SCOM_PB_CFG_IOO23_IS_LOGICAL_PAIR_ON, 1, 1, 63 );
                 }
             }
 
             {
                 if (l_def_OBUS2_FBC_ENABLED)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 2, 1, 63 );
+                    constexpr auto l_PB_IOO_SCOM_PB_CFG_IOO45_IS_LOGICAL_PAIR_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_PB_IOO_SCOM_PB_CFG_IOO45_IS_LOGICAL_PAIR_ON, 2, 1, 63 );
                 }
             }
 
             {
                 if (l_def_OBUS3_FBC_ENABLED)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 3, 1, 63 );
+                    constexpr auto l_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON, 3, 1, 63 );
                 }
             }
 
@@ -159,22 +159,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (l_def_OBUS0_FBC_ENABLED)
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 0, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 8, 4, 60 );
-                }
-            }
-
-            {
-                if (l_def_OBUS0_FBC_ENABLED)
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 4, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 12, 4, 60 );
-                }
-            }
-
-            {
-                if (l_def_OBUS0_FBC_ENABLED)
-                {
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 4, 4, 60 );
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 12, 4, 60 );
                 }
@@ -185,22 +169,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 {
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 16, 4, 60 );
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 24, 4, 60 );
-                }
-            }
-
-            {
-                if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 16, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 24, 4, 60 );
-                }
-            }
-
-            {
-                if ((( ! l_def_OBUS0_FBC_ENABLED) && l_def_OBUS1_FBC_ENABLED))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 20, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 28, 4, 60 );
                 }
             }
 
@@ -223,22 +191,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 32, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 40, 4, 60 );
-                }
-            }
-
-            {
-                if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 36, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 44, 4, 60 );
-                }
-            }
-
-            {
-                if (((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && l_def_OBUS2_FBC_ENABLED))
-                {
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 36, 4, 60 );
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 44, 4, 60 );
                 }
@@ -250,24 +202,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 {
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 48, 4, 60 );
                     l_scom_buffer.insert<uint64_t> (literal_0b0101, 56, 4, 60 );
-                }
-            }
-
-            {
-                if ((((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && ( ! l_def_OBUS2_FBC_ENABLED))
-                     && l_def_OBUS3_FBC_ENABLED))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 48, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 56, 4, 60 );
-                }
-            }
-
-            {
-                if ((((( ! l_def_OBUS0_FBC_ENABLED) && ( ! l_def_OBUS1_FBC_ENABLED)) && ( ! l_def_OBUS2_FBC_ENABLED))
-                     && l_def_OBUS3_FBC_ENABLED))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 52, 4, 60 );
-                    l_scom_buffer.insert<uint64_t> (literal_0b0101, 60, 4, 60 );
                 }
             }
 
