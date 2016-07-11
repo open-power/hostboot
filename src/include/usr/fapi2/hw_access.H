@@ -230,6 +230,20 @@ inline ReturnCode putRing(const Target<K>& i_target,
     return platPutRing(i_target, i_address, i_data, i_ringMode);
 }
 
+/// @brief Platform-level implementation  of putRing()
+/// @tparam K template parameter, passed in target.
+/// @param[in] i_target   Target to operate on.
+/// @param[in] i_ringID   Id of the Ring
+/// @param[in] i_ringMode Ring operation mode.
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template< TargetType K >
+inline ReturnCode putRing(const Target<K>& i_target,
+                          const RingID i_ringID,
+                          const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
+{
+    return platPutRing(i_target, i_ringID, i_ringMode);
+}
+
 /// @brief Platform-level implementation of modifyRing()
 /// @tparam K template parameter, passed in target.
 /// @param[in] i_target     Target to operate on.
