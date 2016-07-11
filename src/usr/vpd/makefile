@@ -36,7 +36,7 @@ OBJS += rtvpd_load.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
+BINARY_FILES = $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
 #Updated mvpd to contain VRML so that part/serial numbers can be
 #found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
