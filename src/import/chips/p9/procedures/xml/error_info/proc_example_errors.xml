@@ -30,6 +30,7 @@
         test example
     </description>
     <buffer>BUFFER</buffer>
+    <collectFfdc>p9_collect_some_ffdc,parm1,parm2</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
