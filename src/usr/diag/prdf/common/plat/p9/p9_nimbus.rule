@@ -716,6 +716,24 @@ chip p9_nimbus
     };
 
     ############################################################################
+    # N3 Chiplet PBEXTFIR
+    ############################################################################
+
+    # External checkstop register - Used for FFDC and Fabric sorting only
+    # Any attention generated from this FIR register indicates that there was a
+    # checkstop attention raised on another chip. Currently, we do not do any
+    # additional analysis in this FIR because we assume we will get an interrupt
+    # from the offending chip. This FIR will set PB_CHIPLET_FIR[2] which is
+    # currently ignored.
+
+    register PBEXTFIR
+    {
+        name        "PowerBus EH EXTFIR";
+        scomaddr    0x05011C2E;
+        capture     group default;
+    };
+
+    ############################################################################
     # P9 chip N3_LFIR
     ############################################################################
 
@@ -1727,6 +1745,14 @@ chip p9_nimbus
         scomaddr    0x00002816;
         capture     group never;
     };
+
+    register TODWOF
+    {
+        name        "Time of Day / WOF Counter";
+        scomaddr    0x00040020;
+        capture     group default;
+    };
+
 };
 
  ##############################################################################
