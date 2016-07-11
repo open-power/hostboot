@@ -138,26 +138,26 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 1, 1, 63 );
+                    constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_ADR_BAR_MODE_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_ADR_BAR_MODE_ON, 1, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 1, 1, 63 );
+                    constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_ADR_BAR_MODE_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_ADR_BAR_MODE_OFF, 1, 1, 63 );
                 }
             }
 
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 6, 1, 63 );
+                    constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_SKIP_G_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_SKIP_G_ON, 6, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 6, 1, 63 );
+                    constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_SKIP_G_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_SKIP_G_OFF, 6, 1, 63 );
                 }
             }
 
