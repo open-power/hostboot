@@ -162,6 +162,22 @@ fapi2::ReturnCode thermal_throttle_scominit (const fapi2::Target<fapi2::TARGET_T
 fapi2::ReturnCode disable_emergency_throttle (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 ///
+/// @brief Perform initializations of the MC performance registers
+/// @note Some of these bits are taken care of in the scom initfiles
+/// @param[in] i_target the target which has the MCA to map
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode setup_perf2_register(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Calculate the value of the MC perf2 register.
+/// @param[in] i_target the target which has the MCA to map
+/// @param[out] o_value the perf2 value for the MCA
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode calculate_perf2(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_value);
+
+///
 /// @brief Perform initializations of the MC translation
 /// @tparam P the fapi2::TargetType of the port
 /// @tparam TT the mcTraits associated with P
@@ -170,6 +186,9 @@ fapi2::ReturnCode disable_emergency_throttle (const fapi2::Target<fapi2::TARGET_
 ///
 template< fapi2::TargetType P,  typename TT = mcTraits<P> >
 fapi2::ReturnCode setup_xlate_map(const fapi2::Target<P>& i_target);
+
 } //mc
+
 } //mss
+
 #endif

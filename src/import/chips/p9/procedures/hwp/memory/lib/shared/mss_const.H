@@ -48,8 +48,6 @@ enum sizes
     DEFAULT_POLL_LIMIT = 10,       ///< the number of poll attempts in the event we can't calculate another
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
-    MAX_SLEW_VALUE = 15,           ///< 4 bit value
-    MAX_SUPPORTED_FREQUENCIES = 1, ///< Number of supported frequencies. Right now it's only 2400
 
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
     T_PER_MT     = 1000000,          ///< Multiplier to go from MT/s to T/s

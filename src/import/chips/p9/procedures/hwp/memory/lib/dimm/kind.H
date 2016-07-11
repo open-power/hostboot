@@ -49,25 +49,68 @@ class kind
 {
     public:
 
+        ///
+        /// @brief Generate a vector of DIMM kind from a vector of DIMM
+        /// @param[in] i_dimm a vector of DIMM
+        /// @return std::vector of dimm::kind relating to the DIMM passed in
+        ///
+        static std::vector<kind> vector(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimm)
+        {
+            std::vector<kind> l_kinds;
+
+            for (const auto& d : i_dimm)
+            {
+                l_kinds.push_back( kind(d) );
+            }
+
+            return l_kinds;
+        }
+
+
+        ///
+        /// @brief operator==() - are two kinds the same?
+        /// @param[in] i_rhs the right hand side of the comparison statement
+        /// @return boll true iff the two kind are of the same kind
+        /// @warning this does not compare the targets (iv_target,) just the values
+        ///
+        inline bool operator==(const kind& i_rhs) const
+        {
+            return ((iv_master_ranks == i_rhs.iv_master_ranks) &&
+                    (iv_slave_ranks == i_rhs.iv_slave_ranks) &&
+                    (iv_dram_density == i_rhs.iv_dram_density) &&
+                    (iv_dram_width == i_rhs.iv_dram_width) &&
+                    (iv_dram_generation == i_rhs.iv_dram_generation) &&
+                    (iv_dimm_type == i_rhs.iv_dimm_type) &&
+                    (iv_rows == i_rhs.iv_rows) &&
+                    (iv_size == i_rhs.iv_size));
+        }
+
+        ///
+        /// @brief Construct a dimm::kind data structure - information about the kind of DIMM this is
+        /// @param[in] i_target a DIMM target
+        ///
         kind(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target):
             iv_target(i_target)
         {
+            uint8_t l_ranks = 0;
+
             FAPI_TRY( mss::eff_dram_gen(i_target, iv_dram_generation) );
             FAPI_TRY( mss::eff_dimm_type(i_target, iv_dimm_type) );
             FAPI_TRY( mss::eff_dram_density(i_target, iv_dram_density) );
             FAPI_TRY( mss::eff_dram_width(i_target, iv_dram_width) );
             FAPI_TRY( mss::eff_num_master_ranks_per_dimm(i_target, iv_master_ranks) );
+            FAPI_TRY( mss::eff_num_ranks_per_dimm(i_target, l_ranks) );
             FAPI_TRY( mss::eff_dram_row_bits(i_target, iv_rows) );
             FAPI_TRY( mss::eff_dimm_size(i_target, iv_size) );
 
-            // TK: Attribute for slave ranks.
-            iv_slave_ranks = 0;
+            iv_slave_ranks = l_ranks - iv_master_ranks;
 
             return;
 
         fapi_try_exit:
             // Not 100% sure what to do here ...
             FAPI_ERR("error initializing DIMM structure: %s 0x%016lx", mss::c_str(i_target), uint64_t(fapi2::current_err));
+            fapi2::Assert(false);
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;

@@ -52,13 +52,13 @@ namespace mss
 namespace mc
 {
 
-
+///
 /// @brief Perform initializations of the MC translation
 /// @tparm P the fapi2::TargetType of the port
 /// @tparm TT the typename of the traits
 /// @param[in] i_target, the target which has the MCA to map
 /// @return FAPI2_RC_SUCCESS iff ok
-
+///
 template<>
 fapi2::ReturnCode setup_xlate_map(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
