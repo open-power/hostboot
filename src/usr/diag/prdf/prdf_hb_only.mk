@@ -154,6 +154,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
 
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 prd_obj_no_sim += mcbist.o

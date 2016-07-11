@@ -38,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 ##########################################################
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common

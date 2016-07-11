@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: procedure.rules.mk $
+# $Source: src/import/chips/p9/procedures/hwp/ffdc/p9_collect_some_ffdc.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,11 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-BUILD_PROCEDURE = $(eval $(call __BUILD_PROCEDURE))
-
-define __BUILD_PROCEDURE
-OBJS += $(PROCEDURE).o
-endef
+PROCEDURE=p9_collect_some_ffdc
+$(call BUILD_PROCEDURE)
