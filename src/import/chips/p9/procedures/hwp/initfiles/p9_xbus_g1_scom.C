@@ -85,24 +85,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002006010c3full, l_scom_buffer);
@@ -125,24 +129,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002106010c3full, l_scom_buffer);
@@ -165,24 +173,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002206010c3full, l_scom_buffer);
@@ -205,24 +217,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002306010c3full, l_scom_buffer);
@@ -245,24 +261,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002406010c3full, l_scom_buffer);
@@ -285,24 +305,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002506010c3full, l_scom_buffer);
@@ -325,24 +349,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002606010c3full, l_scom_buffer);
@@ -365,24 +393,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002706010c3full, l_scom_buffer);
@@ -405,24 +437,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002806010c3full, l_scom_buffer);
@@ -445,24 +481,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002906010c3full, l_scom_buffer);
@@ -485,24 +525,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002a06010c3full, l_scom_buffer);
@@ -525,24 +569,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002b06010c3full, l_scom_buffer);
@@ -565,24 +613,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002c06010c3full, l_scom_buffer);
@@ -605,24 +657,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002d06010c3full, l_scom_buffer);
@@ -645,24 +701,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002e06010c3full, l_scom_buffer);
@@ -685,24 +745,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000002f06010c3full, l_scom_buffer);
@@ -725,24 +789,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000003006010c3full, l_scom_buffer);
@@ -765,24 +833,28 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_IS_HW)
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_OFF, 53, 1, 63 );
                 }
                 else if (l_def_IS_SIM)
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 53, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t>
+                    (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_ON, 53, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_6_OFF, 54, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_7_OFF, 55, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000003106010c3full, l_scom_buffer);
@@ -803,8 +875,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082006010c3full, l_scom_buffer);
@@ -825,8 +898,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082106010c3full, l_scom_buffer);
@@ -847,8 +921,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082206010c3full, l_scom_buffer);
@@ -869,8 +944,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082306010c3full, l_scom_buffer);
@@ -891,8 +967,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082406010c3full, l_scom_buffer);
@@ -913,8 +990,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082506010c3full, l_scom_buffer);
@@ -935,8 +1013,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082606010c3full, l_scom_buffer);
@@ -957,8 +1036,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082706010c3full, l_scom_buffer);
@@ -979,8 +1059,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082806010c3full, l_scom_buffer);
@@ -1001,8 +1082,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082906010c3full, l_scom_buffer);
@@ -1023,8 +1105,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082a06010c3full, l_scom_buffer);
@@ -1045,8 +1128,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082b06010c3full, l_scom_buffer);
@@ -1067,8 +1151,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082c06010c3full, l_scom_buffer);
@@ -1089,8 +1174,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082d06010c3full, l_scom_buffer);
@@ -1111,8 +1197,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082e06010c3full, l_scom_buffer);
@@ -1133,8 +1220,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000082f06010c3full, l_scom_buffer);
@@ -1155,8 +1243,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_OFF,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000083006010c3full, l_scom_buffer);
@@ -1177,8 +1266,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 54, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_ON,
+                                                54, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000083106010c3full, l_scom_buffer);
@@ -3503,8 +3593,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202006010c3full, l_scom_buffer);
@@ -3525,8 +3616,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202106010c3full, l_scom_buffer);
@@ -3547,8 +3639,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202206010c3full, l_scom_buffer);
@@ -3569,8 +3662,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202306010c3full, l_scom_buffer);
@@ -3591,8 +3685,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202406010c3full, l_scom_buffer);
@@ -3613,8 +3708,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202506010c3full, l_scom_buffer);
@@ -3635,8 +3731,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202606010c3full, l_scom_buffer);
@@ -3657,8 +3754,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202706010c3full, l_scom_buffer);
@@ -3679,8 +3777,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202806010c3full, l_scom_buffer);
@@ -3701,8 +3800,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202906010c3full, l_scom_buffer);
@@ -3723,8 +3823,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202a06010c3full, l_scom_buffer);
@@ -3745,8 +3846,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202b06010c3full, l_scom_buffer);
@@ -3767,8 +3869,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202c06010c3full, l_scom_buffer);
@@ -3789,8 +3892,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202d06010c3full, l_scom_buffer);
@@ -3811,8 +3915,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202e06010c3full, l_scom_buffer);
@@ -3833,8 +3938,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002202f06010c3full, l_scom_buffer);
@@ -3855,8 +3961,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_OFF, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002203006010c3full, l_scom_buffer);
@@ -3877,8 +3984,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_ON, 48, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002203106010c3full, l_scom_buffer);
@@ -3899,8 +4007,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_0_15 = 0x1000;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15 =
+                    0x1000;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02006010c3full, l_scom_buffer);
@@ -3921,8 +4031,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_B_0_15 = 0xf03e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_B_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_B_0_15 =
+                    0xf03e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_B_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02106010c3full, l_scom_buffer);
@@ -3943,8 +4055,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_C_0_15 = 0x7bc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_C_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_C_0_15 =
+                    0x7bc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_C_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02206010c3full, l_scom_buffer);
@@ -3965,8 +4079,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_D_0_15 = 0x7c7;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_D_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_D_0_15 =
+                    0x7c7;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_D_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02306010c3full, l_scom_buffer);
@@ -3987,8 +4103,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_E_0_15 = 0x3ef;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_E_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_E_0_15 =
+                    0x3ef;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_E_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02406010c3full, l_scom_buffer);
@@ -4009,8 +4127,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_F_0_15 = 0x1f0f;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_F_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_F_0_15 =
+                    0x1f0f;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_F_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02506010c3full, l_scom_buffer);
@@ -4031,8 +4151,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_G_0_15 = 0x1800;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_G_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_G_0_15 =
+                    0x1800;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_G_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02606010c3full, l_scom_buffer);
@@ -4053,8 +4175,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_H_0_15 = 0x9c00;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_H_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_H_0_15 =
+                    0x9c00;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_H_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02706010c3full, l_scom_buffer);
@@ -4075,8 +4199,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_0_15 = 0x1000;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15 =
+                    0x1000;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02806010c3full, l_scom_buffer);
@@ -4097,8 +4223,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_H_0_15 = 0x9c00;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_H_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_H_0_15 =
+                    0x9c00;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_H_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02906010c3full, l_scom_buffer);
@@ -4119,8 +4247,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_G_0_15 = 0x1800;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_G_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_G_0_15 =
+                    0x1800;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_G_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02a06010c3full, l_scom_buffer);
@@ -4141,8 +4271,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_F_0_15 = 0x1f0f;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_F_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_F_0_15 =
+                    0x1f0f;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_F_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02b06010c3full, l_scom_buffer);
@@ -4163,8 +4295,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_E_0_15 = 0x3ef;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_E_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_E_0_15 =
+                    0x3ef;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_E_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02c06010c3full, l_scom_buffer);
@@ -4185,8 +4319,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_D_0_15 = 0x7c7;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_D_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_D_0_15 =
+                    0x7c7;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_D_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02d06010c3full, l_scom_buffer);
@@ -4207,8 +4343,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_C_0_15 = 0x7bc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_C_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_C_0_15 =
+                    0x7bc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_C_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02e06010c3full, l_scom_buffer);
@@ -4229,8 +4367,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_B_0_15 = 0xf03e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_B_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_B_0_15 =
+                    0xf03e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_B_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c02f06010c3full, l_scom_buffer);
@@ -4251,8 +4391,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_0_15 = 0x1000;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15 =
+                    0x1000;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_PATTERN_24_A_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c03006010c3full, l_scom_buffer);
@@ -4273,8 +4415,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_16_22 = 0x42;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22 =
+                    0x42;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82006010c3full, l_scom_buffer);
@@ -4295,8 +4439,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_B_16_22 = 0x3e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_B_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_B_16_22 =
+                    0x3e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_B_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82106010c3full, l_scom_buffer);
@@ -4317,8 +4463,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_C_12_ACGH_16_22 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_C_12_ACGH_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_C_12_ACGH_16_22 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_C_12_ACGH_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82206010c3full, l_scom_buffer);
@@ -4339,8 +4488,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_D_16_22 = 0x60;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_D_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_D_16_22 =
+                    0x60;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_D_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82306010c3full, l_scom_buffer);
@@ -4361,8 +4512,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_EF_16_22 = 0x40;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_EF_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22 =
+                    0x40;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82406010c3full, l_scom_buffer);
@@ -4383,8 +4536,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_EF_16_22 = 0x40;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_EF_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22 =
+                    0x40;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82506010c3full, l_scom_buffer);
@@ -4405,8 +4560,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_GH_16_22 = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_GH_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22 =
+                    0x3;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82606010c3full, l_scom_buffer);
@@ -4427,8 +4584,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_GH_16_22 = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_GH_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22 =
+                    0x3;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82706010c3full, l_scom_buffer);
@@ -4449,8 +4608,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_16_22 = 0x42;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22 =
+                    0x42;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82806010c3full, l_scom_buffer);
@@ -4471,8 +4632,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_GH_16_22 = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_GH_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22 =
+                    0x3;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82906010c3full, l_scom_buffer);
@@ -4493,8 +4656,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_GH_16_22 = 0x3;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_GH_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22 =
+                    0x3;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_GH_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82a06010c3full, l_scom_buffer);
@@ -4515,8 +4680,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_EF_16_22 = 0x40;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_EF_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22 =
+                    0x40;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82b06010c3full, l_scom_buffer);
@@ -4537,8 +4704,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_EF_16_22 = 0x40;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_EF_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22 =
+                    0x40;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_EF_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82c06010c3full, l_scom_buffer);
@@ -4559,8 +4728,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_D_16_22 = 0x60;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_D_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_D_16_22 =
+                    0x60;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_D_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82d06010c3full, l_scom_buffer);
@@ -4581,8 +4752,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_C_12_ACGH_16_22 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_C_12_ACGH_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_C_12_ACGH_16_22 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_C_12_ACGH_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82e06010c3full, l_scom_buffer);
@@ -4603,8 +4777,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_B_16_22 = 0x3e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_B_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_B_16_22 =
+                    0x3e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_B_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c82f06010c3full, l_scom_buffer);
@@ -4625,8 +4801,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_24_A_16_22 = 0x42;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_24_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22 =
+                    0x42;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_PATTERN_24_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8002c83006010c3full, l_scom_buffer);
@@ -4647,8 +4825,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042006010c3full, l_scom_buffer);
@@ -4669,8 +4848,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042106010c3full, l_scom_buffer);
@@ -4691,8 +4871,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042206010c3full, l_scom_buffer);
@@ -4713,8 +4894,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042306010c3full, l_scom_buffer);
@@ -4735,8 +4917,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042406010c3full, l_scom_buffer);
@@ -4757,8 +4940,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042506010c3full, l_scom_buffer);
@@ -4779,8 +4963,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042606010c3full, l_scom_buffer);
@@ -4801,8 +4986,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042706010c3full, l_scom_buffer);
@@ -4823,8 +5009,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042806010c3full, l_scom_buffer);
@@ -4845,8 +5032,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042906010c3full, l_scom_buffer);
@@ -4867,8 +5055,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042a06010c3full, l_scom_buffer);
@@ -4889,8 +5078,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042b06010c3full, l_scom_buffer);
@@ -4911,8 +5101,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042c06010c3full, l_scom_buffer);
@@ -4933,8 +5124,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042d06010c3full, l_scom_buffer);
@@ -4955,8 +5147,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042e06010c3full, l_scom_buffer);
@@ -4977,8 +5170,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004042f06010c3full, l_scom_buffer);
@@ -4999,8 +5193,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ENABLED = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ENABLED, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_ENABLED, 48,
+                                                1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004043006010c3full, l_scom_buffer);
@@ -5021,8 +5216,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2006010c3full, l_scom_buffer);
@@ -5043,8 +5239,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2106010c3full, l_scom_buffer);
@@ -5065,8 +5262,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2206010c3full, l_scom_buffer);
@@ -5087,8 +5285,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2306010c3full, l_scom_buffer);
@@ -5109,8 +5308,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2406010c3full, l_scom_buffer);
@@ -5131,8 +5331,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2506010c3full, l_scom_buffer);
@@ -5153,8 +5354,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2606010c3full, l_scom_buffer);
@@ -5175,8 +5377,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2706010c3full, l_scom_buffer);
@@ -5197,8 +5400,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2806010c3full, l_scom_buffer);
@@ -5219,8 +5423,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2906010c3full, l_scom_buffer);
@@ -5241,8 +5446,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2a06010c3full, l_scom_buffer);
@@ -5263,8 +5469,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2b06010c3full, l_scom_buffer);
@@ -5285,8 +5492,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2c06010c3full, l_scom_buffer);
@@ -5307,8 +5515,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2d06010c3full, l_scom_buffer);
@@ -5329,8 +5538,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2e06010c3full, l_scom_buffer);
@@ -5351,8 +5561,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c2f06010c3full, l_scom_buffer);
@@ -5373,8 +5584,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 62, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_ON, 62, 1,
+                                                63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80040c3006010c3full, l_scom_buffer);
@@ -5395,8 +5607,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15, 48,
+                 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2006010c3full, l_scom_buffer);
@@ -5417,8 +5632,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15, 48,
+                 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2106010c3full, l_scom_buffer);
@@ -5439,8 +5657,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_C_0_15 = 0x1e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_C_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_C_0_15 =
+                    0x1e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_C_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2206010c3full, l_scom_buffer);
@@ -5461,8 +5681,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_D_0_15 = 0x1f;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_D_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_D_0_15 =
+                    0x1f;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_D_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2306010c3full, l_scom_buffer);
@@ -5483,8 +5705,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_E_HALF_B_0_15 = 0xf;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_E_HALF_B_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_E_HALF_B_0_15 = 0xf;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_E_HALF_B_0_15, 48, 16,
+                 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2406010c3full, l_scom_buffer);
@@ -5505,8 +5730,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_F_0_15 = 0x7c;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_F_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_F_0_15 =
+                    0x7c;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_F_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2506010c3full, l_scom_buffer);
@@ -5527,8 +5754,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_G_0_15 = 0xc63;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_G_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_G_0_15 =
+                    0xc63;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_G_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2606010c3full, l_scom_buffer);
@@ -5549,8 +5778,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_H_0_15 = 0xe73;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_H_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_H_0_15 =
+                    0xe73;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_H_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2706010c3full, l_scom_buffer);
@@ -5571,8 +5802,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15, 48,
+                 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2806010c3full, l_scom_buffer);
@@ -5593,8 +5827,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_H_0_15 = 0xe73;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_H_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_H_0_15 =
+                    0xe73;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_H_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2906010c3full, l_scom_buffer);
@@ -5615,8 +5851,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_G_0_15 = 0xc63;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_G_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_G_0_15 =
+                    0xc63;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_G_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2a06010c3full, l_scom_buffer);
@@ -5637,8 +5875,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_F_0_15 = 0x7c;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_F_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_F_0_15 =
+                    0x7c;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_F_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2b06010c3full, l_scom_buffer);
@@ -5659,8 +5899,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_E_HALF_B_0_15 = 0xf;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_E_HALF_B_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_E_HALF_B_0_15 = 0xf;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_E_HALF_B_0_15, 48, 16,
+                 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2c06010c3full, l_scom_buffer);
@@ -5681,8 +5924,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_D_0_15 = 0x1f;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_D_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_D_0_15 =
+                    0x1f;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_D_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2d06010c3full, l_scom_buffer);
@@ -5703,8 +5948,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_C_0_15 = 0x1e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_C_0_15, 48, 16, 48 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_C_0_15 =
+                    0x1e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_C_0_15, 48, 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2e06010c3full, l_scom_buffer);
@@ -5725,8 +5972,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15, 48,
+                 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c2f06010c3full, l_scom_buffer);
@@ -5747,8 +5997,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15 = 0x0;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_PATTERN_TX_AB_HALF_A_0_15, 48,
+                 16, 48 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80043c3006010c3full, l_scom_buffer);
@@ -5769,8 +6022,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_A_16_22 = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22
+                    = 0x1;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442006010c3full, l_scom_buffer);
@@ -5791,8 +6046,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_B_16_22 = 0x7c;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_B_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_B_16_22
+                    = 0x7c;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_B_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442106010c3full, l_scom_buffer);
@@ -5813,8 +6070,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_C_16_22 = 0x7b;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_C_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_C_16_22
+                    = 0x7b;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_C_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442206010c3full, l_scom_buffer);
@@ -5835,8 +6094,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_DG_16_22 = 0xc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_DG_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22 = 0xc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442306010c3full, l_scom_buffer);
@@ -5857,8 +6119,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_E_16_22 = 0x5e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_E_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_E_16_22
+                    = 0x5e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_E_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442406010c3full, l_scom_buffer);
@@ -5879,8 +6143,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_F_HALF_A_16_22 = 0x10;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_F_HALF_A_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_F_HALF_A_16_22 = 0x10;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_F_HALF_A_16_22, 48,
+                 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442506010c3full, l_scom_buffer);
@@ -5901,8 +6168,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_DG_16_22 = 0xc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_DG_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22 = 0xc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442606010c3full, l_scom_buffer);
@@ -5923,8 +6193,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_H_HALF_B_16_22 = 0x4e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_H_HALF_B_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_H_HALF_B_16_22 = 0x4e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_H_HALF_B_16_22, 48,
+                 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442706010c3full, l_scom_buffer);
@@ -5945,8 +6218,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_A_16_22 = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22
+                    = 0x1;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442806010c3full, l_scom_buffer);
@@ -5967,8 +6242,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_H_HALF_B_16_22 = 0x4e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_H_HALF_B_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_H_HALF_B_16_22 = 0x4e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_H_HALF_B_16_22, 48,
+                 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442906010c3full, l_scom_buffer);
@@ -5989,8 +6267,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_DG_16_22 = 0xc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_DG_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22 = 0xc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442a06010c3full, l_scom_buffer);
@@ -6011,8 +6292,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_F_HALF_A_16_22 = 0x10;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_F_HALF_A_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_F_HALF_A_16_22 = 0x10;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_F_HALF_A_16_22, 48,
+                 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442b06010c3full, l_scom_buffer);
@@ -6033,8 +6317,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_E_16_22 = 0x5e;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_E_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_E_16_22
+                    = 0x5e;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_E_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442c06010c3full, l_scom_buffer);
@@ -6055,8 +6341,11 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_DG_16_22 = 0xc;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_DG_16_22, 48, 7, 57 );
+                constexpr auto
+                l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22 = 0xc;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_DG_16_22, 48, 7,
+                 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442d06010c3full, l_scom_buffer);
@@ -6077,8 +6366,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_C_16_22 = 0x7b;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_C_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_C_16_22
+                    = 0x7b;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_C_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442e06010c3full, l_scom_buffer);
@@ -6099,8 +6390,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_B_16_22 = 0x7c;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_B_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_B_16_22
+                    = 0x7c;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_B_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004442f06010c3full, l_scom_buffer);
@@ -6121,8 +6414,10 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_PATTERN_TX_A_16_22 = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_PATTERN_TX_A_16_22, 48, 7, 57 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22
+                    = 0x1;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22, 48, 7, 57 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8004443006010c3full, l_scom_buffer);
@@ -6164,8 +6459,8 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_OFF, 48, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008102006010c3full, l_scom_buffer);
@@ -6186,13 +6481,15 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_TAP5 = 0x5;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP5, 51, 3, 61 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_INTERVAL_TIMEOUT_SEL_TAP5 = 0x5;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_INTERVAL_TIMEOUT_SEL_TAP5, 51, 3,
+                                                61 );
             }
 
             {
-                constexpr auto l_scom_buffer_TAP1 = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP1, 54, 2, 62 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_STATUS_RPT_TIMEOUT_SEL_TAP1 = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_STATUS_RPT_TIMEOUT_SEL_TAP1, 54,
+                                                2, 62 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008302006010c3full, l_scom_buffer);
@@ -6234,13 +6531,13 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 55, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF, 55, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 56, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF, 56, 1, 63 );
             }
 
             {
@@ -6248,13 +6545,13 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 59, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON, 59, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 60, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON, 60, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8008c02006010c3full, l_scom_buffer);
@@ -6312,19 +6609,19 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             {
                 if (l_def_is_master)
                 {
-                    constexpr auto l_scom_buffer_MASTER = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_MASTER, 48, 1, 63 );
+                    constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_MASTER_MODE_MASTER = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_MASTER_MODE_MASTER, 48, 1, 63 );
                 }
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 58, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON, 58, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_FENCED = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_FENCED, 57, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_FENCE_FENCED = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_FENCE_FENCED, 57, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8009902006010c3full, l_scom_buffer);
@@ -6454,8 +6751,8 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 50, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_GLBSM_REGS_RX_PG_GLBSM_SPARE_MODE_2_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_GLBSM_REGS_RX_PG_GLBSM_SPARE_MODE_2_ON, 50, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800a802006010c3full, l_scom_buffer);
@@ -6522,8 +6819,8 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 60, 1, 63 );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_OFF, 60, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800b802006010c3full, l_scom_buffer);
@@ -6593,13 +6890,13 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 48, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_OFF = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_OFF, 48, 1, 63 );
             }
 
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 59, 1, 63 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PDWN_LITE_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PDWN_LITE_DISABLE_ON, 59, 1, 63 );
             }
 
             {
@@ -6645,8 +6942,9 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_DRV_0S = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_DRV_0S, 48, 2, 62 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_DRV_0S = 0x0;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_DRV_0S, 48, 2,
+                                                62 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800c242006010c3full, l_scom_buffer);
@@ -6692,13 +6990,15 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
 
             {
-                constexpr auto l_scom_buffer_TAP5 = 0x5;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP5, 55, 3, 61 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DYN_RECAL_INTERVAL_TIMEOUT_SEL_TAP5 = 0x5;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DYN_RECAL_INTERVAL_TIMEOUT_SEL_TAP5,
+                                                55, 3, 61 );
             }
 
             {
-                constexpr auto l_scom_buffer_TAP1 = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP1, 58, 2, 62 );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DYN_RECAL_STATUS_RPT_TIMEOUT_SEL_TAP1 = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DYN_RECAL_STATUS_RPT_TIMEOUT_SEL_TAP1,
+                                                58, 2, 62 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800c8c2006010c3full, l_scom_buffer);
