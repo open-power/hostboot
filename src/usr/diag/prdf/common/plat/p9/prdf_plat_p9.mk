@@ -41,6 +41,7 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/p9
 prd_obj += prdfP9Configurator.o
 prd_obj += prdfP9PllDomain.o
 prd_obj += prdfFsiCapUtil.o
+prd_obj += prdfP9ProcDomain.o
 
 # rule plugin related
 prd_rule_plugin += prdfP9Proc.o
