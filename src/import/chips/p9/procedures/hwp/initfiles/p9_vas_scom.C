@@ -126,13 +126,13 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             {
                 if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_SMALL_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_ON = 0x1;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 13, 1, 63 );
+                    constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_ADDR_BAR_MODE_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_VA_VA_SOUTH_VA_EG_EG_SCF_ADDR_BAR_MODE_ON, 13, 1, 63 );
                 }
                 else if ((l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE == fapi2::ENUM_ATTR_PROC_FABRIC_ADDR_BAR_MODE_LARGE_SYSTEM))
                 {
-                    constexpr auto l_scom_buffer_OFF = 0x0;
-                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_OFF, 13, 1, 63 );
+                    constexpr auto l_VA_VA_SOUTH_VA_EG_EG_SCF_ADDR_BAR_MODE_OFF = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_VA_VA_SOUTH_VA_EG_EG_SCF_ADDR_BAR_MODE_OFF, 13, 1, 63 );
                 }
             }
 
