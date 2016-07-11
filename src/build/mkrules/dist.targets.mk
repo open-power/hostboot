@@ -273,6 +273,8 @@ fsp.tar_CONTENTS = \
 fsp_ODE_REMAKES = \
     hbfw:expand_tars:ppc:FORCE_ALWAYS \
     hbfw/img:update_images_for_sandbox:ppc:FORCE_ALWAYS \
-    hbfw/simics:NOTARGET:ppc:$(TARGET_DIR)/simics.tar
+    hbfw/simics:NOTARGET:ppc:$(TARGET_DIR)/simics.tar \
+    sbei/sbfw:-a:ppc:FORCE_ALWAYS \
+    sbei/sbfw:install_all:ppc:FORCE_ALWAYS \
 
 include dist.rules.mk
