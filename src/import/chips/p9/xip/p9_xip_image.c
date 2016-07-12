@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1474,6 +1474,7 @@ xipHeaderFind(void* i_image, const char* i_id, P9XipItem* o_item)
         HEADER_TOC(image_size, iv_imageSize, P9_XIP_UINT32),
         HEADER_TOC(build_date, iv_buildDate, P9_XIP_UINT32),
         HEADER_TOC(build_time, iv_buildTime, P9_XIP_UINT32),
+        HEADER_TOC(build_tag,  iv_buildTag,  P9_XIP_STRING),
 
         HEADER_TOC(header_version, iv_headerVersion, P9_XIP_UINT8),
         HEADER_TOC(toc_normalized, iv_normalized,    P9_XIP_UINT8),
@@ -3068,10 +3069,7 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     o_dest->iv_kernelAddr   = htobe64(i_src->iv_kernelAddr);
     o_dest->iv_linkAddress = htobe64(i_src->iv_linkAddress);
 
-    for (i = 0; i < 3; i++)
-    {
-        o_dest->iv_reserved64[i] = 0;
-    }
+    memset(o_dest->iv_reserved64, 0, sizeof(i_src->iv_reserved64));
 
     for (i = 0, destSection = o_dest->iv_section,
          srcSection = i_src->iv_section;
@@ -3084,20 +3082,16 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     o_dest->iv_imageSize = htobe32(i_src->iv_imageSize);
     o_dest->iv_buildDate = htobe32(i_src->iv_buildDate);
     o_dest->iv_buildTime = htobe32(i_src->iv_buildTime);
+    memcpy(o_dest->iv_buildTag, i_src->iv_buildTag,
+           sizeof(i_src->iv_buildTag));
 
-    for (i = 0; i < 5; i++)
-    {
-        o_dest->iv_reserved32[i] = 0;
-    }
+    o_dest->iv_reserved32 = 0;
 
     o_dest->iv_headerVersion = i_src->iv_headerVersion;
     o_dest->iv_normalized = i_src->iv_normalized;
     o_dest->iv_tocSorted = i_src->iv_tocSorted;
 
-    for (i = 0; i < 3; i++)
-    {
-        o_dest->iv_reserved8[i] = 0;
-    }
+    memset(o_dest->iv_reserved8, 0, sizeof(i_src->iv_reserved8));
 
     memcpy(o_dest->iv_buildUser, i_src->iv_buildUser,
            sizeof(i_src->iv_buildUser));
@@ -3105,7 +3099,6 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
            sizeof(i_src->iv_buildHost));
     memcpy(o_dest->iv_reservedChar, i_src->iv_reservedChar,
            sizeof(i_src->iv_reservedChar));
-
 #else
 
     if (o_dest != i_src)
