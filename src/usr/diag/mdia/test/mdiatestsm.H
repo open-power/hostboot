@@ -564,6 +564,33 @@ class MdiaSmTest : public CxxTest::TestSuite
             TS_TRACE(EXIT_MRK "testSmExecuteWorkItem");
         }
 
+        void testDoMaintCmd(void)
+        {
+            TS_TRACE(ENTER_MRK "testDoMaintCmd");
+
+            StateMachine sm;
+            WorkFlowAssocMap list;
+            TargetHandleList targets;
+            errlHndl_t err = NULL;
+
+            getTargets(1, targets);
+
+            list[targets[0]].push_back(DUMMY_SYNC_PHASE);
+
+            sm.setup(list);
+
+            WorkFlowProperties * tmp = sm.iv_workFlowProperties.front();
+
+            err = sm.doMaintCommand(*tmp);
+            if ( NULL != err )
+            {
+                TS_FAIL("doMaintCommand() failed");
+            }
+
+            TS_TRACE(EXIT_MRK "testDoMaintCmd");
+
+        }
+
         void testSmRun(void)
         {
             using namespace MDIA;
