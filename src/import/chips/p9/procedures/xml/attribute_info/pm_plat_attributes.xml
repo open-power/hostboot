@@ -923,7 +923,7 @@
       <initToZero/>
       <valueType>uint8</valueType>
       <platInit/>
-</attribute>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_POUNDV_BUCKET_DATA</id>
@@ -938,6 +938,29 @@
       <valueType>uint8</valueType>
       <initToZero/>
       <array>51</array>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+          if set to 1, FAPI_ERR records are suppressed from being produced by
+          p9_dump_stop_info.
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+   <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+          if set to 1, p9_dump_stop_info output will be written to error logs
+      </description>
+      <valueType>uint8</valueType>
+      <initToZero/>
       <platInit/>
   </attribute>
 </attributes>

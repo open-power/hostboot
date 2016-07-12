@@ -155,7 +155,7 @@
     </attribute>
      <attribute>
         <id>ATTR_PFET_OFF_CONTROLS</id>
-    </attribute> 
+    </attribute>
     <attribute>
         <id>ATTR_OBUS_RATIO_VALUE</id>
     </attribute>
@@ -234,6 +234,13 @@
     <attribute>
         <id>ATTR_TARGET_IS_SCOMMABLE</id>
     </attribute>
+    <attribute>
+        <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+    </attribute>
+
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
