@@ -587,6 +587,7 @@
     <attribute><id>TEST_NEGATIVE_FCN</id></attribute>
     <!-- End max/min config attributes -->
     <attribute><id>RECONFIGURE_LOOP</id></attribute>
+    <attribute><id>RECONFIG_LOOP_TESTS</id></attribute>
     <attribute><id>MULTI_SCOM_BUFFER_MAX_SIZE</id></attribute>
     <attribute><id>ISTEP_PAUSE_ENABLE</id></attribute>
     <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>

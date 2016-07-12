@@ -48,8 +48,7 @@
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
-//@TODO RTC:128106 port to fapi2 plat attribute service
-//#include <hwpf/plat/fapiPlatAttributeService.H>
+#include <fapi2/plat_attr_override_sync.H>
 #include <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include <mbox/mboxif.H>                 // register mailbox
 #include <intr/interrupt.H>
@@ -330,8 +329,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
                 if (l_attrOverridesExist)
                 {
-                    //@TODO RTC:128106 port to fapi2 plat attribute service
-                    //fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
+                    fapi2::theAttrOverrideSync().getAttrOverridesFromFsp();
                 }
 
                 // Start a new thread to handle non-IStep messages from the FSP
@@ -353,8 +351,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             // Attributes to sync to the FSP
             if(iv_spBaseServicesEnabled)
             {
-                //@TODO RTC:128106 port to fapi2 plat attribute service
-                //fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+                fapi2::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
             }
         }
     } while(0);
@@ -1627,8 +1624,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
     // Send the potentially modified set of Attribute overrides and any
     // Attributes to sync (to Cronus) to the FSP
-    //@TODO RTC:128106 port to fapi2 plat attribute service
-    //fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+    fapi2::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
 
     // Transfer ownership of the message pointer back from iv_pIstepMsg
     mutex_lock(&iv_mutex);

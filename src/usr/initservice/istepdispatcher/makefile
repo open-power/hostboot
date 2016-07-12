@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -27,9 +27,10 @@ MODULE = istepdisp
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+
+# Next includes required for attribute override support
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 
