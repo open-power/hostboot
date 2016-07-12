@@ -2538,7 +2538,6 @@ sub execute_cmvc_reqs
 
     #need to get commit
     my $commits = git_commit_history($level, $released);
-    my $email = $globals{"emails"};
 
     foreach my $commit (@{$commits})
     {
@@ -2547,7 +2546,7 @@ sub execute_cmvc_reqs
         {
             if($coreq ne "")
             {
-                my $cmd = "/esw/bin/coreqTracks -r $release -t $feature -t2 $coreq -e $email";
+                my $cmd = "/esw/bin/coreqTracks -r $release -t $feature -t2 $coreq -e $globals{email}";
                 print "$cmd\n";
                 my $output = `echo "y" | $cmd`;
                 print $output;
@@ -2559,7 +2558,7 @@ sub execute_cmvc_reqs
         {
             if($prereq ne "")
             {
-                my $cmd = "/esw/bin/prereqTracks -r $release -t $prereq -t2 $feature -e $email";
+                my $cmd = "/esw/bin/prereqTracks -r $release -t $prereq -t2 $feature -e $globals{email}";
                 print "$cmd\n";
                 my $output = `echo "y" | $cmd`;
                 print $output
