@@ -251,15 +251,15 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
         /**
-         * @brief   fapi2 task,
+         * @brief   fapi2 task, handles attribute override and fapi2 plat intf.
          */
         {
-                "libfapi2.so" ,                              // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
+            "libfapi2.so" ,                                 // taskname
+            NULL,                                           // no pointer to fn
+            {
+                    START_TASK,                             // task type
+                    EXT_IMAGE,                              // Extended Module
+            }
         },
 
 

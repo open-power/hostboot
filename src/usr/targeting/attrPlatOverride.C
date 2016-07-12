@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,8 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <targeting/attrPlatOverride.H>
-//@TODO RTC:128106
-//#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
+#include <fapi2/plat_attr_override_sync.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/targreasoncodes.H>
 #include <errl/errlmanager.H>
@@ -50,9 +49,8 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
     if (io_tanks == NULL)
     {
         // All indexes are -1 due to the first enum being TANK_LAYER_NONE,
-        //@TODO RTC:128106
-        //l_overTanks[AttributeTank::TANK_LAYER_FAPI-1] =
-        //            &fapi::theAttrOverrideSync().iv_overrideTank;
+        l_overTanks[AttributeTank::TANK_LAYER_FAPI-1] =
+                    &fapi2::theAttrOverrideSync().iv_overrideTank;
         l_overTanks[AttributeTank::TANK_LAYER_TARG-1] =
                     &Target::theTargOverrideAttrTank();
         l_overTanks[AttributeTank::TANK_LAYER_PERM-1] = &l_PermTank;

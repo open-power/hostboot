@@ -36,6 +36,8 @@ SUBDIRS += runtime.d
 
 include fapi2.mk
 
+OBJS += plat_attr_task.o
+
 include ${ROOTPATH}/config.mk
 
 vpath %.C ${GENDIR}

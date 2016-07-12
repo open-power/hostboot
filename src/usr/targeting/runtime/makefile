@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -23,7 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
 MODULE = targeting_rt
 
 #@TODO RTC:132750
@@ -31,6 +30,8 @@ MODULE = targeting_rt
 
 TARGETING_REL_PATH = ..
 include ${TARGETING_REL_PATH}/hostboot_common.mk
+ROOTPATH = ../../../..
+
 vpath %.C ${TARGETING_REL_PATH}
 
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrrp_rt.o

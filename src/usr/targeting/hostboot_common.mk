@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 
+ROOTPATH=../../..
+
 COMMON_TARGETING_REL_PATH = ${TARGETING_REL_PATH}/common
 COMMON_TARGETING_MAKEFILE = ${COMMON_TARGETING_REL_PATH}/common.mk
 
@@ -31,5 +33,9 @@ include ${COMMON_TARGETING_MAKEFILE}
 VPATH += ${TARGETING_REL_PATH}/adapters
 VPATH += ${COMMON_TARGETING_REL_PATH}
 VPATH += ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
+
+# Next includes required for attribute override support
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o

@@ -34,12 +34,12 @@ ROOTPATH = ../../..
 MODULE = targeting
 
 TARGETING_REL_PATH = .
+
 include ${TARGETING_REL_PATH}/hostboot_common.mk
 
 ATTR_RP_OBJS += attrrp.o
 ATTR_RP_OBJS += attrsync.o
 ATTR_RP_OBJS += targplatutil.o
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 ENTRY_POINT_OBJS += targetservicestart.o
 
