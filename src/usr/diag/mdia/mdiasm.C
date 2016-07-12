@@ -194,7 +194,6 @@ fapi2::TargetType getMdiaTargetType()
 errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 {
     errlHndl_t err = NULL;
-    fapi2::buffer<uint64_t> buffer;
 
     do
     {
@@ -204,15 +203,13 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         uint64_t addr = ( ( 0 == i_mba->getAttr<TARGETING::ATTR_CHIP_UNIT>()) ?
                        MEM_MBA0_MBSTR : MEM_MBA1_MBSTR );
 
+        uint64_t data = 0;
+        size_t sz_data = sizeof(uint64_t);
 
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> fapiMb(membuf);
-        fapi2::ReturnCode fapirc = fapi2::getScom( fapiMb, addr, buffer );
-
-        err = fapi2::rcToErrl( fapirc );
-
+        err = deviceRead( membuf, &data, sz_data, DEVICE_SCOM_ADDRESS(addr) );
         if( NULL != err )
         {
-            MDIA_FAST("ceErrorSetup: fapiGetScom on 0x%08X failed HUID:0x%08X",
+            MDIA_FAST("ceErrorSetup: deviceRead on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(membuf));
             break;
         }
@@ -224,23 +221,12 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         // and hard CEs ( set 55, 56, 57 bits ).
         // First clear starting 52 bits and than set relevant bits.
 
-        uint64_t data = ( uint64_t(buffer) & 0x0000000000000fff )
-                        | 0xf0010010010011c0;
+        data = ( data & 0x0000000000000fff ) | 0xf0010010010011c0;
 
-        if( fapi2::FAPI2_RC_SUCCESS != buffer.set(data) )
-        {
-            MDIA_FAST("ceErrorSetup: set() for 0x%08X failed"
-                      " HUID:0x%08X data:0x%16X",
-                      addr, get_huid(membuf), data);
-            break;
-        }
-
-        fapirc = fapi2::putScom( fapiMb, addr , buffer );
-        err = fapi2::rcToErrl( fapirc );
-
+        err = deviceWrite( membuf, &data, sz_data, DEVICE_SCOM_ADDRESS(addr) );
         if( NULL != err )
         {
-            MDIA_FAST("ceErrorSetup: fapiPutScom on 0x%08X failed HUID:0x%08X",
+            MDIA_FAST("ceErrorSetup: deviceWrite on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(i_mba));
             break;
         }
@@ -254,7 +240,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
     MDIA_FAST("sm: processCommandTimeout");
 /*  TODO RTC 145132
     WorkFlowProperties *wkflprop = NULL;
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     vector<mss_MaintCmd *> stopCmds;
 
@@ -271,48 +257,42 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
             if((*wit)->timer == *monitorIt)
             {
                 TargetHandle_t target = getTarget(**wit);
-                ecmdDataBufferBase buffer(64);
-                uint64_t mbaspa = 0;
-                uint64_t mbaspamask = 0;
-                // check MBASPA for maint cmd complete bit
-                // if set then don't time out
-                fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, target);
-                ReturnCode fapirc = fapiGetScom( fapiMba,  MBA01_SPA, buffer);
 
-                err = fapiRcToErrl(fapirc);
-                if(err)
+                uint64_t firData = 0;
+                uint64_t mskData = 0;
+                size_t sz_uint64 = sizeof(uint64_t);
+
+                // Check for command complete. If set, don't time out.
+                err = deviceRead( target, &firData, sz_uint64,
+                                  DEVICE_SCOM_ADDRESS(MBA01_SPA) );
+                if ( nullptr != err )
                 {
-                    MDIA_FAST("sm: fapiGetScom on 0x%08X failed HUID:0x%08X",
+                    MDIA_FAST("sm: deviceRead on 0x%08X failed HUID:0x%08X",
                               MBA01_SPA, get_huid(target));
                     //commit locally and let it timeout
                     errlCommit(err, MDIA_COMP_ID);
                 }
                 else
                 {
-                    mbaspa = buffer.getDoubleWord(0) & 0x8080000000000000;
+                    firData &= 0x8080000000000000;
                 }
 
-                if(0 != mbaspa)
+                if ( 0 != firData )
                 {
-                    fapirc = fapiGetScom( fapiMba,  MBA01_SPA_MASK, buffer);
-
-                    err = fapiRcToErrl(fapirc);
-                    if(err)
+                    err = deviceRead( target, &mskData, sz_uint64,
+                                      DEVICE_SCOM_ADDRESS(MBA01_SPA_MASK) );
+                    if ( nullptr != err )
                     {
-                        MDIA_FAST("sm: fapiGetScom on 0x%08X failed "
+                        MDIA_FAST("sm: deviceRead on 0x%08X failed "
                                   "HUID:0x%08X",
                                   MBA01_SPA_MASK, get_huid(target));
                         //commit locally and let it timeout
                         errlCommit(err, MDIA_COMP_ID);
                     }
-                    else
-                    {
-                        mbaspamask = buffer.getDoubleWord(0);
-                    }
                 }
 
                 // Pending maint cmd complete, reset timer
-                if(mbaspa & ~mbaspamask)
+                if(firData & ~mskData)
                 {
                     // Committing an info log to help debug SW timeout
                     if((*wit)->timeoutCnt >= MBA_TIMEOUT_LOG)
