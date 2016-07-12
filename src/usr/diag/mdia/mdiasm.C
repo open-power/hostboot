@@ -817,78 +817,85 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
 errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 {
-    // uint64_t timeout = i_wfp.memSize / 1024; // TODO RTC 47590
-    errlHndl_t err = NULL;
-
-/* TODO RTC 145132
-    uint64_t stopCondition =
-                mss_MaintCmd::STOP_END_OF_RANK                  |
-                mss_MaintCmd::STOP_ON_MPE                       |
-                mss_MaintCmd::STOP_ON_UE                        |
-                mss_MaintCmd::STOP_ON_END_ADDRESS               |
-                mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
-
+    errlHndl_t err = nullptr;
     uint64_t workItem;
-    TargetHandle_t targetMba;
-    ecmdDataBufferBase startAddr(64), endAddr(64);
-    mss_MaintCmd * cmd = NULL;
+
+    TargetHandle_t target;
 
     // starting a maint cmd ...  register a timeout monitor
-    TargetHandle_t sys = NULL;
+    TargetHandle_t sys = nullptr;
     targetService().getTopLevelTarget(sys);
 
     HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
 
-    uint64_t mbaTO =
-        hbSettings.traceContinuous ? MBA_TIMEOUT_LONG : MBA_TIMEOUT;
+    uint64_t maintCmdTO =
+        hbSettings.traceContinuous ? MAINT_CMD_TIMEOUT_LONG : MAINT_CMD_TIMEOUT;
 
     mutex_lock(&iv_mutex);
 
     uint64_t monitorId = CommandMonitor::INVALID_MONITOR_ID;
     i_wfp.timeoutCnt = 0; // reset for new work item
     workItem = *i_wfp.workItem;
-    targetMba = getTarget(i_wfp);
-    cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
+
+    target = getTarget(i_wfp);
 
     mutex_unlock(&iv_mutex);
 
+    TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
     do
     {
-        fapi::Target fapiMba(TARGET_TYPE_MBA_CHIPLET, targetMba);
-        ReturnCode fapirc;
+        fapi2::ReturnCode fapirc;
 
-        // We will always do ce setup though CE calculation
-        // is only done during MNFG. This will give use better ffdc.
-        err = ceErrorSetup( targetMba );
-        if( NULL != err)
+        // new command...use the full range
+        //target type is MBA
+        if (TYPE_MBA == trgtType)
         {
-            MDIA_FAST("sm: ceErrorSetup failed for mba. HUID:0x%08X",
-                            get_huid(targetMba));
-            break;
-        }
+            /*TODO RTC 155857
 
-        if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
-            & iv_globals.mfgPolicy )
-        {
-            // For MNFG mode, check CE also
-            stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
-        }
+            uint64_t stopCondition =
+                mss_MaintCmd::STOP_END_OF_RANK                  |
+                mss_MaintCmd::STOP_ON_MPE                       |
+                mss_MaintCmd::STOP_ON_UE                        |
+                mss_MaintCmd::STOP_ON_END_ADDRESS               |
+                mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
 
-        // Start the next command on the full range of memory behind the target.
+            if( TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
+                & iv_globals.mfgPolicy )
+            {
+                // For MNFG mode, check CE also
+                stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+            }
 
-        fapirc = mss_get_address_range(
-                fapiMba,
-                MSS_ALL_RANKS,
-                startAddr,
-                endAddr);
-        err = fapiRcToErrl(fapirc);
+            ecmdDataBufferBase startAddr(64), endAddr(64);
+            mss_MaintCmd * cmd = NULL;
+            cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
+            fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(target);
 
-        if(err)
-        {
-            MDIA_FAST("sm: get_address_range failed");
-            break;
-        }
+            // We will always do ce setup though CE calculation
+            // is only done during MNFG. This will give use better ffdc.
+            err = ceErrorSetup( target );
+            if( nullptr != err)
+            {
+                MDIA_FAST("sm: ceErrorSetup failed for mba. HUID:0x%08X",
+                        get_huid(target));
+                break;
+            }
+
+            fapirc = mss_get_address_range(
+                    fapiMba,
+                    MSS_ALL_RANKS,
+                    startAddr,
+                    endAddr);
+            err = fapiRcToErrl(fapirc);
+
+            if(err)
+            {
+                MDIA_FAST("sm: get_address_range failed");
+                break;
+            }
+
+            // new command...use the full range
 
             switch(workItem)
             {
@@ -902,7 +909,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             false);
 
                     MDIA_FAST("sm: random init %p on: %x", cmd,
-                            get_huid(targetMba));
+                            get_huid(target));
                     break;
 
                 case START_SCRUB:
@@ -914,7 +921,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             false);
 
                     MDIA_FAST("sm: scrub %p on: %x", cmd,
-                            get_huid(targetMba));
+                            get_huid(target));
                     break;
                 case START_PATTERN_0:
                 case START_PATTERN_1:
@@ -934,7 +941,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                             false);
 
                     MDIA_FAST("sm: init %p on: %x", cmd,
-                            get_huid(targetMba));
+                            get_huid(target));
                     break;
 
                 default:
@@ -945,55 +952,111 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             {
                 MDIA_ERR("unrecognized maint command type %d on: %x",
                         workItem,
-                        get_huid(targetMba));
+                        get_huid(target));
                 break;
             }
 
-        mutex_lock(&iv_mutex);
+            mutex_lock(&iv_mutex);
 
-        i_wfp.data = cmd;
+            i_wfp.data = cmd;
 
-        mutex_unlock(&iv_mutex);
+            mutex_unlock(&iv_mutex);
 
-        // Command and address configured.
-        // Invoke the command.
-        fapirc = cmd->setupAndExecuteCmd();
-        err = fapiRcToErrl(fapirc);
+            // Command and address configured.
+            // Invoke the command.
+            fapirc = cmd->setupAndExecuteCmd();
 
-        // Start a timeout monitor
-        mutex_lock(&iv_mutex);
+            err = fapi2::rcToErrl(fapirc);
+            if( nullptr != err )
+            {
+                MDIA_FAST("sm: setupAndExecuteCmd %p failed", target);
+                i_wfp.data = nullptr;
+                if (cmd)
+                {
+                    delete cmd;
+                }
+            }
 
-        monitorId = getMonitor().addMonitor(mbaTO);
-        i_wfp.timer = monitorId;
-
-        mutex_unlock(&iv_mutex);
-
-        if(err)
+            */
+        }
+        //target type is MCBIST
+        else
         {
-            MDIA_FAST("sm: setupAndExecuteCmd %p failed", cmd);
-            break;
+            fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
+            mss::mcbist::stop_conditions stopCond;
+
+            switch(workItem)
+            {
+                case START_RANDOM_PATTERN:
+
+                    fapirc = memdiags::sf_init(fapiMcbist,
+                            mss::mcbist::PATTERN_RANDOM);
+                    MDIA_FAST("sm: random init %p on: %x", fapiMcbist,
+                            get_huid(target));
+                    break;
+
+                case START_SCRUB:
+
+                    //set stop conditions
+                    stopCond.set_pause_on_mpe(mss::ON);
+                    stopCond.set_pause_on_ue(mss::ON);
+                    stopCond.set_pause_on_aue(mss::ON);
+                    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                    if (TARGETING::MNFG_FLAG_IPL_MEMORY_CE_CHECKING
+                            & iv_globals.mfgPolicy)
+                    {
+                        stopCond.set_pause_on_nce_hard(mss::ON);
+                    }
+
+                    fapirc = memdiags::sf_read(fapiMcbist, stopCond,
+                            mss::mcbist::STOP_AFTER_SLAVE_RANK);
+                    MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
+                            get_huid(target));
+                    break;
+
+                case START_PATTERN_0:
+                case START_PATTERN_1:
+                case START_PATTERN_2:
+                case START_PATTERN_3:
+                case START_PATTERN_4:
+                case START_PATTERN_5:
+                case START_PATTERN_6:
+                case START_PATTERN_7:
+
+                    fapirc = memdiags::sf_init(fapiMcbist, workItem);
+                    MDIA_FAST("sm: init %p on: %x", fapiMcbist,
+                            get_huid(target));
+                    break;
+
+                default:
+                    MDIA_ERR("unrecognized work item type %d on: %x",
+                             workItem, get_huid(target));
+                    break;
+            }
+            err = fapi2::rcToErrl(fapirc);
+            if( nullptr != err )
+            {
+                MDIA_FAST("sm: Running Maint Cmd failed");
+                i_wfp.data = nullptr;
+            }
+        }
+
+        if ( nullptr == err )
+        {
+            // Start a timeout monitor
+            mutex_lock(&iv_mutex);
+
+            monitorId = getMonitor().addMonitor(maintCmdTO);
+            i_wfp.timer = monitorId;
+
+            mutex_unlock(&iv_mutex);
         }
 
     } while(0);
 
-    if(err)
-    {
-        mutex_lock(&iv_mutex);
 
-        MDIA_FAST("sm: Running Maint Cmd failed");
-
-        getMonitor().removeMonitor(monitorId);
-
-        i_wfp.data = NULL;
-
-        mutex_unlock(&iv_mutex);
-    }
-
-    if(err && cmd)
-    {
-        delete cmd;
-    }
-*/
 
     return err;
 }
