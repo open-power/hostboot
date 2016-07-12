@@ -98,7 +98,12 @@ inline typename TT::pos_type pos(const fapi2::Target<T>& i_target)
 fapi_try_exit:
     // If we can't get our unit position, we're in other trouble
     FAPI_ERR("can't get our chip unit position");
+
+    // Cronusflex doesn't support Assert.
+    // Enable once move to dev complete - AAM
+#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
+#endif
     return 0;
 }
 
@@ -122,7 +127,9 @@ inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type pos(const fapi2::Target<fapi
 fapi_try_exit:
     // If we can't get our position, we're in other trouble
     FAPI_ERR("can't get our position");
+#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
+#endif
     return 0;
 
 }
@@ -148,7 +155,9 @@ inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type pos(
 fapi_try_exit:
     // If we can't get our position, we're in other trouble
     FAPI_ERR("can't get our position");
+#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
+#endif
     return 0;
 
 }
@@ -181,10 +190,6 @@ inline uint8_t relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2
 template< fapi2::TargetType T, typename TT = posTraits<T> >
 inline uint32_t fapi_pos(const fapi2::Target<T>& i_target)
 {
-
-// Doesn't look like ATTR_FAPI_POS is supported in Cronus yet, so we'll
-// use our chip-relative position for the time being.
-#ifdef ATTR_FAPI_POS_SUPPORTED
     uint32_t i_pos = 0;
 
     // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
@@ -199,11 +204,10 @@ inline uint32_t fapi_pos(const fapi2::Target<T>& i_target)
 fapi_try_exit:
     // If we can't get our fapi position, we're in other trouble
     FAPI_ERR("can't get our fapi position");
+#if MOVED_AWAY_FROM_CRONUSFLEX
     fapi2::Assert(false);
-    return 0;
-#else
-    return pos(i_target);
 #endif
+    return 0;
 }
 
 
