@@ -153,8 +153,9 @@ extern "C"
     const uint32_t ALTD_DATA_ECC_MASK = 0xFFFFull;
 
     // ADU operation delay times for HW/sim
-    const uint32_t PROC_ADU_UTILS_ADU_HW_NS_DELAY = 100000000;
-    const uint32_t PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY = 100000;
+    const uint32_t PROC_ADU_UTILS_ADU_HW_NS_DELAY = 100000;
+    const uint32_t PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY = 50000;
+    const uint32_t PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY = 20000;
 
     //---------------------------------------------------------------------------------
     // Function definitions
@@ -551,14 +552,12 @@ extern "C"
         bool l_eccMode           = i_aduOper.getEccMode();
         bool l_overrideEccMode   = i_aduOper.getEccItagOverrideMode();
         bool l_autoIncMode       = i_aduOper.getAutoIncrement();
-        bool l_fastMode          = i_aduOper.getFastMode();
         bool l_accessForceEccReg = (l_itagMode | l_eccMode | l_overrideEccMode);
 
         // Dump ADU write settings
         FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, OVERRIDE_ECC 0x%.8X",
                  l_itagMode, l_eccMode, l_overrideEccMode);
-        FAPI_DBG("       AUTOINC 0x%.8X, FASTMODE 0x%.8X",
-                 l_autoIncMode, l_fastMode);
+        FAPI_DBG("       AUTOINC 0x%.8X", l_autoIncMode);
 
         for (int i = 0; i < 8; i++)
         {
@@ -613,13 +612,10 @@ extern "C"
             FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
         }
 
-        //if we are not in fastmode delay to allow time for the write to go through before we check the status
-        if (l_fastMode == false)
-        {
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
-                     "fapiDelay error");
-        }
+        //delay to allow time for the write to go through before we check the status
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
+                              PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
+                 "fapiDelay error");
 
     fapi_try_exit:
         FAPI_DBG("Exiting...");
@@ -648,11 +644,10 @@ extern "C"
         bool l_itagMode          = i_aduOper.getItagMode();
         bool l_eccMode           = i_aduOper.getEccMode();
         bool l_autoIncMode       = i_aduOper.getAutoIncrement();
-        bool l_fastMode          = i_aduOper.getFastMode();
 
         // Dump ADU read settings
-        FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, AUTOINC 0x%.8X, FASTMODE 0x%.8X",
-                 l_itagMode, l_eccMode, l_autoIncMode, l_fastMode);
+        FAPI_DBG("Modes: ITAG 0x%.8X, ECC 0x%.8X, AUTOINC 0x%.8X",
+                 l_itagMode, l_eccMode, l_autoIncMode);
 
         //Set the ALTD_CMD_START_OP bit to start the read(first granule for autoinc case or not autoinc)
         if ( i_firstGranule || (l_autoIncMode == false) )
@@ -665,13 +660,10 @@ extern "C"
             FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data), "Error writing to the ALTD_CMD_REG");
         }
 
-        //if we are not in fastmode delay to allow time for the read to go through before we get the data
-        if ( l_fastMode == false )
-        {
-            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
-                                  PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
-                     "fapiDelay error");
-        }
+        //delay to allow time for the read to go through before we get the data
+        FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
+                              PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY),
+                 "fapiDelay error");
 
 
         //if we want to include the itag and ecc data collect them before the read
@@ -691,9 +683,6 @@ extern "C"
         {
             o_read_data[eccIndex] = (force_ecc_reg_data >> (63 - ALTD_DATA_TX_ECC_END_BIT)) & ALTD_DATA_ECC_MASK;
         }
-
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, altd_status_reg_data),
-                 "Error reading from ALTD_STATUS Register");
 
         //read data from altd_data_reg
         FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_DATA_REG, altd_data_reg_data),
@@ -768,70 +757,83 @@ extern "C"
         fapi2::buffer<uint64_t> l_statusReg(0x0);
         bool l_statusError = false;
 
-        // Check the ALTD_STATUS_REG
-        FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg),
-                 "Error reading from ALTD_STATUS Register");
-        FAPI_DBG("PU_ALTD_STATUS_REG reg value 0x%016llX", l_statusReg);
-
-        // ---- Handle busy options ----
-
-        // Get busy bit output
-        o_busyBitStatus = l_statusReg.getBit<ALTD_STATUS_BUSY_BIT>();
-
-        // Handle busy bit according to specified input
-        if (o_busyBitStatus == true)
+        for (int i = 0; i < 10; i++)
         {
-            // Exit if busy
-            if (i_busyBitHandler == EXIT_ON_BUSY)
+            l_statusError = false;
+            // Check the ALTD_STATUS_REG
+            FAPI_TRY(fapi2::getScom(i_target, PU_ALTD_STATUS_REG, l_statusReg),
+                     "Error reading from ALTD_STATUS Register");
+            FAPI_DBG("PU_ALTD_STATUS_REG reg value 0x%016llX", l_statusReg);
+
+            // ---- Handle busy options ----
+
+            // Get busy bit output
+            o_busyBitStatus = l_statusReg.getBit<ALTD_STATUS_BUSY_BIT>();
+
+            // Handle busy bit according to specified input
+            if (o_busyBitStatus == true)
             {
-                goto fapi_try_exit;
+                // Exit if busy
+                if (i_busyBitHandler == EXIT_ON_BUSY)
+                {
+                    goto fapi_try_exit;
+                }
+                else if (i_busyBitHandler == EXPECTED_BUSY_BIT_CLEAR)
+                {
+                    l_statusError = true;
+                }
             }
-            else if (i_busyBitHandler == EXPECTED_BUSY_BIT_CLEAR)
+            else if (i_busyBitHandler == EXPECTED_BUSY_BIT_SET)
             {
                 l_statusError = true;
             }
-        }
-        else if (i_busyBitHandler == EXPECTED_BUSY_BIT_SET)
-        {
-            l_statusError = true;
-        }
 
-        // ---- Check for other errors ----
-        // Check the WAIT_CMD_ARBIT bit and make sure it's 0
-        // Check the ADDR_DONE bit and make sure it's set
-        // Check the DATA_DONE bit and make sure it's set
-        // Check the WAIT_RESP bit to make sure it's clear
-        // Check the OVERRUN_ERR to make sure it's clear
-        // Check the AUTOINC_ERR to make sure it's clear
-        // Check the COMMAND_ERR to make sure it's clear
-        // Check the ADDRESS_ERR to make sure it's clear
-        // Check the COMMAND_HANG_ERR to make sure it's clear
-        // Check the DATA_HANG_ERR to make sure it's clear
-        // Check the PBINIT_MISSING to make sure it's clear
-        // Check the ECC_CE to make sure it's clear
-        // Check the ECC_UE to make sure it's clear
-        // Check the ECC_SUE to make sure it's clear
-        l_statusError =
-            ( l_statusError ||
-              l_statusReg.getBit<ALTD_STATUS_WAIT_CMD_ARBIT>()        ||
-              !l_statusReg.getBit<ALTD_STATUS_ADDR_DONE_BIT>()        ||
-              l_statusReg.getBit<ALTD_STATUS_WAIT_RESP_BIT>()         ||
-              l_statusReg.getBit<ALTD_STATUS_OVERRUN_ERROR_BIT>()     ||
-              l_statusReg.getBit<ALTD_STATUS_AUTOINC_ERR_BIT>()       ||
-              l_statusReg.getBit<ALTD_STATUS_COMMAND_ERR_BIT>()       ||
-              l_statusReg.getBit<ALTD_STATUS_ADDRESS_ERR_BIT>()       ||
-              l_statusReg.getBit<ALTD_STATUS_PB_OP_HANG_ERR_BIT>()    ||
-              l_statusReg.getBit<ALTD_STATUS_PB_DATA_HANG_ERR_BIT>()  ||
-              l_statusReg.getBit<ALTD_STATUS_PBINIT_MISSING_BIT>()    ||
-              l_statusReg.getBit<ALTD_STATUS_ECC_CE_BIT>()            ||
-              l_statusReg.getBit<ALTD_STATUS_ECC_UE_BIT>()            ||
-              l_statusReg.getBit<ALTD_STATUS_ECC_SUE_BIT>()
-            );
+            // ---- Check for other errors ----
+            // Check the WAIT_CMD_ARBIT bit and make sure it's 0
+            // Check the ADDR_DONE bit and make sure it's set
+            // Check the DATA_DONE bit and make sure it's set
+            // Check the WAIT_RESP bit to make sure it's clear
+            // Check the OVERRUN_ERR to make sure it's clear
+            // Check the AUTOINC_ERR to make sure it's clear
+            // Check the COMMAND_ERR to make sure it's clear
+            // Check the ADDRESS_ERR to make sure it's clear
+            // Check the COMMAND_HANG_ERR to make sure it's clear
+            // Check the DATA_HANG_ERR to make sure it's clear
+            // Check the PBINIT_MISSING to make sure it's clear
+            // Check the ECC_CE to make sure it's clear
+            // Check the ECC_UE to make sure it's clear
+            // Check the ECC_SUE to make sure it's clear
+            l_statusError =
+                ( l_statusError ||
+                  l_statusReg.getBit<ALTD_STATUS_WAIT_CMD_ARBIT>()        ||
+                  !l_statusReg.getBit<ALTD_STATUS_ADDR_DONE_BIT>()        ||
+                  l_statusReg.getBit<ALTD_STATUS_WAIT_RESP_BIT>()         ||
+                  l_statusReg.getBit<ALTD_STATUS_OVERRUN_ERROR_BIT>()     ||
+                  l_statusReg.getBit<ALTD_STATUS_AUTOINC_ERR_BIT>()       ||
+                  l_statusReg.getBit<ALTD_STATUS_COMMAND_ERR_BIT>()       ||
+                  l_statusReg.getBit<ALTD_STATUS_ADDRESS_ERR_BIT>()       ||
+                  l_statusReg.getBit<ALTD_STATUS_PB_OP_HANG_ERR_BIT>()    ||
+                  l_statusReg.getBit<ALTD_STATUS_PB_DATA_HANG_ERR_BIT>()  ||
+                  l_statusReg.getBit<ALTD_STATUS_PBINIT_MISSING_BIT>()    ||
+                  l_statusReg.getBit<ALTD_STATUS_ECC_CE_BIT>()            ||
+                  l_statusReg.getBit<ALTD_STATUS_ECC_UE_BIT>()            ||
+                  l_statusReg.getBit<ALTD_STATUS_ECC_SUE_BIT>()
+                );
 
-        // If Address only operation, do not check for ALTD_STATUS_DATA_DONE_BIT
-        if ( i_addressOnlyOper == false )
-        {
-            l_statusError |= !l_statusReg.getBit<ALTD_STATUS_DATA_DONE_BIT>();
+            // If Address only operation, do not check for ALTD_STATUS_DATA_DONE_BIT
+            if ( i_addressOnlyOper == false )
+            {
+                l_statusError |= !l_statusReg.getBit<ALTD_STATUS_DATA_DONE_BIT>();
+            }
+
+            if (!l_statusError)
+            {
+                break;
+            }
+
+            FAPI_TRY(fapi2::delay(PROC_ADU_UTILS_ADU_HW_NS_DELAY,
+                                  PROC_ADU_UTILS_ADU_STATUS_SIM_CYCLE_DELAY),
+                     "fapiDelay error");
         }
 
         // If error, display trace
