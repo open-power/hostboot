@@ -18,4 +18,12 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Halt codes for p9_sbe_chiplet_pll_initf -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SBE_CHIPLET_PLL_INITF_INVALID_CHIPLET</rc>
+    <description>Unsupported/unexpected pervasive chiplet instance</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>UNIT_POS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

@@ -18,4 +18,12 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Halt codes for p9_sbe_npll_initf -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SBE_NPLL_INITF_UNSUPPORTED_BUCKET</rc>
+    <description>Unsupported Nest PLL bucket value</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUCKET_INDEX</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

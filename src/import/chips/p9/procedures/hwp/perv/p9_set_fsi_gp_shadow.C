@@ -42,6 +42,7 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
                                        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     fapi2::buffer<uint8_t> l_read_attr;
+    fapi2::buffer<uint32_t> l_cfam_data;
     FAPI_INF("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_FSI_GP_SHADOWS_OVERWRITE, i_target_chip,
@@ -77,13 +78,21 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
 
         //Setting ROOT_CTRL5_COPY register value
         //CFAM.ROOT_CTRL5_COPY = p9SetFsiGpShadow::ROOT_CTRL5_FLUSHVALUE
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL5_COPY_FSI,
+                                        l_cfam_data));
+        l_cfam_data = (l_cfam_data & p9SetFsiGpShadow::ROOT_CTRL5_MASK) |
+                      p9SetFsiGpShadow::ROOT_CTRL5_FLUSHVALUE;
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL5_COPY_FSI,
-                                        p9SetFsiGpShadow::ROOT_CTRL5_FLUSHVALUE));
+                                        l_cfam_data));
 
         //Setting ROOT_CTRL6_COPY register value
         //CFAM.ROOT_CTRL6_COPY = p9SetFsiGpShadow::ROOT_CTRL6_FLUSHVALUE
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL6_COPY_FSI,
+                                        l_cfam_data));
+        l_cfam_data = (l_cfam_data & p9SetFsiGpShadow::ROOT_CTRL6_MASK) |
+                      p9SetFsiGpShadow::ROOT_CTRL6_FLUSHVALUE;
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL6_COPY_FSI,
-                                        p9SetFsiGpShadow::ROOT_CTRL6_FLUSHVALUE));
+                                        l_cfam_data));
 
         //Setting ROOT_CTRL7_COPY register value
         //CFAM.ROOT_CTRL7_COPY = p9SetFsiGpShadow::ROOT_CTRL7_FLUSHVALUE
@@ -92,8 +101,12 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
 
         //Setting ROOT_CTRL8_COPY register value
         //CFAM.ROOT_CTRL8_COPY = p9SetFsiGpShadow::ROOT_CTRL8_FLUSHVALUE
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_ROOT_CTRL8_COPY_FSI,
+                                        l_cfam_data));
+        l_cfam_data = (l_cfam_data & p9SetFsiGpShadow::ROOT_CTRL8_MASK) |
+                      p9SetFsiGpShadow::ROOT_CTRL8_FLUSHVALUE;
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_ROOT_CTRL8_COPY_FSI,
-                                        p9SetFsiGpShadow::ROOT_CTRL8_FLUSHVALUE));
+                                        l_cfam_data));
 
         //Setting PERV_CTRL0_COPY register value
         //CFAM.PERV_CTRL0_COPY = p9SetFsiGpShadow::PERV_CTRL0_FLUSHVALUE

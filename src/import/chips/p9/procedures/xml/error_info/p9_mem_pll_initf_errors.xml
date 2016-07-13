@@ -18,4 +18,12 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Halt codes for p9_mem_pll_initf -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_MEM_PLL_INITF_UNSUPPORTED_FREQ</rc>
+    <description>Unsupported MSS_FREQ attribute value</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MSS_FREQ</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

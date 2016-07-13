@@ -154,12 +154,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"xb_io2_gptr"               , 0x0a, 0x06, 0x06, "xb_io2_gptr_ring"          , NON_VPD_RING, 0,  0x0110000000002000},
     {"xb_io2_time"               , 0x0b, 0x06, 0x06, "xb_io2_time_ring"          , NON_VPD_RING, 0,  0x0110000000000100},
     {"xb_pll_gptr"               , 0x0c, 0x06, 0x06, "xb_pll_gptr_ring"          , NON_VPD_RING, 0,  0x0002000000002000},
-    {"xb_pll_bndy_bucket_1"      , 0x0d, 0x06, 0x06, "xb_pll_bndy_bucket_1_ring" , NON_VPD_PLL_RING, 5,  0x0002000000000080},
-    {"xb_pll_bndy_bucket_2"      , 0x0e, 0x06, 0x06, "xb_pll_bndy_bucket_2_ring" , NON_VPD_PLL_RING, 5,  0x0002000000000080},
-    {"xb_pll_bndy_bucket_3"      , 0x0f, 0x06, 0x06, "xb_pll_bndy_bucket_3_ring" , NON_VPD_PLL_RING, 5,  0x0002000000000080},
-    {"xb_pll_bndy_bucket_4"      , 0x10, 0x06, 0x06, "xb_pll_bndy_bucket_4_ring" , NON_VPD_PLL_RING, 5,  0x0002000000000080},
-    {"xb_pll_bndy_bucket_5"      , 0x11, 0x06, 0x06, "xb_pll_bndy_bucket_5_ring" , NON_VPD_PLL_RING, 5,  0x0002000000000080},
-    {"xb_pll_func"               , 0x12, 0x06, 0x06, "xb_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
+    {"xb_pll_bndy"               , 0x0d, 0x06, 0x06, "xb_pll_bndy_ring"          , NON_VPD_RING, 0,  0x0002000000000080},
+    {"xb_pll_func"               , 0x0e, 0x06, 0x06, "xb_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
@@ -205,12 +201,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"ob0_gptr"                   , 0x01, 0x09, 0x09, "ob0_gptr_ring"              , NON_VPD_RING, 0,  0x0E00000000002000},
     {"ob0_time"                   , 0x02, 0x09, 0x09, "ob0_time_ring"              , NON_VPD_RING, 0,  0x0E00000000000100},
     {"ob0_pll_gptr"               , 0x03, 0x09, 0x09, "ob0_pll_gptr_ring"          , NON_VPD_RING, 0,  0x0002000000002000},
-    {"ob0_pll_bndy_bucket_1"      , 0x04, 0x09, 0x09, "ob0_pll_bndy_bucket_1_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob0_pll_bndy_bucket_2"      , 0x05, 0x09, 0x09, "ob0_pll_bndy_bucket_2_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob0_pll_bndy_bucket_3"      , 0x06, 0x09, 0x09, "ob0_pll_bndy_bucket_3_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob0_pll_bndy_bucket_4"      , 0x07, 0x09, 0x09, "ob0_pll_bndy_bucket_4_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob0_pll_bndy_bucket_5"      , 0x08, 0x09, 0x09, "ob0_pll_bndy_bucket_5_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob0_pll_func"               , 0x09, 0x09, 0x09, "ob0_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
+    {"ob0_pll_bndy"               , 0x04, 0x09, 0x09, "ob0_pll_bndy_ring"          , NON_VPD_RING, 0,  0x0002000000000080},
+    {"ob0_pll_func"               , 0x05, 0x09, 0x09, "ob0_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
@@ -225,12 +217,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"ob1_gptr"                   , 0x01, 0x0a, 0x0a, "ob1_gptr_ring"              , NON_VPD_RING, 0,  0x0E00000000002000},
     {"ob1_time"                   , 0x02, 0x0a, 0x0a, "ob1_time_ring"              , NON_VPD_RING, 0,  0x0E00000000000100},
     {"ob1_pll_gptr"               , 0x03, 0x0a, 0x0a, "ob1_pll_gptr_ring"          , NON_VPD_RING, 0,  0x0002000000002000},
-    {"ob1_pll_bndy_bucket_1"      , 0x04, 0x0a, 0x0a, "ob1_pll_bndy_bucket_1_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob1_pll_bndy_bucket_2"      , 0x05, 0x0a, 0x0a, "ob1_pll_bndy_bucket_2_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob1_pll_bndy_bucket_3"      , 0x06, 0x0a, 0x0a, "ob1_pll_bndy_bucket_3_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob1_pll_bndy_bucket_4"      , 0x07, 0x0a, 0x0a, "ob1_pll_bndy_bucket_4_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob1_pll_bndy_bucket_5"      , 0x08, 0x0a, 0x0a, "ob1_pll_bndy_bucket_5_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob1_pll_func"               , 0x09, 0x0a, 0x0a, "ob1_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
+    {"ob1_pll_bndy"               , 0x04, 0x0a, 0x0a, "ob1_pll_bndy_ring"          , NON_VPD_RING, 0,  0x0002000000000080},
+    {"ob1_pll_func"               , 0x05, 0x0a, 0x0a, "ob1_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
@@ -245,12 +233,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"ob2_gptr"                   , 0x01, 0x0b, 0x0b, "ob2_gptr_ring"              , NON_VPD_RING, 0,  0x0E00000000002000},
     {"ob2_time"                   , 0x02, 0x0b, 0x0b, "ob2_time_ring"              , NON_VPD_RING, 0,  0x0E00000000000100},
     {"ob2_pll_gptr"               , 0x03, 0x0b, 0x0b, "ob2_pll_gptr_ring"          , NON_VPD_RING, 0,  0x0002000000002000},
-    {"ob2_pll_bndy_bucket_1"      , 0x04, 0x0b, 0x0b, "ob2_pll_bndy_bucket_1_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob2_pll_bndy_bucket_2"      , 0x05, 0x0b, 0x0b, "ob2_pll_bndy_bucket_2_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob2_pll_bndy_bucket_3"      , 0x06, 0x0b, 0x0b, "ob2_pll_bndy_bucket_3_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob2_pll_bndy_bucket_4"      , 0x07, 0x0b, 0x0b, "ob2_pll_bndy_bucket_4_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob2_pll_bndy_bucket_5"      , 0x08, 0x0b, 0x0b, "ob2_pll_bndy_bucket_5_ring" , NON_VPD_PLL_RING, 0,  0x0002000000000080},
-    {"ob2_pll_func"               , 0x09, 0x0b, 0x0b, "ob2_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
+    {"ob2_pll_bndy"               , 0x04, 0x0b, 0x0b, "ob2_pll_bndy_ring"          , NON_VPD_RING, 0,  0x0002000000000080},
+    {"ob2_pll_func"               , 0x05, 0x0b, 0x0b, "ob2_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
@@ -265,12 +249,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"ob3_gptr"                   , 0x01, 0x0c, 0x0c, "ob3_gptr_ring"              , NON_VPD_RING, 0,  0x0E00000000002000},
     {"ob3_time"                   , 0x02, 0x0c, 0x0c, "ob3_time_ring"              , NON_VPD_RING, 0,  0x0E00000000000100},
     {"ob3_pll_gptr"               , 0x03, 0x0c, 0x0c, "ob3_pll_gptr_ring"          , NON_VPD_RING, 0,  0x0002000000002000},
-    {"ob3_pll_bndy_bucket_1"      , 0x04, 0x0c, 0x0c, "ob3_pll_bndy_bucket_1_ring" , NON_VPD_PLL_RING, 0,  0x0002000000008000},
-    {"ob3_pll_bndy_bucket_2"      , 0x05, 0x0c, 0x0c, "ob3_pll_bndy_bucket_2_ring" , NON_VPD_PLL_RING, 0,  0x0002000000008000},
-    {"ob3_pll_bndy_bucket_3"      , 0x06, 0x0c, 0x0c, "ob3_pll_bndy_bucket_3_ring" , NON_VPD_PLL_RING, 0,  0x0002000000008000},
-    {"ob3_pll_bndy_bucket_4"      , 0x07, 0x0c, 0x0c, "ob3_pll_bndy_bucket_4_ring" , NON_VPD_PLL_RING, 0,  0x0002000000008000},
-    {"ob3_pll_bndy_bucket_5"      , 0x08, 0x0c, 0x0c, "ob3_pll_bndy_bucket_5_ring" , NON_VPD_PLL_RING, 0,  0x0002000000008000},
-    {"ob3_pll_func"               , 0x09, 0x0c, 0x0c, "ob3_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
+    {"ob3_pll_bndy"               , 0x04, 0x0c, 0x0c, "ob3_pll_bndy_ring"          , NON_VPD_RING, 0,  0x0002000000000080},
+    {"ob3_pll_func"               , 0x05, 0x0c, 0x0c, "ob3_pll_func_ring"          , NON_VPD_RING, 0,  0x0002000000008000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
@@ -284,7 +264,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"pci0_fure"            , 0x00, 0x0d, 0x0d, "pci0_fure_ring"        , NON_VPD_RING, 0,  0x0E00000000009000},
     {"pci0_gptr"            , 0x01, 0x0d, 0x0d, "pci0_gptr_ring"        , NON_VPD_RING, 0,  0x0E00000000002000},
     {"pci0_time"            , 0x02, 0x0d, 0x0d, "pci0_time_ring"        , NON_VPD_RING, 0,  0x0E00000000000100},
-    {"pci0_pll_func"        , 0x03, 0x0d, 0x0d, "pci0_pll_func_ring"    , NON_VPD_RING, 0,  0x0002000000008000},
+    {"pci0_pll_bndy"        , 0x03, 0x0d, 0x0d, "pci0_pll_bndy_ring"    , NON_VPD_RING, 0,  0x0002000000000080},
     {"pci0_pll_gptr"        , 0x04, 0x0d, 0x0d, "pci0_pll_gptr_ring"    , NON_VPD_RING, 0,  0x0002000000002000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
@@ -299,7 +279,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"pci1_fure"            , 0x00, 0x0e, 0x0e, "pci1_fure_ring"        , NON_VPD_RING, 0,  0x0F00000000009000},
     {"pci1_gptr"            , 0x01, 0x0e, 0x0e, "pci1_gptr_ring"        , NON_VPD_RING, 0,  0x0F00000000002000},
     {"pci1_time"            , 0x02, 0x0e, 0x0e, "pci1_time_ring"        , NON_VPD_RING, 0,  0x0F00000000000100},
-    {"pci1_pll_func"        , 0x03, 0x0e, 0x0e, "pci1_pll_func_ring"    , NON_VPD_RING, 0,  0x0002000000008000},
+    {"pci1_pll_bndy"        , 0x03, 0x0e, 0x0e, "pci1_pll_bndy_ring"    , NON_VPD_RING, 0,  0x0002000000000080},
     {"pci1_pll_gptr"        , 0x04, 0x0e, 0x0e, "pci1_pll_gptr_ring"    , NON_VPD_RING, 0,  0x0002000000002000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
@@ -314,7 +294,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"pci2_fure"            , 0x00, 0x0f, 0x0f, "pci2_fure_ring"        , NON_VPD_RING, 0,  0x0F80000000009000},
     {"pci2_gptr"            , 0x01, 0x0f, 0x0f, "pci2_gptr_ring"        , NON_VPD_RING, 0,  0x0F80000000002000},
     {"pci2_time"            , 0x02, 0x0f, 0x0f, "pci2_time_ring"        , NON_VPD_RING, 0,  0x0F80000000000100},
-    {"pci2_pll_func"        , 0x03, 0x0f, 0x0f, "pci2_pll_func_ring"    , NON_VPD_RING, 0,  0x0002000000008000},
+    {"pci2_pll_bndy"        , 0x03, 0x0f, 0x0f, "pci2_pll_bndy_ring"    , NON_VPD_RING, 0,  0x0002000000000080},
     {"pci2_pll_gptr"        , 0x04, 0x0f, 0x0f, "pci2_pll_gptr_ring"    , NON_VPD_RING, 0,  0x0002000000002000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
