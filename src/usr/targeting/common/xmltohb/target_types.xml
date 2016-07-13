@@ -839,8 +839,6 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
-    <attribute><id>TPM_PRIMARY_INFO</id></attribute>
-    <attribute><id>TPM_BACKUP_INFO</id></attribute>
     <attribute><id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id></attribute>
     <attribute><id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id></attribute>
     <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id></attribute>

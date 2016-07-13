@@ -55,6 +55,14 @@ extern trace_desc_t* g_trac_trustedboot;
 namespace TRUSTEDBOOT
 {
 
+/// Common static values
+enum
+{
+    MAX_SYSTEM_TPMS = 2,
+    TPM_MASTER_INDEX = 0,     ///< Index into tpm array for master chip
+    TPM_BACKUP_INDEX = 1,     ///< Index for backup TPM
+};
+
 /// Class object to store system TPM information
 class SystemTpms
 {
@@ -75,12 +83,8 @@ public:
 /**
  * @brief Initialize the targeted TPM
  * @param[in/out] io_target Current TPM target structure
- * @param[in] i_nodeTarget Node Target
- * @param[in] i_chip Chip to initialize
 */
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
-                   TARGETING::Target* i_nodeTarget,
-                   TPMDD::tpm_chip_types_t i_chip);
+void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target);
 
 /**
  * @brief Verify a functional TPM still exists in the system

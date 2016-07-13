@@ -63,12 +63,11 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
     do
     {
         // Send to the TPM
-        err = deviceRead(io_target->nodeTarget,
+        err = deviceRead(io_target->tpmTarget,
                          io_buffer,
                          i_bufsize,
-                         DEVICE_TPM_ADDRESS( io_target->chip,
-                                             TPMDD::TPM_OP_TRANSMIT,
-                                             i_cmdSize));
+                         DEVICE_TPM_ADDRESS(TPMDD::TPM_OP_TRANSMIT,
+                                            i_cmdSize));
         if (NULL != err)
         {
             break;

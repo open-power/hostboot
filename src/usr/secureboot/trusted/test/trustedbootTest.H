@@ -38,6 +38,9 @@
 #include <errl/errlentry.H>
 #include <i2c/tpmddif.H>
 #include <secureboot/trustedbootif.H>
+#include <targeting/common/predicates/predicates.H>
+#include <targeting/common/attributes.H>
+#include <targeting/common/utilFilter.H>
 #include "../trustedTypes.H"
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
@@ -691,7 +694,6 @@ class TrustedBootTest: public CxxTest::TestSuite
      */
     TRUSTEDBOOT::TpmTarget getTestTarget()
     {
-        TARGETING::TargetService& tS = TARGETING::targetService();
         TRUSTEDBOOT::TpmTarget target;
         TPMDD::tpm_info_t tpmInfo;
 
@@ -699,37 +701,41 @@ class TrustedBootTest: public CxxTest::TestSuite
         target.initAttempted = true;
         target.failed = false;
 
-        tS.getMasterNodeTarget( target.nodeTarget );
-
-        assert(target.nodeTarget != NULL);
-
-        TRACFCOMP( g_trac_trustedboot,
-                   "getTestTarget node tgt=0x%X chip=%d",
-                   TARGETING::get_huid(target.nodeTarget));
-
-        // Let's see if the requested chip is functional
-        target.chip = TPMDD::TPM_PRIMARY;
-        tpmInfo.chip = TPMDD::TPM_PRIMARY;
-        errlHndl_t err = tpmReadAttributes (target.nodeTarget,
-                                            tpmInfo);
-
-        if (NULL != err)
+        TARGETING::TargetHandleList tpmList;
+        TARGETING::getAllChips(tpmList,
+                               TARGETING::TYPE_TPM,
+                               false);
+        if (tpmList.size() > 0)
         {
-            target.failed = true;
-            delete err;
-        }
-        else if (!tpmInfo.tpmEnabled)
-        {
-            TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
-                      "Chip %d not enabled",
-                      tpmInfo.chip);
-            target.failed = true;
-        }
-        else
-        {
-            TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
-                      "Chip %d enabled",
-                      target.chip);
+            target.tpmTarget = tpmList[0];
+
+            TRACFCOMP( g_trac_trustedboot,
+                       "getTestTarget tpm tgt=0x%X",
+                       TARGETING::get_huid(target.tpmTarget));
+
+            // Let's see if the requested chip is functional
+            target.role = TPM_PRIMARY;
+            errlHndl_t err = tpmReadAttributes (target.tpmTarget,
+                                                tpmInfo);
+
+            if (NULL != err)
+            {
+                target.failed = true;
+                delete err;
+            }
+            else if (!tpmInfo.tpmEnabled)
+            {
+                TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
+                          "Chip %d not enabled",
+                          target.role);
+                target.failed = true;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
+                          "Chip %d enabled",
+                          target.role);
+            }
         }
 
         return target;

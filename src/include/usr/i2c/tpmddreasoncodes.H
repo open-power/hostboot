@@ -59,6 +59,7 @@ enum tpmModuleId
     TPMDD_WRITEFIFO                        = 0x09,
     TPMDD_READFIFO                         = 0x0A,
     TPMDD_READSTSREGVALID                  = 0x0B,
+    TPMDD_TPMPRESENCEDETECT                = 0x0C,
 };
 
 /**

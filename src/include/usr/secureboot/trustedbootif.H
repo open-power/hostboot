@@ -42,11 +42,21 @@ namespace TRUSTEDBOOT
 {
     struct _TpmLogMgr;
 
+    /// Enumerations to select TPM
+    typedef enum
+    {
+        TPM_PRIMARY   = 0,
+        TPM_BACKUP    = 1,
+        LAST_CHIP_TYPE,
+        FIRST_CHIP_TYPE = TPM_PRIMARY
+    } TPM_role;
+
+
     /// Track system TPM status
     struct TpmTarget
     {
-        TARGETING::Target*      nodeTarget;     ///< Node target ptr
-        TPMDD::tpm_chip_types_t chip;           ///< Chip Pri vs Backup
+        TARGETING::Target*      tpmTarget;      ///< TPM target ptr
+        TPM_role                role;           ///< Pri vs Backup
         uint8_t                 initAttempted:1;///< Has TPM init been run
         uint8_t                 available:1;    ///< Is TPM physically in system
         uint8_t                 failed:1;       ///< Is TPM currently failed

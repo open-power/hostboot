@@ -395,6 +395,7 @@ sub buildAffinity
 {
     my $self = shift;
     my $node      = -1;
+    my $tpm       = -1;
     my $proc      = -1;
     my $node_phys = "";
     my $node_aff  = "";
@@ -433,6 +434,17 @@ sub buildAffinity
                 "physical:sys-0/node-$node");
             $self->setHuid($target, 0, $node);
             $self->setAttribute($target, "ENTITY_INSTANCE",$node);
+        }
+        elsif ($type eq "TPM")
+        {
+            $tpm++;
+            $self->{targeting}{SYS}[0]{NODES}[$node]{TPMS}[$tpm]{KEY} = $target;
+            $self->setAttribute($target, "AFFINITY_PATH",
+                                "affinity:sys-0/node-$node/tpm-$tpm");
+            $self->setAttribute($target, "PHYS_PATH",
+                                "physical:sys-0/node-$node/tpm-$tpm");
+            $self->setHuid($target, 0, $tpm);
+            $self->setAttribute($target, "ENTITY_INSTANCE",$tpm);
         }
         elsif ($type eq "PROC")
         {

@@ -293,7 +293,8 @@ errlHndl_t discoverTargets()
             uint16_t pgData[VPD_CP00_PG_DATA_LENGTH / sizeof(uint16_t)];
             bzero(pgData, sizeof(pgData));
 
-            if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
+            if (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP &&
+                pTarget->getAttr<ATTR_TYPE>() != TYPE_TPM)
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);

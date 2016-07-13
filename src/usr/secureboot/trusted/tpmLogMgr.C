@@ -83,6 +83,7 @@ namespace TRUSTEDBOOT
                  * @userdata1      0
                  * @userdata2      0
                  * @devdesc        TPM log buffer init failure.
+                 * @custdesc       TPM log buffer init failure.
                  */
                 err = tpmCreateErrorLog( MOD_TPMLOGMGR_INITIALIZE,
                                          RC_TPMLOGMGR_INIT_FAIL, 0, 0);
@@ -177,6 +178,7 @@ namespace TRUSTEDBOOT
                  * @userdata1      0
                  * @userdata2      0
                  * @devdesc        TPM log header entry is missing.
+                 * @custdesc       TPM log invalid format
                  */
                 err = tpmCreateErrorLog(MOD_TPMLOGMGR_INITIALIZEEXISTLOG,
                                         RC_TPMLOGMGR_LOGWALKFAIL,
@@ -235,13 +237,16 @@ namespace TRUSTEDBOOT
                  * @reasoncode     RC_TPMLOGMGR_ADDEVENT_FAIL
                  * @severity       ERRL_SEV_UNRECOVERABLE
                  * @moduleid       MOD_TPMLOGMGR_ADDEVENT
-                 * @userdata1      Log buffer NULL
-                 * @userdata2[0:31] Current Log Size
+                 * @userdata1[0:31]  Max log size
+                 * @userdata1[32:63] Log buffer NULL
+                 * @userdata2[0:31]  Current Log Size
                  * @userdata2[32:63] New entry size
                  * @devdesc        TPM log buffer add failure.
+                 * @custdesc       TPM log overflow
                  */
                 err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
                                          RC_TPMLOGMGR_ADDEVENT_FAIL,
+                                         (uint64_t)val->logMaxSize << 32 |
                                          (NULL == val->newEventPtr ? 0 : 1),
                                          (uint64_t)val->logSize << 32 |
                                          newLogSize);
@@ -264,7 +269,8 @@ namespace TRUSTEDBOOT
                  * @moduleid       MOD_TPMLOGMGR_ADDEVENT
                  * @userdata1      0
                  * @userdata2      0
-                 * @devdesc        log buffer malloc failure.
+                 * @devdesc        log buffer marshal failure.
+                 * @custdesc       TPM log operation failure
                  */
                 err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
                                          RC_TPMLOGMGR_ADDEVENTMARSH_FAIL,

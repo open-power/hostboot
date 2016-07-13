@@ -154,12 +154,31 @@
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
+</targetInstance>
+
+<!-- TPMs for node 0 -->
+
+<targetInstance>
+    <id>sys0node0tpm0</id>
+    <type>chip-tpm-cectpm</type>
+    <attribute><id>HUID</id><default>0x00310001</default></attribute>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute>
-        <id>TPM_PRIMARY_INFO</id>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/tpm-0</default>
+    </attribute>
+    <attribute>
+        <id>TPM_INFO</id>
         <default>
              <field><id>tpmEnabled</id><value>1</value></field>
-             <field><id>i2cMasterPath</id>
-               <value>physical:sys-0/node-0/proc-0</value></field>
+             <field>
+               <id>i2cMasterPath</id>
+               <value>physical:sys-0/node-0/proc-0</value>
+             </field>
              <field><id>port</id><value>0</value></field>
              <field><id>devAddrLocality0</id><value>0xAE</value></field>
              <field><id>devAddrLocality4</id><value>0xFF</value></field>
