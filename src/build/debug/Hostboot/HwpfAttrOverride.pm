@@ -584,11 +584,6 @@ sub main
                 $targType = TARGET_TYPE_CORE;
                 $targ =~ s/^.*pu.core//;
             }
-            elsif ($targ =~ /pu.mci/)
-            {
-                $targType = TARGET_TYPE_MCI;
-                $targ =~ s/^.*pu.mci//;
-            }
             elsif ($targ =~ /pu.dmi/)
             {
                 $targType = TARGET_TYPE_DMI;
