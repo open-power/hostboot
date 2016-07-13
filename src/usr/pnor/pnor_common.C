@@ -467,6 +467,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                             o_TOC[secId].flashAddr += PAGESIZE;
                             l_headerSize = PAGESIZE;
                         }
+                        o_TOC[secId].size -= PAGESIZE;
 
                         l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
                                                     cv_EYECATCHER[secId]);
@@ -653,4 +654,3 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
 
     return l_errhdl;
 }
-
