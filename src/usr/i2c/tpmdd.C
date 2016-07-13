@@ -77,10 +77,14 @@ namespace TPMDD
 static const size_t MAX_BYTE_ADDR = 2;
 static const size_t TPM_MAX_NACK_RETRIES = 2;
 
-// Register the perform Op with the routing code for Nodes.
+// Register the perform Op with the routing code for TPM
+DEVICE_REGISTER_ROUTE(DeviceFW::READ,
+                      DeviceFW::PRESENT,
+                      TARGETING::TYPE_TPM,
+                      tpmPresenceDetect);
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::TPM,
-                       TARGETING::TYPE_NODE,
+                       TARGETING::TYPE_TPM,
                        tpmPerformOp );
 
 
@@ -99,7 +103,6 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
     uint64_t commandSize = 0;
     bool unlock = false;
 
-    tpmInfo.chip = va_arg( i_args, uint64_t );
     tpmInfo.operation = ((TPMDD::tpm_op_types_t)va_arg( i_args, uint64_t ));
     commandSize = va_arg( i_args, uint64_t );
 
@@ -107,8 +110,8 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                ENTER_MRK"tpmPerformOp()" );
 
     TRACUCOMP (g_trac_tpmdd, ENTER_MRK"tpmPerformOp(): "
-               "i_opType=%d, chip=%d, operation=%d, buflen=%d, cmdlen=%d",
-               (uint64_t) i_opType, tpmInfo.chip, tpmInfo.operation, io_buflen,
+               "i_opType=%d, operation=%d, buflen=%d, cmdlen=%d",
+               (uint64_t) i_opType, tpmInfo.operation, io_buflen,
                commandSize);
 
     do
@@ -127,8 +130,8 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmPerformOp(): TPM requested not enabled!"
-                       "C-p/e/dA=%d-%d/%d/0x%X, OP=%d",
-                       tpmInfo.chip, tpmInfo.port,
+                       "p/e/dA=%d/%d/0x%X, OP=%d",
+                       tpmInfo.port,
                        tpmInfo.engine, tpmInfo.devAddr, tpmInfo.operation);
 
             /*@
@@ -136,15 +139,15 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
              * @reasoncode     TPM_DEVICE_NOT_AVAILABLE
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       TPMDD_PERFORM_OP
-             * @userdata1      Operation Type
-             * @userdata2      Chip to Access
+             * @userdata1      TPM
+             * @userdata2      Operation Type
              * @devdesc        Invalid operation type.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            TPMDD_PERFORM_OP,
                                            TPM_DEVICE_NOT_AVAILABLE,
+                                           TARGETING::get_huid(i_target),
                                            i_opType,
-                                           tpmInfo.chip,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( TPMDD_COMP_NAME );
@@ -169,9 +172,9 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
             {
                 TRACFCOMP( g_trac_tpmdd,
                            ERR_MRK"tpmPerformOp(): Operation Overflow! "
-                           "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                           "p/e/dA=%d/%d/0x%X, OP=%d, "
                            "blen=%d",
-                           tpmInfo.chip, tpmInfo.port,
+                           tpmInfo.port,
                            tpmInfo.engine, tpmInfo.devAddr,
                            tpmInfo.operation, io_buflen);
 
@@ -181,8 +184,9 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                  * @reasoncode       TPM_OVERFLOW_ERROR
                  * @severity         ERRL_SEV_UNRECOVERABLE
                  * @moduleid         TPMDD_PERFORM_OP
-                 * @userdata1        Operation
-                 * @userdata2        Buffer Length      (in Bytes)
+                 * @userdata1        TPM
+                 * @userdata2[0-31]  Operation
+                 * @userdata2[32-63] Buffer Length      (in Bytes)
                  * @devdesc          TPM buffer length > 4 for read vendor op
                  * @custdesc         A problem occurred during the IPL of the
                  *                   system: TPM buffer is too large.
@@ -190,8 +194,10 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                TPMDD_PERFORM_OP,
                                                TPM_OVERFLOW_ERROR,
-                                               tpmInfo.operation,
-                                               io_buflen,
+                                               TARGETING::get_huid(i_target),
+                                               TWO_UINT32_TO_UINT64(
+                                                     tpmInfo.operation,
+                                                     io_buflen       ),
                                                true /*Add HB SW Callout*/ );
 
                 err->collectTrace( TPMDD_COMP_NAME );
@@ -236,8 +242,8 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmPerformOp(): Invalid TPM Operation!"
-                       "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, Type=%d",
-                       tpmInfo.chip, tpmInfo.port,
+                       "p/e/dA=%d/%d/0x%X, OP=%d, Type=%d",
+                       tpmInfo.port,
                        tpmInfo.engine, tpmInfo.devAddr,
                        tpmInfo.operation, i_opType);
 
@@ -246,15 +252,15 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
              * @reasoncode     TPM_INVALID_OPERATION
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       TPMDD_PERFORM_OP
-             * @userdata1      Operation Type
-             * @userdata2      Chip to Access
+             * @userdata1      TPM
+             * @userdata2      Operation Type
              * @devdesc        Invalid operation type.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            TPMDD_PERFORM_OP,
                                            TPM_INVALID_OPERATION,
+                                           TARGETING::get_huid(i_target),
                                            i_opType,
-                                           tpmInfo.chip,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( TPMDD_COMP_NAME );
@@ -281,22 +287,19 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 //-------------------------------------------------------------------
 //tpmPresence
 //-------------------------------------------------------------------
-bool tpmPresence ( TARGETING::Target * i_target,
-                   tpm_chip_types_t i_chip)
+bool tpmPresence ( TARGETING::Target * i_target)
 {
 
     TRACDCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence()");
     TRACUCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence() : "
-              "node tgt=0x%X chip=%d",
-              TARGETING::get_huid(i_target),
-              i_chip);
+              "tpm tgt=0x%X ",
+              TARGETING::get_huid(i_target));
 
     errlHndl_t err = NULL;
     bool l_present = true;
 
     tpm_info_t tpmInfo;
 
-    tpmInfo.chip = i_chip;
     tpmInfo.offset = 0;
     do
     {
@@ -347,9 +350,8 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACUCOMP(g_trac_tpmdd,
                      ERR_MRK"tpmPresence : ReadVendorID failed!"
-                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X RC=0x%X",
+                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X RC=0x%X",
                       TARGETING::get_huid(i_target),
-                      tpmInfo.chip,
                       tpmInfo.port,
                       tpmInfo.engine,
                       static_cast<uint64_t>(tpmInfo.devAddr),
@@ -366,10 +368,9 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACUCOMP(g_trac_tpmdd,
                      ERR_MRK"tpmPresence : ReadVendorID mismatch!"
-                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
                       " found ID=0x%X exp ID=0x%X",
                       TARGETING::get_huid(i_target),
-                      tpmInfo.chip,
                       tpmInfo.port,
                       tpmInfo.engine,
                       static_cast<uint64_t>(tpmInfo.devAddr),
@@ -399,9 +400,8 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACUCOMP(g_trac_tpmdd,
                      ERR_MRK"tpmPresence : ReadFamilyID failed!"
-                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X RC=0x%X",
+                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X RC=0x%X",
                       TARGETING::get_huid(i_target),
-                      tpmInfo.chip,
                       tpmInfo.port,
                       tpmInfo.engine,
                       static_cast<uint64_t>(tpmInfo.devAddr),
@@ -418,10 +418,9 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACUCOMP(g_trac_tpmdd,
                      ERR_MRK"tpmPresence : FamilyID mismatch!"
-                      "node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
                       " found ID=0x%X exp ID=0x%X",
                       TARGETING::get_huid(i_target),
-                      tpmInfo.chip,
                       tpmInfo.port,
                       tpmInfo.engine,
                       static_cast<uint64_t>(tpmInfo.devAddr),
@@ -434,10 +433,9 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACFCOMP(g_trac_tpmdd,
                       INFO_MRK"tpmPresence : TPM Detected!"
-                      " node tgt=0x%X C-p/e/dA=%d-%d/%d/0x%X"
+                      " tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
                       " Vendor ID=0x%X, Family ID=0x%X",
                       TARGETING::get_huid(i_target),
-                      tpmInfo.chip,
                       tpmInfo.port,
                       tpmInfo.engine,
                       static_cast<uint64_t>(tpmInfo.devAddr),
@@ -454,10 +452,45 @@ bool tpmPresence ( TARGETING::Target * i_target,
     TRACDCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : presence : %d",
               l_present);
     TRACUCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : "
-              "node tgt=0x%X chip=%d presence=%d",
-              TARGETING::get_huid(i_target),
-              i_chip, l_present);
+              "tpm tgt=0x%X presence=%d",
+              TARGETING::get_huid(i_target), l_present);
     return l_present;
+}
+
+errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
+                             TARGETING::Target* i_target,
+                             void* io_buffer,
+                             size_t& io_buflen,
+                             int64_t i_accessType,
+                             va_list i_args)
+{
+    errlHndl_t err = NULL;
+    if (unlikely(io_buflen < sizeof(bool)))
+    {
+        TRACFCOMP(g_trac_tpmdd,
+                  ERR_MRK "tpmPresenceDetect> Invalid data length: %d",
+                  io_buflen);
+        /*@
+         * @errortype
+         * @moduleid     TPMDD_TPMPRESENCEDETECT
+         * @reasoncode   TPM_INVALID_OPERATION
+         * @userdata1    Data Length
+         * @devdesc      presenceDetect> Invalid data length (!= 1 bytes)
+         * @custdesc     Problem occurred during TPM presence detection
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        TPMDD_TPMPRESENCEDETECT,
+                                        TPM_INVALID_OPERATION,
+                                        TO_UINT64(io_buflen),
+                                        true /*SW error*/);
+        io_buflen = 0;
+    } else {
+        bool present = tpmPresence (i_target);
+        memcpy(io_buffer, &present, sizeof(present));
+        io_buflen = sizeof(present);
+    }
+    return err;
+
 }
 
 // ------------------------------------------------------------------
@@ -479,8 +512,8 @@ errlHndl_t tpmRead ( void * o_buffer,
     do
     {
         TRACUCOMP( g_trac_tpmdd,
-                   "TPM READ  START : Chip: %02d : Offset %.2X : Len %d",
-                   i_tpmInfo.chip, i_tpmInfo.offset, i_buflen );
+                   "TPM READ  START : Offset %.2X : Len %d",
+                   i_tpmInfo.offset, i_buflen );
 
         err = tpmPrepareAddress( &byteAddr,
                                  byteAddrSize,
@@ -518,9 +551,9 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmRead(): I2C Read-Offset failed! "
-                              "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                              "p/e/dA=%d/%d/0x%X, OP=%d, "
                               "offset=0x%X, aS=%d, len=%d",
-                              i_tpmInfo.chip, i_tpmInfo.port,
+                              i_tpmInfo.port,
                               i_tpmInfo.engine, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_tpmInfo.offset, byteAddrSize, i_buflen);
@@ -545,9 +578,9 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmRead(): I2C Read failed! "
-                              "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                              "p/e/dA=%d/%d/0x%X, OP=%d, "
                               "len=%d",
-                              i_tpmInfo.chip, i_tpmInfo.port,
+                              i_tpmInfo.port,
                               i_tpmInfo.engine, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
@@ -566,9 +599,9 @@ errlHndl_t tpmRead ( void * o_buffer,
             {
                 // Only retry on NACK failures: break from retry loop
                 TRACFCOMP( g_trac_tpmdd, ERR_MRK"tpmRead(): Non-Nack! "
-                           "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                           "p/e/dA=%d/%d/0x%X, OP=%d, "
                            "Error: rc=0x%X, No Retry (retry=%d)",
-                           i_tpmInfo.chip, i_tpmInfo.port,
+                           i_tpmInfo.port,
                            i_tpmInfo.engine, i_tpmInfo.devAddr,
                            i_tpmInfo.operation,
                            err->reasonCode(), retry);
@@ -591,10 +624,10 @@ errlHndl_t tpmRead ( void * o_buffer,
 
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmRead(): NACK Error! "
-                                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
-                                   i_tpmInfo.chip, i_tpmInfo.port,
+                                   i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err_NACK->reasonCode(),
@@ -608,11 +641,11 @@ errlHndl_t tpmRead ( void * o_buffer,
                         // Add data to original NACK error
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmRead(): Another NACK Error! "
-                                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "plid=0x%X, retry/MAX=%d/%d. "
                                    "Delete error and retry",
-                                   i_tpmInfo.chip, i_tpmInfo.port,
+                                   i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
@@ -634,10 +667,10 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP( g_trac_tpmdd,
                                ERR_MRK"tpmRead(): No More Retries! "
-                               "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                               "p/e/dA=%d/%d/0x%X, OP=%d, "
                                "Error rc=0x%X, eid=%d, "
                                "retry/MAX=%d/%d. Returning Error",
-                               i_tpmInfo.chip, i_tpmInfo.port,
+                               i_tpmInfo.port,
                                i_tpmInfo.engine, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
@@ -685,9 +718,8 @@ errlHndl_t tpmRead ( void * o_buffer,
 
 
         TRACUCOMP( g_trac_tpmdd,
-                   "TPM READ  END   : Chip: %02d : "
-                   "Offset %.2X : Len %d : %016llx",
-                   i_tpmInfo.chip, i_tpmInfo.offset, i_buflen,
+                   "TPM READ  END   : Offset %.2X : Len %d : %016llx",
+                   i_tpmInfo.offset, i_buflen,
                    *(reinterpret_cast<uint64_t*>(o_buffer)) );
 
     } while( 0 );
@@ -716,9 +748,8 @@ errlHndl_t tpmWrite ( void * i_buffer,
     do
     {
         TRACUCOMP( g_trac_tpmdd,
-                   "TPM WRITE START : Chip: %02d : "
-                   "Offset %.2X : Len %d : %016llx",
-                   i_tpmInfo.chip, i_tpmInfo.offset,
+                   "TPM WRITE START : Offset %.2X : Len %d : %016llx",
+                   i_tpmInfo.offset,
                    i_buflen,
                    *(reinterpret_cast<uint64_t*>(i_buffer))  );
 
@@ -758,9 +789,9 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmWrite(): I2C Write-Offset! "
-                              "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, ",
+                              "p/e/dA=%d/%d/0x%X, OP=%d, ",
                               "offset=0x%X, aS=%d, len=%d",
-                              i_tpmInfo.chip, i_tpmInfo.port,
+                              i_tpmInfo.port,
                               i_tpmInfo.engine, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_tpmInfo.offset, byteAddrSize, i_buflen);
@@ -785,9 +816,9 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmWrite(): I2C Write failed! "
-                              "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                              "p/e/dA=%d/%d/0x%X, OP=%d, "
                               "len=%d",
-                              i_tpmInfo.chip, i_tpmInfo.port,
+                              i_tpmInfo.port,
                               i_tpmInfo.engine, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
@@ -806,9 +837,9 @@ errlHndl_t tpmWrite ( void * i_buffer,
             {
                 // Only retry on NACK failures: break from retry loop
                 TRACFCOMP( g_trac_tpmdd, ERR_MRK"tpmWrite(): Non-Nack "
-                           "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                           "p/e/dA=%d/%d/0x%X, OP=%d, "
                            "Error: rc=0x%X, No Retry (retry=%d)",
-                           i_tpmInfo.chip, i_tpmInfo.port,
+                           i_tpmInfo.port,
                            i_tpmInfo.engine, i_tpmInfo.devAddr,
                            i_tpmInfo.operation,
                            err->reasonCode(), retry);
@@ -831,10 +862,10 @@ errlHndl_t tpmWrite ( void * i_buffer,
 
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmWrite(): NACK Error! "
-                                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
-                                   i_tpmInfo.chip, i_tpmInfo.port,
+                                   i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err_NACK->reasonCode(),
@@ -848,11 +879,11 @@ errlHndl_t tpmWrite ( void * i_buffer,
                         // Add data to original NACK error
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmWrite(): Another NACK Error! "
-                                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X "
                                    "plid=0x%X, retry/MAX=%d/%d. "
                                    "Delete error and retry",
-                                   i_tpmInfo.chip, i_tpmInfo.port,
+                                   i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
@@ -874,10 +905,10 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP( g_trac_tpmdd,
                                ERR_MRK"tpmWrite(): No More Retries! "
-                               "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                               "p/e/dA=%d/%d/0x%X, OP=%d, "
                                "Error rc=0x%X, eid=%d, "
                                "retry/MAX=%d/%d. Returning Error",
-                               i_tpmInfo.chip, i_tpmInfo.port,
+                               i_tpmInfo.port,
                                i_tpmInfo.engine, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
@@ -922,9 +953,8 @@ errlHndl_t tpmWrite ( void * i_buffer,
 
 
         TRACSCOMP( g_trac_tpmdd,
-                   "TPM WRITE END   : Chip: %02d : "
-                   "Offset %.2X : Len %d",
-                   i_tpmInfo.chip, i_tpmInfo.offset, i_buflen);
+                   "TPM WRITE END   : Offset %.2X : Len %d",
+                   i_tpmInfo.offset, i_buflen);
 
     } while( 0 );
 
@@ -952,9 +982,7 @@ errlHndl_t tpmTransmit ( void * io_buffer,
     {
 
         TRACUCOMP( g_trac_tpmdd,
-                   "TPM TRANSMIT START : Chip: %02d : "
-                   "BufLen %d : CmdLen %d : %016llx",
-                   i_tpmInfo.chip,
+                   "TPM TRANSMIT START : BufLen %d : CmdLen %d : %016llx",
                    io_buflen, i_commandlen,
                    *(reinterpret_cast<uint64_t*>(io_buffer))  );
 
@@ -1011,9 +1039,7 @@ errlHndl_t tpmTransmit ( void * io_buffer,
     } while( 0 );
 
     TRACUCOMP( g_trac_tpmdd,
-               "TPM TRANSMIT END   : Chip: %02d : "
-               "BufLen %d : CmdLen %d : %016llx",
-               i_tpmInfo.chip,
+               "TPM TRANSMIT END   : BufLen %d : CmdLen %d : %016llx",
                io_buflen, i_commandlen,
                *(reinterpret_cast<uint64_t*>(io_buffer))  );
 
@@ -1068,18 +1094,18 @@ errlHndl_t tpmPrepareAddress ( void * io_buffer,
                  * @reasoncode       TPM_INVALID_DEVICE_TYPE
                  * @severity         ERRL_SEV_UNRECOVERABLE
                  * @moduleid         TPMDD_PREPAREADDRESS
-                 * @userdata1        Address Size (aka Device Type)
-                 * @userdata2        TPM chip
+                 * @userdata1        TPM
+                 * @userdata2        Address Size (aka Device Type)
                  * @devdesc          The Device type not supported (addrSize)
                  * @custdesc         A problem was detected during the IPL of
                  *                   the system: Device type not supported.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               TPMDD_PREPAREADDRESS,
-                                               TPM_INVALID_DEVICE_TYPE,
-                                               i_tpmInfo.addrSize,
-                                               i_tpmInfo.chip,
-                                               true /*Add HB SW Callout*/ );
+                                      TPMDD_PREPAREADDRESS,
+                                      TPM_INVALID_DEVICE_TYPE,
+                                      TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                      i_tpmInfo.addrSize,
+                                      true /*Add HB SW Callout*/ );
 
                 err->collectTrace( TPMDD_COMP_NAME );
 
@@ -1102,80 +1128,24 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                                tpm_info_t & io_tpmInfo )
 {
     errlHndl_t err = NULL;
-    bool fail_reading_attribute = false;
 
     TRACDCOMP( g_trac_tpmdd,
                ENTER_MRK"tpmReadAttributes()" );
 
     // These variables will be used to hold the TPM attribute data
-    TARGETING::TpmPrimaryInfo tpmData;
+    TARGETING::TpmInfo tpmData;
 
     do
     {
 
-        switch (io_tpmInfo.chip )
-        {
-            case TPM_PRIMARY:
-                if( !( i_target->
-                         tryGetAttr<TARGETING::ATTR_TPM_PRIMARY_INFO>
-                             ( tpmData ) ) )
+        if( !( i_target->
+               tryGetAttr<TARGETING::ATTR_TPM_INFO>
+               ( tpmData ) ) )
 
-                {
-                    fail_reading_attribute = true;
-                }
-                break;
-
-            case TPM_BACKUP:
-
-                if( !(i_target->
-                        tryGetAttr<TARGETING::ATTR_TPM_BACKUP_INFO>
-                        ( reinterpret_cast<
-                            TARGETING::ATTR_TPM_BACKUP_INFO_type&>
-                                ( tpmData) ) ) )
-                {
-                    fail_reading_attribute = true;
-                }
-                break;
-
-            default:
-                TRACFCOMP( g_trac_tpmdd,ERR_MRK"tpmReadAttributes() - "
-                           "Invalid chip %d tgt=0x%X to read attributes from!",
-                           io_tpmInfo.chip,
-                           TARGETING::get_huid(i_target));
-
-                /*@
-                 * @errortype
-                 * @reasoncode       TPM_INVALID_CHIP
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         TPMDD_READATTRIBUTES
-                 * @userdata1        TPM Chip
-                 * @userdata2        HUID of target
-                 * @devdesc          Invalid TPM chip to access
-                 */
-                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              TPMDD_READATTRIBUTES,
-                                              TPM_INVALID_CHIP,
-                                              io_tpmInfo.chip,
-                                              TARGETING::get_huid(i_target),
-                                              true /*Add HB SW Callout*/ );
-
-                err->collectTrace( TPMDD_COMP_NAME );
-
-                break;
-        }
-
-        if (NULL != err)
-        {
-            break;
-        }
-
-        // Check if Attribute Data was found
-        if( fail_reading_attribute == true )
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmReadAttributes() - ERROR reading "
-                       "attributes for chip %d, tgt=0x%X!",
-                       io_tpmInfo.chip,
+                       "attributes for tgt=0x%X!",
                        TARGETING::get_huid(i_target));
 
                 /*@
@@ -1184,15 +1154,14 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
                  * @moduleid         TPMDD_READATTRIBUTES
                  * @userdata1        HUID of target
-                 * @userdata2        TPM chip
+                 * @userdata2        0
                  * @devdesc          TPM attribute was not found
                  */
                 err = new ERRORLOG::ErrlEntry(
                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               TPMDD_READATTRIBUTES,
                                               TPM_ATTR_INFO_NOT_FOUND,
-                                              TARGETING::get_huid(i_target),
-                                              io_tpmInfo.chip);
+                                              TARGETING::get_huid(i_target));
 
                 // Could be FSP or HB code's fault
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1213,6 +1182,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
         io_tpmInfo.engine        = tpmData.engine;
         io_tpmInfo.i2cMasterPath = tpmData.i2cMasterPath;
         io_tpmInfo.tpmEnabled    = tpmData.tpmEnabled;
+        io_tpmInfo.tpmTarget     = i_target;
 
         // Convert attribute info to tpm_addr_size_t enum
         if ( tpmData.byteAddrOffset == 0x2 )
@@ -1374,8 +1344,7 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
              * @reasoncode       TPM_I2C_MASTER_PATH_ERROR
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         TPMDD_GETI2CMASTERTARGET
-             * @userdata1[00:31] Attribute Chip Type Enum
-             * @userdata1[32:63] HUID of target
+             * @userdata1        HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          I2C master entity path doesn't exist.
              */
@@ -1383,9 +1352,7 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 TPMDD_GETI2CMASTERTARGET,
                                 TPM_I2C_MASTER_PATH_ERROR,
-                                TWO_UINT32_TO_UINT64(
-                                    io_tpmInfo.chip,
-                                    TARGETING::get_huid(i_target) ),
+                                TARGETING::get_huid(i_target),
                                 l_epCompressed,
                                 true /*Add HB SW Callout*/ );
 
@@ -1428,17 +1395,14 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
              * @reasoncode       TPM_TARGET_NULL
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         TPMDD_GETI2CMASTERTARGET
-             * @userdata1[00:31] Attribute Chip Type Enum
-             * @userdata1[32:63] HUID of target
+             * @userdata1        HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          I2C master path target is null.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            TPMDD::TPMDD_GETI2CMASTERTARGET,
                                            TPMDD::TPM_TARGET_NULL,
-                                           TWO_UINT32_TO_UINT64(
-                                               io_tpmInfo.chip,
-                                               TARGETING::get_huid(i_target) ),
+                                           TARGETING::get_huid(i_target),
                                            l_epCompressed,
                                            true /*Add HB SW Callout*/ );
 
@@ -1514,8 +1478,8 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmReadSTSRegValid(): Timeout! "
-                       "C-p/e/dA=%d-%d/%d/0x%X, %02X",
-                       i_tpmInfo.chip, i_tpmInfo.port,
+                       "p/e/dA=%d/%d/0x%X, %02X",
+                       i_tpmInfo.port,
                        i_tpmInfo.engine, i_tpmInfo.devAddr,
                        o_stsReg.value);
 
@@ -1524,18 +1488,21 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
              * @reasoncode       TPM_TIMEOUT
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @moduleid         TPMDD_READSTSREGVALID
-             * @userdata1        Operation
-             * @userdata2        STS Reg
+             * @userdata1        TPM
+             * @userdata2[0:31]  Operation
+             * @userdata2[32:63] STS Reg
              * @devdesc          TPM timeout waiting for stsValid
              * @custdesc         A problem occurred during the IPL of the
              *                   system: TPM timeout
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           TPMDD_READSTSREGVALID,
-                                           TPM_TIMEOUT,
-                                           i_tpmInfo.operation,
-                                           o_stsReg.value,
-                                           true /*Add HB SW Callout*/ );
+                                    TPMDD_READSTSREGVALID,
+                                    TPM_TIMEOUT,
+                                    TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                    TWO_UINT32_TO_UINT64(
+                                         i_tpmInfo.operation,
+                                         o_stsReg.value),
+                                    true /*Add HB SW Callout*/ );
 
             err->collectTrace( TPMDD_COMP_NAME );
             break;
@@ -1621,26 +1588,27 @@ errlHndl_t tpmPollForCommandReady( tpm_info_t i_tpmInfo)
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmPollForCommandReady() - "
                    "Timeout polling for command ready! "
-                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                    "STS=0x%X",
-                   i_tpmInfo.chip, i_tpmInfo.port,
+                   i_tpmInfo.port,
                    i_tpmInfo.engine, i_tpmInfo.devAddr, i_tpmInfo.operation,
                    stsReg.value );
 
         /*@
          * @errortype
-         * @reasoncode       TPM_TIMEOUT
-         * @severity         ERRL_SEV_UNRECOVERABLE
-         * @moduleid         TPMDD_POLLFORCOMMMANDREADY
-         * @userdata1        Attribute Chip Type Enum
-         * @userdata2        STS Reg
-         * @devdesc        Timeout waiting for TPM to enter command ready state.
+         * @reasoncode   TPM_TIMEOUT
+         * @severity     ERRL_SEV_UNRECOVERABLE
+         * @moduleid     TPMDD_POLLFORCOMMMANDREADY
+         * @userdata1    TPM
+         * @userdata2    STS Reg
+         * @devdesc      Timeout waiting for TPM to enter command ready state.
+         * @custdesc     TPM operation failure
          */
         err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       TPMDD_POLLFORCOMMMANDREADY,
                                       TPM_TIMEOUT,
-                                      i_tpmInfo.chip,
+                                      TARGETING::get_huid(i_tpmInfo.tpmTarget),
                                       stsReg.value,
                                       true /*Add HB SW Callout*/ );
 
@@ -1712,9 +1680,9 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmPollForDataAvail() - "
                    "Timeout polling for dataAvail! "
-                   "C-p/e/dA=%d-%d/%d/0x%X, OP=%d, "
+                   "p/e/dA=%d/%d/0x%X, OP=%d, "
                    "STS=0x%X",
-                   i_tpmInfo.chip, i_tpmInfo.port,
+                   i_tpmInfo.port,
                    i_tpmInfo.engine, i_tpmInfo.devAddr, i_tpmInfo.operation,
                    stsReg.value );
 
@@ -1723,15 +1691,16 @@ errlHndl_t tpmPollForDataAvail( tpm_info_t i_tpmInfo)
          * @reasoncode       TPM_TIMEOUT
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
          * @moduleid         TPMDD_POLLFORDATAAVAIL
-         * @userdata1        Attribute Chip Type Enum
+         * @userdata1        TPM
          * @userdata2        STS Reg
          * @devdesc          Timeout waiting for TPM data available.
+         * @custdesc         TPM operation failure
          */
         err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       TPMDD_POLLFORDATAAVAIL,
                                       TPM_TIMEOUT,
-                                      i_tpmInfo.chip,
+                                      TARGETING::get_huid(i_tpmInfo.tpmTarget),
                                       stsReg.value,
                                       true /*Add HB SW Callout*/ );
 
@@ -1875,9 +1844,9 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
             // TPM is not expecting more data, we overflowed
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Overflow! "
-                       "C-p/e/dA=%d-%d/%d/0x%X, blen=%d, "
+                       "p/e/dA=%d/%d/0x%X, blen=%d, "
                        "clen=%d",
-                       i_tpmInfo.chip, i_tpmInfo.port,
+                       i_tpmInfo.port,
                        i_tpmInfo.engine, i_tpmInfo.devAddr,
                        i_buflen, curByte);
 
@@ -1886,22 +1855,21 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
              * @reasoncode       TPM_OVERFLOW_ERROR
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @moduleid         TPMDD_WRITEFIFO
-             * @userdata1[0:31]  Current byte
-             * @userdata1[32:63] Buffer Length      (in Bytes)
-             * @userdata2        8 bytes of command buffer
+             * @userdata1        TPM
+             * @userdata2[0:31]  Current byte
+             * @userdata2[32:63] Buffer Length      (in Bytes)
              * @devdesc          TPM expected less data during FIFO write
              * @custdesc         A problem occurred during the IPL of the
              *                   system: TPM overflow
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           TPMDD_WRITEFIFO,
-                                           TPM_OVERFLOW_ERROR,
-                                           TWO_UINT32_TO_UINT64(
-                                               curByte,
-                                               i_buflen       ),
-                                           *(reinterpret_cast<uint64_t*>
-                                               (i_buffer)),
-                                           true /*Add HB SW Callout*/ );
+                                      TPMDD_WRITEFIFO,
+                                      TPM_OVERFLOW_ERROR,
+                                      TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                      TWO_UINT32_TO_UINT64(
+                                          curByte,
+                                          i_buflen       ),
+                                      true /*Add HB SW Callout*/ );
 
             err->collectTrace( TPMDD_COMP_NAME );
         }
@@ -1962,9 +1930,9 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmWriteFifo(): Timeout! "
-                   "C-p/e/dA=%d-%d/%d/0x%X, blen=%d, "
+                   "p/e/dA=%d/%d/0x%X, blen=%d, "
                    "clen=%d",
-                   i_tpmInfo.chip, i_tpmInfo.port,
+                   i_tpmInfo.port,
                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                    i_buflen, curByte);
 
@@ -1973,9 +1941,9 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
          * @reasoncode       TPM_TIMEOUT
          * @severity         ERRL_SEV_UNRECOVERABLE
          * @moduleid         TPMDD_WRITEFIFO
-         * @userdata1[0:31]  Current Byte
-         * @userdata1[32:63] Buffer Length      (in Bytes)
-         * @userdata2        8 bytes of command buffer
+         * @userdata1        TPM
+         * @userdata2[0:31]  Current Byte
+         * @userdata2[32:63] Buffer Length      (in Bytes)
          * @devdesc          TPM timeout writing to FIFO
          * @custdesc         A problem occurred during the IPL of the
          *                   system: TPM timeout
@@ -1983,11 +1951,10 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                        TPMDD_WRITEFIFO,
                                        TPM_TIMEOUT,
+                                       TARGETING::get_huid(i_tpmInfo.tpmTarget),
                                        TWO_UINT32_TO_UINT64(
                                                curByte,
                                                i_buflen       ),
-                                       *(reinterpret_cast<uint64_t*>
-                                         (i_buffer)),
                                        true /*Add HB SW Callout*/ );
 
         err->collectTrace( TPMDD_COMP_NAME );
@@ -2005,9 +1972,9 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
             // TPM is expecting more data even though we think we are done
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Underflow! "
-                       "C-p/e/dA=%d-%d/%d/0x%X, blen=%d, "
+                       "p/e/dA=%d/%d/0x%X, blen=%d, "
                        "clen=%d",
-                       i_tpmInfo.chip, i_tpmInfo.port,
+                       i_tpmInfo.port,
                        i_tpmInfo.engine, i_tpmInfo.devAddr,
                        i_buflen, curByte);
 
@@ -2016,22 +1983,21 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
              * @reasoncode       TPM_UNDERFLOW_ERROR
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @moduleid         TPMDD_WRITEFIFO
-             * @userdata1[0:31]  Current Byte
-             * @userdata1[32:63] Buffer Length      (in Bytes)
-             * @userdata2        8 bytes of command buffer
+             * @userdata1        TPM
+             * @userdata2[0:31]  Current Byte
+             * @userdata2[32:63] Buffer Length      (in Bytes)
              * @devdesc          TPM expected more data during FIFO write
              * @custdesc         A problem occurred during the IPL of the
              *                   system: TPM underflow
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           TPMDD_WRITEFIFO,
-                                           TPM_UNDERFLOW_ERROR,
-                                           TWO_UINT32_TO_UINT64(
-                                               curByte,
-                                               i_buflen       ),
-                                           *(reinterpret_cast<uint64_t*>
-                                             (i_buffer)),
-                                           true /*Add HB SW Callout*/ );
+                                      TPMDD_WRITEFIFO,
+                                      TPM_UNDERFLOW_ERROR,
+                                      TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                      TWO_UINT32_TO_UINT64(
+                                          curByte,
+                                          i_buflen       ),
+                                      true /*Add HB SW Callout*/ );
 
             err->collectTrace( TPMDD_COMP_NAME );
         }
@@ -2083,9 +2049,9 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
                 // TPM is expecting more data even though we think we are done
                 TRACFCOMP( g_trac_tpmdd,
                            ERR_MRK"tpmReadFifo(): Data Overflow! "
-                           "C-p/e/dA=%d-%d/%d/0x%X, blen=%d, "
+                           "p/e/dA=%d/%d/0x%X, blen=%d, "
                            "clen=%d",
-                           i_tpmInfo.chip, i_tpmInfo.port,
+                           i_tpmInfo.port,
                            i_tpmInfo.engine, i_tpmInfo.devAddr,
                            io_buflen, curByte + burstCount);
 
@@ -2094,22 +2060,24 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
                  * @reasoncode       TPM_OVERFLOW_ERROR
                  * @severity         ERRL_SEV_UNRECOVERABLE
                  * @moduleid         TPMDD_READFIFO
-                 * @userdata1[0:31]  Operation
-                 * @userdata1[32:63] Buffer Length      (in Bytes)
-                 * @userdata2        Current Byte
+                 * @userdata1        TPM
+                 * @userdata2[0:15]  Operation
+                 * @userdata2[16:31] Current Byte
+                 * @userdata2[32:63] Buffer Length      (in Bytes)
                  * @devdesc          TPM provided more data during FIFO read
                  *                   then buffer space provided
                  * @custdesc         A problem occurred during the IPL of the
                  *                   system: TPM overflow
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               TPMDD_READFIFO,
-                                               TPM_OVERFLOW_ERROR,
-                                               TWO_UINT32_TO_UINT64(
-                                                      i_tpmInfo.operation,
-                                                      io_buflen       ),
-                                               curByte,
-                                               true /*Add HB SW Callout*/ );
+                                     TPMDD_READFIFO,
+                                     TPM_OVERFLOW_ERROR,
+                                     TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                     TWO_UINT32_TO_UINT64(
+                                       TWO_UINT16_TO_UINT32(i_tpmInfo.operation,
+                                                            curByte),
+                                       io_buflen),
+                                     true /*Add HB SW Callout*/ );
 
                 err->collectTrace( TPMDD_COMP_NAME );
                 break;
@@ -2144,9 +2112,9 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmReadFifo(): Timeout! "
-                   "C-p/e/dA=%d-%d/%d/0x%X, blen=%d, "
+                   "p/e/dA=%d/%d/0x%X, blen=%d, "
                    "clen=%d",
-                   i_tpmInfo.chip, i_tpmInfo.port,
+                   i_tpmInfo.port,
                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                    io_buflen, curByte);
 
@@ -2155,21 +2123,23 @@ errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
          * @reasoncode       TPM_TIMEOUT
          * @severity         ERRL_SEV_UNRECOVERABLE
          * @moduleid         TPMDD_READFIFO
-         * @userdata1[0:31]  Operation
-         * @userdata1[32:63] Buffer Length      (in Bytes)
-         * @userdata2        Current Byte
+         * @userdata1        TPM
+         * @userdata2[0:15]  Operation
+         * @userdata2[16:31] Current Byte
+         * @userdata2[32:63] Buffer Length      (in Bytes)
          * @devdesc          TPM timeout writing to FIFO
          * @custdesc         A problem occurred during the IPL of the
          *                   system: TPM timeout
          */
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       TPMDD_READ,
-                                       TPM_TIMEOUT,
-                                       TWO_UINT32_TO_UINT64(
-                                           i_tpmInfo.operation,
-                                           io_buflen       ),
-                                       curByte,
-                                       true /*Add HB SW Callout*/ );
+                                     TPMDD_READ,
+                                     TPM_TIMEOUT,
+                                     TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                     TWO_UINT32_TO_UINT64(
+                                       TWO_UINT16_TO_UINT32(i_tpmInfo.operation,
+                                                            curByte),
+                                       io_buflen),
+                                     true /*Add HB SW Callout*/ );
 
         err->collectTrace( TPMDD_COMP_NAME );
     }

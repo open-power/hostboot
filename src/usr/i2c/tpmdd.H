@@ -466,6 +466,28 @@ errlHndl_t tpmWriteFifo( tpm_info_t i_tpmInfo,
 errlHndl_t tpmReadFifo( tpm_info_t i_tpmInfo,
                         void * o_buffer,
                         size_t & io_buflen);
+/**
+ * @brief Performs a presence detect operation on a TPM Chip.
+ *  This is used for the discoverTargets path and called TPMDD::tpmPresence
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
+                             TARGETING::Target* i_target,
+                             void* io_buffer,
+                             size_t& io_buflen,
+                             int64_t i_accessType,
+                             va_list i_args);
 
 
 }; // end TPMDD namespace

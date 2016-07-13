@@ -56,43 +56,45 @@ class TPMDDTest: public CxxTest::TestSuite
     public:
 
         /**
-         * @brief Retrieve a node target to test with
+         * @brief Retrieve a TPM target to test with
          */
-        TARGETING::Target* getTestTarget( tpm_chip_types_t i_chip )
+        TARGETING::Target* getTestTarget()
         {
-            TARGETING::TargetService& tS = TARGETING::targetService();
             TARGETING::Target* testTarget = NULL;
-            tS.getMasterNodeTarget( testTarget );
-
-            assert(testTarget != NULL);
-
-            TRACFCOMP( g_trac_tpmdd,
-                       "getTestTarget node tgt=0x%X chip=%d",
-                       TARGETING::get_huid(testTarget),
-                       i_chip);
-
-            // Let's see if the requested chip is functional
-            tpm_info_t tpmInfo;
-            tpmInfo.chip = i_chip;
-            errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo);
-
-            if (NULL != err)
+            TARGETING::TargetHandleList tpmList;
+            TARGETING::getAllChips(tpmList,
+                                   TARGETING::TYPE_TPM,
+                                   true); // only functional
+            if (tpmList.size() > 0)
             {
-                testTarget = NULL;
-                delete err;
-            }
-            else if (!tpmInfo.tpmEnabled)
-            {
-                TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
-                          "Chip %d not enabled",
-                          i_chip);
-                testTarget = NULL;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
-                          "Chip %d enabled",
-                          i_chip);
+                testTarget = tpmList[0];
+
+                TRACFCOMP( g_trac_tpmdd,
+                           "getTestTarget tpm tgt=0x%08X",
+                           TARGETING::get_huid(testTarget));
+
+                // Let's see if the requested chip is functional
+                tpm_info_t tpmInfo;
+                memset(&tpmInfo, 0, sizeof(tpm_info_t));
+                errlHndl_t err = tpmReadAttributes (testTarget, tpmInfo);
+
+                if (NULL != err)
+                {
+                    testTarget = NULL;
+                    delete err;
+                    err = NULL;
+                }
+                else if (!tpmInfo.tpmEnabled)
+                {
+                    TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
+                              "Chip not enabled");
+                    testTarget = NULL;
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_tpmdd, "getTestTarget - "
+                              "Chip enabled");
+                }
             }
 
             return testTarget;
@@ -113,8 +115,8 @@ class TPMDDTest: public CxxTest::TestSuite
 
             do
             {
-                // Get a node Target
-                TARGETING::Target* testTarget = getTestTarget(TPM_PRIMARY);
+                // Get a TPM Target
+                TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
                     continue;
@@ -124,8 +126,7 @@ class TPMDDTest: public CxxTest::TestSuite
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_READVENDORID,
+                                 DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
                                                      0) );
 
                 if( NULL != err )
@@ -178,8 +179,8 @@ class TPMDDTest: public CxxTest::TestSuite
             do
             {
 
-                // Get a node Target
-                TARGETING::Target* testTarget = getTestTarget(TPM_PRIMARY);
+                // Get a TPM Target
+                TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
                     continue;
@@ -189,8 +190,7 @@ class TPMDDTest: public CxxTest::TestSuite
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_LASTOP,
+                                 DEVICE_TPM_ADDRESS( TPM_OP_LASTOP,
                                                      0) );
 
                 if( NULL == err )
@@ -215,8 +215,7 @@ class TPMDDTest: public CxxTest::TestSuite
                                 testTarget,
                                 &data,
                                 dataSize,
-                                DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                    TPM_OP_READVENDORID,
+                                DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
                                                     0) );
 
                 if( NULL == err )
@@ -260,8 +259,8 @@ class TPMDDTest: public CxxTest::TestSuite
 
             do
             {
-                // Get a node Target
-                TARGETING::Target* testTarget = getTestTarget(TPM_PRIMARY);
+                // Get a TPM Target
+                TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
                     continue;
@@ -273,8 +272,7 @@ class TPMDDTest: public CxxTest::TestSuite
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_READVENDORID,
+                                 DEVICE_TPM_ADDRESS( TPM_OP_READVENDORID,
                                                      0) );
 
                 if( NULL == err ||
@@ -307,107 +305,6 @@ class TPMDDTest: public CxxTest::TestSuite
 
 
         /**
-         * @brief TPM Invalid Chip Test
-         *      This test will pass in an invalid chip identifier which should
-         *      result in an error being returned.
-         */
-        void testTPMInvalidChip ( void )
-        {
-            errlHndl_t err = NULL;
-            int64_t fails = 0, num_ops = 0;
-            uint64_t data = 0x0ull;
-            size_t dataSize = sizeof(data);
-
-            TRACFCOMP( g_trac_tpmdd,
-                       "testTPMInvalidChip - Start" );
-
-            do
-            {
-
-                // Get a processor Target instead of a node target
-                TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target* testTarget = NULL;
-                tS.masterProcChipTargetHandle( testTarget );
-                assert(testTarget != NULL);
-
-                num_ops++;
-                err = deviceRead(testTarget,
-                                 &data,
-                                 dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_READVENDORID,
-                                                     0) );
-
-                if( NULL == err )
-                {
-                    fails++;
-                    TS_FAIL( "testTPMInvalidChip - ProcTarget: Error should've "
-                             "resulted in using processor target!" );
-                }
-                else
-                {
-                    TRACUCOMP(g_trac_tpmdd, "testTPMInvalidChip - "
-                              "ProcTarget: Error log returned as expected. "
-                              "RC=0x%x ",
-                              err->reasonCode() );
-                    delete err;
-                    err = NULL;
-                }
-
-
-
-                // Attempt operation against the backup TPM
-                tS.getMasterNodeTarget( testTarget );
-                assert(testTarget != NULL);
-
-                // Skip this target if target is non-functional
-                if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
-                                                   .functional)
-                {
-                    continue;
-                }
-
-                // Many systems don't have a backup TPM, if not configured
-                //  test TPM presence against it
-                if (getTestTarget(TPM_BACKUP) == NULL)
-                {
-
-                    num_ops++;
-                    err = deviceRead(testTarget,
-                                     &data,
-                                     dataSize,
-                                     DEVICE_TPM_ADDRESS( TPM_BACKUP,
-                                                         TPM_OP_READVENDORID,
-                                                         0) );
-
-                    if( NULL == err ||
-                        (err->reasonCode() != TPM_DEVICE_NOT_AVAILABLE &&
-                         err->reasonCode() != TPM_BUS_SPEED_LOOKUP_FAIL))
-                    {
-                        fails++;
-                        TS_FAIL( "testTPMInvalidChip - TpmBackup : Error "
-                                 "should've "
-                                 "resulted in using backup TPM target!" );
-                    }
-                    else
-                    {
-                        TRACUCOMP(g_trac_tpmdd, "testTPMInvalidChip - "
-                                  "TpmBackup : Error log returned as expected. "
-                                  "RC=0x%X ",
-                                  err->reasonCode() );
-                        delete err;
-                        err = NULL;
-                    }
-                }
-
-            } while( 0 );
-
-            TRACFCOMP( g_trac_tpmdd,
-                       "testTPMInvalidChip - End: %d/%d fails",
-                       fails, num_ops );
-        }
-
-        /**
          * @brief TPM Presence Test
          */
         void testTPMPresence ( void )
@@ -421,7 +318,7 @@ class TPMDDTest: public CxxTest::TestSuite
             do
             {
 
-                // Get a processor Target instead of a node target
+                // Get a processor Target instead of a tpm target
                 TARGETING::TargetService& tS = TARGETING::targetService();
                 TARGETING::Target* testTarget = NULL;
                 tS.masterProcChipTargetHandle( testTarget );
@@ -437,8 +334,7 @@ class TPMDDTest: public CxxTest::TestSuite
                 num_ops++;
 
                 // Test with invalid proc target
-                presence = TPMDD::tpmPresence(testTarget,
-                                              TPM_PRIMARY);
+                presence = TPMDD::tpmPresence(testTarget);
                 if( presence == true )
                 {
                     fails++;
@@ -452,46 +348,13 @@ class TPMDDTest: public CxxTest::TestSuite
                 }
 
 
-                tS.getMasterNodeTarget( testTarget );
-                assert(testTarget != NULL);
+                testTarget = getTestTarget();
 
-                // Skip this target if target is non-functional
-                if(!testTarget->getAttr<TARGETING::ATTR_HWAS_STATE>()
-                   .functional)
-                {
-                    continue;
-                }
-
-
-                // Many systems don't have a backup TPM, if not configured
-                //  test TPM presence against it
-                if (getTestTarget(TPM_BACKUP) == NULL)
-                {
-
-                    num_ops++;
-                    // Attempt operation against the backup TPM
-                    presence = TPMDD::tpmPresence(testTarget,
-                                                  TPM_BACKUP);
-                    if( presence == true )
-                    {
-                        fails++;
-                        TS_FAIL( "testTPMPresence - TPMBackup: Error when "
-                                 "using backup TPM!, false presence" );
-                    }
-                    else
-                    {
-                        TRACUCOMP(g_trac_tpmdd, "testTPMPresence - "
-                                  "TPMBackup: False returned as expected. ");
-                    }
-                }
-
-
-                if (getTestTarget(TPM_PRIMARY) != NULL)
+                if (NULL != testTarget)
                 {
                     // Now test with valid primary target
                     num_ops++;
-                    presence = TPMDD::tpmPresence(testTarget,
-                                                  TPM_PRIMARY);
+                    presence = TPMDD::tpmPresence(testTarget);
                     if( presence == false )
                     {
                         fails++;
@@ -530,8 +393,8 @@ class TPMDDTest: public CxxTest::TestSuite
             do
             {
 
-                // Get a node Target
-                TARGETING::Target* testTarget = getTestTarget(TPM_PRIMARY);
+                // Get a TPM Target
+                TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
                     continue;
@@ -559,8 +422,7 @@ class TPMDDTest: public CxxTest::TestSuite
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                                     TPM_OP_TRANSMIT,
+                                 DEVICE_TPM_ADDRESS( TPM_OP_TRANSMIT,
                                                      cmdSize) );
 
                 TRUSTEDBOOT::TPM2_BaseOut* resp =
@@ -618,8 +480,8 @@ class TPMDDTest: public CxxTest::TestSuite
             do
             {
 
-                // Get a node Target
-                TARGETING::Target* testTarget = getTestTarget(TPM_PRIMARY);
+                // Get a TPM Target
+                TARGETING::Target* testTarget = getTestTarget();
                 if (NULL == testTarget)
                 {
                     continue;
@@ -648,9 +510,8 @@ class TPMDDTest: public CxxTest::TestSuite
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                        TPM_OP_TRANSMIT,
-                                        cmdSize) );
+                                 DEVICE_TPM_ADDRESS(TPM_OP_TRANSMIT,
+                                                    cmdSize) );
 
                 if( NULL == err ||
                     err->reasonCode() != TPM_OVERFLOW_ERROR)

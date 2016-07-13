@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -244,15 +244,13 @@ namespace DeviceFW
 
     /**
      * Construct the device addressing parameters for the TPM device ops.
-     * @param[in] i_tpm_enum The chip number of the TPM to access. See
-     *                            tpm_chip_types_t in tpmddif.H
      * @param[in] i_tpm_operation The TPM operation to perform. See
      *                            tpm_op_types_t in tpmddif.H
      * @param[in] i_command_len Command length to write during transmit
      *                            operations
      */
-    #define DEVICE_TPM_ADDRESS( i_tpm_enum, i_tpm_op, i_command_len )\
-        DeviceFW::TPM, static_cast<uint64_t>(( i_tpm_enum )),\
+    #define DEVICE_TPM_ADDRESS( i_tpm_op, i_command_len )\
+        DeviceFW::TPM,\
             static_cast<uint64_t>(( i_tpm_op )),\
             static_cast<uint64_t>(( i_command_len ))
 

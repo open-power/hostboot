@@ -943,8 +943,6 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>NODE</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
-    <attribute><id>TPM_PRIMARY_INFO</id></attribute>
-    <attribute><id>TPM_BACKUP_INFO</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_CENT_VDD_SLOPE_ACTIVE</id></attribute>
