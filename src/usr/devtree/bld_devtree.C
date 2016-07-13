@@ -486,8 +486,7 @@ void add_i2c_info( const TARGETING::Target* i_targ,
         {
 
             // Lookup i2c info for the TPM
-            tpmInfo.chip = tpm->chip;
-            err = TPMDD::tpmReadAttributes(tpm->nodeTarget, tpmInfo);
+            err = TPMDD::tpmReadAttributes(tpm->tpmTarget, tpmInfo);
             if (NULL != err)
             {
                 // Unable to get info we skip this guy
@@ -557,17 +556,16 @@ void add_i2c_info( const TARGETING::Target* i_targ,
             dtOffset_t l_tpmNode = i_dt->addNode( l_busNode,
                                                   "tpm",
                                                   tpmInfo.devAddr >> 1 );
-            TRACFCOMP( g_trac_devtree, "TPM NODE %X", l_tpmNode );
 
             i_dt->addPropertyCell32(l_tpmNode, "reg",
                                     tpmInfo.devAddr >> 1);
             char l_label[30];
-            switch (tpm->chip)
+            switch (tpm->role)
             {
-              case TPMDD::TPM_PRIMARY:
+              case TRUSTEDBOOT::TPM_PRIMARY:
                 sprintf( l_label, "tpm" );
                 break;
-              case TPMDD::TPM_BACKUP:
+              case TRUSTEDBOOT::TPM_BACKUP:
                 sprintf( l_label, "tpm-backup" );
                 break;
               default:
@@ -1310,8 +1308,7 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
 
             // We need to build the devtree path to find this TPM node
             // Lookup i2c info for the TPM
-            l_tpmInfo.chip = l_tpm->chip;
-            l_errl = TPMDD::tpmReadAttributes(l_tpm->nodeTarget, l_tpmInfo);
+            l_errl = TPMDD::tpmReadAttributes(l_tpm->tpmTarget, l_tpmInfo);
             if (l_errl)
             {
                 errlCommit(l_errl, DEVTREE_COMP_ID);

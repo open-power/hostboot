@@ -83,9 +83,9 @@ errlHndl_t getTpmLogDevtreeInfo(TpmTarget & i_target,
 {
     errlHndl_t err = NULL;
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"getTpmLogDevtreeInfo() Chip:%d Addr:%lX %lX",
-               i_target.chip, io_logAddr
-               ,(uint64_t)(i_target.logMgr));
+               ENTER_MRK"getTpmLogDevtreeInfo() tgt=0x%X Addr:%lX %lX",
+               TARGETING::get_huid(i_target.tpmTarget),
+               io_logAddr ,(uint64_t)(i_target.logMgr));
 
     o_allocationSize = 0;
 
@@ -108,9 +108,10 @@ void setTpmDevtreeInfo(TpmTarget & i_target,
                        uint32_t i_i2cMasterOffset)
 {
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"setTpmLogDevtreeOffset() Chip:%d "
+               ENTER_MRK"setTpmLogDevtreeOffset() tgt=0x%X "
                "Xscom:%lX Master:%X",
-               i_target.chip, i_xscomAddr, i_i2cMasterOffset);
+               TARGETING::get_huid(i_target.tpmTarget),
+               i_xscomAddr, i_i2cMasterOffset);
 
     if (NULL != i_target.logMgr)
     {
@@ -154,36 +155,92 @@ void* host_update_master_tpm( void *io_pArgs )
     do
     {
 
-        // Get a node Target
         TARGETING::TargetService& tS = TARGETING::targetService();
-        TARGETING::Target* nodeTarget = NULL;
-        tS.getMasterNodeTarget( nodeTarget );
 
-        if (nodeTarget == NULL)
-            break;
+        TARGETING::Target* procTarget = NULL;
+        err = tS.queryMasterProcChipTargetHandle( procTarget );
 
-        // Skip this target if target is non-functional
-        if(!nodeTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().  \
-           functional)
+        if (NULL != err)
         {
-            continue;
+            break;
         }
 
+        // Now get all TPM's to setup our array
+        TARGETING::TargetHandleList tpmList;
+        TARGETING::getAllChips(tpmList,
+                               TARGETING::TYPE_TPM,
+                               true); // ONLY FUNCTIONAL
+
+        // Currently we only support a MAX of two TPMS
+        assert(tpmList.size() <= 2, "Too many TPMs found");
+
         mutex_lock( &(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex) );
+        mutex_lock( &(systemTpms.tpm[TPM_BACKUP_INDEX].tpmMutex) );
         unlock = true;
 
+        systemTpms.tpm[TPM_MASTER_INDEX].role = TPM_PRIMARY;
+        systemTpms.tpm[TPM_BACKUP_INDEX].role = TPM_BACKUP;
+
+        if (0 == tpmList.size())
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "No TPM Targets found");
+            systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
+            systemTpms.tpm[TPM_MASTER_INDEX].available = false;
+            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
+            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
+        }
+        else
+        {
+            // Loop through the TPMs and figure out if they are attached
+            //  to the master or alternate processor
+            TPMDD::tpm_info_t tpmData;
+            size_t tpmIdx = TPM_MASTER_INDEX;
+            for (size_t tpmNum = 0; tpmNum < tpmList.size(); tpmNum++)
+            {
+                memset(&tpmData, 0, sizeof(tpmData));
+                errlHndl_t readErr = tpmReadAttributes(tpmList[tpmNum],
+                                                       tpmData);
+                if (NULL != readErr)
+                {
+                    // We are just looking for configured TPMs here
+                    //  so we ignore any errors
+                    delete readErr;
+                    readErr = NULL;
+                }
+                else
+                {
+                    // Is the i2c master of this TPM also the master proc?
+                    tpmIdx = (tpmData.i2cTarget == procTarget) ?
+                        TPM_MASTER_INDEX : TPM_BACKUP_INDEX;
+
+                    if (NULL != systemTpms.tpm[tpmIdx].tpmTarget)
+                    {
+                        TRACFCOMP( g_trac_trustedboot,
+                                   "Duplicate TPM target found %d",tpmIdx);
+                    }
+                    else
+                    {
+                        systemTpms.tpm[tpmIdx].tpmTarget = tpmList[tpmNum];
+                        systemTpms.tpm[tpmIdx].available = true;
+                    }
+                }
+
+            }
+        }
+
         if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
-            TPMDD::tpmPresence(nodeTarget, TPMDD::TPM_PRIMARY))
+            systemTpms.tpm[TPM_MASTER_INDEX].available &&
+            NULL != systemTpms.tpm[TPM_MASTER_INDEX].tpmTarget &&
+            TPMDD::tpmPresence(systemTpms.tpm[TPM_MASTER_INDEX].tpmTarget))
         {
             // Initialize the TPM, this will mark it as non-functional on fail
-            tpmInitialize(systemTpms.tpm[TPM_MASTER_INDEX],
-                          nodeTarget,
-                          TPMDD::TPM_PRIMARY);
+            tpmInitialize(systemTpms.tpm[TPM_MASTER_INDEX]);
 
         }
         else
         {
-            // TPM doesn't exist in the system
+            // Master TPM doesn't exist in the system
             systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
             systemTpms.tpm[TPM_MASTER_INDEX].available = false;
         }
@@ -220,14 +277,14 @@ void* host_update_master_tpm( void *io_pArgs )
                  * @reasoncode     RC_TPM_EXISTENCE_FAIL
                  * @severity       ERRL_SEV_UNRECOVERABLE
                  * @moduleid       MOD_HOST_UPDATE_MASTER_TPM
-                 * @userdata1      node
+                 * @userdata1      0
                  * @userdata2      0
                  * @devdesc        No TPMs found in system.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                MOD_HOST_UPDATE_MASTER_TPM,
                                                RC_TPM_EXISTENCE_FAIL,
-                                               TARGETING::get_huid(nodeTarget),
+                                               0,
                                                0,
                                                true /*Add HB SW Callout*/ );
 
@@ -238,31 +295,36 @@ void* host_update_master_tpm( void *io_pArgs )
 
         // Lastly we will check on the backup TPM and see if it is enabled
         //  in the attributes at least
-        TPMDD::tpm_info_t tpmInfo;
-        tpmInfo.chip = TPMDD::TPM_BACKUP;
-        errlHndl_t tmpErr = TPMDD::tpmReadAttributes(nodeTarget, tpmInfo);
-        if (NULL != tmpErr)
+        if (NULL == systemTpms.tpm[TPM_BACKUP_INDEX].tpmTarget)
         {
-            // We don't want to log this error we will just assume
-            //   the backup doesn't exist
-            delete tmpErr;
-            tmpErr = NULL;
             TRACUCOMP( g_trac_trustedboot,
-                       "host_update_master_tpm() tgt=0x%X "
+                       "host_update_master_tpm() "
                        "Marking backup TPM unavailable "
-                       "due to attribute fail",
-                       TARGETING::get_huid(nodeTarget));
+                       "due to attribute fail");
             systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
             systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
         }
-        else if (!tpmInfo.tpmEnabled)
+        else
         {
-            TRACUCOMP( g_trac_trustedboot,
-                       "host_update_master_tpm() tgt=0x%X "
-                       "Marking backup TPM unavailable",
-                       TARGETING::get_huid(nodeTarget));
-            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
-            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
+            TPMDD::tpm_info_t tpmInfo;
+            memset(&tpmInfo, 0, sizeof(tpmInfo));
+            errlHndl_t tmpErr = TPMDD::tpmReadAttributes(
+                                 systemTpms.tpm[TPM_BACKUP_INDEX].tpmTarget,
+                                 tpmInfo);
+            if (NULL != tmpErr || !tpmInfo.tpmEnabled)
+            {
+                TRACUCOMP( g_trac_trustedboot,
+                           "host_update_master_tpm() "
+                           "Marking backup TPM unavailable");
+                systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
+                systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
+                if (NULL != tmpErr)
+                {
+                    // Ignore attribute read failure
+                    delete tmpErr;
+                    tmpErr = NULL;
+                }
+            }
         }
 
     } while ( 0 );
@@ -270,6 +332,7 @@ void* host_update_master_tpm( void *io_pArgs )
     if( unlock )
     {
         mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
+        mutex_unlock(&(systemTpms.tpm[TPM_BACKUP_INDEX].tpmMutex));
     }
 
     if (NULL == err)
@@ -304,28 +367,22 @@ void* host_update_master_tpm( void *io_pArgs )
 }
 
 
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
-                   TARGETING::Target* i_nodeTarget,
-                   TPMDD::tpm_chip_types_t i_chip)
+void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
 {
     errlHndl_t err = NULL;
 
     TRACDCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmInitialize()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmInitialize() tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target.nodeTarget),
-               io_target.chip);
+               ENTER_MRK"tpmInitialize() tgt=0x%X",
+               TARGETING::get_huid(io_target.tpmTarget));
 
     do
     {
 
         // TPM Initialization sequence
 
-        io_target.nodeTarget = i_nodeTarget;
-        io_target.chip = i_chip;
         io_target.initAttempted = true;
-        io_target.available = true;
         io_target.failed = false;
 
         // TPM_STARTUP
@@ -626,9 +683,8 @@ void tpmMarkFailed(TpmTarget * io_target)
 
     TRACFCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
-               "tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target->nodeTarget),
-               io_target->chip);
+               "tgt=0x%X",
+               TARGETING::get_huid(io_target->tpmTarget));
 
     io_target->failed = true;
     /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access

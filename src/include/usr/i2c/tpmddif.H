@@ -29,17 +29,6 @@ namespace TPMDD
 {
 
 /**
- * @brief Enumerations to select TPM
-*/
-enum tpm_chip_types_t
-{
-  TPM_PRIMARY   = 0,
-  TPM_BACKUP    = 1,
-  LAST_CHIP_TYPE,
-  FIRST_CHIP_TYPE = TPM_PRIMARY
-};
-
-/**
  * @brief TPM Operation to perform
 */
 enum tpm_op_types_t
@@ -68,12 +57,12 @@ struct tpm_info_t
 {
     tpm_op_types_t operation;    ///< TPM operation to perform
     TARGETING::EntityPath i2cMasterPath; ///< I2C Master path
-    TARGETING::Target * i2cTarget; ///< I2C Target
+    TARGETING::Target * i2cTarget; ///< I2C Master Target
+    TARGETING::Target * tpmTarget; ///< TPM Target
 
     uint64_t busFreq;           ///< Bus speed in Hz
     uint8_t port;               ///< I2C Master port
     uint8_t engine;             ///< I2C Master engine
-    uint8_t chip;               ///< Chip target, primary/backup
     uint8_t tpmEnabled;         ///< TPM attribute defined as available
     uint8_t devAddr;            ///< I2C Address
     size_t  offset;             ///< TPM Device register offset
@@ -90,8 +79,7 @@ struct tpm_info_t
  *
  * @return true if device is present
  */
-bool tpmPresence ( TARGETING::Target * i_target,
-                   tpm_chip_types_t i_chip );
+bool tpmPresence ( TARGETING::Target * i_target);
 
 /**
  * @brief this function will read all of the associated attributes needed

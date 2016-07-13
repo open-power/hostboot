@@ -71,9 +71,6 @@ namespace TRUSTEDBOOT
     /// Common static values
     enum
     {
-        MAX_SYSTEM_TPMS = 2,
-        TPM_MASTER_INDEX = 0,     ///< Index into tpm array for master chip
-        TPM_BACKUP_INDEX = 1,     ///< Index for backup TPM
         MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
 
         HASH_COUNT            = 2,       ///< Maximum # of digests
