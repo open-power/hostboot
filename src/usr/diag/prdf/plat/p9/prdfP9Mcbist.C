@@ -54,6 +54,18 @@ namespace p9_mcbist
 #ifndef __HOSTBOOT_RUNTIME
 
 /**
+ * @brief  Plugin that initializes the data bundle.
+ * @param  i_mcbChip An MCBIST chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( ExtensibleChip * i_mcbChip )
+{
+    i_mcbChip->getDataBundle() = new McbistDataBundle( i_mcbChip );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( p9_mcbist, Initialize );
+
+/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_mcbChip An MCBIST chip.
