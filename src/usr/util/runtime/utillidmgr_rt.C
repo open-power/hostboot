@@ -223,15 +223,17 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
 {
     iv_lidId = i_lidId;
 
-    //if it's in PNOR, it's not technically lid, so use a slightly
-    //different extension.
-    if (g_hostInterfaces->pnor_read)
+    // Check if PNOR is access is supported
+    if (!g_hostInterfaces->pnor_read ||
+        INITSERVICE::spBaseServicesEnabled())
     {
-        iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
+        iv_isLidInPnor = false;
     }
     else
     {
-        iv_isLidInPnor = false;
+        // If it's in PNOR it's not technically a lid
+        // so use a slightly different extension
+        iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
     }
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
     iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);

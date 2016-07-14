@@ -327,6 +327,13 @@ namespace HBPM
                 break;
             }
 
+            // The ref image may still include the 4K header which the HWP is
+            // not expecting, so move the image pointer past the header
+            if( *(reinterpret_cast<uint64_t*>(l_pImageIn)) == VER_EYECATCH)
+            {
+                 l_pImageIn = reinterpret_cast<void*>
+                    (reinterpret_cast<uint8_t*>(l_pImageIn) + PAGESIZE);
+            }
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "loadHcode: HCODE addr = 0x%p, lidId = 0x%.8x",
                        l_pImageIn,

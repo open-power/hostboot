@@ -157,8 +157,11 @@
     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
     <attribute><id>PM_PBAX_NODEID</id></attribute>
+    <attribute><id>PBAX_GROUPID</id></attribute>
     <attribute><id>PM_PBAX_CHIPID</id></attribute>
+    <attribute><id>PBAX_CHIPID</id></attribute>
     <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
+    <attribute><id>PBAX_BRDCST_ID_VECTOR</id></attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
     <attribute><id>PM_SLEEP_TYPE</id></attribute>
@@ -1194,6 +1197,7 @@
     <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
+    <attribute><id>QUAD_PPM_ERRMASK</id></attribute>
     <!--@todo-RTC:155823 <attribute><id>SENSEADJ_STEP</id><default>CPU</default></attribute> -->
 </targetType>
 
@@ -1210,6 +1214,7 @@
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
+    <attribute><id>CME_LOCAL_FIRMASK</id></attribute>
 </targetType>
 
 <!-- CORE: Use same CORE target for both Nimbus and Cumulus
@@ -1226,6 +1231,7 @@
     <attribute><id>CHIPLET_ID</id></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
+    <attribute><id>CORE_PPM_ERRMASK</id></attribute>
 </targetType>
 
 <!-- MCS

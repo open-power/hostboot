@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -189,6 +191,11 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
 
         if(rc)
         {
+            TRACFCOMP(g_trac_xscom,ERR_MRK
+                "Hypervisor scom read/write failed. "
+                "rc 0x%X target 0x%llX proc_id 0x%llX addr 0x%llX r/w %d",
+                rc, get_huid(i_target), proc_id, i_scomAddr, i_ioType);
+
             // convert rc to error log
             /*@
              * @errortype
