@@ -185,6 +185,54 @@ class eccTraits<fapi2::TARGET_TYPE_MCA>
 
         };
 
+        // Symbol to Galois code mapping table
+        // Reference: Nimbus workbook, Section 13.1.6.2: Firmware Mark Store
+        constexpr static const uint8_t symbol2galois[] =
+        {
+            0x80, 0xa0, 0x90, 0xf0,
+            0x08, 0x0a, 0x09, 0x8f,
+            0x98, 0xda, 0xb9, 0x7f,
+            0x91, 0xd7, 0xb2, 0x78,
+            0x28, 0xea, 0x49, 0x9f,
+            0x9a, 0xd4, 0xbd, 0x76,
+            0x60, 0xb0, 0xc0, 0x20,
+            0x06, 0x0b, 0x0c, 0x02,
+            0xc6, 0xfb, 0x1c, 0x42,
+            0xca, 0xf4, 0x1d, 0x46,
+            0xd6, 0x8b, 0x3c, 0xc2,
+            0xcb, 0xf3, 0x1f, 0x4e,
+            0xe0, 0x10, 0x50, 0xd0,
+            0x0e, 0x01, 0x05, 0x0d,
+            0x5e, 0x21, 0xa5, 0x3d,
+            0x5b, 0x23, 0xaf, 0x3e,
+            0xfe, 0x61, 0x75, 0x5d,
+            0x51, 0x27, 0xa2, 0x38
+        };
+
+        // Symbol to DQ index mapping table
+        // Reference: Nimbus workbook, Section 13.1.6.2: Firmware Mark Store
+        constexpr static const uint8_t symbol2dq[] =
+        {
+            71, 70, 69, 68,
+            67, 66, 65, 64,
+            63, 62, 61, 60,
+            55, 54, 53, 52,
+            47, 46, 45, 44,
+            39, 38, 37, 36,
+            31, 30, 29, 28,
+            23, 22, 21, 20,
+            15, 14, 13, 12,
+            7,  6,  5,  4,
+            59, 58, 57, 56,
+            51, 50, 49, 48,
+            43, 42, 41, 40,
+            35, 34, 33, 32,
+            27, 26, 25, 24,
+            19, 18, 17, 16,
+            11, 10,  9,  8,
+            3,  2,  1,  0
+        };
+
 };
 
 ///

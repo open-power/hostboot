@@ -42,4 +42,7 @@ constexpr const uint64_t eccTraits<fapi2::TARGET_TYPE_MCA>::MAINLINE_UE_REGS[];
 constexpr const uint64_t eccTraits<fapi2::TARGET_TYPE_MCA>::MAINLINE_AUE_REGS[];
 constexpr const uint64_t eccTraits<fapi2::TARGET_TYPE_MCA>::ERROR_VECTOR_REGS[];
 
+constexpr const uint8_t eccTraits<fapi2::TARGET_TYPE_MCA>::symbol2galois[];
+constexpr const uint8_t eccTraits<fapi2::TARGET_TYPE_MCA>::symbol2dq[];
+
 } // close namespace mss
