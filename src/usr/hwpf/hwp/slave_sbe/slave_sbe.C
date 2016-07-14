@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,8 @@
 #include "proc_spless_sbe_startWA.H"
 #include <sbe/sbeif.H>
 #include <freqVoltageSvc.H>
+#include <config.h>
+#include <pnor/pnorif.H>
 
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
 const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
@@ -468,6 +470,30 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         "proc_check_slave_sbe_seeprom_complete: %d procs in the system.",
         l_procTargetList.size() );
 
+    do {
+
+    // Load Processor SBE Image into Secure space, if necessary
+#ifdef CONFIG_SECUREBOOT
+    l_errl = loadSecureSection(PNOR::SBE_IPL);
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
+        "proc_check_slave_sbe_seeprom_complete: Error from "
+        "loadSecureSection(PNOR::SBE_IPL)");
+
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        // Commit error log
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+        // break from function now to prevent error from using
+        // unsecure SBE image later
+        break;
+    }
+#endif
+
     // loop thru all the cpu's
     for (TargetHandleList::const_iterator
             l_proc_iter = l_procTargetList.begin();
@@ -494,6 +520,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : proc_check_slave_sbe_seeprom_complete "
                   "Can't find SBE image in pnor");
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            break;
         }
 
         fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
@@ -629,6 +666,27 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     }   // endfor
 
+    // Unload Processor SBE Image from Secure space, if necessary
+#ifdef CONFIG_SECUREBOOT
+    l_errl = unloadSecureSection(PNOR::SBE_IPL);
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
+        "proc_check_slave_sbe_seeprom_complete: Error from "
+        "unloadSecureSection(PNOR::SBE_IPL)");
+
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        // Commit error log
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+        break;
+    }
+#endif
+
+    } while(0); // end do-while
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_proc_check_slave_sbe_seeprom_complete exit");

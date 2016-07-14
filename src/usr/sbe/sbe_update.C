@@ -3280,6 +3280,17 @@ namespace SBE
                 break;
             }
 
+            // Load Processor SBE PNOR section into secure memory, if necessary
+#ifdef CONFIG_SECUREBOOT
+            err = loadSecureSection(PNOR::SBE_IPL);
+
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from loadSecureSection(PNOR::SBE_IPL)");
+                break;
+            }
+#endif
+
         }while(0);
 
         TRACDCOMP( g_trac_sbe,
@@ -3363,6 +3374,16 @@ namespace SBE
                                           HWAS::SRCI_PRIORITY_HIGH );
                 break;
             }
+
+            // Unload the Processor SBE PNOR section from secure memory
+#ifdef CONFIG_SECUREBOOT
+            err = unloadSecureSection(PNOR::SBE_IPL);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK,"createSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::SBE_IPL)");
+                break;
+            }
+#endif
 
         }while(0);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,9 @@ const DepModInfo  g_istep09Dependancies = {
         DEP_LIB(libactivate_powerbus.so),
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libsbe.so),
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_base.so),
+#endif
         DEP_LIB(libbuild_winkle_images.so),
 #endif
         NULL
