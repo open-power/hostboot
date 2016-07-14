@@ -979,7 +979,6 @@
     <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
     <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
     <!-- End proc_fbc_eff_config_links -->
-    <attribute><id>FSI_GP_SHADOWS_OVERWRITE</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PROC_NHTM_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_NHTM_BAR_SIZE</id></attribute>

@@ -10205,25 +10205,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!--TODO RTC: 154455 Move attributes to EC attribute xml file-->
-<attribute>
-    <id>FSI_GP_SHADOWS_OVERWRITE</id>
-    <description>
-        DD1 attribute for assigning flushvalues to root_ctrl and perv_ctrl registers
-    </description>
-    <simpleType>
-        <uint8_t>
-        <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_FSI_GP_SHADOWS_OVERWRITE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <attribute>
     <id>C1_IS_SCANABLE</id>
     <description>
@@ -10418,46 +10399,6 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_OBUS_RATIO_VALUE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<!--TODO RTC: 154455 Move attributes to EC attribute xml file-->
-<attribute>
-    <id>VITL_CLK_SETUP</id>
-    <description>
-        Used to tell the p9_sbe_chiplet_reset hwp to either
-        adjust clock setting for PRESENT targets if this is 1
-        or else set it for FUNCTIONAL targets. Nimbus DD1.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_VITL_CLK_SETUP</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>N3_FLUSH_MODE</id>
-    <description>
-        DD1 update : If this attribute is 1 then dd1s will be
-        flushed without N3
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_N3_FLUSH_MODE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -10715,24 +10656,6 @@ Measured in GB</description>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MEMVPD_POS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>SDISN_SETUP</id>
-    <description>
-        Sdis_n set or clear : flushing LCBES condition workaround
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>1</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SDISN_SETUP</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
