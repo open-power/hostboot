@@ -46,7 +46,87 @@ try {
     run-python-file (lookup-file hbfw/hb-simdebug.py)
 } except { echo "ERROR: Failed to load Hostboot debug tools." }
 
+# Determine security state
+$hw_security=(shell "echo $SECURITY_HW_POLICY")
+if($hw_security == "") {
+    # Assume default if not specified
+    $hw_security = "0"
+}
 
+if(($hw_security != "1") and ($hw_security != "0")) {
+    # Emit warning and assume default
+    echo ("SECURITY: WARNING! Bad value "+
+        $hw_security+" for HW security policy, defaulting to 0")
+    $hw_security = "0"
+}
+echo "SECURITY: HW security policy set to "+$hw_security
+
+$sw_security=(shell "echo $SECURITY_SW_POLICY")
+if($sw_security == "") {
+    # Assume default if not specified
+    $sw_security = "0"
+}
+
+if(($sw_security != "1") and ($sw_security != "0")) {
+    # Emit warning and assume default
+    echo ("SECURITY: WARNING! Bad value "+
+        $sw_security+" for SW security policy, defaulting to 0")
+    $sw_security = "0"
+}
+echo "SECURITY: SW security policy set to "+$sw_security
+
+try {
+    $len = python "len(os.environ['SECURITY_HW_KEYS_HASH'])"
+    if($len == 128) {
+        $hkh=python ("[os.environ['SECURITY_HW_KEYS_HASH'][i:i+8] for
+            i in range(0, len(os.environ['SECURITY_HW_KEYS_HASH']), 8)]")
+        echo "SECURITY: Using HW keys' hash override with value of "+$hkh
+    } else {
+      echo ("SECURITY: WARNING! HW key's hash override was not 128 bytes, "+
+          "using imprint value")
+    }
+} except {
+    # Override not present
+}
+
+if(not (defined hkh)) {
+    # If no override, use the default imprint HW keys' hash
+    $hkh=["40D487FF","7380ED6A",
+        "D54775D5","795FEA0D",
+        "E2F541FE","A9DB06B8",
+        "466A42A3","20E65F75",
+        "B4866546","0017D907",
+        "515DC2A5","F9FC5095",
+        "4D6EE0C9","B67D219D",
+        "FB708535","1D01D6D1"]
+    echo "SECURITY: Using imprint HW keys' hash with value of "+$hkh
+}
+
+# Load security state
+foreach $cc in (get-object-list p8_proc) {
+
+    # Set HW security policy
+    #     "0"=jumper applied(security disabled, default)
+    #     "1"=jumper removed(security enabled)
+    (($cc).proc_chip.regwrite "LOGIC" 0xFF481000 "0x00000000_0000000"+
+        $hw_security 64)
+
+    # Set SW Security Policy
+    #     "0"=SBE open (no security, default)
+    #     "1"=SBE closed (no override of HW security)
+    (($cc).proc_chip.regwrite "LOGIC" 0xFF481001 "0x00000000_0000000"+
+        $sw_security 64)
+
+    # HW Key's Hash (for SEEPROM)
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF480008 "0x"+$hkh[0]+"_"+$hkh[1] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF480009 "0x"+$hkh[2]+"_"+$hkh[3] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000A "0x"+$hkh[4]+"_"+$hkh[5] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000B "0x"+$hkh[6]+"_"+$hkh[7] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000C "0x"+$hkh[8]+"_"+$hkh[9] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000D "0x"+$hkh[10]+"_"+$hkh[11] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000E "0x"+$hkh[12]+"_"+$hkh[13] 64
+    ($cc).proc_chip.regwrite "LOGIC" 0xFF48000F "0x"+$hkh[14]+"_"+$hkh[15] 64
+}
 
 ########################### WORKAROUNDS ####################################
 # Setup the mailbox.

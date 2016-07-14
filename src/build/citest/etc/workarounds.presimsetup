@@ -49,6 +49,8 @@ grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
     $sb/simu/configs/P8_VENICE.config
 echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
     $sb/simu/configs/P8_VENICE.config
-echo "Applying workaround for get hardware hash key"
-sbex -t 991184 -r fips860
+echo "Applying workaround to support setting security bits"
+sbex -t 1000007 -r fips860
+echo "Applying SIMICS workaround to allow header copy in secure mode"
+sbex -t 996855 -r fips860
 
