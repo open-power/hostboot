@@ -348,7 +348,6 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0</default>
     </attribute>
 </targetType>
 
@@ -1462,6 +1461,7 @@
     <attribute><id>EFF_DRAM_TRFC_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TFAW_DLR</id></attribute>
     <attribute><id>EFF_DRAM_TXS</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ACTN</id></attribute>
     <attribute><id>MSS_VPD_MR_DRAM_2N_MODE</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A00</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_A01</id></attribute>
@@ -1481,6 +1481,7 @@
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_BG1</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C0</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C1</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C2</id></attribute>
@@ -1702,7 +1703,7 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
-    <attribute><id>MSS_VOLT</id></attribute><!-- deprecated -->
+    <attribute><id>MSS_VOLT</id></attribute>
     <attribute><id>MSS_VOLT_VDDR</id></attribute>
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
     <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
