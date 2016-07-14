@@ -762,6 +762,13 @@ class eff_config
         ///
         fapi2::ReturnCode dram_trtp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
+        ///
+        /// @brief Grab the VPD blobs and decode into attributes
+        /// @param[in] i_target FAPI2 target (MCS)
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode decode_vpd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
+
 };// eff_config
 
 

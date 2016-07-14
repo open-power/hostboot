@@ -7173,8 +7173,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t>
         </uint8_t>
-<!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
-<!--     <array>2,2</array> -->
+    <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -23496,8 +23495,7 @@ DEPRECATED!!!!
     <simpleType>
       <uint8_t>
       </uint8_t>
-<!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
-<!--       <array>2,2</array> -->
+      <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>

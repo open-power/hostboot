@@ -75,6 +75,9 @@ enum sizes
     // Attribute? BRS
     COARSE_CAL_STEP_SIZE = 0x4,
     CONSEQ_PASS = 0x8,
+
+    // Largest size a VPD keyword can be
+    VPD_KEYWORD_MAX = 255,
 };
 
 enum times

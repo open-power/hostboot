@@ -45,6 +45,7 @@
 fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 {
     mss::eff_config l_eff_config;
+
     // Caches
     std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
@@ -212,6 +213,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         }
 
     }// dimm
+
+    // Decode the VPD for this MCS and stick it in the attributes.
+    FAPI_TRY( l_eff_config.decode_vpd(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -27,13 +27,17 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include <vpd_access.H>
 #include <mss.H>
+#include <lib/mss_vpd_decoder.H>
 
 #include <lib/eff_config/eff_config.H>
 #include <lib/eff_config/timing.H>
 #include <lib/spd/spd_decoder.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
+
+#include <lib/utils/fake_vpd.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -3333,6 +3337,58 @@ fapi2::ReturnCode eff_config::dram_trtp(const fapi2::Target<TARGET_TYPE_DIMM>& i
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trtp, PORTS_PER_MCS)),
               "Failed setting attribute for DRAM_TRTP");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Grab the VPD blobs and decode into attributes
+/// @param[in] i_target FAPI2 target (MCS)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
+{
+    uint8_t l_mt_blob[mss::VPD_KEYWORD_MAX];
+    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX];
+
+    // Get MT data
+    {
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MT);
+
+        // Check the max for giggles. Programming bug so we should assert.
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
+
+        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+        {
+            FAPI_ERR("VPD MT keyword is too big for our array");
+            fapi2::Assert(false);
+        }
+
+        // For MT we need to fill in the rank information
+        // TODO RTC:157758 Seems the interface is incorrect, but we're just returning fake VPD here anyway
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
+    }
+
+    // Get MR data
+    {
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MR);
+
+        // Check the max for giggles. Programming bug so we should assert.
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
+
+        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+        {
+            FAPI_ERR("VPD MR keyword is too big for our array");
+            fapi2::Assert(false);
+        }
+
+        // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
+        FAPI_TRY( mss::freq(mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
+    }
+
+    FAPI_TRY( mss::eff_decode(i_target, l_mt_blob, l_mr_blob) );
 
 fapi_try_exit:
     return fapi2::current_err;

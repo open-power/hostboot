@@ -36,6 +36,7 @@ OBJS += call_mss_attr_update.o
 # library objects needed
 OBJS += spd_decoder.o
 OBJS += fake_spd.o
+OBJS += fake_vpd.o
 OBJS += c_str.o
 OBJS += memory_size.o
 OBJS += attr_setters.o
@@ -44,6 +45,7 @@ OBJS += eff_config.o
 OBJS += timing.o
 OBJS += rank.o
 OBJS += sync.o
+
 
 
 #Add all the extra include paths
