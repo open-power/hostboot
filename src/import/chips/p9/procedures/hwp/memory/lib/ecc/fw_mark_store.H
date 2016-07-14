@@ -45,6 +45,24 @@ namespace ecc
 namespace fwms
 {
 
+enum mark_type
+{
+    SYMBOL = 1,
+    CHIP = 0
+};
+
+enum mark_region
+{
+    DISABLED = 0b000,
+    RESERVED = 0b001,
+    BANK = 0b010,
+    BANKGROUP = 0b011,
+    SRANK = 0b100,
+    MRANK = 0b101,
+    DIMM = 0b110,
+    UNIVERSAL = 0b111
+};
+
 ///
 /// @brief Read Firmware Mark Store (FWMS) register
 /// @tparam R master rank number
@@ -421,7 +439,7 @@ inline void get_mark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 /// @note CHIP=>0b0
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
-inline void set_type( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+inline void set_type( fapi2::buffer<uint64_t>& io_data, const mark_type i_value )
 {
     io_data.writeBit<TT::FIRMWARE_MS_TYPE>(i_value);
     FAPI_INF("set_type: 0x%01lx", i_value);
@@ -439,9 +457,9 @@ inline void set_type( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 /// @note CHIP=>0b0
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
-inline void get_type( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+inline void get_type( const fapi2::buffer<uint64_t>& i_data, mark_type& o_value )
 {
-    o_value = i_data.getBit<TT::FIRMWARE_MS_TYPE>();
+    o_value = mark_type(i_data.getBit<TT::FIRMWARE_MS_TYPE>());
     FAPI_INF("get_type: 0x%01lx", o_value);
 }
 
@@ -463,7 +481,7 @@ inline void get_type( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 /// @note UNIVERSAL=>0b111
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
-inline void set_region( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+inline void set_region( fapi2::buffer<uint64_t>& io_data, const mark_region i_value )
 {
     io_data.insertFromRight<TT::FIRMWARE_MS_REGION, TT::FIRMWARE_MS_REGION_LEN>(i_value);
     FAPI_INF("set_region: 0x%02lx", i_value);
@@ -487,9 +505,11 @@ inline void set_region( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value
 /// @note UNIVERSAL=>0b111
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
-inline void get_region( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+inline void get_region( const fapi2::buffer<uint64_t>& i_data, mark_region& o_value )
 {
-    i_data.extractToRight<TT::FIRMWARE_MS_REGION, TT::FIRMWARE_MS_REGION_LEN>(o_value);
+    uint64_t l_temp = 0;
+    i_data.extractToRight<TT::FIRMWARE_MS_REGION, TT::FIRMWARE_MS_REGION_LEN>(l_temp);
+    o_value = mark_region(l_temp);
     FAPI_INF("get_region: 0x%02lx", o_value);
 }
 
