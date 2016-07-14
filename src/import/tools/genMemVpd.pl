@@ -319,6 +319,10 @@ if ($cfgMrwMemVpdFreqsMhz eq undef ||
 # Parse parameter MRW frequencys
 {
     my ($freq0,$freq1,$freq2,$freq3) = split(',',$cfgMrwMemVpdFreqsMhz);
+
+    fatal("missing frequency in parameters")
+        if (($freq0 eq undef) || ($freq1 eq undef) || ($freq2 eq undef) || ($freq3 eq undef));
+
     @g_MrwFreq = (str2value($freq0),
                   str2value($freq1),
                   str2value($freq2),
@@ -1184,7 +1188,7 @@ sub str2value
     my $value =eval($text);
     if ($value eq undef)
     {
-        fatal("$text is not a number");
+        fatal("str2value: $text is not a number");
     }
 
     return $value;
