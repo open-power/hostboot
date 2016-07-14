@@ -73,6 +73,7 @@ namespace HBPM
 
         // Mask off bit zero
         PHYSICAL_ADDR_MASK = 0x7FFFFFFFFFFFFFFF,
+        VER_EYECATCH       = 0x56455253494F4E00, //'VERSION\0'
     };
 
     /**
