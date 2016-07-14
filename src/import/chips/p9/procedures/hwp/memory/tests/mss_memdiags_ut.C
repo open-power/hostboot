@@ -306,7 +306,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000081 == l_read );
+                REQUIRE( 0x0000000000000080 == l_read );
             }
 
             // Load thresholds - default state (expecting default threshold register state)
@@ -401,7 +401,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000081 == l_read );
+                REQUIRE( 0x0000000000000080 == l_read );
             }
 
             // Load thresholds - default state (expecting default threshold register state)
@@ -493,7 +493,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x00000000000000a1 == l_read );
+                REQUIRE( 0x00000000000000a0 == l_read );
             }
 
             // Load thresholds - default state (expecting default threshold register state)
@@ -594,11 +594,15 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
                 switch (l_size)
                 {
                     case 128:
-                        REQUIRE(l_read == 0x68000000000000);
+                        REQUIRE(l_read == 0x0068000000000000);
                         break;
 
                     case 64:
-                        REQUIRE(l_read == 0xC8000000000000);
+                        REQUIRE(l_read == 0x00C8000000000000);
+                        break;
+
+                    case 32:
+                        REQUIRE(l_read == 0x0198000000000000);
                         break;
 
                     default:
@@ -661,7 +665,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000000000001 == l_read );
+                REQUIRE( 0x0000000000000000 == l_read );
             }
 
 
@@ -712,7 +716,7 @@ TEST_CASE_METHOD(mss::test::mcbist_target_test_fixture, "memdiags", "[memdiags]"
             {
                 fapi2::buffer<uint64_t> l_read;
                 REQUIRE_FALSE( mss::getScom(i_target, MCBIST_MCBCFGQ, l_read) );
-                REQUIRE( 0x0000000020000041 == l_read );
+                REQUIRE( 0x0000000020000040 == l_read );
             }
 
         }

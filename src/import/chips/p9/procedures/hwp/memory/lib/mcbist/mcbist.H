@@ -1213,7 +1213,22 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
     FAPI_INF("loading MCBIST Config 0x%016lx", i_program.iv_config);
-    return mss::putScom(i_target, TT::CFGQ_REG, i_program.iv_config);
+
+    // Copy the program's config settings - we want to modify them if we're in sim.
+    fapi2::buffer<uint64_t> l_config = i_program.iv_config;
+
+    // If we're running in Cronus, there is no interrupt so any attention bits will
+    // hang something somewhere. Make sure there's nothing in this config which can
+    // turn on attention bits unless we're running in hostboot
+#ifndef __HOSTBOOT_MODULE
+    l_config.template clearBit<TT::CFG_ENABLE_HOST_ATTN>();
+    l_config.template clearBit<TT::CFG_ENABLE_SPEC_ATTN>();
+#endif
+
+    FAPI_TRY( mss::putScom(i_target, TT::CFGQ_REG, l_config) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
