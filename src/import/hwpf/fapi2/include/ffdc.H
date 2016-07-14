@@ -156,6 +156,28 @@ class FirstFailureData
                           const ErrorInfoEntry* i_pEntries,
                           const uint8_t i_count);
 
+
+        ///
+        /// @brief Add ErrorInfo
+        ///
+        /// This is called by the collectFfdc and collectRegFfdc functions
+        /// following the call to actually collect the ffdc data, the ffdc
+        /// collection functions return a vector of shared pointers to the
+        /// ErrorInfoFfdc objects
+        ///
+        /// @param[in] i_errorInfo - vector of shared pointers to
+        ///                          errorInfoFfdc objects
+        ///
+        inline void addErrorInfo(std::vector<std::shared_ptr<ErrorInfoFfdc>>& i_errorInfo)
+        {
+            for( auto p : i_errorInfo )
+            {
+                iv_info->iv_ffdcs.push_back(p);
+            }
+        };
+
+        ///
+
         ///
         /// @brief Get a pointer to any ErrorInfo
         ///
