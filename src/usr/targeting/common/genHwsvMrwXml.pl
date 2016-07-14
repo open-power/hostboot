@@ -142,6 +142,21 @@ use constant SPI_APSS_POS_FIELD => 4;
 use constant SPI_APSS_ORD_FIELD => 5;
 use constant SPI_APSS_RID_FIELD => 6;
 
+use constant
+{
+    # Domain is programmed as part of regular power on sequence.
+    # No need to do anything in host_enable_memvolt
+    POWERON_PROGRAM => 0,
+
+    # Domain needs to be programmed during host_enable_memvolt, but
+    # there is no special computation involved
+    STATIC_PROGRAM => 1,
+
+    # Domain needs to be programmed during host_enable_memvolt, and the
+    # new dynamic vid values must be computed beyond what p9_mss_volt() did
+    DYNAMIC_PROGRAM => 2,
+};
+
 our $mrwdir = "";
 my $sysname = "";
 my $sysnodes = "";
@@ -149,6 +164,9 @@ my $usage = 0;
 my $DEBUG = 0;
 my $outFile = "";
 my $build = "fsp";
+
+# used to map voltage domains to mcbist target
+my %mcbist_dimms;  # $node$proc_$mcbist -> @(n0p1, n0p2, ...)
 
 use Getopt::Long;
 GetOptions( "mrwdir:s"  => \$mrwdir,
@@ -321,6 +339,47 @@ push @systemAttr,
     "BRAZOS_RX_FIFO_OVERRIDE", $reqPol->{'rx_fifo_final_l2u_dly_override'},
 ];
 
+
+
+if ($reqPol->{'supports_dynamic_mem_volt'} eq 'true')
+{
+    push @systemAttr, ['SUPPORTS_DYNAMIC_MEM_VOLT', 1];
+}
+else
+{
+    push @systemAttr, ['SUPPORTS_DYNAMIC_MEM_VOLT', 0];
+}
+
+my %domainProgram = (   MSS_VDD_PROGRAM  => $reqPol->{'mss_vdd_program'},
+                        MSS_VCS_PROGRAM  => $reqPol->{'mss_vcs_program'},
+                        MSS_AVDD_PROGRAM => $reqPol->{'mss_avdd_program'},
+                        MSS_VDDR_PROGRAM => $reqPol->{'mss_vddr_program'},
+                        MSS_VPP_PROGRAM  => $reqPol->{'mss_vpp_program'} );
+for my $domain (keys %domainProgram)
+{
+# RTC:159848 - remove the defaulting to poweron when HWSV support is in
+=domain_default
+    if ($domainProgram{$domain} eq "poweron")
+    {
+        push @systemAttr, [$domain, POWERON_PROGRAM];
+    }
+    elsif ($domainProgram{$domain} eq "static")
+    {
+        push @systemAttr, [$domain, STATIC_PROGRAM];
+    }
+    elsif ($domainProgram{$domain} eq "dynamic")
+    {
+        push @systemAttr, [$domain, DYNAMIC_PROGRAM];
+    }
+    else
+=cut
+    {
+        # default to not program in host_enable_memvolt
+        push @systemAttr, [$domain, POWERON_PROGRAM];
+    }
+}
+
+
 my %procLoadline = ();
 $procLoadline{PROC_R_LOADLINE_VDD}{sys}  = $reqPol->{'proc_r_loadline_vdd' }[0];
 $procLoadline{PROC_R_DISTLOSS_VDD}{sys}  = $reqPol->{'proc_r_distloss_vdd' }[0];
@@ -382,16 +441,6 @@ $optSysPolicies{'NOMINAL_FREQ_MHZ'}{MRW_NAME}
     = "nominal-frequency" ;
 $optSysPolicies{'FREQ_CORE_MAX'}{MRW_NAME}
     = "maximum-frequency" ;
-$optSysPolicies{'MSS_CENT_AVDD_OFFSET_DISABLE'}{MRW_NAME}
-    = "mem_avdd_offset_disable" ;
-$optSysPolicies{'MSS_CENT_VDD_OFFSET_DISABLE'}{MRW_NAME}
-    = "mem_vdd_offset_disable" ;
-$optSysPolicies{'MSS_CENT_VCS_OFFSET_DISABLE'}{MRW_NAME}
-    = "mem_vcs_offset_disable" ;
-$optSysPolicies{'MSS_VOLT_VPP_OFFSET_DISABLE'}{MRW_NAME}
-    = "mem_vpp_offset_disable" ;
-$optSysPolicies{'MSS_VOLT_VDDR_OFFSET_DISABLE'}{MRW_NAME}
-    = "mem_vddr_offset_disable" ;
 $optSysPolicies{'MSS_CENT_AVDD_SLOPE_ACTIVE'}{MRW_NAME}
     = "mem_avdd_slope_active" ;
 $optSysPolicies{'MSS_CENT_AVDD_SLOPE_INACTIVE'}{MRW_NAME}
@@ -881,17 +930,17 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
 }
 
 #------------------------------------------------------------------------------
-# Process the cent-vrds MRW file
+# Process the dimm-vrds MRW file
 #------------------------------------------------------------------------------
-my $cent_vrds_file = open_mrw_file($mrwdir, "${sysname}-cent-vrds.xml");
-my $mrwMemVoltageDomains = parse_xml_file($cent_vrds_file,
-                                 forcearray=>['centaur-vrd-connection']);
+my $dimm_vrds_file = open_mrw_file($mrwdir, "${sysname}-dimm-vrds.xml");
+my $mrwMemVoltageDomains = parse_xml_file($dimm_vrds_file,
+                                 forcearray=>['dimm-vrd-connection']);
 
 our %vrmHash = ();
-my %membufVrmUuidHash = ();
-my %vrmIdHash = ();
+my %dimmVrmUuidHash;
+my %vrmIdHash;
 my %validVrmTypes
-    = ('VMEM' => 1,'AVDD' => 1,'VCS' => 1,'VPP' => 1,'VDD' => 1);
+    = ('VDDR' => 1,'AVDD' => 1,'VCS' => 1,'VPP' => 1,'VDD' => 1);
 use constant VRM_I2C_DEVICE_PATH => 'vrmI2cDevicePath';
 use constant VRM_I2C_ADDRESS => 'vrmI2cAddress';
 use constant VRM_DOMAIN_TYPE => 'vrmDomainType';
@@ -899,9 +948,9 @@ use constant VRM_DOMAIN_ID => 'vrmDomainId';
 use constant VRM_UUID => 'vrmUuid';
 
 foreach my $mrwMemVoltageDomain (
-    @{$mrwMemVoltageDomains->{'centaur-vrd-connection'}})
+    @{$mrwMemVoltageDomains->{'dimm-vrd-connection'}})
 {
-    if(   (!exists $mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'})
+    if( (!exists $mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'})
        || (!exists $mrwMemVoltageDomain->{'vrd'}->{'i2c-address'})
        || (ref($mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'}) eq "HASH")
        || (ref($mrwMemVoltageDomain->{'vrd'}->{'i2c-address'}) eq "HASH")
@@ -914,9 +963,14 @@ foreach my $mrwMemVoltageDomain (
     my $vrmDev  = $mrwMemVoltageDomain->{'vrd'}->{'i2c-dev-path'};
     my $vrmAddr = $mrwMemVoltageDomain->{'vrd'}->{'i2c-address'};
     my $vrmType = uc $mrwMemVoltageDomain->{'vrd'}->{'type'};
-    my $membufInstance =
-        "n"  . $mrwMemVoltageDomain->{'centaur'}->{'target'}->{'node'} .
-        ":p" . $mrwMemVoltageDomain->{'centaur'}->{'target'}->{'position'};
+    my $dimmInstance =
+        "n"  . $mrwMemVoltageDomain->{'dimm'}->{'target'}->{'node'} .
+        ":p" . $mrwMemVoltageDomain->{'dimm'}->{'target'}->{'position'};
+
+    if ($vrmType eq 'VMEM') # VMEM is same as VDDR
+    {
+        $vrmType = 'VDDR';
+    }
 
     if(!exists $validVrmTypes{$vrmType})
     {
@@ -925,7 +979,7 @@ foreach my $mrwMemVoltageDomain (
 
     if(!exists $vrmIdHash{$vrmType})
     {
-        $vrmIdHash{$vrmType} = 0;
+        $vrmIdHash{$vrmType} = 1; # changed to 1 as 0 = invalid
     }
 
     my $uuid = -1;
@@ -935,10 +989,13 @@ foreach my $mrwMemVoltageDomain (
            && ($vrmHash{$vrm}{VRM_I2C_ADDRESS}     eq $vrmAddr)
            && ($vrmHash{$vrm}{VRM_DOMAIN_TYPE}     eq $vrmType) )
         {
-            $uuid = $vrm;
+            #print STDOUT "-> Duplicate VRM: $vrm  ($dimmInstance)\n";
+            #print STDOUT "-> Device path: $vrmDev + Address: $vrmAddr\n";
+            #print STDOUT "-> VRM Domain Type: $vrmType\n";
+            #print STDOUT "-> VRM Domain ID: $vrmHash{$vrm}{VRM_DOMAIN_ID}\n";
+            $uuid =  $vrm;
             last;
         }
-
     }
 
     if($uuid == -1)
@@ -950,23 +1007,28 @@ foreach my $mrwMemVoltageDomain (
         $vrmHash{$vrm}{VRM_DOMAIN_ID} =
             $vrmIdHash{$vrmType}++;
         $uuid = $vrm;
+
+        #print STDOUT "** New vrm: $vrm  ($dimmInstance)\n";
+        #print STDOUT "Device path: $vrmDev + Address: $vrmAddr\n";
+        #print STDOUT "VRM Domain Type: $vrmType\n";
+        #print STDOUT "VRM Domain ID: $vrmHash{$vrm}{VRM_DOMAIN_ID}\n";
     }
 
-    $membufVrmUuidHash{$membufInstance}{$vrmType}{VRM_UUID} = $uuid;
+    $dimmVrmUuidHash{$dimmInstance}{$vrmType}{VRM_UUID} = $uuid;
 }
 
 my $vrmDebug = 0;
 if($vrmDebug)
 {
-    foreach my $membuf ( keys %membufVrmUuidHash)
+    print STDOUT "DIMM list from $dimm_vrds_file\n";
+    foreach my $dimm ( sort keys %dimmVrmUuidHash)
     {
-        print STDOUT "Membuf instance: " . $membuf . "\n";
-
-        foreach my $vrmType ( keys %{$membufVrmUuidHash{$membuf}} )
+        print STDOUT "dimm instance: (" . $dimm . ")\n";
+        foreach my $vrmType ( keys %{$dimmVrmUuidHash{$dimm}} )
         {
             print STDOUT "VRM type: " . $vrmType . "\n";
             print STDOUT "VRM UUID: " .
-                $membufVrmUuidHash{$membuf}{$vrmType}{VRM_UUID} . "\n";
+                $dimmVrmUuidHash{$dimm}{$vrmType}{VRM_UUID} . "\n";
         }
     }
 
@@ -1941,17 +2003,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
     {
         my $proc = $STargets[$i][POS_FIELD];
         my $mcbist = $STargets[$i][UNIT_FIELD];
-        if ($mcbist_count == 0)
-        {
-            print "\n<!-- $SYSNAME n${node}p$proc MCBIST units -->\n";
-        }
-        generate_mcbist($proc,$mcbist,$STargets[$i][ORDINAL_FIELD],$ipath,
-            \%fapiPosH);
-        $mcbist_count++;
-        if ($STargets[$i+1][NAME_FIELD] eq "pu")
-        {
-            $mcbist_count = 0;
-        }
+        addFapiPos_for_mcbist($proc,$mcbist,\%fapiPosH);
     }
     elsif ( $STargets[$i][NAME_FIELD] eq "pec")
     {
@@ -2150,7 +2202,7 @@ for my $i ( 0 .. $#STargets )
 
         generate_centaur( $memb, $membMcs, \@fsi, \@altfsi, $ipath,
                           $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
-                          $ipath, $membufVrmUuidHash{"n${node}:p${memb}"},
+                          $ipath, $dimmVrmUuidHash{"n${node}:p${memb}"},
                           \%fapiPosH);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
@@ -2190,6 +2242,33 @@ for my $i ( 0 .. $#STargets )
 generate_is_dimm(\%fapiPosH) if ($isISDIMM);
 generate_centaur_dimm(\%fapiPosH) if (!$isISDIMM);
 
+# Now generate MCBIST targets
+# Moved here to associate voltage dimms to mcbist targets
+for (my $i = 0; $i <= $#STargets; $i++)
+{
+    if ($STargets[$i][NODE_FIELD] != $node)
+    {
+        next;
+    }
+
+    my $ipath = $STargets[$i][PATH_FIELD];
+    if ( $STargets[$i][NAME_FIELD] eq "mcbist")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $mcbist = $STargets[$i][UNIT_FIELD];
+        if ($mcbist_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc MCBIST units -->\n";
+        }
+        generate_mcbist($proc,$mcbist,$STargets[$i][ORDINAL_FIELD],
+                        $ipath,\%fapiPosH);
+        $mcbist_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $mcbist_count = 0;
+        }
+    }
+}
 
 # call to do pnor attributes
 do_plugin('all_pnors', $node);
@@ -2436,6 +2515,60 @@ sub byNodePos($$)
     return $retVal;
 }
 
+sub addVoltageDomainIDs
+{
+  my ($node, $proc, $mcbist) = @_;
+
+  # grab dimms under this mcbist (filled in by generate_is_dimm)
+  my @dimms = @{ $mcbist_dimms{ $node . $proc . "_" . $mcbist } };
+
+  my %o_vrm_uuids;
+  my %vrm_ids =
+  (
+    "AVDD" => -1,
+    "VDD"  => -1,
+    "VCS"  => -1,
+    "VPP"  => -1,
+    "VDDR" => -1,
+  );
+
+  #print "\n<!-- addVoltageDomainIDs for mcbist $mcbist" .
+  #          "--  n".$node."p".$proc." -->\n";
+  foreach my $dimm (@dimms)
+  {
+    # print "\n<!-- DIMM $dimm -->";
+
+    foreach my $vrmType ( keys %{$dimmVrmUuidHash{$dimm}} )
+    {
+      my $key = $dimmVrmUuidHash{$dimm}{$vrmType}{VRM_UUID};
+      my $domain_id = $vrmHash{$key}{VRM_DOMAIN_ID};
+      # print "\n<!-- Key $key: Domain $domain_id -->\n";
+      if ( ($vrm_ids{ $vrmType } != $domain_id) &&
+           ($vrm_ids{ $vrmType } == -1) )
+      {
+        print "\n"
+            . "    <attribute>\n"
+            . "        <id>$vrmType" . "_ID</id>\n"
+            . "        <default>$domain_id</default>\n"
+            . "    </attribute>";
+        $vrm_ids{ $vrmType } = $domain_id;
+        $o_vrm_uuids{ $vrmType } = $key;
+      }
+      elsif (!exists($vrm_ids{$vrmType}))
+      {
+        die "Unknown vrmType $vrmType for dimm $dimm\n";
+      }
+      elsif ($vrm_ids{ $vrmType } != $domain_id)
+      {
+        # MCBIST can only have one unique domainID per domain type
+        die "DIMM $dimm: $vrmType"."_ID has a different DomainID then expected".
+         " (found " . $domain_id . ", expected ". $vrm_ids{ $vrmType } . ")\n";
+      }
+    }
+  }
+  return %o_vrm_uuids;
+}
+
 sub generate_sys
 {
     my $plat = 0;
@@ -2511,7 +2644,7 @@ sub generate_sys
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>HB_SETTINGS</id>
         <default>
             <field><id>traceContinuous</id><value>0</value></field>
@@ -2953,7 +3086,7 @@ sub generate_system_node
 sub calcAndAddFapiPos
 {
     my ($type,$affinityPath,
-        $relativePos,$fapiPosHr,$parentFapiPosOverride) = @_;
+        $relativePos,$fapiPosHr,$parentFapiPosOverride, $noprint) = @_;
 
     # Uncomment to emit debug trace to STDERR
     #print STDERR "$affinityPath,";
@@ -2989,6 +3122,8 @@ sub calcAndAddFapiPos
         $typeToLimit{"pec"}    = ARCH_LIMIT_PEC_PER_PROC;
         $typeToLimit{"phb"}    = ARCH_LIMIT_PHB_PER_PEC;
 
+        #TODO RTC 149326 Add calcAndAddFapiPos logic for NV unit
+        # when generate_nv is available
     }
 
     my $parentFapiPos = 0;
@@ -3037,7 +3172,7 @@ sub calcAndAddFapiPos
    <attribute>
        <id>FAPI_POS</id>
        <default>$fapiPos</default>
-   </attribute>";
+   </attribute>" unless ($noprint);
 
         #mcs MEMVPD_POS is the same as FAPI_POS on single node systems.
         if($type eq "mcs")
@@ -3048,7 +3183,7 @@ sub calcAndAddFapiPos
    <attribute>
        <id>MEMVPD_POS</id>
        <default>$fapiPos</default>
-   </attribute>";
+   </attribute>" unless ($noprint);
         }
     }
     else
@@ -4154,6 +4289,14 @@ sub generate_mca
 ";
 }
 
+sub addFapiPos_for_mcbist
+{
+  my ($proc, $mcbist, $fapiPosHr) = @_;
+  my $affinityPath="affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
+
+  calcAndAddFapiPos("mcbist",$affinityPath,$mcbist,$fapiPosHr, undef, 1);
+}
+
 sub generate_mcbist
 {
     my ($proc, $mcbist, $ordinalId, $ipath,$fapiPosHr) = @_;
@@ -4218,12 +4361,15 @@ sub generate_mcbist
 
     calcAndAddFapiPos("mcbist",$affinityPath,$mcbist,$fapiPosHr);
 
+    my %mcbist_rails_hash = addVoltageDomainIDs($node, $proc, $mcbist);
+
     # call to do any fsp per-mcbist attributes
-    do_plugin('fsp_mcbist', $proc, $mcbist, $ordinalId );
+    do_plugin('fsp_mcbist', \%mcbist_rails_hash);
 
     print "
 </targetInstance>
 ";
+
 }
 
 sub generate_pec
@@ -4837,13 +4983,13 @@ sub generate_nv_ipath
         #@TODO-RTC:156600
         if($Target->{'ecmd-common-name'} eq "nvbus")
         {
-            my $node = $Target->{'node'};
+            my $node     = $Target->{'node'};
             my $position = $Target->{'position'};
             my $chipUnit = $Target->{'chip-unit'};
-            my $ipath = $Target->{'instance-path'};
+            my $ipath    = $Target->{'instance-path'};
 
             $nvList{$node}{$position}{$chipUnit} = {
-                'node'         => $node,
+                'node'        => $node,
                 'position'     => $position,
                 'nvChipUnit'   => $chipUnit,
                 'nvIpath'      => $ipath,
@@ -5182,21 +5328,11 @@ sub generate_centaur
         <default>$lane_swap</default>
     </attribute>";
 
-    foreach my $vrmType ( keys %$membufVrmUuidHash )
-    {
-        my $key = $membufVrmUuidHash->{$vrmType}{VRM_UUID};
-        print
-              "\n"
-            . "    <attribute>\n"
-            . "        <id>$vrmType" . "_ID</id>\n"
-            . "        <default>$vrmHash{$key}{VRM_DOMAIN_ID}</default>\n"
-            . "    </attribute>";
-    }
 
     # call to do any fsp per-centaur attributes
     do_plugin('fsp_centaur', $scomFspApath, $scomFspAsize, $scanFspApath,
        $scanFspAsize, $scomFspBpath, $scomFspBsize, $scanFspBpath,
-       $scanFspBsize, $relativeCentaurRid, $ordinalId, $membufVrmUuidHash);
+       $scanFspBsize, $relativeCentaurRid, $ordinalId);
 
 
     # $TODO RTC:110399
@@ -5467,6 +5603,9 @@ sub generate_is_dimm
 
         my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc"
             . "/mcbist-$mcbist/mcs-$mcs/mca-$mca/dimm-$dimm";
+
+        # add dimm to mcbist array
+        push(@{$mcbist_dimms{$node . $proc."_".$mcbist}}, "n${node}:p${pos}");
 
         print "\n<!-- DIMM n${node}:p${pos} -->\n";
         print "
