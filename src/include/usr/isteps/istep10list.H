@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,6 +172,9 @@ const DepModInfo g_istep10Dependancies = {
         DEP_LIB(libslave_sbe.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
+#endif
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_base.so),
 #endif
 #endif
         NULL

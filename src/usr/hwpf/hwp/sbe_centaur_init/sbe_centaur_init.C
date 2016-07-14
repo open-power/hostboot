@@ -58,6 +58,8 @@
 #include <sbe/sbeif.H>
 #include "cen_xip_customize.H"
 #include <util/align.H>
+#include <config.h>
+#include <pnor/pnorif.H>
 
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
            std::list<uint64_t> & io_sharedObjectArgs);
@@ -114,6 +116,29 @@ void*    call_sbe_centaur_init( void *io_pArgs )
     errlHndl_t  l_errl = NULL;
 
     IStepError  l_StepError;
+
+    do {
+
+    // Load Centaur SBE Image into Secure space, if necessary
+#ifdef CONFIG_SECUREBOOT
+    l_errl = loadSecureSection(PNOR::CENTAUR_SBE);
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
+        "call_sbe_centaur_init() - Error from loadSecureSection() loading "
+        "PNOR::CENTAUR_SBE");
+
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl );
+
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+        // Do not attempt to do this istep
+        break;
+    }
+#endif
 
     // Loop thru all Centaurs in list
     for (TargetHandleList::const_iterator
@@ -322,6 +347,27 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         }
 
     }   // end for
+
+#ifdef CONFIG_SECUREBOOT
+    l_errl = unloadSecureSection(PNOR::CENTAUR_SBE);
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK,
+        "call_sbe_centaur_init() - Error from unloadSecureSection() unloading "
+        "PNOR::CENTAUR_SBE");
+
+        // Create IStep error log and cross reference error that occurred
+        l_StepError.addErrorDetails( l_errl );
+
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+        break;
+    }
+#endif
+
+    } while(0);  // end of do-while
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_sbe_centaur_init exit" );
