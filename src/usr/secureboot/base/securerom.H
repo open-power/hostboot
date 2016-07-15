@@ -68,7 +68,7 @@ class SecureROM
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf) const;
+        errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const;
 
         /**
          * @brief Retrieve the internal hardware hash key from secure ROM

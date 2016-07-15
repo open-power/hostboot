@@ -38,6 +38,7 @@
 #include <console/consoleif.H>
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
+#include <secureboot/trustedbootif.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -336,6 +337,16 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         }
 
         // verification succeeded
+
+        // pcr extension of PNOR hash
+        l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
+                                        (l_tempAddr + PAGESIZE),
+                                        i_id);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections extendPnorSectionHash failed");
+            break;
+        }
 
         // keep track of info size in load record
         o_rec->infoSize = l_info.size;

@@ -77,6 +77,24 @@ class ContainerHeader
          */
         const SHA512_t* payloadTextHash() const;
 
+        /**
+         * @brief Retrieves total size of all sw keys concatenated
+         * @return size_t - size of concatenated sw keys
+         */
+        size_t totalSwKeysSize() const;
+
+        /**
+         * @brief Retrieves sw public key hash
+         * @return SHA512_t* - ptr to hash of sw public keys
+         */
+        const SHA512_t* swKeyHash() const;
+
+        /**
+         * @brief Retrieves pointer to first sw key
+         * @return ecc_key_t* - ptr to first sw key
+         */
+        const ecc_key_t* sw_keys() const;
+
         // @TODO RTC: 155374 remove, SecureROMTest will use iv_isValid.
         /**
          * @brief Returns if the parsed header is a valid secureboot one. This
@@ -118,6 +136,9 @@ class ContainerHeader
 
         // Counter for bytes read while parsing the container header
         size_t iv_hdrBytesRead;
+
+        // Total size of all software keys concatenated
+        size_t iv_totalSwKeysSize;
 
         /**
          * @brief Weak check to determine if secureboot header looks right.
@@ -162,5 +183,3 @@ class ContainerHeader
 }; //end of SECUREBOOT namespace
 
 #endif
-
-

@@ -135,7 +135,7 @@ namespace SECUREBOOT
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t o_buf);
+    errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
 
     /**
      * @brief Retrieve the internal hardware hash key from secure ROM

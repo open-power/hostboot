@@ -65,6 +65,9 @@ namespace TRUSTEDBOOT
 {
 
 #ifdef CONFIG_TPMDD
+// Const string to append to PCR extension messages
+const char* FW_KEY_HASH_EXT = " FW KEY HASH";
+
 /// Global object to store TPM status
 SystemTpms systemTpms;
 
@@ -193,8 +196,56 @@ errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
 {
     errlHndl_t l_errhdl = NULL;
 #ifdef CONFIG_TPMDD
-    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"extendPnorSectionHash for section: %s",
-              cv_EYECATCHER[i_sec]);
+    assert(i_sec < PNOR::NUM_SECTIONS,"PNOR section id %d is not a known section",
+           i_sec);
+    const char* l_secName = cv_EYECATCHER[i_sec];
+    // Generate pcr extension message
+    char l_swKeyMsg[strlen(l_secName) + strlen(FW_KEY_HASH_EXT) + 1];
+    memset(l_swKeyMsg, 0, sizeof(l_swKeyMsg));
+    strcat(l_swKeyMsg,l_secName);
+    strcat(l_swKeyMsg,FW_KEY_HASH_EXT);
+
+    TRACDCOMP(g_trac_trustedboot, ENTER_MRK"extendPnorSectionHash for section: %s",
+              l_secName);
+    do
+    {
+        size_t l_protectedSize = i_conHdr.payloadTextSize();
+        if (SECUREBOOT::enabled())
+        {
+            // If secureboot is enabled, use protected hash in header
+            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0,
+                  reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
+                  sizeof(SHA512_t),
+                  l_secName);
+            if (l_errhdl)
+            {
+                break;
+            }
+
+            // Extend sw public key hash to pcr1
+            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
+                        reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
+                        sizeof(SHA512_t),
+                        l_swKeyMsg);
+            if (l_errhdl)
+            {
+                break;
+            }
+        }
+        else
+        {
+            // If secureboot is not enabled, measure protected section
+            SHA512_t l_hash = {0};
+            SECUREBOOT::hashBlob(i_vaddr, l_protectedSize, l_hash);
+            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
+                                              sizeof(SHA512_t),
+                                              l_secName);
+            if (l_errhdl)
+            {
+                break;
+            }
+        }
+    } while(0);
 #endif
     return l_errhdl;
 }

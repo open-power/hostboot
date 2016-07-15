@@ -57,6 +57,8 @@ void ContainerHeader::parse_header(const void* i_header)
 
     // Get SW keys
     l_size = iv_headerInfo.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
+    // Cache total software keys size
+    iv_totalSwKeysSize = l_size;
     safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.sw_pkey_p, l_hdr, l_size);
 
     /*---- Parse ROM_sw_header_raw ----*/
@@ -98,6 +100,18 @@ void ContainerHeader::print() const
 
     /*---- Print ROM_prefix_header_raw ----*/
     TRACFCOMP(g_trac_secure,"sw_key_count 0x%X", iv_headerInfo.hw_prefix_hdr.sw_key_count);
+    TRACFBIN(g_trac_secure,"sw public key hash", iv_headerInfo.hw_prefix_hdr.payload_hash, SHA512_DIGEST_LENGTH);
+
+    /*---- Print ROM_prefix_data_raw ----*/
+    TRACFBIN(g_trac_secure,"sw_pkey_p", iv_headerInfo.hw_prefix_data.sw_pkey_p, sizeof(ecc_key_t));
+    if (iv_headerInfo.hw_prefix_hdr.sw_key_count>1)
+    {
+        TRACFBIN(g_trac_secure,"sw_pkey_q", iv_headerInfo.hw_prefix_data.sw_pkey_q, sizeof(ecc_key_t));
+    }
+    if (iv_headerInfo.hw_prefix_hdr.sw_key_count>2)
+    {
+        TRACFBIN(g_trac_secure,"sw_pkey_r", iv_headerInfo.hw_prefix_data.sw_pkey_r, sizeof(ecc_key_t));
+    }
 
     /*---- Print ROM_sw_header_raw ----*/
     TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.sw_hdr.payload_size );
@@ -115,6 +129,21 @@ size_t ContainerHeader::payloadTextSize() const
 const SHA512_t* ContainerHeader::payloadTextHash() const
 {
     return &iv_headerInfo.sw_hdr.payload_hash;
+}
+
+size_t ContainerHeader::totalSwKeysSize() const
+{
+    return iv_totalSwKeysSize;
+}
+
+const ecc_key_t* ContainerHeader::sw_keys() const
+{
+    return &iv_headerInfo.hw_prefix_data.sw_pkey_p;
+}
+
+const SHA512_t* ContainerHeader::swKeyHash() const
+{
+    return &iv_headerInfo.hw_prefix_hdr.payload_hash;
 }
 
 void ContainerHeader::validate()

@@ -78,7 +78,7 @@ errlHndl_t verifyContainer(void * i_container, size_t i_size)
  * @brief Hash Signed Blob
  *
  */
-errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
+errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf)
 {
     return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size, io_buf);
 }
@@ -399,7 +399,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 /**
  * @brief Hash Blob
  */
-errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf) const
+errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const
 {
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
@@ -419,7 +419,7 @@ errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf) co
                                                + SHA512_HASH_FUNCTION_OFFSET;
 
         call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                        reinterpret_cast<sha2_byte*>(i_blob),
+                        reinterpret_cast<const sha2_byte*>(i_blob),
                         i_size,
                         reinterpret_cast<sha2_hash_t*>(io_buf));
 

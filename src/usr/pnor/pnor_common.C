@@ -491,7 +491,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                         // the traditional way.  Otherwise, we defer to the
                         // caller
                         #ifdef CONFIG_SECUREBOOT
-                        if(secId == PNOR::HB_BASE_CODE)
+                        if(secId == PNOR::HB_BASE_CODE || isSecure)
                         {
                             extend = false;
                         }
@@ -499,6 +499,9 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
 
                         if(extend)
                         {
+                            // CONFIG_SECUREBOOT:
+                            // true - Extend all PNOR hashes
+                            // false - Do not extend sections with secureboot support
                             l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
                                                         cv_EYECATCHER[secId]);
                             if (l_errhdl)
