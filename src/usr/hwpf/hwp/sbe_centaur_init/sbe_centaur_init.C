@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,9 @@ const uint32_t MAX_SBE_IMG_SIZE = 48 * 1024;
 // Low MSS freq for 32x32 machines
 const uint32_t MSS_FREQ_32x32_CONFIG = 1066;
 
+// Default MSS freq for CDIMM systems
+const uint32_t MSS_FREQ_DEFAULT_CONFIG = 1600;
+
 // Low Nest Freq
 const uint32_t LOW_NEST_FREQ = 2000;
 
@@ -109,8 +112,6 @@ void*    call_sbe_centaur_init( void *io_pArgs )
     size_t l_sbePnorSize = 0;
     void* l_sbePnorAddr = NULL;
     errlHndl_t  l_errl = NULL;
-    uint32_t l_booted_nest_freq = 0;
-    MRW_NEST_CAPABLE_FREQUENCIES_SYS l_mrw_nest_capable;
 
     IStepError  l_StepError;
 
@@ -227,12 +228,18 @@ void*    call_sbe_centaur_init( void *io_pArgs )
         // mem freq -- so set to a default, then clear it (so as not
         // to mess up MSS HWP later
 
+        ATTR_MSS_FREQ_Type l_temp_freq = MSS_FREQ_DEFAULT_CONFIG;
+
+        // All CDIMM systems run exclusively at 1600
+#ifndef CONFIG_CDIMM_FORMAT_FOR_CVPD
+
         // Grab capable frequencies
-        l_mrw_nest_capable =
+        MRW_NEST_CAPABLE_FREQUENCIES_SYS l_mrw_nest_capable =
                    l_sys->getAttr<ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
 
         // Get the nest freq we booted with
-        l_booted_nest_freq = l_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+        uint32_t l_booted_nest_freq =
+          l_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
 
         // If we are running nest at 2.0, and we support 2.0 and 2.4, we
         // need to drop MSS freq to 1066
@@ -244,13 +251,11 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                 "Reducing MSS frequency in sbe_centaur_init to %d based on "
                 "nest frequency", MSS_FREQ_32x32_CONFIG);
 
-            l_membuf_target->setAttr
-                <TARGETING::ATTR_MSS_FREQ>(MSS_FREQ_32x32_CONFIG);
+            l_temp_freq = MSS_FREQ_32x32_CONFIG;
         }
-        else //boot as normal
-        {
-            l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(1600);
-        }
+#endif
+        l_membuf_target->setAttr<TARGETING::ATTR_MSS_FREQ>(l_temp_freq);
+
 
         FAPI_INVOKE_HWP( l_errl, cen_xip_customize,
                          l_fapiTarget, l_sbePnorAddr,
