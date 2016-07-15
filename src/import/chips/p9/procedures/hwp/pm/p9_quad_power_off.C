@@ -60,9 +60,9 @@ fapi2::ReturnCode p9_quad_power_off(
     FAPI_INF("Quad power off chiplet no.%d", l_unit_pos);
 
     // Call the procedure
-//     p9_pm_pfet_control_eq(i_target,
-//                           PM_PFET_TYPE_C::BOTH,
-//                           PM_PFET_TYPE_C::OFF);
+    p9_pm_pfet_control_eq(i_target,
+                          PM_PFET_TYPE_C::BOTH,
+                          PM_PFET_TYPE_C::OFF);
 
 
     FAPI_INF("p9_quad_power_off: ...Exiting");
