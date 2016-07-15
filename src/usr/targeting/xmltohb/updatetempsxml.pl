@@ -273,6 +273,7 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
 
     my $valueType = $fapi_attr->{valueType}->[0];
     $valueType =~ s/(uint\d*)/$1_t/ if($valueType =~ /^uint\d*/);
+    $valueType =~ s/(int\d+)/$1_t/ if ($valueType =~ /^int\d+$/);
 
     my $fwDefault = "";
     if (exists $TempAttr->{default})
@@ -295,7 +296,7 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     # attribute associated with temp FW default uses enum
     my $enum_id = "";
     my $enumDefault = "";
-    if(exists $fapi_attr->{enum})
+    if(exists $fapi_attr->{enum} && (!exists $fapi_attr->{array}))
     {
         $enum_id = $generic_id;
         push @NewAttr, [ "<enumerationType>\n" ];
@@ -305,11 +306,18 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
         push @NewAttr, [ "    </description>\n" ];
 
         my @enum_defs = split(',',$fapi_attr->{enum}->[0]);
+        my $previous_value = -1;
         for my $i ( 0 .. $#enum_defs )
         {
             $enum_defs[$i] =~ /^\s*(.*)\s*=\s*(.*)\s*/;
             my $enumName = $1;
             my $enumValue = $2;
+            unless ($enumValue) # non-specified enum values (first enum = 0)
+            {
+                ($enumName) = $enum_defs[$i] =~ m/^\s*(.*)\s*/;
+                $enumValue = 1 + $previous_value;
+            }
+            $previous_value = $enumValue;
             $enumName =~ s/ //;
             $enumDefault = $enumName if($fwDefault eq $enumValue);
             push @NewAttr, [ "    <enumerator>\n" ];
