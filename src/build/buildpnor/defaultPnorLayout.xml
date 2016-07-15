@@ -129,10 +129,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Extended image (5.5MB w/o ECC)</description>
+        <description>Hostboot Extended image (11MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x29D000</physicalOffset>
-        <physicalRegionSize>0x630000</physicalRegionSize>
+        <physicalRegionSize>0xC60000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -151,7 +151,7 @@ Layout Description
     <section>
         <description>SBE-IPL (Staging Area) (288K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0x8CD000</physicalOffset>
+        <physicalOffset>0xEFD000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
         <sha512perEC/>
         <side>sideless</side>
@@ -160,7 +160,7 @@ Layout Description
     <section>
         <description>Sleep Winkle Ref Image (1.125MB)</description>
         <eyeCatch>WINK</eyeCatch>
-        <physicalOffset>0x915000</physicalOffset>
+        <physicalOffset>0xF45000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -169,7 +169,7 @@ Layout Description
     <section>
         <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0xA35000</physicalOffset>
+        <physicalOffset>0x1065000</physicalOffset>
         <physicalRegionSize>0x480000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -178,7 +178,7 @@ Layout Description
     <section>
         <description>Payload (21.375MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0xEB5000</physicalOffset>
+        <physicalOffset>0x14E5000</physicalOffset>
         <physicalRegionSize>0x1560000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -186,7 +186,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x2415000</physicalOffset>
+        <physicalOffset>0x2A45000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <side>sideless</side>
@@ -195,7 +195,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalOffset>0x241E000</physicalOffset>
+        <physicalOffset>0x2A4E000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
@@ -206,7 +206,7 @@ Layout Description
     <section>
         <description>Hostboot Bootloader (22.5K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x2427000</physicalOffset>
+        <physicalOffset>0x2A57000</physicalOffset>
         <physicalRegionSize>0x6000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>

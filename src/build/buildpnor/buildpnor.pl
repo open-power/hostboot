@@ -607,7 +607,7 @@ sub findLayoutKeyByEyeCatch
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
     for $key ( keys %sectionHash)
     {
-        if($sectionHash{$key}{eyeCatch} =~ $eyeCatch)
+        if($sectionHash{$key}{eyeCatch} eq $eyeCatch)
         {
             $layoutKey = $key;
             last;
