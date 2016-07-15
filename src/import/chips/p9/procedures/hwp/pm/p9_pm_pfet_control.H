@@ -45,9 +45,6 @@
 #include <fapi2.H>
 #include <p9_quad_scom_addresses.H>
 
-static int const PFET_DELAY = 100000;         // 100us in ns
-static int const PFET_SIM_CYCLES_DELAY = 0;
-
 namespace PM_PFET_TYPE_C
 {
 //Valid rail options
