@@ -58,9 +58,6 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
 
-//  TODO: RTC 155373 Need to remove hack that is setting IS_SIMULATION to 1 for this substep
-    sys->setAttr<TARGETING::ATTR_IS_SIMULATION>(1);
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                           "call_mss_ddr_phy_reset entry" );
 
@@ -103,9 +100,6 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
         }
 
     } // end l_mcbist loop
-
-//  TODO: RTC 155373 Need to remove hack that is setting IS_SIMULATION to 1 for this substep
-    sys->setAttr<TARGETING::ATTR_IS_SIMULATION>(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_ddr_phy_reset exit" );
