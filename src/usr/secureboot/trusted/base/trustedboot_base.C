@@ -53,6 +53,8 @@
 #ifdef CONFIG_TPMDD
 trace_desc_t* g_trac_trustedboot = NULL;
 TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
+// Eyecatcher strings for PNOR TOC entries
+extern const char* cv_EYECATCHER[];
 #endif
 
 namespace TRUSTEDBOOT
@@ -180,6 +182,18 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
 #endif
     return err;
+}
+
+errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
+                                 const void* i_vaddr,
+                                 const PNOR::SectionId i_sec)
+{
+    errlHndl_t l_errhdl = NULL;
+#ifdef CONFIG_TPMDD
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"extendPnorSectionHash for section: %s",
+              cv_EYECATCHER[i_sec]);
+#endif
+    return l_errhdl;
 }
 
 } // end TRUSTEDBOOT
