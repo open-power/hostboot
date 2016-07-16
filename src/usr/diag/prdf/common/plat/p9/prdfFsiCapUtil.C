@@ -58,13 +58,13 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
         BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &u32Data);
 
         io_sc.service_data->GetCaptureData().Add(
-                            i_chip->GetChipHandle(),
+                            i_chip->getTrgt(),
                             ( Util::hashString("CFAM_FSI_STATUS") ^
                               i_chip->getSignatureOffset() ),
                             bs);
     }
 
-    if( TYPE_PROC == getTargetType(i_chip->GetChipHandle()) )
+    if( TYPE_PROC == i_chip->getTrgtType() )
     {
         uint32_t fsiGp7 = 0;
         rc = getCfam( i_chip, 0x2816, fsiGp7 );
@@ -73,7 +73,7 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
             BIT_STRING_ADDRESS_CLASS bs (0, 32, (CPU_WORD *) &fsiGp7);
 
             io_sc.service_data->GetCaptureData().Add(
-                                i_chip->GetChipHandle(),
+                                i_chip->getTrgt(),
                                 ( Util::hashString("CFAM_FSI_GP7") ^
                                   i_chip->getSignatureOffset() ),
                                 bs);

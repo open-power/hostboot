@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #endif
 
 #include <iipconst.h>
+#include <prdfPlatServices.H>
 
 /*--------------------------------------------------------------------*/
 /*  Forward References                                                */
@@ -119,6 +120,7 @@ class CHIP_CLASS
      <br><b>Notes:       </b> Not to be used previous to Regatta
      </ul><br>
      */
+    // NOTE: Deprecating this interface. Use getTrgt() instead.
     TARGETING::TargetHandle_t GetChipHandle() const
     {
         return iv_pchipHandle;
@@ -186,7 +188,26 @@ class CHIP_CLASS
      <br><b>Notes:       </b> default is to do nothing
      </ul><br>
      */
+    // NOTE: Deprecating this interface. Use getHuid() instead.
     HUID GetId() const;
+
+    /** @return The target associated with this chip. */
+    TARGETING::TargetHandle_t getTrgt() const
+    {
+        return iv_pchipHandle;
+    }
+
+    /** @return The HUID associated with this chip. */
+    TARGETING::ATTR_HUID_type getHuid() const
+    {
+        return PlatServices::getHuid( iv_pchipHandle );
+    }
+
+    /** @return The targeting type associated with this chip. */
+    TARGETING::TYPE getTrgtType() const
+    {
+        return PlatServices::getTargetType( iv_pchipHandle );
+    }
 
   protected:
 

@@ -74,7 +74,7 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
             ++index)
         {
             ExtensibleChip * l_chip = LookUp( index );
-            TARGETING::TargetHandle_t l_chipTgt = l_chip->GetChipHandle();
+            TARGETING::TargetHandle_t l_chipTgt = l_chip->getTrgt();
             bool l_analysisPending =
                   sysdbug.isActiveAttentionPending( l_chipTgt, RECOVERABLE );
 
@@ -148,7 +148,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             }
 
         }
-        else if ( !PlatServices::isFunctional(l_chip->GetChipHandle()) )
+        else if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
         {
             // The chip is now non-functional.
             nfchips.push_back( l_chip );
@@ -158,7 +158,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     // Remove all non-functional chips.
     for ( NonFuncChips::iterator i = nfchips.begin(); i != nfchips.end(); i++ )
     {
-        systemPtr->RemoveStoppedChips( (*i)->GetChipHandle() );
+        systemPtr->RemoveStoppedChips( (*i)->getTrgt() );
     }
 
     // always suspect the clock source
@@ -187,7 +187,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         if ( tmpCount == serviceData.service_data->getMruListSize() )
         {
             // No additional callouts were made so add this chip to the list.
-            serviceData.service_data->SetCallout( chip()[0]->GetChipHandle());
+            serviceData.service_data->SetCallout( chip()[0]->getTrgt());
         }
     }
 
@@ -204,13 +204,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
     // Set Signature
     serviceData.service_data->GetErrorSignature()->
-        setChipId(chip()[0]->GetId());
+        setChipId(chip()[0]->getHuid());
     serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
 
 #ifndef __HOSTBOOT_MODULE
     // Set dump flag dg09a
-    serviceData.service_data->SetDump(iv_dumpContent,chip()[0]->
-        GetChipHandle());
+    serviceData.service_data->SetDump(iv_dumpContent,chip()[0]->getTrgt());
 #endif
 
     // Clear PLLs from this domain.
