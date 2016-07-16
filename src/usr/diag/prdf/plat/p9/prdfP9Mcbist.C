@@ -88,7 +88,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
     {
         mcbdb->iv_sendCmdCompleteMsg = false;
 
-        int32_t rc = mdiaSendEventMsg( i_mcbChip->GetChipHandle(),
+        int32_t rc = mdiaSendEventMsg( i_mcbChip->getTrgt(),
                                        MDIA::COMMAND_COMPLETE );
         if ( SUCCESS != rc )
         {

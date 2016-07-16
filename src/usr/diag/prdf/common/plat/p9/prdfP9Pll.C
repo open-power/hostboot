@@ -83,7 +83,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         if (rc != SUCCESS)
         {
             PRDF_ERR(PRDF_FUNC "TP_LFIR read failed"
-                     "for 0x%08x", i_chip->GetId());
+                     "for 0x%08x", i_chip->getHuid());
             break;
         }
 
@@ -91,7 +91,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         if (rc != SUCCESS)
         {
             PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK read failed"
-                     "for 0x%08x", i_chip->GetId());
+                     "for 0x%08x", i_chip->getHuid());
             break;
         }
 
@@ -106,7 +106,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     if( rc != SUCCESS )
     {
         PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
-                 i_chip->GetId());
+                 i_chip->getHuid());
     }
 
     return rc;
@@ -139,7 +139,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         if (rc != SUCCESS)
         {
             PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
-                     "for chip: 0x%08x", i_chip->GetId());
+                     "for chip: 0x%08x", i_chip->getHuid());
         }
     }
 
@@ -168,7 +168,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
     if (rc != SUCCESS)
     {
         PRDF_ERR("[Proc::MaskPll] TP_LFIR_AND write failed"
-                 "for chip: 0x%08x", i_chip->GetId());
+                 "for chip: 0x%08x", i_chip->getHuid());
     }
 
     return rc;
@@ -190,8 +190,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     PLL::captureFsiStatusReg( i_chip, io_sc );
 
     // Add EX scom data
-    TargetHandleList exList = getConnected(
-                        i_chip->GetChipHandle(), TYPE_CORE);
+    TargetHandleList exList = getConnected(i_chip->getTrgt(), TYPE_CORE);
     ExtensibleChip * exChip;
     TargetHandleList::iterator itr = exList.begin();
     for( ; itr != exList.end(); ++itr)
