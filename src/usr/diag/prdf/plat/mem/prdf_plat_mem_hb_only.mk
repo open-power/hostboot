@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/plat/p9/prdf_plat_p9_hb_only.mk $
+# $Source: src/usr/diag/prdf/plat/mem/prdf_plat_mem_hb_only.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -29,15 +29,15 @@
 # Paths common to both IPL and runtime
 ################################################################################
 
-prd_vpath += ${PRD_SRC_PATH}/plat/p9
+prd_vpath += ${PRD_SRC_PATH}/plat/mem
 
-prd_incpath += ${PRD_SRC_PATH}/plat/p9
+prd_incpath += ${PRD_SRC_PATH}/plat/mem
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
 
-# plat/p9/ (rule plugin related)
+# plat/mem/ (rule plugin related)
 prd_rule_plugin += prdfP9Mcbist.o
 
 ################################################################################
