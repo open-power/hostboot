@@ -45,9 +45,16 @@
 #include <endian.h>
 #include <util/align.H>
 #include <config.h>
+#include <pnor/pnorif.H>
 #include "pnor_common.H"
 #include <hwas/common/hwasCallout.H>
 #include <console/consoleif.H>
+
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/settings.H>
+#include <secureboot/header.H>
+#include <secureboot/trustedbootif.H>
+#endif
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -205,6 +212,17 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 
         l_errl->collectTrace(PNOR_COMP_NAME);
     }
+    else
+    {
+        // Extend base image (HBB) when Hostboot first starts.  Since HBB is
+        // never re-loaded, inhibit extending this image in runtime code.
+        #ifndef __HOSTBOOT_RUNTIME
+        #ifdef CONFIG_SECUREBOOT
+        // Extend the base image to the TPM, regardless of how it was obtained
+        l_errl = TRUSTEDBOOT::extendBaseImage();
+        #endif
+        #endif
+    }
 
     io_rtaskRetErrl=l_errl;
 }
@@ -331,6 +349,67 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
             break;
         }
+
+        // Extend base image (HBB) when Hostboot first starts.  Since HBB is
+        // never re-loaded, inhibit extending this image in runtime code.
+        #ifndef __HOSTBOOT_RUNTIME
+        #ifdef CONFIG_SECUREBOOT
+        if(!SECUREBOOT::enabled())
+        {
+            // If in secure mode, we already have securely obtained the header
+            // because we copied it before the blind purge.  In non-secure mode,
+            // cache the header from PNOR (susceptible to attacks).  This is ok
+            // because there are already no security guarantees in non-secure
+            // mode.  We need to get the HBB address separately because the
+            // TOC ignores the header
+            PNOR::SideInfo_t pnorInfo = {PNOR::WORKING};
+            l_errhdl = PnorRP::getSideInfo(PNOR::WORKING, pnorInfo);
+            if(l_errhdl != NULL)
+            {
+                break;
+            }
+
+            const SectionData_t* pHbb = &iv_TOC[PNOR::HB_BASE_CODE];
+            bool ecc = (pHbb->integrity == FFS_INTEG_ECC_PROTECT) ? true :false;
+
+            // If dealing with ECC, we need to account for that when selecting
+            // the flash read address
+            size_t effPageSize = (ecc == true) ?
+                  PAGESIZE_PLUS_ECC : PAGESIZE;
+
+            // We have to read two pages because the secure header is a page by
+            // itself, but it is prefixed by the SBE header
+            uint8_t pHeader[2*PAGESIZE] = {0};
+            for(size_t i=0; i<(sizeof(pHeader)/PAGESIZE); ++i)
+            {
+                uint64_t fatalError = 0;
+                l_errhdl = readFromDevice(
+                    pnorInfo.hbbAddress + (effPageSize*i),
+                    pHbb->chip,
+                    ecc,
+                    pHeader+(PAGESIZE*i),
+                    fatalError);
+
+                // If fatalError != 0 there is an uncorrectable ECC error (UE).
+                // In that case, continue on with inaccurate data, as
+                // readFromDevice API will initiate a shutdown.
+                if(l_errhdl != NULL)
+                {
+                    break;
+                }
+            }
+
+            if(l_errhdl != NULL)
+            {
+                break;
+            }
+
+            // Skip the SBE header on the HBB image to get the real header
+            (void)SECUREBOOT::baseHeader().setNonSecurely(
+                pHeader + PNOR::SBE_HEADER_SIZE);
+        }
+        #endif
+        #endif
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );

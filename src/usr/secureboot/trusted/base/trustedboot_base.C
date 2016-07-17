@@ -35,6 +35,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/msg.h>
+#include <sys/mm.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -42,6 +43,9 @@
 #include <errl/errludstring.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
+#include <secureboot/header.H>
+#include <secureboot/containerheader.H>
+#include <pnor/pnorif.H>
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
@@ -193,6 +197,70 @@ errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
               cv_EYECATCHER[i_sec]);
 #endif
     return l_errhdl;
+}
+
+errlHndl_t extendBaseImage()
+{
+    errlHndl_t pError = NULL;
+
+#ifdef CONFIG_TPMDD
+
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK "extendBaseImage()");
+
+    do {
+
+    // Query the HBB header and code address
+    const void* pHbbHeader = NULL;
+
+    (void)SECUREBOOT::baseHeader().getHeader(
+        pHbbHeader);
+
+    // Fatal code bug if either address is NULL
+    assert(pHbbHeader!=NULL,"BUG! Cached header address is NULL");
+
+    TRACDBIN(g_trac_trustedboot,"Base Header",pHbbHeader,128);
+
+    // Build a container header object from the raw header
+    SECUREBOOT::ContainerHeader hbbContainerHeader(pHbbHeader);
+
+    const void* pHbbVa = NULL;
+    if(!SECUREBOOT::enabled())
+    {
+        PNOR::SectionInfo_t l_info = {PNOR::INVALID_SECTION};
+        pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
+        if(pError)
+        {
+            TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+                "getSectionInfo for HBB section");
+            break;
+        }
+        assert(l_info.vaddr != 0,"BUG! HBB virtual address was 0");
+        pHbbVa = reinterpret_cast<const void*>(
+            l_info.vaddr + PNOR::SBE_HEADER_SIZE);
+
+        TRACDBIN(g_trac_trustedboot,"PNOF Base Code",pHbbVa,128);
+    }
+
+    // Extend the HBB measurement to the TPM
+    pError = extendPnorSectionHash(
+        hbbContainerHeader,
+        pHbbVa,
+        PNOR::HB_BASE_CODE);
+
+    if(pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+            "extendPnorSectionHash for HBB section.");
+        break;
+    }
+
+    } while(0);
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK "extendBaseImage()");
+
+#endif
+
+    return pError;
 }
 
 } // end TRUSTEDBOOT

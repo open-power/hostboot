@@ -35,9 +35,9 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <initservice/initserviceif.H>
+#include <secureboot/settings.H>
+#include <secureboot/header.H>
 
-#include "settings.H"
-#include "header.H"
 #include "purge.H"
 
 extern trace_desc_t* g_trac_secure;
@@ -66,7 +66,7 @@ void* initializeBase(void* unused)
         // Load original secureboot header.
         if (enabled())
         {
-            Singleton<Header>::instance().loadBaseHeader();
+            Singleton<Header>::instance().loadSecurely();
         }
 
         // Blind-purge lower portion of cache.

@@ -35,6 +35,7 @@
 #include <util/align.H>
 #include <errl/errlmanager.H>
 #include <secureboot/trustedbootif.H>
+#include <config.h>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -450,11 +451,13 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                             ((o_TOC[secId].size * 8 ) / 9);
                     }
 
-                    // @TODO RTC:153773 move header handling to secure pnor rp
-                    // Don't skip header if verification is needed.
+                    // TODO RTC: 156118
+                    // - Don't skip headers/increment size if secure section.
+                    // - Don't allow skipping header if secure section.
                     if (o_TOC[secId].version == FFS_VERS_SHA512)
                     {
                         uint32_t l_addr = o_TOC[secId].flashAddr;
+
                         size_t l_headerSize = 0;
                     #ifdef CONFIG_SECUREBOOT
                         if(strcmp(cur_entry->name,"HBI") != 0)
@@ -477,11 +480,25 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                         }
                     #endif
 
-                        l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
-                                                    cv_EYECATCHER[secId]);
-                        if (l_errhdl)
+                        bool extend = true;
+                        // If secureboot is compiled out, then we extend HBB
+                        // the traditional way.  Otherwise, we defer to the
+                        // caller
+                        #ifdef CONFIG_SECUREBOOT
+                        if(secId == PNOR::HB_BASE_CODE)
                         {
-                            break;
+                            extend = false;
+                        }
+                        #endif
+
+                        if(extend)
+                        {
+                            l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
+                                                        cv_EYECATCHER[secId]);
+                            if (l_errhdl)
+                            {
+                                break;
+                            }
                         }
 
                         o_TOC[secId].size -= PAGESIZE;

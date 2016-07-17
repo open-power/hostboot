@@ -26,7 +26,7 @@
 #include <devicefw/userif.H>
 #include <secureboot/service.H>
 
-#include "settings.H"
+#include <secureboot/settings.H>
 
 // SECUREBOOT : General driver traces
 trace_desc_t* g_trac_secure = NULL;

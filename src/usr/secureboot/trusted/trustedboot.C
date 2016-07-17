@@ -45,13 +45,14 @@
 #include <sys/mmio.h>
 #include <sys/task.h>
 #include <initservice/initserviceif.H>
+#include <secureboot/settings.H>
+
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
 #include "trustedbootUtils.H"
 #include "tpmLogMgr.H"
 #include "base/trustedbootMsg.H"
-#include "../settings.H"
 
 namespace TRUSTEDBOOT
 {

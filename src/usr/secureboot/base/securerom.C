@@ -32,9 +32,9 @@
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <secureboot/settings.H>
 
 #include "securerom.H"
-#include "../settings.H"
 
 extern trace_desc_t* g_trac_secure;
 

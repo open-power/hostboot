@@ -125,6 +125,7 @@ struct SideInfo_t
 enum
 {
     INVALID_OFFSET = 0xFFFFFFF,  // Invalid primary or alternate TOC
+    SBE_HEADER_SIZE = 24,
 };
 
 /**

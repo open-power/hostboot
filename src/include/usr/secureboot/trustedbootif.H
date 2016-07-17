@@ -165,6 +165,17 @@ namespace TRUSTEDBOOT
                                      const void* i_vaddr,
                                      PNOR::SectionId i_sec);
 
+    /**
+     *  @brief Extends the Hostboot base image to the TPM
+     *
+     *  @warning No-op if trusted boot compiled out
+     *
+     *  @return errHndl_t Error log pointer
+     *  @retval NULL  Successfully extended Hostboot base image to the TPM
+     *  @retval !NULL Failed to extend Hostboot base image to TPM
+     */
+    errlHndl_t extendBaseImage();
+
 } // end TRUSTEDBOOT namespace
 
 

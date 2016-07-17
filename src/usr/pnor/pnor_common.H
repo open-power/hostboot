@@ -58,11 +58,25 @@ namespace PNOR {
     {
         /** Real number of bytes required to read 1 logical page */
         PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
-
         SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
         FFS_TABLE_BASE_ADDR = 0x0,    /**< Currently only have FFS table */
         TOC_SIZE = 0x8000,
     };
+
+    /**
+     *  @brief Converts size of data not including ECC to size of data including
+     *      ECC
+     *
+     *  @warning Asserts if input size is not a multiple of 8 bytes
+     *
+     *  @param[in] i_sizeWithoutEcc Size of buffer without ECC
+     *  @return size_t Size of buffer with ECC
+     */
+    inline size_t sizeWithEcc(const size_t i_sizeWithoutEcc)
+    {
+        assert(i_sizeWithoutEcc % 8 == 0);
+        return i_sizeWithoutEcc * 9/8;
+    }
 
     /**
       * @brief Creates a 4-byte Cyclic Redundancy Check (CRC) on the data
