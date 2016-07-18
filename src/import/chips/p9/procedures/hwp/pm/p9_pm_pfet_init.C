@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -456,75 +456,75 @@ convert_delay_to_value (uint32_t i_delay,
                         uint32_t i_proc_nest_frequency)
 {
     uint8_t   pfet_delay_value;
-    float     dly;
+    uint64_t  dly;
     //  attr_proc_nest_frequency [MHz]
     //  delay [ns]
     //  pfet_delay_value = 15 - log2( i_delay * i_attr_proc_nest_frequency/1000);
     //  since log2 function is not available, this is done manually
     //  pfet_delay_value = 15 - log2( dly );
-    dly = ( i_delay * i_proc_nest_frequency / 1000);
+    dly = ( i_delay * i_proc_nest_frequency );
 
-    if ( dly <= 1.4 )
+    if ( dly <= 1400 )
     {
         pfet_delay_value = 15 - 0 ;
     }
-    else if (( 1.4   < dly ) && ( dly <= 2.8 )  )
+    else if (( 1400   < dly ) && ( dly <= 2800 )  )
     {
         pfet_delay_value = 15 - 1 ;
     }
-    else if (( 2.8   < dly ) && ( dly <= 5.6 )  )
+    else if (( 2800   < dly ) && ( dly <= 5600 )  )
     {
         pfet_delay_value = 15 - 2 ;
     }
-    else if (( 5.6   < dly ) && ( dly <= 11.5 ) )
+    else if (( 5600   < dly ) && ( dly <= 11500 ) )
     {
         pfet_delay_value = 15 - 3 ;
     }
-    else if (( 11.5  < dly ) && ( dly <= 23 )   )
+    else if (( 11500  < dly ) && ( dly <= 23000 )   )
     {
         pfet_delay_value = 15 - 4 ;
     }
-    else if (( 23    < dly ) && ( dly <= 46 )   )
+    else if (( 23000  < dly ) && ( dly <= 46000 )   )
     {
         pfet_delay_value = 15 - 5 ;
     }
-    else if (( 46    < dly ) && ( dly <= 92 )   )
+    else if (( 46000  < dly ) && ( dly <= 92000 )   )
     {
         pfet_delay_value = 15 - 6 ;
     }
-    else if (( 92    < dly ) && ( dly <= 182 )  )
+    else if (( 92000  < dly ) && ( dly <= 182000 )  )
     {
         pfet_delay_value = 15 - 7 ;
     }
-    else if (( 182   < dly ) && ( dly <= 364 )  )
+    else if (( 182000 < dly ) && ( dly <= 364000 )  )
     {
         pfet_delay_value = 15 - 8 ;
     }
-    else if (( 364   < dly ) && ( dly <= 728 )  )
+    else if (( 364000 < dly ) && ( dly <= 728000 )  )
     {
         pfet_delay_value = 15 - 9 ;
     }
-    else if (( 728   < dly ) && ( dly <= 1456 ) )
+    else if (( 728000 < dly ) && ( dly <= 1456000 ) )
     {
         pfet_delay_value = 15 - 10;
     }
-    else if (( 1456  < dly ) && ( dly <= 2912 ) )
+    else if (( 1456000 < dly ) && ( dly <= 2912000 ) )
     {
         pfet_delay_value = 15 - 11;
     }
-    else if (( 2912  < dly ) && ( dly <= 5824 ) )
+    else if (( 2912000 < dly ) && ( dly <= 5824000 ) )
     {
         pfet_delay_value = 15 - 12;
     }
-    else if (( 5824  < dly ) && ( dly <= 11648 ))
+    else if (( 5824000 < dly ) && ( dly <= 11648000 ))
     {
         pfet_delay_value = 15 - 13;
     }
-    else if (( 11648 < dly ) && ( dly <= 23296 ))
+    else if (( 11648000 < dly ) && ( dly <= 23296000 ))
     {
         pfet_delay_value = 15 - 14;
     }
-    else if  ( 23296 < dly )
+    else if  ( 23296000 < dly )
     {
         pfet_delay_value = 15 - 15;
     }
