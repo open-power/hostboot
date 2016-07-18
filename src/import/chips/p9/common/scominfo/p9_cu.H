@@ -23,7 +23,7 @@
 /// HWP HWP Owner: jmcgill@us.ibm.com
 /// HWP FW Owner: dcrowell@us.ibm.com
 /// HWP Team: Infrastructure
-/// HWP Level: 1
+/// HWP Level: 2
 /// HWP Consumed by: FSP/HB
 ///
 
@@ -53,13 +53,11 @@ extern "C"
         PU_MCS_CHIPUNIT,     ///< MCS (Nimbus only)
         PU_MCA_CHIPUNIT,     ///< MCA (Nimbus only)
         PU_MCBIST_CHIPUNIT,  ///< MCBIST (Nimbus only)
-        PU_OCC_CHIPUNIT,     ///< OCC
         PU_PERV_CHIPUNIT,    ///< Pervasive
         PU_PPE_CHIPUNIT,     ///< PPE
         PU_SBE_CHIPUNIT,     ///< SBE
         PU_CAPP_CHIPUNIT,    ///< CAPP
-        NONE,                 ///< None/Invalid
-        PU_NVBUS_CHIPUNIT =  PU_NV_CHIPUNIT  ///< DO NOT USE!  TEMPORARY FOR CI ONLY
+        NONE,                ///< None/Invalid
     } p9ChipUnits_t;
 
     /// P9 chip unit pairing struct
@@ -75,6 +73,34 @@ extern "C"
         p9ChipUnits_t chipUnitType;  ///< chip unit type
         uint32_t chipUnitNum;        ///< chip unit instance number
     };
+
+    /// P9 PPE Chip Unit Instance Number enumeration
+    /// PPE name        Nimbus    Cumulus
+    /// SBE             0         0
+    /// GPE0..3         10..13    10..13
+    /// CME0            20..25    20..25
+    /// CME1            30..35    30..35
+    /// IO PPE (xbus)   40        40
+    /// IO PPE (obus)   41,42     41,42
+    /// IO PPE (dmi)    NA        43,44
+    /// Powerbus PPEs   50        50..52
+    typedef enum
+    {
+        PPE_SBE_CHIPUNIT_NUM         =  0,
+        PPE_GPE0_CHIPUNIT_NUM        = 10,
+        PPE_GPE3_CHIPUNIT_NUM        = 13,
+        PPE_EQ0_CME0_CHIPUNIT_NUM    = 20,   // Quad0-CME0
+        PPE_EQ5_CME0_CHIPUNIT_NUM    = 25,   // Quad5-CME0
+        PPE_EQ0_CME1_CHIPUNIT_NUM    = 30,   // Quad0-CME1
+        PPE_EQ5_CME1_CHIPUNIT_NUM    = 35,   // Quad5-CME1
+        PPE_IO_XBUS_CHIPUNIT_NUM     = 40,
+        PPE_IO_OB0_CHIPUNIT_NUM      = 41,
+        PPE_IO_OB1_CHIPUNIT_NUM      = 42,
+        PPE_IO1_DMI_CHIPUNIT_NUM     = 44,
+        PPE_PB0_CHIPUNIT_NUM         = 50,
+        PPE_PB2_CHIPUNIT_NUM         = 52,
+        PPE_LAST_CHIPUNIT_NUM        = PPE_PB2_CHIPUNIT_NUM,
+    } p9_ppe_chip_unit_instance_num_t;
 
 } // extern "C"
 

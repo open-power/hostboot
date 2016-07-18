@@ -628,11 +628,6 @@ bool getChipUnit (TARGETING::TYPE i_type,
             o_chipUnit = PU_PHB_CHIPUNIT;
             break;
         }
-        case(TARGETING::TYPE_OCC) :
-        {
-            o_chipUnit = PU_OCC_CHIPUNIT;
-            break;
-        }
         case(TARGETING::TYPE_CAPP) :
         {
             o_chipUnit = PU_CAPP_CHIPUNIT;

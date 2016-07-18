@@ -35,11 +35,11 @@
 
 extern "C"
 {
-
     uint64_t p9_scominfo_createChipUnitScomAddr(const p9ChipUnits_t i_p9CU, const uint8_t i_chipUnitNum,
             const uint64_t i_scomAddr, const uint32_t i_mode)
     {
         p9_scom_addr l_scom(i_scomAddr);
+        uint8_t l_ring = l_scom.get_ring();
 
         //Used to help generate entries for the SCOMdef documentation,
         //These aren't general PIB addresses
@@ -81,8 +81,9 @@ extern "C"
                         l_scom.get_chiplet_id() >= EP00_CHIPLET_ID)
                     {
                         l_scom.set_chiplet_id(EP00_CHIPLET_ID + (i_chipUnitNum / 2));
-                        l_scom.set_ring( ( l_scom.get_ring() - ( l_scom.get_ring() % 2 ) ) +
-                                         ( i_chipUnitNum % 2 ) );
+                        uint8_t l_ringId = (l_scom.get_ring() & 0xF); // Clear bits 16:17
+                        l_ringId = ( l_ringId - ( l_ringId % 2 ) ) + ( i_chipUnitNum % 2 );
+                        l_scom.set_ring( l_ringId & 0xF );
                     }
                     else if (EC23_CHIPLET_ID >= l_scom.get_chiplet_id() &&
                              l_scom.get_chiplet_id() >= EC00_CHIPLET_ID)
@@ -114,10 +115,9 @@ extern "C"
                 case PU_MCA_CHIPUNIT:
                     if (l_scom.get_chiplet_id() == MC01_CHIPLET_ID || l_scom.get_chiplet_id() ==  MC23_CHIPLET_ID)
                     {
-
                         l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
 
-                        if (l_scom.get_ring() == MC_MC01_0_RING_ID)
+                        if ( (l_scom.get_ring() & 0xF) == MC_MC01_0_RING_ID)
                         {
                             // mc
                             l_scom.set_sat_id( ( l_scom.get_sat_id() - ( l_scom.get_sat_id() % 4 ) ) +
@@ -126,7 +126,7 @@ extern "C"
                         else
                         {
                             // iomc
-                            l_scom.set_ring(MC_IOM01_0_RING_ID + (i_chipUnitNum % 4));
+                            l_scom.set_ring( (MC_IOM01_0_RING_ID + (i_chipUnitNum % 4)) & 0xF );
                         }
                     }
                     else
@@ -152,7 +152,7 @@ extern "C"
                     if (l_scom.get_chiplet_id() == N2_CHIPLET_ID)
                     {
                         // nest
-                        l_scom.set_ring(N2_PCIS0_0_RING_ID + i_chipUnitNum);
+                        l_scom.set_ring( (N2_PCIS0_0_RING_ID + i_chipUnitNum) & 0xF);
                     }
                     else
                     {
@@ -168,12 +168,12 @@ extern "C"
                         // nest
                         if (i_chipUnitNum == 0)
                         {
-                            l_scom.set_ring(N2_PCIS0_0_RING_ID);
+                            l_scom.set_ring(N2_PCIS0_0_RING_ID & 0xF);
                             l_scom.set_sat_id(((l_scom.get_sat_id() < 4) ? (1) : (4)));
                         }
                         else
                         {
-                            l_scom.set_ring(N2_PCIS0_0_RING_ID + (i_chipUnitNum / 3) + 1);
+                            l_scom.set_ring( (N2_PCIS0_0_RING_ID + (i_chipUnitNum / 3) + 1) & 0xF);
                             l_scom.set_sat_id( ((l_scom.get_sat_id() < 4) ? (1) : (4)) +
                                                ((i_chipUnitNum % 2) ? (0) : (1)) +
                                                (2 * (i_chipUnitNum / 5)));
@@ -203,16 +203,109 @@ extern "C"
                     break;
 
                 case PU_XBUS_CHIPUNIT:
-                    if (XB_IOX_2_RING_ID >= l_scom.get_ring() &&
-                        l_scom.get_ring() >= XB_IOX_0_RING_ID)
+
+                    l_ring &= 0xF;
+
+                    if (XB_IOX_2_RING_ID >= l_ring &&
+                        l_ring >= XB_IOX_0_RING_ID)
                     {
-                        l_scom.set_ring(XB_IOX_0_RING_ID + i_chipUnitNum);
+                        l_scom.set_ring( (XB_IOX_0_RING_ID + i_chipUnitNum) & 0xF);
                     }
 
-                    if (XB_PBIOX_2_RING_ID >= l_scom.get_ring() &&
-                        l_scom.get_ring() >= XB_PBIOX_0_RING_ID)
+                    else if (XB_PBIOX_2_RING_ID >= l_ring &&
+                             l_ring >= XB_PBIOX_0_RING_ID)
                     {
-                        l_scom.set_ring(XB_PBIOX_0_RING_ID + i_chipUnitNum);
+                        l_scom.set_ring( (XB_PBIOX_0_RING_ID + i_chipUnitNum) & 0xF);
+                    }
+
+                    break;
+
+                case PU_SBE_CHIPUNIT:
+                    l_scom.set_chiplet_id(i_chipUnitNum);
+                    break;
+
+                case PU_PPE_CHIPUNIT:
+
+                    // PPE SBE
+                    if (i_chipUnitNum == PPE_SBE_CHIPUNIT_NUM)
+                    {
+                        l_scom.set_chiplet_id(PIB_CHIPLET_ID);
+                        l_scom.set_port(SBE_PORT_ID);
+                        l_scom.set_ring(PPE_SBE_RING_ID);
+                        l_scom.set_sat_id(PPE_SBE_SAT_ID);
+                        l_scom.set_sat_offset(0x0F & l_scom.get_sat_offset());
+                        break;
+                    }
+
+                    // Need to set SAT offset if address is that of PPE SBE
+                    if (l_scom.get_port() == SBE_PORT_ID)
+                    {
+                        // Adjust offset if input address is of SBE
+                        // (ex: 000E0005 --> GPE: xxxxxx1x)
+                        l_scom.set_sat_offset(l_scom.get_sat_offset() | 0x10);
+                    }
+
+                    // PPE GPE
+                    if ( (i_chipUnitNum >= PPE_GPE0_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_GPE3_CHIPUNIT_NUM) )
+                    {
+                        l_scom.set_chiplet_id(PIB_CHIPLET_ID);
+                        l_scom.set_port(GPE_PORT_ID);
+                        l_scom.set_ring( (i_chipUnitNum - PPE_GPE0_CHIPUNIT_NUM) * 8 );
+                        l_scom.set_sat_id(PPE_GPE_SAT_ID);
+                    }
+
+                    // PPE CME
+                    else if ( (i_chipUnitNum >= PPE_EQ0_CME0_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_EQ5_CME1_CHIPUNIT_NUM) )
+                    {
+                        if (i_chipUnitNum >= PPE_EQ0_CME1_CHIPUNIT_NUM)
+                        {
+                            l_scom.set_chiplet_id(EP00_CHIPLET_ID +
+                                                  (i_chipUnitNum % PPE_EQ0_CME1_CHIPUNIT_NUM));
+                        }
+                        else
+                        {
+                            l_scom.set_chiplet_id(EP00_CHIPLET_ID +
+                                                  (i_chipUnitNum % PPE_EQ0_CME0_CHIPUNIT_NUM));
+                        }
+
+                        l_scom.set_port(UNIT_PORT_ID);
+                        l_scom.set_ring( ((i_chipUnitNum / PPE_EQ0_CME1_CHIPUNIT_NUM) + 8) & 0xF );
+                        l_scom.set_sat_id(PPE_CME_SAT_ID);
+                    }
+
+                    // PPE IO (XBUS/OBUS/DMI)
+                    else if ( (i_chipUnitNum >= PPE_IO_XBUS_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_IO1_DMI_CHIPUNIT_NUM) )
+                    {
+                        l_scom.set_chiplet_id( XB_CHIPLET_ID +
+                                               (i_chipUnitNum % PPE_IO_XBUS_CHIPUNIT_NUM) +
+                                               ((i_chipUnitNum / PPE_IO_OB0_CHIPUNIT_NUM) * 2) );
+                        l_scom.set_port(UNIT_PORT_ID);
+
+                        if (i_chipUnitNum == PPE_IO_XBUS_CHIPUNIT_NUM)
+                        {
+                            l_scom.set_ring(XB_IOPPE_0_RING_ID & 0xF);
+                        }
+                        else
+                        {
+                            l_scom.set_ring(OB_PPE_RING_ID & 0xF);
+                        }
+
+                        l_scom.set_sat_id(OB_PPE_SAT_ID); // Same SAT_ID value for XBUS
+                    }
+
+                    // PPE PB
+                    else if ( (i_chipUnitNum >= PPE_PB0_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_PB2_CHIPUNIT_NUM) )
+                    {
+                        l_scom.set_chiplet_id(N3_CHIPLET_ID); // TODO: Need to set ChipID for PB1 and PB2 in Cummulus
+                        l_scom.set_port(UNIT_PORT_ID);
+                        l_scom.set_ring(N3_PB_3_RING_ID & 0xF);
+                        l_scom.set_sat_id(PPE_PB_SAT_ID);
+                    }
+
+                    // Invalid i_chipUnitNum
+                    else
+                    {
+                        l_scom.set_addr(FAILED_TRANSLATION);
                     }
 
                     break;
@@ -449,7 +542,6 @@ extern "C"
                    (l_ring == PCI_PERV_RING_ID)) &&
                   (l_sat_id == PEC_SAT_ID))))
             {
-
                 if ((l_chiplet_id >= PCI0_CHIPLET_ID) && (l_chiplet_id <= PCI2_CHIPLET_ID))
                 {
                     o_chipUnitRelated = true;
@@ -509,7 +601,108 @@ extern "C"
                 o_chipUnitRelated = true;
                 o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_XBUS_CHIPUNIT,
                                             l_ring % 3));
+            }
 
+            // -----------------------------------------------------------------------------
+            // Common 'ppe' registers associated with each pervasive chiplet type
+            // Permit addressing by PPE target type (for all ppe chiplet instances)
+            // -----------------------------------------------------------------------------
+
+            // SBE PM registers
+            //    Port ID = 14
+            if ( (l_port == SBE_PORT_ID) &&
+                 (l_chiplet_id == PIB_CHIPLET_ID) &&
+                 (l_ring == PPE_SBE_RING_ID) &&
+                 (l_sat_id == PPE_SBE_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                // PU_SBE_CHIPUNIT
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_SBE_CHIPUNIT,
+                                            l_chiplet_id));
+                // PU_PPE_CHIPUNIT
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                            l_chiplet_id));
+            }
+
+            // GPE registers
+            //    Port ID = 1
+            if ( (l_port == GPE_PORT_ID) &&
+                 (l_chiplet_id == PIB_CHIPLET_ID) &&
+                 ( (l_ring == PPE_GPE0_RING_ID) ||
+                   (l_ring == PPE_GPE1_RING_ID) ||
+                   (l_ring == PPE_GPE2_RING_ID) ||
+                   (l_ring == PPE_GPE3_RING_ID) ) &&
+                 (l_sat_id == PPE_GPE_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                // PU_PPE_CHIPUNIT
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(
+                                                PU_PPE_CHIPUNIT,
+                                                PPE_GPE0_CHIPUNIT_NUM + (l_ring / 8)));
+            }
+
+            // CME registers which can be addressed by PPE target type
+            //    Port ID = 1
+            //    0x10 <= Chiplet ID <= 0x15
+            //    Ring_ID = 0x8 or Ring_ID = 0x9
+            //    SAT_ID = 0
+            if ( (l_port == UNIT_PORT_ID) &&
+                 ((l_chiplet_id >= EP00_CHIPLET_ID) && (l_chiplet_id <= EP05_CHIPLET_ID)) &&
+                 ( (l_ring == EQ_CME_0_RING_ID) || (l_ring == EQ_CME_1_RING_ID) ) &&
+                 (l_sat_id == PPE_CME_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                            (l_chiplet_id - EP00_CHIPLET_ID) +
+                                            PPE_EQ0_CME0_CHIPUNIT_NUM +
+                                            ((l_ring % 8) * 10)));
+            }
+
+            // PB registers which can be addressed by PPE target type
+            //    Port ID = 1
+            //    Chiplet ID = 0x05
+            //    Ring_ID = 0x9
+            //    SAT_ID = 0
+            if ( (l_port == UNIT_PORT_ID) &&
+                 (l_chiplet_id == N3_CHIPLET_ID) &&
+                 (l_ring == N3_PB_3_RING_ID) &&
+                 (l_sat_id == PPE_PB_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                // TODO: Need to update for PB1/PB2 of Cummulus whenever address
+                //       values are available.
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                            PPE_PB0_CHIPUNIT_NUM));
+            }
+
+            // XBUS registers which can be addressed by PPE target type (IOPPE)
+            //    Port ID = 1
+            //    Chiplet ID = 0x06
+            //    Ring_ID = 0x2
+            //    SAT_ID = 1
+            if ( (l_port == UNIT_PORT_ID) &&
+                 (l_chiplet_id == XB_CHIPLET_ID) &&
+                 (l_ring == XB_IOPPE_0_RING_ID) &&
+                 (l_sat_id == XB_PPE_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                            PPE_IO_XBUS_CHIPUNIT_NUM));
+            }
+
+            // OBUS registers which can be addressed by PPE target type (IOPPE)
+            //    Port ID = 1
+            //    Chiplet ID = 0x09, 0x0A, 0x0B, or 0x0C
+            //    Ring_ID = 0x4
+            //    SAT_ID = 1
+            if ( (l_port == UNIT_PORT_ID) &&
+                 ((l_chiplet_id >= OB0_CHIPLET_ID) && (l_chiplet_id <= OB3_CHIPLET_ID)) &&
+                 (l_ring == OB_PPE_RING_ID) &&
+                 (l_sat_id == OB_PPE_SAT_ID) )
+            {
+                o_chipUnitRelated = true;
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                            (l_chiplet_id - OB0_CHIPLET_ID) + PPE_IO_OB0_CHIPUNIT_NUM));
             }
         }
 

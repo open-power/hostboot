@@ -17,13 +17,13 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_cu.H
-/// @brief P9 chip unit definitions
+/// @file p9_scom_addr.H
+/// @brief P9 SCOM address class
 ///
 /// HWP HWP Owner: jmcgill@us.ibm.com
 /// HWP FW Owner: dcrowell@us.ibm.com
 /// HWP Team: Infrastructure
-/// HWP Level: 1
+/// HWP Level: 2
 /// HWP Consumed by: FSP/HB
 ///
 
@@ -106,6 +106,8 @@ extern "C"
         CC_PORT_ID = 0x3,           ///< Clock control registers
         FIR_PORT_ID = 0x4,          ///< Common FIR registers
         CPM_PORT_ID = 0x5,          ///< CPM registers
+        GPE_PORT_ID = 0x6,          ///< PPE GPE registers (For TP only)
+        SBE_PORT_ID = 0xE,          ///< SBE PM registers (For TP only)
         PCBSLV_PORT_ID = 0xF        ///< PCB Slave registers
     } p9_port_id_t;
 
@@ -230,23 +232,6 @@ extern "C"
 
     /// P9 MC chiplet SCOM ring ID enumeration
     /// source: tpc_p9_mcslow_top.vhdl
-#ifdef MC_E9022
-    typedef enum
-    {
-        MC_PSCM_RING_ID = 0x0,      ///< PSCOM
-        MC_PERV_RING_ID = 0x1,      ///< PERV
-        MC_MC01_0_RING_ID = 0x2,    ///< MC01_0 / MC23_0
-        MC_MCTRA_0_RING_ID = 0x3,   ///< MCTRA01_0 / MCTRA23_0
-        MC_IOM0_0_RING_ID = 0x4,    ///< IOM01_0 / IOM45_0
-        MC_IOM0_1_RING_ID = 0x5,    ///< IOM01_1 / IOM45_1
-        MC_IOM1_0_RING_ID = 0x6,    ///< IOM01_2 / IOM45_2
-        MC_IOM1_1_RING_ID = 0x7,    ///< IOM01_3 / IOM45_3
-        MC_IOM2_0_RING_ID = 0x8,    ///< IOM23_0 / IOM67_0
-        MC_IOM2_1_RING_ID = 0x9,    ///< IOM23_1 / IOM67_1
-        MC_IOM3_0_RING_ID = 0xa,    ///< IOM23_2 / IOM67_2
-        MC_IOM3_1_RING_ID = 0xb     ///< IOM23_3 / IOM67_3
-    } p9_mc_ring_id_t;
-#else
     typedef enum
     {
         MC_PSCM_RING_ID = 0x0,      ///< PSCOM
@@ -259,7 +244,6 @@ extern "C"
         MC_IOM23_1_RING_ID = 0x7,   ///< IOM23_1 / IOM67_1
         MC_MC01_1_RING_ID = 0x8,    ///< MC01_1 / MC23_1
     } p9_mc_ring_id_t;
-#endif
 
     typedef enum
     {
@@ -337,6 +321,41 @@ extern "C"
         PCI_PE_0_RING_ID = 0x2,      ///< PE_0
         PCI_IOPCI_0_RING_ID = 0x3    ///< IOPCI_0
     } p9_pci_ring_id_t;
+
+    /// P9 PPE GPE ring enumeration (bits 16:21)
+    typedef enum
+    {
+        PPE_SBE_RING_ID  = 0x00,
+        PPE_GPE0_RING_ID = 0x00,
+        PPE_GPE1_RING_ID = 0x08,
+        PPE_GPE2_RING_ID = 0x10,
+        PPE_GPE3_RING_ID = 0x18,
+    } p9_tp_ring_id_t;
+
+    /// Satellite ID for SBE
+    typedef enum
+    {
+        PPE_SBE_SAT_ID = 0x0,
+    } p9_tp_sbe_sat_id_t;
+
+    /// Satellite ID for PPE GPE
+    typedef enum
+    {
+        PPE_GPE_SAT_ID = 0x0,
+    } p9_tp_gpe_sat_id_t;
+
+    /// Satellite ID for PPE CME
+    typedef enum
+    {
+        PPE_CME_SAT_ID = 0x0,
+    } p9_eq_ppe_sat_id_t;
+
+    /// Satellite ID for PPE PB
+    typedef enum
+    {
+        PPE_PB_SAT_ID = 0x0,
+    } p9_n3_ppe_sat_id;
+
 
 //        8             7             6             5             4             3          2         1
 //
@@ -443,7 +462,7 @@ extern "C"
             /// @retval uint8_t Ring field value
             inline uint8_t get_ring() const
             {
-                return ((iv_addr >> 10) & 0xF);
+                return ((iv_addr >> 10) & 0x3F);
             }
 
             /// @brief Modify SCOM address, update ring field value
@@ -451,8 +470,8 @@ extern "C"
             /// @retval none
             inline void set_ring(const uint8_t i_ring)
             {
-                iv_addr &= 0xFFFFFFFFFFFFC3FFULL;
-                iv_addr |= ((i_ring & 0xF) << 10);
+                iv_addr &= 0xFFFFFFFFFFFF03FFULL;
+                iv_addr |= ((i_ring & 0x3F) << 10);
                 return;
             }
 
