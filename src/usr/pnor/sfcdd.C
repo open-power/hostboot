@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <lpc/lpcif.H>
 #include "sfcdd.H"
 #include "norflash.H"
+#include "pnor_utils.H"
 
 
 /*****************************************************************************/
@@ -73,6 +74,7 @@ SfcDD::SfcDD( errlHndl_t& o_err,
 , iv_eraseSizeBytes(4*KILOBYTE) //default to 4KB blocks
 {
     o_err = NULL;
+    TRACFCOMP( g_trac_pnor, "LPC_SFC_MMIO_OFFSET=%.8X", PNOR::LPC_SFC_MMIO_OFFSET );
 }
 
 /**

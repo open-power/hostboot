@@ -129,10 +129,10 @@ enum BootloaderTraces
     /** Bootloader Utils parseEntries invalid section */
     BTLDR_TRC_UTILS_PARSE_INVALID_SECTION    = 0xE7,
 
-    /** Bootloader main getHBBSection returned */
+    /** Bootloader main getHBBSection returned error */
     BTLDR_TRC_MAIN_GETHBBSECTION_FAIL        = 0xF0,
 
-    /** Bootloader main removeECC returned */
+    /** Bootloader main removeECC returned error */
     BTLDR_TRC_MAIN_REMOVEECC_FAIL            = 0xF1,
 
     /** Bootloader PNOR Access readTOC checkForNullBuffer null buffer */
