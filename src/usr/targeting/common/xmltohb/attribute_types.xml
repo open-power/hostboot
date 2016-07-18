@@ -29862,4 +29862,21 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>LPC_BASE_ADDR</id>
+  <description>
+    Defines LPC base address on each processor level.
+  </description>
+  <simpleType>
+    <uint64_t>
+    </uint64_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_LPC_BASE_ADDR</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

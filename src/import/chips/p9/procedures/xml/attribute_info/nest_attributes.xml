@@ -699,6 +699,15 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_LPC_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Defines LPC base address on each processor level.</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Define placement policy/scheme for non-mirrored/mirrored memory
