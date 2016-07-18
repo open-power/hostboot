@@ -72,10 +72,8 @@ COPY_FILES = \
     obj/genfiles/target_types_merged.xml:openpower \
     obj/genfiles/fapiattrs.xml:openpower \
     obj/genfiles/attributeOverride:tools,openpower \
-    obj/genfiles/compression:tools,openpower \
     src/usr/targeting/attroverride/README.attr_override:tools,openpower \
     src/build/hwpf/prcd_compile.tcl:tools \
-    src/usr/hwpf/hwp/initfiles/sample.initfile:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
     src/build/buildpnor/buildpnor.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \

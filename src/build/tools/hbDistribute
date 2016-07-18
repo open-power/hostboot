@@ -99,12 +99,12 @@ do
     esac
 done
 
-echo "target dir"
 echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME}"
+echo "target dir ${TARGET_DIR}"
 # Verify target directory or default to sandbox.
 if [ "${TARGET_DIR}" == "invalid directory" ]; then
     if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-        echo "ERROR TARGET_DIR: No path specified and \$SANDBOXBASE undefined."
+        echo "ERROR: TARGET_DIR - No path specified and \$SANDBOXBASE undefined."
         print_usage
         exit -1
     else
@@ -113,12 +113,11 @@ if [ "${TARGET_DIR}" == "invalid directory" ]; then
 fi
 
 
-echo "sbfw dir"
-echo "sbroot=${SANDBOXROOT} sbname=${SANDBOXNAME}"
+echo "sbfw dir = ${SBFW_DIR}"
 # Verify SBFW directory or default to sandbox.
 if [ "${SBFW_DIR}" == "invalid directory" ]; then
     if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
-        echo "ERROR SBFW: No path specified and \$SANDBOXBASE undefined."
+        echo "ERROR:SBFW - No path specified and \$SANDBOXBASE undefined."
         print_usage
         exit -1
     else
