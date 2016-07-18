@@ -50,4 +50,15 @@
     <ffdc>PAYLOAD_SIZE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_MASTER_CORE_NOT_FOUND</rc>
+    <description>
+      Procedure: p9_sbe_load_bootloader
+      The master core is not found from the ex master target 
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>MASTER_CORE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** --> 
 </hwpErrors>
