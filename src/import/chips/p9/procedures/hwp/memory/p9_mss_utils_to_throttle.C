@@ -25,17 +25,28 @@
 
 ///
 /// @file p9_mss_utils_to_throttle.C
-/// @brief Set the N throttle attributes for a given dram data bus utilization.
+/// @brief Sets throttles
+/// TMGT will call this procedure to set the N address operations (commands)
+/// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
 ///
+
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#include <fapi2.H>
-#include <mss.H>
 #include <p9_mss_utils_to_throttle.H>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/power_thermal/throttle.H>
+#include <lib/utils/index.H>
+#include <lib/utils/find.H>
+#include <lib/utils/conversions.H>
+#include <lib/mss_attribute_accessors.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -51,30 +62,38 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_utils_to_throttle( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
-        uint8_t l_databus_util[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {0};
-        uint32_t l_dram_clocks = 0;
-        uint32_t l_num_commands_allowed[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+        std::vector<uint8_t> l_databus_util(mss::PORTS_PER_MCS, 0);
+        std::vector<uint32_t> l_throttled_cmds(mss::PORTS_PER_MCS, 0);
 
-        FAPI_TRY( mss::databus_util(i_target, &l_databus_util[0][0]) );
+        uint32_t l_dram_clocks = 0;
         FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
 
-        for( const auto& l_mca : i_target.getChildren<TARGET_TYPE_MCA>() )
+        // TK - Who sets this attribute? OCC? Not set in eff_config for p8 - AAM
+        // If set by OCC can they just pass in value as a parameter? - AAM
+        FAPI_TRY( mss::databus_util( i_target, l_databus_util.data()) );
+
+        for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
         {
-            const auto l_port_num = mss::index(l_mca);
+            const auto l_port_num = mss::index( l_mca );
 
-            for( const auto& l_dimm : l_mca.getChildren<TARGET_TYPE_DIMM>() )
-            {
-                const auto l_dimm_num = mss::index(l_dimm);
+            FAPI_INF( "MRW dram clock window: %d, databus utilization[%d]: %d",
+                      l_dram_clocks,
+                      l_port_num,
+                      l_databus_util[l_port_num] );
 
-                l_num_commands_allowed[l_port_num][l_dimm_num] = mss::commands_allowed_over_clock_window(
-                            l_databus_util[l_port_num][l_dimm_num],
-                            l_dram_clocks);
-            }
-        }
+            // Calculate programmable N address operations within M dram clock window
+            l_throttled_cmds[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
 
-        FAPI_ATTR_SET(fapi2::ATTR_MSS_THROTTLED_N_COMMANDS, i_target, l_num_commands_allowed);
+            FAPI_INF( "Calculated N commands per port [%d] = %d",
+                      l_port_num,
+                      l_throttled_cmds[l_port_num]);
 
-        FAPI_INF("End utils_to_throttle");
+        }// end for
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_OCC_THROTTLED_N_CMDS,
+                                i_target,
+                                UINT32_VECTOR_TO_1D_ARRAY(l_throttled_cmds, mss::PORTS_PER_MCS)) );
+
     fapi_try_exit:
         return fapi2::current_err;
     }
