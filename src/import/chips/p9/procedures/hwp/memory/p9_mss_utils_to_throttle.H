@@ -25,46 +25,21 @@
 
 ///
 /// @file p9_mss_utils_to_throttle.H
-/// @brief Set the N throttle attributes for a given dram data bus utilization.
+/// @brief Sets throttles
+/// TMGT will call this procedure to set the N address operations (commands)
+/// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
 ///
+
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_UTILS_TO_THROTTLE__
 #define __P9_MSS_UTILS_TO_THROTTLE__
 
 #include <fapi2.H>
-
-namespace mss
-{
-
-enum THROTTLE_UTILS : uint64_t
-{
-    // Dram data bus utilization is 4X the address bus utilization
-    DRAM_BUS_UTILS = 4,
-    PERCENT_CONVERSION = 100,
-};
-
-///
-/// @brief Calculate N (address operations) allowed within a window of M DRAM clocks
-/// @param[in] databus_util databus utilization percentage (e.g. 5% = 5)
-/// @param[in] num_dram_clocks window of M DRAM clocks
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-inline uint32_t commands_allowed_over_clock_window(uint8_t databus_util, uint32_t num_dram_clocks)
-{
-    uint32_t divisor = DRAM_BUS_UTILS * PERCENT_CONVERSION;
-    uint32_t divident = databus_util * num_dram_clocks;
-    uint32_t quotient = divident / divisor;
-    uint32_t remainder = divident % divisor;
-
-    return quotient + (remainder == 0  ? 0 : 1);
-}
-
-}// mss
 
 typedef fapi2::ReturnCode (*p9_mss_utils_to_throttle_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
