@@ -1126,6 +1126,8 @@
     </attribute>
     <!-- End processor characteristics for HDAT -->
 
+    <attribute><id>LPC_BASE_ADDR</id></attribute>
+
 </targetType>
 
 <!-- chip-processor-nimbus -->
