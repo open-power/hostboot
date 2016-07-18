@@ -197,17 +197,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         }
 
         {
-            uint8_t l_throttle_ras[mss::PORTS_PER_MCS] = {0x00, 0x00};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT, i_target, l_throttle_ras ) );
-        }
-
-        {
-            uint8_t l_throttle_cas[mss::PORTS_PER_MCS] = {0x01, 0x01};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT, i_target, l_throttle_cas ) );
-        }
-
-        {
-            uint8_t l_databus_util[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
+            uint8_t l_databus_util[mss::PORTS_PER_MCS] = {0x5A, 0x5A};
             FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_DATABUS_UTIL, i_target, l_databus_util ) );
         }
 

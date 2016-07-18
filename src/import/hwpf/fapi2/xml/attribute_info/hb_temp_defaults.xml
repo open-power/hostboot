@@ -369,9 +369,11 @@
     <attribute>
         <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
     </attribute>
+    <attribute>
+      <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
 
 </attributes>
-

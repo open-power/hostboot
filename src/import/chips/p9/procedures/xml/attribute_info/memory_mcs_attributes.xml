@@ -1248,12 +1248,11 @@
 
     <attribute>
         <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
-        <!-- TK Verify creator and consumer is correct for p9 AAM -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
           This is the throttled M DRAM clocks setting for cfg_nm_m.
           creator: mss_eff_cnfg
-          consumer: mc_config
+          consumer: mss_eff_config_thermal
           firmware notes: none
         </description>
         <initToZero></initToZero>
@@ -2125,28 +2124,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>RAS weight to use for memory throttle control - set in thermal procedures</description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>throttle_control_ras_weight</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>CAS weight to use for memory throttle control - set in thermal procedures</description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>throttle_control_cas_weight</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_EFF_VPD_VERSION</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -2213,35 +2190,31 @@
     <attribute>
         <id>ATTR_MSS_DATABUS_UTIL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
+        <!-- TK Do we need an attr per port & dimm ? P8 only had an attr per port AAM -->
+        <!-- TK Does OCC set this for their use, if so, name attr appropriately? AAM  -->
         <description>
-          DRAM data bus utilization percent to use to determine ATTR_MSS_THROTTLED_N_COMMANDS
-          creator: f/w
-          consumer: mss_utils_to_throttle
+          DRAM data bus utilization percent to use to determine cfg_nm_n_per_port
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <array>2 2</array>
+        <array>2</array>
         <mssAccessorName>databus_util</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_THROTTLED_N_COMMANDS</id>
-        <!-- TK  We can throttle per port/dimm slot will one attr suffice?  AAM  -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-          Throttled N commands (address operations) that are
-          allowed within a window of M DRAM clocks.
-          Nimbus workbook (Power and Thermal Controls).
-          creator: mss_utils_to_throttle
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array>2 2</array>
-        <mssAccessorName>throttled_n_commands</mssAccessorName>
+      <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <!-- TK Do we need an attr per port & dimm ? P8 only had an attr per port AAM -->
+      <description>
+        cfg_nm_n_per_port throttle N value that was calculated from MSS_DATABUS_UTIL
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint32</valueType>
+      <writeable/>
+      <array>2</array>
+      <mssAccessorName>occ_throttled_n_cmds</mssAccessorName>
     </attribute>
-
 
     <attribute>
         <id>ATTR_EFF_DRAM_MAC</id>
