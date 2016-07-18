@@ -71,6 +71,7 @@ namespace Bootloader{
         // Initialization
         bootloader_trace_index = 0;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
+
         g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
 
         // Set variables needed for getting location of HB base code

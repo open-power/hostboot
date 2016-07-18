@@ -29,7 +29,7 @@
 #include <pnor/pnor_const.H>
 #include "limits.h"
 #include "ffs.h"
-
+#include <config.h>
 
 /** @file pnor_utils.H
  *  @brief Provides the utility functions used by different PNOR
@@ -87,11 +87,14 @@ enum pnorUtilErrorCodes
 enum
 {
     LPC_TOP_OF_FLASH_OFFSET = 0x0FFFFFFF,
-#ifdef CONFIG_PNOR_IS_32MB
-    PNOR_SIZE = 32*MEGABYTE,
-#else //default to 64MB
+#ifdef CONFIG_PNOR_IS_128MB
+    PNOR_SIZE = 128*MEGABYTE,
+#elif defined CONFIG_PNOR_IS_64MB
     PNOR_SIZE = 64*MEGABYTE,
+#elif defined CONFIG_PNOR_IS_32MB
+    PNOR_SIZE = 32*MEGABYTE,
 #endif
+
     //The direct offset value must be equal to <top of flash>-<pnor size>+1
     // for the SBE to work so we can rely on that same assertion
     /**< Offset to direct read space, from FW base */
