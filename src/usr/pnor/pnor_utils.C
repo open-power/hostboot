@@ -59,7 +59,7 @@ const char* cv_EYECATCHER[] = {
     "HBB",       /**< PNOR::HB_BASE_CODE     : Hostboot Base Image */
     "SBEC",      /**< PNOR::CENTAUR_SBE      : Centaur Self-Boot Engine image */
     "SBE",       /**< PNOR::SBE_IPL          : Self-Boot Enginer IPL image */
-    "WINK",      /**< PNOR::WINK             : Sleep Winkle Reference image */
+    "HCODE",     /**< PNOR::HCODE            : HCODE Reference image */
     "PAYLOAD",   /**< PNOR::PAYLOAD          : HAL/OPAL */
     "HBRT",      /**< PNOR::HB_RUNTIME       : Hostboot Runtime(for Sapphire)*/
     "HBD",       /**< PNOR::HB_DATA          : Hostboot Data */
@@ -79,6 +79,7 @@ const char* cv_EYECATCHER[] = {
     "TEST",      /**< PNOR::TEST             : Test space for PNOR*/
     "TESTRO",    /**< PNOR::TESTRO           : ReadOnly Test space for PNOR */
     "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
+    "POWERVM",   /**< PNOR::POWERVM          : Power VM data */
 };
 
 /**

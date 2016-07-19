@@ -43,7 +43,7 @@ enum SectionId
     HB_BASE_CODE,   /**< Hostboot Base Image */
     CENTAUR_SBE,    /**< Centaur Self-Boot Engine image */
     SBE_IPL,        /**< Self-Boot Engine IPL image */
-    WINK,           /**< Sleep Winkle Reference image */
+    HCODE,          /**< HCODE Reference image */
     PAYLOAD,        /**< HAL/OPAL */
     HB_RUNTIME,     /**< Hostboot Runtime (for Sapphire) */
     HB_DATA,        /**< Hostboot Data */
@@ -63,7 +63,9 @@ enum SectionId
     TEST,           /**< Scratch space for PNOR test cases */
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
     BACKUP_PART,     /**< Backup of TOC*/
+    POWERVM,        /**< Power VM data */
     NUM_SECTIONS,   /**< Number of defined sections */
+
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
     /**< Used for error cases, initialization */

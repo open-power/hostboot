@@ -57,7 +57,6 @@ COPY_FILES = \
     src/build/vpo/hb-virtdebug.pl:vpo \
     src/build/vpo/VBU_Cacheline.pm:vpo \
     src/build/simics/hb-pnor-vpd-preload.pl:vpo \
-    src/build/buildpnor/pnorLayoutVpo.xml:vpo \
     src/build/buildpnor/pnorLayoutFake.xml:vpo \
     img/errlparser:tools,vpo,openpower \
     img/hbotStringFile:tools,vpo,openpower \

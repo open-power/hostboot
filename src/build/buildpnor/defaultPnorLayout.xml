@@ -158,8 +158,8 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Sleep Winkle Ref Image (1.125MB)</description>
-        <eyeCatch>WINK</eyeCatch>
+        <description>HCODE Ref Image (1.125MB)</description>
+        <eyeCatch>HCODE</eyeCatch>
         <physicalOffset>0xF45000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>

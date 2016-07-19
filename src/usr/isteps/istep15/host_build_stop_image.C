@@ -83,7 +83,7 @@ errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr)
     do
     {
         // Get WINK PNOR section info from PNOR RP
-        l_errl = PNOR::getSectionInfo( PNOR::WINK, l_info );
+        l_errl = PNOR::getSectionInfo( PNOR::HCODE, l_info );
         if( l_errl )
         {
             //No need to commit error here, it gets handled later

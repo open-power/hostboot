@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -74,7 +74,7 @@ test "$AUTOVBU_USER_CMD" = "" && AUTOVBU_USER_CMD=NO_TEST
 AUTOVBU_HBRELEASE_BASEDIR=/gsa/ausgsa/projects/h/hostboot/release
 AUTOVBU_HBTOOLS_BASEDIR=/afs/apd.pok.ibm.com/u/thi/hbtools
 AUTOVBU_HBVBUTOOLS_BASEDIR=/gsa/ausgsa/projects/h/hostboot/vbutools
-	
+
 # Remove any previous test definitions for HostBoot values - force everything to default if not set
 # by Setup_MyEnv function or user specifed argument(s)
 
@@ -92,10 +92,10 @@ unset HB_VBUPNOR_ADDR HB_SYSMVPD_ADDR HB_SYSSPD_ADDR
 ################################################################################
 
 Setup_MyEnv() {
-	
+
 	# Default Sprint release
 	sprint=hb1107b_1445.820
-	
+
 	# Initialize HostBoot environment/cronus/tools - note new naming convention
 	export AUTOVBU_CRONUS_SIM=rel
 
@@ -106,23 +106,23 @@ Setup_MyEnv() {
 
 	# Select default model -- choose either VBU or VPO versions
 	export VPO_MODEL=n_2_b; unset VBU_MODEL; VBUVPO=VPO
-	
+
 	# Default AWAN request time - shorter periods get AWAN faster
 
 	export AWAN_TIME_REQ=-h24
-	
+
 	# Default AWAN request server
 
 	export ASUBMIT_SERVER=${ASUBMIT_SERVER-asubmit2.pok.ibm.com}
 
 	# Default sprint test case settings
-	
+
 	export AUTOVBU_CORE=-cft
 	export AUTOVBU_SIMCLOCKS=5000000
 	export AUTOVBU_INITIAL_CHKPT=mcguirej_14.10.05_real_after_istep_s5.chkpt
 	export AUTOVBU_LOOPS=1200
 	export AUTOVBU_PRINTK_LINES=50
-	
+
 	# Values used internally by automated tools
 
 	test "$MY_BSO_ID" = "" && echo "Warning: Set MY_BSO_ID to IBM intranet ID if BSO firewall required"
@@ -145,7 +145,7 @@ Setup_MyArgs() {
 
 	get_awan=
 	load_hb_img=
-	
+
 	# Argument parse loop
 	while [ $# -gt 0 ]
 	do
@@ -226,7 +226,7 @@ Setup_MyArgs() {
 			*)
 				;;
 		esac
-                 
+
 		shift
 	done
 }
@@ -336,26 +336,26 @@ Setup_MyDynamic() {
 Setup_MyAWAN() {
 
 	# Allow testing with an Austin based VNC server, but we must run in POK and lower BSO firewall
-	
+
 	if [ `hostname -d` != "pok.ibm.com" ]; then
 	        echo "ERROR: This script must be sourced on a POK based Linux system (batchl004, vpopok2 or vpopok3)"
 	        return 1
 	fi
-	
+
 	# Make sure DISPLAY includes our host name
-	
+
 	test "`expr index "$DISPLAY" ':'`" = "1" && DISPLAY=`hostname`$DISPLAY
 
 	# Force common DISPLAY format "<hostname>:<vnc>"
 	DISPLAY=`echo $DISPLAY | sed -e 's/\(:[^\.]*\).*/\1/'`
 
 	# Defines used for AWAN communication
-	
+
 	MY_AWAN_TARGET=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.target-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
 	MY_AWAN_HAVE=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.HAVE-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
 	MY_AWAN_INIT=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.init-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
 	MY_AWAN_KEEP=/afs/apd.pok.ibm.com/u/${MY_AFS_USER-$USER}/awan/awan.KEEP-$VBU_MODEL$VPO_MODEL-${MY_AWAN_DIR-${MY_AFS_USER-$USER}}-$DISPLAY
-		
+
 	if [ "$get_awan" = "YES" ]; then
 		unset ECMD_TARGET
 		# Add environmental definitions for automated test
@@ -365,7 +365,7 @@ Setup_MyAWAN() {
 		#export -p | egrep "P8_${VBUVPO}DD1_.*AWAN_SCRIPT"; echo
 		(
 		# Check to see if we must lower BSO firewall
-	
+
 		echo $DISPLAY | egrep "pok.ibm.com|boeblingen.de.ibm.com" >/dev/null
 		if [ $? -eq 0 ]; then
 		        # POK/BOE based VNC servers should not need BSO
@@ -377,12 +377,12 @@ Setup_MyAWAN() {
 			echo
 			return 1
 		fi
-	
+
 		unset my_bso_cmd
 		test "$MY_BSO_ID" != "" && my_bso_cmd="--lower_firewall $MY_BSO_ID"
-	
+
 		# Pick up SIMDISPATCH level used by this cronus, and pass it to the AWAN request
-		
+
 		if [ -f "$ECMD_EXE" ]; then
 			cronus_dir=`dirname $ECMD_EXE`
 			if [ -f "$cronus_dir/SIMDISP_RELEASE" ]; then
@@ -403,7 +403,7 @@ Setup_MyAWAN() {
 		echo "$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE AUTOVBU_ECMD_VER=$AUTOVBU_ECMD_VER AUTOVBU_CRONUS_SIM=$AUTOVBU_CRONUS_SIM \\"
 		echo "			-- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\\\$AUTOVBU_USER_CMD"
 		echo
-	
+
 		$JR/auto${vbuvpo}test $my_bso_cmd --silent --keep_awan SIMDISP_RELEASE=$SIMDISP_RELEASE AUTOVBU_ECMD_VER=$AUTOVBU_ECMD_VER AUTOVBU_CRONUS_SIM=$AUTOVBU_CRONUS_SIM \
 					-- : $VBU_MODEL$VPO_MODEL:$AWAN_CONFIG:HBI=\$AUTOVBU_USER_CMD
 		) || return 1
@@ -427,7 +427,7 @@ Setup_MyTarget() {
 			done
 		fi
 	fi
-	
+
 	if [ -f $MY_AWAN_TARGET ]; then
 		my_target=`cat $MY_AWAN_TARGET`
 		touch $MY_AWAN_KEEP
@@ -442,12 +442,12 @@ Setup_MyTarget() {
 	fi
 	echo
 	target $my_target
-	
+
 	if [ -f "$CRONUS_HOME/cnfgs/${my_target}_cnfg" ]; then
 		# Update target cronus config file
 
                  getconfig HW_PROCEDURE_PATH -quiet | grep -s $HB_VBUTOOLS
-                 test $? || setconfig HW_PROCEDURE_PATH $HB_VBUTOOLS  
+                 test $? || setconfig HW_PROCEDURE_PATH $HB_VBUTOOLS
 
 		setconfig GLOBAL_DEBUG $GLOBAL_DEBUG -quiet
 		getconfig GLOBAL_DEBUG -quiet
@@ -508,7 +508,7 @@ Setup_MyHBImage() {
         fi
         ls -l hbicore.bin vbu.pnor sysmvpd.dat syscvpd.dat sysspd.dat procpore.dat
 
-        # Note: The loading addresses must match the PNOR layout in src/build/buildpnor/pnorLayoutVpo.xml
+        # Note: The loading addresses must match the PNOR layout in src/build/buildpnor/pnorLayoutFake.xml
         /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -l rel -f $PWD/hbicore.bin -b -cft
         /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -l rel -f $PWD/vbu.pnor -o ${HB_VBUPNOR_ADDR-0x400000} -b -cft
         /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/p8_load_l3 -l rel -f $PWD/sysmvpd.dat -o ${HB_SYSMVPD_ADDR-0x401000} -b -cft
@@ -530,7 +530,7 @@ Setup_MyHBImage() {
         do
                  putscom pu 1${core}0F0105 0280000000000000 -all -quiet
         done
-        
+
         # Set PNOR mode to fake PNOR using Scratch 1 (This is no longer needed since we use a custom image that always use faked PNOR)
         # putscom pu.ex 10013284 FAC0FAC0FAC0FAC0 -p0 -cft -quiet
         # putscom pu.ex 10013285 0000000000000001 -p0 -cft -quiet
