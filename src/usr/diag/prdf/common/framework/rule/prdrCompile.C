@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -445,6 +445,7 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
         g_ActionArgMap["TYPE_MBA"]      = TARGETING::TYPE_MBA;
         g_ActionArgMap["TYPE_OCC"]      = TARGETING::TYPE_OCC;
         g_ActionArgMap["TYPE_PSI"]      = TARGETING::TYPE_PSI;
+        g_ActionArgMap["TYPE_CAPP"]     = TARGETING::TYPE_CAPP;
         g_ActionArgMap["TYPE_NA"]       = TARGETING::TYPE_NA;
 
         // Initialize symbolic callouts.

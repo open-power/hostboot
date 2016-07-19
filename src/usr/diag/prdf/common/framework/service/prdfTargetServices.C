@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -440,17 +440,18 @@ struct conn_t
             case TYPE_PCICLKENDPT:  order =  6; break;
             case TYPE_PORE:         order =  7; break;
             case TYPE_NX:           order =  8; break;
-            case TYPE_OCC:          order =  9; break;
-            case TYPE_PSI:          order =  10; break;
-            case TYPE_EX:           order =  11; break;
-            case TYPE_XBUS:         order =  12; break;
-            case TYPE_ABUS:         order =  13; break;
-            case TYPE_PCI:          order =  14; break;
-            case TYPE_MCS:          order =  15; break;
-            case TYPE_MEMBUF:       order =  16; break;
-            case TYPE_L4:           order =  17; break;
-            case TYPE_MBA:          order =  18; break;
-            case TYPE_DIMM:         order =  19; break;
+            case TYPE_CAPP:         order =  9; break;
+            case TYPE_OCC:          order =  10; break;
+            case TYPE_PSI:          order =  11; break;
+            case TYPE_EX:           order =  12; break;
+            case TYPE_XBUS:         order =  13; break;
+            case TYPE_ABUS:         order =  14; break;
+            case TYPE_PCI:          order =  15; break;
+            case TYPE_MCS:          order =  16; break;
+            case TYPE_MEMBUF:       order =  17; break;
+            case TYPE_L4:           order =  18; break;
+            case TYPE_MBA:          order =  19; break;
+            case TYPE_DIMM:         order =  20; break;
             default: ;
         }
 
@@ -516,6 +517,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_PCICLKENDPT,TargetService::CHILD_BY_AFFINITY },
         { TYPE_PROC,   TYPE_PORE,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_NX,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_CAPP,       TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_OCC,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_PSI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_EX,         TargetService::CHILD_BY_AFFINITY  },
@@ -540,6 +542,8 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_PORE,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
 
         { TYPE_NX,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
+
+        { TYPE_CAPP,   TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
 
         { TYPE_OCC,    TYPE_NODE,       TargetService::PARENT_BY_AFFINITY  },
         { TYPE_OCC,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY  },
