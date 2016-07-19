@@ -50,11 +50,14 @@ function build {
     BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
 
     # Run hb distribute to put binaries in cmvc checkout directory
-    export SANDBOXBASE=$WORKSPACE/$RELEASE_NAME
+    export SANDBOXROOT=$WORKSPACE
+    export SANDBOXNAME=$RELEASE_NAME
+    export SANDBOXBASE=$SANDBOXROOT/$SANDBOXNAME
     mkdir -p $SANDBOXBASE
-    hb prime --fsp $SANDBOXBASE || exit -1
-    mkdir -p $CMVC_DIR/src/hbfw
-    cp -rf $SANDBOXBASE/* $CMVC_DIR/src/hbfw
+    hb prime --release $SANDBOXBASE || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw || exit -1
+    cp -rf $SANDBOXBASE/fsp/* $CMVC_DIR/src/hbfw || exit -1
+    rm -rf $SANDBOXBASE/fsp || exit -1
 
     ### Push tag to gerrit, create track and checkin files
     git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
@@ -217,4 +220,3 @@ while getopts "btch" opt; do
             ;;
     esac
 done
-
