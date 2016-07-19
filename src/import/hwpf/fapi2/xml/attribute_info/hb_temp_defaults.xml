@@ -240,7 +240,9 @@
     <attribute>
         <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
     </attribute>
-
+    <attribute>
+        <id>ATTR_VDM_ENABLE</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

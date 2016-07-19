@@ -963,4 +963,17 @@
       <initToZero/>
       <platInit/>
   </attribute>
+   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDM_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Controls the enablement of Voltage Droop Monitors in the system
+     Producer:Machine Readable Workbook
+     Consumers:p9_pstate_parameter_block to set flag for CME QuadManager Hcode reaction
+               p9_hcd_cache procedures to power on VDMs before CME booting
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
 </attributes>
