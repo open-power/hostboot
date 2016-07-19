@@ -45,7 +45,7 @@ typedef fapi2::ReturnCode (*p9_mem_pll_initf_FP_t)(const fapi2::Target<fapi2::TA
 ///       Request SBE to scan said ring and data stored as a ring image.
 ///
 ///
-/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
