@@ -587,17 +587,17 @@ group gNxCxaFir_0 filter singlebit
     /** NXCXAFIR_0[1]
      *  REGISTER_PE
      */
-    (NxCxaFir_0, bit(1)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(1)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[2]
      *  MASTER_ARRAY_CE
      */
-    (NxCxaFir_0, bit(2)) ? SelfMedThr32PerDay;
+    (NxCxaFir_0, bit(2)) ? Capp0MedThr32PerDay;
 
     /** NXCXAFIR_0[3]
      *  MASTER_ARRAY_UE
      */
-    (NxCxaFir_0, bit(3)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(3)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[4]
      *  TIMER_EXPIRED_RECOV_ERROR
@@ -607,7 +607,7 @@ group gNxCxaFir_0 filter singlebit
     /** NXCXAFIR_0[5]
      *  TIMER_EXPIRED_XSTOP_ERROR
      */
-    (NxCxaFir_0, bit(5)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(5)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[6]
      *  PSL_CMD_UE
@@ -627,12 +627,12 @@ group gNxCxaFir_0 filter singlebit
     /** NXCXAFIR_0[9]
      *  SNOOP_ARRAY_UE
      */
-    (NxCxaFir_0, bit(9)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(9)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[10]
      *  RECOVERY_FAILED
      */
-    (NxCxaFir_0, bit(10)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(10)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[11]
      *  ILLEGAL_LPC_BAR_ACCESS
@@ -662,17 +662,17 @@ group gNxCxaFir_0 filter singlebit
     /** NXCXAFIR_0[16]
      *  MASTER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_0, bit(16)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(16)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[17]
      *  SNOOPER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_0, bit(17)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(17)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[18]
      *  XPT_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_0, bit(18)) ? SelfMedThr1;
+    (NxCxaFir_0, bit(18)) ? Capp0MedThr1;
 
     /** NXCXAFIR_0[19]
      *  MUOP_ERROR_1
@@ -848,17 +848,17 @@ group gNxCxaFir_1 filter singlebit
     /** NXCXAFIR_1[1]
      *  REGISTER_PE
      */
-    (NxCxaFir_1, bit(1)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(1)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[2]
      *  MASTER_ARRAY_CE
      */
-    (NxCxaFir_1, bit(2)) ? SelfMedThr32PerDay;
+    (NxCxaFir_1, bit(2)) ? Capp1MedThr32PerDay;
 
     /** NXCXAFIR_1[3]
      *  MASTER_ARRAY_UE
      */
-    (NxCxaFir_1, bit(3)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(3)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[4]
      *  TIMER_EXPIRED_RECOV_ERROR
@@ -868,7 +868,7 @@ group gNxCxaFir_1 filter singlebit
     /** NXCXAFIR_1[5]
      *  TIMER_EXPIRED_XSTOP_ERROR
      */
-    (NxCxaFir_1, bit(5)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(5)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[6]
      *  PSL_CMD_UE
@@ -888,12 +888,12 @@ group gNxCxaFir_1 filter singlebit
     /** NXCXAFIR_1[9]
      *  SNOOP_ARRAY_UE
      */
-    (NxCxaFir_1, bit(9)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(9)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[10]
      *  RECOVERY_FAILED
      */
-    (NxCxaFir_1, bit(10)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(10)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[11]
      *  ILLEGAL_LPC_BAR_ACCESS
@@ -923,17 +923,17 @@ group gNxCxaFir_1 filter singlebit
     /** NXCXAFIR_1[16]
      *  MASTER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_1, bit(16)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(16)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[17]
      *  SNOOPER_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_1, bit(17)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(17)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[18]
      *  XPT_SYS_XSTOP_ERROR
      */
-    (NxCxaFir_1, bit(18)) ? SelfMedThr1;
+    (NxCxaFir_1, bit(18)) ? Capp1MedThr1;
 
     /** NXCXAFIR_1[19]
      *  MUOP_ERROR_1
@@ -3673,6 +3673,41 @@ actionclass calloutNxThr5pHr
     calloutNx;
     threshold5phour;
 };
+
+actionclass Capp0MedThr1
+{
+    calloutCapp0;
+    threshold1;
+};
+
+actionclass Capp0MedThr32PerDay
+{
+    calloutCapp0;
+    threshold32pday;
+};
+
+actionclass Capp1MedThr1
+{
+    calloutCapp1;
+    threshold1;
+};
+
+actionclass Capp1MedThr32PerDay
+{
+    calloutCapp1;
+    threshold32pday;
+};
+
+actionclass calloutCapp0
+{
+    callout(connected(TYPE_CAPP, 0), MRU_MED);
+};
+
+actionclass calloutCapp1
+{
+    callout(connected(TYPE_CAPP, 1), MRU_MED);
+};
+
 
 actionclass combinedResponseError
 {
