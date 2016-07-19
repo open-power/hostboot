@@ -109,8 +109,8 @@ Layout Description
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>WINK (512K) </description>
-        <eyeCatch>WINK</eyeCatch>
+        <description>HCODE (512K) </description>
+        <eyeCatch>HCODE</eyeCatch>
         <physicalOffset>0x4A000</physicalOffset>
         <physicalRegionSize>0x80000</physicalRegionSize>
         <sha512Version/>

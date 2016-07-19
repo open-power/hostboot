@@ -50,7 +50,7 @@ $${IMGDIR}/$(1).pnor: $${IMGDIR}/hbicore_extended.bin $${IMGDIR}/$(1)_targeting.
 #	@echo "  HOSTBOOT_PROFILE enabled."
 #	@echo "  Build of vbu.pnor skipped due to space constraints."
 #else
-#	./buildpnorOld.pl --pnorLayout ./pnorLayoutVpo.xml \
+#	./buildpnorOld.pl --pnorLayout ./pnorLayoutFake.xml \
 #	    --genToc \
 #	    --pnorOutBin $${IMGDIR}/$(1).pnor \
 #	    --binFile_part $${IMGDIR}/$(1)_pnor.toc \
