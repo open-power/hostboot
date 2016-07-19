@@ -21321,6 +21321,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_PG</id>
     <macro>DIRECT</macro>

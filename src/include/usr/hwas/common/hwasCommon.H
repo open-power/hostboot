@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,6 +195,7 @@ const uint32_t VPD_CP00_PG_EC00_INDEX       = 32;
 const uint32_t VPD_CP00_PG_ECxx_GOOD        = 0xE1FF;
 
 const uint32_t VPD_CP00_PG_MAX_USED_INDEX   = 55;
+const uint32_t VPD_CP00_PG_xxx_VITAL        = 0x1000;
 const uint32_t VPD_CP00_PG_xxx_PERV         = 0x0800;
 const uint32_t VPD_CP00_PG_RESERVED_GOOD    = 0xFFFF;
 

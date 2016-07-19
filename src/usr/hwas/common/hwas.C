@@ -883,22 +883,26 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     {
         // The chip unit number of the perv target
         // is the index into the PG data
-         ATTR_CHIP_UNIT_type indexPERV =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        ATTR_CHIP_UNIT_type indexPERV =
+          i_desc->getAttr<ATTR_CHIP_UNIT>();
 
-         // Check PERV bit in the entry
-         if ((i_pgData[indexPERV]
-              & VPD_CP00_PG_xxx_PERV) != 0)
-         {
-             HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
-                      "actual 0x%04X, expected 0x%04X - bad",
-                      i_desc->getAttr<ATTR_HUID>(),
-                      indexPERV,
-                      i_pgData[indexPERV],
-                      (i_pgData[indexPERV] &
-                       ~VPD_CP00_PG_xxx_PERV));
-             l_descFunctional = false;
-         }
+        // Check VITAL bit in the entry
+        if ((i_pgData[indexPERV]
+             & VPD_CP00_PG_xxx_VITAL) != 0)
+        {
+            HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(),
+                     indexPERV,
+                     i_pgData[indexPERV],
+                     (i_pgData[indexPERV] &
+                      ~VPD_CP00_PG_xxx_VITAL));
+            l_descFunctional = false;
+        }
+
+        // Set the local attribute copy of this data
+        ATTR_PG_type l_pg = i_pgData[indexPERV];
+        i_desc->setAttr<ATTR_PG>(l_pg);
     }
 
     return l_descFunctional;
