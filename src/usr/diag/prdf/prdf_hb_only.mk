@@ -134,3 +134,33 @@ ${MFG_THRES_PATH} : ${MFG_THRES_ATTR_H}
 	${MFG_THRES_PL} $^ > $@
 EXTRA_CLEAN += ${MFG_THRES_PATH}
 CLEAN_TARGETS += ${MFG_THRES_PATH}
+
+################################################################################
+# The following are hardware procedure utilities that we are pulling into the
+# PRD library (only needed here for HBRT). This code is already compiled in
+# istep14 for Hostboot
+################################################################################
+
+ifeq (${HOSTBOOT_RUNTIME},1)
+
+# This is really the only file we need, but all of the other files below are
+# required because of dependencies.
+prd_obj_no_sim += memdiags.o
+
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
+
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+
+prd_obj_no_sim += mcbist.o
+prd_obj_no_sim += sim.o
+prd_obj_no_sim += rank.o
+prd_obj_no_sim += c_str.o
+prd_obj_no_sim += memory_size.o
+prd_obj_no_sim += patterns.o
+
+endif
