@@ -51,8 +51,6 @@ namespace p9_mcbist
 //
 //##############################################################################
 
-#ifndef __HOSTBOOT_RUNTIME
-
 /**
  * @brief  Plugin that initializes the data bundle.
  * @param  i_mcbChip An MCBIST chip.
@@ -69,15 +67,17 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, Initialize );
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_mcbChip An MCBIST chip.
- * @param  i_sc      The step code data struct.
+ * @param  io_sc     The step code data struct.
  * @note   This is especially useful for any analysis that still needs to be
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
 int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
-                      STEP_CODE_DATA_STRUCT & i_sc )
+                      STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[p9_mcbist::PostAnalysis] "
+
+    #ifndef __HOSTBOOT_RUNTIME
 
     // Send command complete to MDIA.
     // This must be done in post analysis after attentions have been cleared.
@@ -96,13 +96,13 @@ int32_t PostAnalysis( ExtensibleChip * i_mcbChip,
         }
     }
 
-    return SUCCESS; // Intentionally return SUCCESS for this plugin
+    #endif // not __HOSTBOOT_RUNTIME
+
+    return SUCCESS; // Always return SUCCESS for this plugin.
 
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( p9_mcbist, PostAnalysis );
-
-#endif // not __HOSTBOOT_RUNTIME
 
 //##############################################################################
 //
@@ -113,26 +113,18 @@ PRDF_PLUGIN_DEFINE( p9_mcbist, PostAnalysis );
 /**
  * @brief  MCBIST[10] - MCBIST Command Complete.
  * @param  i_mcbChip An MCBIST chip.
- * @param  i_sc      The step code data struct.
+ * @param  io_sc     The step code data struct.
  * @return SUCCESS
  */
 int32_t McbistCmdComplete( ExtensibleChip * i_mcbChip,
-                           STEP_CODE_DATA_STRUCT & i_sc )
+                           STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[p9_mcbist::McbistCmdComplete] "
 
-    // TODO: RTC 152592 - This code is only temporary so that we can get MDIA
-    //       working in SIMICs. Eventually, we will add a call to the TD
-    //       controller which will handle errors, restart commands, communicate
-    //       with MDIA, etc.
-    #ifndef __HOSTBOOT_RUNTIME
+    // Tell the TD controller there was a command complete attention.
+    getMcbistDataBundle(i_mcbChip)->getTdCtlr()->handleCmdComplete( io_sc );
 
-    McbistDataBundle * mcbdb = getMcbistDataBundle( i_mcbChip );
-    mcbdb->iv_sendCmdCompleteMsg = true;
-
-    #endif
-
-    return SUCCESS;
+    return SUCCESS; // Always return SUCCESS for this plugin.
 
     #undef PRDF_FUNC
 }

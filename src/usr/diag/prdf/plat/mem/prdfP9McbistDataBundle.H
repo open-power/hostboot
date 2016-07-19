@@ -34,6 +34,7 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
+#include <prdfMemTdCtlr.H>
 #include <prdfPlatServices.H>
 
 namespace PRDF
@@ -44,32 +45,36 @@ class McbistDataBundle : public DataBundle
 {
   public: // functions
 
-    #ifdef __HOSTBOOT_RUNTIME
-
-    /**
-     * @brief Constructor.
-     * @param i_mcbChip The MCBIST chip.
-     */
-    explicit McbistDataBundle( ExtensibleChip * i_mcbChip ) = default;
-
-    #else
-
     /**
      * @brief Constructor.
      * @param i_mcbChip The MCBIST chip.
      */
     explicit McbistDataBundle( ExtensibleChip * i_mcbChip ) :
-        iv_sendCmdCompleteMsg(false)
+        iv_chip(i_mcbChip)
     {}
 
-    #endif
-
     /** @brief Destructor. */
-    ~McbistDataBundle() = default;
+    ~McbistDataBundle()
+    {
+        delete iv_tdCtlr; iv_tdCtlr = nullptr;
+    }
 
     // Don't allow copy or assignment.
     McbistDataBundle( const McbistDataBundle & ) = delete;
     const McbistDataBundle & operator=( const McbistDataBundle & ) = delete;
+
+    /** @return The Targeted Diagnostics controller. */
+    MemTdCtlr<TARGETING::TYPE_MCBIST,McbistDataBundle *> * getTdCtlr()
+    {
+        using namespace TARGETING;
+
+        if ( nullptr == iv_tdCtlr )
+        {
+            iv_tdCtlr = new MemTdCtlr<TYPE_MCBIST,McbistDataBundle *>{iv_chip};
+        }
+
+        return iv_tdCtlr;
+    }
 
   public: // instance variables
 
@@ -77,12 +82,17 @@ class McbistDataBundle : public DataBundle
 
     /** TRUE if a message needs to be sent to MDIA in the post analysis plugin,
      *  FALSE otherwise. */
-    bool iv_sendCmdCompleteMsg;
+    bool iv_sendCmdCompleteMsg = false;
 
     #endif
 
   private: // instance variables
 
+    /** The MCBIST chip associated with this data bundle. */
+    ExtensibleChip * const iv_chip;
+
+    /** The Targeted Diagnostics controller. */
+    MemTdCtlr<TARGETING::TYPE_MCBIST,McbistDataBundle *> * iv_tdCtlr = nullptr;
 };
 
 /**
