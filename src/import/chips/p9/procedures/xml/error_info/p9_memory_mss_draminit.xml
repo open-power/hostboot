@@ -29,9 +29,8 @@
 <!-- -->
 <!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
 <!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
-<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 2 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -44,6 +43,27 @@
   </description>
   <ffdc>DIMM_TYPE</ffdc>
   <ffdc>DRAM_GEN</ffdc>
+  <callout>
+    <target>DIMM_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>DIMM_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+
+<hwpError>
+  <rc>RC_MSS_BAD_MR_PARAMETER</rc>
+  <description>
+    A bad parameter was passed to MR processing
+  </description>
+  <ffdc>MR_NUMBER</ffdc>
+  <ffdc>PARAMETER</ffdc>
+  <ffdc>PARAMETER_VALUE</ffdc>
   <callout>
     <target>DIMM_IN_ERROR</target>
     <priority>HIGH</priority>
