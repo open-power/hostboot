@@ -99,7 +99,7 @@ inline fapi2::ReturnCode set_hwms( const fapi2::Target<T>& i_target,
                                    const uint64_t i_galois )
 {
     fapi2::buffer<uint64_t> l_buffer;
-    uint8_t l_symbol;
+    uint8_t l_symbol = 0;
 
     // galois value of 0 means to clear the mark so only fill in fields if non-zero
     if (i_galois != 0)
@@ -168,7 +168,7 @@ inline fapi2::ReturnCode set_fwms( const fapi2::Target<T>& i_target,
                                    const mss::mcbist::address i_address )
 {
     fapi2::buffer<uint64_t> l_buffer = 0;
-    uint8_t l_symbol;
+    uint8_t l_symbol = 0;
 
     // galois value of 0 means to clear the mark so only fill in fields if non-zero
     if (i_galois != 0)
@@ -449,7 +449,7 @@ inline fapi2::ReturnCode get_per_symbol_error_counts( const fapi2::Target<T>& i_
         std::vector<uint64_t>& o_error_counts )
 {
     fapi2::buffer<uint64_t> l_buffer;
-    uint64_t l_count;
+    uint64_t l_count = 0;
 
     for (uint64_t l_index = 0; l_index < TT::NUM_MBSSYM_REGS; ++l_index)
     {
@@ -457,6 +457,7 @@ inline fapi2::ReturnCode get_per_symbol_error_counts( const fapi2::Target<T>& i_
 
         for (uint64_t l_symbol = 0; l_symbol < TT::MODAL_SYMBOL_COUNTERS_PER_REG; ++l_symbol)
         {
+            l_count = 0;
             mss::ecc::modal_symbol_count::get_count(l_buffer, l_symbol, l_count);
             o_error_counts.push_back(l_count);
         }
