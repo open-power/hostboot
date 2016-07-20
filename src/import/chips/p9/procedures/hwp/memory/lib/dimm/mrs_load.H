@@ -46,6 +46,25 @@ namespace mss
 {
 
 ///
+/// @brief MR Parameter Error Values
+/// A set of enumerations allowing one error xml/code to represent all bad parameters
+/// for MR encoding. The error info will take which MR has bad encoding, one of these
+/// enumerations to indicate which field was incorrect, and then the incorrect value.
+///
+enum mrs_bad_field
+{
+    WRITE_CMD_LATENCY = 0,
+    WRITE_RECOVERY = 1,
+    CAS_LATENCY = 2,
+    OUTPUT_IMPEDANCE = 3,
+    CAS_WRITE_LATENCY = 4,
+    CS_CMD_LATENCY = 5,
+    CA_PARITY_LATENCY = 6,
+    RTT_PARK = 7,
+    TCCD = 8,
+};
+
+///
 /// @brief A structure to represent an MRS operation
 /// @tparam T, the target type of the CCS engine chiplet
 ///
@@ -64,10 +83,10 @@ struct mrs_data
     // The delay needed after this MRS word is written
     uint64_t iv_delay;
 
-    mrs_data( uint64_t i_mrs,
+    mrs_data( const uint64_t i_mrs,
               fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, ccs::instruction_t<T>&, const uint64_t),
               fapi2::ReturnCode (*i_dumper)(const ccs::instruction_t<T>&, const uint64_t),
-              uint64_t i_delay ):
+              const uint64_t i_delay ):
         iv_mrs(i_mrs),
         iv_func(i_func),
         iv_dumper(i_dumper),
@@ -142,7 +161,7 @@ struct perform_mrs_load_overload< KIND_LRDIMM_DDR4 >
 template< mss::kind_t K = FORCE_DISPATCH >
 typename std::enable_if< perform_mrs_load_overload<DEFAULT_KIND>::available, fapi2::ReturnCode>::type
 perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                  std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+                  std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 //
 // We know we registered overloads for perform_mrs_load, so we need the entry point to
@@ -151,11 +170,11 @@ perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 //
 template<>
 fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 template<>
 fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 //
 // Boilerplate dispatcher
@@ -163,27 +182,27 @@ fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TAR
 template< kind_t K, bool B = perform_mrs_load_overload<K>::available >
 inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
 {
     // We dispatch to another kind if:
     // We don't have an overload defined (B == false)
     // Or, if we do have an overload (B == true) and this is not out kind.
     if ((B == false) || ((B == true) && (K != i_kind)))
     {
-        return perform_mrs_load_dispatch < (kind_t)(K - 1) > (i_kind, i_target, i_inst);
+        return perform_mrs_load_dispatch < (kind_t)(K - 1) > (i_kind, i_target, io_inst);
     }
 
     // Otherwise, we call the overload.
-    return perform_mrs_load<K>(i_target, i_inst);
+    return perform_mrs_load<K>(i_target, io_inst);
 }
 
 // DEFAULT_KIND is 0 so this is the end of the recursion
 template<>
 inline fapi2::ReturnCode perform_mrs_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
 {
-    return perform_mrs_load<DEFAULT_KIND>(i_target, i_inst);
+    return perform_mrs_load<DEFAULT_KIND>(i_target, io_inst);
 }
 
 }

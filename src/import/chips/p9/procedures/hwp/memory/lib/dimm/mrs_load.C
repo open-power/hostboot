@@ -38,7 +38,7 @@
 
 #include <mss.H>
 #include <lib/dimm/mrs_load.H>
-#include <lib/dimm/mrs_load_ddr4.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -84,12 +84,12 @@ fapi_try_exit:
 ///
 /// @brief Perform the mrs_load operations - unknown DIMM case
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] i_inst a vector of CCS instructions we should add to (unused)
+/// @param[in] io_inst a vector of CCS instructions we should add to (unused)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -114,15 +114,15 @@ fapi_try_exit:
 ///
 /// @brief Perform the mrs_load operations - RDIMM DDR4
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] i_inst a vector of CCS instructions we should add to
+/// @param[in] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     FAPI_DBG("perform mrs_load for %s [expecting rdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( mrs_load_ddr4(i_target, i_inst) );
+    FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -131,15 +131,15 @@ fapi_try_exit:
 ///
 /// @brief Perform the mrs_load operations - LRDIMM DDR4
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] i_inst a vector of CCS instructions we should add to
+/// @param[in] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     FAPI_DBG("perform mrs_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( mrs_load_ddr4(i_target, i_inst) );
+    FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -149,12 +149,12 @@ fapi_try_exit:
 ///
 /// @brief Perform the mrs_load operations - start the dispatcher
 /// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] i_inst a vector of CCS instructions we should add to
+/// @param[in] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
 fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
+        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
@@ -162,7 +162,7 @@ fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_T
     FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
     FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
 
-    return perform_mrs_load_dispatch<FORCE_DISPATCH>(dimm_kind( l_type, l_gen ), i_target, i_inst);
+    return perform_mrs_load_dispatch<FORCE_DISPATCH>(dimm_kind( l_type, l_gen ), i_target, io_inst);
 
 fapi_try_exit:
     FAPI_ERR("couldn't get dimm type, dram gen: %s", mss::c_str(i_target));

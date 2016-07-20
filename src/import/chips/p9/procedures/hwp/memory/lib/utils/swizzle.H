@@ -118,7 +118,7 @@ inline fapi2::buffer<DB>& swizzle( fapi2::buffer<SB> i_source, fapi2::buffer<DB>
     reverse(i_source);
 
 #ifdef SWIZZLE_TRACE
-    FAPI_DBG("swizzle o: 0x%0X s: 0x%X d: 0x%llX ds: %d l: %d ss: %d",
+    FAPI_DBG("swizzle o: 0x%016lx s: 0x%016lx d: 0x%016lx ds: %d l: %d ss: %d",
              l_tmp, i_source, o_destination, DS, L, (sizeof(SB) * 8) - (SS + 1));
 #endif
 
