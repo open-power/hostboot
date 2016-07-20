@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.69 2016/04/21 11:05:04 sasethur Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.71 2016/07/20 14:10:54 lwmulkey Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -110,6 +110,8 @@
 //  1.67   |dcadiga   |04-APR-16| Code Review Updates
 //  1.68   |preeragh  |20-APR-16| Compatible for fw840 only
 //  1.69   |preeragh  |20-APR-16| Compatible for fw860 onwards (not reverse compatible)
+//  1.70   |sglancy   |19-JUL-16| Save and Restore bug fix
+//  1.71   |lwmulkey  |20-JUL-16| Code Review Updates
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
@@ -153,7 +155,77 @@ enum shmoo_param
 
 extern "C"
 {
+fapi::ReturnCode mcb_SaveAndRestore(const fapi::Target & i_target_mba,uint64_t i_content_array[],uint8_t i_mode) 
+	{
 
+		ReturnCode rc;
+		uint32_t rc_num;
+		uint8_t l_index = 0;
+		uint8_t l_index1 = 0;
+		uint64_t l_value = 0;
+		uint64_t l_val_u64 = 0;
+		ecmdDataBufferBase l_mcbem1ab(64);	
+		uint64_t l_register_array[6] = {0x030106e0,0x0301040d,0x0301040e,0x03010449,0x03010416,0x03010434};
+		uint64_t l_mbs_reg[2] = {0x0201144a,0x0201148a};
+		//populate the array{0x030106d0,0x030106d2,0x030106d1,0x030106d3,0x0301040d,0x0301040e,0x03010449,0x0201144a,0x0201148a};
+		
+		
+		Target l_target_centaur;
+		rc = fapiGetParentChip(i_target_mba, l_target_centaur); if(rc) return rc;
+		if (rc)
+		{
+			FAPI_DBG("%s:Error in getting parent chip!",i_target_mba.toEcmdString()); return rc;
+		}
+		
+		if(i_mode == 0)
+		{
+			FAPI_INF("%s: Saving Register contents",i_target_mba.toEcmdString());
+			for(l_index = 0;l_index<6;l_index++)
+			{ 	
+				l_value = l_register_array[l_index];
+				rc = fapiGetScom(i_target_mba,l_value,l_mcbem1ab); if(rc) return rc;
+				i_content_array[l_index] = l_mcbem1ab.getDoubleWord (0);			
+			}
+			
+			for(l_index = 6;l_index<8;l_index++)
+			{ 	
+				
+				l_value = l_mbs_reg[l_index1];
+				rc = fapiGetScom(l_target_centaur,l_value,l_mcbem1ab); if(rc) return rc;
+				i_content_array[l_index] = l_mcbem1ab.getDoubleWord (0);	
+				l_index1++;	
+			}
+		}
+		
+		else if(i_mode == 1)
+		{
+			FAPI_INF("%s:  Restoring Register contents",i_target_mba.toEcmdString());	
+			for(l_index = 0;l_index<6;l_index++)
+			{ 	
+				l_val_u64 = i_content_array[l_index];
+				l_value = l_register_array[l_index];
+				rc_num  =  l_mcbem1ab.setDoubleWord(0,l_val_u64);if (rc_num){FAPI_ERR( "Error in function  mcb_SaveAndRestore:");rc.setEcmdError(rc_num);return rc;} 
+				rc = fapiPutScom(i_target_mba,l_value,l_mcbem1ab); if(rc) return rc;				
+			}
+			
+			l_index1 = 0;
+			for(l_index = 6;l_index<8;l_index++)
+			{ 	
+				l_val_u64 = i_content_array[l_index];
+				l_value = l_mbs_reg[l_index1];
+				rc_num  =  l_mcbem1ab.setDoubleWord(0,l_val_u64);if (rc_num){FAPI_ERR( "Error in function  mcb_SaveAndRestore:");rc.setEcmdError(rc_num);return rc;} 
+				rc = fapiPutScom(l_target_centaur,l_value,l_mcbem1ab); if(rc) return rc;	
+				l_index1++;		
+			}	
+		}
+		else
+		{
+			FAPI_INF("%s: Invalid value of MODE",i_target_mba.toEcmdString());
+		}
+		return rc;
+
+
+	}
     using namespace fapi;
 
     fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_target_mba);
@@ -214,6 +286,11 @@ extern "C"
     {
         // const fapi::Target is centaur.mba
         fapi::ReturnCode rc;
+        uint8_t i_mode = 0;
+	uint64_t i_content_array[8];
+	rc = mcb_SaveAndRestore(i_target_mba,i_content_array,i_mode);
+	if(rc) return rc;
+	
         //FAPI_INF(" pattern bit is %d and test_type_bit is %d");
         rc = mss_draminit_training_advanced_cloned(i_target_mba);
         if (rc)
@@ -232,6 +309,8 @@ extern "C"
             FAPI_ERR("Unmask Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
             return rc;
         }
+	rc = mcb_SaveAndRestore(i_target_mba,i_content_array,1);
+	
         return rc;
     }
 
