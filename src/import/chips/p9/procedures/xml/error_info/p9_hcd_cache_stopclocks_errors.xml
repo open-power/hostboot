@@ -1,0 +1,98 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_hcd_cache_stopclocks_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_hcd_cache_startclocks procedures -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_CACHECLKSYNCDROP_TIMEOUT</rc>
+    <description>
+        L2 EXs clock sync done drop timed out.
+    </description>
+    <ffdc>EQPPMQACSR</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_CACHECLKSTOP_FAILED</rc>
+    <description>
+        cache clock stop failed.
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQCLKSTAT</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_CACHECLKSTOP_TIMEOUT</rc>
+    <description>
+        cache clock stop timed out.
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQCPLTSTAT</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
