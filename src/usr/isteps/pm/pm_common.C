@@ -411,10 +411,7 @@ namespace HBPM
             cmeHeader_t* pCmeHeader = (cmeHeader_t*)
                 (&(pChipHomer->cpmrRegion.cmeBin.elements.imgHeader));
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "CME header  -- Date:0x%08X, Version:0x%08X, "
-                      "Hcode offset:0x%08X, Hcode length:0x%08X",
-                      pCmeHeader->g_cme_build_date,
-                      pCmeHeader->g_cme_build_ver,
+                      "CME header  -- Hcode offset:0x%08X, Hcode length:0x%08X",
                       pCmeHeader->g_cme_hcode_offset,
                       pCmeHeader->g_cme_hcode_length);
 
