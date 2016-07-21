@@ -94,12 +94,10 @@ HCD_HDR_UINT32( quadCmnRingOccOffset, 0);
 HCD_HDR_UINT32( quadSpecRingOccOffset, 0);
 HCD_HDR_UINT32( quadCmnScomOccOffset, 0);
 HCD_HDR_PAD(512);
-//HCD_HDR_PAD(QPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
 }  __attribute__((packed, aligned(512))) QpmrHeaderLayout_t;
-//} __attribute__((packed, aligned(QPMR_HEADER_SIZE))) QpmrHeaderLayout_t;
 #endif
 // @todo Get around the above hardcoding.
 
@@ -138,12 +136,10 @@ HCD_HDR_UINT32( coreSpecRingLength, 0);
 HCD_HDR_UINT32( coreScomOffset, 0);
 HCD_HDR_UINT32( coreScomLength, 0);
 HCD_HDR_PAD(256);
-//HCD_HDR_PAD(CPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
 } __attribute__((packed, aligned(256))) cpmrHeader_t;
-//} __attribute__((packed, aligned(CPMR_HEADER_SIZE))) cpmrHeader_t;
 #endif
 
 // @todo Get around the above hardcoding.
@@ -180,9 +176,11 @@ HCD_HDR_UINT64(g_sgpe_reserve_flags, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_ovrd_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);
-HCD_HDR_UINT32(g_sgpe_spec_ring_ovrd_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_scom_offset, 0);
-HCD_HDR_UINT32(g_sgpe_reserve3, 0);
+HCD_HDR_UINT32(g_sgpe_cmn_scom_mem_offset, 0);
+HCD_HDR_UINT32(g_sgpe_cmn_scom_length, 0);
+HCD_HDR_UINT32(g_sgpe_24x7_offset, 0);
+HCD_HDR_UINT32(g_sgpe_24x7_length, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
@@ -299,6 +297,7 @@ enum
     MAX_CME_PER_CHIP            = 12,
     MAX_CACHE_CHIPLETS          = 6,
     CACH0_CHIPLET_ID            = 0x10,
+    MAX_CORES_PER_EX            = 2,
     CORE0_CHIPLET_ID            = 0x20,
     PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
     PPE_RESERVE_AREA            = 0x200,
@@ -316,11 +315,9 @@ enum
 
     //** Hcode
     SGPE_INT_VECT               = 384,
-    //SGPE_IMG_HEADER             = 64,
     SGPE_IMG_HEADER             = sizeof(sgpeHeader_t),
     SGPE_DBG_PTR_AREA_SIZE      = 64,
-    //SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
-    SGPE_HCODE_SIZE             = 45 * ONE_KB,  // @todo RTC 158543 Reallocate space
+    SGPE_HCODE_SIZE             = (45 * ONE_KB) + HALF_KB,  // @todo RTC 158543 Reallocate space
 
     SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
                                    SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
@@ -328,17 +325,17 @@ enum
     SGPE_ALLOCATED_SIZE         = SGPE_HCODE_SIZE,   // @todo RTC 158543 Reallocate space (collapse??)
 
     //** Scan
-    //SGPE_COMMON_RING            = 13  * ONE_KB, // Common rings (10KB) + Override rings(3KB)
     SGPE_COMMON_RING_SIZE       = 13 * ONE_KB,  // 400B * 9 rings * 3 types (base, RL, CC)
     SGPE_OVERRIDE_RING_SIZE     = 3 * ONE_KB,   // 300B * 9 rings
 
     CACHE_INST_SPECIFIC_SIZE    = (3 * ONE_KB) + HALF_KB, // per cache, 1KB/ring x 5 rings/cache
-    CACHE_SPECIFIC_RING_SIZE    = MAX_CACHE_CHIPLETS * CACHE_INST_SPECIFIC_SIZE,
     SGPE_INSTRUMENTATION_SIZE   = 2 * ONE_KB,
+    MAX_CACHE_CHIPLET           = 6,
+    MAX_QUAD_SPEC_RING_SIZE     = 19  * ONE_KB,
 
     //** SCOM
     NUM_CACHE_SCOM_REGS         = 47 + 1,       // 16 L2 repr, 16 L3 repr, 15 non-repr, 1 NULL
-    CACHE_SCOM_RESTORE_SIZE     = MAX_CACHE_CHIPLETS * NUM_CACHE_SCOM_REGS * SCOM_ENTRY_SIZE,
+    CACHE_SCOM_RESTORE_SIZE     = 6 * ONE_KB, //4488B rounded to 6KB
 
     CACHE_SCOM_START            = 128 * ONE_KB, // HOMER offset from QPMR
 
@@ -363,35 +360,28 @@ enum
     //** SCOM
     CORE_SCOM_START             = (256 * ONE_KB),
     CORE_SCOM_RESTORE_SIZE      = SCOM_ENTRY_SIZE * 16, // (15 registers + 1 NULL) per core
-    CORE_SCOM_RES_SIZE          = CORE_SCOM_RESTORE_SIZE * MAX_CORES_PER_CHIP,
     CME_SCOM_AREA               = CORE_SCOM_RESTORE_SIZE * 2, // 2 cores
     SCOM_AREA_PER_CME           =  HALF_KB, // 256(ea ) * 2( CORES PER CME) (???)
 
     //** Hcode
+    CORE_SCOM_PER_CME           = 512,
+    CORE_SCOM_RES_SIZE          = MAX_CME_PER_CHIP * SCOM_AREA_PER_CME,
     CME_INT_VECTOR_SIZE         = 384,
     CME_IMG_HEADER_SIZE         = 64,
     CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_HCODE_SIZE              = (28 * ONE_KB) + HALF_KB,
+    CME_HCODE_SIZE              = (30 * ONE_KB), //FIXME RTC 159737 Needs review before merge of P-State
 
     //** Scan
-    CORE_COMMON_RING_SIZE       = 3  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
-    CORE_SPECIFIC_RING          = 2 * ONE_KB,   // per core
+    CORE_COMMON_RING_SIZE       = 1  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
+    MAX_SIZE_CME_INST_RING      = 1 * ONE_KB,
     CORE_OVERRIDE_RING          = 1 * ONE_KB,   // common for all cores
     QUAD_PSTATE_SIZE            = HALF_KB,      // common for all cores
     CME_INSTRUMENTATION_SIZE    = HALF_KB,      // per CME
     INSTRUMENTATION_COUNTERS    = HALF_KB,      // (???)
-
-    CORE_RESERVE_SIZE           = CORE_SCOM_START -
-                                  ( CORE_RESTORE_SIZE +
-                                    CME_HCODE_SIZE +
-                                    CORE_COMMON_RING_SIZE +
-                                    QUAD_PSTATE_SIZE  ),
-
     CME_SRAM_HCODE_OFFSET       = 0x00, //(???)
-    CME_REGION_START            = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
     CME_INST_SPEC_RING_START    = 300 * ONE_KB,
-    RESERVE_CME_RING_AREA       = ( CME_INST_SPEC_RING_START  -
-                                    (CME_REGION_START +
+    CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
                                      CME_HCODE_SIZE +
                                      CORE_COMMON_RING_SIZE +
                                      QUAD_PSTATE_SIZE)),
@@ -407,10 +397,13 @@ enum
     PGPE_HCODE_SIZE             = 30 * ONE_KB,
     PGPE_PARAM_BLOCK_SIZE       = 8 * ONE_KB,  //Global and OCC PPB
     PSTATE_OUTPUT_TABLE         = 8 * ONE_KB,
-    IGNORE_CHIPLET_INSTANCE     = 0xFF,
 
     PGPE_MAX_AREA_SIZE          = 48 * ONE_KB, // @todo RTC 158543 Reallocate space
 
+    IGNORE_CHIPLET_INSTANCE     =  0xFF,
+
+    //RING LAYOUT
+    RING_ALIGN_BOUNDARY         =  0x08,
 };
 
 /**
@@ -446,7 +439,157 @@ enum ImgBldRetCode_t
     BUILD_FAIL_PGPE_BL2         =   25,
     BUILD_FAIL_PGPE_HCODE       =   26,
     BUILD_FAIL_OVERRIDE         =   27,
+    BUILD_SEC_SIZE_OVERFLOW     =   28,
+    BUILD_FAIL_INVALID_SECTN    =   29,
+    BUILD_FAIL_RING_EXTRACTN    =   30,
 };
+
+/**
+ * @brief   models layout of core common rings in HOMER.
+ * @note    Ring list below is primarily for debug.
+ */
+typedef struct
+{
+    uint16_t    ecFuncRing;
+    uint16_t    ecGptrRing;
+    uint16_t    ecTimeRing;
+    uint16_t    ecModeRing;
+} CoreCmnRingsList_t;
+
+typedef struct
+{
+    CoreCmnRingsList_t cmnRings;
+    uint8_t     cmnScanRingPayload[CORE_COMMON_RING_SIZE - sizeof(CoreCmnRingsList_t)];
+} CoreCmnRingsCme_t;
+
+typedef union
+{
+    CoreCmnRingsCme_t cmnRingIndex;
+    uint8_t cmnScanRings[CORE_COMMON_RING_SIZE];
+} CoreCmnRingLayout_t;
+
+/**
+ * @brief   models layout of core instance specific ring in HOMER.
+ * @note    Ring list below is primarily for debug.
+ */
+typedef struct
+{
+    uint16_t ecRepr0;
+    uint16_t ecRepr1;
+    uint8_t  ecReserve[4];
+} CoreSpecRingList_t;
+typedef struct
+{
+    CoreSpecRingList_t coreSpecRings;
+    uint8_t  instanceRingPayLoad[ MAX_SIZE_CME_INST_RING - sizeof(CoreSpecRingList_t)];
+} CoreSpecRingCme_t;
+
+typedef union
+{
+    CoreSpecRingCme_t instRingIndex;
+    uint8_t instScanRings[ MAX_SIZE_CME_INST_RING ];
+} CoreSpecRingLayout_t;
+
+/**
+ * @brief   models layout of quad common rings in HOMER.
+ * @note    this layout resides in QPMR region and is consumed by SGPE.
+ *          Ring list below is primarily for debug.
+ */
+
+typedef struct
+{
+    uint16_t    eqFureRing;
+    uint16_t    eqGptrRing;
+    uint16_t    eqTimeRing;
+    uint16_t    eqModeRing;
+    uint16_t    exL3FureRing;
+    uint16_t    exL3GptrRing;
+    uint16_t    exL3TimeRing;
+    uint16_t    exL2ModeRing;
+    uint16_t    exL2FureRing;
+    uint16_t    exL2GptrRing;
+    uint16_t    exL2TimeRing;
+    uint16_t    exL3RefrFureRing;
+    uint16_t    exL3RefrGptrRing;
+    uint16_t    eqAnaFuncRing;
+    uint16_t    eqAnaGptrRing;
+    uint16_t    eqDpllFuncRing;
+    uint16_t    eqDpllGptrRing;
+    uint16_t    eqDpllModeRing;
+    uint16_t    eqAnaBndyRingBucket0;
+    uint16_t    eqAnaBndyRingBucket1;
+    uint16_t    eqAnaBndyRingBucket2;
+    uint16_t    eqAnaBndyRingBucket3;
+    uint16_t    eqAnaBndyRingBucket4;
+    uint16_t    eqAnaBndyRingBucket5;
+    uint16_t    eqAnaBndyRingBucket6;
+    uint16_t    eqAnaBndyRingBucket7;
+    uint16_t    eqAnaBndyRingBucket8;
+    uint16_t    eqAnaBndyRingBucket9;
+    uint16_t    eqAnaBndyRingBucket10;
+    uint16_t    eqAnaBndyRingBucket11;
+    uint16_t    eqAnaBndyRingBucket12;
+    uint16_t    eqAnaBndyRingBucket13;
+    uint16_t    eqAnaBndyRingBucket14;
+    uint16_t    eqAnaBndyRingBucket15;
+    uint16_t    eqAnaBndyRingBucket16;
+    uint16_t    eqAnaBndyRingBucket17;
+    uint16_t    eqAnaBndyRingBucket18;
+    uint16_t    eqAnaBndyRingBucket19;
+    uint16_t    eqAnaBndyRingBucket20;
+    uint16_t    eqAnaBndyRingBucket21;
+    uint16_t    eqAnaBndyRingBucket22;
+    uint16_t    eqAnaBndyRingBucket23;
+    uint16_t    eqAnaBndyRingBucket24;
+    uint16_t    eqAnaBndyRingBucket25;
+    uint16_t    eqAnaBndyRingl3dccBucket26;
+    uint16_t    eqAnaModeRing;
+    uint16_t    ex_l2_fure_1;
+    uint16_t    ex_l3_fure_1;
+} QuadCmnRingsList_t;
+
+typedef struct
+{
+    QuadCmnRingsList_t   quadCmnRingList;
+    uint8_t             cmnRingPayLoad[SGPE_COMMON_RING_SIZE - sizeof(QuadCmnRingsList_t)];
+} QuadCmnRingsSgpe_t;
+
+typedef union
+{
+    QuadCmnRingsSgpe_t cmnRingIndex;
+    uint8_t cmnScanRings[SGPE_COMMON_RING_SIZE];
+} CmnRingLayoutSgpe_t;
+
+/**
+ * @brief   models layout of quad/ex instance specific ring in HOMER.
+ * @note    this layout resides in QPMR region and is consumed by SGPE.
+ *          Ring list below is primarily for debug.
+ */
+typedef struct
+{
+    uint16_t eqRepr0Index;
+    uint16_t ex0L3ReprIndex;
+    uint16_t ex1L3ReprIndex;
+    uint16_t ex0L2ReprIndex;
+    uint16_t ex1L2ReprIndex;
+    uint16_t ex0L3RefrReprIndex;
+    uint16_t ex1L3RefrReprIndex;
+    uint16_t ex0L3RefrTimeIndex;
+    uint16_t ex1L3RefrTimeIndex;
+    uint8_t  eqReserve[6];
+} QuadSpecRingsList_t;
+
+typedef struct
+{
+    QuadSpecRingsList_t quadSpecRings[MAX_CACHE_CHIPLET];
+    uint8_t quadSpecRingPayLoad[ MAX_QUAD_SPEC_RING_SIZE - (MAX_CACHE_CHIPLET * sizeof(QuadSpecRingsList_t))];
+} QuadSpecRing_t;
+
+typedef union
+{
+    QuadSpecRing_t instRingIndex;
+    uint8_t instScanRings[ MAX_QUAD_SPEC_RING_SIZE ];
+} InstRingLayoutSgpe_t;
 
 /**
  * @brief   models image section of SGPE in HOMER.
@@ -460,10 +603,8 @@ typedef struct
     uint8_t imgHeader[sizeof(sgpeHeader_t)];
     uint8_t debugPtrs[PK_DBG_PTR_AREA_SIZE];
     uint8_t hcode[SGPE_EXE_SIZE];
-    uint8_t commonRings[SGPE_COMMON_RING_SIZE];
-    uint8_t cacheSpecificRing[CACHE_SPECIFIC_RING_SIZE];
-    uint8_t overrideRings[SGPE_OVERRIDE_RING_SIZE];
-    uint8_t cacheScomRestore[CACHE_SCOM_RESTORE_SIZE];
+    CmnRingLayoutSgpe_t quadCmnRingArea;
+    InstRingLayoutSgpe_t quadSpecRingArea;
 } SgpeLayout_t;
 
 typedef union CPMRSelfRestoreLayout
@@ -501,12 +642,12 @@ typedef union CmeHcodeLayout
 
 typedef struct
 {
-    SelfRestoreLayout_t  selfRestoreRegion;
-    CmeHcodeLayout_t     cmeBin;
-    uint8_t              commonRings[CORE_COMMON_RING_SIZE];
-    uint8_t              quadPstateArea[QUAD_PSTATE_SIZE];
-    uint8_t              resvRingArea[RESERVE_CME_RING_AREA];
-    uint8_t              instSpecificRing[MAX_CORES_PER_CHIP * CORE_SPECIFIC_RING];
+    SelfRestoreLayout_t     selfRestoreRegion;
+    CmeHcodeLayout_t        cmeBin;
+    CoreCmnRingLayout_t     coreCmnRingArea;
+    uint8_t                 quadPstateArea[QUAD_PSTATE_SIZE];
+    uint8_t                 resvRingArea[RESERVE_CME_RING_AREA];
+    CoreSpecRingLayout_t    coreSpecRingArea[MAX_CME_PER_CHIP];
 } CPMRLayout_t;
 
 /**
