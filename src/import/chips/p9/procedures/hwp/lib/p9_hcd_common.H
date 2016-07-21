@@ -169,6 +169,12 @@ enum P9_HCD_CLK_CTRL_CONSTANTS
     CLK_REGION_DPLL                          = BIT64(14),
     CLK_REGION_REFR                          = BITS64(12, 2),
     CLK_REGION_L3_REFR                       = BITS64(6, 2) | BITS64(12, 2),
+    CLK_REGION_EX0_L3                        = BIT64(6),
+    CLK_REGION_EX1_L3                        = BIT64(7),
+    CLK_REGION_EX0_L2                        = BIT64(8),
+    CLK_REGION_EX1_L2                        = BIT64(9),
+    CLK_REGION_EX0_REFR                      = BIT64(12),
+    CLK_REGION_EX1_REFR                      = BIT64(13),
     CLK_REGION_EX0_L2_L3_REFR                = BIT64(6) | BIT64(8) | BIT64(12),
     CLK_REGION_EX1_L2_L3_REFR                = BIT64(7) | BIT64(9) | BIT64(13),
     CLK_REGION_ALL_BUT_L3_REFR               = BITS64(4, 2) | BITS64(8, 4) | BIT64(14),
@@ -229,6 +235,8 @@ enum XCR_DEFS
 
 /// @todo remove these once correct header contains them
 /// Scom addresses missing from p9_quad_scom_addresses.H
+#define PU_OCB_OCI_QSSR_CLEAR            PU_OCB_OCI_QSSR_SCOM1
+#define PU_OCB_OCI_QSSR_OR               PU_OCB_OCI_QSSR_SCOM2
 #define EQ_QPPM_QCCR_WCLEAR              EQ_QPPM_QCCR_SCOM1
 #define EQ_QPPM_QCCR_WOR                 EQ_QPPM_QCCR_SCOM2
 #define EX_0_CME_SCOM_SICR_CLEAR         EX_0_CME_SCOM_SICR_SCOM1
