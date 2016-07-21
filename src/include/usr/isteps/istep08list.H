@@ -120,6 +120,15 @@ void* call_host_cbs_start(void *io_pArgs);
 void* call_proc_check_slave_sbe_seeprom_complete(void *io_pArgs);
 
 /**
+ *  @brief call_host_attnlisten_proc
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep
+ */
+void* call_host_attnlisten_proc(void *io_pArgs);
+
+/**
  *  @brief  proc_cen_ref_clk_enable
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
@@ -314,9 +323,9 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(08,05,"host_attnlisten_proc"),    // @TODO-RTC:154658
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(08,05,"host_attnlisten_proc"),
+                ISTEP_08::call_host_attnlisten_proc,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(08,06,"proc_cen_ref_clk_enable"),

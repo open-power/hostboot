@@ -1705,4 +1705,18 @@ ID for the sensor number returned with the elog. -->
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>ATTN_CHK_ALL_PROCS</id>
+    <description>
+      Used to tell ATTN code whether to chk MASTER(0) OR all PROCs(1)
+      when the checkForIplAttns routine is called.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

@@ -60,6 +60,7 @@ OBJS += call_proc_scomoverride_chiplets.o
 OBJS += call_proc_chiplet_enable_ridi.o
 OBJS += call_host_rng_bist.o
 OBJS += call_host_set_voltages.o
+OBJS += call_host_attnlisten_proc.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
