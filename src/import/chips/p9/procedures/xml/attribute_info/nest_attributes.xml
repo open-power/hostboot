@@ -67,7 +67,8 @@
   <description>
     The lowest frequency that a core can be set to in MHz.
     This is the same for all cores in the system.
-    Provided by the MRW.
+    Provided by the MVPD #V and is calculated as the max of the
+    Power Save frequencies.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
@@ -91,7 +92,8 @@
   <description>
     The maximum core frequency in MHz.
     This is the same for all cores in the system.
-    Provided by the #V bucket of module VPD.
+    Provided by the #V bucket of module VPD and is calculated
+    as the minimum of the turbo frequencies.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
