@@ -74,6 +74,7 @@
     <description>Temporary buffer size invalid</description>
     <ffdc>TEMP_BUF1_SIZE</ffdc>
     <ffdc>TEMP_BUF2_SIZE</ffdc>
+    <ffdc>TEMP_BUF3_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
