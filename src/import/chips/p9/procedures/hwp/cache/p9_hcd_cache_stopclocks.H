@@ -25,7 +25,7 @@
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
 // *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
 // *HWP Team               : PM
-// *HWP Consumed by        : HB:PREV
+// *HWP Consumed by        : HB:PERV
 // *HWP Level              : 2
 
 #ifndef __P9_HCD_CACHE_STOPCLOCKS_H__
@@ -38,7 +38,8 @@
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_hcd_cache_stopclocks_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>&,
-    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS);
+    const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS,
+    const p9hcd::P9_HCD_EX_CTRL_CONSTANTS);
 
 extern "C"
 {
@@ -50,7 +51,8 @@ extern "C"
     fapi2::ReturnCode
     p9_hcd_cache_stopclocks(
         const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-        const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions);
+        const p9hcd::P9_HCD_CLK_CTRL_CONSTANTS      i_select_regions,
+        const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex);
 
 }
 
