@@ -39,6 +39,7 @@
 #include "common/attnmem.H"
 #include <util/singleton.H>
 #include <errl/errlmanager.H>
+#include <targeting/common/targetservice.H>
 
 // Custom compile configs
 #include <config.h>
@@ -72,9 +73,41 @@ errlHndl_t checkForIplAttentions()
 
     assert(!Singleton<Service>::instance().running());
 
-    TargetHandleList list;
+    TargetHandleList     list;
+    uint8_t              l_useAllProcs = 0;
+    TARGETING::Target   *l_MasterProcTarget = NULL;
+    TARGETING::Target   *l_sys = NULL;
 
-    getTargetService().getAllChips(list, TYPE_PROC);
+
+    // ------------------------------------------------
+    // NOTE: ATTN code overrides TARGETING code for
+    //       testing purposes. However for this case
+    //       of getting an attribute, we can just
+    //       modify the attribute for testing.
+    //       For the master proc, I don't think we
+    //       really need to alter it for testing.
+    // ------------------------------------------------
+
+    // We have an ATTRIBUTE that indicates all procs
+    // or just the master proc.
+    TARGETING::targetService().getTopLevelTarget( l_sys );
+    assert(l_sys != NULL);
+    l_sys->tryGetAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
+
+
+    // Do we want to check ALL procs ?
+    if (0 == l_useAllProcs)
+    {
+        // Just the master (so early IPL)
+        TARGETING::targetService().masterProcChipTargetHandle(
+                                            l_MasterProcTarget);
+        list.push_back(l_MasterProcTarget);
+    } // end if just master proc
+    else
+    {
+        getTargetService().getAllChips(list, TYPE_PROC);
+    } // end else ALL procs
+
 
     TargetHandleList::iterator tit = list.begin();
 
