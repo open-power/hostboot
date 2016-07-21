@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/prdfPlatServices_rt.H $         */
+/* $Source: src/usr/diag/prdf/plat/prdfPlatServices_rt.H $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -57,6 +57,18 @@ void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE );
  * @param i_endAddr   Last address in the range.
  */
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
+
+//##############################################################################
+//##                  MCBIST/Maintenance Command wrappers
+//##############################################################################
+
+/**
+ * @brief  Stops Background Scrubbing.
+ * @param  i_trgt MCBIST or MBA target.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t stopBgScrub( TARGETING::TargetHandle_t i_trgt );
 
 } // end namespace PlatServices
 
