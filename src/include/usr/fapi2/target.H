@@ -1022,6 +1022,26 @@ inline Target<T> getTarget(uint64_t Ordinal)
     return Target<T>(Ordinal);
 }
 
+///
+/// @brief Returns the chiplet number associated with the Target
+/// @return The chiplet number for the Target. 0 is returned if the
+/// Target does not have a chiplet number (for ex, the PROC_CHIP Target)
+/// @note For logical targets such as the EX, the chiplet number of
+/// their immediate parent chiplet is returned
+///
+template< TargetType K, typename V >
+inline uint8_t Target< K, V >::getChipletNumber(void) const
+{
+    const TARGETING::Target * l_pTarget =
+        static_cast<TARGETING::Target*>(this->get());
+    uint8_t  l_chiplet_id = 0;
+    if(!l_pTarget->tryGetAttr<TARGETING::ATTR_CHIPLET_ID>(l_chiplet_id))
+    {
+        FAPI_ERR("ERROR: getChipletNumber: Can not read CHIPLET_ID attribute");
+    }
+    return l_chiplet_id;
+}
+
 } // End namespace fapi2
 
 #endif // End __FAPI2_TARGET__

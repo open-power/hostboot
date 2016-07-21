@@ -346,6 +346,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0</default>
+    </attribute>
 </targetType>
 
 <!-- Memory Buffer Target Types -->
@@ -1231,7 +1235,6 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
-    <attribute><id>CHIPLET_ID</id></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
     <attribute><id>CORE_PPM_ERRMASK</id></attribute>
