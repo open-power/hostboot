@@ -51,13 +51,14 @@ prd_incpath += ${PRD_SRC_PATH}/plat
 # External header paths
 prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 prd_incpath += ${ROOTPATH}/src/include/usr/errl
-prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/include/usr/fapi2
 prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
 prd_incpath += ${ROOTPATH}/src/include/usr/util
-#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
-#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/include
-#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -151,11 +152,6 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
-
-prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
-prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
-prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 prd_obj_no_sim += mcbist.o
 prd_obj_no_sim += sim.o

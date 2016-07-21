@@ -34,6 +34,7 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
+#include <lib/mcbist/memdiags.H> ///< MCBIST command interfaces
 //#include <utility_procedures/mss_maint_cmds.H> TODO: RTC 136126
 
 // This must be included after all Hostboot specific includes. This will take

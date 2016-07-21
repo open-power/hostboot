@@ -132,7 +132,13 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         if ( nullptr != iv_curProcedure ) break;
 
         // Stop background scrubbing.
-        // TODO: RTC 136126
+        o_rc = stopBgScrub<T>( iv_chip->getTrgt() );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
 
         // Move onto the next step in the state machine.
         o_rc = nextStep( io_sc );

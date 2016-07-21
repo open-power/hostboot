@@ -200,39 +200,11 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         // Stop background scrubbing. Whether to start a new TD procedure or to
         // temporarily mask TPS triggers while TPS is banned to prevent
         // flooding.
-        if ( NULL == iv_mssCmd )
+        o_rc = stopBgScrub<TYPE_MBA>( iv_mbaTrgt );
+        if ( SUCCESS != o_rc )
         {
-            // This scenario will only exist if there was a resest/reload or
-            // failover. It should be safe to just make a dummy command so that
-            // we can stop the current command.
-            iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                      iv_mbaTrgt, CenRank(0), 0 );
-            if ( NULL == iv_mssCmd )
-            {
-                PRDF_ERR( PRDF_FUNC "createMssCmd() failed" );
-                break;
-            }
-
-            o_rc = iv_mssCmd->stopCmd();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "stopCmd() failed" );
-                break;
-            }
-
-            // We don't want to chance calling cleanupCmd() on this command
-            // since we created a temporary command object just to stop
-            // background scrubbing. Therefore, delete the object.
-            delete iv_mssCmd; iv_mssCmd = NULL;
-        }
-        else
-        {
-            o_rc = iv_mssCmd->stopCmd();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "stopCmd() failed" );
-                break;
-            }
+            PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MBA>() failed" );
+            break;
         }
 
         // If the queue is empty, there were no pending requests and the new

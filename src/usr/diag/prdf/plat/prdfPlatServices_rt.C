@@ -31,11 +31,19 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <prdfPlatServices.H>
+// Framework includes
+#include <prdfErrlUtil.H>
 #include <prdfTrace.H>
+
+// Platform includes
+#include <prdfPlatServices.H>
+
+// Other includes
 #include <runtime/interface.h>
 
 //------------------------------------------------------------------------------
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -101,6 +109,74 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
             break;
         }
     }while(0);
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//##                         MCBIST Command wrappers
+//##############################################################################
+
+template<>
+uint32_t stopBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt )
+{
+    #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MCBIST>] "
+
+    PRDF_ASSERT( TYPE_MCBIST == getTargetType(i_trgt) );
+
+    uint32_t rc = SUCCESS;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_trgt );
+
+    fapi2::ReturnCode fapi_rc = memdiags::stop( fapiTrgt );
+
+    errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", getHuid(i_trgt) );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        rc = FAIL;
+    }
+
+    return rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//##                         MBA Command wrappers
+//##############################################################################
+
+template<>
+uint32_t stopBgScrub<TYPE_MBA>( TargetHandle_t i_trgt )
+{
+    #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MBA>] "
+
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
+
+    uint32_t rc = SUCCESS;
+
+    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+/* TODO RTC 136126
+    // It is safe to create a dummy command object because runtime commands do
+    // not store anything for cleanupCmd() and the stopCmd() function is generic
+    // for all command types. Also, since we are only stopping the command, all
+    // of the parameters for the command object are junk except for the target.
+    ecmdDataBufferBase i_startAddr, i_endAddr;
+    mss_TimeBaseScrub cmd { getFapiTarget(i_trgt), i_startAddr, i_endAddr,
+                            mss_MaintCmd::FAST_MAX_BW_IMPACT, 0, false };
+
+    errlHndl_t errl = fapi::fapiRcToErrl( cmd.stopCmd() );
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "mss_TimeBaseScrub::stop(0x%08x) failed",
+                  getHuid(i_trgt) );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        rc = FAIL;
+    }
+*/
+
+    return rc;
 
     #undef PRDF_FUNC
 }
