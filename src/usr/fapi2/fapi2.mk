@@ -103,11 +103,17 @@ FAPI2_PLAT_INCLUDE += $(addsuffix /common/include, \
 #------------------------------------------------------------------------------
 # The PLAT HWP RC and FFDC parser file generated from Error XML files
 #------------------------------------------------------------------------------
-PLAT_HWP_ERR_PARSER = platHwpErrParser.H
+PLAT_HWP_ERR_PARSER_TARGET = hbfwPlatHwpErrParser.H
+PLAT_HWP_ERR_PARSER_FFDC_TARGET = hbfwPlatHwpErrParserFFDC.H
+
 GENDIR_PLUGINS = $(ROOTPATH)/obj/genfiles/plugins
 GENPLUGINTARGET = $(addprefix $(GENDIR_PLUGINS)/, $(1))
-GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER}
-$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
+GENFILES_PLUGINS = ${PLAT_HWP_ERR_PARSER_TARGET}
+GENFILES_PLUGINS += ${PLAT_HWP_ERR_PARSER_FFDC_TARGET}
+
+
+$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER_TARGET}) \
+$(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER_FFDC_TARGET}) : \
 	$(ROOTPATH)/src/usr/fapi2/platCreateHwpErrParser.pl ${FAPI2_ERROR_XML}
 	$< $(dir $@) ${FAPI2_ERROR_XML}
 

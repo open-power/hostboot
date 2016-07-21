@@ -809,7 +809,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
 
     if (io_rc)
     {
-        uint64_t l_rcValue = io_rc;
+        uint32_t l_rcValue = io_rc;
 
         // ReturnCode contains an error. Find out which component of the HWPF
         // created the error

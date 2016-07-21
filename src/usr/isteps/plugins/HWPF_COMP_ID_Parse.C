@@ -30,5 +30,5 @@
 #include "errludparser.H"
 #include "hwpfUdParserFactory.H"
 
-ERRL_MAKE_UD_PARSER(fapi::HwpfUserDetailsParserFactory, hbfw::HWPF_COMP_ID)
+ERRL_MAKE_UD_PARSER(fapi2::HwpfUserDetailsParserFactory, hbfw::HWPF_COMP_ID)
 
