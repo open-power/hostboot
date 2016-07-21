@@ -33,14 +33,30 @@
 #ifndef FAPI2TESTUTILS_H_
 #define FAPI2TESTUTILS_H_
 
-#define EQ_PER_PROC 6
-#define EX_PER_EQ 2
-#define CORE_PER_EX 2
-#define MCS_PER_PROC 4
-#define MCA_PER_MCS 2
-#define MCBIST_PER_PROC 2
+#define EQ_PER_PROC          6
+#define EX_PER_EQ            2
+#define CORE_PER_EX          2
+#define MCS_PER_PROC         4
+#define MCA_PER_MCS          2
+#define MCBIST_PER_PROC      2
+#define MCS_PER_MCBIST       2
+#define PERV_PER_PROC        43
+#define XBUS_PER_PROC        1
+#define OBUS_PER_PROC        2
 
 #define SIMULATED_GOOD_CORES 4
+
+// non-core and non-cache chiplet ids
+#define START_PERV_CHIPLET_NUM    0x01
+#define START_XBUS_CHIPLET_NUM    0x06
+#define START_MCBIST_CHIPLET_NUM  0x07
+#define START_OBUS_CHIPLET_NUM    0x09
+
+// All Cache Chiplets
+#define START_EQ_CHIPLET_NUM      0x10
+
+// All Core Chiplets
+#define START_CORE_CHIPLET_NUM    0x20
 
 #include <fapi2.H>
 

@@ -3677,6 +3677,9 @@ sub generate_ex
     my $mruData = get_mruid($ipath);
     my $fapi_name = sprintf("pu.ex:k0:n%d:s0:p%02d:c%d", $node, $proc,$ex_orig);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex";
+    #EX is a logical target, Chiplet ID is the chiplet id of their immediate
+    #parent which is EQ. The range of EQ is 0x10 - 0x15
+    my $chipletId = sprintf("0x%X",(($ex_orig/2) + 0x10));
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex$ex</id>
@@ -3706,6 +3709,10 @@ sub generate_ex
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ex_orig</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     calcAndAddFapiPos("ex",$affinityPath,$ex_orig,$fapiPosHr);
@@ -3909,6 +3916,8 @@ sub generate_eq
     my $mruData = get_mruid($ipath);
     my $fapi_name = sprintf("pu.eq:k0:n%d:s0:p%02d:c%d", $node, $proc, $eq);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/eq-$eq";
+    #Chiplet ID range for EQ start with 0x10
+    my $chipletId = sprintf("0x%X",($eq + 0x10));
 
     print "
 <targetInstance>
@@ -3939,6 +3948,10 @@ sub generate_eq
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$eq</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$eq,"eq");
@@ -3962,6 +3975,10 @@ sub generate_mcs
     my $mcs_orig = $mcs;
     $mcs = $mcs%2;
     my $mcbist = ($mcs_orig - ($mcs_orig%2))/2;
+
+    #MCS is a logical target, Chiplet ID is the chiplet id of their immediate
+    #parent which is MCBIST. The range of MCBIST is 0x07 - 0x08
+    my $chipletId = sprintf("0x%X",($mcbist + 0x07));
 
     my $lognode;
     my $logid;
@@ -4035,6 +4052,10 @@ sub generate_mcs
         <id>CHIP_UNIT</id>
         <default>$mcs_orig</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
+    </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>$mscStr</default>
@@ -4066,6 +4087,10 @@ sub generate_mca
     my $mcbist = ($mca - ($mca%4))/4;
     my $mca_orig = $mca;
     $mca = $mca % 2;
+    #MCA is a logical target, Chiplet ID is the chiplet id of their immediate
+    #parent which is MCS. since MCS is the also logical, therefore the
+    # chiplet id of MCSIST will be returned. The range of MCBIST is 0x07 - 0x08
+    my $chipletId = sprintf("0x%X",($mcbist + 0x07));
 
     my $lognode;
     my $logid;
@@ -4116,6 +4141,10 @@ sub generate_mca
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mca_orig</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$mca_orig,"mca");
@@ -4152,6 +4181,9 @@ sub generate_mcbist
     my $physicalPath="physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
     my $affinityPath="affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
 
+    #Chiplet ID range for 2 MCBIST start with 0x07
+    my $chipletId = sprintf("0x%X",($mcbist + 0x07));
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcbist$mcbist</id>
@@ -4181,6 +4213,10 @@ sub generate_mcbist
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mcbist</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$mcbist,"mcbist");
@@ -4419,6 +4455,9 @@ sub generate_obus
         }
     }
 
+    #Chiplet ID range for OBUS start with 0x09
+    my $chipletId = sprintf("0x%X",($obus + 0x09));
+
     my $fapi_name = sprintf("pu.obus:k0:n%d:s0:p%02d:c%d", $node, $proc, $obus);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/obus-$obus";
 
@@ -4451,6 +4490,10 @@ sub generate_obus
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$obus</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$obus,"obus");
@@ -4485,6 +4528,9 @@ sub generate_xbus
 
     my $fapi_name = sprintf("pu.xbus:k0:n%d:s0:p%02d:c%d", $node, $proc, $xbus);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus";
+
+    #Chiplet ID for XBUS is 0x06
+    my $chipletId = sprintf("0x%X", 0x06);
 
     # Peer target variables
     my $peer;
@@ -4542,6 +4588,10 @@ sub generate_xbus
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$xbus</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     if ($peer)
@@ -4580,6 +4630,9 @@ sub generate_perv
     my ($proc, $perv, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X2C%04X",${node},$proc*MAX_PERV_PER_PROC + $perv);
     my $mruData = get_mruid($ipath);
+
+    #Chiplet ID for PERV is 0x01
+    my $chipletId = sprintf("0x%X", $perv);
 
     my $lognode;
     my $logid;
@@ -4624,6 +4677,10 @@ sub generate_perv
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$perv</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     calcAndAddFapiPos("perv",$affinityPath,$perv,$fapiPosHr);

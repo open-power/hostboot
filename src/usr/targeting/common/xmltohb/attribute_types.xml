@@ -21628,7 +21628,8 @@ DEPRECATED!!!!
    <id>CHIPLET_ID</id>
    <description>The address offset which each Chiplet types pervasive
      address space used to represent the a chiplet.
-     0x00 to 0x0F => For P9 all non-core and non-cache chiplets
+     0x00         => Target does not have a chiplet id
+     0x01 to 0x0F => For P9 all non-core and non-cache chiplets
      0x10 to 0x1F => All Cache Chiplets
      0x20 to 0x37 => All Core Chiplets
      0x38 to 0x3F => Multicast Operation
