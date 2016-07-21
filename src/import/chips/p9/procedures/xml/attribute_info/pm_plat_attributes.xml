@@ -1498,4 +1498,18 @@
     <platInit/>
 </attribute>
    <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+      <description>
+      Debug modes supported for CME/SGPE Scan layout in HOMER.
+      </description>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <valueType>uint8</valueType>
+      <enum>
+          SCAN_RING_NO_DEBUG = 0x00, SCAN_RING_TRACE_DEBUG = 0x01
+      </enum>
+      <initToZero/>
+      <platInit/>
+  </attribute>
+   <!-- ********************************************************************* -->
 </attributes>
