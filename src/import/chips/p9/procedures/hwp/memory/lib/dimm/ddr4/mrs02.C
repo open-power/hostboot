@@ -201,6 +201,14 @@ fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
     return FAPI2_RC_SUCCESS;
 }
 
+fapi2::ReturnCode (*mrs02_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mrs02_data& i_data,
+        ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+        const uint64_t i_rank) = &mrs02;
+
+fapi2::ReturnCode (*mrs02_data::decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                        const uint64_t i_rank) = &mrs02_decode;
+
 } // ns ddr4
 
 } // ns mss

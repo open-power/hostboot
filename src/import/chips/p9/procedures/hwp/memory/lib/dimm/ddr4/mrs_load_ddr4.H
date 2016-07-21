@@ -47,156 +47,14 @@ namespace mss
 namespace ddr4
 {
 
-//
-// Each MRS has it's attributes encapsulated in it's little struct.
-//
-
-///
-/// @brief Data structure for MRS0 data
-///
-struct mrs00_data
-{
-    ///
-    /// @brief mrs00_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_burst_length;
-    uint8_t iv_read_burst_type;
-    uint8_t iv_dll_reset;
-    uint8_t iv_test_mode;
-    uint8_t iv_write_recovery;
-    uint8_t iv_cas_latency;
-};
-
-///
-/// @brief Data structure for MRS1 data
-///
-struct mrs01_data
-{
-    ///
-    /// @brief mrs01_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_dll_enable;
-    uint8_t iv_odic;
-    uint8_t iv_additive_latency;
-    uint8_t iv_wl_enable;
-    uint8_t iv_tdqs;
-    uint8_t iv_qoff;
-    uint8_t iv_rtt_nom[MAX_RANK_PER_DIMM];
-};
-
-///
-/// @brief Data structure for MRS2 data
-///
-struct mrs02_data
-{
-    ///
-    /// @brief mrs03_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_lpasr;
-    uint8_t iv_cwl;
-    uint8_t iv_write_crc;
-    uint8_t iv_dram_rtt_wr[MAX_RANK_PER_DIMM];
-};
-
-
-///
-/// @brief Data structure for MRS3 data
-///
-struct mrs03_data
-{
-    ///
-    /// @brief mrs03_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_mpr_mode;
-    uint8_t iv_mpr_page;
-    uint8_t iv_geardown;
-    uint8_t iv_pda;
-    uint8_t iv_crc_wr_latency;
-    uint8_t iv_temp_readout;
-    uint8_t iv_fine_refresh;
-    uint8_t iv_read_format;
-};
-
-///
-/// @brief Data structure for MRS4 data
-///
-struct mrs04_data
-{
-    ///
-    /// @brief mrs04_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_max_pd_mode;
-    uint8_t iv_temp_refresh_range;
-    uint8_t iv_temp_ref_mode;
-    uint8_t iv_vref_mon;
-    uint8_t iv_cs_cmd_latency;
-    uint8_t iv_ref_abort;
-    uint8_t iv_rd_pre_train_mode;
-    uint8_t iv_rd_preamble;
-    uint8_t iv_wr_preamble;
-    uint8_t iv_ppr;
-};
-
-///
-/// @brief Data structure for MRS5 data
-///
-struct mrs05_data
-{
-    ///
-    /// @brief mrs05_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_ca_parity_latency;
-    uint8_t iv_crc_error_clear;
-    uint8_t iv_ca_parity_error_status;
-    uint8_t iv_odt_input_buffer;
-    uint8_t iv_ca_parity;
-    uint8_t iv_data_mask;
-    uint8_t iv_write_dbi;
-    uint8_t iv_read_dbi;
-    uint8_t iv_rtt_park[MAX_RANK_PER_DIMM];
-};
-
-///
-/// @brief Data structure for MRS6 data
-///
-struct mrs06_data
-{
-    ///
-    /// @brief mrs06_data ctor
-    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-    ///
-    mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
-
-    uint8_t iv_vrefdq_train_value[MAX_RANK_PER_DIMM];
-    uint8_t iv_vrefdq_train_range[MAX_RANK_PER_DIMM];
-    uint8_t iv_vrefdq_train_enable[MAX_RANK_PER_DIMM];
-    uint8_t iv_tccd_l;
-};
+// Forward declarations
+class mrs00_data;
+class mrs01_data;
+class mrs02_data;
+class mrs03_data;
+class mrs04_data;
+class mrs05_data;
+class mrs06_data;
 
 ///
 /// @defgroup setup-ccs
@@ -454,6 +312,247 @@ fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
+///
+/// @defgroup mrs-structs
+/// @addtogroup mrs-structs
+// Each MRS has it's attributes encapsulated in it's little struct.
+/// @{
+
+///
+/// @brief Data structure for MRS0 data
+///
+struct mrs00_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 0;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    // Kind of inverted; normally you'd implement this as a method of this class. But that
+    // would mean pointers <sigh> as we'd have to make the IPL MRS machine's table leverage
+    // dynaimc polymorphism and I avoid that where possible.
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs00_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs00_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_burst_length;
+    uint8_t iv_read_burst_type;
+    uint8_t iv_dll_reset;
+    uint8_t iv_test_mode;
+    uint8_t iv_write_recovery;
+    uint8_t iv_cas_latency;
+};
+
+///
+/// @brief Data structure for MRS1 data
+///
+struct mrs01_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 1;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs01_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs01_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_dll_enable;
+    uint8_t iv_odic;
+    uint8_t iv_additive_latency;
+    uint8_t iv_wl_enable;
+    uint8_t iv_tdqs;
+    uint8_t iv_qoff;
+    uint8_t iv_rtt_nom[MAX_RANK_PER_DIMM];
+};
+
+///
+/// @brief Data structure for MRS2 data
+///
+struct mrs02_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 2;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs02_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs03_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_lpasr;
+    uint8_t iv_cwl;
+    uint8_t iv_write_crc;
+    uint8_t iv_dram_rtt_wr[MAX_RANK_PER_DIMM];
+};
+
+
+///
+/// @brief Data structure for MRS3 data
+///
+struct mrs03_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 3;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs03_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs03_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_mpr_mode;
+    uint8_t iv_mpr_page;
+    uint8_t iv_geardown;
+    uint8_t iv_pda;
+    uint8_t iv_crc_wr_latency;
+    uint8_t iv_temp_readout;
+    uint8_t iv_fine_refresh;
+    uint8_t iv_read_format;
+};
+
+///
+/// @brief Data structure for MRS4 data
+///
+struct mrs04_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 4;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs04_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs04_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_max_pd_mode;
+    uint8_t iv_temp_refresh_range;
+    uint8_t iv_temp_ref_mode;
+    uint8_t iv_vref_mon;
+    uint8_t iv_cs_cmd_latency;
+    uint8_t iv_ref_abort;
+    uint8_t iv_rd_pre_train_mode;
+    uint8_t iv_rd_preamble;
+    uint8_t iv_wr_preamble;
+    uint8_t iv_ppr;
+};
+
+///
+/// @brief Data structure for MRS5 data
+///
+struct mrs05_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 5;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs05_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs05_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_ca_parity_latency;
+    uint8_t iv_crc_error_clear;
+    uint8_t iv_ca_parity_error_status;
+    uint8_t iv_odt_input_buffer;
+    uint8_t iv_ca_parity;
+    uint8_t iv_data_mask;
+    uint8_t iv_write_dbi;
+    uint8_t iv_read_dbi;
+    uint8_t iv_rtt_park[MAX_RANK_PER_DIMM];
+};
+
+///
+/// @brief Data structure for MRS6 data
+///
+struct mrs06_data
+{
+    // Needed as we need to know what MR for the CCS instruction created by the lab tooling
+    static constexpr uint64_t iv_number = 6;
+
+    // Helper function needed by the lab tooling to find our instruction maker and our dumper
+    static fapi2::ReturnCode (*make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+            const mrs06_data& i_data,
+            ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst,
+            const uint64_t i_rank);
+
+    static fapi2::ReturnCode (*decode)(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                       const uint64_t i_rank);
+
+    ///
+    /// @brief mrs06_data ctor
+    /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+    /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+    ///
+    mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    uint8_t iv_vrefdq_train_value[MAX_RANK_PER_DIMM];
+    uint8_t iv_vrefdq_train_range[MAX_RANK_PER_DIMM];
+    uint8_t iv_vrefdq_train_enable[MAX_RANK_PER_DIMM];
+    uint8_t iv_tccd_l;
+};
+
+/// @}
 
 ///
 /// @brief Perform the mrs_load DDR4 operations - TARGET_TYPE_DIMM specialization
@@ -463,8 +562,6 @@ fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 ///
 fapi2::ReturnCode mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                             std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
-
-/// @}
 
 } // ns ddr4
 
