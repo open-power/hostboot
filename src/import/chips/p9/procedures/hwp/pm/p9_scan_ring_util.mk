@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/pm/p9_hcode_image_build.mk $
+# $Source: src/import/chips/p9/procedures/hwp/pm/p9_scan_ring_util.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,16 +22,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE = p9_hcode_image_build
-HCODE_UTIL=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
-HCODE_UTIL+=$(ROOTPATH)/chips/p9/xip/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
-HCODE_UTIL+=$(ROOTPATH)/chips/p9/utils/imageProcs/
-HCODE_UTIL+=$(ROOTPATH)/tools/imageProcs/
-HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/customize/
-lib$(PROCEDURE)_DEPLIBS += p9_scan_ring_util
-lib$(PROCEDURE)_DEPLIBS += p9_xip_image
-lib$(PROCEDURE)_DEPLIBS += p9_tor
-lib$(PROCEDURE)_DEPLIBS += p9_ringId
+PROCEDURE = p9_scan_ring_util
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)

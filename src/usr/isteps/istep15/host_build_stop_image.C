@@ -330,6 +330,7 @@ void* host_build_stop_image (void *io_pArgs)
     // allocate two temporary work buffer
     void* l_temp_buffer0 = malloc(MAX_RING_BUF_SIZE);
     void* l_temp_buffer1 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer2 = malloc(MAX_RING_BUF_SIZE);
 
     do  {
         // Get the node-offset for our instance by looking at the HRMOR
@@ -442,6 +443,8 @@ void* host_build_stop_image (void *io_pArgs)
                                  l_temp_buffer0,
                                  MAX_RING_BUF_SIZE,
                                  l_temp_buffer1,
+                                 MAX_RING_BUF_SIZE,
+                                 l_temp_buffer2,
                                  MAX_RING_BUF_SIZE );
 
                 if ( l_errl )
@@ -505,6 +508,7 @@ void* host_build_stop_image (void *io_pArgs)
     // delete working buffers
     if( l_temp_buffer0 ) { free(l_temp_buffer0); }
     if( l_temp_buffer1 ) { free(l_temp_buffer1); }
+    if( l_temp_buffer2 ) { free(l_temp_buffer2); }
 
     if(l_pVirtMemBase)
     {

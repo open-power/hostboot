@@ -42,6 +42,7 @@
 // Includes
 //--------------------------------------------------------------------------
 #include <fapi2.H>
+#include <p9_infrastruct_help.H>
 
 extern "C"
 {
@@ -63,7 +64,8 @@ extern "C"
      */
     enum
     {
-        HW_IMG_RING_SIZE   =  1024 * 1024,
+        HW_IMG_RING_SIZE    =  MAX_SEEPROM_IMAGE_SIZE,
+        WORK_BUF_SIZE       =  MAX_RING_BUF_SIZE,
     };
 
     /**
@@ -131,7 +133,9 @@ extern "C"
       void*  const    i_pBuf1,
       const  uint32_t i_sizeBuf1,
       void*  const    i_pBuf2,
-      const  uint32_t  i_sizeBuf2 );
+      const  uint32_t  i_sizeBuf2,
+      void*  const    i_pBuf3,
+      const  uint32_t  i_sizeBuf3 );
 
     /**
     * @brief   builds a STOP image using a refrence image as input.
@@ -143,8 +147,10 @@ extern "C"
     * @param   i_imgType        image type to be built.
     * @param   i_pBuf1          pointer to a work buffer1.
     * @param   i_sizeBuf1       size of work buffer1. Minimum size expected HW_IMG_RING_SIZE.
-    * @param   i_pBuf2          pointer to a work buffer2. Minimum size expected HW_IMG_RING_SIZE.
+    * @param   i_pBuf2          pointer to a work buffer2. Minimum size expected WORK_BUF_SIZE.
     * @param   i_sizeBuf2       size of work buffer2
+    * @param   i_pBuf3          pointer to a work buffer2. Minimum size expected WORK_BUF_SIZE.
+    * @param   i_sizeBuf3       size of work buffer2
     * @note    needs attribute ATTR_EC
     */
     fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
@@ -156,7 +162,8 @@ extern "C"
                                             void*  const    i_pBuf1,
                                             const  uint32_t i_sizeBuf1,
                                             void* const    i_pBuf2,
-                                            const uint32_t  i_sizeBuf2
-                                          );
+                                            const uint32_t  i_sizeBuf2,
+                                            void* const    i_pBuf3,
+                                            const uint32_t  i_sizeBuf3 );
 } // extern C
 #endif //__HCODE_IMG_BUILD_H_

@@ -224,6 +224,10 @@
       <attribute>
           <id>ATTR_PULSE_MODE_VALUE</id>
       </attribute>
+      <attribute>
+        <id>ATTR_SYSTEM_RING_DBG_MODE</id>
+        <default>0x0</default>
+    </attribute>        
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
