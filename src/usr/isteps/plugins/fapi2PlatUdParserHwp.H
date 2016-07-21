@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/plugins/fapiPlatUdParserHwp.H $                */
+/* $Source: src/usr/isteps/plugins/fapi2PlatUdParserHwp.H $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,42 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef FAPIPLATUDPARSERHWP_H
-#define FAPIPLATUDPARSERHWP_H
+#ifndef FAPI2PLATUDPARSERHWP_H
+#define FAPI2PLATUDPARSERHWP_H
 
 /**
- *  @file fapiPlatUdParserHwp.H
+ *  @file fapi2PlatUdParserHwp.H
  *
  *  Defines ErrlUserDetailsParser subclasses to parse the different types of HWP
  *  FFDC added as user detail data to an error log.
  *
  *  Note that there are no corresponding ErrlUserDetails subclasses to create
  *  the user detail data because it is created by the platform neutral
- *  fapi::ReturnCode
+ *  fapi2::ReturnCode
  */
 #include "errluserdetails.H"
-//TODO-RTC:151336 #include "platHwpErrParser.H"
+#include "hbfwPlatHwpErrParser.H"
+#include "hbfwPlatHwpErrParserFFDC.H"
 
-namespace fapi
+namespace fapi2
 {
 
 /**
- * @class PlatUserDetailsParserHwpRcValue
+ * @class HbfwPlatUserDetailsParserHwpRcValue
  *
  * Parses the HWP RcValue in an error log.
  */
-class PlatUserDetailsParserHwpRcValue : public ERRORLOG::ErrlUserDetailsParser
+class HbfwPlatUserDetailsParserHwpRcValue : public ERRORLOG::ErrlUserDetailsParser
 {
 public:
     /**
      *  @brief Constructor
      */
-    PlatUserDetailsParserHwpRcValue() {}
+    HbfwPlatUserDetailsParserHwpRcValue() {}
 
     /**
      *  @brief Destructor
      */
-    virtual ~PlatUserDetailsParserHwpRcValue() {}
+    virtual ~HbfwPlatUserDetailsParserHwpRcValue() {}
 
     /**
      *  @brief Parses the HWP RcValue in an error log.
@@ -73,33 +74,33 @@ public:
                        const uint32_t i_buflen) const
     {
         // Call a FAPI generated function to parse the return code
-        //TODO-RTC:151336 fapi2::parseHwpRc(i_parser, i_pBuffer, i_buflen);
+        hbfwParseHwpRc(i_parser, i_pBuffer, i_buflen);
     }
 
 private:
     // Disabled
-    PlatUserDetailsParserHwpRcValue(const PlatUserDetailsParserHwpRcValue &);
-    PlatUserDetailsParserHwpRcValue & operator=(
-        const PlatUserDetailsParserHwpRcValue &);
+    HbfwPlatUserDetailsParserHwpRcValue(const HbfwPlatUserDetailsParserHwpRcValue &);
+    HbfwPlatUserDetailsParserHwpRcValue & operator=(
+        const HbfwPlatUserDetailsParserHwpRcValue &);
 };
 
 /**
- * @class PlatUserDetailsParserHwpTarget
+ * @class HbfwPlatUserDetailsParserHwpTarget
  *
  * Parses HWP FFDC in an error log.
  */
-class PlatUserDetailsParserHwpFfdc : public ERRORLOG::ErrlUserDetailsParser
+class HbfwPlatUserDetailsParserHwpFfdc : public ERRORLOG::ErrlUserDetailsParser
 {
 public:
     /**
      *  @brief Constructor
      */
-    PlatUserDetailsParserHwpFfdc() {}
+    HbfwPlatUserDetailsParserHwpFfdc() {}
 
     /**
      *  @brief Destructor
      */
-    virtual ~PlatUserDetailsParserHwpFfdc() {}
+    virtual ~HbfwPlatUserDetailsParserHwpFfdc() {}
 
     /**
      *  @brief Parses HWP FFDC in an error log.
@@ -115,14 +116,14 @@ public:
                        const uint32_t i_buflen) const
     {
         // Call a FAPI generated function to parse the FFDC
-        fapiParseHwpFfdc(i_parser, i_pBuffer, i_buflen);
+        hbfwParseHwpFfdc(i_parser, i_pBuffer, i_buflen);
     }
 
 private:
     // Disabled
-    PlatUserDetailsParserHwpFfdc(const PlatUserDetailsParserHwpFfdc &);
-    PlatUserDetailsParserHwpFfdc & operator=(
-        const PlatUserDetailsParserHwpFfdc &);
+    HbfwPlatUserDetailsParserHwpFfdc(const HbfwPlatUserDetailsParserHwpFfdc &);
+    HbfwPlatUserDetailsParserHwpFfdc & operator=(
+        const HbfwPlatUserDetailsParserHwpFfdc &);
 };
 
 }

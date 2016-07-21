@@ -253,7 +253,8 @@ fsp.tar_CONTENTS = \
     obj/genfiles/attrInfo.csv \
     obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv\
-    obj/genfiles/plugins/platHwpErrParser.H:plugins
+    obj/genfiles/plugins/hbfwPlatHwpErrParser.H:plugins/ \
+    obj/genfiles/plugins/hbfwPlatHwpErrParserFFDC.H:plugins
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

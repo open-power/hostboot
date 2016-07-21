@@ -26,15 +26,15 @@
 #define HWPFUDPARSERFACTORY_H
 
 /**
- *  @file fapiPlatHwpUdDecode.H
+ *  @file hwpfUdParserFactory.H
  *
  *  Defines the PlatUserDetailsParserFactory class
  */
 #include "errludparserfactory.H"
-//TODO-RTC:151336 #include "fapiPlatUdParserHwp.H"
+#include "fapi2PlatUdParserHwp.H"
 #include "hwpistepud.H"
 
-namespace fapi
+namespace fapi2
 {
 
 /**
@@ -52,8 +52,8 @@ public:
      */
     HwpfUserDetailsParserFactory()
     {
-        //TODO-RTC:151336 registerParser<PlatUserDetailsParserHwpRcValue>(HWPF_UDT_HWP_RCVALUE);
-        //TODO-RTC:151336 registerParser<PlatUserDetailsParserHwpFfdc>(HWPF_UDT_HWP_FFDC);
+        registerParser<HbfwPlatUserDetailsParserHwpRcValue>(HWPF_UDT_HWP_RCVALUE);
+        registerParser<HbfwPlatUserDetailsParserHwpFfdc>(HWPF_UDT_HWP_FFDC);
         registerParser<ISTEP_ERROR::HwpUserDetailsParserIstep>
             (HWPF_UDT_STEP_ERROR_DETAILS);
     }
