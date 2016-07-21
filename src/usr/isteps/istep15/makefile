@@ -30,6 +30,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/stop_reg/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/customize/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/

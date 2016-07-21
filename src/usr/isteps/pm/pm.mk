@@ -33,8 +33,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 
-HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
-EXTRAINCDIR += ${HWP_PATH}
+HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+EXTRAINCDIR += ${HWP_PM_PATH}
+HWP_CUST_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
+EXTRAINCDIR += ${HWP_CUST_PATH}
+HWP_ACC_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
+EXTRAINCDIR += ${HWP_ACC_PATH}
 HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${HWP_XIP_PATH}
 HWP_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
@@ -49,35 +53,41 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 OBJS += pm_common.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${HWP_PATH} ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
+VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
+VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
 
 # TODO RTC: 164237
 # Take another look at PM lib
 
 include ${ROOTPATH}/procedure.rules.mk
-include ${HWP_PATH}/p9_pm_pba_bar_config.mk
-include ${HWP_PATH}/p9_pm_pba_init.mk
-include ${HWP_PATH}/p9_pm_pba_firinit.mk
-include ${HWP_PATH}/p9_pm_utils.mk
-include ${HWP_PATH}/p9_pm_ocb_init.mk
-include ${HWP_PATH}/p9_pm_ocb_indir_setup_linear.mk
-include ${HWP_PATH}/p9_pm_ocb_indir_access.mk
-include ${HWP_PATH}/p9_pm_init.mk
-include ${HWP_PATH}/p9_pm_occ_control.mk
-include ${HWP_PATH}/p9_pm_occ_firinit.mk
-include ${HWP_PATH}/p9_pm_corequad_init.mk
-include ${HWP_PATH}/p9_pm_firinit.mk
-include ${HWP_PATH}/p9_pm_pss_init.mk
-include ${HWP_PATH}/p9_pm_cme_firinit.mk
-include ${HWP_PATH}/p9_hcode_image_build.mk
-include ${HWP_PATH}/p9_pm_stop_gpe_init.mk
-include ${HWP_PATH}/p9_pm_pfet_init.mk
-include ${HWP_PATH}/p9_pm_reset.mk
-include ${HWP_PATH}/p9_pm_occ_sram_init.mk
-include ${HWP_PATH}/p9_pm_occ_gpe_init.mk
-include ${HWP_PATH}/p9_pm_ppm_firinit.mk
-include ${HWP_PATH}/p9_pm_ocb_indir_setup_circular.mk
+include ${HWP_PM_PATH}/p9_pm_pba_bar_config.mk
+include ${HWP_PM_PATH}/p9_pm_pba_init.mk
+include ${HWP_PM_PATH}/p9_pm_pba_firinit.mk
+include ${HWP_PM_PATH}/p9_pm_utils.mk
+include ${HWP_PM_PATH}/p9_pm_ocb_init.mk
+include ${HWP_PM_PATH}/p9_pm_ocb_indir_setup_linear.mk
+include ${HWP_PM_PATH}/p9_pm_ocb_indir_access.mk
+include ${HWP_PM_PATH}/p9_pm_init.mk
+include ${HWP_PM_PATH}/p9_pm_occ_control.mk
+include ${HWP_PM_PATH}/p9_pm_occ_firinit.mk
+include ${HWP_PM_PATH}/p9_pm_corequad_init.mk
+include ${HWP_PM_PATH}/p9_pm_firinit.mk
+include ${HWP_PM_PATH}/p9_pm_pss_init.mk
+include ${HWP_PM_PATH}/p9_pm_cme_firinit.mk
+include ${HWP_PM_PATH}/p9_hcode_image_build.mk
+include ${HWP_PM_PATH}/p9_pm_stop_gpe_init.mk
+include ${HWP_PM_PATH}/p9_pm_pfet_init.mk
+include ${HWP_PM_PATH}/p9_pm_reset.mk
+include ${HWP_PM_PATH}/p9_pm_occ_sram_init.mk
+include ${HWP_PM_PATH}/p9_pm_occ_gpe_init.mk
+include ${HWP_PM_PATH}/p9_pm_ppm_firinit.mk
+include ${HWP_PM_PATH}/p9_pm_ocb_indir_setup_circular.mk
+include ${HWP_PM_PATH}/p9_scan_ring_util.mk
+include ${HWP_CUST_PATH}/p9_xip_customize.mk
+include ${HWP_ACC_PATH}/p9_get_mvpd_ring.mk
+include ${HWP_ACC_PATH}/p9_mvpd_ring_funcs.mk
 include ${HWP_XIP_PATH}/p9_xip_image.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
+include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
