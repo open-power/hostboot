@@ -111,7 +111,9 @@ extern "C"
                                       l_tCKmin);
 
                 // Find dimm transfer speed from selected tCK
-                l_min_dimm_freq = mss::ps_to_freq(l_tCKmin);
+                FAPI_TRY( mss::ps_to_freq(l_tCKmin, l_min_dimm_freq),
+                          "Failed ps_to_freq()");
+
                 FAPI_INF("DIMM speed from selected tCK: %d", l_min_dimm_freq);
 
                 FAPI_TRY(mss::select_supported_freq(l_min_dimm_freq),

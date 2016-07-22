@@ -82,38 +82,80 @@ namespace mss
 
 
 ///
-/// @brief     Return the number of picoseconds
-/// @tparam    T input and output type
-/// @param[in] i_transfer_rate input in MegaTransfers per second (MT/s)
-/// @return    timing in picoseconds
-/// @note      clock periods are defined to 1 ps of accuracy, so
-///            so 1.0714 ns is defined as 1071 ps as defined by JEDEC's
-///            SPD rounding algorithm. This concept is used for this calculation.
+/// @brief Return the number of picoseconds
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_speed_grade input in MegaTransfers per second (MT/s)
+/// @param[out] o_tCK_in_ps
+/// @return FAPI2_RC_SUCCESS if okay
 ///
-template<typename T>
-inline T freq_to_ps(const T i_transfer_rate)
+template<typename T, typename OT>
+inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
 {
-    // ATTR_MSS_FREQ is in MT/s, and we know microsecond per clock is 1/(freq/2)
-    // actual dimm_freq is 1/2 of the speed bin
-    T l_dimm_freq = i_transfer_rate / 2;
+    switch(i_speed_grade)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_tCK_in_ps = 1071;
+            break;
 
-    // ps per clock (note value is rounded down)
-    return CONVERT_PS_IN_A_US / ((l_dimm_freq == 0) ? 1 : l_dimm_freq);
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_tCK_in_ps = 937;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_tCK_in_ps = 833;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_tCK_in_ps = 750;
+            break;
+
+        default:
+            FAPI_ERR("Invalid dimm speed grade (MT/s) - %d - provided");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
-/// @brief      Return the number in MT/s
-/// @tparam     T input and output type
-/// @param[in]  i_time_in_ps time in picoseconds
-/// @return     speed in MT/s
+/// @brief Return the number in MT/s
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_time_in_ps time in picoseconds
+/// @param[out] o_speed_grade transfer rate in MT/s
+/// @return FAPI2_RC_SUCCESS if okay
 ///
-template<typename T>
-inline T ps_to_freq(const T i_time_in_ps)
+template<typename T, typename OT>
+fapi2::ReturnCode ps_to_freq(const T i_time_in_ps, OT& o_speed_grade)
 {
-    // reverse of freq_to_ps function, solving for freq
-    // since running at DDR, data is transferred on both rising & falling edges
-    // hence the 2X factor
-    return (2 * CONVERT_PS_IN_A_US) / ((i_time_in_ps == 0) ? 1 : i_time_in_ps);
+    switch(i_time_in_ps)
+    {
+        case 750:
+            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
+            break;
+
+        case 833:
+            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2400;
+            break;
+
+        case 937:
+            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2133;
+            break;
+
+        case 1071:
+            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT1866;
+            break;
+
+        default:
+            FAPI_ERR("Invalid clock period (tCK) - %d - provided");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
 }
 
 ///
@@ -145,19 +187,20 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
     // Hoping the compiler figures out how to do these together.
-    l_divisor = freq_to_ps(l_freq);
+    FAPI_TRY( freq_to_ps(l_freq, l_divisor) );
     l_quotient = i_ps / ((l_divisor == 0) ? 1 : l_divisor);
     l_remainder = i_ps % l_divisor;
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
-    FAPI_DBG("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : 1));
+    FAPI_INF("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : 1));
 
     return l_quotient + (l_remainder == 0 ? 0 : 1);
 
 fapi_try_exit:
-
-    // We simply can't work if we can't get the frequency - so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ - stopping");
+    // We simply can't work if we can't get the frequency or
+    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
+    // ...so this should be ok
+    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
     fapi2::Assert(false);
 
     // Keeps compiler happy
@@ -175,16 +218,19 @@ inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_
 {
     // The frequency in mHZ
     uint64_t l_freq = 0;
+    uint64_t l_clock_period = 0;
 
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
-
-    FAPI_DBG("converting %llu cycles to %llups", i_cycles, i_cycles * freq_to_ps(l_freq));
-    return i_cycles * freq_to_ps(l_freq);
+    FAPI_TRY( freq_to_ps(l_freq, l_clock_period) );
+    FAPI_INF("converting %llu cycles to %llups", i_cycles, i_cycles * l_clock_period );
+    return i_cycles * l_clock_period;
 
 fapi_try_exit:
 
-    // We simply can't work if we can't get the frequency - so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ - stopping");
+    // We simply can't work if we can't get the frequency or
+    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
+    // ...so this should be ok
+    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
     fapi2::Assert(false);
 
     // Keeps compiler happy
@@ -245,7 +291,7 @@ template< fapi2::TargetType T >
 inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
 {
     uint64_t l_ns = cycles_to_time<T, CONVERT_PS_IN_A_NS>(i_target, i_cycles);
-    FAPI_DBG("converting %llu cycles to %lluns", i_cycles, l_ns);
+    FAPI_INF("converting %llu cycles to %lluns", i_cycles, l_ns);
 
     return l_ns;
 }
@@ -260,7 +306,7 @@ template< fapi2::TargetType T >
 inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
 {
     uint64_t l_us = cycles_to_time<T, CONVERT_PS_IN_A_US>(i_target, i_cycles);
-    FAPI_DBG("converting %llu cycles to %lluus", i_cycles, l_us);
+    FAPI_INF("converting %llu cycles to %lluus", i_cycles, l_us);
 
     return l_us;
 }
@@ -278,10 +324,10 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
 }
 
 ///
-/// @brief     Convert nanoseconds to picoseconds
-/// @tparam    T input and output type
+/// @brief Convert nanoseconds to picoseconds
+/// @tparam T input and output type
 /// @param[in] i_time_in_ns time in nanoseconds
-/// @return    time in picoseconds
+/// @return time in picoseconds
 ///
 template<typename T>
 inline T ns_to_ps(const T i_time_in_ns)
@@ -290,10 +336,11 @@ inline T ns_to_ps(const T i_time_in_ns)
 }
 
 ///
-/// @brief     Convert nanoseconds to picoseconds
-/// @tparam    T input and output type
+/// @brief Convert nanoseconds to picoseconds
+/// @tparam T input and output type
 /// @param[in] i_time_in_ps time in picoseconds
-/// @return    time in nanoseconds
+/// @return time in nanoseconds
+/// @note rounds up
 ///
 template<typename T>
 inline T ps_to_ns(const T i_time_in_ps)

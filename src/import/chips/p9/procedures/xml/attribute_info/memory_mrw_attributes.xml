@@ -144,7 +144,6 @@
         <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
     </attribute>
 
-
     <attribute>
         <id>ATTR_MRW_AVDD_OFFSET_DISABLE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -200,8 +199,8 @@
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
           Fine refresh mode.
+          Sets DDR4 MRS3.
           Should be defaulted to normal mode.
-          This is for DDR4 MRS3.
         </description>
         <valueType>uint8</valueType>
         <enum>
@@ -219,9 +218,9 @@
         <id>ATTR_MRW_TEMP_REFRESH_RANGE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-          Temp ref range.
+          Temperature refresh range.
+          Sets DDR4 MRS4.
           Should be defaulted to extended range.
-          This is for DDR4 MRS4.
         </description>
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, EXTEND = 1</enum>

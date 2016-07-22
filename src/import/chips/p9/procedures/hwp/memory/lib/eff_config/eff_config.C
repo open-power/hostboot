@@ -435,29 +435,40 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
+    uint8_t l_temp_refresh_range = 0;
     uint8_t l_refresh_mode = 0;
     uint64_t l_trefi_in_ps = 0;
 
-    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode) );
+    FAPI_TRY( mss::mrw_temp_refresh_range(l_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
+    FAPI_TRY( mss::mrw_fine_refresh_mode(l_refresh_mode), "Failed mrw_fine_refresh_mode()" );
 
     // Calculates appropriate tREFI based on fine refresh mode
     switch(l_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
-            FAPI_TRY( calc_trefi1(i_target, l_trefi_in_ps),
-                      "Failed to calculate tREFI1" );
+
+            FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
+                                  l_temp_refresh_range,
+                                  l_trefi_in_ps),
+                      "Failed to calculate tREF1" );
             break;
 
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
-            FAPI_TRY( calc_trefi2(i_target, l_trefi_in_ps),
-                      "Failed to calculate tREFI2" );
+
+            FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
+                                  l_temp_refresh_range,
+                                  l_trefi_in_ps),
+                      "Failed to calculate tREF2" );
             break;
 
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
-            FAPI_TRY( calc_trefi4(i_target, l_trefi_in_ps),
-                      "Failed to calculate tREFI4" );
+
+            FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
+                                  l_temp_refresh_range,
+                                  l_trefi_in_ps),
+                      "Failed to calculate tREF4" );
             break;
 
         default:
@@ -477,10 +488,9 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
     {
         // Calculate clock period (tCK) from selected freq from mss_freq
         uint64_t l_tCK_in_ps = 0;
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps),
-                  "Failed to calclate clock period");
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calclate clock period");
 
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         {
             // Calculate refresh cycle time in nCK & set attribute
@@ -495,14 +505,10 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
 
             // Calculate nck
             l_trefi_in_nck = calc_nck(l_trefi_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-            FAPI_DBG("Calculated tREFI (nck): %d", l_trefi_in_ps);
+            FAPI_INF("Calculated tREFI (ps): %d, tREFI (nck): %d", l_trefi_in_ps, l_trefi_in_ps);
 
             // Update MCS attribute
             l_mcs_attrs_trefi[l_port_num] = l_trefi_in_nck;
-
-            // TK - RIT skeleton. Need to finish - BRS
-            // (note old calc resulted in 0x01 which seems really wrong in any event
-            l_mcs_attrs_trefi[l_port_num] = 0x1249;
 
             // casts vector into the type FAPI_ATTR_SET is expecting by deduction
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI,
@@ -525,6 +531,7 @@ fapi_try_exit:
 fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     uint8_t l_refresh_mode = 0;
+    int64_t l_trfc_mtb = 0;
     int64_t l_trfc_in_ps = 0;
 
     FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode),
@@ -534,19 +541,19 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
     switch(l_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(i_target, l_trfc_in_ps),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC1" );
             break;
 
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(i_target, l_trfc_in_ps),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC2" );
             break;
 
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
         case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
-            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(i_target, l_trfc_in_ps),
+            FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC4" );
             break;
 
@@ -565,19 +572,30 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
 
     }// switch
 
+    // Calculate trfc (in ps)
+    {
+        constexpr int64_t l_trfc_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+
+        l_trfc_in_ps = calc_timing_from_timebase(l_trfc_mtb, l_mtb, l_trfc_ftb, l_ftb);
+    }
+
     {
         // Calculate clock period (tCK) from selected freq from mss_freq
         int64_t l_tCK_in_ps = 0;
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps),
                   "Failed to calculate clock period (tCK)");
 
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         {
             // Calculate refresh cycle time in nCK & set attribute
             const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
             const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-
 
             uint16_t l_trfc_in_nck = 0;
             std::vector<uint16_t> l_mcs_attrs_trfc(PORTS_PER_MCS, 0);
@@ -588,13 +606,10 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
 
             // Calculate nck
             l_trfc_in_nck = calc_nck(l_trfc_in_ps, l_tCK_in_ps, int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-            FAPI_DBG("Calculated tRFC (nck): %d", l_trfc_in_nck);
+            FAPI_INF("Calculated tRFC (ps): %d, tRFC (nck): %d", l_trfc_in_ps, l_trfc_in_nck);
 
             // Update MCS attribute
             l_mcs_attrs_trfc[l_port_num] = l_trfc_in_nck;
-
-            // TK - RIT skeleton. Need to finish - BRS
-            l_mcs_attrs_trfc[l_port_num] = 0x1A4;
 
             // casts vector into the type FAPI_ATTR_SET is expecting by deduction
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC,
@@ -627,7 +642,7 @@ fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_
 
     // TK - RIT skeleton. Need to finish - BRS
     l_mcs_attrs_trfc_dlr[l_port_num] = 0x90;
-    FAPI_DBG("Hardwired tRFC_DLR: %d", l_mcs_attrs_trfc_dlr[l_port_num]);
+    FAPI_INF("Hardwired tRFC_DLR: %d", l_mcs_attrs_trfc_dlr[l_port_num]);
 
     // Update MCS attribute
     // casts vector into the type FAPI_ATTR_SET is expecting by deduction
@@ -790,7 +805,7 @@ fapi2::ReturnCode eff_config::odt_read(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     FAPI_TRY( eff_odt_rd(l_mcs, &l_attrs_odt_rd[0][0][0]) );
     FAPI_TRY( mss::ranks(i_target, l_ranks) );
-    FAPI_DBG("seeing %d ranks on %s", l_ranks.size(), mss::c_str(i_target));
+    FAPI_INF("seeing %d ranks on %s", l_ranks.size(), mss::c_str(i_target));
 
     // Initialize all ranks on this DIMM to 0, then write values for ranks which exist.
     memset(&(l_attrs_odt_rd[l_port_num][l_dimm_num][0]), 0, MAX_RANK_PER_DIMM);
@@ -798,7 +813,7 @@ fapi2::ReturnCode eff_config::odt_read(const fapi2::Target<TARGET_TYPE_DIMM>& i_
     // Replace with proper ODT calculation.
     for(const auto& l_rank : l_ranks)
     {
-        FAPI_DBG("writing odt_rd[%d][%d][%d] for %s", l_port_num, l_dimm_num, index(l_rank), mss::c_str(i_target));
+        FAPI_INF("writing odt_rd[%d][%d][%d] for %s", l_port_num, l_dimm_num, index(l_rank), mss::c_str(i_target));
         l_attrs_odt_rd[l_port_num][l_dimm_num][index(l_rank)] = 0x00;
     }
 
@@ -826,7 +841,7 @@ fapi2::ReturnCode eff_config::odt_write(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_odt_wr(l_mcs, &l_attrs_odt_wr[0][0][0]) );
     FAPI_TRY( mss::ranks(i_target, l_ranks) );
-    FAPI_DBG("seeing %d ranks on %s", l_ranks.size(), mss::c_str(i_target));
+    FAPI_INF("seeing %d ranks on %s", l_ranks.size(), mss::c_str(i_target));
 
     // Initialize all ranks on this DIMM to 0, then write values for ranks which exist.
     memset(&(l_attrs_odt_wr[l_port_num][l_dimm_num][0]), 0, MAX_RANK_PER_DIMM);
@@ -842,7 +857,7 @@ fapi2::ReturnCode eff_config::odt_write(const fapi2::Target<TARGET_TYPE_DIMM>& i
             l_value = (l_rank == 0) ? 0x40 : 0x80;
         }
 
-        FAPI_DBG("writing odt_wr[%d][%d][%d] for %s", l_port_num, l_dimm_num, index(l_rank), mss::c_str(i_target));
+        FAPI_INF("writing odt_wr[%d][%d][%d] for %s", l_port_num, l_dimm_num, index(l_rank), mss::c_str(i_target));
         l_attrs_odt_wr[l_port_num][l_dimm_num][index(l_rank)] = l_value;
     }
 
@@ -2890,14 +2905,14 @@ fapi2::ReturnCode eff_config::dram_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_trp_in_nck = calc_nck(l_trp_in_ps,
                                 l_tCK_in_ps,
                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated tRP (nck): %d", l_trp_in_nck);
+        FAPI_INF("Calculated tRP (nck): %d", l_trp_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trp(l_mcs, l_attrs_dram_trp.data()) );
@@ -2947,14 +2962,14 @@ fapi2::ReturnCode eff_config::dram_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_trcd_in_nck = calc_nck(l_trcd_in_ps,
                                  l_tCK_in_ps,
                                  int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated trcd (nck): %d", l_trcd_in_nck);
+        FAPI_INF("Calculated trcd (nck): %d", l_trcd_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trcd(l_mcs, l_attrs_dram_trcd.data()) );
@@ -3003,14 +3018,14 @@ fapi2::ReturnCode eff_config::dram_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>&
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_twtr_l_in_nck = calc_nck(l_twtr_l_in_ps,
                                    l_tCK_in_ps,
                                    int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated twtr_l (nck): %d", l_twtr_l_in_nck);
+        FAPI_INF("Calculated twtr_l (nck): %d", l_twtr_l_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_l(l_mcs, l_attrs_dram_twtr_l.data()) );
@@ -3058,14 +3073,14 @@ fapi2::ReturnCode eff_config::dram_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>&
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_twtr_s_in_nck = calc_nck(l_twtr_s_in_ps,
                                    l_tCK_in_ps,
                                    int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated twtr_s (nck): %d", l_twtr_s_in_nck);
+        FAPI_INF("Calculated twtr_s (nck): %d", l_twtr_s_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_s(l_mcs, l_attrs_dram_twtr_s.data()) );
@@ -3114,14 +3129,14 @@ fapi2::ReturnCode eff_config::dram_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>&
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_trrd_s_in_nck = calc_nck(l_trrd_s_in_ps,
                                    l_tCK_in_ps,
                                    int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated trrd_s (nck): %d", l_trrd_s_in_nck);
+        FAPI_INF("Calculated trrd_s (nck): %d", l_trrd_s_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trrd_s(l_mcs, l_attrs_dram_trrd_s.data()) );
@@ -3170,14 +3185,14 @@ fapi2::ReturnCode eff_config::dram_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>&
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_trrd_l_in_nck = calc_nck(l_trrd_l_in_ps,
                                    l_tCK_in_ps,
                                    int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated trrd_l (nck): %d", l_trrd_l_in_nck);
+        FAPI_INF("Calculated trrd_l (nck): %d", l_trrd_l_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trrd_l(l_mcs, l_attrs_dram_trrd_l.data()) );
@@ -3225,14 +3240,14 @@ fapi2::ReturnCode eff_config::dram_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_tfaw_in_nck = calc_nck(l_tfaw_in_ps,
                                  l_tCK_in_ps,
                                  int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated tfaw (nck): %d", l_tfaw_in_nck);
+        FAPI_INF("Calculated tfaw (nck): %d", l_tfaw_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_tfaw(l_mcs, l_attrs_dram_tfaw.data()) );
@@ -3281,14 +3296,14 @@ fapi2::ReturnCode eff_config::dram_tras(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
         // Calculate clock period (tCK) from selected freq from mss_freq
         FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
         // Calculate nck
         l_tras_in_nck = calc_nck(l_tras_in_ps,
                                  l_tCK_in_ps,
                                  int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-        FAPI_DBG("Calculated tras (nck): %d", l_tras_in_nck);
+        FAPI_INF("Calculated tras (nck): %d", l_tras_in_nck);
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_tras(l_mcs, l_attrs_dram_tras.data()) );
@@ -3326,14 +3341,14 @@ fapi2::ReturnCode eff_config::dram_trtp(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     // Calculate clock period (tCK) from selected freq from mss_freq
     FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-    FAPI_DBG("Calculated clock period (tCK): %d", l_tCK_in_ps);
+    FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
 
     // Calculate nck
     l_calc_trtp_in_nck = calc_nck(l_max_trtp_in_ps,
                                   l_tCK_in_ps,
                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
 
-    FAPI_DBG("Calculated trtp (nck): %d", l_calc_trtp_in_nck);
+    FAPI_INF("Calculated trtp (nck): %d", l_calc_trtp_in_nck);
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trtp(l_mcs, l_attrs_dram_trtp.data()) );
