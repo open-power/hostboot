@@ -65,15 +65,19 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
 
         // Phase2 init step 1
         // NestBase+0x00
-        // Set bits 00:03 = 0b0001Set hang poll scale
-        // Set bits             04:07 = 0b0010 Set data scale
+        // Set bits 00:03 = 0b0001 Set hang poll scale
+        // Set bits 04:07 = 0b0010 Set data scale
         // Set bits 08:11 = 0b0001 Set hang pe scale
         // Set bit 22 = 0b1 Disable out-of-order store behavior
+        // Set bit 33 = 0b1 Enable Channel Tag streaming behavior
+        // Set bits 34:35 = 0b11 Set P9 Style cache-inject behavior
         FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PBCQHWCFG_REG, l_buf));
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_POLL_SCALE, PEC_PBCQHWCFG_REG_HANG_POLL_SCALE_LEN>(0x1);
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_DATA_SCALE, PEC_PBCQHWCFG_REG_HANG_DATA_SCALE_LEN>(0x2);
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_PE_SCALE, PEC_PBCQHWCFG_REG_HANG_PE_SCALE_LEN>(0x1);
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_DISABLE_OOO_MODE, 1>(0x1);
+        l_buf.setBit<PEC_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN>();
+        l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE, PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(0x3);
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PBCQHWCFG_REG, l_buf));
 
@@ -113,7 +117,57 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         // Get the pec id
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_phb_chiplets,
                                l_phb_id));
+
         // Phase2 init step 7_a
+        // PCIBase+StackBase+0xB
+        // 0x00000000_00000000
+        // Clear any spurious pbaib_cerr_rpt bits
+        l_buf = (uint64_t)0x0;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PBAIB_CERR_RPT_REG, l_buf));
+
+        // Phase2 init step 7_b
+        // PCIBase+StackBase+0x0
+        // 0x00000000_00000000
+        // Clear any spurious FIR
+        // bits (PFIR)PFIR
+        l_buf = (uint64_t)0x0;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIR_REG, l_buf));
+
+        // Phase2 init step 8
+        // PCIBase+StackBase+0x8
+        // 0x00000000_00000000
+        // Clear any spurious WOF
+        // bits (PFIRWOF)
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRWOF_REG, l_buf));
+
+        // Phase2 init step 9
+        // PCIBase+StackBase+0x6
+        // 0x5B0F8190_00000000
+        // Set the per FIR Bit Action 0 register
+        l_buf = 0xB000000000000000;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION0_REG, l_buf));
+
+        // Phase2 init step 10
+        // PCIBase+StackBase+0x7
+        // 0x7F0F8190_00000000
+        // Set the per FIR Bit Action 1 register
+        l_buf = 0xBE00000000000000;
+        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION1_REG, l_buf));
+
+        // Phase2 init step 11
+        // PCIBase+StackBase+0x3
+        // 0x00000000_00000000
+        // Set FIR Mask Bits to allow errors (PFIRMask)
+        l_buf = 0x0000000000000000;
+        FAPI_DBG("phb%i: %#lx", l_phb_id,  l_buf());
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRMASK_REG, l_buf));
+
+        // Phase2 init step 12_a
         // NestBase+StackBase+0xA
         // 0x00000000_00000000
         // Clear any spurious cerr_rpt0 bits (cerr_rpt0)
@@ -123,7 +177,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         //FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         //FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_CERR_RPT0_REG, l_buf));
 
-        // Phase2 init step 7_b
+        // Phase2 init step 12_b
         // NestBase+StackBase+0xB
         // 0x00000000_00000000
         // Clear any spurious cerr_rpt1 bits (cerr_rpt1)
@@ -133,7 +187,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         //FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         //FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_CERR_RPT1_REG, l_buf));
 
-        // Phase2 init step 7_c
+        // Phase2 init step 12_c
         // NestBase+StackBase+0x0
         // 0x00000000_00000000
         // Clear any spurious FIR
@@ -142,7 +196,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIR_REG, l_buf));
 
-        // Phase2 init step 8
+        // Phase2 init step 13
         // NestBase+StackBase+0x8
         // 0x00000000_00000000
         // Clear any spurious WOF
@@ -150,7 +204,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRWOF_REG, l_buf));
 
-        // Phase2 init step 9
+        // Phase2 init step 14
         // NestBase+StackBase+0x6
         // 0x5B0F8190_00000000
         // Set the per FIR Bit Action 0 register
@@ -158,7 +212,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION0_REG, l_buf));
 
-        // Phase2 init step 10
+        // Phase2 init step 15
         // NestBase+StackBase+0x7
         // 0x7F0F8190_00000000
         // Set the per FIR Bit Action 1 register
@@ -166,7 +220,7 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRACTION1_REG, l_buf));
 
-        // Phase2 init step 11
+        // Phase2 init step 16
         // NestBase+StackBase+0x3
         // 0x00000000_00000000
         // Set FIR Mask Bits to allow errors (NFIRMask)
@@ -174,62 +228,13 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_NFIRMASK_REG, l_buf));
 
-        // Phase2 init step 12
+        // Phase2 init step 17
         // NestBase+StackBase+0x15
         // 0x00000000_00000000
         // Set Data Freeze Type Register for SUE handling (DFREEZE)
         l_buf = 0x0000000000000000;
         FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PE_DFREEZE_REG, l_buf));
-
-        // Phase2 init step 13_a
-        // PCIBase+StackBase+0xB
-        // 0x00000000_00000000
-        // Clear any spurious pbaib_cerr_rpt bits
-        l_buf = (uint64_t)0x0;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIR_REG, l_buf));
-
-        // Phase2 init step 13_b
-        // PCIBase+StackBase+0x0
-        // 0x00000000_00000000
-        // Clear any spurious FIR
-        // bits (PFIR)PFIR
-        l_buf = (uint64_t)0x0;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PBAIB_CERR_RPT_REG, l_buf));
-
-        // Phase2 init step 14
-        // PCIBase+StackBase+0x8
-        // 0x00000000_00000000
-        // Clear any spurious WOF
-        // bits (PFIRWOF)
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRWOF_REG, l_buf));
-
-        // Phase2 init step 15
-        // PCIBase+StackBase+0x6
-        // 0x5B0F8190_00000000
-        // Set the per FIR Bit Action 0 register
-        l_buf = 0x5B0F819000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION0_REG, l_buf));
-
-        // Phase2 init step 16
-        // PCIBase+StackBase+0x7
-        // 0x7F0F8190_00000000
-        // Set the per FIR Bit Action 1 register
-        l_buf = 0x7F0F819000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRACTION1_REG, l_buf));
-
-        // Phase2 init step 17
-        // PCIBase+StackBase+0x3
-        // 0x00000000_00000000
-        // Set FIR Mask Bits to allow errors (PFIRMask)
-        l_buf = 0x0000000000000000;
-        FAPI_DBG("phb%i: %#lx", l_phb_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PFIRMASK_REG, l_buf));
 
         // Get the attribute for BAR address and size.
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_BAR_BASE_ADDR, l_phb_chiplets,
