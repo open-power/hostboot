@@ -38,12 +38,31 @@
     <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY</rc>
     <description>
       Procedure: p9_tod_setup
-      Either the oscilattor that is selected is NONE or 
-      the tx or rx bus is NONE 
+      the oscilattor that is selected is NONE 
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>OSCSEL</ffdc>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY_RX</rc>
+    <description>
+      Procedure: p9_tod_setup
+      the rx is an invalid rx 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RX</ffdc>
+  </hwpError>
+<!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY_TX</rc>
+    <description>
+      Procedure: p9_tod_setup
+      the tx is an invalid tx
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TX</ffdc>
+  </hwpError> 
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_TOD_INIT_NOT_RUNNING</rc>
