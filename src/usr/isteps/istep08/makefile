@@ -108,6 +108,10 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_tl_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_dl_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_no_hp_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioe_tl_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_nx_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
 
 # proc_xbus_scominit : Apply scom inits to Xbus
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk
@@ -127,6 +131,7 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
 # proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
 
+# p9_mcs_scom
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcs_scom.mk
 
 # proc_scomoverride_chiplets : Apply sequenced scom inits
