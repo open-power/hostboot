@@ -384,8 +384,8 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
 {
     /*   ringName   rinngId chipIdMin chipIdMax  ringNameImg        mvpdKeyword               */
     { "ec_func"         , 0x00, 0x20, 0x20, "ec_func_ring",              NON_VPD_RING, 0,  0x0E00000000009000},
-    { "ec_time"         , 0x01, 0x20, 0x20, "ec_time_ring",              NON_VPD_RING, 0,  0x0E00000000000100},
-    { "ec_gptr"         , 0x02, 0x20, 0x20, "ec_gptr_ring",              NON_VPD_RING, 0,  0x0E00000000002000},
+    { "ec_gptr"         , 0x01, 0x20, 0x20, "ec_gptr_ring",              NON_VPD_RING, 0,  0x0E00000000002000},
+    { "ec_time"         , 0x02, 0x20, 0x20, "ec_time_ring",              NON_VPD_RING, 0,  0x0E00000000000100},
     { "ec_mode"         , 0x03, 0x20, 0x20, "ec_mode_ring",              NON_VPD_RING, 0,  0x0E00000000004000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
