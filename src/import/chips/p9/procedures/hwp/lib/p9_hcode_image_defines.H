@@ -46,7 +46,6 @@
 namespace p9_hcodeImageBuild
 {
 #endif //__PPE_PLAT
-
 #endif //__ASSEMBLER__
 
 // Constants used in both C++ and Assembler/Linker code
@@ -280,14 +279,15 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #endif
 
 #ifndef __ASSEMBLER__
+
 /**
  * @brief   summarizes constants associated with hcode image build.
  */
 enum
 {
+    HALF_KB                     = 512,
     ONE_KB                      = 1024,
     ONE_MB                      = 1024 * 1024,
-    HALF_KB                     = 512,
     HARDWARE_IMG_SIZE           = ONE_MB,
     OCC_HOST_AREA_SIZE          = ONE_MB,
     HOMER_OCC_REGION_NUM        = 0,
@@ -295,70 +295,122 @@ enum
     HOMER_CMPR_REGION_NUM       = 2,
     HOMER_PPMR_REGION_NUM       = 3,
     MAX_CORES_PER_CHIP          = 24,
+    THREADS_PER_CORE            = 4,
     MAX_CME_PER_CHIP            = 12,
+    MAX_CACHE_CHIPLETS          = 6,
+    CACH0_CHIPLET_ID            = 0x10,
     CORE0_CHIPLET_ID            = 0x20,
     PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
     PPE_RESERVE_AREA            = 0x200,
     FUSE_STATE                  = 0xAA,
     UNFUSE_STATE                = 0xBB,
     PK_DBG_PTR_AREA_SIZE        = 64,
+    SCOM_ENTRY_SIZE             = 16,           // 4B pad, 4B address, 8B data
 
-    // QPMR
+    //---- QPMR  ----
     QPMR_OFFSET                 = HOMER_QPMR_REGION_NUM * ONE_MB,
+
+    //** Boot Loaders
     SGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
     SGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
+
+    //** Hcode
     SGPE_INT_VECT               = 384,
+    //SGPE_IMG_HEADER             = 64,
     SGPE_IMG_HEADER             = sizeof(sgpeHeader_t),
-    SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
+    SGPE_DBG_PTR_AREA_SIZE      = 64,
+    //SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
+    SGPE_HCODE_SIZE             = 38 * ONE_KB,  // @todo RTC 158543 Reallocate space
+
     SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
                                    SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
-    SGPE_COMMON_RING            = 13  * ONE_KB, // Common rings (10KB) + Override rings(3KB)
-    CACHE_INST_SPECIFIC_SIZE    = 19  * ONE_KB,
-    CACHE_SCOM_RESTORE_SIZE     = 6 * ONE_KB, //4488B rounded to 6KB
+
+    SGPE_ALLOCATED_SIZE         = SGPE_HCODE_SIZE,   // @todo RTC 158543 Reallocate space (collapse??)
+
+    //** Scan
+    //SGPE_COMMON_RING            = 13  * ONE_KB, // Common rings (10KB) + Override rings(3KB)
+    SGPE_COMMON_RING_SIZE       = 13 * ONE_KB,  // 400B * 9 rings * 3 types (base, RL, CC)
+    SGPE_OVERRIDE_RING_SIZE     = 3 * ONE_KB,   // 300B * 9 rings
+
+    CACHE_INST_SPECIFIC_SIZE    = (3 * ONE_KB) + HALF_KB, // per cache, 1KB/ring x 5 rings/cache
+    CACHE_SPECIFIC_RING_SIZE    = MAX_CACHE_CHIPLETS * CACHE_INST_SPECIFIC_SIZE,
     SGPE_INSTRUMENTATION_SIZE   = 2 * ONE_KB,
-    MAX_CACHE_CHIPLET           = 6,
-    CACH0_CHIPLET_ID            = 0x10,
 
-    SGPE_MAX_AREA_SIZE          = 64 * ONE_KB,
+    //** SCOM
+    NUM_CACHE_SCOM_REGS         = 47 + 1,       // 16 L2 repr, 16 L3 repr, 15 non-repr, 1 NULL
+    CACHE_SCOM_RESTORE_SIZE     = MAX_CACHE_CHIPLETS * NUM_CACHE_SCOM_REGS * SCOM_ENTRY_SIZE,
 
-    // CPMR
+    CACHE_SCOM_START            = 128 * ONE_KB, // HOMER offset from QPMR
+
+    //** OCC SRAM Allocation
+    SGPE_MAX_AREA_SIZE          = 80 * ONE_KB,  // Allocation within the OCC SRAM
+    SGPE_RESERVE_SIZE           = SGPE_MAX_AREA_SIZE -
+                                  ( SGPE_HCODE_SIZE +
+                                    SGPE_COMMON_RING_SIZE +
+                                    CACHE_SCOM_RESTORE_SIZE +
+                                    SGPE_OVERRIDE_RING_SIZE +
+                                    CACHE_SCOM_RESTORE_SIZE),
+
+    //---- CPMR ----
     CPMR_OFFSET                 = HOMER_CMPR_REGION_NUM * ONE_MB,
+
+    //** Self Restore
     THREAD_LAUNCHER_SIZE        = 256,
     CORE_INT_AREA               = 8 * ONE_KB,
     SELF_REST_SIZE              = CORE_INT_AREA + THREAD_LAUNCHER_SIZE,
-    CORE_RESTORE_SIZE           = 192 * ONE_KB,
-    CORE_SCOM_START             = (256 * ONE_KB),
-    CORE_SCOM_RES_SIZE          = 6 * ONE_KB,
-    CME_INT_VECTOR_SIZE         = 384,
-    CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_HCODE_SIZE              = (25 * ONE_KB) + HALF_KB,
-    CORE_COMMON_RING_SIZE       = 3  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
-    CORE_SPECIFIC_RING          = 2  * ONE_KB,
-    SCOM_AREA_PER_CME           =  HALF_KB, // 256(ea ) * 2( CORES PER CME)
-    QUAD_PSTATE_SIZE            = HALF_KB,
-    INSTRUMENTATION_COUNTERS    = HALF_KB,
-    CME_SRAM_HCODE_OFFSET       = 0x00,
-    CORE_RESERVE_SIZE           =
-        CORE_SCOM_START - ( CORE_RESTORE_SIZE + CME_HCODE_SIZE + CORE_COMMON_RING_SIZE + QUAD_PSTATE_SIZE  ),
+    CORE_RESTORE_SIZE           = ((2 * ONE_KB) * THREADS_PER_CORE) * MAX_CORES_PER_CHIP,
 
-    CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_INST_SPEC_RING_START    =  (300 * ONE_KB ) ,
-    RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
+    //** SCOM
+    CORE_SCOM_START             = (256 * ONE_KB),
+    CORE_SCOM_RESTORE_SIZE      = SCOM_ENTRY_SIZE * 16, // (15 registers + 1 NULL) per core
+    CORE_SCOM_RES_SIZE          = CORE_SCOM_RESTORE_SIZE * MAX_CORES_PER_CHIP,
+    CME_SCOM_AREA               = CORE_SCOM_RESTORE_SIZE * 2, // 2 cores
+    SCOM_AREA_PER_CME           =  HALF_KB, // 256(ea ) * 2( CORES PER CME) (???)
+
+    //** Hcode
+    CME_INT_VECTOR_SIZE         = 384,
+    CME_IMG_HEADER_SIZE         = 64,
+    CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_HCODE_SIZE              = (27 * ONE_KB) + HALF_KB,
+
+    //** Scan
+    CORE_COMMON_RING_SIZE       = 3  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
+    CORE_SPECIFIC_RING          = 2 * ONE_KB,   // per core
+    CORE_OVERRIDE_RING          = 1 * ONE_KB,   // common for all cores
+    QUAD_PSTATE_SIZE            = HALF_KB,      // common for all cores
+    CME_INSTRUMENTATION_SIZE    = HALF_KB,      // per CME
+    INSTRUMENTATION_COUNTERS    = HALF_KB,      // (???)
+
+    CORE_RESERVE_SIZE           = CORE_SCOM_START -
+                                  ( CORE_RESTORE_SIZE +
+                                    CME_HCODE_SIZE +
+                                    CORE_COMMON_RING_SIZE +
+                                    QUAD_PSTATE_SIZE  ),
+
+    CME_SRAM_HCODE_OFFSET       = 0x00, //(???)
+    CME_REGION_START            = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
+    CME_INST_SPEC_RING_START    = 300 * ONE_KB,
+    RESERVE_CME_RING_AREA       = ( CME_INST_SPEC_RING_START  -
+                                    (CME_REGION_START +
                                      CME_HCODE_SIZE +
                                      CORE_COMMON_RING_SIZE +
                                      QUAD_PSTATE_SIZE)),
-    CME_BLOCK_READ_LEN          =  32,
-    CME_BLK_SIZE_SHIFT          =  0x05,
-    CACHE_SCOM_START            =  128 * ONE_KB,
+    CME_BLOCK_READ_LEN          = 32,
+    CME_BLK_SIZE_SHIFT          = 0x05,
 
     // PPMR
+
+    //** Boot Loaders
     PGPE_LVL_1_BOOT_LOAD_SIZE   = ONE_KB,
     PGPE_LVL_2_BOOT_LOAD_SIZE   = ONE_KB,
-    PGPE_INT_VECTOR             =  384,
-    PGPE_HCODE_SIZE             =  32 * ONE_KB,
-    PGPE_PARAM_BLOCK_SIZE       =  4 * ONE_KB,
-    PSTATE_OUTPUT_TABLE         =  4 * ONE_KB,
-    IGNORE_CHIPLET_INSTANCE     =  0xFF,
+    PGPE_INT_VECTOR             = 384,
+    PGPE_HCODE_SIZE             = 30 * ONE_KB,
+    PGPE_PARAM_BLOCK_SIZE       = 8 * ONE_KB,  //Global and OCC PPB
+    PSTATE_OUTPUT_TABLE         = 8 * ONE_KB,
+    IGNORE_CHIPLET_INSTANCE     = 0xFF,
+
+    PGPE_MAX_AREA_SIZE          = 48 * ONE_KB, // @todo RTC 158543 Reallocate space
+
 };
 
 /**
@@ -408,8 +460,10 @@ typedef struct
     uint8_t imgHeader[sizeof(sgpeHeader_t)];
     uint8_t debugPtrs[PK_DBG_PTR_AREA_SIZE];
     uint8_t hcode[SGPE_EXE_SIZE];
-    uint8_t commonRings[SGPE_COMMON_RING];
-    uint8_t cacheSpecificRing[CACHE_INST_SPECIFIC_SIZE];
+    uint8_t commonRings[SGPE_COMMON_RING_SIZE];
+    uint8_t cacheSpecificRing[CACHE_SPECIFIC_RING_SIZE];
+    uint8_t overrideRings[SGPE_OVERRIDE_RING_SIZE];
+    uint8_t cacheScomRestore[CACHE_SCOM_RESTORE_SIZE];
 } SgpeLayout_t;
 
 typedef union CPMRSelfRestoreLayout
