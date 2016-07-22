@@ -60,6 +60,7 @@
 #include <p9_pm_stop_gpe_init.H>
 #include <p9_pm_pba_init.H>
 #include <p9_pm_pfet_init.H>
+//#include <p9_ppe_state.H>  @todo RTC 147996 to incorporate PPE state removing strings.
 
 
 // ----------------------------------------------------------------------
@@ -75,6 +76,11 @@ static const uint32_t SGPE_TIMEOUT_MCYCLES  = 20;       // Guess at this time
 static const uint32_t SGPE_POLLTIME_MS      = 20;       // Guess at this time
 static const uint32_t SGPE_POLLTIME_MCYCLES = 2;        // Guess at this time
 static const uint32_t TIMEOUT_COUNT = SGPE_TIMEOUT_MS / SGPE_POLLTIME_MS;
+
+static const uint64_t GPE3_BASE_ADDRESS = 0x00066010;
+static const uint64_t SGPE_BASE_ADDRESS = GPE3_BASE_ADDRESS;
+
+
 
 // -----------------------------------------------------------------------------
 //  Function prototypes
@@ -182,6 +188,8 @@ fapi2::ReturnCode stop_gpe_init(
     fapi2::buffer<uint64_t> l_occ_flag;
     fapi2::buffer<uint64_t> l_xcr;
     fapi2::buffer<uint64_t> l_xsr;
+    fapi2::buffer<uint64_t> l_iar;
+    fapi2::buffer<uint64_t> l_ir;
     fapi2::buffer<uint64_t> l_ivpr;
     fapi2::buffer<uint64_t> l_slave_cfg;
     uint32_t                l_ivpr_offset;
@@ -228,12 +236,15 @@ fapi2::ReturnCode stop_gpe_init(
     {
         FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCFLG_SCOM, l_occ_flag));
         FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIXSR_SCOM, l_xsr));
-        FAPI_DBG("   Poll content: OCC Flag: 0x%16llX; XSR: 0x%16llX Timeout: %d",
+        FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIIAR_SCOM, l_iar));
+        FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIIR_SCOM, l_ir));
+        FAPI_DBG("   Poll content: OCC Flag: 0x%16llX; XSR: 0x%16llX  IAR: 0x%16llX IR: 0x%16llX Timeout: %d",
                  l_occ_flag,
                  l_xsr,
+                 l_iar,
+                 l_ir,
                  l_timeout_in_MS);
         fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
-
 
     }
     while((!((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1) &&
