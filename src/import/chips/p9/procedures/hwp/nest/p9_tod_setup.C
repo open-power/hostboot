@@ -355,8 +355,15 @@ extern "C"
         uint32_t port_ctrl_check_reg = 0;
         uint32_t port_rx_select_val = 0;
         uint32_t path_sel = 0;
+        uint8_t l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[7];
+        uint8_t l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[4];
 
         const bool is_mdmt = (i_tod_node->i_tod_master && i_tod_node->i_drawer_master);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *target,
+                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *target,
+                               l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG");
 
         // PERV_TOD_PRI_PORT_0_CTRL_REG is only used for Primary configurations
         // PERV_TOD_SEC_PORT_1_CTRL_REG is only used for Secondary configurations
@@ -389,42 +396,69 @@ extern "C"
         switch (i_tod_node->i_bus_rx)
         {
             case(XBUS0):
+                //If XBUS0 is not enabled throw an error
+                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS0),
+                            "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X0_SEL;
                 break;
 
             case(XBUS1):
+                //If XBUS1 is not enabled throw an error
+                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS1),
+                            "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X1_SEL;
                 break;
 
             case(XBUS2):
+                //If XBUS2 is not enabled throw an error
+                FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS2),
+                            "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X2_SEL;
                 break;
 
-            case(XBUS3):
+            case(OBUS0):
+                //If OBUS0 is not enabled throw an error
+                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
+                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS0),
+                            "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X3_SEL;
                 break;
 
-            case(XBUS4):
+            case(OBUS1):
+                //If OBUS1 is not enabled throw an error
+                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
+                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS1),
+                            "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X4_SEL;
                 break;
 
-            case(XBUS5):
+            case(OBUS2):
+                //If OBUS2 is not enabled throw an error
+                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
+                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS2),
+                            "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X5_SEL;
                 break;
 
-            case(XBUS6):
+            case(OBUS3):
+                //If OBUS3 is not enabled throw an error
+                FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
+                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS3),
+                            "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
                 port_rx_select_val = TOD_PORT_CTRL_REG_RX_X6_SEL;
                 break;
 
             case(XBUS7):
-                port_rx_select_val = TOD_PORT_CTRL_REG_RX_X7_SEL;
-                break;
-
-            case(ABUS0):
-            case(ABUS1):
-            case(ABUS2):
-                FAPI_ASSERT((i_tod_node->i_bus_rx != ABUS0 && i_tod_node->i_bus_rx != ABUS1 && i_tod_node->i_bus_rx != ABUS2),
-                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_rx is set to ABUS");
+                FAPI_ASSERT(false,
+                            fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS7),
+                            "i_tod_node->i_bus_rx is set to XBUS7");
                 break;
 
             case(NONE):
@@ -496,6 +530,10 @@ extern "C"
             switch (tod_node->i_bus_tx)
             {
                 case(XBUS0):
+                    //If XBUS0 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS0),
+                                "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X0_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X0_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
@@ -503,6 +541,10 @@ extern "C"
                     break;
 
                 case(XBUS1):
+                    //If XBUS1 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS1),
+                                "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X1_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X1_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
@@ -510,34 +552,58 @@ extern "C"
                     break;
 
                 case(XBUS2):
+                    //If XBUS2 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS2),
+                                "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X2_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data2.setBit<TOD_PORT_CTRL_REG_TX_X2_EN>();
                     break;
 
-                case(XBUS3):
+                case(OBUS0):
+                    //If OBUS0 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS0),
+                                "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X3_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data2.setBit<TOD_PORT_CTRL_REG_TX_X3_EN>();
                     break;
 
-                case(XBUS4):
+                case(OBUS1):
+                    //If OBUS1 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS1),
+                                "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X4_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data2.setBit<TOD_PORT_CTRL_REG_TX_X4_EN>();
                     break;
 
-                case(XBUS5):
+                case(OBUS2):
+                    //If OBUS2 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS2),
+                                "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X5_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data2.setBit<TOD_PORT_CTRL_REG_TX_X5_EN>();
                     break;
 
-                case(XBUS6):
+                case(OBUS3):
+                    //If OBUS3 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(OBUS3),
+                                "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
                     data.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
                     data.setBit<TOD_PORT_CTRL_REG_TX_X6_EN>();
                     data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X6_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
@@ -545,22 +611,14 @@ extern "C"
                     break;
 
                 case(XBUS7):
-                    data.insertFromRight<TOD_PORT_CTRL_REG_TX_X7_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data.setBit<TOD_PORT_CTRL_REG_TX_X7_EN>();
-                    data2.insertFromRight<TOD_PORT_CTRL_REG_TX_X7_SEL, TOD_PORT_CTRL_REG_TX_LEN>(path_sel);
-                    data2.setBit<TOD_PORT_CTRL_REG_TX_X7_EN>();
-                    break;
-
-                case(ABUS0):
-                case(ABUS1):
-                case(ABUS2):
-                    FAPI_ASSERT((tod_node->i_bus_tx != ABUS0 && tod_node->i_bus_tx != ABUS1 && tod_node->i_bus_tx != ABUS2),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_tx is set to ABUS");
+                    FAPI_ASSERT(false,
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(XBUS7),
+                                "i_tod_node->i_bus_tx is set to XBUS7");
                     break;
 
                 case(NONE):
                     FAPI_ASSERT((tod_node->i_bus_tx != NONE),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_osc_sel), "i_tod_node->i_bus_tx is set to NONE");
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_TX().set_TARGET(target).set_TX(NONE), "i_tod_node->i_bus_tx is set to NONE");
                     break;
             }
         }
@@ -845,80 +903,121 @@ extern "C"
         else // slave node
         {
             uint32_t bus_mode_addr = 0;
-            uint32_t bus_mode_sel = 0;
+            uint32_t bus_mode_sel_even = 0;
+            uint32_t bus_mode_sel_odd = 0;
             uint32_t bus_freq = 0;
-            uint32_t  bus_delay = 0;
+            uint32_t bus_delay = 0;
+            uint32_t bus_delay_even = 0;
+            uint32_t bus_delay_odd = 0;
+
+            uint8_t l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[7];
+            uint8_t l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[4];
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, *target,
+                                   l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, *target,
+                                   l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG), "Error getting ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG");
 
             data.flush<0>();
 
             switch (i_tod_node->i_bus_rx)
             {
                 case(XBUS0):
+                    //If XBUS0 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[0] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS0),
+                                "i_tod_node->i_bus_rx is set to XBUS0 and it is not enabled");
                     bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_0>();
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_0>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_1>();
                     bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR0_LINK_DELAY_START_BIT;
+                    bus_mode_sel_even = PB_ELINK_DLY_FMR0_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_ELINK_DLY_FMR1_LINK_DELAY_START_BIT;
                     break;
 
                 case(XBUS1):
+                    //If XBUS1 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS1),
+                                "i_tod_node->i_bus_rx is set to XBUS1 and it is not enabled");
                     bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_1>();
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_2>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_3>();
                     bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR1_LINK_DELAY_START_BIT;
+                    bus_mode_sel_even = PB_ELINK_DLY_FMR2_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_ELINK_DLY_FMR3_LINK_DELAY_START_BIT;
                     break;
 
                 case(XBUS2):
+                    //If XBUS2 is not enabled throw an error
+                    FAPI_ASSERT((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] != 0),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS2),
+                                "i_tod_node->i_bus_rx is set to XBUS2 and it is not enabled");
                     bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_2>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR2_LINK_DELAY_START_BIT;
-                    break;
-
-                case(XBUS3):
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_3>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_0123_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR3_LINK_DELAY_START_BIT;
-                    break;
-
-                case(XBUS4):
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_4>();
+                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_4>().setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
                     bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT;
+                    bus_mode_sel_even = PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
                     break;
 
-                case(XBUS5):
+                case(OBUS0):
+                    //If OBUS0 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[3] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS0),
+                                "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
                     bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_0>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_1>();
+                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
+                    bus_mode_sel_even = PB_OLINK_DLY_FMR0_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_OLINK_DLY_FMR1_LINK_DELAY_START_BIT;
                     break;
 
-                case(XBUS6):
+                case(OBUS1):
+                    //If OBUS1 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS1),
+                                "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
                     bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_2>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_3>();
+                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
+                    bus_mode_sel_even = PB_OLINK_DLY_FMR2_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_OLINK_DLY_FMR3_LINK_DELAY_START_BIT;
+                    break;
+
+                case(OBUS2):
+                    //If OBUS2 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS2),
+                                "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_4>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_5>();
+                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
+                    bus_mode_sel_even = PB_OLINK_DLY_FMR4_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_OLINK_DLY_FMR5_LINK_DELAY_START_BIT;
+                    break;
+
+                case(OBUS3):
+                    //If OBUS3 is not enabled throw an error
+                    FAPI_ASSERT(((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] != 0)
+                                 || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS3),
+                                "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
+                    bus_freq = i_freq_x;
+                    data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_6>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_7>();
+                    bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
+                    bus_mode_sel_even = PB_OLINK_DLY_FMR6_LINK_DELAY_START_BIT;
+                    bus_mode_sel_odd = PB_OLINK_DLY_FMR7_LINK_DELAY_START_BIT;
                     break;
 
                 case(XBUS7):
-                    bus_freq = i_freq_x;
-                    data.setBit<PB_ELINK_RT_DELAY_CTL_SET_LINK_5>();
-                    bus_mode_addr = PU_PB_ELINK_DLY_45_REG;
-                    bus_mode_sel = PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT;
-                    break;
-
-                case(ABUS0):
-                case(ABUS1):
-                case(ABUS2):
-                    FAPI_ASSERT((i_tod_node->i_bus_rx != ABUS0 && i_tod_node->i_bus_rx != ABUS1 && i_tod_node->i_bus_rx != ABUS2),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_freq_x), "i_tod_node->i_bus_rx is set to ABUS");
+                    FAPI_ASSERT(false,
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(XBUS7), "i_tod_node->i_bus_rx is set to XBUS7");
                     break;
 
                 case(NONE):
                     FAPI_ASSERT((i_tod_node->i_bus_rx != NONE),
-                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY().set_TARGET(target).set_OSCSEL(i_freq_x), "i_tod_node->i_bus_rx is set to NONE");
+                                fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(NONE), "i_tod_node->i_bus_rx is set to NONE");
                     break;
             }
 
@@ -927,8 +1026,11 @@ extern "C"
 
             FAPI_TRY(fapi2::getScom(*target, bus_mode_addr, data),
                      "Error from fapiGetScom when retrieving bus_mode_addr!");
-            FAPI_TRY(data.extractToRight(bus_delay, bus_mode_sel, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
+            FAPI_TRY(data.extractToRight(bus_delay_even, bus_mode_sel_even, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
                      "Error trying to extract delay");
+            FAPI_TRY(data.extractToRight(bus_delay_odd, bus_mode_sel_odd, PB_ELINK_DLY_FMR_LINK_DELAY_LEN),
+                     "Error trying to extract delay");
+            bus_delay = (bus_delay_even + bus_delay_odd) / 2;
 
             //FAPI_ASSERT(!data.getBit<bus_mode_sel>(), fapi2::P9_TOD_LINK_DELAY_NOT_VALID.set_TARGET(target).set_ADDR(bus_mode_addr).set_DATA(data), "the TOD delay first bit is set to 1 so it is not valid");
 
