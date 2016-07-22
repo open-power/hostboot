@@ -62,7 +62,7 @@ inline fapi2::ReturnCode check_for_freq_override(const fapi2::Target<fapi2::TARG
     // If there is no override, don't change anything
     if ( l_freq_override != fapi2::ENUM_ATTR_MSS_FREQ_OVERRIDE_AUTO)
     {
-        o_tCK = mss::freq_to_ps(l_freq_override);
+        FAPI_TRY( mss::freq_to_ps(l_freq_override, o_tCK), "Failed freq_to_ps()");
         FAPI_DBG( "Override Frequency Detected: %d", l_freq_override);
     }
 
