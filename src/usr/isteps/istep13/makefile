@@ -75,6 +75,15 @@ OBJS += adr32s.o
 OBJS += xlate.o
 OBJS += port.o
 OBJS += memdiags_fir.o
+OBJS += mrs00.o
+OBJS += mrs01.o
+OBJS += mrs02.o
+OBJS += mrs03.o
+OBJS += mrs04.o
+OBJS += mrs05.o
+OBJS += mrs06.o
+
+
 
 OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
@@ -109,3 +118,4 @@ VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDUR
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/ ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ ${PROCEDURES_PATH}/hwp/memory/lib/utils/ ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
