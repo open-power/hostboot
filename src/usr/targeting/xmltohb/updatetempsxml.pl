@@ -85,13 +85,16 @@ open (FH, "<$generic") ||
     die "ERROR: unable to open $generic\n";
 close (FH);
 
+#print STDERR "XMLin($generic)\n";
 my $genericXml = XMLin("$generic");
+#print STDERR "XMLin($generic, ForceArray=>1)\n";
 my $genericXmlArray = XMLin("$generic", ForceArray=>1);
 
 open (FH, "<$fapi") ||
     die "ERROR: unable to open $fapi\n";
 close (FH);
 
+#print STDERR "XMLin($fapi, ForceArray=>1)\n";
 my $fapiXml = XMLin("$fapi", ForceArray=>1);
 
 open (FH, "<$fapi_inc") ||
@@ -102,12 +105,14 @@ open (FH, "<$fw_dflts") ||
     die "ERROR: unable to open $fw_dflts\n";
 close (FH);
 
+#print STDERR "XMLin($fw_dflts, ForceArray=>1)\n";
 my $fwDfltsXml = XMLin("$fw_dflts", ForceArray=>1);
 
 open (FH, "<$defaults") ||
     die "ERROR: unable to open $defaults\n";
 close (FH);
 
+#print STDERR "XMLin($defaults, ForceArray=>1)\n";
 my $defaultsXml = XMLin("$defaults", ForceArray=>1);
 
 
@@ -312,10 +317,11 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
             $enum_defs[$i] =~ /^\s*(.*)\s*=\s*(.*)\s*/;
             my $enumName = $1;
             my $enumValue = $2;
-            unless ($enumValue) # non-specified enum values (first enum = 0)
+            if ($enumValue eq "") # non-specified enum values (first enum = 0)
             {
                 ($enumName) = $enum_defs[$i] =~ m/^\s*(.*)\s*/;
                 $enumValue = 1 + $previous_value;
+#                print STDERR "Update enum $enumName with value $enumValue\n";
             }
             $previous_value = $enumValue;
             $enumName =~ s/ //;
