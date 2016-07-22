@@ -237,6 +237,17 @@ const uint32_t PB_ELINK_DLY_FMR4_LINK_DELAY_START_BIT = 4;
 const uint32_t PB_ELINK_DLY_FMR5_LINK_DELAY_START_BIT = 20;
 const uint32_t PB_ELINK_DLY_FMR_LINK_DELAY_LEN = 12;
 
+//PB_OLINK_DLY register bits
+const uint32_t PB_OLINK_DLY_FMR0_LINK_DELAY_START_BIT = 4;
+const uint32_t PB_OLINK_DLY_FMR1_LINK_DELAY_START_BIT = 20;
+const uint32_t PB_OLINK_DLY_FMR2_LINK_DELAY_START_BIT = 36;
+const uint32_t PB_OLINK_DLY_FMR3_LINK_DELAY_START_BIT = 52;
+const uint32_t PB_OLINK_DLY_FMR4_LINK_DELAY_START_BIT = 4;
+const uint32_t PB_OLINK_DLY_FMR5_LINK_DELAY_START_BIT = 20;
+const uint32_t PB_OLINK_DLY_FMR6_LINK_DELAY_START_BIT = 36;
+const uint32_t PB_OLINK_DLY_FMR7_LINK_DELAY_START_BIT = 52;
+const uint32_t PB_OLINK_DLY_FMR_LINK_DELAY_LEN = 12;
+
 //PB_ELINK_RT_DELAY register bits
 const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_0 = 0;
 const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_1 = 1;
@@ -244,6 +255,16 @@ const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_2 = 2;
 const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_3 = 3;
 const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_4 = 4;
 const uint32_t PB_ELINK_RT_DELAY_CTL_SET_LINK_5 = 5;
+
+//PB_OLINK_RT_DELAY register bits
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_0 = 0;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_1 = 1;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_2 = 2;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_3 = 3;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_4 = 4;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_5 = 5;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_6 = 6;
+const uint32_t PB_OLINK_RT_DELAY_CTL_SET_LINK_7 = 7;
 
 //The number of syncs that we are ok with the slave path missing (this must be set to at least 1 or there will be a fail)
 const uint32_t S_PATH_REMOTE_SYNC_MISS_COUNT_1 = 1;
@@ -265,21 +286,24 @@ extern "C" {
     enum p9_tod_setup_bus
     {
         NONE, //This is for MDMT
+        //this covers fbc x0
         XBUS0,
+        //this covers fbc x1
         XBUS1,
+        //this covers fbc x2
         XBUS2,
-        XBUS3,
-        XBUS4,
-        XBUS5,
-        XBUS6,
+        //this covers fbc x3 or a0
+        OBUS0,
+        //this covers fbc x4 or a1
+        OBUS1,
+        //this covers fbc x5 or a2
+        OBUS2,
+        //this covers fbc x6 or a3
+        OBUS3,
+        //this should never be used and if it is it will throw an error
         XBUS7,
-        //TODO These were added for Manish and the HWSV code since it has dependency on these enums.
-        //Manish is waiting until the specifications of multi-node systems are there and then
-        //he will modify his code and I will remove these. The ABUSes are not for FAPI consumption.
-        ABUS0,
-        ABUS1,
-        ABUS2,
-        BUS_MAX = ABUS2
+        //This was added for Manish and the HWSV code since it has dependency on this enums
+        BUS_MAX = OBUS3
     };
 
     enum tod_action
