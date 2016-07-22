@@ -1,0 +1,199 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_sbe_check_quiesce_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_RAS_STATUS_ERR</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      RAS Status is not in the STOP state 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RASSTATUS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_CAPP_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      CAPP quiesce done bit is not set  
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_NTL_NOT_IN_RESET</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      The NTLs are not all in the reset state for the NPU   
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NTL_DATA0</ffdc>
+    <ffdc>NTL_DATA1</ffdc>
+    <ffdc>NTL_DATA2</ffdc>
+    <ffdc>NTL_DATA3</ffdc>
+    <ffdc>NTL_DATA4</ffdc>
+    <ffdc>NTL_DATA5</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_VAS_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      The VAS quiesce was not achieved                                  
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NORTHDATA</ffdc>
+    <ffdc>SOUTHDATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_NX_PBI_WRITE_IDLE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      The PBI Write Idle never happened                                               
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_NX_CRB_KILL_DONE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      CRB kills were not complete 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_NX_STOP_UMAC_FETCHING_NEW_CRBS_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      UMAC was not stopped from fetchihng new CRBs
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_NX_UMAC_DISPATCH_SLOTS_TO_DRAIN_CRBS_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      UMAC was not done dispatching slots to drain of CRBs
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_WAIT_FOR_DMA_CHANNELS_TO_DRAIN_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      DMA channels were not drained 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_WAIT_FOR_ERAT_IDLE</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      ERAT was not idle 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PBI_MASTER_MACHINES_IDLE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      PBI Master machines are not idle
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_UMAC_QUIESCE_FAILED</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      UMAC status control quiesce failed 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_UMAC_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      UMAC status control quiesce timed out 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PSIHBCR_INBOUND_QUEUE_NOT_EMPTY</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      PSIHBCR inbound queue not empty 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_INTP_QUIESCE_TIMEOUT</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      INTP master or slave is not idle 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
