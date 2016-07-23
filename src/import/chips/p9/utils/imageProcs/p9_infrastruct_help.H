@@ -28,13 +28,28 @@
 //
 // Various image/ring buffer sizes. Must be used by all users (VBU, FSP, HB, HBI, Cronus)
 //
-const uint32_t  MAX_REF_IMAGE_SIZE    =     1024 *
-        1024; // Max reference image size.
-const uint32_t  FIXED_RING_BUF_SIZE   =
-    60000; // Fixed ring buf size for _fixed.
+//@FIXME: CMO: get rid of FIXED_RING_BUF_SIZE when ring_apply no longer uses it.
+const uint32_t  FIXED_RING_BUF_SIZE     = 60000; // Fixed ring buf size for _fixed.
+const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * 56 * 1024; // Max Seeprom size, excl ECC bits (4 banks).
+const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
+const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size.
+const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides section size.
+const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section size.
 
-#define CHIPLET_ID_MIN            (uint8_t)0x00
-#define CHIPLET_ID_MAX            (uint8_t)0x37
+enum SYSPHASE
+{
+    SYSPHASE_HB_SBE = 0,
+    SYSPHASE_RT_CME = 1,
+    SYSPHASE_RT_SGPE = 2,
+    NOOF_SYSPHASES = 3,
+};
+
+enum MODEBUILD
+{
+    MODEBUILD_IPL = 0,
+    MODEBUILD_REBUILD = 1,
+    NOOF_MODEBUILDS = 2,
+};
 
 #if defined(__FAPI)
     #include <fapi2.H>

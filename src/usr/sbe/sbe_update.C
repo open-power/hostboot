@@ -753,6 +753,7 @@ namespace SBE
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapiTarg(i_target);
 
+#if 0 //temporary removal to allow ekb merge
             FAPI_INVOKE_HWP( err,
                              p9_xip_customize,
                              l_fapiTarg,
@@ -763,6 +764,7 @@ namespace SBE
                              (uint32_t)FIXED_RING_BUF_SIZE,
                              (void*)RING_BUF2_VADDR,
                              (uint32_t)FIXED_RING_BUF_SIZE );
+#endif
 
             if ( err )
             {
