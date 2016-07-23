@@ -45,19 +45,33 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
-
 //------------------------------------------------------------------------------
-// Function prototypes
+// Constant definitions
 //------------------------------------------------------------------------------
 
-///
-/// @brief Reset SBE applied hostboot dcbz MC configuration for one unit target
-///
-/// @param[in] i_target Reference to an MC target (MCS/MI)
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-template<fapi2::TargetType T>
-fapi2::ReturnCode revert_hb_dcbz_config(const fapi2::Target<T>& i_target);
+// MCS target type constants
+const uint8_t NUM_MCS_TARGETS = 4;
+const uint64_t MCS_MCFGP_ARR[NUM_MCS_TARGETS] =
+{
+    MCS_0_MCFGP,
+    MCS_1_MCFGP,
+    MCS_2_MCFGP,
+    MCS_3_MCFGP
+};
+const uint64_t MCS_MCMODE1_ARR[NUM_MCS_TARGETS] =
+{
+    MCS_0_MCMODE1,
+    MCS_1_MCMODE1,
+    MCS_2_MCMODE1,
+    MCS_3_MCMODE1
+};
+const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_TARGETS] =
+{
+    MCS_0_MCFIRMASK_OR,
+    MCS_1_MCFIRMASK_OR,
+    MCS_2_MCFIRMASK_OR,
+    MCS_3_MCFIRMASK_OR
+};
 
 
 //------------------------------------------------------------------------------
@@ -65,9 +79,10 @@ fapi2::ReturnCode revert_hb_dcbz_config(const fapi2::Target<T>& i_target);
 //------------------------------------------------------------------------------
 
 
-// specialization for MCS target type
-template<>
-fapi2::ReturnCode revert_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+// helper function for MCS target type
+fapi2::ReturnCode
+revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                          const uint8_t i_mcs)
 {
     FAPI_DBG("Start");
     fapi2::buffer<uint64_t> l_mcfgp;
@@ -75,30 +90,30 @@ fapi2::ReturnCode revert_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_M
     fapi2::buffer<uint64_t> l_mcfirmask;
 
     // MCFGP -- mark BAR invalid & reset grouping configuration fields
-    FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP, l_mcfgp),
-             "Error from getScom (MCS_MCFGP)");
+    FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
+             "Error from getScom (MCS%d_MCFGP)", i_mcs);
     l_mcfgp.clearBit<MCS_MCFGP_VALID>();
     l_mcfgp.clearBit<MCS_MCFGP_MC_CHANNELS_PER_GROUP,
                      MCS_MCFGP_MC_CHANNELS_PER_GROUP_LEN>();
     l_mcfgp.clearBit<MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION,
                      MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION_LEN>();
     l_mcfgp.clearBit<MCS_MCFGP_GROUP_SIZE, MCS_MCFGP_GROUP_SIZE_LEN>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP, l_mcfgp),
-             "Error from putScom (MCS_MCFGP)");
+    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
+             "Error from putScom (MCS%d_MCFGP)", i_mcs);
 
     // MCMODE1 -- enable speculation
-    FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1, l_mcmode1),
-             "Error from getScom (MCS_MCMODE1)");
+    FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
+             "Error from getScom (MCS%d_MCMODE1)", i_mcs);
     l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
     l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
                        MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1, l_mcmode1),
-             "Error from putScom (MCS_MCMODE1)");
+    FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
+             "Error from putScom (MCS%d_MCMODE1)", i_mcs);
 
     // MCFIRMASK -- mask all errors
     l_mcfirmask.flush<1>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR, l_mcfirmask),
-             "Error from putScom (MCS_MCFIRMASK_OR)");
+    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
+             "Error from putScom (MCS%d_MCFIRMASK_OR)", i_mcs);
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -106,11 +121,18 @@ fapi_try_exit:
 }
 
 
-// specialization for MI target type
-template<>
-fapi2::ReturnCode revert_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target)
+// helper function for MI target type
+fapi2::ReturnCode
+revert_mi_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    // TODO: implement for Cumulus (MI target)
+    FAPI_DBG("Start");
+
+    // TODO: implement for Cumulus/MI target type
+    (void) i_target;
+    goto fapi_try_exit;
+
+fapi_try_exit:
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 
@@ -121,25 +143,31 @@ p9_revert_sbe_mcs_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 {
     FAPI_INF("Start");
 
-    auto l_mcs_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_ipl_phase;
+    auto l_mcs_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>(fapi2::TARGET_STATE_PRESENT);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, FAPI_SYSTEM, l_ipl_phase),
+             "Error from FAPI_ATTR_GET (ATTR_SYSTEM_IPL_PHASE)");
+
+    if (l_ipl_phase == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CHIP_CONTAINED)
+    {
+        FAPI_INF("Leaving MC BAR configured for chip contained execution");
+        goto fapi_try_exit;
+    }
 
     if (l_mcs_chiplets.size())
     {
-        for (auto l_target_mcs : l_mcs_chiplets)
+        for (uint8_t l_mcs = 0; l_mcs < NUM_MCS_TARGETS; l_mcs++)
         {
-            FAPI_TRY(revert_hb_dcbz_config(l_target_mcs),
-                     "Error from revert_hb_dcbz_config (MCS)");
+            FAPI_TRY(revert_mcs_hb_dcbz_config(i_target, l_mcs),
+                     "Error from revert_mcs_hb_dcbz_config");
         }
     }
     else
     {
-        auto l_mi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
-
-        for (auto l_target_mi : l_mi_chiplets)
-        {
-            FAPI_TRY(revert_hb_dcbz_config(l_target_mi),
-                     "Error from revert_hb_dcbz_config (MI)");
-        }
+        FAPI_TRY(revert_mi_hb_dcbz_config(i_target),
+                 "Error from revert_mi_hb_dcbz_config");
     }
 
 fapi_try_exit:

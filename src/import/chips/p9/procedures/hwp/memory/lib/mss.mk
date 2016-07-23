@@ -39,6 +39,8 @@ MSS_SOURCE_DIRS := $(shell find $(MSS_PATH) -type d)
 # Define common source and include paths.
 define MSS_MODULE_INCLUDES
 $(foreach dir, $(MSS_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
+$(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/p9/procedures/hwp/memory)
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
 endef
