@@ -23,6 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_throttle_sync
-lib$(PROCEDURE)_DEPLIBS+=mss
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib)
 $(call BUILD_PROCEDURE)
