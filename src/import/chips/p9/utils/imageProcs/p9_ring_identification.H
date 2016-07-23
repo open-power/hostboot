@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // General Ring ID list structure
 typedef struct
 {
@@ -162,22 +161,27 @@ extern const GenRingIdList RING_ID_LIST_INSTANCE[];
 extern const RingVariantOrder RING_VARIANT_ORDER[];
 }
 
-// VPD Ring ID list structure.
+// MVPD Ring ID list structure.
 typedef struct
 {
     const char*  ringName;
+    //@FIXME: CMO: Replace this with RingID asap.
     uint8_t      ringId;
     uint8_t      instanceIdMin;    // the min instanceId
     uint8_t      instanceIdMax;    // the max instanceId
     uint8_t      vpdKeyword;
+    uint8_t      vpdRingClass;     // Indicates std, gptr, or ex instance.
 } RingIdList;
 
 
+typedef struct
+{
+    const RingIdList* ringIdList;
+    uint32_t    ringIdListSize;
+} VPDRingList;
 
 extern const RingIdList  RING_ID_LIST_PG[], RING_ID_LIST_PR[];
-extern const uint32_t    RING_ID_LIST_PG_SIZE, RING_ID_LIST_PR_SIZE;
-extern const RingIdList  RING_ID_LIST[];
-extern const uint32_t    RING_ID_LIST_SIZE;
+extern const VPDRingList ALL_VPD_RINGS[];
 
 extern const uint32_t    RING_ID_LIST_CHIP_SIZE, RING_ID_LIST_CORE_SIZE,
        RING_ID_LIST_CME_SIZE, RING_ID_LIST_CC_SIZE;
@@ -198,10 +202,18 @@ enum VpdKeyword
 };
 
 
+enum VpdRingClass
+{
+    VPD_RING_CLASS_NEST = 0,   // Indicates NEST rings
+    VPD_RING_CLASS_EQ = 1,     // Indicates EQ rings
+    VPD_RING_CLASS_EX = 2,     // Indicates EX rings
+    VPD_RING_CLASS_EC = 3,     // Indicates EC rings
+    VPD_RING_CLASS_GPTR = 4,   // Indicates GPTR #G rings
+    VPD_RING_CLASS_LAST = 5,
+};
 
-int get_vpd_ring_list_entry(const char* i_ringName,
-                            const uint8_t i_ringId,
-                            RingIdList** i_ringIdList);
+
+#define MVPD_END_OF_DATA_MAGIC (uint32_t)0x454E4400 // "END "
 
 
 #endif
