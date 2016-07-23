@@ -58,18 +58,22 @@ fapi2::ReturnCode p9_mem_pll_initf(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             switch (l_mss_freq)
             {
                 case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+                    FAPI_DBG("Scan mc_pll_bndy_bucket_1 ring");
                     l_ring_id = mc_pll_bndy_bucket_1;
                     break;
 
                 case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+                    FAPI_DBG("Scan mc_pll_bndy_bucket_2 ring");
                     l_ring_id = mc_pll_bndy_bucket_2;
                     break;
 
                 case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+                    FAPI_DBG("Scan mc_pll_bndy_bucket_3 ring");
                     l_ring_id = mc_pll_bndy_bucket_3;
                     break;
 
                 case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+                    FAPI_DBG("Scan mc_pll_bndy_bucket_4 ring");
                     l_ring_id = mc_pll_bndy_bucket_4;
                     break;
 
@@ -82,7 +86,7 @@ fapi2::ReturnCode p9_mem_pll_initf(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             }
 
             FAPI_TRY(fapi2::putRing(l_mcbist_target, l_ring_id, fapi2::RING_MODE_SET_PULSE_NSL),
-                     "Error from putRing");
+                     "Error from putRing (mc_pll_bndy, ringID: %d)", l_ring_id);
         }
     }
     else

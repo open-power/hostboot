@@ -177,14 +177,48 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_FORCE_ALL_CORES, FAPI_SYSTEM,
                                l_read_3));
 
-        l_read_scratch_reg.writeBit<0>(l_read_1.getBit<7>());
-        l_read_scratch_reg.writeBit<1>(l_read_3.getBit<7>());
-        l_read_scratch_reg.writeBit<2>(l_read_2.getBit<7>());
+        // set cache contained flag
+        if (l_read_1 == fapi2::ENUM_ATTR_SYSTEM_IPL_PHASE_CACHE_CONTAINED)
+        {
+            l_read_scratch_reg.setBit<0>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<0>();
+        }
+
+        // set all cores flag
+        if (l_read_3)
+        {
+            l_read_scratch_reg.setBit<1>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<1>();
+        }
+
+        // set risk level flag
+        if (l_read_2 == fapi2::ENUM_ATTR_RISK_LEVEL_TRUE)
+        {
+            l_read_scratch_reg.setBit<2>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<2>();
+        }
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DISABLE_HBBL_VECTORS, FAPI_SYSTEM,
                                l_read_1));
 
-        l_read_scratch_reg.writeBit<3>(l_read_1.getBit<7>());
+        // set disable of HBBL exception vector flag
+        if (l_read_1 == fapi2::ENUM_ATTR_DISABLE_HBBL_VECTORS_TRUE)
+        {
+            l_read_scratch_reg.setBit<3>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<3>();
+        }
 
         FAPI_DBG("Setting up value of Scratch_reg5");
         //Setting SCRATCH_REGISTER_5 register value
