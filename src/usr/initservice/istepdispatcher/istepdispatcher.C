@@ -280,15 +280,12 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
         if(iv_istepMode)
         {
-            // IStep mode (receive messages to run individual steps)
-            if (!iv_mailboxEnabled)
-            {
-                // Cannot get messages from either HWSV or Cronus. Launch SPTask
-                // to accept messages from the SPless user console
-                TRACFCOMP(g_trac_initsvc, "IStep mode and SPLESS");
-                tid_t spTaskTid = task_create(spTask, iv_msgQ);
-                assert(spTaskTid > 0);
-            }
+            // In IStep mode (receive messages to run individual steps)
+            // always listen to debug interface.  If on FSP this allows
+            // both HWSV, Cronus, and debug tools to control the IPL
+            TRACFCOMP(g_trac_initsvc, "IStep mode, start debug 'spless' interface");
+            tid_t spTaskTid = task_create(spTask, iv_msgQ);
+            assert(spTaskTid > 0);
 
             // Call the message handler to handle messages from FSP or SPless
             // user console, these messages include the IStep messages. This
