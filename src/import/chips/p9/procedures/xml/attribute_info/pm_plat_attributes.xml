@@ -1272,10 +1272,10 @@
       </description>
       <valueType>uint8</valueType>
       <enum>
-          STATIC_FREQ,
-          STATIC_DROOP_PROTECT,
-          DROOP_PROTECT_OVERVOLT,
-          DYNAMIC_FREQ
+          STATIC_FREQ = 0x00,
+          STATIC_DROOP_PROTECT = 0x01,
+          DROOP_PROTECT_OVERVOLT = 0x02,
+          DYNAMIC_FREQ = 0x04
       </enum>
       <initToZero/>
       <platInit/>
