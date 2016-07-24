@@ -441,33 +441,29 @@ ReturnCode platGetFusedCoreMode(uint8_t & o_isFused)
 // ******************************************************************************
 // fapi2::platAttrSvc::platGetPoundVBucketData function
 //******************************************************************************
-ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_EQ>& i_fapiTarget,
+ReturnCode platGetPoundVBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                              uint8_t * o_poundVData)
 {
     fapi2::ReturnCode rc;
-    if(i_fapiTarget.getType() != TARGET_TYPE_EQ)
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+    if (l_errl)
     {
-        /*@
-        * @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-        * @moduleid          fapi2::MOD_FAPI2_MVPD_ACCESS
-        * @reasoncode        RC_INCORRECT_TARGET
-        * @userdata1         Actual Target Type
-        * @userdata2         Expected Target Type
-        * @devdesc           Attempted to read attribute from wrong target type
-        * @custdesc          Firmware Error
-        */
-        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              MOD_FAPI2_MVPD_ACCESS,
-                                              RC_INCORRECT_TARGET,
-                                              i_fapiTarget.getType(),
-                                              TARGET_TYPE_EQ,
-                                              true);
+        FAPI_ERR("getTargetingAttr: Error from getTargetingTarget");
         rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
     }
     else
     {
-        rc = p9_pm_get_poundv_bucket_attr(i_fapiTarget,o_poundVData);
+        fapi2::Target<TARGET_TYPE_EQ> l_fapiTarget( l_pTarget);
+        rc = p9_pm_get_poundv_bucket_attr(l_fapiTarget,o_poundVData);
     }
+
     return rc;
 }
 
