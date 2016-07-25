@@ -163,6 +163,7 @@ sub manipulateImages
     my $parallelPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
     my %tempImages = (
         HDR_PHASE => "$bin_dir/$parallelPrefix.temp.hdr.bin",
+        PREFIX_PHASE => "$bin_dir/$parallelPrefix.temp.hdr.prefix.bin",
         TEMP_SHA_IMG => "$bin_dir/$parallelPrefix.temp.sha.bin",
         PAD_PHASE => "$bin_dir/$parallelPrefix.temp.pad.bin",
         ECC_PHASE => "$bin_dir/$parallelPrefix.temp.bin.ecc",
@@ -234,6 +235,15 @@ sub manipulateImages
                     {
                         run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                     }
+
+                    # Customize secureboot prefix header with container size,
+                    # target HRMOR, and stack address (8 bytes each), in that
+                    # order. Customization begins at offset 6 into the container
+                    # header.
+                    if($eyeCatch eq "HBB")
+                    {
+                        run_command("echo \"000000000007EF8000000000080000000000000008280000\" | xxd -r -ps -seek 6 - $tempImages{HDR_PHASE}");
+                    }
                 }
                 # Add simiple version header
                 else
@@ -254,6 +264,22 @@ sub manipulateImages
             }
         }
 
+        # Prefix phase
+        if (-e $bin_file)
+        {
+            # Add SBE header to HBB
+            if($eyeCatch eq "HBB")
+            {
+                run_command("echo \"00000000001800000000000008000000000000000007EF80\" | xxd -r -ps - $tempImages{PREFIX_PHASE}");
+                run_command("cat $tempImages{HDR_PHASE} >> $tempImages{PREFIX_PHASE}");
+            }
+            # Otherwise propagate image to next phase
+            else
+            {
+                run_command("mv $tempImages{HDR_PHASE} $tempImages{PREFIX_PHASE}");
+            }
+        }
+
         # Padding Phase
         if ($sectionHash{$layoutKey}{ecc} eq "yes")
         {
@@ -265,7 +291,7 @@ sub manipulateImages
             # If "--test" flag set do not pad as the test HBI images is
             # possibly larger than parition size and does not need to be
             # fully padded. Size adjustments made in checkSpaceConstraints
-            run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+            run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
         }
         elsif (!-e $bin_file)
         {
@@ -282,7 +308,7 @@ sub manipulateImages
         }
         else
         {
-            run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+            run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
         }
 
         # Create .header.bin file for FSP
