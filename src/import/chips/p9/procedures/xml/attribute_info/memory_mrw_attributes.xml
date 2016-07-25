@@ -257,4 +257,113 @@
       <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
     </attribute>
 
+    <attribute>
+      <id>ATTR_MSS_MRW_OFFSET_GPO</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Global Offset in number of Clocks
+      </description>
+      <valueType>uint8</valueType>
+        <mssUnits> nck </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_offset_gpo</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_OFFSET_RLO</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Read Latency Offset in number of Clocks
+      </description>
+      <valueType>uint8</valueType>
+        <mssUnits> nck </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_offset_rlo</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_OFFSET_WLO</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Write Latency Offset in number of Clocks
+      </description>
+      <valueType>uint8</valueType>
+        <mssUnits> nck </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_offset_wlo</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Describes the settings for periodic calibration for port 0:
+        Reading left to right. (DEFAULT: 0xD90C -> Byte 0(11011001), Byte 1(00001100))
+        For each bit: OFF = 0, ON = 1
+        Byte 0:
+        0: ZCAL
+        1: SYSCK_ALIGN
+        2 :RDCENTERING
+        3: RDLCK_ALING
+        4: DQS_ALIGN
+        5: RDCLK_UPDATE
+        6: PER_DUTYCYCLE
+        7: PERCAL_PWR_DIS
+
+        Byte 1:
+        0: PERCAL_REPEAT
+        1: PERCAL_REPEAT
+        2: PERCAL_REPEAT
+        3: SINGLE_BIT_MPR
+        4: MBA_CFG_0
+        5: MBA_CFG_1
+        6: SPARE
+        7: SPARE
+      </description>
+      <valueType>uint16</valueType>
+        <mssUnits> encoded settings for periodic calibration </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_periodic_memcal_mode_options</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_TSYS_ADR</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Phase rotator value for the memory sub-system clock in ticks.
+        Ticks are 1/128 of one cycle of clock.
+      </description>
+      <valueType>uint8</valueType>
+        <mssUnits> tick </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_tsys_adr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_TSYS_DATA</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Phase rotator value for the memory sub-system data in ticks.
+        Ticks are 1/128 of one cycle of clock.
+      </description>
+      <valueType>uint8</valueType>
+        <mssUnits> tick </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_tsys_data</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Allows user to manually turn on and off 2N Mode.
+        AUTO feature defaults to Signal Integrity generated setting.
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0, ON = 1, AUTO = 2 </enum>
+      <mssUnits> encoded settings for 2N Mode </mssUnits>
+      <platInit/>
+      <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
+    </attribute>
+
 </attributes>
