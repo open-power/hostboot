@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.112 2016/03/30 13:58:40 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.114 2016/05/24 09:34:53 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.114 |preeragh|24-MAY-16| FW Fixes, delete str fixes
+//   1.113 |preeragh|18-MAY-16| RD_EYE Fixes to Print Report
 //   1.112 |preeragh|29-MAR-16| Print Target Info Sanity checks
 //   1.109 |sglancy |08-MAR-16| Fixed compile error
 //   1.108 |sglancy |07-MAR-16| Updated for box shmoo
@@ -316,17 +318,7 @@ extern "C"
                 return rc;
             }
         }
-	//runs the box shmoo
-	else if (l_attr_schmoo_test_type_u8 == BOX) {
-	    rc=get_all_noms(i_target);
-            if(rc) return rc;
-            if(l_attr_schmoo_multiple_setup_call_u8==0) {
-                rc=schmoo_setup_mcb(i_target);
-                if(rc) return rc;
-            }
-	    rc=do_box_shmoo(i_target);
-            if(rc) return rc;
-	}
+
         else if (l_attr_schmoo_test_type_u8 == 8)
         {
             if (l_rankpgrp0[0] != 255)
@@ -1367,133 +1359,7 @@ extern "C"
         return rc;
     }
     
-    //runs the box shmoo going to +5 and -5 ticks
-    fapi::ReturnCode generic_shmoo::do_box_shmoo(const fapi::Target & i_target)
-    {
-        fapi::ReturnCode rc;
-        ecmdDataBufferBase data_buffer_64(64);
-	uint8_t l_p;
-	uint8_t l_rank;
-	uint8_t l_dq;
-	uint8_t l_n;
-	uint8_t rank=0;
-        uint8_t l_SCHMOO_NIBBLES=18;
-        input_type_t l_input_type_e = WR_DQ;
-        access_type_t l_access_type_e = WRITE;
-	
-	uint8_t delay_train_step_size;
-	rc = FAPI_ATTR_GET( ATTR_MRW_WR_VREF_CHECK_VREF_STEP_SIZE, NULL, delay_train_step_size);
-        if(rc) return rc;
-	
-	for(l_p = 0; l_p < MAX_PORT; l_p++) {
 
-             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
-             {
-            	 //l_dq+l_n*4=bit;
-            	 //////
-            	 rank=valid_rank1[l_p][l_rank];
-            	 //printf ("Current Rank : %d",rank );
-
-            	 for(l_dq = 0; l_dq < 4; l_dq++) {
-            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
-            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]+delay_train_step_size);
-            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
-            		if(rc) return rc;
-            	     }
-            	 }
-             }
-       }
-
-       rc=do_mcbist_reset(i_target);
-       if(rc)
-       {
-           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
-           return rc;
-       }
-       rc=do_mcbist_test(i_target);
-       if(rc)
-       {
-           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
-           return rc;
-       }
-
-       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
-       if (rc) return rc;
-       
-       if(data_buffer_64.isBitSet(2)) {
-          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
-	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
-          FAPI_ERR("FOUND FAILING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
-       }
-       else {
-          FAPI_INF("FOUND PASSING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
-       }
-       
-       for(l_p = 0; l_p < MAX_PORT; l_p++) {
-
-             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
-             {
-            	 //l_dq+l_n*4=bit;
-            	 //////
-            	 rank=valid_rank1[l_p][l_rank];
-            	 //printf ("Current Rank : %d",rank );
-
-            	 for(l_dq = 0; l_dq < 4; l_dq++) {
-            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
-            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]-delay_train_step_size);
-
-            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
-            		if(rc) return rc;
-            	     }
-            	 }
-             }
-       }
-
-       
-       rc=do_mcbist_reset(i_target);
-       if(rc)
-       {
-           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
-           return rc;
-       }
-       rc=do_mcbist_test(i_target);
-       if(rc)
-       {
-           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
-           return rc;
-       }
-		    
-       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
-       if (rc) return rc;
-       
-       if(data_buffer_64.isBitSet(2)) {
-          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
-	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
-          FAPI_ERR("FOUND FAILING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
-       }
-       else {
-          FAPI_INF("FOUND PASSING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
-       }
-	
-	for(l_p = 0; l_p < MAX_PORT; l_p++)
-        {
-            for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
-            {
-        	//l_dq+l_n*4=bit;
-        	//////
-        	rank=valid_rank1[l_p][l_rank];
-        	//printf("Valid rank of %d %d %d %d %d %d %d %d",valid_rank1[0],valid_rank1[1],valid_rank1[2],valid_rank1[3],valid_rank1[4],valid_rank1[5],valid_rank1[6],valid_rank1[7]);
-        	for(l_dq = 0; l_dq < 4; l_dq++) {
-        	    for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
-        		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]);
-        		if(rc) return rc;
-        		//l_dq+l_n*4=l_dq+l_n*4+4;
-        	    }
-        	}
-            }
-        }
-	return rc;
-    }
     
 
     fapi::ReturnCode generic_shmoo::knob_update_bin(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag)
@@ -3731,6 +3597,8 @@ extern "C"
         l_cyc=l_cyc/l_freq;// converting to zepto to get more accurate data
         l_factor=l_cyc/128;
 
+		 //FAPI_INF("Get Margin2 - Preet");
+		 
         for (l_p=0; l_p< 2; l_p++) {
             for (l_rnk=0; l_rnk<iv_MAX_RANKS[l_p]; l_rnk++)
             {
@@ -3747,25 +3615,19 @@ extern "C"
                         {
                             l_dq=8*l_byte+4*l_nibble+l_bit;
 
-                            if(iv_shmoo_type==8)
-                            {
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] == 0) {
-
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]=0;
-                                    if((iv_shmoo_param==4)||(iv_shmoo_param==6)) {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]-1;
-                                    } else {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]-2;
-                                    }
-                                    //FAPI_INF("\n the value of left bound after is %d \n",SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]);
-                                }
-                            }
+                           
+                                if((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]) <= 0 && (iv_shmoo_type == 8)) 
+								{
+									SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]=0;
+                                } 
+                                
+                            
 
                             if((iv_shmoo_param==4)||(iv_shmoo_param==6)) {
                                 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]>SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq]) {
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]-1;
                                 }
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]<SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq]) {
+                                if((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]<SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq]) && (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] !=0)) {
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]=SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]+1;
                                 }
                             } else {
@@ -3801,7 +3663,7 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
     uint16_t l_total_margin = 0;
 	uint8_t l_dq = 0;
 	uint8_t vrefdq_train_value[2][2][4];
-	char * l_pMike = new char[128];
+	char * l_pMike = new char[160];
     char * l_str = new char[128];
 	
 	fapi::Target l_target_centaur;
@@ -3810,20 +3672,38 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
     if (rc) return rc;
 	
 	uint8_t l_dram_gen = 1;
+	uint8_t l_param_valid = 0;
 	uint32_t base_percent = 60000;
 	uint32_t index_mul_print = 650;
 	uint32_t vref_val_print = 0;
     uint8_t vrefdq_train_range[2][2][4];
+	uint32_t l_attr_rd_vred_vpd_value[2] = {0};
 	
 	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen); if(rc) return rc;
 	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value); if(rc) return rc;
+	rc = FAPI_ATTR_GET( ATTR_EFF_SCHMOO_PARAM_VALID, &i_target, l_param_valid); if(rc) return rc;
+	
 	if(vrefdq_train_range[0][0][0] == 1)
 	{
 	base_percent = 45000;
 	}
-	
-	vref_val_print = base_percent + (vrefdq_train_value[0][0][0] * index_mul_print);
+	if (iv_shmoo_type == 2)
+	{
+		vref_val_print = base_percent + (vrefdq_train_value[0][0][0] * index_mul_print);
+	}
+
+	else if((iv_shmoo_type == 8) && (l_param_valid!=ENUM_ATTR_EFF_SCHMOO_PARAM_VALID_RD_VREF))
+	{
+		rc = FAPI_ATTR_GET( ATTR_VPD_CEN_RD_VREF, &i_target, l_attr_rd_vred_vpd_value); if(rc) return rc;
+		//FAPI_INF("Rd_From VPD = %d",l_attr_rd_vred_vpd_value[0]);
+		vref_val_print = l_attr_rd_vred_vpd_value[0];
+	}
+	else if((iv_shmoo_type == 8) && (l_param_valid==ENUM_ATTR_EFF_SCHMOO_PARAM_VALID_RD_VREF))
+	{
+		FAPI_INF("Rd_From iv_vref_mul = %d",iv_vref_mul);
+		vref_val_print = iv_vref_mul;
+	}
     rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32);
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32);
@@ -3869,11 +3749,11 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
 
     if (iv_shmoo_type == 0)
     {
-        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tSetup_Limit\tHold_Limit\tWrD_Setup(ps)\tWrD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
+        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tNominal\tSetup_Limit\tHold_Limit\tWrD_Setup(ps)\tWrD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
     }
     else
     {
-        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tSetup_Limit\tHold_Limit\tRdD_Setup(ps)\tRdD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
+        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tNominal\tSetup_Limit\tHold_Limit\tRdD_Setup(ps)\tRdD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
     }
     //FAPI_INF("Schmoo  POS\tPort\tRank\tByte\tnibble\tbit\tNominal\t\tSetup_Limit\tHold_Limit \n");
     FAPI_INF("%s", l_pMike);
@@ -3903,8 +3783,8 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
 								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
                                 l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
                                 l_total_margin, l_attr_mss_freq_u32, vref_val_print);
@@ -3914,8 +3794,8 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
 								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
                                 l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
                                 l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
