@@ -370,6 +370,30 @@
             0, 0, 0
         </default>
     </attribute>
+    <attribute>
+        <id>VDD_AVSBUS_BUSNUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VDD_AVSBUS_RAIL</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_BUSNUM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_RAIL</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_BUSNUM</id>
+        <default>255</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_RAIL</id>
+        <default>255</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 EQ units -->
@@ -4874,6 +4898,33 @@
         <default>0xFF</default><!-- no B path -->
     </attribute>
     <!-- End FSI connections -->
+
+    <attribute>
+        <id>VDD_AVSBUS_BUSNUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VDD_AVSBUS_RAIL</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_BUSNUM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_RAIL</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_BUSNUM</id>
+        <default>255</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_RAIL</id>
+        <default>255</default>
+    </attribute>
+
+
     <attribute>
         <id>EEPROM_SBE_PRIMARY_INFO</id>
         <default>

@@ -388,6 +388,18 @@ $procLoadline{PROC_R_LOADLINE_VCS}{sys}  = $reqPol->{'proc_r_loadline_vcs' }[0];
 $procLoadline{PROC_R_DISTLOSS_VCS}{sys}  = $reqPol->{'proc_r_distloss_vcs' }[0];
 $procLoadline{PROC_VRM_VOFFSET_VCS}{sys} = $reqPol->{'proc_vrm_voffset_vcs'}[0];
 
+#Save avsbus data to add to proc target type later
+our %voltageRails = (
+        "vdd_avsbus_busnum" => $reqPol->{'vdd_avsbus_busnum'},
+        "vdd_avsbus_rail"   => $reqPol->{'vdd_avsbus_rail'  },
+        "vdn_avsbus_busnum" => $reqPol->{'vdn_avsbus_busnum'},
+        "vdn_avsbus_rail"   => $reqPol->{'vdn_avsbus_rail'  },
+        "vcs_avsbus_busnum" => $reqPol->{'vcs_avsbus_busnum'},
+        "vcs_avsbus_rail"   => $reqPol->{'vcs_avsbus_rail'  }, );
+
+
+
+
 my $optPol = $sysPolicy->{"optional-policy-settings"};
 if(defined $optPol->{'loadline-overrides'})
 {
@@ -1692,6 +1704,7 @@ for my $i ( 0 .. $#SortedTargets )
 # Finally, generate the xml file.
 print "<!-- Source path(s) = $mrwdir -->\n";
 
+
 print "<attributes>\n";
 
 # First, generate system target (always sys0)
@@ -1917,7 +1930,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
         generate_proc($proc, $is_master, $ipath, $lognode, $logid,
                       $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology,
-                      \%fapiPosH);
+                      \%fapiPosH,\%voltageRails );
 
         generate_occ($proc, $proc_ordinal_id);
         generate_nx($proc,$proc_ordinal_id,$node);
@@ -3210,10 +3223,11 @@ sub generate_proc
 {
     my ($proc, $is_master, $ipath, $lognode, $logid, $ordinalId,
         $fsiA, $altfsiA,
-        $fruid, $hwTopology, $fapiPosHr) = @_;
+        $fruid, $hwTopology, $fapiPosHr, $voltageRails) = @_;
 
     my @fsi = @{$fsiA};
     my @altfsi = @{$altfsiA};
+    our %nestRails = %{$voltageRails};
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
     my $vpdnum = ${proc};
     my $position = ${proc};
@@ -3495,6 +3509,34 @@ sub generate_proc
     # add I2C_BUS_SPEED_ARRAY attribute
     addI2cBusSpeedArray($sys, $node, $proc, "pu");
 
+
+    print "
+    <!-- Nest Voltage Rails -->
+    <attribute>
+        <id>VDD_AVSBUS_BUSNUM</id>
+        <default>$nestRails{vdd_avsbus_busnum}</default>
+    </attribute>
+    <attribute>
+        <id>VDD_AVSBUS_RAIL</id>
+        <default>$nestRails{vdd_avsbus_rail}</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_BUSNUM</id>
+        <default>$nestRails{vdn_avsbus_busnum}</default>
+    </attribute>
+    <attribute>
+        <id>VDN_AVSBUS_RAIL</id>
+        <default>$nestRails{vdn_avsbus_rail}</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_BUSNUM</id>
+        <default>$nestRails{vcs_avsbus_busnum}</default>
+    </attribute>
+    <attribute>
+        <id>VCS_AVSBUS_RAIL</id>
+        <default>$nestRails{vcs_avsbus_rail}</default>
+    </attribute>\n";
+
     # fsp-specific proc attributes
     do_plugin('fsp_proc',
             $scomFspApath, $scomFspAsize, $scanFspApath, $scanFspAsize,
@@ -3502,7 +3544,7 @@ sub generate_proc
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
             $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId,
             $sbefifoFspApath, $sbefifoFspAsize, $sbefifoFspBpath,
-            $sbefifoFspBsize);
+            $sbefifoFspBsize, \%nestRails );
 
     # Data from PHYP Memory Map
     print "\n";
