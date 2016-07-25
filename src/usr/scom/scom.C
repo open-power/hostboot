@@ -263,12 +263,6 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
 #endif // __HOSTBOOT_RUNTIME
     } while(0);
 
-    if(i_opMode & fapi2::IGNORE_HW_ERROR)
-    {
-        TRACFCOMP(g_trac_scom, "IGNORE_HW_ERROR opmode detected for scom, any errors are being deleted");
-        delete l_err;
-    }
-
     return l_err;
 }
 
