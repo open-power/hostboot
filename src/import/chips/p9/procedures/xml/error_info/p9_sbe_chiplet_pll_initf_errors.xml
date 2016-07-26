@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_CHIPLET_PLL_INITF_INVALID_CHIPLET</rc>
     <description>Unsupported/unexpected pervasive chiplet instance</description>
     <ffdc>TARGET</ffdc>
