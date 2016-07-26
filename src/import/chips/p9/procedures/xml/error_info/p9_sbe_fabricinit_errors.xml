@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_FABRICINIT_FBC_STOPPED_ERR</rc>
     <description>
       Procedure: p9_sbe_fabricinit
@@ -36,6 +37,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_FABRICINIT_FAILED_ERR</rc>
     <description>
       Procedure: p9_sbe_fabricinit
@@ -47,6 +49,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_FABRICINIT_NO_INIT_ERR</rc>
     <description>
       Procedure: p9_sbe_fabricinit
