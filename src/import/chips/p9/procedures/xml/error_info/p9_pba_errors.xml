@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_PBA_COHERENT_UTILS_INVALID_ARGS</rc>
     <description>
       Procedure: p9_pba_coherent_utils
@@ -36,6 +37,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_PBA_COHERENT_UTILS_RESET_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
@@ -46,6 +48,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_PBA_STATUS_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
@@ -60,6 +63,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_PBA_FBC_NOT_INITIALIZED_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
