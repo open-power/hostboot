@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_DPLL_LOCK_TIMEOUT</rc>
     <description>
         DPLL is not locking.
@@ -56,6 +57,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_DPLLCLKSTART_TIMEOUT</rc>
     <description>
         dpll clock start timed out.
@@ -86,6 +88,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_DPLLCLKSTART_FAILED</rc>
     <description>
         dpll clock start failed.
@@ -94,6 +97,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_ANEPCLKSTART_TIMEOUT</rc>
     <description>
         anep clock start timed out.
