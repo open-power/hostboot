@@ -82,15 +82,28 @@ void* call_host_activate_master (void *io_pArgs)
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                                 const_cast<TARGETING::Target*> (l_masterCore));
 
+        //Because of a bug in how the SBE injects the IPI used to wake
+        //up the master core, need to ensure no mailbox traffic
+        //or even an interrupt in the interrupt presenter
+        // 1) suspend the mailbox with interrupt disable
+        // 2) tell the SBE to start the deadman timer
+        // 3) ensure that interrupt presenter is drained
+        l_errl = MBOX::suspend(true, true);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master ERROR : MBOX::suspend");
+            break;
+        }
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: About to start deadman loop... "
                    "Target HUID %.8X",
                     TARGETING::get_huid(l_proc_target));
 
-         //In the future possibly move default "waitTime" value to SBEIO code
-         uint64_t waitTime = 10000;
-         l_errl = SBEIO::startDeadmanLoop(waitTime);
-
+        //In the future possibly move default "waitTime" value to SBEIO code
+        uint64_t waitTime = 10000;
+        l_errl = SBEIO::startDeadmanLoop(waitTime);
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -107,26 +120,14 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "startDeadManLoop SUCCESS"  );
         }
+
         //Need to indicate to PHYP to save HRMOR and other SPR Data to be
         // applied during wakeup
         MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
-        //Because of a bug in how the SBE injects the IPI used to wake
-        //up the master core, need to ensure no mailbox traffic
-        //or even an interrupt in the interrupt presenter
-        // 1) suspend the mailbox with interrupt disable
-        // 2) ensure that interrupt presenter is drained
-        l_errl = MBOX::suspend(true, true);
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master ERROR : MBOX::suspend");
-            break;
-        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
         INTR::drainQueue();
-
 
         // Call p9_block_wakeup_intr to prevent stray interrupts from
         // popping core out of winkle before SBE sees it.
@@ -226,21 +227,7 @@ void* call_host_activate_master (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Returned from Winkle." );
 
-        //Re-enable the mailbox
-        l_errl = MBOX::resume();
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_master ERROR : MBOX::resume");
-            break;
-        }
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call proc_stop_deadman_timer. Target %.8X",
-                    TARGETING::get_huid(l_proc_target) );
-
         l_errl = SBEIO::stopDeadmanLoop();
-
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -258,6 +245,20 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "stopDeadmanLoop SUCCESS"  );
         }
+
+        //Re-enable the mailbox
+        l_errl = MBOX::resume();
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master ERROR : MBOX::resume");
+            break;
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Call proc_stop_deadman_timer. Target %.8X",
+                   TARGETING::get_huid(l_proc_target) );
+
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
 
