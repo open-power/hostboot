@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +34,8 @@ use Fcntl qw(SEEK_SET);
 
 use constant    MEMSTATE_NO_MEM => 0x0;
 use constant    MEMSTATE_HALF_CACHE => 0x4;
-use constant    MEMSTATE_FULL_CACHE => 0x8;
+use constant    MEMSTATE_REDUCED_CACHE => 0x8;
+use constant    MEMSTATE_FULL_CACHE => 0xa;
 use constant    MEMSTATE_MS_32MEG => 0x20;
 use constant    MEMSTATE_PRE_SECURE_BOOT => 0xff;
 
@@ -64,16 +67,21 @@ our %memory_maps = (
           2 * _MB + 512 * _KB,          512 * _KB,
           3 * _MB + 512 * _KB,          512 * _KB
         ],
-    MEMSTATE_FULL_CACHE() =>
-        # Add next full 4MB after we expand to the full cache.
+    MEMSTATE_REDUCED_CACHE() =>
+        # Initial chips may have 2MB bad cache
         [ 4 * _MB,                      1 * _MB,
           5 * _MB,                      1 * _MB,
           6 * _MB,                      1 * _MB,
           7 * _MB,                      1 * _MB
         ],
+    MEMSTATE_FULL_CACHE() =>
+        # Full cache is 10MB
+        [ 8 * _MB,                      1 * _MB,
+          9 * _MB,                      1 * _MB
+        ],
     MEMSTATE_MS_32MEG() =>
-        # Add next 24MB after we expand to memory.
-        [ 8 * _MB,                      24 * _MB
+        # Add next 22MB after we expand to memory.
+        [ 10 * _MB,                      22 * _MB
         ]
 );
 
@@ -83,11 +91,15 @@ our %memory_states = (
     MEMSTATE_PRE_SECURE_BOOT() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT ],
     MEMSTATE_HALF_CACHE() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
                              MEMSTATE_HALF_CACHE ],
+    MEMSTATE_REDUCED_CACHE() =>
+                             [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE ],
     MEMSTATE_FULL_CACHE() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
-                             MEMSTATE_HALF_CACHE, MEMSTATE_FULL_CACHE ],
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
+                             MEMSTATE_FULL_CACHE ],
     MEMSTATE_MS_32MEG() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
-                             MEMSTATE_HALF_CACHE, MEMSTATE_FULL_CACHE,
-                             MEMSTATE_MS_32MEG ]
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_32MEG ]
 );
 
 sub main

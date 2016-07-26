@@ -32,8 +32,7 @@
 namespace KernelMemState
 {
     // hb_Mem_Location struct values are defined below.
-    /* Core Scratch 6 (Scom 0x10013289) will be used to indicate the memory
-     state
+    /* see mmio.h for scratch reg definitions
 
      Register Bit Definition:
      - 0:7 - Indicator of memory mode

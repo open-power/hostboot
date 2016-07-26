@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,9 +148,12 @@ do
             dump 7340032 1048576
             STATE=04
             ;;
-        20)
+         0A|A)
             dump 8388608 1048576
             dump 9437184 1048576
+            STATE=08
+            ;;
+        20)
             dump 10485760 1048576
             dump 11534336 1048576
             dump 12582912 1048576
@@ -171,7 +176,7 @@ do
             dump 30408704 1048576
             dump 31457280 1048576
             dump 32505856 1048576
-            STATE=08
+            STATE=0A
             ;;
         discover)  # Call discover function to determine state.
             discover

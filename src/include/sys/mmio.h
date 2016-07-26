@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,25 +88,15 @@ void mmio_hmer_write(uint64_t value);
  */
 enum MMIO_Scratch_Register
 {
-        /** Thread0 Scratch Register - Progress Code / Status. */
+        /** Progress Code / Status. */
     MMIO_SCRATCH_PROGRESS_CODE = 0x0,
-        /** Thread1 Scratch Register - PNOR mode control*/
-    MMIO_SCRATCH_PNOR_MODE = 0x8,
-        /** Thread2 Scratch Register - Unused */
-    MMIO_SCRATCH_ISTEP_MODE = 0x10,
-        /** Thread3 Scratch Register - Identifies if Hostboot is active after
-         *                             host_start_payload. */
+        /** Identifies where hostboot currently resides and how large the
+         *  space is */
+    MMIO_SCRATCH_MEMORY_STATE = 0x08,
+        /** Spare scratch reg */
+    MMIO_SCRATCH_SPARE = 0x10,
+        /** Identifies if Hostboot is active after host_start_payload. */
     MMIO_SCRATCH_HOSTBOOT_ACTIVE = 0x18,
-        /** Thread4 Scratch Register - Unused */
-    MMIO_SCRATCH_RSVD_T4 = 0x20,
-        /** Thread5 Scratch Register - Unused (unit tests may modify) */
-    MMIO_SCRATCH_RSVD_T5_TESTCASES = 0x28,
-        /** Thread6 Scratch Register - Identifies where hostboot currently
-                                       resides and how large the space is */
-    MMIO_SCRATCH_MEMORY_STATE = 0x30,
-        /** Thread7 Scratch Register - Set be SBE for reduced-threads support
-         *                             for AVPs.  */
-    MMIO_SCRATCH_AVP_THREADS = 0x38,
 };
 
 /** @fn mmio_scratch_read()

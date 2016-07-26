@@ -593,13 +593,17 @@ namespace KernelMisc
           case CORE_POWER8_MURANO:
           case CORE_POWER8_VENICE:
           case CORE_POWER8_NAPLES:
+              l_scratch_addr = l_scratch_addr + 0x40;
+              break;
           case CORE_POWER9_NIMBUS:
           case CORE_POWER9_CUMULUS:
           case CORE_UNKNOWN:
-            l_scratch_addr = l_scratch_addr + 0x40;
-            break;
+          default:
+              // See EX07.EC.CC.PCC0.COMMON.SPR_COMMON.SCOMC in scomdef for
+              // info on this offset - MODE_CX_SCOMC: 0000xxx = SCRATCH xx SPR
+              // It's 0 for P9 so just pass through scratch reg offset
+              break;
         }
-
         writeScratchReg(l_scratch_addr, data);
     };
 

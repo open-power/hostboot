@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,18 +66,19 @@ void mmio_hmer_write(uint64_t value)
  */
 static uint64_t mmio_scratch_base()
 {
-    // @todo-RTC:130438 Verify value for P9
     ProcessorCoreType cpuType = CpuID::getCpuType();
     switch (cpuType)
     {
         case CORE_POWER8_MURANO:
         case CORE_POWER8_VENICE:
         case CORE_POWER8_NAPLES:
+            return 0x40;
         case CORE_POWER9_NIMBUS:
         case CORE_POWER9_CUMULUS:
         case CORE_UNKNOWN:
         default:
-            return 0x40;
+            // See misc.C - updateScratchReg() for more info on this
+            return 0x00;
     }
 }
     /** Global cache of the scratch register SPRC base address. */
