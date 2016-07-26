@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_PENDING</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
@@ -37,6 +38,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_INVALID_REQUEST_LEVEL</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
@@ -46,6 +48,7 @@
   </hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_INVALID_ACTUAL_LEVEL</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
@@ -55,6 +58,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CHECK_MASTER_STOP15_INVALID_STATE</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15

@@ -27,6 +27,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_LOAD_BOOTLOADER_INVALID_TARGET_ADDRESS</rc>
     <description>
       Procedure: p9_sbe_load_bootloader
@@ -40,6 +41,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_LOAD_BOOTLOADER_INVALID_PAYLOAD_SIZE</rc>
     <description>
       Procedure: p9_sbe_load_bootloader
@@ -51,6 +53,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_MASTER_CORE_NOT_FOUND</rc>
     <description>
       Procedure: p9_sbe_load_bootloader

@@ -29,23 +29,27 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_XSTOP_ERR</rc>
     <description>Checkstop bit set in interrupt type reg</description>
     <ffdc>READ_XSTOP</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CALIBRATION_NOT_DONE</rc>
     <description>Precision Reference Voltage : Calibration not done</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_MF_OSC_ERR</rc>
     <description>MF Oscillator error active</description>
     <ffdc>READ_OSCERR_HOLD</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_MF_OSC_NOT_TOGGLE</rc>
     <description>MF Oscillator not toggling</description>
     <ffdc>READ_SNS1LTH</ffdc>

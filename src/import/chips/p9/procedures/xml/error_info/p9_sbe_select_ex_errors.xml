@@ -29,16 +29,19 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SELECT_EX_NO_CORES</rc>
     <description>No good cores were found in the Partial Good attribures</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SELECT_EX_NO_EQS</rc>
     <description>No good cache chiplets were found in the Partial Good attribures</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SELECT_EX_CORE_EQ_CONFIG_ERROR</rc>
     <description>Did not find the matching EQ for the first core</description>
     <ffdc>CORE_NUM</ffdc>
@@ -46,6 +49,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SELECT_EX_NO_CORE_AVAIL_ERROR</rc>
     <description>No cores are configurable with current partial good and gard settings</description>
   </hwpError>

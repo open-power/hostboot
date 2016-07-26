@@ -29,11 +29,13 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_BUS_STATUS_BUSY0</rc>
     <description>Status busy check</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_MAGIC_NUMBER_NOT_VALID</rc>
     <description>Magic number not matching</description>
   </hwpError>
