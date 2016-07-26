@@ -29,6 +29,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_BUS_STATUS_BUSY_0</rc>
     <description>Status busy check</description>
   </hwpError>
