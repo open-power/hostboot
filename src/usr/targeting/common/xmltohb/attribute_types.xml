@@ -23252,6 +23252,41 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
+    <id>DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+    <description>
+        if set to 1, FAPI_ERR records are suppressed from being produced
+        by p9_dump_stop_info.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+    <description>
+        if set to 1, p9_dump_stop_info output will be written to error logs.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>PROC_FABRIC_CORE_FLOOR_RATIO</id>
     <description>
       Processor SMP core floor/nest frequency ratio

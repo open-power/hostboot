@@ -1039,7 +1039,8 @@
     <attribute><id>CP_FILTER_BYPASS</id></attribute>
     <attribute><id>SS_FILTER_BYPASS</id></attribute>
     <attribute><id>IO_FILTER_BYPASS</id></attribute>
-
+    <attribute><id>DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id></attribute>
+    <attribute><id>DUMP_STOP_INFO_ENABLE_ERRORLOG</id></attribute>
 <!-- TODO: RTC 156244 - To be removed -->
     <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
     <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
