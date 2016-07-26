@@ -209,6 +209,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
+    src/build/buildpnor/pnorLayoutFSP.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
     $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
