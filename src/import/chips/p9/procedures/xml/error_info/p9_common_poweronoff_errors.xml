@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_BAD_DOMAIN</rc>
     <description>Invalid domain value passed to p9_pfet_control.</description>
     <ffdc>EX</ffdc>
@@ -37,6 +38,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_BAD_SCOM</rc>
     <description>SCOM request failed.</description>
     <ffdc>EX</ffdc>
@@ -49,6 +51,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_BAD_OP</rc>
     <description>Invalid operation value passed to p9_pfet_control.</description>
     <ffdc>EX</ffdc>
@@ -61,6 +64,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_RAIL_ON</rc>
     <description>Error returned turning PFETs on in p9_pfet_control.</description>
     <ffdc>EX</ffdc>
@@ -69,6 +73,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_RAIL_OFF</rc>
     <description>Error returned turning PFETs off in p9_pfet_control.</description>
     <ffdc>EX</ffdc>
@@ -77,6 +82,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFETLIB_TIMEOUT</rc>
     <description>
         PFET sequencer timed out in p9_pfet_control.
@@ -110,6 +116,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFET_CODE_BAD_MODE</rc>
     <description>Unknown mode passed to p9_pfet_init</description>
     <ffdc>EX</ffdc>
@@ -121,6 +128,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PMPROC_PFET_GET_ATTR</rc>
     <description>p9_pfet_init could not get an attribute.</description>   
     <ffdc>EX</ffdc>
