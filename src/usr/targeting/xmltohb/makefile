@@ -77,13 +77,27 @@ XMLTOHB_COMMON_TARGET_SOURCES           = target_types.xml
 XMLTOHB_HB_ATTRIBUTE_SOURCES            = attribute_types_hb.xml
 XMLTOHB_HB_TARGET_SOURCES               = target_types_hb.xml
 
+# attribute files that are only included in openpower build.
+XMLTOHB_OPENPOWER_ATTRIBUTE_SOURCES     = attribute_types_openpower.xml
+XMLTOHB_OPENPOWER_TARGET_SOURCES        = target_types_openpower.xml
+
 XMLTOHB_MERGED_COMMON_TARGET_SOURCES    = target_types_merged.xml
+
+# The customize target file combines all targetTypeExtension files before
+# combining them with the common target_types.xml file. To include a new file,
+# just add it to the XMLTOHB_TARGET_SOURCES
+XMLTOHB_CUSTOMIZE_TARGET_SOURCES        = target_types_customize.xml
+
+XMLTOHB_TARGET_SOURCES += target_types_hb.xml
+XMLTOHB_TARGET_SOURCES += $(if $(CONFIG_INCLUDE_OPENPOWER_XML), target_types_openpower.xml)
 
 #Define XMLTOHB_GENERIC_SOURCES
 XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_COMMON_ATTRIBUTE_SOURCES}
 XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_HB_ATTRIBUTE_SOURCES}
+XMLTOHB_GENERIC_SOURCES += $(if $(CONFIG_OPENPOWER_ONLY),${XMLTOHB_OPENPOWER_ATTRIBUTE_SOURCES})
 XMLTOHB_GENERIC_SOURCES += ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}
 XMLTOHB_GENERIC_SOURCES += ${XMLTOHB_HB_TARGET_SOURCES}
+XMLTOHB_GENERIC_SOURCES += $(if $(CONFIG_OPENPOWER_ONLY),${XMLTOHB_OPENPOWER_TARGET_SOURCES})
 
 TEMP_DEFAULT_SOURCES                    = tempdefaults.xml
 
@@ -150,11 +164,16 @@ include ${ROOTPATH}/config.mk
 ${EXTRA_PARTS}: ${IMGDIR}/% : ${GENDIR}/%
 	cp -f $^ $@
 
+
 # create merged target xml
+${GENDIR}/${XMLTOHB_CUSTOMIZE_TARGET_SOURCES}: \
+				${XMLTOHB_MERGE_SCRIPT} ${XMLTOHB_TARGET_SOURCES}
+		$< $(wordlist 2,$(words $^),$^) > $@
+
 ${GENDIR}/${XMLTOHB_MERGED_COMMON_TARGET_SOURCES}: \
-        ${XMLTOHB_TARGET_MERGE_SCRIPT} ${XMLTOHB_COMMON_TARGET_SOURCES} ${XMLTOHB_HB_TARGET_SOURCES}
-	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_HB_TARGET_SOURCES}) \
-       $(addprefix --common=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_COMMON_TARGET_SOURCES}) > $@
+		${XMLTOHB_TARGET_MERGE_SCRIPT} ${XMLTOHB_COMMON_TARGET_SOURCES} ${GENDIR}/${XMLTOHB_CUSTOMIZE_TARGET_SOURCES}
+	./${XMLTOHB_TARGET_MERGE_SCRIPT} $(addprefix --hb=,${GENDIR}/${XMLTOHB_CUSTOMIZE_TARGET_SOURCES}) \
+		$(addprefix --common=,${COMMON_TARGETING_REL_PATH}/${XMLTOHB_COMMON_TARGET_SOURCES}) > $@
 
 # merge all FAPI attribute files into one
 ${GENDIR}/${XMLTOHB_FAPI_XML}: ${XMLTOHB_MERGE_SCRIPT} \
