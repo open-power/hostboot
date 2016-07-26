@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_BLOCK_WAKEUP_INTR_OP</rc>
     <description>Unknown operation passed to p9_block_wakeup_intr
     </description>
@@ -33,6 +34,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
    <hwpError>
+    <sbeError/>
     <rc>RC_BLOCK_WAKEUP_INTR_CHECK_FAIL</rc>
     <description>Test of p9_block_wakeup_intr failed.  Note: this is NOT
     a production error definition; used by test infrastructure.
