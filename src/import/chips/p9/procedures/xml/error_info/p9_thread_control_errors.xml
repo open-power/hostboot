@@ -27,6 +27,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_SRESET_PRE_FAIL</rc>
     <description>SReset command precondition not met: Not all threads are running.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -39,6 +40,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_SRESET_FAIL</rc>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
@@ -61,6 +63,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_START_PRE_NOMAINT</rc>
     <description>Start command precondition not met: RAS STAT Maintenance bit is not set.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -73,6 +76,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_START_FAIL</rc>
     <description>Start command failed: RAS STAT instruction completed bit was not set after start command.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -85,6 +89,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING</rc>
     <description>Stop command precondition not met: Not all threads are running.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -97,6 +102,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_STOP_FAIL</rc>
     <description>Stop command issued to core PC, but RAS STAT maintenance bit is not set.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -109,6 +115,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_STEP_PRE_NOTSTOPPING</rc>
     <description>Step command precondition not met: Not all threads are stopped.</description>
     <ffdc>CORE_TARGET</ffdc>
@@ -121,6 +128,7 @@
 
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_STEP_FAIL</rc>
     <description>Step command issued to core PC, but RAS STAT run bit is still set.</description>
     <ffdc>CORE_TARGET</ffdc>

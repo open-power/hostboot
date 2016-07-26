@@ -26,6 +26,7 @@
 <hwpErrors>
     <!-- ******************************************************************* -->
     <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCB_PUT_NO_DATA_ERROR</rc>
     <description>
     No data passed for Put operation.
@@ -33,6 +34,7 @@
     </hwpError>
     <!-- ******************************************************************* -->
     <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR</rc>
     <description>
     Indicates that a timeout occured waiting for a push queue to be non-full

@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SBE_NPLL_INITF_UNSUPPORTED_BUCKET</rc>
     <description>Unsupported Nest PLL bucket value</description>
     <ffdc>TARGET</ffdc>

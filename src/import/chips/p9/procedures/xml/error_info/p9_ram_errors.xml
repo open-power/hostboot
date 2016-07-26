@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SPR_NAME_MAP_INIT_ERR</rc>
     <description>
       SPR name map is not empty while try to initialize
@@ -37,6 +38,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_SPR_NAME_MAP_ACCESS_ERR</rc>
     <description>
       Illegal SPR name or read/write mode access
@@ -49,6 +51,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_NOT_SETUP_ERR</rc>
     <description>
       RAM is not setup as active before doing ram or cleanup
@@ -60,6 +63,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_THREAD_NOT_STOP_ERR</rc>
     <description>
       The thread to perform ramming is not stopped
@@ -72,6 +76,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_THREAD_INACTIVE_ERR</rc>
     <description>
       The thread to perform ramming is not active
@@ -84,6 +89,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_STATUS_IN_RECOVERY_ERR</rc>
     <description>
       Attempt to perform ramming during recovery
@@ -95,6 +101,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_STATUS_EXCEPTION_ERR</rc>
     <description>
       Exception or interrupt happened during ramming
@@ -106,6 +113,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_STATUS_POLL_THRESHOLD_ERR</rc>
     <description>
       Polling for ram done reached threshold
@@ -117,6 +125,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_RAM_INVALID_REG_TYPE_ACCESS_ERR</rc>
     <description>
       Illegal reg type access

@@ -29,52 +29,61 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ARY_ERR</rc>
     <description>ary_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_ARY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_NSL_ERR</rc>
     <description>nsl_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_NSL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SL_ERR</rc>
     <description>sl_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_SL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CPLT_NOT_ALIGNED_ERR</rc>
     <description>Chiplet not aligned</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CPLT_OPCG_DONE_NOT_SET_ERR</rc>
     <description>Chiplet OPCG_DONE not set after clock start/stop command</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_NEST_ARY_ERR</rc>
     <description>ary_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_ARY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_NEST_NSL_ERR</rc>
     <description>nsl_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_NSL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_NEST_SL_ERR</rc>
     <description>sl_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_SL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_READ_ALL_CHECKSTOP_ERR</rc>
     <description>Read and or all Checkstop error</description>
     <ffdc>READ_ALL_CHECKSTOP</ffdc>

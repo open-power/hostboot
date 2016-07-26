@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_ADU_COHERENT_UTILS_INVALID_ARGS</rc>
     <description>
       Procedure: p9_adu_coherent_utils
@@ -35,6 +36,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_ADU_COHERENT_UTILS_RESET_ERR</rc>
     <description>
       Procedure: p9_adu_coherent_utils
@@ -44,6 +46,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P9_ADU_FBC_NOT_INITIALIZED_ERR</rc>
     <description>
       Procedure: p9_adu_coherent_utils
@@ -55,6 +58,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc> RC_P9_ADU_STATUS_REG_ERR</rc>
     <description>
       Procedure: p9_adu_coherent_utils
