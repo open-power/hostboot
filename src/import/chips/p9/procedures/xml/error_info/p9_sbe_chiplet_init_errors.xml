@@ -29,6 +29,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_CHECKSTOP_ERR</rc>
     <description>Checkstop error after scan0</description>
     <ffdc>READ_CHECKSTOP</ffdc>
