@@ -12,16 +12,11 @@
     }
     try {
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-            ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
-            ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
-            ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x255000
+            ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x229000
+            ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x1E1000
+            ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x2B9000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
-#Write the PNOR MMIO addr into Scratch 2, 0x283A
-($hb_masterproc).proc_lbus_map.write 0x28e8 0xFFF78000  #HB PNOR addr
-foreach $cc in (get-object-list p9_proc) {
-    ($cc).proc_lbus_map.write 0x28e8 0xFFF78000
-}
 
 # Loop through every processor chip
 foreach $cc in (get-object-list p9_proc) {

@@ -54,7 +54,6 @@ enum
     /** Real number of bytes required to read 1 logical page */
     PAGESIZE_PLUS_ECC = ((PAGESIZE * 9)/8),  // 8B data + 1B of ECC
     SUPPORTED_FFS_VERSION = 0x1,  /**< Supported FFS Version */
-    TOC_SIZE = 0x8000,
 };
 
 

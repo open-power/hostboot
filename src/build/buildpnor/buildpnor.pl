@@ -201,70 +201,22 @@ sub loadPnorLayout
     #parse the input XML file
     my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
     my $xml = $xs->XMLin($i_pnorFile);
-
-    #Iterate over the <section> elements.
-    foreach my $sectionEl (@{$xml->{section}})
-    {
-        my $description = $sectionEl->{description}[0];
-        my $eyeCatch = $sectionEl->{eyeCatch}[0];
-        my $physicalOffset = $sectionEl->{physicalOffset}[0];
-        my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
-        my $side = $sectionEl->{side}[0];
-        my $testonly = $sectionEl->{testonly}[0];
-        my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
-        my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
-        my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
-        my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
-        my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
-        if (($testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
-        {
-            next;
-        }
-
-        trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
-
-        $physicalOffset = getNumber($physicalOffset);
-        $physicalRegionSize = getNumber($physicalRegionSize);
-
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
-
-        #store the physical offsets of each section in a hash, so, it is easy
-        #to search physicalOffsets based on the name of the section (eyecatch)
-        if ($side eq "sideless")
-        {
-            foreach my $metadata (@{$xml->{metadata}})
-            {
-                foreach my $sides (@{$metadata->{side}})
-                {
-                    $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
-                }
-            }
-        }
-        else
-        {
-            $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
-        }
-    }
+    my $imageSize = 0;
+    my $chipSize = 0;
     # Save the metadata - imageSize, blockSize, toc Information etc.
     foreach my $metadataEl (@{$xml->{metadata}})
     {
         # Get meta data
-        my $imageSize   = $metadataEl->{imageSize}[0];
+        $imageSize   = $metadataEl->{imageSize}[0];
+        $chipSize    = $metadataEl->{chipSize}[0];
         my $blockSize   = $metadataEl->{blockSize}[0];
         my $tocSize     = $metadataEl->{tocSize}[0];
         my $arrangement = $metadataEl->{arrangement}[0];
+        $chipSize       = getNumber($chipSize);
         $imageSize      = getNumber($imageSize);
         $blockSize      = getNumber($blockSize);
         $tocSize        = getNumber($tocSize);
+        $$i_pnorLayoutRef{metadata}{chipSize}    = $chipSize;
         $$i_pnorLayoutRef{metadata}{imageSize}   = $imageSize;
         $$i_pnorLayoutRef{metadata}{blockSize}   = $blockSize;
         $$i_pnorLayoutRef{metadata}{tocSize}     = $tocSize;
@@ -280,7 +232,8 @@ sub loadPnorLayout
         #
         #Arrangement A-B-D means that the layout had Primary TOC (A), then backup TOC (B), then Data (pnor section information).
         #Similaryly, arrangement A-D-B means that primary toc is followed by the data (section information) and then
-        #the backup TOC.
+        #the backup TOC. In order for the parsing tools to find the TOC, the TOCs must be at TOP_OF_FLASH-(2) * TOC_SIZE
+        # and the other at 0x0 of flash memory.
         if ($arrangement eq "A-B-D")
         {
             my $count = 0;
@@ -301,18 +254,22 @@ sub loadPnorLayout
         }
         elsif ($arrangement eq "A-D-B")
         {
+            my $count = 0;
             foreach my $side (@{$metadataEl->{side}})
             {
                 my $golden     = (exists $side->{golden} ? "yes" : "no");
                 my $sideId     = $side->{id}[0];
-                my $hbbAddr    = $$i_physicalOffsets{side}{$sideId}{eyecatch}{"HBB"};
-                my $primaryTOC = align_down($hbbAddr, $sideSize);
-                my $backupTOC  = align_up($hbbAddr, $sideSize) - $tocSize;
+
+                #Leave 1 block sized pad because the top addr of flash special
+                # and simics broke we had the toc touching it
+                my $primaryTOC = ($sideSize)*($count + 1) - ($tocSize + $blockSize) ;
+                my $backupTOC  = ($sideSize)*($count);
 
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
-                trace(1, "A-D-B: side:$sideId HBB:$hbbAddr, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+                $count = $count + 1;
+                trace(1, "A-D-B: side:$sideId, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
             }
         }
         else
@@ -320,6 +277,65 @@ sub loadPnorLayout
             trace(0, "Arrangement:$arrangement is not supported");
             exit(1);
         }
+
+        #Iterate over the <section> elements.
+        foreach my $sectionEl (@{$xml->{section}})
+        {
+            my $description = $sectionEl->{description}[0];
+            my $eyeCatch = $sectionEl->{eyeCatch}[0];
+            my $physicalOffset = $sectionEl->{physicalOffset}[0];
+            my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
+            my $side = $sectionEl->{side}[0];
+            my $testonly = $sectionEl->{testonly}[0];
+            my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
+            my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
+            my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
+            my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
+            my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
+            if (($testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
+            {
+                next;
+            }
+
+            trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
+
+            $physicalOffset = getNumber($physicalOffset);
+            $physicalRegionSize = getNumber($physicalRegionSize);
+
+            if($physicalRegionSize  + $physicalOffset > $imageSize)
+            {
+                die "ERROR: $this_func: Image size ($imageSize) smaller than $eyeCatch's offset + $eyeCatch's size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
+            }
+
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
+
+            #store the physical offsets of each section in a hash, so, it is easy
+            #to search physicalOffsets based on the name of the section (eyecatch)
+            if ($side eq "sideless")
+            {
+                foreach my $metadata (@{$xml->{metadata}})
+                {
+                    foreach my $sides (@{$metadata->{side}})
+                    {
+                        $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
+                    }
+                }
+            }
+            else
+            {
+                $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
+            }
+        }
+
     }
     return 0;
 }
@@ -339,6 +355,7 @@ sub createPnorImg
     my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
 
     #Get size of image in blocks
+    my $chipSize = $$i_pnorLayoutRef{metadata}{chipSize};
     my $imageSize = $$i_pnorLayoutRef{metadata}{imageSize};
     my $blockCount = $imageSize/$blockSize;
     if ($blockCount != int($blockCount))
@@ -347,8 +364,8 @@ sub createPnorImg
 
     }
     #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
-    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
+    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $chipSize --block $blockSize --force");
+    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $chipSize --block $blockSize --force");
     die "ERROR: $this_func: Call to creating image failed. Aborting!" if($?);
 }
 
@@ -735,6 +752,8 @@ sub fillPnorImage
     my $key;
     my $other_side = getOtherSide($side);
 
+    my $imageSize =  $$i_pnorLayoutRef{metadata}{imageSize};
+
     trace(1, "fillPnorImage:: $offset");
     #key is the physical offset into the file, however don't need to sort
     #since FFS allows populating partitions in any order
@@ -769,7 +788,7 @@ sub fillPnorImage
             }
             trace(5, "$this_func: populating section $sideInfo:$eyeCatch, filename=$inputFile");
             #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
-            system("$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000");
+            system("$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer $imageSize");
             die "ERROR: $this_func: Call to fcp adding data to partition $eyeCatch failed. Aborting!" if($?);
          }
      }

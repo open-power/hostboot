@@ -107,6 +107,8 @@ enum
 {
     INVALID_OFFSET = 0xFFFFFFF,  // Invalid primary or alternate TOC
     BACKUP_TOC_OFFSET = 0x8000,
+    TOC_SIZE = 0x8000,
+    TOC_OFFSET_FROM_TOP_OF_FLASH = 0x8FFF,
     INVALID_FLASH_OFFSET = 0xFFFFFFFF,
 };
 

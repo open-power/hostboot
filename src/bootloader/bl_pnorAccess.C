@@ -40,9 +40,10 @@ extern const char* cv_EYECATCHER[];
          also returns a SectionData_t struct if the toc was valid
 */
 void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
-                            uint32_t & o_errCode,
+                            uint32_t& o_errCode,
                             PNOR::SectionData_t * o_TOC,
-                            uint64_t i_baseAddr)
+                            uint64_t& o_pnorStart,
+                            uint64_t i_pnorEnd)
 {
     do
     {
@@ -56,6 +57,10 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
 
         //make sure that the buffer is not null
         PNOR::checkForNullBuffer(i_tocBuffer, o_errCode, l_ffs_hdr);
+
+        //Subtract the size of the pnor from the end address to find the start
+        o_pnorStart = i_pnorEnd -
+                        (l_ffs_hdr->block_size * l_ffs_hdr->block_count) + 1;
 
         if(o_errCode != PNOR::NO_ERROR)
         {
@@ -109,8 +114,9 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
     } while(0);
 }
 
-void bl_pnorAccess::findTOC(uint64_t i_pnorBase, PNOR::SectionData_t * o_TOC,
-                            uint32_t& o_errCode,  uint8_t& o_tocUsed)
+void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
+                            uint32_t& o_errCode,  uint8_t& o_tocUsed,
+                            uint64_t& o_pnorStart)
 {
     uint8_t *l_tocBuffer = Bootloader::g_blScratchSpace;
     do
@@ -119,14 +125,15 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorBase, PNOR::SectionData_t * o_TOC,
         o_errCode = 0;
         o_tocUsed = 0;
         //Copy Table of Contents from PNOR flash to a local buffer
-        Bootloader::handleMMIO(i_pnorBase,
+        //The first TOC is 2 TOC sizes back from the end of the flash (+ 1)
+        Bootloader::handleMMIO(i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
                     (PNOR::TOC_SIZE),
                     Bootloader::BYTESIZE);
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_HANDLEMMIO_RTN);
 
-        readTOC(l_tocBuffer, o_errCode, o_TOC, i_pnorBase);
+        readTOC(l_tocBuffer, o_errCode, o_TOC, o_pnorStart, i_pnorEnd);
 
         if(o_errCode == PNOR::NO_ERROR)
         {
@@ -136,13 +143,14 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorBase, PNOR::SectionData_t * o_TOC,
         }
         else
         {
-            Bootloader::handleMMIO(i_pnorBase + PNOR::BACKUP_TOC_OFFSET,
+            //If the first toc was invalid, look for the backup in the start
+            Bootloader::handleMMIO(o_pnorStart,
                               reinterpret_cast<uint64_t>(l_tocBuffer),
                               (PNOR::TOC_SIZE),
                               Bootloader::BYTESIZE);
 
             o_errCode = 0;
-            readTOC(l_tocBuffer, o_errCode, o_TOC, i_pnorBase);
+            readTOC(l_tocBuffer, o_errCode, o_TOC, o_pnorStart, i_pnorEnd);
             if(o_errCode == PNOR::NO_ERROR)
             {
                 o_tocUsed = 1;
@@ -158,17 +166,19 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorBase, PNOR::SectionData_t * o_TOC,
 /**
  * @brief Get the hostboot base image
  */
-void bl_pnorAccess::getHBBSection(uint64_t i_pnorStart,
+void bl_pnorAccess::getHBBSection(uint64_t i_pnorEnd,
                                   PNOR::SectionData_t& o_hbbSection,
                                   uint32_t& o_errCode,
-                                  uint8_t& o_tocUsed)
+                                  uint8_t& o_tocUsed,
+                                  uint64_t& o_pnorStart)
 {
     BOOTLOADER_TRACE(BTLDR_TRC_PA_GETHBBSECTION_START);
     do
     {
         PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
 
-        findTOC(i_pnorStart, l_TOC, o_errCode, o_tocUsed);
+        findTOC(i_pnorEnd, l_TOC, o_errCode, o_tocUsed, o_pnorStart);
+
         if(o_errCode != PNOR::NO_ERROR)
         {
             BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_GETHBBSECTION_FINDTOC_ERR);

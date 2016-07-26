@@ -49,7 +49,7 @@ class bl_pnorAccess
 /**
  * @brief Get the hostboot base image
  *
- * @param[in] i_pnorStart       MMIO address to access the start of pnor flash
+ * @param[in] i_pnorEnd         MMIO address to access the end of pnor flash
  *
  * @param[out] o_hbbSection     Struct that holds information about the
  *                              Hostboot Base Image Section
@@ -58,12 +58,15 @@ class bl_pnorAccess
  *
  * @param[out] o_tocUsed        Tells you which table of contents was used
  *
+ * @param[out] o_pnorStart      The MMIO address of the start of PNOR
+ *
  * @return void
  */
-static void getHBBSection(uint64_t i_pnorStart,
+static void getHBBSection(uint64_t i_pnorEnd,
                           PNOR::SectionData_t& o_hbbSection,
                           uint32_t& o_errCode,
-                          uint8_t& o_tocUsed);
+                          uint8_t& o_tocUsed,
+                          uint64_t& o_pnorStart);
 
   private:
 /**
@@ -75,18 +78,20 @@ static void getHBBSection(uint64_t i_pnorStart,
  *
  * @param[out] o_TOC          Array of section data describing contents of pnor
  *
- * @param[in] i_baseAddr      MMIO address to access the start of pnor flash
+ * @param[out] o_pnorStart   The MMIO address of the start of PNOR
+ *
+ * @param[out] i_pnorEnd     The MMIO address of the end of PNOR
  *
  * @return void
  */
 static void readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],  uint32_t & o_errCode,
-                    PNOR::SectionData_t * o_TOC, uint64_t i_baseAddr);
+                    PNOR::SectionData_t * o_TOC, uint64_t& o_pnorStart, uint64_t i_pnorEnd);
 
 /**
  * @brief Find a valid TOC within specified side of pnor flash
           side is determined by the base mmio address passed in
  *
- * @param[in] i_pnorBase     MMIO address to access the start of pnor flash
+ * @param[in] i_pnorEnd      MMIO address to access the end of pnor flash
  *
  * @param[out] o_TOC         Array of section data describing contents of pnor
  *
@@ -94,10 +99,12 @@ static void readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],  uint32_t & o_errCode,
  *
  * @param[out] o_tocUsed     Tells you which table of contents was used
  *
+ * @param[out] o_pnorStart   The MMIO address of the start of PNOR
+ *
  * @return void
  */
-static void findTOC(uint64_t i_pnorBase, PNOR::SectionData_t * o_TOC,
-                    uint32_t& o_errCode, uint8_t& o_tocUsed);
+static void findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
+                    uint32_t& o_errCode, uint8_t& o_tocUsed, uint64_t& o_pnorStart);
 
 };
 
