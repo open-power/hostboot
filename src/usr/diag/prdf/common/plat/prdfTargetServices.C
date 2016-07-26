@@ -515,12 +515,16 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         { TYPE_PSI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
 
         { TYPE_MCBIST, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCBIST, TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCBIST, TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCS,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCS,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCS,    TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MCS,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MCA,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
@@ -765,6 +769,30 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                         return (trgtPos == relPec) && (i_connPos == relPhb);
                     } );
         }
+        else if ( TYPE_MCBIST == trgtType && TYPE_MCS == i_connType )
+        {
+            // i_connPos is position relative to MCBIST (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mcbPos = getTargetPosition(t);
+                        return (trgtPos   == (mcbPos / MAX_MCS_PER_MCBIST)) &&
+                               (i_connPos == (mcbPos % MAX_MCS_PER_MCBIST));
+                    } );
+
+        }
+        else if ( TYPE_MCBIST == trgtType && TYPE_MCA == i_connType )
+        {
+            // i_connPos is position relative to MCBIST (0-3)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mcbPos = getTargetPosition(t);
+                        return (trgtPos   == (mcbPos / MAX_MCA_PER_MCBIST)) &&
+                               (i_connPos == (mcbPos % MAX_MCA_PER_MCBIST));
+                    } );
+
+        }
         else if ( TYPE_MCS == trgtType && TYPE_MCA == i_connType )
         {
             // i_connPos is position relative to MCS (0-1)
@@ -772,8 +800,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                     [&](const TargetHandle_t & t)
                     {
                         uint32_t mcaPos = getTargetPosition(t);
-                        return (trgtPos   == (mcaPos / MAX_EC_PER_EX)) &&
-                               (i_connPos == (mcaPos % MAX_EC_PER_EX));
+                        return (trgtPos   == (mcaPos / MAX_MCA_PER_MCS)) &&
+                               (i_connPos == (mcaPos % MAX_MCA_PER_MCS));
                     } );
         }
         else if ( TYPE_MCS == trgtType && TYPE_MEMBUF == i_connType )
