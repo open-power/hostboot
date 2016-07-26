@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCBINIT_BAD_MODE</rc>
     <description>Unknown mode passed to p9_pm_ocb_init.
     </description>
@@ -33,6 +34,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCBINIT_BAD_Q_LENGTH_PARM</rc>
     <description>Bad Queue Length Passed to p9_pm_ocb_init.
     </description>
