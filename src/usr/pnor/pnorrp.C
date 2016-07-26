@@ -1314,8 +1314,14 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
              id < PNOR::NUM_SECTIONS;
              id = (PNOR::SectionId) (id + 1) )
         {
+            // TODO RTC: 156118 Remove the HBI size workaround
+            size_t extra = 0;
+#ifdef CONFIG_SECUREBOOT
+            extra = (id==PNOR::HB_EXT_CODE) ? PAGE_SIZE : 0;
+#endif
             if( (i_vaddr >= iv_TOC[id].virtAddr)
-                && (i_vaddr < (iv_TOC[id].virtAddr + iv_TOC[id].size)) )
+                && (i_vaddr < (iv_TOC[id].virtAddr + iv_TOC[id].size
+                    + extra)) )
             {
                 o_id = iv_TOC[id].id;
                 break;

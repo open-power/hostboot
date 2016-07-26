@@ -545,9 +545,15 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     else
                     {
                         // Need to set permissions to R/W
+
+                        // TODO RTC: 156118 Remove the HBI size workaround
+                        size_t extra = 0;
+#ifdef CONFIG_SECUREBOOT
+                        extra = (secId==PNOR::HB_EXT_CODE) ? PAGESIZE : 0;
+#endif
                         int rc = mm_set_permission(
                                             (void*)o_TOC[secId].virtAddr,
-                                            o_TOC[secId].size,
+                                            o_TOC[secId].size + extra,
                                             WRITABLE | WRITE_TRACKED);
                         if (rc)
                         {
