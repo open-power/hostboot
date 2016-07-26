@@ -29,22 +29,26 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_SCAN0_DONE_POLL_THRESHOLD_ERR</rc>
     <description>Timeout waiting for scan0 to complete , loop count expired that polls for OPCG_DONE</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_ARRAYINIT_POLL_THRESHOLD_ERR</rc>
     <description>Polling for OPCG_DONE for arrayInit reached threshold , count expired.</description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
     <description>SRAM abist done bit is not set</description>
     <ffdc>READ_ABIST_DONE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_EDRAM_ABIST_DONE_BIT_ERR</rc>
     <description>EDRAM abist done bit is not set</description>
     <ffdc>READ_ABIST_DONE</ffdc>
