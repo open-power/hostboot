@@ -46,12 +46,14 @@
 #include    <arch/pirformat.H>
 
 //  targeting support
+#include    <targeting/common/target.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
 //  fapi support
 #include    <fapi2.H>
 #include    <fapi2_target.H>
+#include    <fapi2_hw_access.H>
 #include    <plat_hwp_invoker.H>
 #include    <istep_reasoncodes.H>
 #include    <p9_cpu_special_wakeup.H>
@@ -417,9 +419,44 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         if ((!PNOR::usingL3Cache()) &&
             (!getCacheDeconfig(l_masterCoreID)))
         {
-            TRACFCOMP( g_fapiTd,
-                       "activate_threads: Extending cache to 8MB" );
-            mm_extend(MM_EXTEND_FULL_CACHE);
+            // Get EX
+            TARGETING::Target* l_ex =
+                (TARGETING::Target*)getExChiplet(l_masterCore);
+            assert(l_ex != NULL);
+
+            // Check SCOM 0x1001181B for reduced cache mode
+            uint64_t l_reducedCacheMode = 0;
+            size_t l_size = sizeof(l_reducedCacheMode);
+            l_errl = deviceRead(l_ex,
+                                reinterpret_cast<void*>(&l_reducedCacheMode),
+                                l_size,
+                                DEVICE_SCOM_ADDRESS(
+                                    EX_L3_EDRAM_BANK_FAIL_SCOM_RD));
+
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiTd,
+                           ERR_MRK"activate_threads: Could not get "
+                           "SCOM 0x%.8X, reason code 0x%.8X, EX HUID=%.8X",
+                           EX_L3_EDRAM_BANK_FAIL_SCOM_RD,
+                           l_errl->reasonCode(),
+                           TARGETING::get_huid(l_ex) );
+                break;
+            }
+
+            if(l_reducedCacheMode)
+            {
+                TRACFCOMP( g_fapiTd,
+                           "activate_threads: Extending cache to 8MB" );
+                mm_extend(MM_EXTEND_REDUCED_CACHE);
+            }
+            else
+            {
+                TRACFCOMP( g_fapiTd,
+                           "activate_threads: Extending cache to 10MB" );
+                mm_extend(MM_EXTEND_FULL_CACHE);
+            }
+
         }
 
     } while(0);

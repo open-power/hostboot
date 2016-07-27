@@ -517,7 +517,7 @@ namespace KernelMisc
         return 0;
     }
 
-    int expand_full_cache()
+    int expand_full_cache(uint64_t i_expandSize)
     {
         static bool executed = false;
 
@@ -538,8 +538,7 @@ namespace KernelMisc
             case CORE_POWER9_CUMULUS:
                 startAddr = reinterpret_cast<uint64_t*>
                                          ( VmmManager::INITIAL_MEM_SIZE ) ;
-                endAddr =
-                    reinterpret_cast<uint64_t*>(VMM_BASE_BLOCK_SIZE);
+                endAddr = reinterpret_cast<uint64_t*>(i_expandSize);
                 break;
 
             default:
@@ -565,7 +564,9 @@ namespace KernelMisc
         executed = true;
 
         KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                         KernelMemState::FULL_CACHE);
+                                         (i_expandSize == VMM_BASE_BLOCK_SIZE)
+                                         ? KernelMemState::FULL_CACHE
+                                         : KernelMemState::REDUCED_CACHE);
 
         return 0;
     }

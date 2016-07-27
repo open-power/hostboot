@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,7 +44,8 @@ namespace KernelMemState
      - 32:63 - Size of active Hostboot memory in MB
      - - 0 = Hostboot is not ready yet.
      - - 4 = Hostboot is using half a cache
-     - - 8 = Hostboot is using the full cache
+     - - 8 = Hostboot is using reduced cache
+     - - 10 = Hostboot is using the full cache
      - - 32 = Hostboot is using 32 MB of mainstore*/
 
 
@@ -58,7 +61,8 @@ namespace KernelMemState
     {
           NO_MEM          =  0x0,
           HALF_CACHE      =  0x00000004,
-          FULL_CACHE      =  0x00000008,
+          REDUCED_CACHE   =  0x00000008,
+          FULL_CACHE      =  0x0000000A,
           MS_32MEG        =  0x00000020,
           PRE_SECURE_BOOT =  0x000000FF,
     };

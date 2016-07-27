@@ -896,8 +896,8 @@ namespace Systemcalls
      * Extends the initial footprint of the image further into memory.
      *
      * Depending on the syscall parameter, we will either switch from 4MB
-     * to 8MB cache-contained mode or expand into 32MB of space using real
-     * system memory.
+     * to a cache-contained mode (either full 10MB or reduced 8MB) or will
+     * expand into 32MB of space using real system memory.
 
      * @param[in] t: The task used to extend Memory
      */
@@ -911,8 +911,13 @@ namespace Systemcalls
                 TASK_SETRTN(t, KernelMisc::expand_half_cache());
                 break;
 
+            case MM_EXTEND_REDUCED_CACHE:
+                TASK_SETRTN(t, KernelMisc::expand_full_cache(8*MEGABYTE));
+                break;
+
             case MM_EXTEND_FULL_CACHE:
-                TASK_SETRTN(t, KernelMisc::expand_full_cache());
+                TASK_SETRTN(t,
+                            KernelMisc::expand_full_cache(VMM_BASE_BLOCK_SIZE));
                 break;
 
             case MM_EXTEND_REAL_MEMORY:
