@@ -111,8 +111,10 @@ void* call_host_load_payload (void *io_pArgs)
         // Get Payload base/entry from attributes
         uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
-                   "call_load_payload: Payload Base: 0x%08x, Base:0x%08x",
+                   "call_load_payload: Payload Base: 0x%08x MB, Base:0x%08x",
                    payloadBase, (payloadBase * MEGABYTE) );
+
+        payloadBase = payloadBase * MEGABYTE;
 
         // Load payload data in PHYP mode or in Sapphire mode
         if(is_sapphire_load() || is_phyp_load())
@@ -180,7 +182,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             originalPayloadSize,
             i_physAddr );
 
-    uint64_t loadAddr = NULL;
+    void * loadAddr = NULL;
     // Use simics optimization if we are running under simics which has very
     // slow PNOR access.
     if ( Util::isSimicsRunning()  )
@@ -199,9 +201,8 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         // Map in the physical memory we are loading into.
         // If we are not xz compressed, the uncompressedSize
         // is equal to the original size.
-        loadAddr = reinterpret_cast<uint64_t>(
-                     mm_block_map( reinterpret_cast<void*>( i_physAddr ),
-                                   uncompressedPayloadSize ) );
+        loadAddr = mm_block_map( reinterpret_cast<void*>( i_physAddr ),
+                                   uncompressedPayloadSize );
 
         // Print out inital progress bar.
 #ifdef CONFIG_CONSOLE
@@ -220,7 +221,8 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             const uint32_t BLOCK_SIZE = 4096;
             for ( uint32_t i = 0; i < originalPayloadSize; i += BLOCK_SIZE )
             {
-                memcpy( reinterpret_cast<void*>( loadAddr + i ),
+                memcpy( reinterpret_cast<void*>( 
+                          reinterpret_cast<uint64_t>(loadAddr) + i ),
                         reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
                         std::min( originalPayloadSize - i, BLOCK_SIZE ) );
 #ifdef CONFIG_CONSOLE
@@ -304,6 +306,26 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
 
     }
 
+    int rc = 0;
+    rc = mm_block_unmap(reinterpret_cast<void *>(loadAddr));
+    if(rc)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                 "load_pnor_section: mm_block_unmap returned 1");
+
+        /*@
+         * @errortype
+         * @reasoncode      fapi::RC_MM_UNMAP_ERR
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        fapi::MOD_START_XZ_PAYLOAD
+         * @devdesc         mm_block_unmap returned incorrectly with 0
+         * @custdesc        Error unmapping memory section
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      fapi::MOD_START_XZ_PAYLOAD,
+                                      fapi::RC_MM_UNMAP_ERR,
+                                      0,0,0);
+    }
     return err;
 }
 

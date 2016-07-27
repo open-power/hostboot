@@ -431,6 +431,28 @@ const char* EntityPath::pathElementTypeAsString(
             return "MFREFCLKENDPT";
         case TYPE_TPM:
             return "TPM";
+        case TYPE_SP:
+            return "SP";
+        case TYPE_UART:
+            return "UART";
+        case TYPE_PS:
+            return "PS";
+        case TYPE_FAN:
+            return "FAN";
+        case TYPE_VRM:
+            return "VRM";
+        case TYPE_USB:
+            return "USB";
+        case TYPE_ETH:
+            return "ETH";
+        case TYPE_PANEL:
+            return "PANEL";
+//        case TYPE_FSI_LINK:
+//            return "FSI-link";
+//        case TYPE_CFAM:
+//            return "CFAM";
+//        case TYPE_ENGINE:
+//            return "Engine";
         default:
             return "Unknown path type";
     }

@@ -895,6 +895,8 @@
     <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id></attribute>
     <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
+    <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
+    <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
 </targetType>
 
 <!-- chip-tpm-cectpm -->
@@ -1224,10 +1226,7 @@
     <attribute><id>NEST_VCS_ID</id></attribute>
     <attribute><id>NEST_VIO_ID</id></attribute>
     <attribute><id>NEST_VDDR_ID</id></attribute>
-
     <attribute><id>MSS_FREQ</id></attribute>
-
-
     <attribute><id>WAIT_N2</id></attribute>
     <attribute><id>WAIT_N1</id></attribute>
     <attribute><id>WAIT_N0</id></attribute>
@@ -1249,6 +1248,7 @@
     <attribute><id>WAIT_N3</id></attribute>
     <attribute><id>PROC_PERV_BNDY_PLL_DATA</id></attribute>
     <attribute><id>DEVICE_ID</id></attribute>
+    <attribute><id>TOD_CPU_DATA</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
@@ -2395,6 +2395,130 @@
         </default>
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+</targetType>
+
+<targetType>
+    <id>uart</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>UART</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>sp</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>CHIP</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>SP</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>bmc</id>
+    <parent>sp</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>SP</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>BMC</default>
+    </attribute>
+    <attribute>
+        <id>HWAS_STATE</id>
+        <default>
+            <field><id>deconfiguredByEid</id><value>0</value></field>
+            <field><id>poweredOn</id><value>1</value></field>
+            <field><id>present</id><value>1</value></field>
+            <field><id>functional</id><value>1</value></field>
+            <field><id>dumpfunctional</id><value>0</value></field>
+            <field><id>specdeconfig</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>power-supply</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>fan</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>FAN</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>vrm</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>VRM</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>usb</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>USB</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>eth</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>ETH</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>panel</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>PANEL</default>
+    </attribute>
 </targetType>
 
 <!-- End p9 sub-units -->

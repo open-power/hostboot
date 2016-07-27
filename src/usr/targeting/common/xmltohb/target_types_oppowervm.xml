@@ -1,0 +1,193 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/target_types_oppowervm.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+<!-- =====================================================================
+     Contains the target definition of attributes that are only available
+     on openpower systems.  This file is only compiled when
+     CONFIG_XML_INCLUDE_OPENPOWER is set to true and is always false on
+     FSP based systems.
+     =====================================================================
+ -->
+
+<targetTypeExtension>
+    <id>base</id>
+    <attribute><id>ORDINAL_ID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>sys-sys-power8</id>
+    <attribute><id>THREAD_COUNT</id></attribute>
+    <attribute><id>SERIAL_NUMBER</id></attribute>
+    <attribute><id>PHYP_SYSTEM_TYPE</id></attribute>
+    <attribute><id>ASCII_VPD_LX_KEYWORD</id></attribute>
+    <attribute><id>IPL_ATTRIBUTES</id></attribute>
+    <attribute><id>PRESERVE_MDC_PARTITION_VPD</id></attribute>
+    <attribute><id>HYPERVISOR_IPL_SIDE</id><default>0</default></attribute>
+    <attribute><id>OS_IPL_MODE</id></attribute>
+    <attribute><id>LMB_SIZE</id></attribute>
+    <attribute><id>MAX_HSL_OPTICONNECT_CONNECTIONS</id></attribute>
+    <attribute><id>HUGE_PAGE_COUNT</id></attribute>
+    <attribute><id>HUGE_PAGE_SIZE</id></attribute>
+    <attribute><id>VLAN_SWITCHES</id></attribute>
+    <attribute><id>VTPM_ENABLED</id></attribute>
+    <attribute><id>HYP_DISPATCH_WHEEL</id></attribute>
+    <attribute><id>SYSTEM_BRAND_NAME</id></attribute>
+    <attribute><id>HYPERVISOR_IPL_DESTINATION</id></attribute>
+    <attribute><id>RAW_MTM</id></attribute>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>chip-processor</id>
+    <attribute><id>ICACHE_LINE_SIZE</id></attribute>
+    <attribute><id>ICACHE_BLOCK_SIZE</id></attribute>
+    <attribute><id>ICACHE_SIZE</id></attribute>
+    <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>DCACHE_LINE_SIZE</id></attribute>
+    <attribute><id>DCACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>DATA_CACHE_SIZE</id></attribute>
+    <attribute><id>DATA_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>L3_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L3_CACHE_SIZE</id></attribute>
+    <attribute><id>TIME_BASE</id></attribute>
+    <attribute><id>TLB_DATA_ENTRIES</id></attribute>
+    <attribute><id>TLB_INSTR_ENTRIES</id></attribute>
+    <attribute><id>TLB_DATA_ASSOC_SETS</id></attribute>
+    <attribute><id>TLB_INSTR_ASSOC_SETS</id></attribute>
+    <attribute><id>TLB_RESERVE_SIZE</id></attribute>
+    <attribute><id>CPU_ATTR</id></attribute>
+    <attribute>
+        <id>PROC_HW_TOPOLOGY</id>
+        <default>0x00000000</default>
+    </attribute>
+    <attribute>
+        <id>SLCA_INDEX</id>
+        <default>0x00000000</default>
+    </attribute>
+    <attribute>
+        <id>SLCA_RID</id>
+        <default>0x00001000</default>
+    </attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>sp</id>
+    <attribute><id>CHIP_VER</id></attribute>
+    <attribute><id>CHIP_ID</id></attribute>
+    <attribute><id>HW_VER</id></attribute>
+    <attribute><id>SW_VER</id></attribute>
+    <attribute><id>ROLE</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>bmc</id>
+    <attribute><id>CHIP_VER</id></attribute>
+    <attribute><id>CHIP_ID</id><default>0</default></attribute>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+    <attribute><id>HW_VER</id></attribute>
+    <attribute><id>SW_VER</id></attribute>
+    <attribute><id>ROLE</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>lcard-dimm</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-pci-power8</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>enc-node-power8</id>
+    <attribute><id>ENLARGED_IO_SLOT_COUNT</id></attribute>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>chip-membuf-centaur</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>uart</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>sp</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>power-supply</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>fan</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>vrm</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>usb</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>eth</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>panel</id>
+    <attribute><id>SLCA_INDEX</id></attribute>
+    <attribute><id>SLCA_RID</id></attribute>
+</targetTypeExtension>
+
+</attributes>

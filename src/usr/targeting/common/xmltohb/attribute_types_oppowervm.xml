@@ -1,0 +1,798 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/attribute_types_oppowervm.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+<!-- =====================================================================
+     Contains the definition of attributes that are only available on
+     openpower systems.  This file is only compiled when
+     CONFIG_XML_INCLUDE_OPENPOWER is set to true and is always false on
+     FSP based systems.
+     =====================================================================
+-->
+
+<attribute>
+    <id>ICACHE_LINE_SIZE</id>
+    <description>Icache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_BLOCK_SIZE</id>
+    <description>ICache Block Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+       </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_SIZE</id>
+    <description>ICache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>32</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_ASSOC_SETS</id>
+    <description>ICache Assoc Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>4</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DCACHE_LINE_SIZE</id>
+    <description>DCache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DCACHE_ASSOC_SETS</id>
+    <description>DCache Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>8</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_LINE_SIZE</id>
+    <description>L2 Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_SIZE</id>
+    <description>L2 Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>512</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_ASSOC_SETS</id>
+    <description>L2 Cache Assoc Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>8</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L3_CACHE_LINE_SIZE</id>
+    <description>L3 Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L3_CACHE_SIZE</id>
+    <description>L3 Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>8192</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+ </attribute>
+
+ <attribute>
+     <id>TIME_BASE</id>
+     <description>Time Base frequency in MHZ</description>
+     <simpleType>
+         <uint32_t>
+            <default>0x800000</default>
+        </uint32_t>
+     </simpleType>
+     <persistency>non-volatile</persistency>
+     <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_DATA_ENTRIES</id>
+    <description>TLB Data Entries</description>
+    <simpleType>
+        <uint32_t>
+            <default>2048</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_DATA_ASSOC_SETS</id>
+    <description>TLB Data Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>4</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_INSTR_ENTRIES</id>
+    <description>TLB Instruction Entries</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_INSTR_ASSOC_SETS</id>
+    <description>TLB Instruction Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_RESERVE_SIZE</id>
+    <description>Reserve Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DATA_CACHE_SIZE</id>
+    <description>Data Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>64</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DATA_CACHE_LINE_SIZE</id>
+    <description>Data Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>THREAD_COUNT</id>
+    <description>Thread Count</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x8</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_HW_TOPOLOGY</id>
+    <description>Hardware topology for HDAT
+        creator:MRW
+        consumer:HDAT
+        firmware notes:
+        Hardware Topology 2 Bytes
+        Byte 1:
+            bit 0-3: Node Id
+            bit 4-7: Socket id inside the node
+            bit 8-11: Proc id inside socket
+            bit 12-15:Hub Id inside proc
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ORDINAL_ID</id>
+    <description>Ordinal ID of a target</description>
+    <simpleType>
+        <uint32_t>
+            <default>0xFFFFFFFF</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>CPU_ATTR</id>
+    <description>CPU Attribute</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x0000001D</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<enumerationType>
+    <id>CHIP_VER</id>
+    <description>Enumeration indicating the chip version</description>
+    <enumerator>
+        <name>DD10</name>
+        <value>0x10</value>
+    </enumerator>
+    <enumerator>
+        <name>DD11</name>
+        <value>0x11</value>
+    </enumerator>
+    <enumerator>
+        <name>DD20</name>
+        <value>0x20</value>
+    </enumerator>
+    <enumerator>
+        <name>DD21</name>
+        <value>0x21</value>
+    </enumerator>
+    <default>DD10</default>
+</enumerationType>
+
+<enumerationType>
+    <id>HW_VER</id>
+    <description>Enumeration indicating the chip HW version</description>
+    <enumerator>
+        <name>FSP_HW_VER</name>
+        <value>0x2</value>
+    </enumerator>
+    <enumerator>
+        <name>BMC_HW_VER</name>
+        <value>0x3</value>
+    </enumerator>
+    <default>BMC_HW_VER</default>
+</enumerationType>
+
+<enumerationType>
+    <id>SW_VER</id>
+    <description>Enumeration indicating the SW version</description>
+    <enumerator>
+        <name>FSP_SW_VER</name>
+        <value>0x1</value>
+    </enumerator>
+    <enumerator>
+        <name>BMC_SW_VER</name>
+        <value>0x2</value>
+    </enumerator>
+    <default>BMC_SW_VER</default>
+</enumerationType>
+
+<enumerationType>
+    <id>ROLE</id>
+    <description>Enumeration indicating the master's FSI type</description>
+    <enumerator>
+        <name>PRIMARY</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>BACKUP</name>
+        <value>0</value>
+    </enumerator>
+    <default>PRIMARY</default>
+</enumerationType>
+
+<attribute>
+    <id>CHIP_VER</id>
+    <description>Attribute indicating the target's chip version</description>
+    <simpleType>
+        <enumeration>
+            <id>CHIP_VER</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>HW_VER</id>
+    <description>Attribute indicating the target's hw version</description>
+    <simpleType>
+        <enumeration>
+            <id>HW_VER</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>SW_VER</id>
+    <description>Attribute indicating the target's software version</description>
+    <simpleType>
+        <enumeration>
+            <id>SW_VER</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>ROLE</id>
+    <description>Attribute indicating the target's role</description>
+    <simpleType>
+        <enumeration>
+            <id>ROLE</id>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+</attribute>
+
+<attribute>
+    <id>PHYP_SYSTEM_TYPE</id>
+    <description>PHYP system type value for habanero
+            and barreleye (0x3015 and 0x3016 respectively).
+            The value is updated in the system xml.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ASCII_VPD_LX_KEYWORD</id>
+    <description>LX keyword VPD data for HDAT module
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ENLARGED_IO_SLOT_COUNT</id>
+    <description>
+        User configuration for Enlarged IO SLot Count
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>CREATE_DEF_PARTITION</id>
+    <description>
+        User configuration for creating default partition
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+   <id>IPL_ATTRIBUTES</id>
+   <description>
+       Assorted list of differnt IPL attributes passed via HDAT
+   </description>
+   <complexType>
+        <description>struct - 8 booleans </description>
+        <field>
+            <name>createDefaultPartition</name>
+            <description>
+             0b0: Dont create default partition;
+             0b1: Create default partition;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>clickToAcceptState</name>
+            <description>
+             0b0: Customer has not accepted license agreement;
+             0b1: Customer has accepted license agreement;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>disableVirtIO</name>
+            <description>
+             0b0: Enable Virtual IO Connections between partitions;
+             0b1: Disable Virtual IO Connections between partitions;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>resetPCINumbers</name>
+            <description>
+             0b0: Do not reset PCI Numbers;
+             0b1: Reset PCI Numbers;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>clearHypNVRAM</name>
+            <description>
+             0b0: Do not clear HYP NVRAM;
+             0b1: Clear HYP NVRAM;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>deleteHYPSELs</name>
+            <description>
+             0b0: Do not delete SELs originating from HYP;
+             0b1: Delete SELs originating from HYP;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>deleteHBSELs</name>
+            <description>
+             0b0: Do not delete SELs originating from Hostboot;
+             0b1: Delete SELs originating from Hostboot;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>deleteBMCSELs</name>
+            <description>
+             0b0: Do not delete SELs originating from BMC;
+             0b1: Delete SELs originating from BMC;
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+   </complexType>
+   <persistency>volatile-zeroed</persistency>
+   <readable/>
+   <writeable/>
+</attribute>
+
+<attribute>
+    <id>PRESERVE_MDC_PARTITION_VPD</id>
+    <description>
+        MFG setting to preserve MDC partition vpd
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HYPERVISOR_IPL_SIDE</id>
+    <description>
+       Platform IPL Side
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>OS_IPL_MODE</id>
+    <description>
+       Operating System IPL Mode
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>LMB_SIZE</id>
+    <description>
+       Logical Memory Block Size
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
+    <description>
+        User configuration for max HSL Opticonnect connections
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HUGE_PAGE_COUNT</id>
+    <description>
+       Huge Memory Page Count
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HUGE_PAGE_SIZE</id>
+    <description>
+       Huge Memory Page Size
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VLAN_SWITCHES</id>
+    <description>
+       Number of VLAN Switches
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VTPM_ENABLED</id>
+    <description>
+       Virtual TPM Enabled
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HYPERVISOR_IPL_DESTINATION</id>
+    <description>
+      Hypervisor IPL Destination
+    </description>
+    <simpleType>
+    <uint8_t>
+    </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>RAW_MTM</id>
+    <description>
+       Raw value of system MTM
+    </description>
+    <simpleType>
+    <string>
+      <sizeInclNull>64</sizeInclNull>
+    </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HYP_DISPATCH_WHEEL</id>
+    <description>
+       Hypervisor Dispatch Wheel
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_BRAND_NAME</id>
+    <description>
+       Brand Name of OEM systems
+    </description>
+    <simpleType>
+     <string>
+        <sizeInclNull>64</sizeInclNull>
+     </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SLCA_INDEX</id>
+    <description>
+       SLCA index for this FRU
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SLCA_RID</id>
+    <description>
+       SLCA RID for this FRU
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+</attributes>

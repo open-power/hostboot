@@ -41,7 +41,6 @@
 #include <util/singleton.H>
 #include "proc_tod_utils.H"
 #include "TodDrawer.H"
-#include <map>
 
 namespace TOD
 {
@@ -273,66 +272,6 @@ public:
         return iv_todConfig[i_config].iv_isConfigured;
     }
 
-    /**
-     *
-     * @brief getTodConfigState will enable other methods to make a decision
-     *     regarding valid action to be performed to modify the
-     *     topology.
-     *
-     * @par Detailed Description:
-     *     On getting a topology creation/modification request, TOD service
-     *     methods need to determine next course of action based on the ChipTOD
-     *     HW state and the state of the data that is available in the
-     *     TodSystemData file.(TodSystemData file contains the previously
-     *     created TOD topology's information). This method will provide all
-     *     the information that is required to determine next course of action.
-     *
-     *     Following algorithm is used
-     *     1) Check TOD status register to determine TOD HW state and the active
-     *     configuration
-     *     2) Read the TodSystemData to find, if HW has changed i.e. new
-     *     functional processors became available or one of the processor that
-     *     was functional when topology was created last time became
-     *     non-functional.
-     *
-     *     Method can report TOD config state as one of the following
-     *        a)TOD_UNCHANGED ==> No change in the HW
-     *        b)TOD_MODIFIED ==> HW has changed
-     *        c)TOD_UNKNOWN ==> It is not possible to determine the state
-     *
-     * @param[out] o_configState
-     *     This parameter will indicate to caller if the HW as seen by
-     *     getTodConfigState is same as indicated by the TodSystemData or not.
-     *     One of the enums listed in TOD_CONFIG_STATE will be returned.
-     *
-     * @param[out] o_isTodRunning
-     *     It will be true if the ChipTOD HW is running.
-     *
-     * @param[out] o_activeConfig
-     *     This parameter will carry back the information regarding the topology
-     *     that has been currently selected by PHYP, if ChipTOD HW is running.
-     *     In case TOD HW is not running then it will report TOD_PRIMARY, as
-     *     that is the configuration to be picked by PHYP once the TOD logic
-     *     starts running.
-     *
-     * @return Error log handle that will determine if method was successful in
-     *      determining various parameters or not
-     * @retval  NULL , Indicates success
-     * @retval !NULL , Failed getting the output parameters,in this case
-     *      value of o_configState,o_isTodRunning and o_activeConfig should
-     *      not be considered for any further action.
-     *
-     *      This API may return one of the following "special" reason codes:
-     *      NA
-     *
-     * @note It is up to the caller to change the severity of the
-     *     returned error based on what it decides to do with it. By default
-     *     any returned error created by this function will be a non-reported
-     *     tracing event error log.
-     */
-     errlHndl_t getTodConfigState ( TOD_CONFIG_STATE& o_configState,
-                                   proc_tod_setup_tod_sel& o_activeConfig,
-                                   bool& o_isTodRunning)const;
      /**
      * @brief isTodRunning returns the current state of  ChipTOD HW i.e.
      *    whether it is running or not
@@ -369,14 +308,14 @@ public:
 
 
      /**
-      * @brief This method will provide TOD topology register data to HDAT
+      * @brief This method will save TOD topology register data for HDAT
       *
       * @par Detailed Description:
       *     HWSV needs to share TOD topology data with HDAT.
       *     HWSV also needs to persist with TOD topology data across non-memory
       *     preserving IPL's.
       *     Both the above requirements will be fulfilled by writing data
-      *     to a file.
+      *     to an attribute per proc.
       *     This method will take the TOD register data and put it in the format
       *     required by HDAT, and then call helper method to write the same to a
       *     file
@@ -389,78 +328,24 @@ public:
       *     building one of the topologies i.e. primary could be built but not
       *     the secondary then primary should be passed as i_config.
       *
-      * @return Error log handle indicating the status of the request.
-      * @retval NULL if successful
-      * @retval !NULL if failed to write TOD configuration data
-      *
-      *      Error log handle points to a valid error log object whose primary
-      *      SRC reason code (pError->getSRC()->reasonCode()) indicates the type
-      *      of error.
-      *
-      * @note It is up to the caller to change the severity of the returned
-      *     error based on what it decides to do with it. By default any
-      *     returned error created by this function will be a non-reported
-      *     tracing event error log.
+      * @return NULL if successful
+      *         !NULL otherwise
       */
      errlHndl_t writeTodProcData(const proc_tod_setup_tod_sel i_config);
 
- 
-     /**
-      *
-      * @brief This is a helper method for writeTodProcDataToFile, it will
-      *     determine file path where array of hwsvTodChipData structure has to
-      *     be written by HWSV , HDAT will read this file.
-      *
-      * @par Detailed Description:
-      *     The file to which data has to be written will be determined by the
-      *     following registry keys
-      *     1. fstp/P1_Root (To determine the root directory of P1)
-      *     2. CINI_SYSTODFILE_PATH (To determine the directory and file name
-      *     within P1_Root where the data is to be written)
-      *
-      * @param[in] o_fileName
-      *     Output parameter to carry back the file name qualified by full path
-      *     where the data has has to be written.
-      *
-      * @return Error log handle indicating the status of the request.
-      * @retval NULL if file path could be determined successfully
-      * @retval !NULL if file path could not be found
-      *
-      *      Error log handle points to a valid error log object whose primary
-      *      SRC reason code (pError->getSRC()->reasonCode()) indicates the type
-      *      of error.
-      *
-      * @note It is up to the caller to change the severity of the returned error
-      *     based on what it decides to do with it. By default any returned
-      *     error created by this function will be a non-reported tracing event
-      *     error log.
-      */
-     errlHndl_t getTodProcDataFilePath(char * o_fileName) const;
 
-     /**
-      * @brief This is a helper method for writeTodProcData, it will write the
-      *     array of hwsvTodChipData structures created by writeTodProcData to a
-      *     file with P1 persistancy
-      *
-      * @par Detailed Description:
-      *     The method will work on iv_todChipData and take help of
-      *     getTodProcDataFilePath to detrmine the file path where
-      *     iv_todChipData has to be written.
-      *
-      * @return Error log handle indicating the status of the request
-      * @retval NULL if the data could not be written  successfully
-      * @retval !NULL if the data was written successfully
-      *
-      *     Error log handle points to a valid error log object whose primary
-      *     SRC reason code (pError->getSRC()->reasonCode()) indicates the type
-      *     of error.
-      *
-      * @note It is up to the caller to change the severity of the returned
-      *     error based on what it decides to do with it. By default any
-      *     returned error created by this function will be a non-reported
-      *     tracing event error log.
-      */
-     errlHndl_t writeTodProcDataToFile();
+    /**
+     * @brief This method will be used to return Tod Data for all procs
+     *        by reading the TOD data from chip attribute
+     *
+     * @param[in]: o_todChipDataVector
+     *             is populated with TOD data
+     *
+     * @return if it cannot read from attribute TOD_ASSERT() will be invoked
+     */
+    errlHndl_t getTodProcDataFromAttribute(
+            std::vector<TodChipData>& o_todChipDataVector )const;
+
 
      /**
       *
@@ -562,37 +447,6 @@ private:
      errlHndl_t getConfiguredMdmt(TARGETING::Target*& o_primaryMdmt,
                          TARGETING::Target*& o_secondaryMdmt)const;
 
-     /**
-      * @brief This method will read the TOD topology register data from
-      *     TodSystemData file
-      *
-      * @par Detailed Description:
-      *     TodSystemData file is a P1 persistent file that will retain the TOD
-      *     topology data from previous configuration. Any request to recofigure
-      *     backup topology should consider the previous topology data. This
-      *     method will read the TodSystemData file and put the data in
-      *     hwsvTodChipData structures.
-      *
-      * @param[out ] o_todChipDataVector , Array of hwsvTodChipData structures
-      *     that will be populated with the data from TodSystemData file.
-      *
-      * @return Error log handle indicating the status of the request.
-      * @retval NULL if TodSystemData was successfully read.
-      * @retval !NULL if TodSystemData could not be read. This will happen if
-      *     the file does not exist, one of the file operation failed or file
-      *     does not have expected data.
-      *
-      *     This API may return one of the following "special" reason codes:
-      *     NA
-      *
-      * @note It is up to the caller to change the severity of the
-      *     returned error based on what it decides to do with it. By default
-      *     any returned error created by this function will be a non-reported
-      *     tracing event error log.
-      */
-     errlHndl_t readTodProcDataFromFile(std::vector<TodChipData>&
-             o_todChipDataVector )const;
- 
      /**
       * @brief This method will be used to determine if the data read from
       *     TodSystemData file indicates at least one functional processor
