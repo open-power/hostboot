@@ -93,9 +93,8 @@ COPY_FILES = \
     $(foreach file, $(call ROOTPATH_WILDCARD,releaseNotes.html), $(file):fsp)\
 
 include ${ROOTPATH}/config.mk
-COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPENPOWER),obj/genfiles/target_types_placeholder.xml:openpower) \
-    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/target_types_openpower.xml:openpower) \
-    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/attribute_types_openpower.xml:openpower) \
+COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/target_types_oppowervm.xml:openpower) \
+    $(if $(CONFIG_INCLUDE_XML_OPENPOWER),src/usr/targeting/common/xmltohb/attribute_types_oppowervm.xml:openpower) \
 
 #
 # Files which are copied and renamed for targets.

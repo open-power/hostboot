@@ -127,13 +127,27 @@ errlHndl_t discoverTargets()
             target != targetService().end();
             ++target)
     {
-        HwasState hwasState             = target->getAttr<ATTR_HWAS_STATE>();
-        hwasState.deconfiguredByEid     = 0;
-        hwasState.poweredOn             = false;
-        hwasState.present               = false;
-        hwasState.functional            = false;
-        hwasState.dumpfunctional        = false;
-        target->setAttr<ATTR_HWAS_STATE>(hwasState);
+        // TODO:RTC:151617 Need to find a better way
+        // to initialize the target
+        if(target->getAttr<ATTR_TYPE>() == TYPE_SP)
+        {
+            HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
+            hwasState.deconfiguredByEid  = 0;
+            hwasState.poweredOn          = true;
+            hwasState.present            = true;
+            hwasState.functional         = true;
+            hwasState.dumpfunctional     = false;
+            target->setAttr<ATTR_HWAS_STATE>(hwasState);
+        }else
+        {
+            HwasState hwasState          = target->getAttr<ATTR_HWAS_STATE>();
+            hwasState.deconfiguredByEid  = 0;
+            hwasState.poweredOn          = false;
+            hwasState.present            = false;
+            hwasState.functional         = false;
+            hwasState.dumpfunctional     = false;
+            target->setAttr<ATTR_HWAS_STATE>(hwasState);
+        }
     }
 
     // Assumptions and actions:

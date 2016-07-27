@@ -220,14 +220,46 @@
         <name>TPM</name>
         <value>35</value>
     </enumerator>
-    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
-        <name>TEST_FAIL</name>
+        <name>SP</name>
         <value>36</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>UART</name>
         <value>37</value>
+    </enumerator>
+    <enumerator>
+        <name>PS</name>
+        <value>38</value>
+    </enumerator>
+    <enumerator>
+        <name>FAN</name>
+        <value>39</value>
+    </enumerator>
+    <enumerator>
+        <name>VRM</name>
+        <value>40</value>
+    </enumerator>
+    <enumerator>
+        <name>USB</name>
+        <value>41</value>
+    </enumerator>
+    <enumerator>
+        <name>ETH</name>
+        <value>42</value>
+    </enumerator>
+    <enumerator>
+        <name>PANEL</name>
+        <value>43</value>
+    </enumerator>
+    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <enumerator>
+        <name>TEST_FAIL</name>
+        <value>44</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>45</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -2209,8 +2241,8 @@
             <default>0</default>
         </field>
         <field>
-            <name>reserved</name>
-            <description>Reserved for future use</description>
+            <name>MinorIPLType</name>
+            <description>Minor IPL Type</description>
             <type>uint8_t</type>
             <bits>7</bits>
             <default>0</default>
@@ -16746,6 +16778,54 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_EFF_DRAM_TCCD_S</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>HDAT_HBRT_NUM_SECTIONS</id>
+    <description>
+        Number of internal data pointers we have in
+        the hostboot runtime data section.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_HBRT_SECTION_SIZE</id>
+    <description>
+        Biggest size for any of the hostboot
+        runtime data sections.
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    <array>9</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>TOD_CPU_DATA</id>
+    <description>TOD CHIP DATA for each CHIP
+        The size of the TOD CHIP DATA must be equal to the sizeof(TodChipData)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    <!-- the size of the array must be equal to the sizeof(TodChipData)
+    defined in TodTypes.H  -->
+        <array>44</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 </attributes>

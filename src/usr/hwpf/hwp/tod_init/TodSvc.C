@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -197,8 +199,7 @@ errlHndl_t TodSvc::todSetup()
         l_errHdl = l_Tod.writeTodProcData(TOD_PRIMARY);
         if(l_errHdl)
         {
-            TOD_ERR("TOD setup failure:Failed to write topology register data"
-            " to the file.");
+          TOD_ERR("TOD setup failure:Failed to write topology register data");
         }
     }
 

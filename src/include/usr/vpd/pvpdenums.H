@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,7 @@ namespace PVPD
         VP         = 0x15,
         VS         = 0x16,
         VZ         = 0x17,
+        LX         = 0x18,
 
         // Last Keyword
         PVPD_LAST_KEYWORD,

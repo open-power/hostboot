@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,7 +64,7 @@ namespace TOD
         uint32_t chipID; //Chip ID
         uint32_t flags;  //Flags
         TodChipHeader(void) : chipID(0),flags(TOD_NONFUNC) {}
-    };
+    }__attribute__ ((packed));
 
     /**
      * Sub structure of TodChipData, That will contain the first 32 bits of
@@ -88,7 +90,7 @@ namespace TOD
             mpcr(0),pcrp0(0),pcrp1(0),scrp0(0),scrp1(0),
             spcr(0),ipcr(0),psmscr(0),ccr(0)
         {}
-    };
+    }__attribute__ ((packed));
 
     /**
      * TOD Data for each chip that HDAT will communicate

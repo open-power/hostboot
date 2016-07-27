@@ -318,6 +318,8 @@
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_US</id></attribute>
     <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
     <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
+    <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
+    <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
 </targetType>
 
 <targetType>
@@ -545,6 +547,7 @@
     <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
+    <attribute><id>TOD_CPU_DATA</id></attribute>
 </targetType>
 
 <targetType>
@@ -1842,6 +1845,130 @@
     </attribute>
     <attribute>
         <id>FRU_ID</id>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>uart</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>UART</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>sp</id>
+    <parent>chip</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>CHIP</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>SP</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>bmc</id>
+    <parent>sp</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>SP</default>
+    </attribute>
+    <attribute>
+        <id>MODEL</id>
+        <default>BMC</default>
+    </attribute>
+    <attribute>
+        <id>HWAS_STATE</id>
+        <default>
+            <field><id>deconfiguredByEid</id><value>0</value></field>
+            <field><id>poweredOn</id><value>1</value></field>
+            <field><id>present</id><value>1</value></field>
+            <field><id>functional</id><value>1</value></field>
+            <field><id>dumpfunctional</id><value>0</value></field>
+            <field><id>specdeconfig</id><value>0</value></field>
+        </default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>power-supply</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>fan</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>FAN</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>vrm</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>VRM</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>usb</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>USB</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>eth</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>ETH</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>panel</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>PANEL</default>
     </attribute>
 </targetType>
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,6 +41,17 @@ static inline int64_t log2(uint64_t s)
 }
 
 double sqrt(double) __attribute__((const));
+
+/**
+ * @brief  power function
+ *
+ * @param[in] base - value of base
+ * @param[in] exp  - value of exponential
+ *
+ * @return value of the value of base raised to the power of exp.
+ *
+ */
+uint64_t pow(const uint32_t base, const uint32_t exp);
 
 #ifdef __cplusplus
 };
