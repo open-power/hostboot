@@ -2335,6 +2335,27 @@ errlHndl_t bld_fdt_secureboot(devTree * i_dt, bool i_smallTree)
     return errhdl;
 }
 
+void bld_fdt_mnfgMode(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return; }
+
+    // Get manufacturing mode flags
+    TARGETING::Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    TARGETING::ATTR_MNFG_FLAGS_type l_mnfgFlags =
+                l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+    // @todo RTC 118752 Use generic mfg-mode attr when available
+    if (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+    {
+        // Find the / node and add a manufacturing mode node under it.
+        dtOffset_t rootNode = i_dt->findNode("/");
+
+        i_dt->addProperty(rootNode, "ibm,manufacturing-mode");
+    }
+    return;
+}
+
 errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
                               bool i_smallTree )
 {
@@ -2405,6 +2426,10 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
         {
             break;
         }
+
+        TRACFCOMP( g_trac_devtree, "---devtree mnfg mode ---" );
+        bld_fdt_mnfgMode(dt, i_smallTree);
+
     }while(0);
 
     return errhdl;
