@@ -26,6 +26,7 @@
 #include "spnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
 #include <sys/msg.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
@@ -40,9 +41,23 @@
 
 extern trace_desc_t* g_trac_pnor;
 
+// used to uniquley identify the secure PNOR RP message queue
+const char* SPNORRP_MSG_Q = "spnorrpq";
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
+namespace PNOR
+{
+    //used by secure message queue for load/unload of secure PNOR sections
+    enum secure_msg_type
+    {
+        MSG_LOAD_SECTION = 0x02,
+        MSG_UNLOAD_SECTION = 0x03,
+    };
+};
+
 
 using namespace PNOR;
 
@@ -71,10 +86,7 @@ void* secure_wait_for_message( void* unused )
 SPnorRP::SPnorRP()
 :
 iv_msgQ(NULL)
-,iv_sectionVerified(0)
 ,iv_startupRC(0)
-,iv_secAddr(NULL)
-,iv_textSize(0)
 {
     TRACFCOMP(g_trac_pnor, "SPnorRP::SPnorRP> " );
     // setup everything in a separate function
@@ -94,6 +106,16 @@ SPnorRP::~SPnorRP()
     if( iv_msgQ )
     {
         msg_q_destroy( iv_msgQ );
+    }
+
+    // clean up the load records
+    for(std::map<SectionId, LoadRecord*>::iterator
+        i = iv_loadedSections.begin();
+        i != iv_loadedSections.end();
+        ++i)
+    {
+        LoadRecord* l_rec = (*i).second;
+        delete l_rec;
     }
 
     TRACFCOMP(g_trac_pnor, "< SPnorRP::~SPnorRP" );
@@ -179,6 +201,11 @@ void SPnorRP::initDaemon()
         // create a message queue for secure space
         iv_msgQ = msg_q_create();
 
+        // register it so that it can be discovered by loadSecureSection()
+        int rc = msg_q_register(iv_msgQ, SPNORRP_MSG_Q);
+
+        assert(rc == 0);
+
         // create a Block for temp space
         l_errhdl = allocBlock( NULL, reinterpret_cast<void*>(TEMP_VADDR),
                                                              PNOR_SIZE );
@@ -211,9 +238,6 @@ void SPnorRP::initDaemon()
             break;
         }
 
-        // TODO RTC 156118 - move to new location for the next story
-        verifySections();
-
         // start task to wait on the queue
         task_create( secure_wait_for_message, NULL );
 
@@ -231,16 +255,14 @@ void SPnorRP::initDaemon()
 /**
  * @brief  Load secure sections into temporary address space and verify them
  */
-void SPnorRP::verifySections()
+void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 {
     SectionInfo_t l_info = {PNOR::INVALID_SECTION};
     errlHndl_t l_errhdl = NULL;
     bool failedVerify = false;
 
     do {
-
-        // TODO RTC 156118 - make more generic for each secure section
-        l_errhdl = getSectionInfo(HB_EXT_CODE, l_info);
+        l_errhdl = getSectionInfo(i_id, l_info);
 
         if (l_errhdl)
         {
@@ -250,6 +272,9 @@ void SPnorRP::verifySections()
             break;
         }
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo succeeded");
+
+        // it's a coding error if l_info.vaddr is not in secure space
+        assert(l_info.vaddr >= SBASE_VADDR);
 
         // Note: A pointer to virtual memory in one PNOR space can be converted
         // to a pointer to any of the other two PNOR spaces and visa versa.
@@ -267,14 +292,14 @@ void SPnorRP::verifySections()
         // Note: the textSize we get back is untrusted until verification
         // completes and should not be treated as correct until then.
         SECUREBOOT::ContainerHeader l_conHdr(l_unsecuredAddr);
-        iv_textSize = ALIGN_PAGE(l_conHdr.payloadTextSize());
+        o_rec->textSize = ALIGN_PAGE(l_conHdr.payloadTextSize());
 
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
                     "in temp space is 0x%.16llX\n"
                     "section start address in unsecured space is 0x%.16llX\n"
                     "l_info.size = 0x%.16llX\n"
                     "payload size = 0x%.16llX\n",
-                    l_tempAddr,l_unsecuredAddr, l_info.size, iv_textSize);
+                    l_tempAddr,l_unsecuredAddr, l_info.size, o_rec->textSize);
 
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections unsecured mem now: ",
                              l_unsecuredAddr, 128);
@@ -282,18 +307,18 @@ void SPnorRP::verifySections()
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections about to do memcpy");
 
         // copy from unsecured PNOR space to temp PNOR space
-        memcpy(l_tempAddr, l_unsecuredAddr, iv_textSize
+        memcpy(l_tempAddr, l_unsecuredAddr, o_rec->textSize
                                           + PAGESIZE); // plus header size
 
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections did memcpy");
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections temp mem now: ",
                              l_tempAddr, 128);
 
-        // rename secure space pointer for readability
-        iv_secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        // store secure space pointer in load record
+        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
 
         TRACFCOMP(g_trac_pnor,"section start address in secure space is "
-                              "0x%.16llX",iv_secAddr);
+                              "0x%.16llX",o_rec->secAddr);
 
         // verify while in temp space
         if (SECUREBOOT::enabled())
@@ -304,7 +329,7 @@ void SPnorRP::verifySections()
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections"
-                      " - HBI section failed verification");
+                      " - section with id %X failed verification",i_id);
                 failedVerify = true;
                 break;
             }
@@ -312,17 +337,17 @@ void SPnorRP::verifySections()
 
         // verification succeeded
 
-        // Indicate that HBI section has successfully been verified.
-        iv_sectionVerified |= HBI_SECTION;
+        // keep track of info size in load record
+        o_rec->infoSize = l_info.size;
 
         // skip the header to block secure header access
-        uint8_t* l_securePayloadStart = iv_secAddr + PAGESIZE;
+        uint8_t* l_securePayloadStart = o_rec->secAddr + PAGESIZE;
 
         // set permissions on the secured pages to writable
         l_errhdl = setPermission(l_securePayloadStart - PAGESIZE,
-                                          iv_textSize + PAGESIZE, WRITABLE);
+                                          o_rec->textSize + PAGESIZE, WRITABLE);
         // TODO RTC 156118 - change above two lines of code to below:
-        //l_errhdl = setPermission(l_securePayloadStart, iv_textSize, WRITABLE);
+        //l_errhdl = setPermission(l_securePayloadStart, o_rec->textSize, WRITABLE);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
@@ -332,8 +357,8 @@ void SPnorRP::verifySections()
 
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
-        l_errhdl = setPermission(l_securePayloadStart + iv_textSize,
-                                       l_info.size - iv_textSize,
+        l_errhdl = setPermission(l_securePayloadStart + o_rec->textSize,
+                                       l_info.size - o_rec->textSize,
                                        WRITABLE | WRITE_TRACKED);
         if(l_errhdl)
         {
@@ -348,14 +373,16 @@ void SPnorRP::verifySections()
 
     if( l_errhdl )
     {
+        uint32_t l_errPlid = l_errhdl->plid();
         iv_startupRC = l_errhdl->reasonCode();
         errlCommit(l_errhdl,PNOR_COMP_ID);
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections there was an error");
         if (failedVerify) {
-            // TODO RTC 156118
-            // Halt the machine since we've failed verification.
+            // TODO RTC 125309
+            // Change failedVerify from doShutdown to something more clever.
             TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections failed verify");
         }
+        INITSERVICE::doShutdown(l_errPlid);
     }
 }
 
@@ -374,6 +401,10 @@ void SPnorRP::waitForMessage()
     uint8_t* eff_addr = NULL;
     int rc = 0;
     uint64_t status_rc = 0;
+    LoadRecord l_rec;
+    l_rec.secAddr = NULL;
+    l_rec.textSize = 0;
+    l_rec.infoSize = 0;
 
     while(1)
     {
@@ -410,17 +441,62 @@ void SPnorRP::waitForMessage()
                     {
                         uint64_t delta = VMM_VADDR_SPNOR_DELTA;
 
+                        // check and see if our cached section information
+                        // is obsolete and if so, change it
+                        if ( (eff_addr < l_rec.secAddr) ||
+                             (eff_addr >= (l_rec.secAddr + l_rec.infoSize
+                                                                   + PAGESIZE))
+                            // TODO RTC 156118 remove the PAGESIZE adjustment
+                            // as soon as getSectionInfo offset change is in
+                           )
+                        {
+                            bool l_found = false;
+                            // recalculate addresses
+                            for(std::map<SectionId, LoadRecord*>::const_iterator
+                                i = iv_loadedSections.begin();
+                                i != iv_loadedSections.end();
+                                ++i)
+                            {
+                                LoadRecord* l_record = (*i).second;
+                                if ( (eff_addr >= l_record->secAddr) &&
+                                     (eff_addr < (l_record->secAddr +
+                                                l_record->infoSize + PAGESIZE))
+                                    // TODO RTC 156118 also remove this PAGESIZE
+                                   )
+                                {
+                                    l_rec = *l_record;
+                                    l_found = true;
+                                    break;
+                                }
+                            }
+                            if (!l_found)
+                            {
+                                TRACFCOMP( g_trac_pnor,
+                                    "SPnorRP::waitforMessage - address %p "
+                                    "out of bounds", eff_addr);
+                                // not much we can do here unfortunately
+                                // if we get here it is a coding mistake
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                        }
+
                         TRACDCOMP( g_trac_pnor, "SPnorRP::waitForMessage got a"
                             " request to read from secure space - "
                             "message : user_addr=%p, eff_addr=%p, msgtype=%d, "
                             "textSize=0x%.16llX secAddr0x%.16llX", user_addr,
-                            eff_addr, message->type, iv_textSize, iv_secAddr);
+                            eff_addr, message->type, l_rec.textSize,
+                                                               l_rec.secAddr);
 
                         // determine the source of the data depending on
                         // whether it is part of the secure payload.
                         // by the way, this if could be removed to make this
                         // purely arithmetic
-                        if (eff_addr >= (iv_secAddr + iv_textSize))
+                        if (eff_addr >= (l_rec.secAddr + l_rec.textSize
+                                                                 + PAGESIZE))
+                        // TODO RTC 156118 remove the PAGESIZE adjustment after
+                        // the getSectionOffset stuff gets closed out
                         {
                             delta += VMM_VADDR_SPNOR_DELTA;
                         }
@@ -433,7 +509,10 @@ void SPnorRP::waitForMessage()
                         memcpy(user_addr, eff_addr - delta, PAGESIZE);
                         // if the page came from temp space then free up
                         // the temp page now that we're done with it
-                        if (eff_addr < (iv_secAddr + iv_textSize))
+                        if (eff_addr < (l_rec.secAddr + l_rec.textSize
+                                                                   + PAGESIZE))
+                        // TODO RTC 156118 remove the PAGESIZE adjustment here
+                        // as well for the same reason as above
                         {
                             mm_remove_pages(RELEASE, eff_addr - delta,
                                             PAGESIZE);
@@ -450,6 +529,33 @@ void SPnorRP::waitForMessage()
                         // encounter sections that flush data back to PNOR
                         // dirty writes need to be flushed back to PNOR
                         assert(false); // should never get here
+                        // Notes from Nick:
+                        // we're going to have to implement a flush handler to
+                        // commit any write tracked pages (unprotected areas)
+                        // back to PNOR. And we'll have to
+                        // INITSERVICE::registerBlock( ..) when we set up
+                        // permissions on load for each set of pages that
+                        // in a write tracked area so that it will be flushed
+                        // appropriately. And we'll need to use a
+                        // "BlockPriority" between pnor and VFS enums in
+                        // src/include/usr/vmmconst.h so that we get flushed in
+                        // the right order
+                    }
+                    break;
+
+                case( PNOR::MSG_LOAD_SECTION ):
+                    {
+                        SectionId l_id =
+                                    static_cast<SectionId>(message->data[0]);
+                        if (iv_loadedSections[l_id] == NULL)
+                        {
+                            LoadRecord* l_record = new LoadRecord;
+                            verifySections(l_record,l_id);
+                            iv_loadedSections[l_id] = l_record;
+
+                            // cache the record to use fields later as hints
+                            l_rec = *l_record;
+                        }
                     }
                     break;
 
@@ -487,7 +593,8 @@ void SPnorRP::waitForMessage()
             }
 
             /*  Expected Response:
-             *      data[0] = virtual address requested
+             *      data[0] = virtual address requested or
+             *                section id (if load message)
              *      data[1] = rc (0 or negative errno value)
              *      extra_data = Specific reason code.
              */
@@ -506,4 +613,74 @@ void SPnorRP::waitForMessage()
     }
 
     TRACFCOMP(g_trac_pnor, "< SPnorRP::waitForMessage" );
+}
+
+/**
+ *  @brief Loads requested PNOR section to secure virtual address space
+ */
+errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
+{
+    // Send message to secure provider to load the section
+    errlHndl_t err = NULL;
+    msg_q_t spnorQ = msg_q_resolve(SPNORRP_MSG_Q);
+
+    assert(spnorQ != NULL);
+
+    msg_t* msg = msg_allocate();
+
+    assert(msg != NULL);
+
+    msg->type = PNOR::MSG_LOAD_SECTION;
+    msg->data[0] = static_cast<uint64_t>(i_section);
+    int rc = msg_sendrecv(spnorQ, msg);
+
+    // TODO RTC 156118 - Need to be able to receive an error from the
+    // message handler. Also, message handler should police whether the request
+    // is for a secure section or not and throw an error accordingly.
+    //if (0 == rc)
+    //{
+    //    err = reinterpret_cast<errlHndl_t>(msg->data[1]);
+    //}
+    //else remove the if clause below at some point
+    if (rc != 0)
+    {
+        /* @errorlog tag
+         * @errortype         ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid          MOD_PNORRP_LOADSECURESECTION
+         * @reasoncode        RC_EXTERNAL_ERROR
+         * @userdata1         returncode from msg_sendrecv()
+         * @userdata2[0:31]   SPNOR message type [LOAD | UNLOAD]
+         * @userdata2[32:63]  Section ID
+         * @devdesc           Could not load/unload section.
+         * @custdesc          Security failure: unable to securely load
+         *                    requested firmware.
+         */
+
+        err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   // severity
+             MOD_PNORRP_LOADSECURESECTION,           // moduleid
+             RC_EXTERNAL_ERROR,                      // reason Code
+             rc,                                     // user1 = msg_sendrecv rc
+             TWO_UINT32_TO_UINT64(
+               PNOR::MSG_LOAD_SECTION,               // user2 = message type
+               i_section                             //         and section Id
+             ),
+             true /* Add HB Software Callout */
+            );
+    }
+    msg_free(msg);
+    return err;
+}
+
+/**
+ *  @brief Flushes any applicable pending writes and unloads requested PNOR
+ *         section from secure virtual address space
+ */
+errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
+{
+    // @TODO RTC 156118
+    // Replace with call to secure provider to unload the section
+    errlHndl_t pError=NULL;
+    return pError;
 }

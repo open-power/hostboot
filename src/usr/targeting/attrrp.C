@@ -278,6 +278,13 @@ namespace TARGETING
                 break;
             }
 
+            // TODO RTC 156118 - Remove this as soon as the secure header is
+            // accounted for properly.
+            #ifdef CONFIG_SECUREBOOT
+            l_pnorSectionInfo.vaddr += PAGESIZE;
+            #endif
+
+
             // Find attribute section header.
             TargetingHeader* l_header =
                 reinterpret_cast<TargetingHeader*>(l_pnorSectionInfo.vaddr);

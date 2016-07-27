@@ -97,12 +97,6 @@ class SPnorRP
     msg_q_t iv_msgQ;
 
     /**
-     * Indicates that a section has been verified and is able to be accessed
-     * in the secured space now.
-     */
-    uint64_t iv_sectionVerified;
-
-    /**
      * Remember that we failed during initial startup
      *   This is set by startup methods to indicate to constructor that
      *   something went wrong
@@ -110,10 +104,14 @@ class SPnorRP
     uint64_t iv_startupRC;
 
     /**
-     * Keep track of secured payload size and secure section address
+     * Keep track of secured payload size and secure section addresses
      */
-    uint8_t* iv_secAddr;
-    size_t iv_textSize;
+    struct LoadRecord{
+        uint8_t* secAddr;
+        size_t textSize;
+        size_t infoSize;
+    };
+    std::map<PNOR::SectionId, LoadRecord*> iv_loadedSections;
 
 
     /**
@@ -124,7 +122,7 @@ class SPnorRP
     /**
      * @brief Load secure sections into temporary address space and verify them
      */
-    void verifySections();
+    void verifySections(LoadRecord* o_rec, PNOR::SectionId i_id);
 
     /**
      * @brief  Message receiver for secure space
@@ -153,6 +151,4 @@ class SPnorRP
     errlHndl_t setPermission(void* va, uint64_t size,
                                        uint64_t accessType) const;
 };
-
-
 #endif

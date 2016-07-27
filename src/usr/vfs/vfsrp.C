@@ -140,15 +140,30 @@ errlHndl_t VfsRp::_init()
 {
     errlHndl_t err = NULL;
     size_t rc = 0;
-    iv_msgQ = msg_q_create();
-    rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_VFS);
 
-    // Discover PNOR virtual address of extended image
-    PNOR::SectionInfo_t l_pnor_info;
+    do {
+        iv_msgQ = msg_q_create();
+        rc = msg_q_register(iv_msgQ, VFS_ROOT_MSG_VFS);
 
-    err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, l_pnor_info);
-    if(!err)
-    {
+        assert(rc == 0);
+
+        #ifdef CONFIG_SECUREBOOT
+        err = loadSecureSection(PNOR::HB_EXT_CODE);
+        if(err)
+        {
+            break;
+        }
+        #endif
+
+        // Discover PNOR virtual address of extended image
+        PNOR::SectionInfo_t l_pnor_info;
+
+        err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, l_pnor_info);
+        if(err)
+        {
+            break;
+        }
+
         iv_pnor_vaddr = l_pnor_info.vaddr;
 
         #ifdef CONFIG_SECUREBOOT
@@ -202,7 +217,7 @@ errlHndl_t VfsRp::_init()
                  true /*Add HB Software Callout*/
                 );
         }
-    }
+    } while(0);
 
     return err;
 }

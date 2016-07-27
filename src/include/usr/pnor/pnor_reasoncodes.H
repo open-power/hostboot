@@ -48,7 +48,6 @@ namespace PNOR
         MOD_PNORRP_GETSIDEINFO          = 0x0D, /**< PnorRP::getSideInfo */
         MOD_PNORRP_SETSIDEINFO          = 0x0E, /**< PnorRP::setSideInfo */
 
-
         // pnorvalid.C
         MOD_PNORVALID_MAIN              = 0x0E, /**< validateAltMaster */
         MOD_PNORVALID_MAGIC             = 0x0F, /**< validateAltMaster */
@@ -104,6 +103,7 @@ namespace PNOR
         MOD_SPNORRP_WAITFORMESSAGE      = 0xD3, /**< SPnorRP::waitForMessage */
         MOD_SPNORRP_VERIFYSECTIONS      = 0xD4, /**< SPnorRP::verifySections */
         MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
+        MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
     };
 
     enum PNORReasonCode

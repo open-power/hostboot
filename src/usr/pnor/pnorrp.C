@@ -98,29 +98,6 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 }
 
 /**
- *  @brief Loads requested PNOR section to secure virtual address space
- */
-errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
-{
-    //@TODO RTC 156118
-    // Replace with call to secure provider to load the section
-    errlHndl_t pError=NULL;
-    return pError;
-}
-
-/**
- *  @brief Flushes any applicable pending writes and unloads requested PNOR
- *      section from secure virtual address space
- */
-errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
-{
-    //@TODO RTC 156118
-    // Replace with call to secure provider to load the section
-    errlHndl_t pError=NULL;
-    return pError;
-}
-
-/**
  * @brief  Clear pnor section
  */
 errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
@@ -471,7 +448,8 @@ errlHndl_t PnorRP::getSideInfo( PNOR::SideId i_side,
 errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                    PNOR::SectionInfo_t& o_info )
 {
-    //TRACDCOMP(g_trac_pnor, "PnorRP::getSectionInfo> i_section=%d", i_section );
+    TRACDCOMP(g_trac_pnor, "PnorRP::getSectionInfo> i_section=%d", i_section );
+
     errlHndl_t l_errhdl = NULL;
     PNOR::SectionId id = i_section;
 
@@ -541,8 +519,11 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.name = cv_EYECATCHER[id];
 
 #ifdef CONFIG_SECUREBOOT
-        // handle HB_EXT_CODE in SPnorRP's address space
-        if (o_info.id == HB_EXT_CODE)
+        // handle secure sections in SPnorRP's address space
+        if (o_info.id == HB_EXT_CODE ||
+            o_info.id == HB_DATA ||
+            o_info.id == SBE_IPL ||
+            o_info.id == CENTAUR_SBE)
         {
             // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
             // address into a secure pnor address, since pnor, temp, and spnor
@@ -1421,7 +1402,11 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
             // TODO RTC: 156118 Remove the HBI size workaround
             size_t extra = 0;
 #ifdef CONFIG_SECUREBOOT
-            extra = (id==PNOR::HB_EXT_CODE) ? PAGE_SIZE : 0;
+            bool isSecure = (id == HB_EXT_CODE ||
+                             id == HB_DATA ||
+                             id == SBE_IPL ||
+                             id == CENTAUR_SBE);
+            extra = (isSecure) ? PAGE_SIZE : 0;
 #endif
             if( (i_vaddr >= iv_TOC[id].virtAddr)
                 && (i_vaddr < (iv_TOC[id].virtAddr + iv_TOC[id].size

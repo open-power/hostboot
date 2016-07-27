@@ -451,16 +451,22 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                             ((o_TOC[secId].size * 8 ) / 9);
                     }
 
-                    // TODO RTC: 156118
-                    // - Don't skip headers/increment size if secure section.
-                    // - Don't allow skipping header if secure section.
-                    if (o_TOC[secId].version == FFS_VERS_SHA512)
+                    // @TODO RTC:153773 move header handling to secure pnor rp
+                    // Don't skip header if verification is needed.
+                    bool isSecure = false;
+                    #ifdef CONFIG_SECUREBOOT
+                    isSecure = (secId == PNOR::HB_EXT_CODE) ||
+                               (secId == PNOR::HB_DATA) ||
+                               (secId == PNOR::SBE_IPL) ||
+                               (secId == PNOR::CENTAUR_SBE);
+                    #endif
+                    if (o_TOC[secId].version == FFS_VERS_SHA512 || isSecure)
                     {
                         uint32_t l_addr = o_TOC[secId].flashAddr;
 
                         size_t l_headerSize = 0;
                     #ifdef CONFIG_SECUREBOOT
-                        if(strcmp(cur_entry->name,"HBI") != 0)
+                        if(!isSecure)
                         {
                     #endif
                             TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
@@ -567,7 +573,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                         // TODO RTC: 156118 Remove the HBI size workaround
                         size_t extra = 0;
 #ifdef CONFIG_SECUREBOOT
-                        extra = (secId==PNOR::HB_EXT_CODE) ? PAGESIZE : 0;
+                        extra = isSecure ? PAGESIZE : 0;
 #endif
                         int rc = mm_set_permission(
                                             (void*)o_TOC[secId].virtAddr,

@@ -149,6 +149,7 @@ errlHndl_t getSideInfo (SideId i_side, SideInfo_t& o_info);
 errlHndl_t getSectionInfo( SectionId i_section,
                            SectionInfo_t& o_info );
 
+#ifdef CONFIG_SECUREBOOT
 /**
  *  @brief Loads requested PNOR section to secure virtual address space
  *
@@ -178,6 +179,7 @@ errlHndl_t loadSecureSection(SectionId i_section);
  *  @retval !NULL Failed to unload PNOR section
  */
 errlHndl_t unloadSecureSection(SectionId i_section);
+#endif // CONFIG_SECUREBOOT
 
 /**
  * @brief  Write the data back from hostboot memory to PNOR of a given section
