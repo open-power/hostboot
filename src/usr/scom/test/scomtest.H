@@ -625,7 +625,7 @@ public:
       } test_data[] = {
           { scom_targets[myPROC0], 0x900003210D010BEE, 0x0004432112344321, false}, // Form 1
           { scom_targets[myPROC0], 0x9000012307011BEE, 0x000443211234ABAB, false }, // Form 1
-          { scom_targets[myPROC0], 0x9000000007011BEE, 0x123443211234ABAB, true }, // Form 1  
+          { scom_targets[myPROC0], 0x9000000007011BEE, 0x123443211234ABAB, true }, // Form 1
           { scom_targets[myPROC0], 0x9FEEDB0B0DEADBEE, 0x000443211234ABAB, true }, // Form 1
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
@@ -648,7 +648,7 @@ public:
                                &(test_data[x].data),
                                op_size,
                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-   
+
           if(!test_data[x].isFail && l_err )
           {
               TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomForm1_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
@@ -713,8 +713,8 @@ public:
           {
               TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWriteForm1_proc> [%d] Read: Data miss-match : addr=0x%X, read_form1data=0x%llx, write_data=0x%llx", x, read_addresses[x].addr, read_form1data[x], test_data[x].data);
               TS_FAIL( "ScomTest::test_IndirectScomreadWriteForm1_proc> ERROR : Data miss-match between read and expected data" );
-              fails++; 
-          } 
+              fails++;
+          }
       }
 
       // allocate space for read data
@@ -798,6 +798,7 @@ public:
         myOCC1,
         mySBE0,
         mySBE1,
+        myCAPP0,
         NUM_TARGETS
     };
 
@@ -1021,6 +1022,8 @@ public:
     // remove SBE1 target
     epath.removeLast();
 
+    epath.addLast(TARGETING::TYPE_CAPP,0);
+    scom_targets[myCAPP0] = TARGETING::targetService().toTarget(epath);
     struct {
     TARGETING::Target* target;
     uint64_t initAddr;
@@ -1094,6 +1097,7 @@ public:
     { scom_targets[myNV1], 0x050110D4, 0x050110F4,false},
     { scom_targets[myNV0], 0x12012826, 0x12012826, true},
     { scom_targets[myNV1], 0x24030008, 0x24030008, true},
+    { scom_targets[myCAPP0],0x2010803, 0x2010803, false},
     };
 
     int numOfAddr = sizeof test_data / sizeof(test_data[0]);

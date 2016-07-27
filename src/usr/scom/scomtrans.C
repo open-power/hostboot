@@ -161,7 +161,10 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     TARGETING::TYPE_OCC,
                     startScomProcess);
 
-
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                        DeviceFW::SCOM,
+                        TARGETING::TYPE_CAPP,
+                        startScomProcess);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -628,6 +631,11 @@ bool getChipUnit (TARGETING::TYPE i_type,
         case(TARGETING::TYPE_OCC) :
         {
             o_chipUnit = PU_OCC_CHIPUNIT;
+            break;
+        }
+        case(TARGETING::TYPE_CAPP) :
+        {
+            o_chipUnit = PU_CAPP_CHIPUNIT;
             break;
         }
         //Need to add centaur support for Cumulus
