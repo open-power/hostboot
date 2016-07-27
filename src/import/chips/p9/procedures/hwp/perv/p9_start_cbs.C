@@ -48,10 +48,11 @@
 
 enum P9_START_CBS_Private_Constants
 {
-    P9_CFAM_CBS_POLL_COUNT = 600, // Observed Number of times CBS read for CBS_INTERNAL_STATE_VECTOR
+    P9_CFAM_CBS_POLL_COUNT = 20, // Observed Number of times CBS read for CBS_INTERNAL_STATE_VECTOR
     CBS_IDLE_VALUE = 0x002, // Read the value of CBS_CS_INTERNAL_STATE_VECTOR
-    P9_CBS_IDLE_HW_NS_DELAY = 100000, // unit is nano seconds
-    P9_CBS_IDLE_SIM_CYCLE_DELAY = 250000 // unit is sim cycles
+    P9_CBS_IDLE_HW_NS_DELAY = 640000, // unit is nano seconds [min : 64k x (1/100MHz) = 64k x 10(-8) = 640 us
+    //                       max : 64k x (1/50MHz) = 128k x 10(-8) = 1280 us]
+    P9_CBS_IDLE_SIM_CYCLE_DELAY = 7500000 // unit is sim cycles,to match the poll count change( 250000 * 30 )
 };
 
 fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -98,7 +99,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
                                     l_data32_cbs_cs));
 
-    // HW319150 - pervSoA:  cbs_start is implemented as pulse 0 -> 1
+
     FAPI_DBG("Triggering CFAM Boot Sequencer (CBS) to start");
     //Setting CBS_CS register value
     l_data32_cbs_cs.setBit<0>();  //CFAM.CBS_CS.CBS_CS_START_BOOT_SEQUENCER = 1
