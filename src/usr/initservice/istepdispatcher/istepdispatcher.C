@@ -88,14 +88,8 @@ namespace   INITSERVICE
 /******************************************************************************/
 extern trace_desc_t *g_trac_initsvc;
 const MBOX::queue_id_t HWSVRQ = MBOX::IPL_SERVICE_QUEUE;
-const uint8_t INNER_START_STEP = 12;
-const uint8_t INNER_START_SUBSTEP = 1;
-const uint8_t INNER_STOP_STEP = 12;
-const uint8_t INNER_STOP_SUBSTEP = 5;
-const uint8_t OUTER_START_STEP = 10;
-const uint8_t OUTER_START_SUBSTEP = 1;
-const uint8_t OUTER_STOP_STEP = 14;
-const uint8_t OUTER_STOP_SUBSTEP = 5;
+const uint8_t SW_RECONFIG_START_STEP = 7;
+const uint8_t SW_RECONFIG_START_SUBSTEP = 1;
 const uint8_t HB_START_ISTEP = 6;
 
 // @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
@@ -372,6 +366,11 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     uint32_t substep = 0;
     bool l_doReconfig = false;
     uint32_t numReconfigs = 0;
+
+    // soft reconfig loops happen really fast
+    // and since for scale-out systems it only happens for istep 7
+    // there is no significant max time delay to recover the system
+    // because all in all other steps it will result in TI
     const uint32_t MAX_NUM_RECONFIG_ATTEMPTS = 30;
 
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::executeAllISteps()");
@@ -1945,43 +1944,30 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
                                     uint8_t & o_newSubstep)
 {
     bool doReconfigure = false;
-    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::checkReconfig(): istep %d.%d",
+    TRACDCOMP(g_trac_initsvc,
+              ENTER_MRK"IStepDispatcher::checkReconfig(): istep %d.%d",
               i_curIstep, i_curSubstep);
 
-    uint16_t current = (i_curIstep << 8) | i_curSubstep;
-    const uint16_t INNER_START = (INNER_START_STEP << 8) | INNER_START_SUBSTEP;
-    const uint16_t INNER_STOP = (INNER_STOP_STEP << 8) | INNER_STOP_SUBSTEP;
-    const uint16_t OUTER_START = (OUTER_START_STEP << 8) | OUTER_START_SUBSTEP;
-    const uint16_t OUTER_STOP = (OUTER_STOP_STEP << 8) | OUTER_STOP_SUBSTEP;
-
-    // TODO RTC:101925. PRD enables FIRs in Istep 11. If Istep 12 deconfigures
-    // HW that is asserting FIRs and performs the Inner Reconfig Loop then PRD
-    // ends up logging errors when it sees FIR bits for the deconfigured HW.
-    // The fix is to dispense with the Inner Reconfig Loop, if the code loops
-    // back to Istep 10 then everything is cleaned up. This issue will be
-    // resolved with RTC 101925
-    const bool INNER_LOOP_ENABLED = false;
-
-    // If current step is within major step 12
-    if ( INNER_LOOP_ENABLED &&
-         ((current >= INNER_START) && (current <= INNER_STOP)) )
+    //@TODO-RTC:158411 for Cumulus support reconfig logic needs to be updated
+    // Software reconfig loop happens in istep 7 only.
+    // The rest of the isteps should result in TI path for scale-out systems
+    if( (i_curIstep == SW_RECONFIG_START_STEP)
+            && (i_curSubstep >= SW_RECONFIG_START_SUBSTEP ) )
     {
+        TRACDCOMP(g_trac_initsvc,
+        ENTER_INFO"checkReconfig(): SW RECONFIGURE is ON at istep %d.%d",
+           i_curIstep, i_curSubstep);
         doReconfigure = true;
-        // Loop back to 12.1
-        o_newIstep = INNER_START_STEP;
-        o_newSubstep = INNER_START_SUBSTEP;
-    }
-    // Else if current step is outside of 12 but in step 10, 11, 13 or
-    // 14 (up to 14.5)
-    else if ((current >= OUTER_START) && (current <= OUTER_STOP))
-    {
-        doReconfigure = true;
-        // Loop back to 10.1
-        o_newIstep = OUTER_START_STEP;
-        o_newSubstep = OUTER_START_SUBSTEP;
-    }
+        o_newIstep = SW_RECONFIG_START_STEP;
+        o_newSubstep = SW_RECONFIG_START_SUBSTEP;
+    }else
+     {
+        //remember that TI will be requested for all other steps outside
+        //software reconfig istep 7 in NIMBUS for scale-out systems
+     }
 
-    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::checkReconfig: reconfig new istep/substep: %d %d.%d",
+     TRACDCOMP(g_trac_initsvc,
+       EXIT_MRK"IStepDispatcher::checkReconfig: new istep/substep: %d %d.%d",
               doReconfigure, o_newIstep, o_newSubstep);
 
     return doReconfigure;
