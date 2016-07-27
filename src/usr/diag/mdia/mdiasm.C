@@ -1076,6 +1076,7 @@ CommandMonitor & StateMachine::getMonitor()
 
 bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 {
+    MDIA_FAST("sm: processMaintCommandEvent");
 
     enum
     {
@@ -1088,9 +1089,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     uint64_t flags = 0;
 
-/* TODO RTC 145132
-    mss_MaintCmd * cmd = NULL;
-    ReturnCode fapirc;
+    TargetHandle_t target = NULL;
     errlHndl_t err = NULL;
 
     mutex_lock(&iv_mutex);
@@ -1126,10 +1125,11 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
         getMonitor().removeMonitor(wfp.timer);
 
-        cmd = static_cast<mss_MaintCmd *>(wfp.data);
+        target = getTarget(**wit);
+        TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
-        MDIA_FAST("sm: processing event for: %x, cmd: %p, type: %x",
-                get_huid(getTarget(wfp)), cmd, i_event.type);
+        MDIA_FAST("sm: processing event for: %x, target: %x, type: %x",
+                get_huid(getTarget(wfp)), get_huid(target), i_event.type);
 
         MaintCommandEventType eventType = i_event.type;
 
@@ -1145,8 +1145,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 & iv_globals.mfgPolicy)))
         {
             MDIA_FAST("sm: shutdown requested, overrding event "
-                      "for: %x, cmd: %p, type: %x, globals: %x",
-                get_huid(getTarget(wfp)), cmd,
+                      "for: %x, target: %p, type: %x, globals: %x",
+                get_huid(getTarget(wfp)), target,
                 i_event.type, iv_globals.mfgPolicy);
 
             eventType = STOP_TESTING;
@@ -1206,34 +1206,63 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 break;
         }
 
-        if(cmd && (flags & STOP_CMD))
+        //target type is MBA
+        if(TYPE_MBA == trgtType)
         {
-            MDIA_FAST("sm: stopping command: %p", cmd);
+            //TODO RTC 155857
+            //mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
+            //
+            //if(cmd && (flags & STOP_CMD))
+            //{
+            //    MDIA_FAST("sm: stopping command: %p", target);
 
-            fapirc = cmd->stopCmd();
-            err = fapiRcToErrl(fapirc);
+            //    fapi2::ReturnCode fapirc = cmd->stopCmd();
+            //    err = fapi2::rcToErrl(fapirc);
 
-            if(err)
+            //    if (nullptr != err)
+            //    {
+            //        MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+            //        errlCommit(err, MDIA_COMP_ID);
+            //    }
+            //}
+
+            //if(cmd && (flags & CLEANUP_CMD))
+            //{
+            //    // restore any init settings that
+            //    // may have been changed by the command
+
+            //    fapi2::ReturnCode fapirc = cmd->cleanupCmd();
+            //    err = fapi2::rcToErrl(fapirc);
+            //    if(nullptr != err)
+            //    {
+            //        MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+            //        errlCommit(err, MDIA_COMP_ID);
+            //    }
+            //}
+
+            //if(cmd && (flags & DELETE_CMD))
+            //{
+            //    delete cmd;
+            //}
+        }
+        //target type is MCBIST
+        else
+        {
+            if(flags & STOP_CMD)
             {
-                MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-                errlCommit(err, MDIA_COMP_ID);
+                MDIA_FAST("sm: stopping command: %p", target);
+
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
+                fapi2::ReturnCode fapirc = memdiags::stop(fapiMcbist);
+                err = fapi2::rcToErrl(fapirc);
+
+                if(nullptr != err)
+                {
+                    MDIA_ERR("sm: memdiags::stop failed");
+                    errlCommit(err, MDIA_COMP_ID);
+                }
             }
         }
-
-        if(cmd && (flags & CLEANUP_CMD))
-        {
-            // restore any init settings that
-            // may have been changed by the command
-
-            fapirc = cmd->cleanupCmd();
-            err = fapiRcToErrl(fapirc);
-            if(err)
-            {
-                MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-                errlCommit(err, MDIA_COMP_ID);
-            }
-        }
-
         // schedule the next work item
         if((flags & START_NEXT_CMD) && !iv_shutdown)
         {
@@ -1245,12 +1274,6 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     }
 
     mutex_unlock(&iv_mutex);
-
-    if(cmd && (flags & DELETE_CMD))
-    {
-        delete cmd;
-    }
-*/
 
     return (flags & DISPATCHED);
 }
