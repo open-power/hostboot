@@ -591,6 +591,46 @@ class MdiaSmTest : public CxxTest::TestSuite
 
         }
 
+        void testProcessMaintCommandEvent(void)
+        {
+            TS_TRACE(ENTER_MRK "testProcessMaintCommandEvent");
+
+            StateMachine sm;
+            WorkFlowAssocMap list;
+            TargetHandleList targets;
+
+            getTargets(2, targets);
+
+            list[targets[0]].push_back(DUMMY_SYNC_PHASE);
+            list[targets[1]].push_back(DUMMY_SYNC_PHASE);
+
+            sm.setup(list);
+
+            TargetHandleList mcbistList;
+            getAllChiplets(mcbistList, TYPE_MCBIST);
+            TargetHandle_t mcbist = mcbistList[0];
+
+            MaintCommandEvent event;
+            event.target = mcbist;
+            event.type = COMMAND_COMPLETE;
+            bool rc = false;
+
+            rc = sm.processMaintCommandEvent(event);
+            if (true == rc)
+            {
+                TS_TRACE("testProcessMaintCommandEvent: "
+                         "a work item was dispatched");
+            }
+            else
+            {
+                TS_TRACE("testProcessMaintCommandEvent: "
+                         "a work item was not dispatched");
+
+            }
+
+            TS_TRACE(EXIT_MRK "testProcessMaintCommandEvent");
+        }
+
         void testSmRun(void)
         {
             using namespace MDIA;
