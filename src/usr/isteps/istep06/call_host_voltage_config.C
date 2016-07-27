@@ -52,10 +52,9 @@ void* call_host_voltage_config( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_voltage_config entry" );
-// TODO RTC:157341 RE-enabled this after form 3 #v gets merged
 
     ISTEP_ERROR::IStepError l_stepError;
-#if 0
+
     errlHndl_t l_err = nullptr;
     Target * l_sys = nullptr;
     TargetHandleList l_procList;
@@ -290,7 +289,6 @@ void* call_host_voltage_config( void *io_pArgs )
         errlCommit( l_err, ISTEP_COMP_ID );
 
     }
-#endif
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_voltage_config exit" );
 
