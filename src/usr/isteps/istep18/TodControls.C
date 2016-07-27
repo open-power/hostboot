@@ -537,164 +537,6 @@ errlHndl_t  TodControls::buildTodDrawers(
 }
 
 //******************************************************************************
-//TodControls::getTodConfigState
-//******************************************************************************
-errlHndl_t TodControls::getTodConfigState(
-        TOD_CONFIG_STATE& o_configState,
-        proc_tod_setup_tod_sel& o_activeConfig,
-        bool& o_isTodRunning)const
-{
-    TOD_ENTER("getTodConfigState");
-    errlHndl_t l_errHdl = NULL;
-    o_configState = TOD_UNCHANGED;
-    o_activeConfig = TOD_PRIMARY;
-    o_isTodRunning = false;
-
-    do
-    {
-        //Get the currently active TOD configuration
-        l_errHdl = queryActiveConfig (o_activeConfig,o_isTodRunning);
-        if ( l_errHdl )
-        {
-            TOD_ERR("Call to queryActiveConfig failed ");
-            break;
-        }
-        //Need to read the TodSystemFile to decide if HW configuration has
-        //changed since the last time TOD was configured
-        std::vector<TodChipData> l_todChipDataVector;
-        l_errHdl = TodControls::readTodProcDataFromFile(l_todChipDataVector);
-        if ( l_errHdl ) //Indicates hard failure not limited to failure of tod
-            //logic only, we cannot continue with flow
-        {
-            TOD_ERR("Failed loading TodChipData from TodSystemFile");
-            break;
-        }
-
-        //Determine if the TOD HW has changed since the last time topology was
-        //created
-        //1) File data is valid but HW has changed => Report TOD_MODIFIED
-        //2) File data is valid and HW has not changed => Report TOD_UNCHANGED
-        //3) Authenticity of file data is in question => Report
-        //TOD_UNKNOWN
-
-        //Check if TodSystemFile has topology data for atleast one node
-        if ( hasNoValidData ( l_todChipDataVector ))
-        {
-            TOD_INF("No valid data found in the file TodSystemFile");
-            o_configState = TOD_UNKNOWN;
-            break;
-        }
-
-        //For each functional processor present in the system, if we
-        //have, old  configuration data in the TodSystemConfig file then
-        //validate it.
-
-        //Get the processors present in the system
-        TARGETING::PredicateCTM
-            l_procFilter(TARGETING::CLASS_CHIP,TARGETING::TYPE_PROC,
-                    TARGETING::MODEL_NA);
-
-        TARGETING::PredicateHwas l_presencePredicate;
-        l_presencePredicate.present(true);
-
-        TARGETING::PredicatePostfixExpr l_presenceAndProcChipFilter;
-        l_presenceAndProcChipFilter.push(&l_procFilter).
-            push(&l_presencePredicate).And();
-
-        TARGETING::TargetRangeFilter l_filter(
-                TARGETING::targetService().begin(),
-                TARGETING::targetService().end(),
-                &l_presenceAndProcChipFilter);
-
-        bool l_state = false;  //Variable for keeping functional state of
-        //the processor
-        uint32_t l_ordinalId = TOD_INVALID_UNITID;
-        //Initializing to some value not expected to be ordinal id
-
-        ecmdDataBufferBase l_chipCtrlRegBuf(64);
-
-        //Initialize l_chipCtrlRegBuf it will be used later
-
-        FAPI_INVOKE_HWP(l_errHdl, init_chip_ctrl_reg, l_chipCtrlRegBuf);
-        if ( l_errHdl )
-        {
-            TOD_ERR("init_chip_ctrl_reg returned error ");
-            break;
-        }
-
-        for ( ; l_filter ; ++l_filter )
-        {
-            l_state = false;
-            if ((*l_filter)->getAttr<ATTR_HWAS_STATE>().functional)
-            {
-                l_state = true;
-            }
-
-            // use position attribute on one drawer only machine
-            l_ordinalId=(*l_filter)->getAttr<ATTR_POSITION>();
-
-            if ( l_state ) //Functional processor
-            {
-                //Check if TodSystemData file also indicates the processor as
-                //functional
-
-                //Indexing into l_todChipDataVector is safe as size of vector is
-                //always determined by the maximum possible processors for this
-                //system type
-                if(((l_todChipDataVector[l_ordinalId].header.flags) &
-                            TOD_FUNC) != 0 )
-                {
-
-                    //File data says that the chip is functional do some more
-                    //validation on the data
-
-                    //Check if the chip control register (0x40010) data is valid
-                    //This data does not depend on topology, so it should tally
-                    if ( (l_todChipDataVector[l_ordinalId].regs.ccr) !=
-                            l_chipCtrlRegBuf.getWord(0)  )
-                    {
-                        TOD_INF("Chip control register read from TodSystemData"
-                                "is not valid for the processor 0x%08X",
-                                (*l_filter)->getAttr<TARGETING::ATTR_HUID>());
-                        //We do not have a valid data no need to continue
-                        //further
-                        o_configState = TOD_UNKNOWN;
-                        break;
-                    }
-                }
-                else
-                {
-                    //New hardware has been added
-                    TOD_INF("New processor detected 0x%08X",
-                            (*l_filter)->getAttr<ATTR_HUID>());
-                    o_configState = TOD_MODIFIED;
-                }
-
-            }
-            else
-            {
-                //Check if this chip was functional earlier
-                if ( ((l_todChipDataVector[l_ordinalId].header.flags) &
-                            TOD_FUNC) != 0 )
-                {
-                    //HW has been removed
-                    o_configState = TOD_MODIFIED;
-                    TOD_INF("Processor 0x%08X is no more available ",
-                            (*l_filter)->getAttr<ATTR_HUID>());
-                }
-            }
-        }
-
-    }while(0);
-
-    TOD_EXIT(" config state = %d, active config = %d, TOD HW State = "
-            "%d errHdl = %p",
-            o_configState, o_activeConfig , o_isTodRunning, l_errHdl);
-
-    return l_errHdl;
-}
-
-//******************************************************************************
 //TodControls::isTodRunning
 //******************************************************************************
 errlHndl_t TodControls::isTodRunning(bool& o_isTodRunning)const
@@ -1038,6 +880,11 @@ errlHndl_t TodControls::writeTodProcData(
 
         TodChipData blank;
         uint32_t l_maxProcCount = getMaxProcsOnSystem();
+        Target* l_target = NULL;
+
+        //the size of the attribute needs to accomodate the size of the struct
+        TOD_ASSERT(sizeof(TodChipData) == sizeof(ATTR_TOD_CPU_DATA_type),
+                "sizeof TodChipData and attribute are different");
 
         TOD_INF("Max possible processor chips for this system when configured "
                 "completely is %d",l_maxProcCount);
@@ -1119,15 +966,13 @@ errlHndl_t TodControls::writeTodProcData(
 
                 }
 
-            }
-        }
+                ATTR_TOD_CPU_DATA_type l_tod_array;
+                memcpy(l_tod_array,
+                       &iv_todChipDataVector[l_ordId],sizeof(TodChipData));
 
-        //Done with setting the data write it to the file
-        l_errHdl = writeTodProcDataToFile();
-        if ( l_errHdl )
-        {
-            TOD_ERR( "Failed writing TOD chip data to the file ");
-            break;
+                l_target = const_cast<Target *>((*l_procItr)->getTarget());
+                l_target->setAttr<ATTR_TOD_CPU_DATA>(l_tod_array);
+            }
         }
 
     }while(0);
@@ -1136,214 +981,6 @@ errlHndl_t TodControls::writeTodProcData(
     return l_errHdl;
 
 }//end of writeTodProcData
-
-
-//******************************************************************************
-//TodControls::writeTodProcDataToFile()
-//******************************************************************************
-errlHndl_t TodControls::writeTodProcDataToFile()
-{
-    TOD_ENTER("writeTodProcDataToFile");
-    errlHndl_t l_errHdl = NULL;
-#ifndef __HOSTBOOT_MODULE
-    do
-    {
-        std::string l_fileOpenMode(FILE_WRITE_MODE);
-        char l_fileName[128];
-        l_errHdl = getTodProcDataFilePath(l_fileName);
-        if(l_errHdl)
-        {
-            TOD_ERR("Failed getting the file path for sharing TOD data with "
-                    "   HDAT ");
-            break;
-        }
-
-        //Create the parent directory in which file has to be written
-        std::string l_dirPath = l_fileName.substr
-            (0,l_fileName.find_last_of(DIR_PATH_SERERATOR));
-        int rc = mkdir(l_dirPath.c_str(),DIR_CREATION_MODE);
-
-        if ( rc != 0 )
-        {
-            //EEXIST just means it already exists, which is fine
-            if (errno != EEXIST)
-            {
-                TOD_ERR("Error creating the directory %s "
-                        "system returned error code %d",
-                        l_dirPath.c_str(),errno);
-                break;
-            }
-        }
-
-        UtilFile file;
-        l_errHdl = file.open(l_fileName.c_str(), l_fileOpenMode.c_str());
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed opening the file %s, with mode %s" ,
-                    l_fileName.c_str(),l_fileOpenMode.c_str());
-            break;
-        }
-
-        TodChipDataContainer::iterator l_chipDataItr =
-            iv_todChipDataVector.begin();
-        file.write(reinterpret_cast<void *>((&(*l_chipDataItr))),
-                (iv_todChipDataVector.size()* sizeof(TodChipData)));
-
-        l_errHdl = file.getLastError();
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed writing the tod chip data to file ");
-            break;
-        }
-
-        l_errHdl = file.close();
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed closing the file %s",  l_fileName.c_str());
-            break;
-        }
-
-    }while(0);
-#endif
-    TOD_EXIT("writeTodProcDataToFile. errHdl = %p", l_errHdl);
-    return l_errHdl;
-
-}
-
-//*****************************************************************************
-//TodControls::readTodProcDataFromFile
-//******************************************************************************
-errlHndl_t TodControls::readTodProcDataFromFile(
-        std::vector<TodChipData>& o_todChipDataVector )const
-{
-    TOD_ENTER("readTodProcDataFromFile");
-    errlHndl_t l_errHdl = NULL;
-#ifndef __HOSTBOOT_MODULE
-    do
-    {
-        std::string l_todProcDataFile;
-        UtilFile l_file;
-
-        l_errHdl = getTodProcDataFilePath(l_todProcDataFile);
-        if(l_errHdl)
-        {
-            TOD_ERR("Failed getting the path of TodSystemFile ");
-            break;
-        }
-
-        if ( !UtilFile::exists(l_todProcDataFile.c_str()))
-        {
-            TOD_INF("File %s , does not exist",l_todProcDataFile.c_str());
-            break;
-        }
-
-        //Open the file for reading
-        l_errHdl = l_file.open(l_todProcDataFile.c_str(),FILE_READ_MODE);
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed opening the file %s, with mode %s" ,
-                    l_todProcDataFile.c_str(),FILE_READ_MODE);
-            break;
-        }
-
-        //The amount of data stored on TodSystemFile always depend on the
-        //maximum processor possible for the given system type
-        uint32_t l_maxProcCount = getMaxProcsOnSystem();
-
-        uint32_t l_bytesToRead = l_file.size();
-
-        if ( (l_bytesToRead == 0)  || (l_bytesToRead > (l_maxProcCount *
-            sizeof(TodChipData))))  //Check for further safeguards
-        {
-            TOD_ERR("Error, File %s is corrupted"
-                    ,l_todProcDataFile.c_str());
-
-            //Commit this locally, because system can still proceed if TOD HW is
-            //not running
-            l_errHdl->commit(HWSV_COMP_ID, ERRL_ACTION_REPORT,
-                    ERRL_SEV_INFORMATIONAL);
-            delete l_errHdl;
-            l_errHdl = 0;
-            break;
-        }
-
-        TodChipData blank;
-        o_todChipDataVector.assign(l_maxProcCount,blank); //Allocate memory with
-        //default values
-
-        //Read the data from file
-        l_file.read(reinterpret_cast<void *>(&(*(o_todChipDataVector.begin()))),
-                l_bytesToRead);
-
-
-        l_errHdl = l_file.getLastError();
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed reading tod chip data from file ");
-            break;
-
-        }
-
-        l_errHdl = l_file.close();
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed closing the file %s", l_todProcDataFile.c_str());
-            break;
-        }
-        //Not going to close the file in error path , UtilFile will close it.
-
-    }while(0);
-#endif
-     TOD_EXIT("readTodProcDataFromFile. errHdl = %p", l_errHdl);
-     return l_errHdl;
-}
-
-//******************************************************************************
-//TodControls::getTodProcDataFilePath()
-//******************************************************************************
-errlHndl_t TodControls::getTodProcDataFilePath(char * o_fileName)
-    const
-{
-    TOD_ENTER("getTodProcDataFilePath");
-    errlHndl_t l_errHdl = NULL;
-#ifndef __HOSTBOOT_MODULE
-    char *l_buf = NULL;
-    do
-    {
-        uint32_t     l_fileSize = 0;
-        const char* l_stringToAppend = NULL;
-        const char* l_filePathKey[2] =
-        {   P1_ROOT_PATH,
-            CINI_SYSTODFILE_PATH
-        };
-
-
-        l_errHdl = UtilReg::path(l_filePathKey,(sizeof(l_filePathKey) /
-        sizeof(l_filePathKey[0])),
-        l_stringToAppend,l_buf,l_fileSize);
-
-        if ( l_errHdl )
-        {
-            TOD_ERR("Failed getting file path from the registry using keys"
-            "P1_ROOT_PATH and CINI_SYSTODFILE_PATH " );
-            break;
-        }
-
-        o_fileName = std::string(l_buf);
-        TOD_INF("Found file path %s",o_fileName.c_str());
-
-
-    }while(0);
-
-    if ( l_buf )
-    {
-        delete l_buf;
-    }
-#endif
-    TOD_EXIT("getTodProcDataFilePath. errHdl = %p", l_errHdl);
-    return l_errHdl;
-}
-
 
 //******************************************************************************
 //HwsvTodControls::hasNoValidData()
@@ -1367,5 +1004,54 @@ bool TodControls::hasNoValidData(const std::vector<TodChipData>&
     return result;
 }
 
+
+//*****************************************************************************
+//TodControls::getTodProcDataFromAttribute()
+//******************************************************************************
+errlHndl_t TodControls::getTodProcDataFromAttribute(
+        std::vector<TodChipData>& o_todChipDataVector )const
+{
+    TOD_ENTER("getTodProcDataFromAttribute()");
+    errlHndl_t l_errHdl = NULL;
+
+    do
+    {
+        TodChipData l_todData;
+        memset(&l_todData,0,sizeof(TodChipData));
+        ATTR_TOD_CPU_DATA_type l_arrayVal;
+
+        //the size of the attribute needs to accommodate the size of the struct
+        TOD_ASSERT(sizeof(TodChipData) == sizeof(ATTR_TOD_CPU_DATA_type),
+                "sizeof TodChipData and attribute different");
+
+        //The amount of data stored on TodSystemFile always depend on the
+        //maximum processor possible for the given system type
+        uint32_t l_maxProcCount = getMaxProcsOnSystem();
+
+        TodChipData blank;
+
+        //Allocate memory
+        o_todChipDataVector.assign(l_maxProcCount,blank);
+
+        TARGETING::TargetHandleList l_procListA;
+        getAllChips(l_procListA, TYPE_PROC);
+
+        bool l_read=0;
+        for(TargetHandleList::const_iterator proc = l_procListA.begin();
+                 proc != l_procListA.end(); ++proc)
+        {
+            l_read =
+               (*proc)->tryGetAttr<TARGETING::ATTR_TOD_CPU_DATA>(l_arrayVal);
+            TOD_ASSERT(l_read==true, "ATTR_TOD_CPU_DATA not found");
+            memcpy(&l_todData, l_arrayVal, sizeof(TodChipData));
+            o_todChipDataVector
+            [(*proc)->getAttr<TARGETING::ATTR_POSITION>()]= l_todData;
+        }
+
+    }while(0);
+    TOD_EXIT("getTodProcDataFromAttribute(). errHdl = %p", l_errHdl);
+
+    return l_errHdl;
+}
 
 }//end of namespace

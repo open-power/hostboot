@@ -199,8 +199,7 @@ errlHndl_t TodSvc::todSetup()
         l_errHdl = l_Tod.writeTodProcData(TOD_PRIMARY);
         if(l_errHdl)
         {
-            TOD_ERR("TOD setup failure:Failed to write topology register data"
-            " to the file.");
+            TOD_ERR("TOD setup: Failed to write topology register data");
         }
     }
 

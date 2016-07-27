@@ -277,14 +277,46 @@
         <name>TPM</name>
         <value>49</value>
     </enumerator>
-    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
-        <name>TEST_FAIL</name>
+        <name>SP</name>
         <value>50</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>UART</name>
         <value>51</value>
+    </enumerator>
+    <enumerator>
+        <name>PS</name>
+        <value>52</value>
+    </enumerator>
+    <enumerator>
+        <name>FAN</name>
+        <value>53</value>
+    </enumerator>
+    <enumerator>
+        <name>VRM</name>
+        <value>54</value>
+    </enumerator>
+    <enumerator>
+        <name>USB</name>
+        <value>55</value>
+    </enumerator>
+    <enumerator>
+        <name>ETH</name>
+        <value>56</value>
+    </enumerator>
+    <enumerator>
+        <name>PANEL</name>
+        <value>57</value>
+    </enumerator>
+    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <enumerator>
+        <name>TEST_FAIL</name>
+        <value>58</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>59</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -2736,8 +2768,8 @@
             <default>0</default>
         </field>
         <field>
-            <name>reserved</name>
-            <description>Reserved for future use</description>
+            <name>MinorIPLType</name>
+            <description>Minor IPL Type</description>
             <type>uint8_t</type>
             <bits>7</bits>
             <default>0</default>
@@ -31449,5 +31481,21 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>TOD_CPU_DATA</id>
+    <description>TOD CHIP DATA for each CHIP
+        The size of the TOD CHIP DATA must be equal to the sizeof(TodChipData)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    <!-- the size of the array must be equal to the sizeof(TodChipData)
+    defined in TodTypes.H  -->
+        <array>44</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 </attributes>
