@@ -189,6 +189,7 @@ clobber_build_sbe_partitions:
 #	   --fpartCmd "${FPARTCMD}" --fcpCmd "${FCPCMD}"
 ##################################################
 PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
+GEN_FAKE_HEADER_SCRIPT = ${genfakeheader.pl:P}
 
 #early hostboot use of this makefile will be against FSP drivers lacking fips_pnor.mk
 #so need to use tryinclude for now.
