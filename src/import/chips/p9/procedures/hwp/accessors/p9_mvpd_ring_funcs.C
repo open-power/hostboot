@@ -40,6 +40,7 @@
 
 //      pull in CompressedScanData def from proc_slw_build HWP
 #include <p9_scan_compression.H>
+#include <p9_ring_identification.H>
 
 
 extern "C"
@@ -53,7 +54,11 @@ extern "C"
             uint8_t             i_ringId,
             uint32_t            i_ringBufsize);
 
-    fapi2::ReturnCode mvpdRingFuncFind( const uint8_t   i_chipletId,
+    fapi2::ReturnCode mvpdRingFuncFind( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                        & i_fapiTarget,
+                                        fapi2::MvpdRecord    i_record,
+                                        fapi2::MvpdKeyword   i_keyword,
+                                        const uint8_t   i_chipletId,
                                         const uint8_t   i_ringId,
                                         uint8_t*        i_pRecordBuf,
                                         uint32_t        i_recordBufLenfapi,
@@ -65,7 +70,11 @@ extern "C"
                                        uint8_t*     i_pCallerRingBuf,
                                        uint32_t&    io_rCallerRingBufLen);
 
-    fapi2::ReturnCode mvpdRingFuncSet( uint8_t*     i_pRecordBuf,
+    fapi2::ReturnCode mvpdRingFuncSet( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                       & i_fapiTarget,
+                                       fapi2::MvpdRecord    i_record,
+                                       fapi2::MvpdKeyword   i_keyword,
+                                       uint8_t*     i_pRecordBuf,
                                        uint32_t     i_recordLen,
                                        uint8_t*     i_pRing,
                                        uint32_t     i_ringLen,
@@ -177,7 +186,7 @@ extern "C"
                                    uint8_t*             i_pRingBuf,
                                    uint32_t&            io_rRingBufsize)
     {
-        fapi2::ReturnCode       l_fapirc;
+        fapi2::ReturnCode       l_fapirc = fapi2::FAPI2_RC_SUCCESS;
         uint32_t                l_recordLen  = 0;
         uint8_t*                l_recordBuf  = NULL;
         uint8_t*                l_pRing      = NULL;
@@ -254,7 +263,10 @@ extern "C"
         // find ring in the record. It is an error if not there for a "get".
         // Its ok if not there for a "set". The ring will be added.
         // l_ringLen set to 0 if not there with l_pRing at the start of padding.
-        FAPI_TRY(mvpdRingFuncFind(i_chipletId,
+        FAPI_TRY(mvpdRingFuncFind(i_fapiTarget,
+                                  i_record,
+                                  i_keyword,
+                                  i_chipletId,
                                   i_ringId,
                                   l_recordBuf,
                                   l_recordLen,
@@ -270,9 +282,9 @@ extern "C"
         {
             // ensure ring was found. Must be there for "get"
             FAPI_ASSERT(l_ringLen != 0,
-                        fapi2::REPAIR_RING_NOT_FOUND().
-                        set_RING_MODIFIER(i_ringId).
+                        fapi2::MVPD_RING_NOT_FOUND().
                         set_CHIP_TARGET(i_fapiTarget).
+                        set_RING_ID(i_ringId).
                         set_CHIPLET_ID(i_chipletId),
                         "mvpdRingFunc: mvpdRingFuncFind did not find ring");
 
@@ -289,7 +301,10 @@ extern "C"
         else         // set operation
         {
             // update record with caller's ring
-            FAPI_TRY(mvpdRingFuncSet(l_recordBuf,
+            FAPI_TRY(mvpdRingFuncSet(i_fapiTarget,
+                                     i_record,
+                                     i_keyword,
+                                     l_recordBuf,
                                      l_recordLen,
                                      l_pRing,
                                      l_ringLen,
@@ -364,12 +379,16 @@ extern "C"
      *
      *  @return     fapi2::ReturnCode
      */
-    fapi2::ReturnCode mvpdRingFuncFind( const uint8_t    i_chipletId,
-                                        const uint8_t    i_ringId,
-                                        uint8_t*         i_pRecordBuf,
-                                        uint32_t         i_recordBufLen,
-                                        uint8_t*&        o_rpRing,
-                                        uint32_t&        o_rRingLen)
+    fapi2::ReturnCode mvpdRingFuncFind(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                       & i_fapiTarget,
+                                       fapi2::MvpdRecord    i_record,
+                                       fapi2::MvpdKeyword   i_keyword,
+                                       const uint8_t    i_chipletId,
+                                       const uint8_t    i_ringId,
+                                       uint8_t*         i_pRecordBuf,
+                                       uint32_t         i_recordBufLen,
+                                       uint8_t*&        o_rpRing,
+                                       uint32_t&        o_rRingLen)
     {
         fapi2::ReturnCode       l_fapirc;
         uint8_t*                l_pRing         =   NULL;
@@ -387,7 +406,7 @@ extern "C"
 
         do
         {
-            //  point to #R record
+            //  Point to record
             l_pRing =   i_pRecordBuf;
 
             //  Find first RSA data block in ring (fixed offset defined by
@@ -400,39 +419,62 @@ extern "C"
             l_pRing++;
             l_offset    =   0;
 
+            // point to header of first ring in record
+            l_pScanData =
+                reinterpret_cast<CompressedScanData*>( l_pRing + l_offset );
+
             l_foundflag =   false;
 
             // be sure that data we will look at is within the passed buffer
-            while ( l_offset + sizeof(CompressedScanData) < i_recordBufLen )
+            while ( (l_offset + be32toh(l_pScanData->iv_size)) < i_recordBufLen )
             {
-                //  point to header
-                l_pScanData =
-                    reinterpret_cast<CompressedScanData*>( l_pRing + l_offset );
 
-                //  Check magic key to make sure this is a valid record.
-                FAPI_ASSERT(be32toh(l_pScanData->iv_magic) == RS4_MAGIC,
-                            fapi2::MVPD_RING_FUNC_INVALID_RECORD(),
-                            "mvpdRingFuncFind: Header 0x%x offset 0x%x, "
-                            "end of list chipletId=0x%x, ringId=0x%x",
-                            be32toh(l_pScanData->iv_magic),
-                            l_offset,
-                            i_chipletId,
-                            i_ringId);
+                // There's only two valid header words that may appear in the Mvpd record:
+                // - MVPD_END_OF_DATA_MAGIC which indicates end of the data with a record.
+                // - RS4_MAGIC which indicates the beginning of another VPD ring.
+                // - Anything else is a catastrophic failure.
 
-                //  dump record info for debug
+                // Check for end of data magic word
+                if ((be32toh(l_pScanData->iv_magic) & 0xffffff00) == (MVPD_END_OF_DATA_MAGIC & 0xffffff00))
+                {
+                    FAPI_DBG("mvpdRingFuncFind: Found end of data magic word (=0x%08X): "
+                             "offset=0x%x, chipletId=0x%x, ringId=0x%x",
+                             be32toh(l_pScanData->iv_magic),
+                             l_offset,
+                             i_chipletId,
+                             i_ringId);
+                    break;
+                }
+
+                // Check magic word to make sure this is valid data.
+                FAPI_ASSERT( (be32toh(l_pScanData->iv_magic) & 0xffffff00) == (RS4_MAGIC & 0xffffff00),
+                             fapi2::MVPD_INVALID_RS4_HEADER().
+                             set_CHIP_TARGET(i_fapiTarget).
+                             set_MVPD_RECORD(i_record).
+                             set_MVPD_KEYWORD(i_keyword),
+                             "mvpdRingFuncFind: Couldn't find RS4 or End-of-data magic word in header: "
+                             "Header=0x%x, offset=0x%x, ringId=0x%x, chipletId=0x%x",
+                             be32toh(l_pScanData->iv_magic),
+                             l_offset,
+                             i_ringId,
+                             i_chipletId );
+
+                // We can now assume good data...
+
+                // Dump record info for debug
                 FAPI_DBG("mvpdRingFuncFind:%d ringId=0x%x chipletId=0x%x"
                          " ringlen=0x%x size=0x%x",
                          l_offset,
                          l_pScanData->iv_ringId,
                          l_pScanData->iv_chipletId,
                          be32toh(l_pScanData->iv_length),
-                         be32toh(l_pScanData->iv_size)  );
+                         be32toh(l_pScanData->iv_size) );
 
 
-                if (    (l_pScanData->iv_ringId == i_ringId)
-                        && (l_pScanData->iv_chipletId == i_chipletId) )
+                if ( (l_pScanData->iv_ringId == i_ringId)
+                     && (l_pScanData->iv_chipletId == i_chipletId) )
                 {
-                    FAPI_DBG( "mvpdRingFuncFind: Found it: ring=0x%x, "
+                    FAPI_DBG( "mvpdRingFuncFind: Found it: ringId=0x%x, "
                               "chiplet=0x%x, ringlen=0x%x",
                               i_ringId,
                               i_chipletId,
@@ -441,11 +483,11 @@ extern "C"
                     // shouldn't happen, but does not all fit
                     FAPI_ASSERT(l_offset + be32toh(l_pScanData->iv_size) <=
                                 i_recordBufLen,
-                                fapi2::REPAIR_RING_INVALID_SIZE(),
+                                fapi2::MVPD_INSUFFICIENT_RECORD_SPACE(),
                                 "mvpdRingFuncFind: data does not fit "
-                                "chipletId=0x%x, ringId=0x%x",
-                                i_chipletId,
-                                i_ringId);
+                                "into record buffer: ringId=0x%x, chipletId=0x%x",
+                                i_ringId,
+                                i_chipletId );
 
                     l_foundflag =   true;
                     o_rpRing = l_pRing + l_offset;
@@ -463,6 +505,11 @@ extern "C"
 
                 // bump to next ring
                 l_offset += be32toh(l_pScanData->iv_size) ;
+
+                //  point to header
+                l_pScanData =
+                    reinterpret_cast<CompressedScanData*>( l_pRing + l_offset );
+
 
             }   // end while scan loop
 
@@ -521,7 +568,7 @@ extern "C"
                     "chipletId=0x%x, ringId=0x%x",
                     i_chipletId,
                     i_ringId);
-        FAPI_ASSERT(be32toh(i_pRingBuf->iv_magic) == RS4_MAGIC,
+        FAPI_ASSERT((be32toh(i_pRingBuf->iv_magic) & 0xffffff00) == (RS4_MAGIC & 0xffffff00),
                     fapi2::MVPD_RING_FUNC_INVALID_PARAMETER(),
                     "mvpdValidateRingHeader: i_pRingBuf->iv_magic failed "
                     "chipletId=0x%x, ringId=0x%x",
@@ -591,7 +638,7 @@ extern "C"
 
             //  check if we have enough space
             FAPI_ASSERT(io_rCallerRingBufLen >= i_ringLen,
-                        fapi2::REPAIR_RING_INVALID_SIZE(),
+                        fapi2::MVPD_RING_BUFFER_TOO_SMALL(),
                         "mvpdRingFuncGet: output buffer too small:  "
                         "0x%x < 0x%x",
                         io_rCallerRingBufLen,
@@ -612,7 +659,7 @@ extern "C"
         // get current error
         l_fapirc = fapi2::current_err;
 
-        if (l_fapirc.isRC(RC_REPAIR_RING_INVALID_SIZE))
+        if (l_fapirc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL))
         {
             //  return actual size of data, so caller can re-try with
             //  the correct value
@@ -653,7 +700,11 @@ extern "C"
      *
      *  @return     fapi2::ReturnCode
      */
-    fapi2::ReturnCode mvpdRingFuncSet( uint8_t*     i_pRecordBuf,
+    fapi2::ReturnCode mvpdRingFuncSet( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                       & i_fapiTarget,
+                                       fapi2::MvpdRecord    i_record,
+                                       fapi2::MvpdKeyword   i_keyword,
+                                       uint8_t*     i_pRecordBuf,
                                        uint32_t     i_recordLen,
                                        uint8_t*     i_pRing,
                                        uint32_t     i_ringLen,
@@ -691,7 +742,10 @@ extern "C"
             }
 
             // will need the end for shifting... look for something invalid
-            FAPI_TRY(mvpdRingFuncFind(0x00,
+            FAPI_TRY(mvpdRingFuncFind(i_fapiTarget,
+                                      i_record,
+                                      i_keyword,
+                                      0x00,
                                       0x00,
                                       i_pRecordBuf,
                                       i_recordLen,
@@ -707,8 +761,8 @@ extern "C"
             {
                 FAPI_ASSERT(l_pRingEnd + i_callerRingBufLen <=
                             i_pRecordBuf + i_recordLen,
-                            fapi2::MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE(),
-                            "mvpdRingFuncSet: not enough room to append");
+                            fapi2::MVPD_INSUFFICIENT_RECORD_SPACE(),
+                            "mvpdRingFuncSet: not enough record space to append");
 
                 l_to = i_pRing;
                 l_fr = i_pCallerRingBuf;
@@ -763,8 +817,8 @@ extern "C"
                 // ensure the padding can contain the growth
                 FAPI_ASSERT((l_pRingEnd + (i_callerRingBufLen - i_ringLen)) <=
                             (i_pRecordBuf + i_recordLen),
-                            fapi2::MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE(),
-                            "mvpdRingFuncSet: not enough room to insert");
+                            fapi2::MVPD_INSUFFICIENT_RECORD_SPACE(),
+                            "mvpdRingFuncSet: not enough record space to insert ");
 
                 l_to = i_pRing + i_callerRingBufLen;
                 l_fr = i_pRing + i_ringLen;

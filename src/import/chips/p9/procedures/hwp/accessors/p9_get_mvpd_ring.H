@@ -35,12 +35,14 @@
 
 #include   <fapi2.H>
 
-// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*getMvpdRing_FP_t)
-(fapi2::MvpdRecord, fapi2::MvpdKeyword,
- const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
- const uint8_t, const uint8_t, uint8_t*, uint32_t&);
+namespace fapi2
+{
 
+// function pointer typedef definition for HWP call support
+typedef ReturnCode (*getMvpdRing_FP_t)
+(MvpdRecord, MvpdKeyword,
+ const Target<TARGET_TYPE_PROC_CHIP>&,
+ const uint8_t, const uint8_t, uint8_t*, uint32_t&);
 
 extern "C"
 {
@@ -84,15 +86,15 @@ extern "C"
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
      *                               relevant error code for failure.
      */
-    fapi2::ReturnCode getMvpdRing( fapi2::MvpdRecord   i_record,
-                                   fapi2::MvpdKeyword  i_keyword,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                   & i_fapiTarget,
-                                   const uint8_t       i_chipletId,
-                                   const uint8_t       i_ringId,
-                                   uint8_t*             io_pRingBuf,
-                                   uint32_t&            io_rRingBufsize );
+    ReturnCode getMvpdRing( MvpdRecord     i_record,
+                            MvpdKeyword    i_keyword,
+                            const Target<TARGET_TYPE_PROC_CHIP>&
+                            i_fapiTarget,
+                            const uint8_t  i_chipletId,
+                            const uint8_t  i_ringId,
+                            uint8_t*       io_pRingBuf,
+                            uint32_t&      io_rRingBufsize );
 
 }
-
+}
 #endif

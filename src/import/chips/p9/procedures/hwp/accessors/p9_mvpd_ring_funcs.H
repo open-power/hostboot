@@ -36,6 +36,7 @@
 
 namespace fapi2
 {
+
 ///
 /// @brief Enumeration of mvpdRingFunc ops
 ///
@@ -44,6 +45,11 @@ enum mvpdRingFuncOp
     MVPD_RING_GET,
     MVPD_RING_SET,
 };
+
+typedef ReturnCode (*mvpdRingFuncs_FP_t)
+(mvpdRingFuncOp, MvpdRecord, MvpdKeyword,
+ const Target<TARGET_TYPE_PROC_CHIP>&,
+ const uint8_t, const uint8_t, uint8_t*, uint32_t&);
 
 extern "C"
 {
@@ -78,7 +84,5 @@ extern "C"
                             uint32_t&            io_rRingBufsize);
 
 } // extern "C"
-
-} // namespace fapi2
-
+} // namespace fapi
 #endif

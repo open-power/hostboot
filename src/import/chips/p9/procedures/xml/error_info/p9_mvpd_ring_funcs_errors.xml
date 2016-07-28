@@ -35,20 +35,32 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_REPAIR_RING_NOT_FOUND</rc>
+    <rc>RC_MVPD_INVALID_RS4_HEADER</rc>
+    <description>Record's data had invalid RS4 magic word</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_RECORD</ffdc>
+    <ffdc>MVPD_KEYWORD</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_NOT_FOUND</rc>
     <description>Specified MVPD ring for this target was not found</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>RING_MODIFIER</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_REPAIR_RING_INVALID_SIZE</rc>
-    <description>Data does not fit into record</description>
+    <rc>RC_MVPD_RING_BUFFER_TOO_SMALL</rc>
+    <description>Data does not fit into supplied buffer</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -56,7 +68,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_RING_FUNC_INSUFFICIENT_RECORD_SPACE</rc>
+    <rc>RC_MVPD_INSUFFICIENT_RECORD_SPACE</rc>
     <description>Data does not fit into output buffer</description>
     <callout>
       <procedure>CODE</procedure>
