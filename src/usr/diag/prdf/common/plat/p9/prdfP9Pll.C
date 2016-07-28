@@ -50,11 +50,11 @@ using namespace PlatServices;
 namespace Proc
 {
 
+// PLL detect bits in TPLFIR
 enum
 {
-    // All of the chiplet PLL_ERROR bits below
-    // are collected in this TP_LFIR bit
-    PLL_DETECT_P9 = 21,
+    PLL_DETECT_SYS_REF = 36,
+    PLL_DETECT_MF_REF  = 37,
 };
 
 /**
@@ -95,8 +95,10 @@ int32_t QueryPll( ExtensibleChip * i_chip,
             break;
         }
 
-        if (( ! TP_LFIRmask->IsBitSet(PLL_DETECT_P9) ) &&
-            ( TP_LFIR->IsBitSet(PLL_DETECT_P9) ))
+        if (((! TP_LFIRmask->IsBitSet(PLL_DETECT_SYS_REF)) &&
+             (TP_LFIR->IsBitSet(PLL_DETECT_SYS_REF))) ||
+            ((! TP_LFIRmask->IsBitSet(PLL_DETECT_MF_REF)) &&
+             (TP_LFIR->IsBitSet(PLL_DETECT_MF_REF))))
         {
             o_result = true;
         }
@@ -134,7 +136,8 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
                    i_chip->getRegister("TP_LFIR_AND");
         TP_LFIRand->setAllBits();
-        TP_LFIRand->ClearBit(PLL_DETECT_P9);
+        TP_LFIRand->ClearBit(PLL_DETECT_SYS_REF);
+        TP_LFIRand->ClearBit(PLL_DETECT_MF_REF);
         rc = TP_LFIRand->Write();
         if (rc != SUCCESS)
         {
@@ -163,7 +166,8 @@ int32_t MaskPll( ExtensibleChip * i_chip,
     SCAN_COMM_REGISTER_CLASS * tpmask_or =
         i_chip->getRegister("TP_LFIR_MASK_OR");
     tpmask_or->clearAllBits();
-    tpmask_or->SetBit(PLL_DETECT_P9);
+    tpmask_or->SetBit(PLL_DETECT_SYS_REF);
+    tpmask_or->SetBit(PLL_DETECT_MF_REF);
     rc = tpmask_or->Write();
     if (rc != SUCCESS)
     {
