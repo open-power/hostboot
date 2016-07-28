@@ -31,7 +31,7 @@
  * @note    IStep definition for Hostboot - Slave SBE
  *
  *  IStep 06    Slave SBE
- *  IPL FLow Doc        v0.95
+ *  IPL FLow Doc        v0.98
  *
  *  06.1    host_bootloader
  *        : Host Bootloader (non-executable istep)
@@ -220,7 +220,7 @@ const   TaskInfo    g_istep06[]  =   {
         {
                 ISTEPNAME(06,11,"host_start_occ_xstop_handler"),
                 ISTEP_06::host_start_occ_xstop_handler,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
                 ISTEPNAME(06,12,"host_voltage_config"),

@@ -320,7 +320,7 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(08,04,"proc_check_slave_sbe_seeprom_complete"),
                 ISTEP_08::call_proc_check_slave_sbe_seeprom_complete,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(08,05,"host_attnlisten_proc"),

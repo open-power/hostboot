@@ -167,12 +167,12 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(14,07,"proc_exit_cache_contained"),
                 ISTEP_14::call_proc_exit_cache_contained,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(14,08,"host_mpipl_service"),
                 ISTEP_14::call_host_mpipl_service,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
     };
 
