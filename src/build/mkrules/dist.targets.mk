@@ -76,6 +76,7 @@ COPY_FILES = \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
     src/build/buildpnor/buildpnor.pl:openpower \
+    src/build/buildpnor/genfakeheader.pl:openpower \
     src/build/buildpnor/genPnorImages.pl:openpower \
     src/build/buildpnor/PnorUtils.pm:openpower \
     src/build/buildpnor/imprintHwKeyHash:openpower \
@@ -227,6 +228,7 @@ fsp.tar_CONTENTS = \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
+    src/build/buildpnor/genfakeheader.pl \
     src/build/buildpnor/genPnorImages.pl \
     src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/imprintHwKeyHash \
