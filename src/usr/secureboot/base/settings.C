@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
+#include <secureboot/service.H>
 
 #include "settings.H"
 
@@ -34,10 +35,6 @@ TRAC_INIT(&g_trac_secure, SECURE_COMP_NAME, KILOBYTE); //1K
 
 namespace SECUREBOOT
 {
-    const uint64_t Settings::SECURITY_SWITCH_REGISTER = 0x00010005;
-    const uint64_t
-        Settings::SECURITY_SWITCH_TRUSTED_BOOT = 0x4000000000000000ull;
-
     void Settings::_init()
     {
         errlHndl_t l_errl = NULL;
@@ -46,7 +43,7 @@ namespace SECUREBOOT
         // Read / cache security switch setting from processor.
         l_errl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                             &iv_regValue, size,
-                            DEVICE_SCOM_ADDRESS(SECURITY_SWITCH_REGISTER));
+                            DEVICE_SCOM_ADDRESS(PROC_SECURITY_SWITCH_REGISTER));
 
         // If this errors, we're in bad shape and shouldn't trust anything.
         assert(NULL == l_errl);
@@ -54,7 +51,7 @@ namespace SECUREBOOT
 
     bool Settings::getEnabled()
     {
-        return 0 != (iv_regValue & SECURITY_SWITCH_TRUSTED_BOOT);
+        return 0 != (iv_regValue & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK);
     }
 
     uint64_t Settings::getSecuritySwitch()

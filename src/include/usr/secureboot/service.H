@@ -37,6 +37,23 @@ typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
 
 namespace SECUREBOOT
 {
+
+    /******************************************/
+    /*  Constants                             */
+    /******************************************/
+
+    // Processor Security Switch Register Details
+    const uint64_t PROC_SECURITY_SWITCH_REGISTER = 0x00010005;
+    const uint64_t
+          PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK = 0x4000000000000000ull;
+    const uint64_t
+          PROC_SECURITY_SWITCH_PROTECT_I2C_SEEPROM_MASK = 0x0100000000000000ull;
+
+
+    /******************************************/
+    /*  Functions                             */
+    /******************************************/
+
     /** @brief Perform initialization of Secureboot for the Base image.
      *
      *  - Copy secure header from original location.
@@ -103,6 +120,14 @@ namespace SECUREBOOT
     errlHndl_t hashConcatBlobs (const void* i_blob1, size_t i_blob1Size,
                                 const void* i_blob2, size_t i_blob2Size,
                                 SHA512_t o_buf);
+
+    /**
+     * @brief Secures/Locks I2C access to SBE Seeproms on each functional
+     *        processor target in the system
+     *
+     * @return void   - All error logs are handled internally in this function
+     */
+    void secureSbeSeeproms( void ) ;
 
 }
 

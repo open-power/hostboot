@@ -53,6 +53,8 @@
 
 #include    <initservice/isteps_trace.H>
 #include    <sbe/sbeif.H>
+#include    <secureboot/service.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -1377,6 +1379,14 @@ void*    call_mss_freq( void *io_pArgs )
                 ERR_MRK"Error: call_mss_freq()::setNestBasedOffDimms()");
             l_StepError.addErrorDetails(l_err);
         }
+#ifdef CONFIG_SECUREBOOT
+        /************************************************************/
+        /* Secure/Lock SBE Seeproms in Secureboot, if necessary     */
+        /************************************************************/
+        // All error logs are handled internally in the function
+        SECUREBOOT::secureSbeSeeproms();
+#endif
+
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );

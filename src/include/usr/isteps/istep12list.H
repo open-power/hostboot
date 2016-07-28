@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -106,6 +106,9 @@ const DepModInfo g_istep12Dependancies = {
         DEP_LIB(libmc_config.so),
 #endif
         DEP_LIB(libsbe.so),
+#ifdef CONFIG_SECUREBOOT
+        DEP_LIB(libsecureboot_base.so),
+#endif
         DEP_LIB(libbuild_winkle_images.so),
         NULL
     }
