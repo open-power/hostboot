@@ -29,11 +29,11 @@
 //
 // io_RingTyp
 // -------------
-// While using tor_get_ring API, it is used as pass by reference
+// While using tor_access_ring API, it is used as pass by reference
 // While using tor_get_block_of_rings API, it is used as  pass by value
 // io_instanceId
 // --------------
-// While using tor_get_ring API, it is used as pass by reference.
+// While using tor_access_ring API, it is used as pass by reference.
 // While using tor_tor_get_block_of_rings and tor_get_single_ring API,
 // it is used pass by value
 //
@@ -969,29 +969,29 @@ int get_ring_from_cme_image ( void*
 
 //////////////////////////////////////////////////////////////////////////////////////////
 ///
-///                            TOR GET RING API
+///                            TOR ACCESS RING API
 //////////////////////////////////////////////////////////////////////////////////////////
 
-int tor_get_ring(  void*
-                   i_ringSectionPtr,  // Ring address Ptr any of .rings, .overrides and .overlays.
-                   uint64_t        i_magic,           // Image Magic Number
-                   RingID          i_ringId,          // Unique ring ID
-                   uint16_t        i_ddLevel,         // DD level info
-                   PpeType_t       i_PpeType,         // PPE type : SBE, CME, etc
-                   RingType_t&      io_RingType,      // 0: Common 1: Instance
-                   RingVariant_t   i_RingVariant,     // Base, Cache etc
-                   uint8_t&        io_instanceId,     // chiplet instance ID
-                   RingBlockType_t i_RingBlockType,   // 0: single ring,  1: ring block
-                   void**          io_ringBlockPtr,   // Addr of ring buffer
-                   uint32_t&       io_ringBlockSize,  // size of ring data
-                   char*           o_ringName,        // Ring name
-                   uint32_t        i_dbgl)              // Debug option
+int tor_access_ring(  void*
+                      i_ringSectionPtr,  // Ring address Ptr any of .rings, .overrides and .overlays.
+                      uint64_t        i_magic,           // Image Magic Number
+                      RingID          i_ringId,          // Unique ring ID
+                      uint16_t        i_ddLevel,         // DD level info
+                      PpeType_t       i_PpeType,         // PPE type : SBE, CME, etc
+                      RingType_t&      io_RingType,      // 0: Common 1: Instance
+                      RingVariant_t   i_RingVariant,     // Base, Cache etc
+                      uint8_t&        io_instanceId,     // chiplet instance ID
+                      RingBlockType_t i_RingBlockType,   // 0: single ring,  1: ring block
+                      void**          io_ringBlockPtr,   // Addr of ring buffer
+                      uint32_t&       io_ringBlockSize,  // size of ring data
+                      char*           o_ringName,        // Ring name
+                      uint32_t        i_dbgl)              // Debug option
 {
     int rc = 0;
 
     if(i_dbgl > 1)
     {
-        MY_INF( "TOR_GET_RING(1): function call \n");
+        MY_INF( "TOR_ACCESS_RING(1): function call \n");
     }
 
     uint32_t ddLevelOffset = 0;
@@ -1000,7 +1000,7 @@ int tor_get_ring(  void*
 
     if(i_dbgl > 1)
     {
-        MY_INF( "TOR_GET_RING(2):DD Level info extracting from TOR \n");
+        MY_INF( "TOR_ACCESS_RING(2):DD Level info extracting from TOR \n");
     }
 
     if (i_magic == P9_XIP_MAGIC_HW)
@@ -1011,7 +1011,7 @@ int tor_get_ring(  void*
 
         if(i_dbgl > 1)
         {
-            MY_INF("TOR_GET_RING(3): No of DD levels in the TOR is %d \n", ddLevelCount);
+            MY_INF("TOR_ACCESS_RING(3): No of DD levels in the TOR is %d \n", ddLevelCount);
         }
 
         for (uint8_t i = 0; i < ddLevelCount; i++)
@@ -1023,7 +1023,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF( "TOR_GET_RING(4): DD level offset %d DD %d level Copy  \n",
+                MY_INF( "TOR_ACCESS_RING(4): DD level offset %d DD %d level Copy  \n",
                         ddLevelOffset, temp );
             }
 
@@ -1095,7 +1095,7 @@ int tor_get_ring(  void*
 
         if(i_dbgl > 1)
         {
-            MY_INF( " TOR_GET_RING(5): DD level offset %d DD %d size 0x%08x %d \n",
+            MY_INF( "TOR_ACCESS_RING(5): DD level offset %d DD %d size 0x%08x %d \n",
                     ddLevelOffset, temp, temp1, temp1);
         }
 
@@ -1114,7 +1114,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF( "TOR_GET_RING(6): SBE PPE_LEVEL_RING COPY called ... \n");
+                MY_INF( "TOR_ACCESS_RING(6): SBE PPE_LEVEL_RING COPY called ... \n");
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
@@ -1128,7 +1128,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF( "TOR_GET_RING(7): CME PPE_LEVEL_RING COPY called... \n");
+                MY_INF( "TOR_ACCESS_RING(7): CME PPE_LEVEL_RING COPY called... \n");
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
@@ -1143,7 +1143,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF( "TOR_GET_RING(8): SPGE PPE_LEVEL_RING COPY called... \n");
+                MY_INF( "TOR_ACCESS_RING(8): SPGE PPE_LEVEL_RING COPY called... \n");
             }
 
             l_ppe_offset = *((uint32_t*)i_ringSectionPtr + temp);
@@ -1169,7 +1169,7 @@ int tor_get_ring(  void*
     {
         if(i_dbgl > 1)
         {
-            MY_INF( "TOR_GET_RING(9): CPLT_LEVEL_RING COPY called... \n");
+            MY_INF( "TOR_ACCESS_RING(9): CPLT_LEVEL_RING COPY called... \n");
         }
 
         if(io_RingType == ALLRING)
@@ -1642,7 +1642,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF(" TOR_GET_RING(10): After get_ring_from_sbe_image Size %d \n",
+                MY_INF(" TOR_ACCESS_RING(10): After get_ring_from_sbe_image Size %d \n",
                        io_ringBlockSize );
             }
         }
@@ -1675,7 +1675,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF(" TOR_GET_RING(11): After get_ring_from_sbe_image Size %d \n",
+                MY_INF("TOR_ACCESS_RING(11): After get_ring_from_sbe_image Size %d \n",
                        io_ringBlockSize );
             }
         }
@@ -1708,7 +1708,7 @@ int tor_get_ring(  void*
 
             if(i_dbgl > 1)
             {
-                MY_INF("TOR_GET_RING(12): After get_ring_from_sbe_image Size %d \n",
+                MY_INF("TOR_ACCESS_RING(12): After get_ring_from_sbe_image Size %d \n",
                        io_ringBlockSize );
             }
         }
@@ -1747,7 +1747,7 @@ int tor_get_single_ring ( void*
         MY_INF(" TOR_GET_SINGLE_RING1: function call \n");
     }
 
-    rc = tor_get_ring(
+    rc = tor_access_ring(
              i_ringSectionPt,
              P9_XIP_MAGIC_HW,
              i_ringId,
@@ -1764,7 +1764,7 @@ int tor_get_single_ring ( void*
 
     if(i_dbgl > 1)
     {
-        MY_INF(" TOR_GET_SINGLE_RING(2): after tor_get_ring function, Size %d \n",
+        MY_INF(" TOR_GET_SINGLE_RING(2): after tor_access_ring function, Size %d \n",
                io_ringBlockSize );
     }
 
@@ -1798,54 +1798,54 @@ int tor_get_block_of_rings ( void*           i_ringSectionPt,
     if(l_ringType == ALLRING && i_PpeType != NUM_PPE_TYPES)
     {
         //ppe level copy
-        rc = tor_get_ring( i_ringSectionPt,
-                           P9_XIP_MAGIC_HW,
-                           P9_NUM_RINGS,
-                           i_ddLevel,
-                           i_PpeType,
-                           l_ringType,
-                           i_RingVariant,
-                           l_instanceId,
-                           PPE_LEVEL_RINGS,
-                           io_ringBlockPtr,
-                           io_ringBlockSize,
-                           i_ringName,
-                           i_dbgl );
+        rc = tor_access_ring( i_ringSectionPt,
+                              P9_XIP_MAGIC_HW,
+                              P9_NUM_RINGS,
+                              i_ddLevel,
+                              i_PpeType,
+                              l_ringType,
+                              i_RingVariant,
+                              l_instanceId,
+                              PPE_LEVEL_RINGS,
+                              io_ringBlockPtr,
+                              io_ringBlockSize,
+                              i_ringName,
+                              i_dbgl );
 
     }
     else if (l_ringType == ALLRING && i_PpeType == NUM_PPE_TYPES)
     {
         //dd level Copy
-        rc = tor_get_ring( i_ringSectionPt,
-                           P9_XIP_MAGIC_HW,
-                           P9_NUM_RINGS,
-                           i_ddLevel,
-                           i_PpeType,
-                           l_ringType,
-                           i_RingVariant,
-                           l_instanceId,
-                           DD_LEVEL_RINGS,
-                           io_ringBlockPtr,
-                           io_ringBlockSize,
-                           i_ringName,
-                           i_dbgl );
+        rc = tor_access_ring( i_ringSectionPt,
+                              P9_XIP_MAGIC_HW,
+                              P9_NUM_RINGS,
+                              i_ddLevel,
+                              i_PpeType,
+                              l_ringType,
+                              i_RingVariant,
+                              l_instanceId,
+                              DD_LEVEL_RINGS,
+                              io_ringBlockPtr,
+                              io_ringBlockSize,
+                              i_ringName,
+                              i_dbgl );
     }
     else if(l_ringType == COMMON || l_ringType == INSTANCE)
     {
         // Chiplet level copy
-        rc = tor_get_ring( i_ringSectionPt,
-                           P9_XIP_MAGIC_HW,
-                           P9_NUM_RINGS,
-                           i_ddLevel,
-                           i_PpeType,
-                           l_ringType,
-                           i_RingVariant,
-                           l_instanceId,
-                           CPLT_LEVEL_RINGS,
-                           io_ringBlockPtr,
-                           io_ringBlockSize,
-                           i_ringName,
-                           i_dbgl );
+        rc = tor_access_ring( i_ringSectionPt,
+                              P9_XIP_MAGIC_HW,
+                              P9_NUM_RINGS,
+                              i_ddLevel,
+                              i_PpeType,
+                              l_ringType,
+                              i_RingVariant,
+                              l_instanceId,
+                              CPLT_LEVEL_RINGS,
+                              io_ringBlockPtr,
+                              io_ringBlockSize,
+                              i_ringName,
+                              i_dbgl );
     }
     else
     {
@@ -1855,7 +1855,7 @@ int tor_get_block_of_rings ( void*           i_ringSectionPt,
 
     if(i_dbgl > 1)
     {
-        MY_INF(" TOR_GET_SINGLE_RING(2): after tor_get_ring function, Size %d \n",
+        MY_INF(" TOR_GET_SINGLE_RING(2): after tor_access_ring function, Size %d \n",
                io_ringBlockSize );
     }
 
