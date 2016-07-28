@@ -63,30 +63,61 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<TARGET_TYPE_MC
 
     if(i_targets.empty())
     {
-        FAPI_ERR("Empty target vector found when constructing dimm speed mapping!");
+        FAPI_ERR("Empty MCBIST target vector found when constructing dimm speed mapping!");
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    // Getting a sample freq value from an arbitrary target (first one)
-    // to compare against all other target freq values
+    // The find_if loop is meant to find the "first" good (non-zero) freq value
+    // so I can compare it against all other freq values from the MCBIST vector
+    // I am checking to make sure I don't get a value of 0
+    // Since Cronus can hand me back an MCBIST w/no DIMMs
+    // Which would give ATTR_MSS_FREQ value of 0 in p9_mss_freq
     uint64_t l_comparator = 0;
-    FAPI_TRY( mss::freq(i_targets[0], l_comparator), "Failed accessor to mss_freq" );
+    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+    const auto l_found_comp = std::find_if(i_targets.begin(), i_targets.end(),
+                                           [&l_rc, &l_comparator] (const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)->bool
+    {
+        l_rc = mss::freq(i_target, l_comparator);
+        return l_comparator != 0;
+    });
 
+    FAPI_TRY(l_rc, "Failed accessor mss::freq()");
+
+    // If all MCBISTs are 0 we go no further
+    if( l_found_comp == i_targets.end() )
+    {
+        FAPI_ERR( "All MCBIST have a 0 MSS_FREQ" );
+        return fapi2::FAPI2_RC_FALSE;
+    }
+
+    // DIMM speed is equal until we deduce otherwise
     o_is_speed_equal = speed_equality::EQUAL_DIMM_SPEEDS;
 
     // Loop through all MCSBISTs and store dimm speeds
-    for (const auto& l_mcbist : i_targets)
+    // Starting from known 1st known good freq (non-zero) value
+    // I found above to avoid double looping target vector
+    for (auto l_iter = l_found_comp + 1; l_iter != i_targets.end(); ++l_iter)
     {
         uint64_t l_dimm_speed = 0;
-        FAPI_TRY( mss::freq(l_mcbist, l_dimm_speed), "Failed accessor to mss_freq" );
+        FAPI_TRY( mss::freq(*l_iter, l_dimm_speed), "Failed accessor to mss_freq" );
 
-        if(l_comparator != l_dimm_speed)
+        // In FW, parents are deconfigured if they have no children
+        // So there is no way to get an MCBIST w/no DIMMs.
+        // This isn't true for Cronus so I am skipping map
+        // insertion and check for dimm speed equality
+        // to avoid incorrect settings
+        if( l_dimm_speed != 0)
         {
-            o_is_speed_equal = speed_equality::NOT_EQUAL_DIMM_SPEEDS;
-        }
+            // At least one mismatch freq value occurred
+            if(l_comparator != l_dimm_speed)
+            {
+                o_is_speed_equal = speed_equality::NOT_EQUAL_DIMM_SPEEDS;
+            }
 
-        FAPI_INF("%s: Dimm speed %d MT/s", c_str(l_mcbist), l_dimm_speed);
-        o_freq_map.emplace( std::make_pair(l_mcbist, l_dimm_speed) );
+            FAPI_INF("%s: Dimm speed %d MT/s", c_str(*l_iter), l_dimm_speed);
+
+            o_freq_map.emplace( std::make_pair(*l_iter, l_dimm_speed) );
+        }
     }
 
 fapi_try_exit:
