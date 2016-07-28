@@ -75,7 +75,8 @@ p9_hcd_l2_stopclocks(
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
                            l_attr_chip_unit_pos));
-    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+//    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+    l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
     if (i_select_ex & p9hcd::EVEN_EX)
     {
