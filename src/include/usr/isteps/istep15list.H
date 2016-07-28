@@ -109,22 +109,22 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(15,01,"host_build_stop_image"),
                 ISTEP_15::host_build_stop_image,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(15,02,"proc_set_pba_homer_bar"),
                 ISTEP_15::proc_set_pba_homer_bar,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(15,03,"host_establish_ex_chiplet"),
                 ISTEP_15::host_establish_ex_chiplet,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(15,04,"host_start_stop_engine"),
                 ISTEP_15::host_start_stop_engine,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
 };
 
