@@ -32,7 +32,7 @@
 
 #include    <stdint.h>
 
-//  fapi2 support
+// fapi2 support
 #include    <fapi2.H>
 
 #include    <p9_get_mvpd_ring.H>
