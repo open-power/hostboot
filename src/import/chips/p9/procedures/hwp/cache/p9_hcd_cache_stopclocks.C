@@ -73,7 +73,8 @@ p9_hcd_cache_stopclocks(
                            l_attr_vdm_enable));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
                            l_attr_chip_unit_pos));
-    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+//    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+    l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
     if (i_select_regions & p9hcd::CLK_REGION_EX0_L3)
     {
