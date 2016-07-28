@@ -87,7 +87,7 @@ extern const char* ppeTypeName[];
 
 
 typedef enum
-RingBlockType   // Different options to extract data using tor_get_ring API
+RingBlockType   // Different options to extract data using tor_access_ring API
 {
     SINGLE_RING      = 0x00,
     DD_LEVEL_RINGS   = 0x01,
@@ -222,20 +222,20 @@ int get_ring_from_cme_image ( void*           i_ringSectionPtr, // Image pointer
                               char*           o_ringName,       // Name of ring
                               uint32_t        dbgl);            // Debug option
 
-int tor_get_ring(  void*
-                   i_ringSectionPtr, // Ring address Ptr any of .rings, .overrides and .overlays.
-                   uint64_t        i_magic,          // Image Magic Number
-                   RingID          i_ringId,         // Unique ring ID
-                   uint16_t        i_ddLevel,        // DD level info
-                   PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
-                   RingType_t&      io_RingType,     // 0: Common 1: Instance
-                   RingVariant_t   i_RingVariant,    // Base, Cache etc
-                   uint8_t&        io_instanceId,     // chiplet instance ID
-                   RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
-                   void**          io_ringBlockPtr,  // Addr of ring buffer
-                   uint32_t&       io_ringBlockSize, // size of ring data
-                   char*           o_ringName,       // Ring name
-                   uint32_t        i_dbgl = 0);      // Debug option
+int tor_access_ring(  void*
+                      i_ringSectionPtr, // Ring address Ptr any of .rings, .overrides and .overlays.
+                      uint64_t        i_magic,          // Image Magic Number
+                      RingID          i_ringId,         // Unique ring ID
+                      uint16_t        i_ddLevel,        // DD level info
+                      PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
+                      RingType_t&     io_RingType,      // 0: Common 1: Instance
+                      RingVariant_t   i_RingVariant,    // Base, Cache etc
+                      uint8_t&        io_instanceId,    // chiplet instance ID
+                      RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
+                      void**          io_ringBlockPtr,  // Addr of ring buffer
+                      uint32_t&       io_ringBlockSize, // size of ring data
+                      char*           o_ringName,       // Ring name
+                      uint32_t        i_dbgl = 0);      // Debug option
 
 int tor_get_single_ring ( void*
                           i_ringSectionPt,     // Ring address Ptr any of .rings, .overrides and .overlays.
@@ -246,7 +246,7 @@ int tor_get_single_ring ( void*
                           uint8_t       i_instanceId,        // Chiplet Instance ID
                           void**        io_ringBlockPtr,     // Addr of ring buffer
                           uint32_t&     io_ringBlockSize,    // size of ring data
-                          uint32_t      i_dbgl = 0);      // Debug option
+                          uint32_t      i_dbgl = 0);         // Debug option
 
 int tor_get_block_of_rings ( void*
                              i_ringSectionPt,  // Ring address Ptr any of .rings, .overrides and .overlays.
@@ -256,8 +256,8 @@ int tor_get_block_of_rings ( void*
                              RingVariant_t i_RingVariant,     // base,cache,etc
                              uint8_t       i_instanceId,      // Chiplet Instance ID
                              void**        io_ringBlockPtr,   // Addr of ring buffer
-                             uint32_t&     io_ringBlockSize, // size of ring data
-                             uint32_t      i_dbgl = 0); // Debug option
+                             uint32_t&     io_ringBlockSize,  // size of ring data
+                             uint32_t      i_dbgl = 0);       // Debug option
 };
 
 #endif //_P9_TOR_H_
