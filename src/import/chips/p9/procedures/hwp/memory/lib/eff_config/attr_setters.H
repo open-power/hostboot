@@ -41,7 +41,7 @@
 namespace mss
 {
 ///
-/// @brief Set ATTR_MSS_VOLT and ATTR_MSS_VOLT_VPP
+/// @brief Set ATTR_MSS_VOLT_VDDR and ATTR_MSS_VOLT_VPP
 /// @param[in] i_target_mcs the MCS target
 /// @param[in] l_selected_dram_voltage the voltage in millivolts for nominal voltage
 /// @param[in] l_selected_dram_voltage_vpp voltage  in millivolts for the VPP
@@ -49,8 +49,8 @@ namespace mss
 ///
 
 fapi2::ReturnCode set_voltage_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
-        uint64_t l_selected_dram_voltage,
-        uint64_t l_selected_dram_voltage_vpp);
+        uint32_t l_selected_dram_voltage,
+        uint32_t l_selected_dram_voltage_vpp);
 
 }  // mss
 

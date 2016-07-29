@@ -19,7 +19,7 @@
 <attributes>
 
     <attribute>
-        <id>ATTR_MSS_VOLT</id>
+        <id>ATTR_MSS_VOLT_VDDR</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
             DRAM Voltage, each voltage rail would need to have a value.
@@ -29,9 +29,9 @@
             firmware notes: none
         </description>
         <initToZero></initToZero>
-        <valueType>uint64</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>volt</mssAccessorName>
+        <mssAccessorName>volt_vddr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -45,7 +45,7 @@
             firmware notes: none
         </description>
         <initToZero></initToZero>
-        <valueType>uint64</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
         <mssAccessorName>volt_vpp</mssAccessorName>
     </attribute>
@@ -739,7 +739,7 @@
     <attribute>
         <id>ATTR_EFF_DIMM_DDR4_RC11</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT. Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
+        <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT_VDDR. Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
         creator: mss_eff_cnfg
         consumer: mss_dram_init
         firmware notes: none</description>

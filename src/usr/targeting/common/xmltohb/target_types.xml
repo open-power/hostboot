@@ -1702,7 +1702,8 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>MSS_FREQ</id></attribute>
-    <attribute><id>MSS_VOLT</id></attribute>
+    <attribute><id>MSS_VOLT</id></attribute><!-- deprecated -->
+    <attribute><id>MSS_VOLT_VDDR</id></attribute>
     <attribute><id>MSS_FREQ_OVERRIDE</id></attribute>
     <attribute><id>MSS_VOLT_OVERRIDE</id></attribute>
     <attribute><id>MSS_VOLT_VPP</id></attribute>
