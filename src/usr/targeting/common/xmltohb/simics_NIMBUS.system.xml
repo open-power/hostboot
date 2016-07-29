@@ -97,6 +97,10 @@
         <id>NEST_FREQ_MHZ</id>
         <default>0x960</default>
     </attribute>
+    <attribute>
+        <id>FREQ_PB_MHZ</id>
+        <default>0x7D0</default>
+    </attribute>
      <attribute>
         <id>PAYLOAD_BASE</id>
         <!-- Value of 0x0 for standalone systems, no payload to start -->
