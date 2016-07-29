@@ -545,7 +545,8 @@ void add_i2c_info( const TARGETING::Target* i_targ,
               tpm@50 {
               reg = <0x50>; << right-justified 7-bit addr
               label = "tpm"; << arbitrary name
-              compatible = "nuvoton,npct650"; << from i2c driver
+              compatible = "nuvoton,npct650", "nuvoton,npct601";
+                                         << from i2c driver
               status = "ok"; << Opal fills in
               phandle = <0x10000065>; << auto-filled
               linux,phandle = <0x10000065>; << Opal fills in
@@ -575,8 +576,9 @@ void add_i2c_info( const TARGETING::Target* i_targ,
             i_dt->addPropertyString(l_tpmNode, "label", l_label);
 
             // fill in nuvoton compatible
-            const char* l_compat = "nuvoton,npct650";
-            i_dt->addPropertyString(l_tpmNode, "compatible", l_compat);
+            const char* l_compat[] = {"nuvoton,npct650",
+                                      "nuvoton,npct601", NULL};
+            i_dt->addPropertyStrings(l_tpmNode, "compatible", l_compat);
 
             // Placeholders for the tpm log which will be filled in later
             // We store info away so we can look up this devtree node later
