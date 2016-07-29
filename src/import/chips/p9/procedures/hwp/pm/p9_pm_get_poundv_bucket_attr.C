@@ -188,46 +188,37 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                 {
                     l_numMatches++;
 
-                    /*
-                     * TODO RTC: 157341
-                     * Modify function to fail if multiple buckets have same nest
-                     */
                     if(l_numMatches > 1)
                     {
                         FAPI_ERR("p9_pm_get_poundv_bucket_attr::"
-                                 " Multiple buckets (%d) reporting the same nest frequency",
-                                 l_numMatches);
-                    }
+                                 " Multiple buckets (%d) reporting the same nest frequency"
+                                 " Bucket Nest = %d Bucket ID = %d",
+                                 l_numMatches,
+                                 l_buckets[i].pbFreq,
+                                 (i + 1));
 
-                    /*
+                    }
                     else
                     {
                         l_currentBucket = &l_buckets[i];
                     }
-                    */
-                    l_currentBucket = &l_buckets[i];
                 }
             }
 
-            /*
-             * TODO RTC: 157341
-             * Modify function to fail if multiple buckets have same nest
-             if(l_numMatches == 1)
-             {
-                 l_bucketId = l_currentBucket->bucketId;
-             }
-             else
-             {
+            if(l_numMatches == 1)
+            {
+                l_bucketId = l_currentBucket->bucketId;
+            }
+            else
+            {
 
-                 FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching nest freqs found. Matches found = %d",
-                          l_numMatches );
-                 FAPI_ASSERT(0,
-                             fapi2::INVALID_MATCHING_FREQ_NUMBER().
-                             set_MATCHES_FOUND(l_numMatches),
-                             "Matches found is NOT 1" );
-             }
-             */
-            l_bucketId = l_currentBucket->bucketId;
+                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching nest freqs found. Matches found = %d",
+                         l_numMatches );
+                FAPI_ASSERT(false,
+                            fapi2::INVALID_MATCHING_FREQ_NUMBER().
+                            set_MATCHES_FOUND(l_numMatches),
+                            "Matches found is NOT 1" );
+            }
         }
         else
         {
