@@ -39,13 +39,19 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+
+#include <p9_quad_scom_addresses.H>
+#include "p9_hcd_common.H"
 #include "p9_common_poweronoff.H"
-#include "p9_quad_scom_addresses.H"
 
 //------------------------------------------------------------------------------
 // Constant Definitions:
 //------------------------------------------------------------------------------
 // Define only address offset to be compatible with both core and cache domain
+
+const uint64_t NET_CTRL0_WOR[2] = { C_NET_CTRL0_WOR,
+                                    EQ_NET_CTRL0_WOR
+                                  };
 
 const uint64_t PPM_PFCS[2]     = { C_PPM_PFCS_SCOM,
                                    EQ_PPM_PFCS_SCOM
@@ -168,6 +174,7 @@ p9_common_poweronoff(
 
             FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                      "getScom failed for address PPM_PFCS"); // poll
+            FAPI_DBG("timeout l_loopsPerMs. %x", l_loopsPerMs);
         }
         while ((l_data.getBit < VDD_PG_STATE_BIT + PG_STATE_IDLE_OFFSET > ()
                 == 0 ) && (--l_loopsPerMs != 0));
@@ -200,7 +207,7 @@ p9_common_poweronoff(
 
     auto pollVcsFSMIdle = [&] ()
     {
-        //   Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)
+        //   Poll for PFETCNTLSTAT_REG[VCS_PG_STATE] for 0b1000 (FSM idle)
         //      – Timeout value = 1ms
         FAPI_DBG("Polling for power gate sequencer state: FSM idle");
         l_loopsPerMs = 1E6 / FSM_IDLE_POLLING_HW_NS_DELAY;
@@ -299,14 +306,14 @@ p9_common_poweronoff(
         //      vcs_pfet_val_override = 0 (Override disabled)
         //      vcs_pfet_sel_override = 0 (Override disabled)
         //      Note there is no vcs_pfet_enable_regulation_finger
-        FAPI_DBG("Clear VSS PFET stage select and value override bits");
+        FAPI_DBG("Clear VCS PFET stage select and value override bits");
         l_data.flush<0>().
         setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
         setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
         FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
-        FAPI_DBG("Force VSS on");
+        FAPI_DBG("Force VCS on");
         l_data.flush<0>().insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VON);
         FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR[l_type], l_data),
@@ -320,7 +327,7 @@ p9_common_poweronoff(
         //      vcs_pfet_force_state = 00 (No Operation);
         //      all fields set to 1 for WAND
         //   Use PPM_PFCS_CLR,  vdd_pfet_force_state = ~(0b00)
-        FAPI_DBG("vss_pfet_force_state = 00, or Idle");
+        FAPI_DBG("vcs_pfet_force_state = 00, or Idle");
         l_data.flush<0>().insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(~PFET_NOP);
         FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
@@ -380,14 +387,14 @@ p9_common_poweronoff(
         //      vcs_pfet_val_override = 0 (Override disabled)
         //      vcs_pfet_sel_override = 0 (Override disabled)
         //      Note there is no vcs_pfet_enable_regulation_finger
-        FAPI_DBG("Clear VSS PFET stage select and value override bits");
+        FAPI_DBG("Clear VCS PFET stage select and value override bits");
         l_data.flush<0>().
         setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
         setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
         FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
-        FAPI_DBG("Force VSS off");
+        FAPI_DBG("Force VCS off");
         l_data.flush<0>().
         insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VOFF);
@@ -422,6 +429,15 @@ p9_common_poweronoff(
     FAPI_TRY(fapi2::putScom(i_target, PPM_PFDLY, l_data),
              "putScom failed for address PPM_PFDLY");
 #endif
+    fapi2::buffer<uint64_t> l_data64;
+    FAPI_DBG("Assert PCB fence via NET_CTRL0[25]");
+    FAPI_TRY(putScom(i_target, NET_CTRL0_WOR[l_type], MASK_SET(25)));
+
+    FAPI_DBG("Assert chiplet electrical fence via NET_CTRL0[26]");
+    FAPI_TRY(putScom(i_target, NET_CTRL0_WOR[l_type], MASK_SET(26)));
+
+    FAPI_DBG("Assert vital thold via NET_CTRL0[16]");
+    FAPI_TRY(putScom(i_target, NET_CTRL0_WOR[l_type], MASK_SET(16)));
 
     ///////////////////////////////////////////////////////////////////////////
     // Procedure code
@@ -487,12 +503,8 @@ p9_common_poweronoff(
                             .set_ADDRESS(PPM_PFCS[l_type]),
                             "PFET_FORCE_STATE not 0");
 
-                // 2) Set bits to program HW to turn off VDD PFET, and
+                // 2) Set bits to program HW to turn off VCS PFET, and
                 // 3) Poll state bit until Pfet sequence is complete
-                FAPI_TRY(powerOffVdd());
-
-                // 4) Set bits to program HW to turn off VCS PFET, and
-                // 5) Poll state bit until Pfet sequence is complete
 
                 // Note: if (i_target.getType() & fapi2::TARGET_TYPE_EQ) doesn't work.
                 //   Created a  POWER_*_VDD label to delineate Vcs and Vdd
@@ -500,6 +512,10 @@ p9_common_poweronoff(
                 {
                     FAPI_TRY(powerOffVcs());
                 }
+
+                // 4) Set bits to program HW to turn off VDD PFET, and
+                // 5) Poll state bit until Pfet sequence is complete
+                FAPI_TRY(powerOffVdd());
 
             }
             break;
