@@ -20782,9 +20782,10 @@ DEPRECATED!!!!
   </description>
   <simpleType>
       <uint8_t>
+      <default>0x05</default>
       </uint8_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>non-volatile</persistency>
   <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
