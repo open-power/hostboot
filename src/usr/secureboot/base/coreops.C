@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/purge.C $                             */
+/* $Source: src/usr/secureboot/base/coreops.C $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,11 +27,96 @@
 #include <sys/time.h>
 #include <devicefw/userif.H>
 #include <secureboot/secure_reasoncodes.H>
+#include <errl/errludtarget.H>
+#include <secureboot/service.H>
 
-#include "purge.H"
+#include "coreops.H"
+
+// Quick change for unit testing
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
 
 namespace SECUREBOOT
 {
+    /**
+     *  @brief Return core ID of running thread
+     *
+     *  @return size_t Running thread's core ID
+     */
+    inline size_t getCoreId(void)
+    {
+        return (task_getcpuid() / 8) & 0xF;
+    }
+
+    errlHndl_t unprotectCore(void)
+    {
+        TRACUCOMP(g_trac_secure,ENTER_MRK"SECUREBOOT::unprotectCore>");
+
+        errlHndl_t pError = NULL;
+
+        bool readFail = false;
+        bool writeFail = false;
+        const size_t coreId = getCoreId();
+        const uint64_t regAddr = CORE_PROTECT_REG_0x10013C03
+             + (EX_CHILPLET_MULTIPLIER * coreId);
+        TARGETING::Target* const pMasterProc =
+            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+
+        do {
+
+        // Disable core protect bit
+        uint64_t data = 0;
+        size_t size = sizeof(data);
+        const size_t expSize = size;
+
+        pError = deviceRead(
+            pMasterProc,
+            &data, size,
+            DEVICE_SCOM_ADDRESS(regAddr));
+        if(pError)
+        {
+            readFail = true;
+            break;
+        }
+
+        assert(expSize==size,"Expected size %d returned from SCOM read "
+                            "!= actual size %d",expSize,size);
+
+        data &= ~CORE_PROTECT_TRUSTED_BOOT_EN_BIT0;
+        pError = deviceWrite(
+            pMasterProc,
+            &data, size,
+            DEVICE_SCOM_ADDRESS(regAddr));
+        if(pError)
+        {
+            writeFail = true;
+            break;
+        }
+
+        assert(expSize==size,"Expected size %s returned from SCOM write "
+                            "!= actual size %d",expSize,size);
+
+        } while(0);
+
+        if(pError)
+        {
+            TRACFCOMP(g_trac_secure,ERR_MRK"Failed to read (failed? %d) or "
+                "write (failed? %d) core protect register 0x%08X for core ID "
+                "%d. Error Log reason code = 0x%04X, eid = 0x%08X, "
+                "plid = 0x%08X",
+                readFail,writeFail,regAddr,coreId,pError->reasonCode(),
+                pError->eid(), pError->plid());
+
+            ERRORLOG::ErrlUserDetailsTarget(pMasterProc).addToLog(pError);
+
+            pError->collectTrace(SECURE_COMP_NAME);
+        }
+
+        TRACUCOMP(g_trac_secure,EXIT_MRK"SECUREBOOT::unprotectCore>");
+
+        return pError;
+    }
+
     errlHndl_t issueBlindPurge()
     {
         static const uint64_t PURGE_REG = 0x1001080e;
@@ -50,7 +137,7 @@ namespace SECUREBOOT
         errlHndl_t l_errl = NULL;
         do
         {
-            size_t coreId = (task_getcpuid() / 8) & 0xF;
+            size_t coreId = getCoreId();
             uint64_t regAddr = PURGE_REG + 0x01000000 * coreId;
 
             uint64_t data = 0;

@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/purge.H $                             */
+/* $Source: src/usr/secureboot/base/coreops.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -27,6 +29,15 @@
 
 namespace SECUREBOOT
 {
+    /**
+     *  @brief Unprotects the boot core so that errors in secure mode do not
+     *      vector Hostboot back to the ROM code
+     *
+     *  @return errlHndl_t Error log handle; NULL on success, otherwise
+     *      pointer to error log
+     */
+    errlHndl_t unprotectCore();
+
     /** @brief Issues the SCOMs to the master EX's L3 to perform a blind purge.
      */
     errlHndl_t issueBlindPurge();

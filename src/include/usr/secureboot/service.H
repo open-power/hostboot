@@ -34,16 +34,16 @@ typedef uint8_t SHA512_t[64];
 typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
                 SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
 
+extern trace_desc_t* g_trac_secure;
 
 namespace SECUREBOOT
 {
-
     /******************************************/
     /*  Constants                             */
     /******************************************/
 
     // Processor Security Switch Register Details
-    const uint64_t PROC_SECURITY_SWITCH_REGISTER = 0x00010005;
+    const uint64_t PROC_SECURITY_SWITCH_REGISTER = 0x00010005ull;
     const uint64_t
           PROC_SECURITY_SWITCH_JUMPER_STATE_MASK = 0x8000000000000000ull;
     const uint64_t
@@ -51,6 +51,14 @@ namespace SECUREBOOT
     const uint64_t
           PROC_SECURITY_SWITCH_PROTECT_I2C_SEEPROM_MASK = 0x0100000000000000ull;
 
+    // Core protect register
+    const uint64_t CORE_PROTECT_REG_0x10013C03 = 0x10013C03ull;
+
+    // Core protect register bits
+    const uint64_t CORE_PROTECT_TRUSTED_BOOT_EN_BIT0 = 0x8000000000000000ull;
+
+    // Chiplet multipliers
+    const size_t EX_CHILPLET_MULTIPLIER = 0x01000000;
 
     /******************************************/
     /*  Functions                             */

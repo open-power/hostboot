@@ -38,7 +38,7 @@
 #include <secureboot/settings.H>
 #include <secureboot/header.H>
 
-#include "purge.H"
+#include "coreops.H"
 
 extern trace_desc_t* g_trac_secure;
 
@@ -67,6 +67,16 @@ void* initializeBase(void* unused)
         if (enabled())
         {
             Singleton<Header>::instance().loadSecurely();
+
+            // Unprotect the boot core so that we're not sent to ROM
+            // code on error
+            l_errl = unprotectCore();
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_secure,ERR_MRK"Failed in call to "
+                    "unprotectCore()");
+                break;
+            }
         }
 
         // Blind-purge lower portion of cache.
