@@ -58,6 +58,7 @@ enum
     CTR               = 9,
     OCC_BOOT_OFFSET   = 0x40,
     OCC_SRAM_BOOT_ADDR = 0xFFF40000,
+    OCC_SRAM_BOOT_ADDR2 = 0xFFF40002,
     OCC_MEM_BOOT_PGMADDR = 0xFFF40000,
 };
 
@@ -148,6 +149,7 @@ uint32_t ppc_mtspr( const uint16_t i_Rs, const uint16_t i_Spr )
 {
     uint32_t mtsprInstOpcode = 0;
     mtsprInstOpcode = OPCODE_31 << (31 - 5);
+    mtsprInstOpcode |= i_Rs << (31 - 10);
     uint32_t temp = (( i_Spr & 0x03FF ) << (31 - 20));
     mtsprInstOpcode |= ( temp  & 0x0000F800 ) << 5;  // Perform swizzle
     mtsprInstOpcode |= ( temp & 0x001F0000 ) >> 5;  // Perform swizzle
@@ -160,14 +162,16 @@ uint32_t ppc_mtspr( const uint16_t i_Rs, const uint16_t i_Spr )
 /**
  * @brief Creates and loads the OCC memory boot launcher
  * @param[in] i_target  Chip target
- * @return returns 32 bit instruction representing mtspr instruction.
+ * @param[in] i_data64  32 bit instruction representing the branch
+ *                      instruction to the SRAM boot loader
+ * @return returns RC
  */
 fapi2::ReturnCode bootMemory(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    fapi2::buffer<uint64_t>& i_data64)
 {
     static const uint32_t SRAM_PROGRAM_SIZE = 2;  // in double words
     uint64_t l_sram_program[SRAM_PROGRAM_SIZE];
-    fapi2::buffer<uint64_t> l_data64;
     fapi2::ReturnCode l_rc;
     uint32_t l_ocb_length_act = 0;
 
@@ -190,10 +194,10 @@ fapi2::ReturnCode bootMemory(
     FAPI_DBG("ppc_ori: 0x%08X with data 0x%08X",
              ppc_ori(1, 1, OCC_BOOT_OFFSET), OCC_BOOT_OFFSET);
 
-    // mtctr (mtspr CTR, r1 )
-    l_sram_program[1] = ((uint64_t)ppc_mtspr(CTR, 1) << 32);
+    // mtctr (mtspr r1, CTR )
+    l_sram_program[1] = ((uint64_t)ppc_mtspr(1, CTR) << 32);
     FAPI_DBG("ppc_mtspr: 0x%08X with spr 0x%08X",
-             ppc_mtspr(CTR, 1), CTR);
+             ppc_mtspr(1, CTR), CTR);
 
     // bctr
     l_sram_program[1] |= ppc_bctr();
@@ -218,12 +222,8 @@ fapi2::ReturnCode bootMemory(
                 .set_LENGTH(SRAM_PROGRAM_SIZE),
                 "OCC memory boot launcher length mismatch");
 
-    // b OCC_SRAM_BOOT_ADDR
-    l_data64.insertFromRight<0, 32>(ppc_b(OCC_SRAM_BOOT_ADDR));
-
-    // Write to SBV3
-    FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV3_SCOM, l_data64),
-             "SRAM Boot Vector 3");
+    // b OCC_SRAM_BOOT_ADDR2
+    i_data64.insertFromRight<0, 32>(ppc_b(OCC_SRAM_BOOT_ADDR2));
 
 fapi_try_exit:
     // Channel 1 returned to Linear Stream, Circular upon exit
@@ -308,7 +308,7 @@ fapi2::ReturnCode p9_pm_occ_control
         else if (i_ppc405_boot_ctrl == p9occ_ctrl::PPC405_BOOT_MEM)
         {
             FAPI_INF("Setting up for memory boot");
-            FAPI_TRY(bootMemory(i_target), , "Booting from Memory Failed");
+            FAPI_TRY(bootMemory(i_target, l_data64), "Booting from Memory Failed");
         }
         else
         {
@@ -438,6 +438,11 @@ fapi2::ReturnCode p9_pm_occ_control
             FAPI_TRY(fapi2::putScom(i_target,
                                     PU_OCB_PIB_OCR_CLEAR,
                                     BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+            // Set the reset bit
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_OR,
+                                    BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
+
             // Clear the reset bit
             FAPI_TRY(fapi2::putScom(i_target,
                                     PU_OCB_PIB_OCR_CLEAR,
