@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,12 +42,12 @@ class MdiaMbaTest : public CxxTest::TestSuite
 {
     public:
 
-        void testGetMbaDiagnosticMode(void)
+        void testGetDiagnosticMode(void)
         {
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK "testGetMbaDiagnosticMode");
+            TS_TRACE(ENTER_MRK "testGetDiagnosticMode");
 
             TargetHandleList mbaList;
             getAllChiplets(mbaList, TYPE_MBA);
@@ -56,12 +58,12 @@ class MdiaMbaTest : public CxxTest::TestSuite
                 Globals globals;
                 TargetHandle_t mba = mbaList[0];
 
-                errlHndl_t err = getMbaDiagnosticMode(
+                errlHndl_t err = getDiagnosticMode(
                                         globals, mba, mode);
 
                 if(err)
                 {
-                    TS_FAIL("getMbaDiagnosticMode failed "
+                    TS_FAIL("getDiagnosticMode failed "
                             "unexpectedly");
                 }
 
@@ -71,15 +73,15 @@ class MdiaMbaTest : public CxxTest::TestSuite
                 }
             }
 
-            TS_TRACE(EXIT_MRK "testGetMbaDiagnosticMode");
+            TS_TRACE(EXIT_MRK "testGetDiagnosticMode");
         }
 
-        void testGetMbaWorkFlow(void)
+        void testGetWorkFlow(void)
         {
             using namespace MDIA;
             using namespace TARGETING;
 
-            TS_TRACE(ENTER_MRK "testGetMbaWorkFlow");
+            TS_TRACE(ENTER_MRK "testGetWorkFlow");
 
             Globals globals;
             TargetHandle_t mba = 0;
@@ -91,12 +93,12 @@ class MdiaMbaTest : public CxxTest::TestSuite
             if( !mbaList.empty() )
             {
                 mba = mbaList[0];
-                err = getMbaDiagnosticMode(
+                err = getDiagnosticMode(
                                 globals, mba, mode);
 
                 if(err)
                 {
-                    TS_FAIL("getMbaDiagnosticMode "
+                    TS_FAIL("getDiagnosticMode "
                             "failed unexpectedly");
                 }
 
@@ -113,11 +115,11 @@ class MdiaMbaTest : public CxxTest::TestSuite
             expected.push_back(START_SCRUB);
             expected.push_back(CLEAR_HW_CHANGED_STATE);
 
-            err = getMbaWorkFlow(mode, wf, globals);
+            err = getWorkFlow(mode, wf, globals);
 
             if(err)
             {
-                TS_FAIL("getMbaWorkFlow failed unexpectedly");
+                TS_FAIL("getWorkFlow failed unexpectedly");
             }
 
             if(wf.size() != expected.size())
@@ -135,7 +137,7 @@ class MdiaMbaTest : public CxxTest::TestSuite
                 }
             }
 
-            TS_TRACE(EXIT_MRK "testGetMbaWorkFlow");
+            TS_TRACE(EXIT_MRK "testGetWorkFlow");
         }
 };
 #endif

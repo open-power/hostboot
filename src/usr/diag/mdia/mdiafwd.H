@@ -162,7 +162,7 @@ typedef WorkFlowAssocMap::const_iterator WorkFlowAssoc;
 typedef std::vector<uint64_t> MonitorIDs;
 
 /**
- * @brief getMbaDiagnosticMode get the mode (scrub, init, one, four, nine)
+ * @brief getDiagnosticMode get the mode (scrub, init, one, four, nine)
  *
  * @param[in] i_globals policy flags needed to determine the mode
  * @param[in] i_target the mba target for which the mode is determined
@@ -171,13 +171,13 @@ typedef std::vector<uint64_t> MonitorIDs;
  * @retval 0 no error
  * @retval !0 unexpected error occurred
  */
-errlHndl_t getMbaDiagnosticMode(
+errlHndl_t getDiagnosticMode(
         const Globals & i_globals,
         TARGETING::TargetHandle_t i_mba,
         DiagMode & o_mode);
 
 /**
- * @brief getMbaWorkFlow get the workflow for an mba target
+ * @brief getWorkFlow get the workflow for an mba target
  *
  * @param[in] i_mode the diagnostic mode for the target
  * @param[out] o_wf the workflow for the mba target
@@ -186,7 +186,7 @@ errlHndl_t getMbaDiagnosticMode(
  * @retval 0 no error
  * @retval !0 unexpected error occurred
  */
-errlHndl_t getMbaWorkFlow(
+errlHndl_t getWorkFlow(
         DiagMode i_mode,
         WorkFlow & o_wf,
         const Globals & i_globals);

@@ -48,78 +48,79 @@ namespace MDIA
 
 errlHndl_t runStep(const TargetHandleList & i_targetList)
 {
-    //TODO RTC 151755
-    //MDIA_FAST("memory diagnostics entry with %d target(s)",
-    //        i_targetList.size());
+    MDIA_FAST("memory diagnostics entry with %d target(s)",
+            i_targetList.size());
 
     // memory diagnostics ipl step entry point
 
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
-   // TODO RTC 151755
-   // Globals globals;
+    Globals globals;
 
-   // TargetHandle_t top = 0;
-   // targetService().getTopLevelTarget(top);
+    TargetHandle_t top = 0;
+    targetService().getTopLevelTarget(top);
 
-   // if(top)
-   // {
-   //     globals.mfgPolicy = top->getAttr<ATTR_MNFG_FLAGS>();
+    if(top)
+    {
+        globals.mfgPolicy = top->getAttr<ATTR_MNFG_FLAGS>();
 
-   //     uint8_t maxMemPatterns =
-   //         top->getAttr<ATTR_RUN_MAX_MEM_PATTERNS>();
+        uint8_t maxMemPatterns =
+            top->getAttr<ATTR_RUN_MAX_MEM_PATTERNS>();
 
-   //     // This registry / attr is the same as the
-   //     // exhaustive mnfg one
-   //     if(maxMemPatterns)
-   //     {
-   //         globals.mfgPolicy |=
-   //           MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
-   //     }
 
-   //     globals.simicsRunning = Util::isSimicsRunning();
+        // This registry / attr is the same as the
+        // exhaustive mnfg one
+        if(maxMemPatterns)
+        {
+            globals.mfgPolicy |=
+              MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST;
+        }
 
-   //     globals.disableScrubs =
-   //      top->getAttr<ATTR_DISABLE_SCRUB_AFTER_PATTERN_TEST>();
-   // }
+        globals.simicsRunning = Util::isSimicsRunning();
+    }
 
-   // // get the workflow for each target mba passed in.
-   // // associate each workflow with the target handle.
+    // get the workflow for each target mba passed in.
+    // associate each workflow with the target handle.
 
-   // WorkFlowAssocMap list;
+    WorkFlowAssocMap list;
 
-   // TargetHandleList::const_iterator tit;
-   // DiagMode mode;
+    TargetHandleList::const_iterator tit;
+    DiagMode mode;
 
-   // for(tit = i_targetList.begin(); tit != i_targetList.end(); ++tit)
-   // {
-   //     err = getMbaDiagnosticMode(globals, *tit, mode);
 
-   //     if(err)
-   //     {
-   //         break;
-   //     }
+    for(tit = i_targetList.begin(); tit != i_targetList.end(); ++tit)
+    {
+        err = getDiagnosticMode(globals, *tit, mode);
 
-   //     err = getMbaWorkFlow(mode, list[*tit], globals);
+        if(err)
+        {
+            break;
+        }
 
-   //     if(err)
-   //     {
-   //         break;
-   //     }
-   // }
+        err = getWorkFlow(mode, list[*tit], globals);
 
-   // if(!err)
-   // {
-   //     // set global data
-   //     Singleton<StateMachine>::instance().setGlobals(globals);
+        if(err)
+        {
+            break;
+        }
+    }
 
-   //     // TODO...run the workflow through the state machine
-   //     err = Singleton<StateMachine>::instance().run(list);
-   // }
+    if(nullptr == err)
+    {
+        // set global data
+        Singleton<StateMachine>::instance().setGlobals(globals);
 
-   // // ensure threads and pools are shutdown when finished
+        err = Singleton<StateMachine>::instance().run(list);
+    }
 
-   // doStepCleanup(globals);
+    // ensure threads and pools are shutdown when finished
+
+    doStepCleanup(globals);
+
+    if (nullptr != err)
+    {
+        MDIA_FAST("runStep: error in runStep");
+    }
 
     return err;
 
