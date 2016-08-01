@@ -529,7 +529,7 @@ fapi_try_exit:
 ///
 /// PBA slave 0 is used to boot the SGPE and the OCC PPC405.
 ///
-/// PBA slave 1 is not used and not setup.
+/// PBA slave 1 is used to boot the OCC PPC405.
 
 /// PBA slave 2 is used to boot the PGPE.  It is setup as a read/write slave
 /// as the PGPE as to write to HOMER memory during this phase.
@@ -618,8 +618,29 @@ pba_slave_setup_boot_phase(
     FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL0_SCOM, l_data64),
              "Failed to set Slave 0 control register");
 
-    FAPI_INF("Skipping PBA Slave 1 ...");
-    // Slave 1 is not used during Boot phase
+    FAPI_INF("Initialize PBA Slave 1 ...");
+    // Slave 1 (405 ICU/DCU).  This is a read/write slave.  Write gethering is
+    // allowed, but with the shortest possible timeout. This slave is
+    // effectively disabled soon after IPL.
+
+    ps.value = 0;
+    ps.fields.enable = 1;
+    ps.fields.mid_match_value = OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_ICU & OCI_MASTER_ID_DCU;
+
+    ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
+    ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
+    ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;
+    ps.fields.wr_gather_timeout = PBA_WRITE_GATHER_TIMEOUT_2_PULSES;
+    ps.fields.buf_alloc_a = 1;
+    ps.fields.buf_alloc_b = 1;
+    ps.fields.buf_alloc_c = 1;
+    ps.fields.buf_alloc_w = 1;
+
+    l_data64 = ps.value;
+
+    FAPI_TRY(fapi2::putScom(i_target, PU_PBASLVCTL1_SCOM, l_data64),
+             "Failed to set Slave 1 control register");
 
     FAPI_INF("Initialize PBA Slave 2 ...");
     // Slave 2 (PGPE Boot).  This is a read/write slave.  Write gethering is
