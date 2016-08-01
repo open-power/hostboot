@@ -88,10 +88,13 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target);
 
 /**
  * @brief Verify a functional TPM still exists in the system
- * @return errlHndl_t NULL if TPM available, otherwise a pointer to the
- *       error log.
+ *
+ * If no functional TPMs are found in the system :
+ *   If the system is running in secure mode an error log will be committed
+ *   and if the TPMRequired attribute is true a system shutdown will be
+ *   initiated
 */
-errlHndl_t tpmVerifyFunctionalTpmExists();
+void tpmVerifyFunctionalTpmExists();
 
 /**
  * @brief Replay the entries that exist in the log into the TPM as needed
@@ -109,13 +112,6 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target);
  */
 errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target);
 
-
-/**
- * @brief Verify a functional TPM still exists in the system
- * @return errlHndl_t NULL if TPM available, otherwise a pointer to the
- *       error log.
-*/
-errlHndl_t tpmVerifyFunctionalTpmExists();
 
 /**
  * @brief Extend a measurement into a TPM and log
