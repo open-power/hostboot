@@ -255,6 +255,8 @@ void* host_update_master_tpm( void *io_pArgs )
                         systemTpms.tpm[TPM_MASTER_INDEX].logMgr);
             if (NULL != err)
             {
+                systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
+                systemTpms.tpm[TPM_MASTER_INDEX].failed = true;
                 break;
             }
         }
@@ -268,28 +270,6 @@ void* host_update_master_tpm( void *io_pArgs )
             // Master TPM not available
             TRACFCOMP( g_trac_trustedboot,
                        "Master TPM Existence Fail");
-
-            systemTpms.failedTpmsPosted = true;
-            if (isTpmRequired())
-            {
-                /*@
-                 * @errortype
-                 * @reasoncode     RC_TPM_EXISTENCE_FAIL
-                 * @severity       ERRL_SEV_UNRECOVERABLE
-                 * @moduleid       MOD_HOST_UPDATE_MASTER_TPM
-                 * @userdata1      0
-                 * @userdata2      0
-                 * @devdesc        No TPMs found in system.
-                 */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                               MOD_HOST_UPDATE_MASTER_TPM,
-                                               RC_TPM_EXISTENCE_FAIL,
-                                               0,
-                                               0,
-                                               true /*Add HB SW Callout*/ );
-
-                err->collectTrace( SECURE_COMP_NAME );
-            }
 
         }
 
@@ -334,6 +314,10 @@ void* host_update_master_tpm( void *io_pArgs )
         mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
         mutex_unlock(&(systemTpms.tpm[TPM_BACKUP_INDEX].tpmMutex));
     }
+
+    // Make sure we are in a state
+    //  where we have a functional TPM
+    TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
 
     if (NULL == err)
     {
@@ -691,14 +675,15 @@ void tpmMarkFailed(TpmTarget * io_target)
 
 }
 
-errlHndl_t tpmVerifyFunctionalTpmExists()
+void tpmVerifyFunctionalTpmExists()
 {
     errlHndl_t err = NULL;
     bool foundFunctional = false;
 
     for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
     {
-        if ((!systemTpms.tpm[idx].failed && systemTpms.tpm[idx].available) ||
+        if ((!systemTpms.tpm[idx].failed &&
+             systemTpms.tpm[idx].available) ||
             !systemTpms.tpm[idx].initAttempted)
         {
             foundFunctional = true;
@@ -711,7 +696,9 @@ errlHndl_t tpmVerifyFunctionalTpmExists()
         systemTpms.failedTpmsPosted = true;
         TRACFCOMP( g_trac_trustedboot,
                    "NO FUNCTIONAL TPM FOUND");
-        if (isTpmRequired())
+
+        // Check to ensure jumper indicates we are running secure
+        if (SECUREBOOT::getJumperState())
         {
             /*@
              * @errortype
@@ -729,16 +716,43 @@ errlHndl_t tpmVerifyFunctionalTpmExists()
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( SECURE_COMP_NAME );
+            uint32_t errPlid = err->plid();
+
+            // Log this failure here
+            errlCommit(err, SECURE_COMP_ID);
+#if 0
+            // Code for early release
+            // Only terminate in manufacturing mode
+            // Get manufacturing mode flags
+            TARGETING::Target* pTopLevel = NULL;
+            TARGETING::targetService().getTopLevelTarget(pTopLevel);
+            TARGETING::ATTR_MNFG_FLAGS_type mnfgFlags =
+                pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+            if (mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
+#else
+            if (isTpmRequired())
+#endif
+
+            {
+                // terminating the IPL with this fail
+                // Terminate IPL immediately
+                INITSERVICE::doShutdown(errPlid);
+            }
+            else
+            {
+                TRACUCOMP( g_trac_trustedboot,
+                           "No functional TPM's found but TPM not Required");
+            }
         }
         else
         {
             TRACUCOMP( g_trac_trustedboot,
-                       "No functional TPM's found but TPM not Required");
+                       "No functional TPM's found but not running secure");
         }
 
     }
 
-    return err;
+    return;
 }
 
 void* tpmDaemon(void* unused)
@@ -806,15 +820,9 @@ void* tpmDaemon(void* unused)
                                    msgData->mLogMsg);
                   }
 
-                  if (TRUSTEDBOOT::MSG_MODE_SYNC == tb_msg->iv_mode)
-                  {
-                      // Lastly make sure we are in a state
-                      //  where we have a functional TPM
-                      // Only do for sync messages that will actually
-                      //  get the error log back
-                      tb_msg->iv_errl =
-                          TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
-                  }
+                  // Lastly make sure we are in a state
+                  //  where we have a functional TPM
+                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
               }
               break;
 
@@ -873,16 +881,20 @@ void* tpmDaemon(void* unused)
 bool isTpmRequired()
 {
 
+    bool retVal = false;
     TARGETING::Target* pTopLevel = NULL;
+
     (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
     assert(pTopLevel != NULL, "Unable to get top level target");
 
     TARGETING::ATTR_TPM_REQUIRED_type tpmRequired =
         pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
-    TRACFCOMP( g_trac_trustedboot,
-               "Tpm Required: %s",(tpmRequired ? "Yes" : "No"));
+    retVal = tpmRequired;
 
-    return tpmRequired;
+    TRACFCOMP( g_trac_trustedboot,
+               "Tpm Required: %s",(retVal ? "Yes" : "No"));
+
+    return retVal;
 }
 
 

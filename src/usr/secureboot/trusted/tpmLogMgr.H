@@ -77,7 +77,7 @@ namespace TRUSTEDBOOT
     uint32_t TCG_EfiSpecIdEventStruct_size(TCG_EfiSpecIdEventStruct* val);
 
     enum {
-        TPMLOG_BUFFER_SIZE   = 2048, ///< Size of event log buffer in bytes
+        TPMLOG_BUFFER_SIZE   = 3584, ///< Size of event log buffer for HB
         TPMLOG_DEVTREE_SIZE  = 64*1024, ///< Size to allocate for OPAL
     };
 
