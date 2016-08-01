@@ -37,6 +37,7 @@
 // While using tor_tor_get_block_of_rings and tor_get_single_ring API,
 // it is used pass by value
 //
+#include "p9_ringId.H"
 #include "p9_tor.H"
 #include "p9_xip_image.h"
 #include "p9_infrastruct_help.H"
