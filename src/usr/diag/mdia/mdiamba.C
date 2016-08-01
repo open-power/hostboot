@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,21 +38,17 @@ using namespace TARGETING;
 namespace MDIA
 {
 
-errlHndl_t getMbaDiagnosticMode(
+errlHndl_t getDiagnosticMode(
         const Globals & i_globals,
-        TargetHandle_t i_mba,
+        TargetHandle_t i_trgt,
         DiagMode & o_mode)
 {
     o_mode = ONE_PATTERN;
 
     do
     {
-        if(i_globals.simicsRunning)
-        {
-            o_mode = ONE_PATTERN;
-        }
 
-        else if(MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
+        if(MNFG_FLAG_ENABLE_EXHAUSTIVE_PATTERN_TEST
            & i_globals.mfgPolicy)
         {
             o_mode = NINE_PATTERNS;
@@ -70,12 +66,17 @@ errlHndl_t getMbaDiagnosticMode(
             o_mode = ONE_PATTERN;
         }
 
+        else if(i_globals.simicsRunning)
+        {
+            o_mode = ONE_PATTERN;
+        }
+
         // Only need to check hw changed state attributes
         // when not already set to exhaustive and not in simics
         if(( NINE_PATTERNS != o_mode ) &&
            ( ! i_globals.simicsRunning ))
         {
-            if(isHWStateChanged(i_mba))
+            if(isHWStateChanged(i_trgt))
             {
                 o_mode = NINE_PATTERNS;
             }
@@ -83,14 +84,14 @@ errlHndl_t getMbaDiagnosticMode(
 
     } while(0);
 
-    MDIA_FAST("getMbaDiagnosticMode: mba: %x, o_mode: 0x%x, "
+    MDIA_FAST("getDiagnosticMode: trgt: %x, o_mode: 0x%x, "
               "simics: %d",
-              get_huid(i_mba), o_mode, i_globals.simicsRunning);
+              get_huid(i_trgt), o_mode, i_globals.simicsRunning);
 
     return 0;
 }
 
-errlHndl_t getMbaWorkFlow(
+errlHndl_t getWorkFlow(
                 DiagMode i_mode,
                 WorkFlow & o_wf,
                 const Globals & i_globals)
@@ -133,13 +134,7 @@ errlHndl_t getMbaWorkFlow(
         case ONE_PATTERN:
 
             o_wf.push_back(START_PATTERN_0); // 0's pattern, must be last
-
-            // disable scrub for one pattern test if set, no need
-            // to do this for other pattern tests at this point
-            if( ! i_globals.disableScrubs )
-            {
-                o_wf.push_back(START_SCRUB);
-            }
+            o_wf.push_back(START_SCRUB);
 
             break;
 
@@ -173,7 +168,7 @@ errlHndl_t getMbaWorkFlow(
  *     or about to be cleared by this MBA
  */
 TargetHandleList getMemTargetsForQueryOrClear(
-                    TargetHandle_t i_mba, bool i_queryOnly)
+                    TargetHandle_t i_trgt, bool i_queryOnly)
 {
     #define FUNC "getMemTargetsForQueryOrClear: "
     TargetHandleList o_list;
@@ -183,7 +178,7 @@ TargetHandleList getMemTargetsForQueryOrClear(
         // add associated DIMMs
         TargetHandleList dimmList;
         getChildAffinityTargets(dimmList,
-                                i_mba,
+                                i_trgt,
                                 CLASS_NA,
                                 TYPE_DIMM);
 
@@ -196,14 +191,14 @@ TargetHandleList getMemTargetsForQueryOrClear(
         // add associated Centaur
         TargetHandleList targetList;
         getParentAffinityTargets(targetList,
-                                 i_mba,
+                                 i_trgt,
                                  CLASS_CHIP,
                                  TYPE_MEMBUF);
 
         if( targetList.empty() )
         {
             MDIA_FAST(FUNC "no connected centaur "
-                    "for mba: %x", get_huid(i_mba));
+                    "for mba: %x", get_huid(i_trgt));
             break;
         }
 
@@ -278,7 +273,7 @@ TargetHandleList getMemTargetsForQueryOrClear(
     } while(0);
 
     MDIA_DBG(FUNC "mba: %x, size: %d",
-             get_huid(i_mba), o_list.size());
+             get_huid(i_trgt), o_list.size());
 
     return o_list;
 
@@ -286,14 +281,14 @@ TargetHandleList getMemTargetsForQueryOrClear(
 }
 
 
-bool isHWStateChanged(TargetHandle_t i_mba)
+bool isHWStateChanged(TargetHandle_t i_trgt)
 {
     bool hwChanged = false;
     ATTR_HWAS_STATE_CHANGED_FLAG_type hwChangeFlag;
 
     // Get a list of associated targets for attribute query
     TargetHandleList targetList =
-        getMemTargetsForQueryOrClear(i_mba, true);
+        getMemTargetsForQueryOrClear(i_trgt, true);
 
     for(TargetHandleList::iterator target = targetList.begin();
         target != targetList.end(); ++target )
@@ -313,18 +308,18 @@ bool isHWStateChanged(TargetHandle_t i_mba)
     return hwChanged;
 }
 
-void clearHWStateChanged(TargetHandle_t i_mba)
+void clearHWStateChanged(TargetHandle_t i_trgt)
 {
     TargetHandleList targetList;
 
     // Get a list of associated targets for attribute clearing
-    targetList = getMemTargetsForQueryOrClear(i_mba, false);
+    targetList = getMemTargetsForQueryOrClear(i_trgt, false);
 
     for(TargetHandleList::iterator target = targetList.begin();
         target != targetList.end(); ++target)
     {
         MDIA_DBG("clearHWStateChanged: mba: %x, target: %x",
-                 get_huid(i_mba), get_huid(*target));
+                 get_huid(i_trgt), get_huid(*target));
 
         clear_hwas_changed_bit( *target,
                                 HWAS_CHANGED_BIT_MEMDIAG);
