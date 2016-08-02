@@ -1041,6 +1041,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
     uint8_t l_enhancedNoMirrorMode = 0;
+    uint8_t l_mem_ipl_complete = 1;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     // Stores data read from ATTR_MSS_MCS_GROUP_32
@@ -1110,6 +1111,10 @@ fapi2::ReturnCode p9_mss_setup_bars(
         // 1) Add code to template functions for MI in Cumulus
         // 2) Need to also program Mirror memory in Cumulus.
     }
+
+    // write attribute signifying BARs are valid & MSS inits are finished
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_IPL_COMPLETE, i_target, l_mem_ipl_complete),
+             "Error from FAPI_ATTR_SET (ATTR_MSS_MEM_IPL_COMPLETE)");
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
