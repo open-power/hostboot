@@ -159,6 +159,8 @@ public:
         DECONFIGURED_BY_EQ_DECONFIG,            // BASE | 0x0F
         DECONFIGURED_BY_EX_DECONFIG,            // BASE | 0x10
         DECONFIGURED_BY_CORE_DECONFIG,          // BASE | 0x11
+        DECONFIGURED_BY_PHB_DECONFIG,           // BASE | 0x12
+        DECONFIGURED_BY_PEC_DECONFIG,           // BASE | 0x13
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
