@@ -61,30 +61,6 @@ OBJS += call_mss_draminit_training.o
 OBJS += call_mss_draminit_trainadv.o
 OBJS += call_mss_draminit_mc.o
 
-#From import/chips/p9/procedures/hwp/memory/lib
-OBJS += rank.o
-OBJS += c_str.o
-OBJS += ccs.o
-OBJS += rcd_load.o
-OBJS += mrs_load.o
-OBJS += mrs_load_ddr4.o
-OBJS += rcd_load_ddr4.o
-OBJS += ddr_phy.o
-OBJS += dp16.o
-OBJS += adr32s.o
-OBJS += xlate.o
-OBJS += port.o
-OBJS += memdiags_fir.o
-OBJS += mrs00.o
-OBJS += mrs01.o
-OBJS += mrs02.o
-OBJS += mrs03.o
-OBJS += mrs04.o
-OBJS += mrs05.o
-OBJS += mrs06.o
-
-
-
 OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
 #HWP build tool

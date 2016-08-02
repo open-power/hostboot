@@ -33,21 +33,6 @@ OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o
 OBJS += call_mss_attr_update.o
 
-# library objects needed
-OBJS += spd_decoder.o
-OBJS += fake_spd.o
-OBJS += fake_vpd.o
-OBJS += c_str.o
-OBJS += memory_size.o
-OBJS += attr_setters.o
-OBJS += cas_latency.o
-OBJS += eff_config.o
-OBJS += timing.o
-OBJS += rank.o
-OBJS += sync.o
-
-
-
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbe/
