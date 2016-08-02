@@ -150,6 +150,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libistep07.so),
+        DEP_LIB(libisteps_mss.so),
         NULL
     }
 };

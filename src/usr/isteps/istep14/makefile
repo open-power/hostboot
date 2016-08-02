@@ -50,15 +50,6 @@ OBJS += call_proc_setup_bars.o
 OBJS += call_proc_htm_setup.o
 OBJS += call_proc_exit_cache_contained.o
 OBJS += call_host_mpipl_service.o
-OBJS += memdiags.o
-OBJS += mcbist.o
-OBJS += sim.o
-OBJS += rank.o
-OBJS += patterns.o
-
-#Object files from lib directories
-OBJS += memory_size.o
-OBJS += c_str.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk

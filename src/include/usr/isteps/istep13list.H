@@ -259,6 +259,7 @@ const   TaskInfo    g_istep13[]  =   {
 const DepModInfo g_istep13Dependancies = {
     {
         DEP_LIB(libistep13.so),
+        DEP_LIB(libisteps_mss.so),
         NULL
     }
 };
