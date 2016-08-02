@@ -44,7 +44,7 @@ namespace decoder
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_0_version_layout(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mr_0_version_layout(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value;
@@ -64,7 +64,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_1_version_data(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mr_1_version_data(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value;
@@ -84,7 +84,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_2_signature_hash(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mr_2_signature_hash(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint32_t l_value;
@@ -105,7 +105,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -125,7 +125,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -145,7 +145,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -165,7 +165,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -185,7 +185,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -205,7 +205,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -225,7 +225,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -245,7 +245,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -265,7 +265,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -285,7 +285,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -305,7 +305,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -325,7 +325,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -345,7 +345,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -365,7 +365,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -385,7 +385,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of command/address of A## in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -405,7 +405,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -425,7 +425,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Bank Address of BA# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -445,7 +445,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Bank Group of BG# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -465,7 +465,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Bank Group of BA# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -485,7 +485,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -505,7 +505,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -525,7 +525,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip ID of C# in ticks. Only used in TSV Dimms. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -545,7 +545,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -565,7 +565,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -585,7 +585,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -605,7 +605,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -625,7 +625,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Activate for ACTN in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -645,8 +645,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Column Access Strobe for CASN in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-        i_target, const uint8_t* i_blob)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
@@ -665,8 +665,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Row Access Strobe for RASN in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-        i_target, const uint8_t* i_blob)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
@@ -685,7 +685,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Write Enable for WEN in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -705,7 +705,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of the Parity Input for PAR in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -725,7 +725,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -745,7 +745,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -765,7 +765,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -785,7 +785,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock Enable for Dimm#_CKE# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -805,7 +805,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -825,7 +825,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -845,7 +845,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -865,7 +865,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Chip Select for Dimm#_CSN# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -885,7 +885,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -905,7 +905,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -925,7 +925,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -945,7 +945,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of On Die Termination for Dimm#_ODT# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -965,7 +965,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Default value for 2N Mode from Signal Integrity.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -987,7 +987,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  MT Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_0_version_layout(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mt_0_version_layout(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value;
@@ -1007,7 +1007,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  MT Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_1_version_data(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mt_1_version_data(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value;
@@ -1027,7 +1027,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_2_signature_hash(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
+inline fapi2::ReturnCode vpd_mt_2_signature_hash(const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target,
         const uint8_t* i_blob)
 {
     uint32_t l_value;
@@ -1048,7 +1048,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Register Clock Driver, Input Bus Termination in tens of Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2][2];
@@ -1068,7 +1068,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  DQ and DQS Drive Impedance for [Port][DIMM][RANK].
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
@@ -1088,7 +1088,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  DRAM side Nominal Termination Resistance in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
@@ -1108,7 +1108,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  DRAM side Park Termination Resistance in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
@@ -1128,7 +1128,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  DRAM side Write Termination Resistance in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
@@ -1158,7 +1158,7 @@ fapi_try_exit:
 /// Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
 /// Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint32_t l_value[2];
@@ -1194,7 +1194,7 @@ fapi_try_exit:
 /// Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
 /// Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint32_t l_value[2];
@@ -1230,7 +1230,7 @@ fapi_try_exit:
 /// Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
 /// Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint32_t l_value[2];
@@ -1264,7 +1264,7 @@ fapi_try_exit:
 /// Bit 12-13 = DP16 Block 1 Nibble 2     Bit 28-29 = DP16 Block 3 Nibble 2
 /// Bit 14-15 = DP16 Block 1 Nibble 3     Bit 30-31 = DP16 Block 3 Nibble 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint64_t l_value[2];
@@ -1298,7 +1298,7 @@ fapi_try_exit:
 /// Bit 18-20 = DP16 Block 1 Nibble 2     Bit 42-44 = DP16 Block 3 Nibble 2
 /// Bit 21-23 = DP16 Block 1 Nibble 3     Bit 45-47 = DP16 Block 3 Nibble 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint64_t l_value[2];
@@ -1324,7 +1324,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Drive Impedance for Address Lines in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1344,7 +1344,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Drive Impedance for Clock in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1364,7 +1364,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Drive Impedance for Control Lines in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1384,7 +1384,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Drive Impedance for Data and Data Strobe Lines in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1404,7 +1404,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Drive Impedance for Clock Enable Spare Line in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1424,7 +1424,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Receiver Impedance for Data and Data Strobe Lines in Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1444,7 +1444,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  READ, On Die Termination triggering bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
+inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
 
@@ -1463,7 +1463,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  WRITE, On Die Termination triggering bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
+inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
 {
     uint8_t l_value[2][2][2];
 
@@ -1482,7 +1482,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  DRAM side Write Vref setting for DDR4. Bit encode is 01234567. Bit 0 is unused. Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in JEDEC.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
@@ -1502,8 +1502,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Memory Controller side Read Vref setting. Dividing by 1000 gives you percentage of Vdd
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        const uint8_t* i_blob)
+inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
 {
     uint32_t l_value[2];
 
@@ -1528,7 +1527,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x8023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default
 ///
-inline fapi2::ReturnCode mss_vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint16_t l_value[2];
@@ -1560,77 +1559,77 @@ fapi_try_exit:
 inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_mt_blob,
                                     const uint8_t* i_mr_blob)
 {
-    FAPI_TRY (decoder::mss_vpd_mr_0_version_layout(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_1_version_data(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_2_signature_hash(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a00(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a01(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a02(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a03(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a04(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a05(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a06(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a07(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a08(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a09(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a10(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a11(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a12(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a13(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_a17(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_ba0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_ba1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_bg0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_bg1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_c0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_c1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_addr_c2(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_d0_clk0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_d0_clk1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_d1_clk0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_d1_clk1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cmd_actn(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cmd_addr_casn_a15(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cmd_addr_wen_a14(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cmd_par(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_cke0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_cke1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_cke0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_cke1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_csn0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_csn1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_csn0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_csn1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_odt0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d0_odt1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_odt0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_phase_rot_cntl_d1_odt1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mr_mc_2n_mode_autoset(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_0_version_layout(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_1_version_data(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_2_signature_hash(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_dimm_rcd_ibt(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_dram_drv_imp_dq_dqs(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_dram_rtt_nom(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_dram_rtt_park(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_dram_rtt_wr(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_dq_acboost_rd_up(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_dq_acboost_wr_down(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_dq_acboost_wr_up(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_dq_ctle_cap(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_dq_ctle_res(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_drv_imp_addr(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_drv_imp_clk(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_drv_imp_cntl(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_drv_imp_dq_dqs(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_drv_imp_spcke(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_mc_rcv_imp_dq_dqs(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_odt_rd(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_odt_wr(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_vref_dram_wr(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_vref_mc_rd(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::mss_vpd_mt_windage_rd_ctr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mr_0_version_layout(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_1_version_data(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_2_signature_hash(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a00(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a01(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a02(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a03(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a04(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a05(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a06(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a07(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a08(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a09(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a10(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a11(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a12(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a13(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_a17(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_ba0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_ba1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_bg0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_bg1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c2(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clk0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clk1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clk0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clk1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_actn(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_addr_casn_a15(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_addr_wen_a14(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_par(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_cke0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_cke1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_cke0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_cke1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_csn0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_csn1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_csn0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_csn1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_odt0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d0_odt1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_odt0(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cntl_d1_odt1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_2n_mode_autoset(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mt_0_version_layout(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_1_version_data(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_2_signature_hash(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dram_drv_imp_dq_dqs(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dram_rtt_nom(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dram_rtt_park(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dram_rtt_wr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_dq_acboost_rd_up(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_dq_acboost_wr_down(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_dq_acboost_wr_up(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_dq_ctle_cap(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_dq_ctle_res(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_addr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_clk(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_cntl(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_dq_dqs(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_spcke(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_rcv_imp_dq_dqs(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_odt_rd(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_odt_wr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_vref_dram_wr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_vref_mc_rd(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_windage_rd_ctr(i_target, i_mt_blob) );
 
 fapi_try_exit:
     return fapi2::current_err;
