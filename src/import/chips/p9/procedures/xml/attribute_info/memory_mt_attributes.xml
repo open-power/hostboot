@@ -35,7 +35,7 @@
         <mssUnits>num</mssUnits>
         <mssBlobStart>0</mssBlobStart>
         <mssBlobLength>1</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_0_version_layout</mssAccessorName>
+        <mssAccessorName>vpd_mt_0_version_layout</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -50,7 +50,7 @@
         <mssUnits>num</mssUnits>
         <mssBlobStart>1</mssBlobStart>
         <mssBlobLength>1</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_1_version_data</mssAccessorName>
+        <mssAccessorName>vpd_mt_1_version_data</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -65,7 +65,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>2</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_2_signature_hash</mssAccessorName>
+        <mssAccessorName>vpd_mt_2_signature_hash</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -81,7 +81,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>6</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_dimm_rcd_ibt</mssAccessorName>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt</mssAccessorName>
         <array>2 2</array>
     </attribute>
 
@@ -98,7 +98,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>10</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_dram_drv_imp_dq_dqs</mssAccessorName>
+        <mssAccessorName>vpd_mt_dram_drv_imp_dq_dqs</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -115,7 +115,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>18</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_dram_rtt_nom</mssAccessorName>
+        <mssAccessorName>vpd_mt_dram_rtt_nom</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -132,7 +132,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>26</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_dram_rtt_park</mssAccessorName>
+        <mssAccessorName>vpd_mt_dram_rtt_park</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -149,7 +149,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>34</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_dram_rtt_wr</mssAccessorName>
+        <mssAccessorName>vpd_mt_dram_rtt_wr</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -175,7 +175,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>42</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_dq_acboost_rd_up</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_dq_acboost_rd_up</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -201,7 +201,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>50</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_dq_acboost_wr_down</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_dq_acboost_wr_down</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -227,7 +227,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>58</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_dq_acboost_wr_up</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_dq_acboost_wr_up</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -251,7 +251,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>66</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_dq_ctle_cap</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_dq_ctle_cap</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -275,7 +275,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>82</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_dq_ctle_res</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_dq_ctle_res</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -292,7 +292,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>98</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_drv_imp_addr</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_drv_imp_addr</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -309,7 +309,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>100</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_drv_imp_clk</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_drv_imp_clk</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -326,7 +326,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>102</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_drv_imp_cntl</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_drv_imp_cntl</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -343,7 +343,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>104</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -360,7 +360,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>106</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_drv_imp_spcke</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_drv_imp_spcke</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -377,7 +377,7 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>108</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
+        <mssAccessorName>vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -393,7 +393,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>110</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_odt_rd</mssAccessorName>
+        <mssAccessorName>vpd_mt_odt_rd</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -409,7 +409,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>118</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_odt_wr</mssAccessorName>
+        <mssAccessorName>vpd_mt_odt_wr</mssAccessorName>
         <array>2 2 2</array>
     </attribute>
 
@@ -425,7 +425,7 @@
         <mssUnits></mssUnits>
         <mssBlobStart>126</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_vref_dram_wr</mssAccessorName>
+        <mssAccessorName>vpd_mt_vref_dram_wr</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -442,7 +442,7 @@
         <mssUnits>percent of Vdd</mssUnits>
         <mssBlobStart>128</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_vref_mc_rd</mssAccessorName>
+        <mssAccessorName>vpd_mt_vref_mc_rd</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -458,7 +458,7 @@
         <mssUnits>num</mssUnits>
         <mssBlobStart>136</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
-        <mssAccessorName>mss_vpd_mt_windage_rd_ctr</mssAccessorName>
+        <mssAccessorName>vpd_mt_windage_rd_ctr</mssAccessorName>
         <array>2</array>
     </attribute>
 
