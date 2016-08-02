@@ -908,6 +908,7 @@
     <odmVisable/>
     <odmChangeable/>
     <persistRuntime/>
+    <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
