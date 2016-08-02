@@ -20572,7 +20572,7 @@ fapi_try_exit:
 /// or redefined. Does not
 /// reset.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_0_version_layout(uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_0_version_layout(uint8_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_0_VERSION_LAYOUT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -20593,7 +20593,7 @@ fapi_try_exit:
 /// layout version. Resets when layout version number
 /// increments.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_1_version_data(uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_1_version_data(uint8_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_1_VERSION_DATA, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -20613,7 +20613,7 @@ fapi_try_exit:
 /// @note  Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of
 /// data.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_2_signature_hash(uint32_t& o_value)
+inline fapi2::ReturnCode vpd_mr_2_signature_hash(uint32_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MR_2_SIGNATURE_HASH, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -20635,7 +20635,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20661,7 +20661,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20688,7 +20688,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a00(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -20719,7 +20719,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20745,7 +20745,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20772,7 +20772,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a01(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -20803,7 +20803,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20829,7 +20829,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20856,7 +20856,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a02(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -20887,7 +20887,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20913,7 +20913,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20940,7 +20940,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a03(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -20971,7 +20971,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -20997,7 +20997,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21024,7 +21024,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a04(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21055,7 +21055,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21081,7 +21081,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21108,7 +21108,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a05(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21139,7 +21139,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21165,7 +21165,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21192,7 +21192,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a06(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21223,7 +21223,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21249,7 +21249,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21276,7 +21276,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a07(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21307,7 +21307,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21333,7 +21333,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21360,7 +21360,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a08(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21391,7 +21391,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21417,7 +21417,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21444,7 +21444,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a09(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21475,7 +21475,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21501,7 +21501,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21528,7 +21528,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a10(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21559,7 +21559,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21585,7 +21585,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21612,7 +21612,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a11(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21643,7 +21643,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21669,7 +21669,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21696,7 +21696,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a12(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21727,7 +21727,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21753,7 +21753,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21780,7 +21780,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a13(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21811,7 +21811,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21837,7 +21837,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21864,7 +21864,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_a17(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21895,7 +21895,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21921,7 +21921,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -21948,7 +21948,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -21979,7 +21979,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22005,7 +22005,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22032,7 +22032,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_ba1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22063,7 +22063,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22089,7 +22089,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22116,7 +22116,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22147,7 +22147,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22173,7 +22173,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22200,7 +22200,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_bg1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22231,7 +22231,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22257,7 +22257,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22284,7 +22284,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22315,7 +22315,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22341,7 +22341,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22368,7 +22368,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22399,7 +22399,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22425,7 +22425,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22452,7 +22452,7 @@ fapi_try_exit:
 /// Ticks are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_addr_c2(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22483,7 +22483,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22509,7 +22509,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22536,7 +22536,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22567,7 +22567,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22593,7 +22593,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22620,7 +22620,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22651,7 +22651,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22677,7 +22677,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22704,7 +22704,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22735,7 +22735,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22761,7 +22761,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22788,7 +22788,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22819,7 +22819,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22845,7 +22845,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -22872,7 +22872,7 @@ fapi_try_exit:
 /// cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_actn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -22903,8 +22903,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
-        i_target, uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -22929,8 +22929,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target, uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
 {
     uint8_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -22956,8 +22956,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-        i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_casn_a15(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -22987,8 +22987,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
-        i_target, uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -23013,8 +23013,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target, uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
 {
     uint8_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -23040,8 +23040,8 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-        i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -23071,7 +23071,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23097,8 +23097,8 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-        i_target, uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
 {
     uint8_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -23124,7 +23124,7 @@ fapi_try_exit:
 /// one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_addr_wen_a14(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23155,7 +23155,7 @@ fapi_try_exit:
 /// of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23181,7 +23181,7 @@ fapi_try_exit:
 /// of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23208,7 +23208,7 @@ fapi_try_exit:
 /// of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cmd_par(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23239,7 +23239,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23265,7 +23265,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23292,7 +23292,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23323,7 +23323,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23349,7 +23349,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23376,7 +23376,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23407,7 +23407,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23433,7 +23433,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23460,7 +23460,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23491,7 +23491,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23517,7 +23517,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23544,7 +23544,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_cke1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23575,7 +23575,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23601,7 +23601,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23628,7 +23628,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23659,7 +23659,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23685,7 +23685,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23712,7 +23712,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23743,7 +23743,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23769,7 +23769,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23796,7 +23796,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23827,7 +23827,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23853,7 +23853,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23880,7 +23880,7 @@ fapi_try_exit:
 /// 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_csn1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23911,7 +23911,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23937,7 +23937,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -23964,7 +23964,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -23995,7 +23995,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24021,7 +24021,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24048,7 +24048,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d0_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24079,7 +24079,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24105,7 +24105,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24132,7 +24132,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24163,7 +24163,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24189,7 +24189,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24216,7 +24216,7 @@ fapi_try_exit:
 /// are 1/128 of one cycle of
 /// clock.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_cntl_d1_odt1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24246,7 +24246,7 @@ fapi_try_exit:
 /// @note  Default value for 2N Mode from Signal
 /// Integrity.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24271,7 +24271,7 @@ fapi_try_exit:
 /// @note  Default value for 2N Mode from Signal
 /// Integrity.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -24297,7 +24297,7 @@ fapi_try_exit:
 /// @note  Default value for 2N Mode from Signal
 /// Integrity.
 ///
-inline fapi2::ReturnCode mss_vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_2n_mode_autoset(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24328,7 +24328,7 @@ fapi_try_exit:
 /// or redefined. Does not
 /// reset.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_0_version_layout(uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_0_version_layout(uint8_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_0_VERSION_LAYOUT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -24349,7 +24349,7 @@ fapi_try_exit:
 /// layout version. Resets when layout version number
 /// increments.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_1_version_data(uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_1_version_data(uint8_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_1_VERSION_DATA, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -24369,7 +24369,7 @@ fapi_try_exit:
 /// @note  Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of
 /// data.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_2_signature_hash(uint32_t& o_value)
+inline fapi2::ReturnCode vpd_mt_2_signature_hash(uint32_t& o_value)
 {
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_2_SIGNATURE_HASH, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), o_value) );
@@ -24390,8 +24390,7 @@ fapi_try_exit:
 /// @note  Register Clock Driver, Input Bus Termination in tens of
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2][2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -24416,8 +24415,7 @@ fapi_try_exit:
 /// @note  Register Clock Driver, Input Bus Termination in tens of
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24447,8 +24445,7 @@ fapi_try_exit:
 /// @note  Register Clock Driver, Input Bus Termination in tens of
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24477,7 +24474,7 @@ fapi_try_exit:
 /// @note  DQ and DQS Drive Impedance for
 /// [Port][DIMM][RANK].
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24509,7 +24506,7 @@ fapi_try_exit:
 /// @note  DQ and DQS Drive Impedance for
 /// [Port][DIMM][RANK].
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24540,7 +24537,7 @@ fapi_try_exit:
 /// @note  DQ and DQS Drive Impedance for
 /// [Port][DIMM][RANK].
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -24570,8 +24567,7 @@ fapi_try_exit:
 /// @note  DRAM side Nominal Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24602,8 +24598,7 @@ fapi_try_exit:
 /// @note  DRAM side Nominal Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24633,8 +24628,7 @@ fapi_try_exit:
 /// @note  DRAM side Nominal Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24663,8 +24657,7 @@ fapi_try_exit:
 /// @note  DRAM side Park Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24695,8 +24688,7 @@ fapi_try_exit:
 /// @note  DRAM side Park Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24726,8 +24718,7 @@ fapi_try_exit:
 /// @note  DRAM side Park Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24756,8 +24747,7 @@ fapi_try_exit:
 /// @note  DRAM side Write Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24788,7 +24778,7 @@ fapi_try_exit:
 /// @note  DRAM side Write Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24818,7 +24808,7 @@ fapi_try_exit:
 /// @note  DRAM side Write Termination Resistance in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -24853,7 +24843,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -24884,7 +24874,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -24916,7 +24906,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint32_t* o_array)
 {
     if (o_array == nullptr)
@@ -24952,7 +24942,7 @@ fapi_try_exit:
 /// 8-15) Bit 24-26 = DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -24983,7 +24973,7 @@ fapi_try_exit:
 /// 8-15) Bit 24-26 = DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -25015,7 +25005,7 @@ fapi_try_exit:
 /// 8-15) Bit 24-26 = DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint32_t* o_array)
 {
     if (o_array == nullptr)
@@ -25051,7 +25041,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -25082,7 +25072,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint32_t& o_value)
 {
     uint32_t l_value[2];
@@ -25114,7 +25104,7 @@ fapi_try_exit:
 /// DP16 Block 4 (DQ Bits 0-7) Bit 27-29 = DP16 Block 4 (DQ Bits
 /// 8-15)
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint32_t* o_array)
 {
     if (o_array == nullptr)
@@ -25154,8 +25144,7 @@ fapi_try_exit:
 /// 3 Nibble 2 Bit 14-15 = DP16 Block 1 Nibble 3 Bit 30-31 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint64_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_value)
 {
     uint64_t l_value[2];
 
@@ -25188,7 +25177,7 @@ fapi_try_exit:
 /// 3 Nibble 2 Bit 14-15 = DP16 Block 1 Nibble 3 Bit 30-31 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint64_t& o_value)
 {
     uint64_t l_value[2];
@@ -25223,8 +25212,7 @@ fapi_try_exit:
 /// 3 Nibble 2 Bit 14-15 = DP16 Block 1 Nibble 3 Bit 30-31 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint64_t* o_array)
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint64_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25263,8 +25251,7 @@ fapi_try_exit:
 /// Nibble 2 Bit 21-23 = DP16 Block 1 Nibble 3 Bit 45-47 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint64_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_value)
 {
     uint64_t l_value[2];
 
@@ -25297,7 +25284,7 @@ fapi_try_exit:
 /// Nibble 2 Bit 21-23 = DP16 Block 1 Nibble 3 Bit 45-47 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint64_t& o_value)
 {
     uint64_t l_value[2];
@@ -25332,8 +25319,7 @@ fapi_try_exit:
 /// Nibble 2 Bit 21-23 = DP16 Block 1 Nibble 3 Bit 45-47 = DP16 Block 3 Nibble
 /// 3
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint64_t* o_array)
+inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint64_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25362,8 +25348,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Address Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -25387,7 +25372,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Address Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25412,8 +25397,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Address Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25442,8 +25426,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -25466,8 +25449,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -25491,8 +25473,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25521,8 +25502,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Control Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -25546,7 +25526,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Control Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25571,8 +25551,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Control Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25601,7 +25580,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25626,7 +25605,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25651,7 +25630,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -25681,7 +25660,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock Enable Spare Line in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25706,7 +25685,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock Enable Spare Line in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25731,7 +25710,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Drive Impedance for Clock Enable Spare Line in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -25761,7 +25740,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Receiver Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25786,7 +25765,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Receiver Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint8_t& o_value)
 {
     uint8_t l_value[2];
@@ -25811,7 +25790,7 @@ fapi_try_exit:
 /// @note  Memory Controller side Receiver Impedance for Data and Data Strobe Lines in
 /// Ohms.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         uint8_t* o_array)
 {
     if (o_array == nullptr)
@@ -25841,7 +25820,7 @@ fapi_try_exit:
 /// @note  READ, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25872,7 +25851,7 @@ fapi_try_exit:
 /// @note  READ, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25902,7 +25881,7 @@ fapi_try_exit:
 /// @note  READ, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25931,7 +25910,7 @@ fapi_try_exit:
 /// @note  WRITE, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25962,7 +25941,7 @@ fapi_try_exit:
 /// @note  WRITE, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -25992,7 +25971,7 @@ fapi_try_exit:
 /// @note  WRITE, On Die Termination triggering
 /// bitmap.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -26022,8 +26001,7 @@ fapi_try_exit:
 /// Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in
 /// JEDEC.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
 
@@ -26047,8 +26025,7 @@ fapi_try_exit:
 /// Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in
 /// JEDEC.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
+inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
 {
     uint8_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -26073,8 +26050,7 @@ fapi_try_exit:
 /// Bit 1 is the Range. Bits 2-7 is the Value. Refer to the VrefDQ Training Table in
 /// JEDEC.
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint8_t* o_array)
+inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint8_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -26104,7 +26080,7 @@ fapi_try_exit:
 /// of
 /// Vdd
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint32_t& o_value)
+inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint32_t& o_value)
 {
     uint32_t l_value[2];
 
@@ -26128,8 +26104,7 @@ fapi_try_exit:
 /// of
 /// Vdd
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        uint32_t& o_value)
+inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint32_t& o_value)
 {
     uint32_t l_value[2];
     auto l_mca = i_target.getParent<fapi2::TARGET_TYPE_MCA>();
@@ -26154,7 +26129,7 @@ fapi_try_exit:
 /// of
 /// Vdd
 ///
-inline fapi2::ReturnCode mss_vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint32_t* o_array)
+inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint32_t* o_array)
 {
     if (o_array == nullptr)
     {
@@ -26186,8 +26161,7 @@ fapi_try_exit:
 /// enabled, disable periodic rd_ctr in draminit_mc.
 /// Default
 ///
-inline fapi2::ReturnCode mss_vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint16_t& o_value)
+inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint16_t& o_value)
 {
     uint16_t l_value[2];
 
@@ -26213,7 +26187,7 @@ fapi_try_exit:
 /// enabled, disable periodic rd_ctr in draminit_mc.
 /// Default
 ///
-inline fapi2::ReturnCode mss_vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         uint16_t& o_value)
 {
     uint16_t l_value[2];
@@ -26241,8 +26215,7 @@ fapi_try_exit:
 /// enabled, disable periodic rd_ctr in draminit_mc.
 /// Default
 ///
-inline fapi2::ReturnCode mss_vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        uint16_t* o_array)
+inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, uint16_t* o_array)
 {
     if (o_array == nullptr)
     {
