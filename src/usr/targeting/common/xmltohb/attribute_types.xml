@@ -30348,47 +30348,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_NX_RNG_BIST_ENABLE</id>
-  <description>
-      Enable NX RNG BIST
-      creator: platform
-      consumer: p9_rng_init_phase1
-      firmware notes: none
-      DISABLE = 0x0, ENABLE = 0x1
-  </description>
-  <simpleType>
-    <uint8_t>
-    </uint8_t>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_NX_RNG_BIST_ENABLE</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-  <id>PROC_NX_RNG_BIST_THRESHOLD</id>
-  <description>
-      BIST threshold attribute
-      creator: platform
-      consumer: p9_rng_init_phase1
-      firmware notes: none
-  </description>
-  <simpleType>
-    <uint8_t>
-    </uint8_t>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_NX_RNG_BIST_THRESHOLD</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
   <id>MSS_VPD_MR_DPHY_GPO</id>
   <description>
         Global phy offset in number of clocks

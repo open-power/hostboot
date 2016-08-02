@@ -234,7 +234,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>NX RNG BAR enable
       creator: platform
-      consumer: p9_setup_bars
+      consumer: p9_rng_init_phase2
       firmware notes: none
     </description>
     <valueType>uint8</valueType>
@@ -242,18 +242,18 @@
     <platInit/>
     <persistRuntime/>
   </attribute>
-  <!-- ********************************************************************** -->
+  <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>NX RNG BAR
       creator: platform
-      consumer: p9_setup_bars
+      consumer: p9_rng_init_phase2
       firmware notes:
         Defines 8KB range (size implied) mapped for NX RNG function
-        Attribute holds offset (relative to chip MMIO origin) to program into
-        chip address range field of BAR -- RA bits 22:51
-        (excludes system/memory select/group/chip fields)
+        Attributes holds offset (relative to chip MMIO origin) to program into
+	chip address range field of BAR -- RA bits 22:51
+	(excludes system/memory select/group/chip fields)
     </description>
     <valueType>uint64</valueType>
     <platInit/>
@@ -291,31 +291,5 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_NX_RNG_BIST_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Enable NX RNG BIST
-      creator: platform
-      consumer: p9_rng_init_phase1
-      firmware notes: none
-    </description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_PROC_NX_RNG_BIST_THRESHOLD</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>BIST threshold attribute
-      creator: platform
-      consumer: p9_rng_init_phase1
-      firmware notes: none
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <persistRuntime/>
-  </attribute>
-  <!-- ********************************************************************* -->
 </attributes>
+
