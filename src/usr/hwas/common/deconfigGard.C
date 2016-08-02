@@ -1314,6 +1314,7 @@ void DeconfigGard::_deconfigureByAssoc(
     {
         TargetHandle_t pChild = *pChild_it;
 
+        HWAS_INF("_deconfigureByAssoc CHILD: %.8X", get_huid(pChild));
         _deconfigureTarget(*pChild, i_errlEid, NULL,
                 i_deconfigRule);
         // Deconfigure other Targets by association
@@ -1731,6 +1732,28 @@ void DeconfigGard::_deconfigureByAssoc(
                                     i_errlEid, i_deconfigRule);
                 break;
             } // TYPE_PORE
+            case TYPE_PHB:
+            {
+                TargetHandleList pParentPECList;
+                getParentAffinityTargetsByState(pParentPECList, &i_target,
+                        CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
+                HWAS_ASSERT((pParentPECList.size() == 1),
+                    "HWAS _deconfigureByAssoc: pParentPECList != 1");
+                Target *l_parentPEC = pParentPECList[0];
+
+                if (isFunctional(l_parentPEC))
+                {
+                    if (!anyChildFunctional(*l_parentPEC))
+                    {
+                       _deconfigureTarget(*l_parentPEC,
+                          i_errlEid, NULL, i_deconfigRule);
+                       _deconfigureByAssoc(*l_parentPEC,
+                          i_errlEid,i_deconfigRule);
+                    }
+                }
+
+                break;
+            } // TYPE_PHB
             default:
                 // no action
             break;

@@ -310,10 +310,267 @@ public:
 #endif
     }
 
+
+    /**
+     *  @brief Test Deconfiguring a PEC Target directly
+     */
+
+    void testDeconfigurePECTarget()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigurePECTarget: Started");
+
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+
+#else
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            //Find a functional PEC Target for the deconfigure test
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+            PredicateCTM predPEC(CLASS_UNIT, TYPE_PEC);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predPEC).push(&predFunctional).And();
+            TargetHandleList l_pecList;
+            targetService().getAssociated( l_pecList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            //Verify PEC list isn't empty
+            if (l_pecList.empty())
+            {
+                TS_FAIL("testDeconfigurePECTarget: empty l_pecList");
+                break;
+            }
+
+            //Iterate PEC targets doing the following
+            // 1) Verify PEC is functional
+            // 2) Verify Child PHB targets are functional
+            // 3) Deconfigure PEC target
+            // 4) Verify PEC target is non-functional
+            // 5) Verify Child PHB targets are non-functional
+            for (auto l_pec : l_pecList)
+            {
+                // Get the original HWAS_STATE of PEC
+                HwasState l_state = l_pec->getAttr<ATTR_HWAS_STATE>();
+                if (!l_state.functional)
+                {
+                    TS_FAIL("testDeconfigurePECTarget: PEC is non-functional"
+                            " before deconfiguration");
+                    break;
+                }
+
+                TargetHandleList l_phbList;
+                // Get the list of PHB targets associated with the PEC target
+                getChildAffinityTargets(l_phbList, l_pec,
+                                        CLASS_NA, TYPE_PHB);
+
+                if (l_phbList.empty())
+                {
+                    TS_FAIL("testDeconfigurePECTarget: empty l_phbList");
+                    break;
+                }
+
+                //Iterate through the PHB's
+                //   - Verify each is functional
+                for (auto l_phb : l_phbList)
+                {
+                    l_state = l_phb->getAttr<ATTR_HWAS_STATE>();
+                    //Verify the PHB is functional
+                    if (!l_state.functional)
+                    {
+                        TS_FAIL("testDeconfigurePECTarget: PHB is non-functional before test");
+                        break;
+                    }
+                }
+
+                // Deconfigure the target PEC and check that works
+                l_pErr = theDeconfigGard().
+                        deconfigureTarget(*l_pec,
+                            DeconfigGard::DECONFIGURED_BY_PEC_DECONFIG);
+                if (l_pErr)
+                {
+                    TS_FAIL("testDeconfigurePECTarget: Error from deconfigureTarget");
+                    break;
+                }
+
+                l_state = l_pec->getAttr<ATTR_HWAS_STATE>();
+                if (l_state.functional)
+                {
+                    TS_FAIL("testDeconfigurePECTarget: PEC is functional after deconfiguration");
+                    break;
+                }
+                // Reset the HWAS_STATE of PEC
+                l_state.functional = 1;
+                l_pec->setAttr<ATTR_HWAS_STATE>(l_state);
+
+                // Iterate through child PHB targets and verify they were also
+                //     deconfigured
+                for (const auto l_phb : l_phbList)
+                {
+                    TS_TRACE("testDeconfigurePECTarget: PHB: %.8X",
+                              get_huid(l_phb));
+                    // Get the current HWAS_STATE of PHB
+                    l_state = l_phb->getAttr<ATTR_HWAS_STATE>();
+                    if (l_state.functional)
+                    {
+                        TS_FAIL("testDeconfigurePECTarget: PHB Functional after parent PEC deconfigured");
+                        break;
+                    }
+                    //Reset HWAS State of the PHB
+                    l_state.functional = 1;
+                    l_phb->setAttr<ATTR_HWAS_STATE>(l_state);
+                }
+            }
+        } while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+
+#endif
+    }
+
+   /**
+     *  @brief Verify PEC deconfigured when all PHB's deconfigured
+     */
+    void testDeconfigurePECwithAllBadPHBs()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigurePECwithAllBadPHBs: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+
+#else
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            //Find a functional PEC Target for the deconfigure test
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+            PredicateCTM predPEC(CLASS_UNIT, TYPE_PEC);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predPEC).push(&predFunctional).And();
+            TargetHandleList l_pecList;
+            targetService().getAssociated( l_pecList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            //Verify PEC list isn't empty
+            if (l_pecList.empty())
+            {
+                TS_FAIL("testDeconfigurePECwithAllBadPHBs: empty l_pecList");
+                break;
+            }
+
+            //Iterate PEC targets doing the following
+            // 1) Verify PEC is functional
+            // 2) Verify Child PHB targets are functional
+            // 3) Deconfigure all child PHB targets
+            // 4) Verify PHB targets non-functional
+            // 5) Verify PEC is non-functional after all child PHB targets are
+            //    deconfigured
+            for (auto l_pec : l_pecList)
+            {
+                HwasState l_state = l_pec->getAttr<ATTR_HWAS_STATE>();
+                if (!l_state.functional)
+                {
+                    TS_FAIL("testDeconfigurePECwithAllBadPHBs: PEC is non-functional before test");
+                    break;
+                }
+
+                TargetHandleList l_phbList;
+                // Get the list of PHB targets associated with the PEC target
+                getChildAffinityTargets(l_phbList, l_pec, CLASS_NA, TYPE_PHB);
+
+                //Iterate through the PHB's
+                //   - Verify each is functional
+                //   - Deconfigure the PHB
+                //   - Verify it is now-nonfunctional
+                for (auto l_phb : l_phbList)
+                {
+                    l_state = l_phb->getAttr<ATTR_HWAS_STATE>();
+                    //Verify the PHB is functional
+                    if (!l_state.functional)
+                    {
+                        TS_FAIL("testDeconfigurePECwithAllBadPHBs: PHB is non-functional before test");
+                        break;
+                    }
+
+                    //Deconfigure the PHB Target
+                    l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_phb,
+                        DeconfigGard::DECONFIGURED_BY_PHB_DECONFIG);
+                    if (l_pErr)
+                    {
+                        TS_FAIL("testDeconfigurePECwithallBadPHBs: Error from deconfigureTarget");
+                        break;
+                    }
+
+                    //Verify the PHB target is now non-functional
+                    l_state = l_phb->getAttr<ATTR_HWAS_STATE>();
+                    if (l_state.functional)
+                    {
+                        TS_FAIL("testDeconfigurePECwithAllBadPHBs: PHB is functional after deconfigure");
+                        break;
+                    }
+                }
+
+                //Verify PEC is now non-functional as all child PHB targets
+                //  were deconfigured
+                l_state = l_pec->getAttr<ATTR_HWAS_STATE>();
+                if (l_state.functional)
+                {
+                    TS_FAIL("testDeconfigurePECwithAllBadPHBs: PEC is functional after deconfiguring all Child PHBs");
+                    break;
+                }
+
+                //Reset HWAS State of the PEC
+                l_state.functional = 1;
+                l_pec->setAttr<ATTR_HWAS_STATE>(l_state);
+
+                //Reset HWAS State of the Child PHB's
+                for (auto l_phb : l_phbList)
+                {
+                    l_state.functional = 1;
+                    l_phb->setAttr<ATTR_HWAS_STATE>(l_state);
+                }
+
+            }
+        } while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+
+#endif
+    }
+
     /**
      *  @brief Test Deconfiguring a Target - EQ directly
      */
-
     void testDeconfigureEQTarget()
     {
         TS_TRACE(INFO_MRK "testDeconfigureEQTarget: Started");
