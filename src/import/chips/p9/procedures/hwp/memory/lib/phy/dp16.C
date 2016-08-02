@@ -79,6 +79,19 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1 =
     MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_4,
 };
 
+// Definition of the DP16 AC Boost Control registers
+// DP16 AC Boost registers all come in pairs - one per 8 bits
+// 5 DP16 per MCA gives us 10  Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::AC_BOOST_CNTRL_REG =
+{
+    { MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0, MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_0 },
+    { MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1, MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_1 },
+    { MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_2, MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_2 },
+    { MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_3, MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_3 },
+    { MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_4, MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_4 },
+};
+
 namespace dp16
 {
 
@@ -418,6 +431,118 @@ fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<TARGET_TYPE_MCBIST
     FAPI_INF("blasting 0x%016lx to dp16 DLL/VREG config 1", l_data);
 
     FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), l_addrs, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset AC_BOOST_CNTL MCA specialization - for all DP16 in the target
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_ac_boost_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // Get the attributes which contain the information from the VPD
+    fapi2::buffer<uint32_t> l_rd_up;
+    fapi2::buffer<uint32_t> l_wr_down;
+    fapi2::buffer<uint32_t> l_wr_up;
+
+    // Keep track of the bit postion we start at, so we can slide thru the attributes
+    // as we iterate over the registers
+    uint64_t l_start_bit = 0;
+    constexpr uint64_t BIT_FIELD_LEN = 3;
+    constexpr uint64_t BIT_POSITION_DELTA = BIT_FIELD_LEN * 2;
+
+    // A little DP block indicator useful for tracing
+    uint64_t l_which_dp16 = 0;
+
+    FAPI_TRY( mss::vpd_mt_mc_dq_acboost_rd_up(i_target, l_rd_up) );
+    FAPI_TRY( mss::vpd_mt_mc_dq_acboost_wr_down(i_target, l_wr_down) );
+    FAPI_TRY( mss::vpd_mt_mc_dq_acboost_wr_up(i_target, l_wr_up) );
+
+    FAPI_INF("seeing acboost attributes wr_down: 0x%08lx wr_up: 0x%08lx, rd_up: 0x%08lx",
+             l_wr_down, l_wr_up, l_rd_up);
+
+    // For all of the AC Boost attributes, they're laid out in the uint32_t as such:
+    // (dear OpenPOWER: remember in IBM-speak, bit 0 is the left-most bit because no
+    // good reason)
+    // Bit 0-2   = DP16 Block 0 (DQ Bits 0-7)
+    // Bit 3-5   = DP16 Block 0 (DQ Bits 8-15)
+    // Bit 6-8   = DP16 Block 1 (DQ Bits 0-7)
+    // Bit 9-11  = DP16 Block 1 (DQ Bits 8-15)
+    // Bit 12-14 = DP16 Block 2 (DQ Bits 0-7)
+    // Bit 15-17 = DP16 Block 2 (DQ Bits 8-15)
+    // Bit 18-20 = DP16 Block 3 (DQ Bits 0-7)
+    // Bit 21-23 = DP16 Block 3 (DQ Bits 8-15)
+    // Bit 24-26 = DP16 Block 4 (DQ Bits 0-7)
+    // Bit 27-29 = DP16 Block 4 (DQ Bits 8-15)
+
+    // For all the AC_BOOST registers on this MCA, shuffle in the bits and write
+    // the registers.
+
+    for (const auto& r : TT::AC_BOOST_CNTRL_REG)
+    {
+        fapi2::buffer<uint64_t> l_boost_0;
+        fapi2::buffer<uint64_t> l_boost_1;
+
+        // Read
+        FAPI_TRY( mss::getScom(i_target, r.first, l_boost_0) );
+        FAPI_TRY( mss::getScom(i_target, r.second, l_boost_1) );
+
+        // Modify
+        {
+            // Yeah, we could do this once, however we need to flush them to 0 every time so this is the same
+            fapi2::buffer<uint64_t> l_scratch_0;
+            fapi2::buffer<uint64_t> l_scratch_1;
+
+            l_wr_down.extractToRight(l_scratch_0, l_start_bit, BIT_FIELD_LEN);
+            l_boost_0.insertFromRight(l_scratch_0, TT::AC_BOOST_WR_DOWN, TT::AC_BOOST_WR_DOWN_LEN);
+
+            l_wr_down.extractToRight(l_scratch_1, l_start_bit + BIT_FIELD_LEN, BIT_FIELD_LEN);
+            l_boost_1.insertFromRight(l_scratch_1, TT::AC_BOOST_WR_DOWN, TT::AC_BOOST_WR_DOWN_LEN);
+
+            FAPI_INF("ac boost wr down for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
+                     mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_boost_0, l_boost_1);
+        }
+        {
+            fapi2::buffer<uint64_t> l_scratch_0;
+            fapi2::buffer<uint64_t> l_scratch_1;
+
+            l_wr_up.extractToRight(l_scratch_0, l_start_bit, BIT_FIELD_LEN);
+            l_boost_0.insertFromRight(l_scratch_0, TT::AC_BOOST_WR_UP, TT::AC_BOOST_WR_UP_LEN);
+
+            l_wr_up.extractToRight(l_scratch_1, l_start_bit + BIT_FIELD_LEN, BIT_FIELD_LEN);
+            l_boost_1.insertFromRight(l_scratch_1, TT::AC_BOOST_WR_UP, TT::AC_BOOST_WR_UP_LEN);
+
+            FAPI_INF("ac boost wr up for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
+                     mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_boost_0, l_boost_1);
+        }
+        {
+            fapi2::buffer<uint64_t> l_scratch_0;
+            fapi2::buffer<uint64_t> l_scratch_1;
+
+            l_rd_up.extractToRight(l_scratch_0, l_start_bit, BIT_FIELD_LEN);
+            l_boost_0.insertFromRight(l_scratch_0, TT::AC_BOOST_RD_UP, TT::AC_BOOST_RD_UP_LEN);
+
+            l_rd_up.extractToRight(l_scratch_1, l_start_bit + BIT_FIELD_LEN, BIT_FIELD_LEN);
+            l_boost_1.insertFromRight(l_scratch_1, TT::AC_BOOST_RD_UP, TT::AC_BOOST_RD_UP_LEN);
+
+            FAPI_INF("ac boost rd down for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
+                     mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_boost_0, l_boost_1);
+        }
+
+        // Write
+        FAPI_TRY( mss::putScom(i_target, r.first, l_boost_0) );
+        FAPI_TRY( mss::putScom(i_target, r.second, l_boost_1) );
+
+        // Slide over in the attributes, bump the dp16 trace counter, and do it again
+        l_start_bit += BIT_POSITION_DELTA;
+        ++l_which_dp16;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

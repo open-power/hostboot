@@ -668,6 +668,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Read Control reset
         FAPI_TRY( mss::rc::reset(p) );
+
+        // Reset the AC Boost controls from the values in VPD
+        FAPI_TRY( mss::dp16::reset_ac_boost_cntl(p) );
     }
 
 fapi_try_exit:
