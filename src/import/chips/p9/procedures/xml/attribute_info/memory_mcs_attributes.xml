@@ -129,24 +129,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_CUSTOM_DIMM</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DIMM is a custom DIMM. This is commonly known as a CDIMM,
-            but technically, we could support Custom DIMMs of different types than an UDIMM,
-            such as RDIMM and LRDIMM.
-           Created in mss_eff_cnfg
-           Use this attribute if you need to know if the Centaur is on the DIMM instead of on a planar.
-       </description>
-       <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>NO = 0, YES = 1</enum>
-        <writeable/>
-        <array>2 2 </array>
-        <mssAccessorName>eff_custom_dimm</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DIMM_SPARE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -255,25 +237,6 @@
         <array> 2 2</array>
         <mssUnits>GB</mssUnits>
         <mssAccessorName>eff_dimm_size</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_BL</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Burst Length.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_bl</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1712,7 +1675,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum>1NCLK = 1, 2NCLK = 2</enum>
+        <enum>1NCLK = 0, 2NCLK = 1</enum>
         <writeable/>
         <array>2</array>
         <mssAccessorName>eff_rd_preamble</mssAccessorName>
@@ -1730,7 +1693,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum>1NCLK = 1, 2NCLK = 2</enum>
+        <enum>1NCLK = 0, 2NCLK = 1</enum>
         <writeable/>
         <array>2</array>
         <mssAccessorName>eff_wr_preamble</mssAccessorName>
