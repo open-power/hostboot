@@ -94,6 +94,16 @@ p9avsInitAttributes( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VCS_AVSBUS_BUSNUM, i_target,
                                attrs->RailBusNum));
+
+        if(attrs->RailBusNum == 0xFF)
+        {
+            FAPI_ERR("Programming error via AVSBus, VCS rail not connected to AVSBus interface in the system.");
+            FAPI_ASSERT(false,
+                        fapi2::P9_VCS_RAIL_ERR()
+                        .set_TARGET(i_target),
+                        "ERROR: Programming error via AVSBus, VCS rail not connected to AVSBus interface in the system.");
+        }
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VCS_AVSBUS_RAIL,  i_target,
                                attrs->RailSelect));
     }
@@ -112,34 +122,17 @@ p9_avsbus_voltage_read( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
     p9_avsbus_attrs_t attrs;
 
-    p9avslib::avsBusNum l_avs_bus_num = p9avslib::AVSBUSVDD;
-
     avsbus_data_t voltage_read_data;
-
-    //@TODO RTC 156536 - Remove code once p9_avsbus_lib function is updated to read bus num directly from attributes
-    if (i_voltage_rail == p9avslib::VDD)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVDD;
-    }
-    else if (i_voltage_rail == p9avslib::VDN)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVDN;
-    }
-    else if (i_voltage_rail == p9avslib::VCS)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVCS;
-    }
 
     // Read attribute -
     FAPI_INF("Reading AVSBus attributes for the selected voltage rail");
     FAPI_TRY(p9avsInitAttributes(i_target, i_voltage_rail, &attrs));
 
-    //@TODO RTC 156536 - Replace with attrs.RailBusNum once  p9_avsbus_lib function is updated to read bus num directly from attributes
     // Initialize the buses
     FAPI_INF("Initializing AVSBus interface");
     FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                      l_avs_bus_num, BRIDGE_NUMBER),
-             "Initializing avsBus Num %d, bridge %d", l_avs_bus_num, BRIDGE_NUMBER);
+                                      attrs.RailBusNum, BRIDGE_NUMBER),
+             "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
 
     FAPI_INF("Reading the specified voltage rail value");
     FAPI_TRY(avsVoltageRead(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
@@ -159,38 +152,21 @@ p9_avsbus_voltage_write( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
 
     p9_avsbus_attrs_t attrs;
 
-    p9avslib::avsBusNum l_avs_bus_num = p9avslib::AVSBUSVDD;
-
-    //@TODO RTC 156536- Remove code once p9_avsbus_lib function is updated to read bus num directly from attributes
-    if (i_voltage_rail == p9avslib::VDD)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVDD;
-    }
-    else if (i_voltage_rail == p9avslib::VDN)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVDN;
-    }
-    else if (i_voltage_rail == p9avslib::VCS)
-    {
-        l_avs_bus_num = p9avslib::AVSBUSVCS;
-    }
-
     // Read attribute -
     FAPI_INF("Reading AVSBus attributes for the selected voltage rail");
     FAPI_TRY(p9avsInitAttributes(i_target, i_voltage_rail, &attrs));
 
-    //@TODO RTC 156536 - Replace with attrs.RailBusNum once  p9_avsbus_lib function is updated to read bus num directly from attributes
     // Initialize the buses
     FAPI_INF("Initializing AVSBus interface");
     FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                      l_avs_bus_num, BRIDGE_NUMBER),
-             "Initializing avsBus Num %d, bridge %d", l_avs_bus_num, BRIDGE_NUMBER);
+                                      attrs.RailBusNum, BRIDGE_NUMBER),
+             "Initializing avsBus Num %d, bridge %d", attrs.RailBusNum, BRIDGE_NUMBER);
 
     // Set the required voltage
     FAPI_INF("Setting the specified voltage rail value");
     FAPI_TRY(avsVoltageWrite(i_target, attrs.RailBusNum, BRIDGE_NUMBER,
                              attrs.RailSelect, i_Voltage),
-             "Setting voltage via AVSBus %d, Bridge %d",
+             "Setting voltage via AVSBus %d, Bridge %d failed",
              attrs.RailBusNum,
              BRIDGE_NUMBER);
 
