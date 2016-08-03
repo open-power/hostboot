@@ -254,6 +254,7 @@ p9_fab_iovalid_update_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     // form data buffers for iovalid/RAS FIR mask updates
     fapi2::buffer<uint64_t> l_iovalid_mask;
     fapi2::buffer<uint64_t> l_ras_fir_mask;
+    fapi2::buffer<uint64_t> l_extfir_action;
 
     if (i_set_not_clear)
     {
@@ -264,6 +265,19 @@ p9_fab_iovalid_update_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // clear RAS FIR mask
         l_ras_fir_mask.flush<1>();
         FAPI_TRY(l_ras_fir_mask.clearBit(i_ctl.ras_fir_field_bit));
+
+        //Get the value of the action 0 command register, clear the bit and write it
+        FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION0_REG, l_extfir_action),
+                 "Error reading Action 0 register");
+        FAPI_TRY(l_extfir_action.clearBit(i_ctl.ras_fir_field_bit));
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION0_REG, l_extfir_action),
+                 "Error writing Action 0 register");
+        //Get the value of the action 1 registers, clear the bit, and write it
+        FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION1_REG, l_extfir_action),
+                 "Error reading Action 1 register");
+        FAPI_TRY(l_extfir_action.clearBit(i_ctl.ras_fir_field_bit));
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_CENT_SM1_EXTFIR_ACTION1_REG, l_extfir_action),
+                 "Error writing Action 1 register");
     }
     else
     {
