@@ -2279,10 +2279,11 @@ fapi2::ReturnCode decoder::min_write_recovery_time(const fapi2::Target<TARGET_TY
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0) were reserved
-    // and coded as zeros. There was no concept of
-    // min write recovery time so this
-    // is thus hard-wired to zero.
-    o_value = 0x00;
+    // and coded as zeros.
+    // Default as 0x78 for all DDR4 bins for rev 1.0
+    // No value given in 1.0 JEDEC spec and no value in SPD - JLH
+    // 1.1 Has valid values defined and in SPD, this is taken from there
+    o_value = 0x78;
     return fapi2::FAPI2_RC_SUCCESS;
 
 }
@@ -2302,9 +2303,11 @@ fapi2::ReturnCode decoder::min_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0) were reserved
-    // and coded as zeros. There was no concept of twtr_s so this
-    // is thus hard-wired to zero.
-    o_value = 0x00;
+    // and coded as zeros.
+    // Default as 0x14 for all DDR4 bins for rev 1.0
+    // No value given in 1.0 JEDEC spec and no value in SPD - JLH
+    // 1.1 Has valid values defined and in SPD, this is taken from there
+    o_value = 0x14;
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
@@ -2323,9 +2326,11 @@ fapi2::ReturnCode decoder::min_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 {
     // For General Section rev 1.0 of the SPD,
     // SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0) were reserved
-    // and coded as zeros. There was no concept of twtr_l so this
-    // is thus hard-wired to zero.
-    o_value = 0x00;
+    // and coded as zeros.
+    // Default as 0x3C for all DDR4 bins for rev 1.0
+    // No value given in 1.0 JEDEC spec and no value in SPD - JLH
+    // 1.1 Has valid values defined and in SPD, this is taken from there
+    o_value = 0x3C;
     return fapi2::FAPI2_RC_SUCCESS;
 
 }

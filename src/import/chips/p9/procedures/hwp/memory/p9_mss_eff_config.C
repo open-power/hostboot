@@ -122,10 +122,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.rcd_mirror_mode(l_dimm) );
         FAPI_TRY( l_eff_config.dram_bank_bits(l_dimm) );
         FAPI_TRY( l_eff_config.dram_row_bits(l_dimm) );
-        FAPI_TRY( l_eff_config.custom_dimm(l_dimm) );
         FAPI_TRY( l_eff_config.dram_dqs_time(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tccd_l(l_dimm) );
-        FAPI_TRY( l_eff_config.data_mask(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc00(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc01(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc02(l_dimm) );
@@ -153,12 +151,10 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dimm_rcax(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rcbx(l_dimm) );
         FAPI_TRY( l_eff_config.dram_twr(l_dimm) );
-        FAPI_TRY( l_eff_config.burst_length(l_dimm) );
         FAPI_TRY( l_eff_config.read_burst_type(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tm(l_dimm) );
         FAPI_TRY( l_eff_config.dram_cwl(l_dimm) );
         FAPI_TRY( l_eff_config.dram_lpasr(l_dimm) );
-        FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
         FAPI_TRY( l_eff_config.dll_enable(l_dimm) );
         FAPI_TRY( l_eff_config.dll_reset(l_dimm) );
         FAPI_TRY( l_eff_config.write_level_enable(l_dimm) );
@@ -171,8 +167,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.ca_parity(l_dimm) );
         FAPI_TRY( l_eff_config.crc_error_clear(l_dimm) );
         FAPI_TRY( l_eff_config.odt_input_buffer(l_dimm) );
-        FAPI_TRY( l_eff_config.write_dbi(l_dimm) );
-        FAPI_TRY( l_eff_config.read_dbi(l_dimm) );
         FAPI_TRY( l_eff_config.post_package_repair(l_dimm) );
         FAPI_TRY( l_eff_config.read_preamble_train(l_dimm) );
         FAPI_TRY( l_eff_config.read_preamble(l_dimm) );
@@ -200,7 +194,10 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dram_tfaw(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tras(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trtp(l_dimm) );
-
+        FAPI_TRY( l_eff_config.read_dbi(l_dimm) );
+        FAPI_TRY( l_eff_config.write_dbi(l_dimm) );
+        FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
+        FAPI_TRY( l_eff_config.data_mask(l_dimm) );
         // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
         {
             uint16_t l_mss_vpd_mt_windage_rd_ctr[mss::PORTS_PER_MCS] = {0xDEAD, 0xBEEF};

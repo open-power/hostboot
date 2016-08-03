@@ -44,6 +44,9 @@
 // mss lib
 #include <lib/spd/common/spd_decoder.H>
 
+#include <lib/eff_config/timing.H>
+#include <lib/utils/conversions.H>
+#include <lib/utils/find.H>
 namespace mss
 {
 
@@ -53,26 +56,44 @@ namespace mss
 ///
 class eff_config
 {
+    private:
+
+        int64_t iv_tCK_in_ps;
+
     public:
         //TK - Make this constructor take this as param - AAM
         std::shared_ptr<spd::decoder> iv_pDecoder;
 
-        // TK - Adding decoder in ctor can allow me to save off the
-        // state of decoder timebases, target, fapi2 positions,
-        // and clock period eliminate code duplication.
+        //TODO: RTC 159777: Change eff_config class to use iv's for mcs, port and dimm position
 
         ///
         /// @brief Constructor
-        /// @tparam T, the fapi2::TargetType of the target
-        /// @param[in] i_target, the fapi2::Target which we're configuring
+        /// @param[in] i_target, the fapi2::Target which we're configuring (DIMM)
         /// @param[out] o_rc, a return code which determines the success of the constructor
         ///
-        template< fapi2::TargetType T >
-        eff_config( const fapi2::Target<T>& i_target, fapi2::ReturnCode& o_rc )
+        eff_config( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
         {
-            // Leaving the fapi2::RaturnCode scaffolding in place as we'll likely need it
-            // in the future and this way it will be here. BRS
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
+            FAPI_INF("Calculated clock period (tCK): %d  on DIMM %s", iv_tCK_in_ps, mss::c_str(i_target));
+
+        fapi_try_exit:
+            o_rc = fapi2::current_err;
+            return;
+        }
+
+        ///
+        /// @brief Constructor
+        /// @param[in] i_target  the fapi2::Target which we're configuring (MCS)
+        /// @param[out] o_rc, a return code which determines the success of the constructor
+        ///
+        eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, fapi2::ReturnCode& o_rc )
+        {
+            FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
+            FAPI_INF("Calculated clock period (tCK): %d  on DIMM %s", iv_tCK_in_ps, mss::c_str(i_target));
+
+        fapi_try_exit:
+            o_rc = fapi2::current_err;
+            return;
         }
 
         //
@@ -190,13 +211,6 @@ class eff_config
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode master_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
-        /// @brief Determines & sets effective config for custom dimm
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode custom_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for tDQS
@@ -404,13 +418,6 @@ class eff_config
         fapi2::ReturnCode dram_twr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for burst length (BL)
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode burst_length(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
         /// @brief Determines & sets effective config for RBT
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -437,7 +444,6 @@ class eff_config
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dram_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
 
         ///
         /// @brief Determines & sets effective config for additive latency
@@ -530,7 +536,6 @@ class eff_config
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode odt_input_buffer(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
         ///
         /// @brief Determines & sets effective config for data_mask
         /// @param[in] i_target FAPI2 target
@@ -765,5 +770,4 @@ class eff_config
 }; // eff_config
 
 } // mss
-
 #endif // _MSS_EFF_CONFIG_H_

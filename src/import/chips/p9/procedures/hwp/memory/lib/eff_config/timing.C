@@ -72,6 +72,7 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
     // 16Gb - TBD
 };
 
+///
 /// @brief Calculates refresh interval time
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_temp_refresh_range temperature refresh range
@@ -80,9 +81,9 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
 ///
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
-                              uint64_t& o_timing )
+                              int64_t& o_timing )
 {
-    uint64_t l_multiplier = 0;
+    int64_t l_multiplier = 0;
 
     switch(i_temp_refresh_range)
     {
@@ -103,8 +104,8 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
             break;
     }
 
-    const uint64_t l_quotient = TREFI_BASE / ( uint64_t(i_mode) * l_multiplier );
-    const uint64_t l_remainder = TREFI_BASE % ( uint64_t(i_mode) * l_multiplier );
+    const int64_t l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
+    const int64_t l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
     o_timing = l_quotient + (l_remainder == 0 ? 0 : 1);
 
     FAPI_INF( "tREFI: %d, quotient: %d, remainder: %d, tREFI_base: %d",

@@ -35,6 +35,7 @@
 // fapi2
 #include <fapi2.H>
 #include <vpd_access.H>
+#include <utility>
 
 // mss lib
 #include <lib/eff_config/eff_config.H>
@@ -44,6 +45,7 @@
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
+#include <lib/utils/find.H>
 #include <lib/utils/fake_vpd.H>
 
 using fapi2::TARGET_TYPE_MCA;
@@ -109,6 +111,7 @@ static uint64_t ibt_helper(const uint8_t i_ibt)
 fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                        const std::vector<uint8_t>& i_spd_data )
 {
+    //TODO: RTC 159777: Change eff_config class to use iv's for mcs, port and dimm position
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
     const auto l_dimm_num = index(i_target);
@@ -321,7 +324,7 @@ fapi2::ReturnCode eff_config::dimm_size(const fapi2::Target<TARGET_TYPE_DIMM>& i
         uint32_t l_attrs_dimm_size[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
         FAPI_TRY( eff_dimm_size(l_mcs, &l_attrs_dimm_size[0][0]) );
 
-        l_attrs_dimm_size[l_port_num][l_dimm_num] = uint8_t(l_dimm_size);
+        l_attrs_dimm_size[l_port_num][l_dimm_num] = l_dimm_size;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_SIZE, l_mcs, l_attrs_dimm_size) );
     }
 
@@ -363,7 +366,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
 {
     uint8_t l_temp_refresh_range = 0;
     uint8_t l_refresh_mode = 0;
-    uint64_t l_trefi_in_ps = 0;
+    int64_t l_trefi_in_ps = 0;
 
     FAPI_TRY( mss::mrw_temp_refresh_range(l_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
     FAPI_TRY( mss::mrw_fine_refresh_mode(l_refresh_mode), "Failed mrw_fine_refresh_mode()" );
@@ -376,7 +379,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
                                   l_temp_refresh_range,
                                   l_trefi_in_ps),
-                      "Failed to calculate tREF1" );
+                      "Failed to calculate tREF1 in refresh_interval_time for target %s", mss::c_str(i_target) );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
@@ -385,7 +388,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
                                   l_temp_refresh_range,
                                   l_trefi_in_ps),
-                      "Failed to calculate tREF2" );
+                      "Failed to calculate tREF2 for target %s", mss::c_str(i_target) );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
@@ -394,7 +397,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
                                   l_temp_refresh_range,
                                   l_trefi_in_ps),
-                      "Failed to calculate tREF4" );
+                      "Failed to calculate tREF4  for target %s", mss::c_str(i_target) );
             break;
 
         default:
@@ -411,36 +414,31 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
     }
 
     {
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        uint64_t l_tCK_in_ps = 0;
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calclate clock period");
+        // Calculate refresh cycle time in nCK & set attribute
+        const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
+        uint16_t l_trefi_in_nck  = 0;
 
-        {
-            // Calculate refresh cycle time in nCK & set attribute
-            const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-            const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+        // Retrieve MCS attribute data
+        FAPI_TRY( eff_dram_trefi(l_mcs, l_mcs_attrs_trefi.data()) );
 
-            std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
-            uint16_t l_trefi_in_nck ;
+        // Calculate nck
+        // iv_tCK-in_ps will always be positive
+        FAPI_TRY(  calc_nck(l_trefi_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trefi_in_nck),
+                   "Error in calculating tREFI for target %s, with value of l_trefi_in_ps: %d", mss::c_str(i_target), l_trefi_in_ps);
 
-            // Retrieve MCS attribute data
-            FAPI_TRY( eff_dram_trefi(l_mcs, l_mcs_attrs_trefi.data()) );
+        FAPI_INF("Calculated tREFI (ps): %d, tREFI (nck): %d", l_trefi_in_ps, l_trefi_in_nck);
 
-            // Calculate nck
-            l_trefi_in_nck = calc_nck(l_trefi_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-            FAPI_INF("Calculated tREFI (ps): %d, tREFI (nck): %d", l_trefi_in_ps, l_trefi_in_ps);
+        // Update MCS attribute
+        l_mcs_attrs_trefi[l_port_num] = l_trefi_in_nck;
 
-            // Update MCS attribute
-            l_mcs_attrs_trefi[l_port_num] = l_trefi_in_nck;
-
-            // casts vector into the type FAPI_ATTR_SET is expecting by deduction
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI,
-                                    l_mcs,
-                                    UINT16_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trefi, PORTS_PER_MCS)),
-                      "Failed to set tREFI attribute");
-        }
+        // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI,
+                                l_mcs,
+                                UINT16_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trefi, PORTS_PER_MCS)),
+                  "Failed to set tREFI attribute");
     }
 
 fapi_try_exit:
@@ -510,38 +508,30 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
     }
 
     {
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        int64_t l_tCK_in_ps = 0;
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps),
-                  "Failed to calculate clock period (tCK)");
+        // Calculate refresh cycle time in nCK & set attribute
+        const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint16_t l_trfc_in_nck = 0;
+        std::vector<uint16_t> l_mcs_attrs_trfc(PORTS_PER_MCS, 0);
 
-        {
-            // Calculate refresh cycle time in nCK & set attribute
-            const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-            const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+        // Retrieve MCS attribute data
+        FAPI_TRY( eff_dram_trfc(l_mcs, l_mcs_attrs_trfc.data()),
+                  "Failed to retrieve tRFC attribute" );
 
-            uint16_t l_trfc_in_nck = 0;
-            std::vector<uint16_t> l_mcs_attrs_trfc(PORTS_PER_MCS, 0);
+        // Calculate nck
+        FAPI_TRY( calc_nck(l_trfc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
+                  "Error in calculating l_tRFC for target %s, with value of l_trfc_in_ps: %d", mss::c_str(i_target), l_trfc_in_ps);
+        FAPI_INF("Calculated tRFC (ps): %d, tRFC (nck): %d", l_trfc_in_ps, l_trfc_in_nck);
 
-            // Retrieve MCS attribute data
-            FAPI_TRY( eff_dram_trfc(l_mcs, l_mcs_attrs_trfc.data()),
-                      "Failed to retrieve tRFC attribute" );
+        // Update MCS attribute
+        l_mcs_attrs_trfc[l_port_num] = l_trfc_in_nck;
 
-            // Calculate nck
-            l_trfc_in_nck = calc_nck(l_trfc_in_ps, l_tCK_in_ps, int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-            FAPI_INF("Calculated tRFC (ps): %d, tRFC (nck): %d", l_trfc_in_ps, l_trfc_in_nck);
-
-            // Update MCS attribute
-            l_mcs_attrs_trfc[l_port_num] = l_trfc_in_nck;
-
-            // casts vector into the type FAPI_ATTR_SET is expecting by deduction
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC,
-                                    l_mcs,
-                                    UINT16_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trfc, PORTS_PER_MCS) ),
-                      "Failed to set tRFC attribute" );
-        }
+        // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC,
+                                l_mcs,
+                                UINT16_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trfc, PORTS_PER_MCS) ),
+                  "Failed to set tRFC attribute" );
     }
 
 fapi_try_exit:
@@ -579,7 +569,7 @@ fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_
     FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
 
     // Calculate refresh cycle time in nck
-    l_trfc_dlr_in_nck = calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+    FAPI_TRY( calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_dlr_in_nck));
 
     FAPI_INF("Calculated clock period (tCK): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
              l_tCK_in_ps, l_trfc_dlr_in_ps, l_trfc_dlr_in_nck);
@@ -678,40 +668,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for custom dimm
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::custom_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
-    const auto l_dimm_num = index(i_target);
-
-    uint8_t l_attrs_custom_dimm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY(eff_custom_dimm(l_mcs, &l_attrs_custom_dimm[0][0]));
-
-    l_attrs_custom_dimm[l_port_num][l_dimm_num] = 0x00;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CUSTOM_DIMM, l_mcs, l_attrs_custom_dimm) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Determines & sets effective config for tDQS
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Sets TDQS to off for x4, sets to on for x8
 ///
 fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dqs_time[PORTS_PER_MCS] = {};
+    uint8_t l_dram_width = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -720,8 +685,17 @@ fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<TARGET_TYPE_DIMM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    //Get the DRAM width
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_dram_width) );
+
+    // Get & update MCS attribute
     FAPI_TRY( eff_dram_tdqs(l_mcs, &l_attrs_dqs_time[0]) );
-    l_attrs_dqs_time[l_port_num] = 0x01;
+    FAPI_INF("Dram width is %ld for target %s", l_dram_width, mss::c_str(i_target));
+
+    //Only possible dram width are x4, x8. If x8, tdqs is available, else not available
+    l_attrs_dqs_time[l_port_num] = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
+                                   fapi2::ENUM_ATTR_EFF_DRAM_TDQS_ENABLE : fapi2::ENUM_ATTR_EFF_DRAM_TDQS_DISABLE;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TDQS, l_mcs, l_attrs_dqs_time) );
 
 fapi_try_exit:
@@ -735,20 +709,52 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dram_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_tccd_l[PORTS_PER_MCS] = {};
+    int64_t l_tccd_mtb = 0;
+    int64_t l_tccd_ftb = 0;
+    int64_t l_tccd_in_ps = 0;
 
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
+    //Get the tCCD timing values
+    FAPI_TRY( iv_pDecoder->min_tccd_l(i_target, l_tccd_mtb), "failed to get min_tccd_l" );
+    FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(i_target, l_tccd_ftb) );
 
-    // Current index
-    const auto l_port_num = index(l_mca);
+    //Calculate tccd in ps
+    {
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
 
-    FAPI_TRY( eff_dram_tccd_l(l_mcs, &l_attrs_tccd_l[0]) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
 
-    l_attrs_tccd_l[l_port_num] = 0x06;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TCCD_L, l_mcs, l_attrs_tccd_l) );
+        l_tccd_in_ps = calc_timing_from_timebase(l_tccd_mtb, l_mtb, l_tccd_ftb, l_ftb);
+    }
+
+
+    {
+        // Calculate refresh cycle time in nCK & set attribute
+        const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+        const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+
+        uint8_t l_tccd_in_nck = 0;
+        std::vector<uint8_t> l_mcs_attrs_tccd(PORTS_PER_MCS, 0);
+
+        // Retrieve MCS attribute data
+        FAPI_TRY( eff_dram_tccd_l(l_mcs, l_mcs_attrs_tccd.data()),
+                  "Failed to retrieve tCCD attribute" );
+
+        // Calculate nck
+        FAPI_TRY ( calc_nck(l_tccd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
+                   "Error in calculating tccd  for target %s, with value of l_tccd_in_ps: %d", mss::c_str(i_target), l_tccd_in_ps);
+        FAPI_INF("Calculated tCCD (ps): %d, tCCD (nck): %d", l_tccd_in_ps, l_tccd_in_nck);
+
+        // Update MCS attribute
+        l_mcs_attrs_tccd[l_port_num] = l_tccd_in_nck;
+
+        // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TCCD_L,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_mcs_attrs_tccd, PORTS_PER_MCS) ),
+                  "Failed to set tCCD_L attribute" );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1460,52 +1466,45 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dram_twr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    std::vector<uint8_t> l_attrs_twr(PORTS_PER_MCS, 0);
-
-    // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_twr_in_ps = 0;
 
-    // Current index
-    const auto l_port_num = index(l_mca);
+    // Calculate twr (in ps)
+    {
+        constexpr int64_t l_twr_ftb = 0;
+        int64_t l_twr_mtb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
 
-    FAPI_TRY( eff_dram_twr(l_mcs, l_attrs_twr.data()) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->min_write_recovery_time(i_target, l_twr_mtb) );
+        FAPI_INF("Values for write_recovery (twr) in MTB units: medium timebase: %ld, fine timebase: %ld, and min write: %ld",
+                 l_mtb, l_ftb, l_twr_mtb);
+        l_twr_in_ps = calc_timing_from_timebase(l_twr_mtb, l_mtb, l_twr_ftb, l_ftb);
+    }
 
-    l_attrs_twr[l_port_num] = 0x12;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWR,
-                            l_mcs,
-                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_twr, PORTS_PER_MCS)),
-              "Failed setting attribute for tWR");
-fapi_try_exit:
-    return fapi2::current_err;
-}
+    {
+        std::vector<uint8_t> l_attrs_dram_twr(PORTS_PER_MCS, 0);
+        uint8_t l_twr_in_nck = 0;
 
-///
-/// @brief Determines & sets effective config for burst length (BL)
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::burst_length(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    std::vector<uint8_t> l_attrs_bl(PORTS_PER_MCS, 0);
+        FAPI_INF("iv tck is %d", iv_tCK_in_ps);
+        // Calculate tNCK
+        FAPI_TRY( calc_nck(l_twr_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
+                  "Error in calculating l_twr_in_nck for target %s, with value of l_twr_in_ps: %d", mss::c_str(i_target), l_twr_in_ps);
 
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
+        FAPI_INF("Calculated tWR (ps): %d, tWR (nck): %d  for target: %s", l_twr_in_ps, l_twr_in_nck, mss::c_str(i_target));
 
-    // Current index
-    const auto l_port_num = index(l_mca);
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_twr(l_mcs, l_attrs_dram_twr.data()) );
 
-    FAPI_TRY( eff_dram_bl(l_mcs, l_attrs_bl.data()) );
-
-    l_attrs_bl[l_port_num] = 0x00;
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_BL,
-                            l_mcs,
-                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_bl, PORTS_PER_MCS)),
-              "Failed setting attribute for BL");
+        l_attrs_dram_twr[l_port_num] = l_twr_in_nck;
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWR,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twr, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TWR");
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1518,7 +1517,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::read_burst_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_rbt[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Targets
@@ -1531,7 +1529,7 @@ fapi2::ReturnCode eff_config::read_burst_type(const fapi2::Target<TARGET_TYPE_DI
 
     FAPI_TRY( eff_dram_rbt(l_mcs, &l_attrs_rbt[0][0]) );
 
-    l_attrs_rbt[l_port_num][l_dimm_num] = 0x00;
+    l_attrs_rbt[l_port_num][l_dimm_num] = fapi2::ENUM_ATTR_EFF_DRAM_RBT_SEQUENTIAL;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RBT, l_mcs, l_attrs_rbt),
               "Failed setting attribute for RTB");
@@ -1544,10 +1542,11 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for TM
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note dram testing mode
+/// @note always disabled
 ///
 fapi2::ReturnCode eff_config::dram_tm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_tm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Targets
@@ -1560,7 +1559,7 @@ fapi2::ReturnCode eff_config::dram_tm(const fapi2::Target<TARGET_TYPE_DIMM>& i_t
 
     FAPI_TRY( eff_dram_tm(l_mcs, &l_attrs_tm[0][0]) );
 
-    l_attrs_tm[l_port_num][l_dimm_num] = 0x00;
+    l_attrs_tm[l_port_num][l_dimm_num] = fapi2::ENUM_ATTR_EFF_DRAM_TM_NORMAL;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TM, l_mcs, l_attrs_tm),
               "Failed setting attribute for BL");
@@ -1574,22 +1573,82 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for cwl
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Sets CAS Write Latency, depending on frequency and ATTR_MSS_MT_PREAMBLE
 ///
 fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+
+    // Taken from DDR4 JEDEC spec 1716.78C
+    // Proposed DDR4 Full spec update(79-4A)
+    // Page 26, Table 7
+    static std::pair<uint64_t, uint8_t> CWL_TABLE_1 [6] =
+    {
+        {1600, 9},
+        {1866, 10},
+        {2133, 11},
+        {2400, 12},
+        {2666, 14},
+        {3200, 16},
+    };
+    static std::pair<uint64_t, uint8_t> CWL_TABLE_2 [3] =
+    {
+        {2400, 14},
+        {2666, 16},
+        {3200, 18},
+    };
+
     std::vector<uint8_t> l_attrs_cwl(PORTS_PER_MCS, 0);
+    uint8_t l_cwl = 0;
+    uint64_t l_freq;
+    uint8_t l_preamble = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
+    const auto l_mcbist = find_target <TARGET_TYPE_MCBIST>(i_target);
     // Current index
     const auto l_port_num = index(l_mca);
 
-    FAPI_TRY( eff_dram_cwl(l_mcs, l_attrs_cwl.data()) );
 
-    l_attrs_cwl[l_port_num] = 0x0C;
+    FAPI_TRY (vpd_mt_preamble (l_mca, l_preamble) );
+
+    //get the first nibble as according to vpd. 4-7 is read, 0-3 for write
+    l_preamble = l_preamble & 0x0F;
+
+    FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
+                 fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
+                 .set_VALUE(l_preamble)
+                 .set_DIMM_TARGET(i_target),
+                 "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
+                 c_str(i_target),
+                 l_preamble );
+
+    FAPI_TRY( mss::freq(l_mcbist, l_freq) );
+
+    // Using an if branch because a ternary conditional wasn't working with params for find_value_from_key
+    if (l_preamble == 0)
+    {
+        FAPI_TRY( mss::find_value_from_key( CWL_TABLE_1,
+                                            l_freq, l_cwl),
+                  "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
+                  l_freq,
+                  l_preamble);
+    }
+    else
+    {
+        FAPI_TRY( mss::find_value_from_key( CWL_TABLE_2,
+                                            l_freq, l_cwl),
+                  "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
+                  l_freq,
+                  l_preamble);
+
+    }
+
+    FAPI_TRY( eff_dram_cwl(l_mcs, l_attrs_cwl.data()) );
+    l_attrs_cwl[l_port_num] = l_cwl;
+
+    FAPI_INF("Calculated CAS Write Latency is %d", l_cwl);
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_CWL,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_cwl, PORTS_PER_MCS)),
@@ -1603,10 +1662,11 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for lpasr
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note from JEDEC DDR4 DRAM MR2 page 26
+/// @note All DDR4 supports auto refresh, setting to default
 ///
 fapi2::ReturnCode eff_config::dram_lpasr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_lpasr(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1618,7 +1678,8 @@ fapi2::ReturnCode eff_config::dram_lpasr(const fapi2::Target<TARGET_TYPE_DIMM>& 
 
     FAPI_TRY( eff_dram_lpasr(l_mcs, l_attrs_lpasr.data()) );
 
-    l_attrs_lpasr[l_port_num] = 0x00;
+    l_attrs_lpasr[l_port_num] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_ASR;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_LPASR,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_lpasr, PORTS_PER_MCS)),
@@ -1635,7 +1696,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::additive_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_dram_al(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1647,7 +1707,7 @@ fapi2::ReturnCode eff_config::additive_latency(const fapi2::Target<TARGET_TYPE_D
 
     FAPI_TRY( eff_dram_al(l_mcs, l_attrs_dram_al.data()) );
 
-    l_attrs_dram_al[l_port_num] = 0x00;
+    l_attrs_dram_al[l_port_num] = fapi2::ENUM_ATTR_EFF_DRAM_AL_DISABLE;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_AL,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_al, PORTS_PER_MCS)),
@@ -1722,7 +1782,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::write_level_enable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_wr_lvl_enable(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1734,7 +1793,7 @@ fapi2::ReturnCode eff_config::write_level_enable(const fapi2::Target<TARGET_TYPE
 
     FAPI_TRY( eff_dram_wr_lvl_enable(l_mcs, l_attrs_wr_lvl_enable.data()) );
 
-    l_attrs_wr_lvl_enable[l_port_num] = 0x00;
+    l_attrs_wr_lvl_enable[l_port_num] = fapi2::ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_WR_LVL_ENABLE,
                             l_mcs,
@@ -1751,7 +1810,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::output_buffer(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_output_buffer(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1763,7 +1821,7 @@ fapi2::ReturnCode eff_config::output_buffer(const fapi2::Target<TARGET_TYPE_DIMM
 
     FAPI_TRY( eff_dram_output_buffer(l_mcs, l_attrs_output_buffer.data()) );
 
-    l_attrs_output_buffer[l_port_num] = 0x00;
+    l_attrs_output_buffer[l_port_num] = fapi2::ENUM_ATTR_EFF_DRAM_OUTPUT_BUFFER_ENABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_OUTPUT_BUFFER,
                             l_mcs,
@@ -1901,7 +1959,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::ca_parity_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    //TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity_latency(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1912,9 +1970,7 @@ fapi2::ReturnCode eff_config::ca_parity_latency(const fapi2::Target<TARGET_TYPE_
     const auto l_port_num = index(l_mca);
 
     FAPI_TRY( eff_ca_parity_latency(l_mcs, l_attrs_ca_parity_latency.data()) );
-
-    l_attrs_ca_parity_latency[l_port_num] = 0x00;
-
+    l_attrs_ca_parity_latency[l_port_num] = fapi2::ENUM_ATTR_EFF_CA_PARITY_LATENCY_DISABLE;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CA_PARITY_LATENCY,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_ca_parity_latency, PORTS_PER_MCS)),
@@ -1930,7 +1986,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::crc_error_clear(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    //TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_crc_error_clear(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1942,7 +1998,7 @@ fapi2::ReturnCode eff_config::crc_error_clear(const fapi2::Target<TARGET_TYPE_DI
 
     FAPI_TRY( eff_crc_error_clear(l_mcs, l_attrs_crc_error_clear.data()) );
 
-    l_attrs_crc_error_clear[l_port_num] = 0x01;
+    l_attrs_crc_error_clear[l_port_num] = fapi2::ENUM_ATTR_EFF_CRC_ERROR_CLEAR_ERROR;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CRC_ERROR_CLEAR,
                             l_mcs,
@@ -1959,7 +2015,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::ca_parity_error_status(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    //TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity_error_status(PORTS_PER_MCS, 0);
 
     // Targets
@@ -1971,7 +2027,7 @@ fapi2::ReturnCode eff_config::ca_parity_error_status(const fapi2::Target<TARGET_
 
     FAPI_TRY( eff_ca_parity_error_status(l_mcs, l_attrs_ca_parity_error_status.data()) );
 
-    l_attrs_ca_parity_error_status[l_port_num] = 0x01;
+    l_attrs_ca_parity_error_status[l_port_num] = fapi2::ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_CLEAR;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CA_PARITY_ERROR_STATUS,
                             l_mcs,
@@ -1988,7 +2044,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::ca_parity(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    //TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_ca_parity(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2000,7 +2056,7 @@ fapi2::ReturnCode eff_config::ca_parity(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_ca_parity(l_mcs, l_attrs_ca_parity.data()) );
 
-    l_attrs_ca_parity[l_port_num] = 0x00;
+    l_attrs_ca_parity[l_port_num] = fapi2::ENUM_ATTR_EFF_CA_PARITY_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CA_PARITY,
                             l_mcs,
@@ -2050,10 +2106,11 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for data_mask
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Datamask is unnused and not needed because no DBI.
+/// @note Defaulted to 0
 ///
 fapi2::ReturnCode eff_config::data_mask(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_data_mask(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2065,7 +2122,7 @@ fapi2::ReturnCode eff_config::data_mask(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_data_mask(l_mcs, l_attrs_data_mask.data()) );
 
-    l_attrs_data_mask[l_port_num] = 0x00;
+    l_attrs_data_mask[l_port_num] = fapi2::ENUM_ATTR_EFF_DATA_MASK_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DATA_MASK,
                             l_mcs,
@@ -2079,10 +2136,10 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for write_dbi
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note DBI is not supported
 ///
 fapi2::ReturnCode eff_config::write_dbi(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_write_dbi(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2094,7 +2151,7 @@ fapi2::ReturnCode eff_config::write_dbi(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_write_dbi(l_mcs, l_attrs_write_dbi.data()) );
 
-    l_attrs_write_dbi[l_port_num] = 0x00;
+    l_attrs_write_dbi[l_port_num] = fapi2::ENUM_ATTR_EFF_WRITE_DBI_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_WRITE_DBI,
                             l_mcs,
@@ -2109,17 +2166,18 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for read_dbi
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note read_dbi is not supported, so set to DISABLED (0)
+/// @note No logic for DBI
 ///
 fapi2::ReturnCode eff_config::read_dbi(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
     std::vector<uint8_t> l_attrs_read_dbi(PORTS_PER_MCS, 0);
     FAPI_TRY( eff_read_dbi(l_mcs, l_attrs_read_dbi.data()) );
 
-    l_attrs_read_dbi[l_port_num] = 0x00;
+    l_attrs_read_dbi[l_port_num] = fapi2::ENUM_ATTR_EFF_READ_DBI_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_READ_DBI,
                             l_mcs,
@@ -2134,10 +2192,11 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for Post Package Repair
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note write_dbi is not supported, so set to DISABLED (0)
+/// @note no logic for DBI
 ///
 fapi2::ReturnCode eff_config::post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
     const auto l_dimm_num = index(i_target);
@@ -2187,8 +2246,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::read_preamble(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_rd_preamble(PORTS_PER_MCS, 0);
+    uint8_t l_preamble = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -2197,9 +2256,22 @@ fapi2::ReturnCode eff_config::read_preamble(const fapi2::Target<TARGET_TYPE_DIMM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    FAPI_TRY (vpd_mt_preamble (l_mca, l_preamble) ) ;
+    l_preamble = l_preamble & 0xF0;
+    l_preamble = l_preamble >> 4;
+
+
+    FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
+                 fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
+                 .set_VALUE(l_preamble)
+                 .set_DIMM_TARGET(i_target),
+                 "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
+                 c_str(i_target),
+                 l_preamble );
+
     FAPI_TRY( eff_rd_preamble(l_mcs, l_attrs_rd_preamble.data()) );
 
-    l_attrs_rd_preamble[l_port_num] = 0x00;
+    l_attrs_rd_preamble[l_port_num] = l_preamble;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_RD_PREAMBLE,
                             l_mcs,
@@ -2217,9 +2289,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::write_preamble(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_wr_preamble(PORTS_PER_MCS, 0);
-
+    uint8_t l_preamble = 0;
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -2227,14 +2298,26 @@ fapi2::ReturnCode eff_config::write_preamble(const fapi2::Target<TARGET_TYPE_DIM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    FAPI_TRY (vpd_mt_preamble (l_mca, l_preamble) ) ;
+    l_preamble = l_preamble & 0x0F;
+    FAPI_INF("WR preamble is %d", l_preamble);
+
+    FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
+                 fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
+                 .set_VALUE(l_preamble)
+                 .set_DIMM_TARGET(i_target),
+                 "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
+                 c_str(i_target),
+                 l_preamble );
+
     FAPI_TRY( eff_wr_preamble(l_mcs, l_attrs_wr_preamble.data()) );
 
-    l_attrs_wr_preamble[l_port_num] = 0x00;
+    l_attrs_wr_preamble[l_port_num] = l_preamble;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_WR_PREAMBLE,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_wr_preamble, PORTS_PER_MCS)),
-              "Failed setting attribute for WR_PREAMBLE");
+              "Failed setting attribute for RD_PREAMBLE");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2247,7 +2330,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::self_refresh_abort(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_self_ref_abort(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2259,7 +2341,7 @@ fapi2::ReturnCode eff_config::self_refresh_abort(const fapi2::Target<TARGET_TYPE
 
     FAPI_TRY( eff_self_ref_abort(l_mcs, l_attrs_self_ref_abort.data()) );
 
-    l_attrs_self_ref_abort[l_port_num] = 0x00;
+    l_attrs_self_ref_abort[l_port_num] = fapi2::ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_SELF_REF_ABORT,
                             l_mcs,
@@ -2270,7 +2352,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Determines & sets effective config for cs_cmd_latency
 /// @param[in] i_target FAPI2 target
@@ -2278,7 +2359,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::cs_to_cmd_addr_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_cs_cmd_latency(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2290,7 +2370,7 @@ fapi2::ReturnCode eff_config::cs_to_cmd_addr_latency(const fapi2::Target<TARGET_
 
     FAPI_TRY( eff_cs_cmd_latency(l_mcs, l_attrs_cs_cmd_latency.data()) );
 
-    l_attrs_cs_cmd_latency[l_port_num] = 0x00;
+    l_attrs_cs_cmd_latency[l_port_num] = fapi2::ENUM_ATTR_EFF_CS_CMD_LATENCY_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CS_CMD_LATENCY,
                             l_mcs,
@@ -2308,7 +2388,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::internal_vref_monitor(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_int_vref_mon(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2320,7 +2399,7 @@ fapi2::ReturnCode eff_config::internal_vref_monitor(const fapi2::Target<TARGET_T
 
     FAPI_TRY( eff_internal_vref_monitor(l_mcs, l_attrs_int_vref_mon.data()) );
 
-    l_attrs_int_vref_mon[l_port_num] = 0x00;
+    l_attrs_int_vref_mon[l_port_num] = fapi2::ENUM_ATTR_EFF_INTERNAL_VREF_MONITOR_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_INTERNAL_VREF_MONITOR,
                             l_mcs,
@@ -2338,7 +2417,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::max_powerdown_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_powerdown_mode(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2350,7 +2428,7 @@ fapi2::ReturnCode eff_config::max_powerdown_mode(const fapi2::Target<TARGET_TYPE
 
     FAPI_TRY( eff_max_powerdown_mode(l_mcs, l_attrs_powerdown_mode.data()) );
 
-    l_attrs_powerdown_mode[l_port_num] = 0x00;
+    l_attrs_powerdown_mode[l_port_num] = fapi2::ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MAX_POWERDOWN_MODE,
                             l_mcs,
@@ -2604,7 +2682,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::write_crc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    //TODO: RTC 159554 Update RAS related attributes
     std::vector<uint8_t> l_attrs_write_crc(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2616,7 +2694,7 @@ fapi2::ReturnCode eff_config::write_crc(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_write_crc(l_mcs, l_attrs_write_crc.data()) );
 
-    l_attrs_write_crc[l_port_num] = 0x00;
+    l_attrs_write_crc[l_port_num] = fapi2::ENUM_ATTR_EFF_WRITE_CRC_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_WRITE_CRC,
                             l_mcs,
@@ -2634,8 +2712,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint32_t> l_attrs_zqcal_interval(PORTS_PER_MCS, 0);
+    uint64_t l_freq = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -2644,15 +2722,17 @@ fapi2::ReturnCode eff_config::zqcal_interval(const fapi2::Target<TARGET_TYPE_DIM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(l_mcs), l_freq));
     FAPI_TRY( eff_zqcal_interval(l_mcs, l_attrs_zqcal_interval.data()) );
-
 
     // Calculate ZQCAL Interval based on the following equation from Ken:
     //               0.5
     // ------------------------------ = 13.333ms
     //     (1.5 * 10) + (0.15 * 150)
     //  (13333 * ATTR_MSS_FREQ) / 2
-    l_attrs_zqcal_interval[l_port_num] = 0xF42270;
+
+    l_attrs_zqcal_interval[l_port_num] = 13333 * l_freq / 2;
+
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_ZQCAL_INTERVAL,
                             l_mcs,
@@ -2670,8 +2750,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint32_t> l_attrs_memcal_interval(PORTS_PER_MCS, 0);
+    uint64_t l_freq = 0;
 
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
@@ -2680,11 +2760,13 @@ fapi2::ReturnCode eff_config::memcal_interval(const fapi2::Target<TARGET_TYPE_DI
     // Current index
     const auto l_port_num = index(l_mca);
 
+    FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq));
+
     FAPI_TRY( eff_memcal_interval(l_mcs, l_attrs_memcal_interval.data()) );
 
     // Calculate MEMCAL Interval based on 1sec interval across all bits per DP16
     // (62500 * ATTR_MSS_FREQ) / 2
-    l_attrs_memcal_interval[l_port_num] = 0x47868C0;
+    l_attrs_memcal_interval[l_port_num] = 62500 * l_freq / 2;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MEMCAL_INTERVAL,
                             l_mcs,
@@ -2724,24 +2806,18 @@ fapi2::ReturnCode eff_config::dram_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     {
         std::vector<uint8_t> l_attrs_dram_trp(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_trp_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_trp_in_nck = 0;
 
         // Calculate nck
-        l_trp_in_nck = calc_nck(l_trp_in_ps,
-                                l_tCK_in_ps,
-                                int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_trp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
+                  "Error in calculating dram_tRP nck for target %s, with value of l_trp_in_ps: %d", mss::c_str(i_target), l_trp_in_ps);
 
-        FAPI_INF("Calculated tRP (nck): %d", l_trp_in_nck);
+        FAPI_INF("Calculated trp (ps): %d, trp (nck): %d  for target: %s", l_trp_in_ps, l_trp_in_nck, mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trp(l_mcs, l_attrs_dram_trp.data()) );
 
-        l_attrs_dram_trp[l_port_num] = uint8_t( l_trp_in_nck );
+        l_attrs_dram_trp[l_port_num] = l_trp_in_nck ;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRP,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trp, PORTS_PER_MCS)),
@@ -2774,26 +2850,20 @@ fapi2::ReturnCode eff_config::dram_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i
         FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
         FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(i_target, l_trcd_mtb) );
         FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(i_target, l_trcd_ftb) );
-
+        FAPI_INF( "trcd values are: min_trcd %d, fine offset is %d", l_trcd_mtb, l_trcd_ftb);
         l_trcd_in_ps = calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
     }
 
 
     {
         std::vector<uint8_t> l_attrs_dram_trcd(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_trcd_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_trcd_in_nck = 0;
 
         // Calculate nck
-        l_trcd_in_nck = calc_nck(l_trcd_in_ps,
-                                 l_tCK_in_ps,
-                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_trcd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
+                  "Error in calculating trcd for target %s, with value of l_trcd_in_ps: %d", mss::c_str(i_target), l_trcd_in_ps);
 
-        FAPI_INF("Calculated trcd (nck): %d", l_trcd_in_nck);
+        FAPI_INF("Calculated trcd (ps): %d, trcd (nck): %d  for target: %s", l_trcd_in_ps, l_trcd_in_nck, mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trcd(l_mcs, l_attrs_dram_trcd.data()) );
@@ -2837,24 +2907,19 @@ fapi2::ReturnCode eff_config::dram_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>&
 
     {
         std::vector<uint8_t> l_attrs_dram_twtr_l(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_twtr_l_in_nck = 0;
+        int8_t l_twtr_l_in_nck = 0;
 
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        // Calculate tNCK
+        FAPI_TRY( calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
+                  "Error in calculating twtr_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_l_in_ps );
 
-        // Calculate nck
-        l_twtr_l_in_nck = calc_nck(l_twtr_l_in_ps,
-                                   l_tCK_in_ps,
-                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-
-        FAPI_INF("Calculated twtr_l (nck): %d", l_twtr_l_in_nck);
+        FAPI_INF("Calculated twtr_l (ps): %d, twtr_l (nck): %d  for target: %s", l_twtr_l_in_ps, l_twtr_l_in_nck,
+                 mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_l(l_mcs, l_attrs_dram_twtr_l.data()) );
 
-        l_attrs_dram_twtr_l[l_port_num] = uint8_t( l_twtr_l_in_nck );
+        l_attrs_dram_twtr_l[l_port_num] = l_twtr_l_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_L,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_l, PORTS_PER_MCS)),
@@ -2892,24 +2957,19 @@ fapi2::ReturnCode eff_config::dram_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>&
 
     {
         std::vector<uint8_t> l_attrs_dram_twtr_s(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_twtr_s_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_twtr_s_in_nck = 0;
 
         // Calculate nck
-        l_twtr_s_in_nck = calc_nck(l_twtr_s_in_ps,
-                                   l_tCK_in_ps,
-                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
+                  "Error in calculating l_twtr_s  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_s_in_ps);
 
-        FAPI_INF("Calculated twtr_s (nck): %d", l_twtr_s_in_nck);
+        FAPI_INF("Calculated twtr_s (ps): %d, twtr_s (nck): %d  for target: %s", l_twtr_s_in_ps, l_twtr_s_in_nck,
+                 mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_s(l_mcs, l_attrs_dram_twtr_s.data()) );
 
-        l_attrs_dram_twtr_s[l_port_num] = uint8_t( l_twtr_s_in_nck );
+        l_attrs_dram_twtr_s[l_port_num] = l_twtr_s_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TWTR_S,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_twtr_s, PORTS_PER_MCS)),
@@ -2948,24 +3008,18 @@ fapi2::ReturnCode eff_config::dram_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>&
 
     {
         std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_trrd_s_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_trrd_s_in_nck = 0;
 
         // Calculate nck
-        l_trrd_s_in_nck = calc_nck(l_trrd_s_in_ps,
-                                   l_tCK_in_ps,
-                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_trrd_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
+                  "Error in calculating trrd_s  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_trrd_s_in_ps);
 
-        FAPI_INF("Calculated trrd_s (nck): %d", l_trrd_s_in_nck);
-
+        FAPI_INF("Calculated trrd_s (ps): %d, trrd_s (nck): %d  for target: %s", l_trrd_s_in_ps, l_trrd_s_in_nck,
+                 mss::c_str(i_target));
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trrd_s(l_mcs, l_attrs_dram_trrd_s.data()) );
 
-        l_attrs_dram_trrd_s[l_port_num] = uint8_t( l_trrd_s_in_nck );
+        l_attrs_dram_trrd_s[l_port_num] = l_trrd_s_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_S,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_s, PORTS_PER_MCS)),
@@ -3004,24 +3058,19 @@ fapi2::ReturnCode eff_config::dram_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>&
 
     {
         std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_trrd_l_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_trrd_l_in_nck = 0;
 
         // Calculate nck
-        l_trrd_l_in_nck = calc_nck(l_trrd_l_in_ps,
-                                   l_tCK_in_ps,
-                                   int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_trrd_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
+                  "Error in calculating trrd_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_trrd_l_in_ps);
 
-        FAPI_INF("Calculated trrd_l (nck): %d", l_trrd_l_in_nck);
+        FAPI_INF("Calculated trrd_l (ps): %d, trrd_l (nck): %d  for target: %s", l_trrd_l_in_ps, l_trrd_l_in_nck,
+                 mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trrd_l(l_mcs, l_attrs_dram_trrd_l.data()) );
 
-        l_attrs_dram_trrd_l[l_port_num] = uint8_t( l_trrd_l_in_nck );
+        l_attrs_dram_trrd_l[l_port_num] = l_trrd_l_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_l, PORTS_PER_MCS)),
@@ -3059,24 +3108,18 @@ fapi2::ReturnCode eff_config::dram_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     {
         std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_tfaw_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        uint8_t l_tfaw_in_nck = 0;
 
         // Calculate nck
-        l_tfaw_in_nck = calc_nck(l_tfaw_in_ps,
-                                 l_tCK_in_ps,
-                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY ( calc_nck(l_tfaw_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
+                   "Error in calculating tfaw_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_tfaw_in_ps );
 
-        FAPI_INF("Calculated tfaw (nck): %d", l_tfaw_in_nck);
+        FAPI_INF("Calculated tFAW (ps): %d, tFAW (nck): %d  for target: %s", l_tfaw_in_ps, l_tfaw_in_nck, mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_tfaw(l_mcs, l_attrs_dram_tfaw.data()) );
 
-        l_attrs_dram_tfaw[l_port_num] = uint8_t( l_tfaw_in_nck );
+        l_attrs_dram_tfaw[l_port_num] = l_tfaw_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tfaw, PORTS_PER_MCS)),
@@ -3094,7 +3137,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dram_tras(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
     int64_t l_tras_in_ps = 0;
@@ -3115,24 +3157,18 @@ fapi2::ReturnCode eff_config::dram_tras(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     {
         std::vector<uint8_t> l_attrs_dram_tras(PORTS_PER_MCS, 0);
-        int64_t l_tCK_in_ps = 0;
-        int64_t l_tras_in_nck = 0;
-
-        // Calculate clock period (tCK) from selected freq from mss_freq
-        FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-        FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
+        int8_t l_tras_in_nck = 0;
 
         // Calculate nck
-        l_tras_in_nck = calc_nck(l_tras_in_ps,
-                                 l_tCK_in_ps,
-                                 int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+        FAPI_TRY( calc_nck(l_tras_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tras_in_nck),
+                  "Error in calculating tras_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_tras_in_ps);
 
-        FAPI_INF("Calculated tras (nck): %d", l_tras_in_nck);
+        FAPI_INF("Calculated tRAS (ps): %d, tRAS (nck): %d  for target: %s", l_tras_in_ps, l_tras_in_nck, mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_tras(l_mcs, l_attrs_dram_tras.data()) );
 
-        l_attrs_dram_tras[l_port_num] = uint8_t( l_tras_in_nck );
+        l_attrs_dram_tras[l_port_num] = l_tras_in_nck;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRAS,
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tras, PORTS_PER_MCS)),
@@ -3160,17 +3196,11 @@ fapi2::ReturnCode eff_config::dram_trtp(const fapi2::Target<TARGET_TYPE_DIMM>& i
     constexpr int64_t l_min_trtp_in_nck = 4;
 
     std::vector<uint8_t> l_attrs_dram_trtp(PORTS_PER_MCS, 0);
-    int64_t l_tCK_in_ps = 0;
     int64_t l_calc_trtp_in_nck = 0;
 
-    // Calculate clock period (tCK) from selected freq from mss_freq
-    FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
-    FAPI_INF("Calculated clock period (tCK): %d", l_tCK_in_ps);
-
     // Calculate nck
-    l_calc_trtp_in_nck = calc_nck(l_max_trtp_in_ps,
-                                  l_tCK_in_ps,
-                                  int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+    FAPI_TRY( calc_nck(l_max_trtp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
+              "Error in calculating trtp  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_max_trtp_in_ps);
 
     FAPI_INF("Calculated trtp (nck): %d", l_calc_trtp_in_nck);
 

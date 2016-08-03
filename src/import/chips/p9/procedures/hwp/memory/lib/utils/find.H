@@ -313,6 +313,41 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
 }// find_value_from_key
 
 ///
+/// @brief find a key value from a C-style array of STL pairs
+/// @tparam T  input type
+/// @tparam OT the output type to be returned
+/// @tparam N size of the array being passed in
+/// @param[in] i_array the input array of pairs
+/// @param[in] i_key the "map" key
+/// @param[in] o_value the value found from given key
+/// @return the value corresponding to the key
+/// @note To use on short arrays. O(N), simple search
+///
+
+template<typename T, typename OT, size_t N>
+fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N], const T& i_key, OT& o_value)
+{
+    // TK Use sort and binary search for larger arrays
+    if (i_array == nullptr)
+    {
+        FAPI_ERR("nullptr passed to the find_value_from_key function");
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    for (size_t i = 0; i < N; i++)
+    {
+        if (i_array[i].first == i_key)
+        {
+            o_value = i_array[i].second;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
+    FAPI_ERR ("No match found for find_value_from_key");
+    return fapi2::FAPI2_RC_INVALID_PARAMETER;
+}
+
+///
 /// @brief Determine if a thing is functional
 /// @tparam P, the type of the parent which holds the things of interest
 /// @tparam I, the type of the item we want to check for

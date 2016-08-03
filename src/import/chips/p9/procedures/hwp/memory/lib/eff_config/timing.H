@@ -37,11 +37,12 @@
 
 #include <cstdint>
 #include <fapi2.H>
-
+#include <lib/utils/find.H>
+#include <lib/utils/conversions.H>
 namespace mss
 {
 
-enum GUARD_BAND : size_t
+enum GUARD_BAND : uint16_t
 {
     // Used for caclulating spd timing values - from JEDEC rounding algorithm
     // Correction factor is 1% (for DDR3) or 2.5% (for DDR4)
@@ -87,26 +88,40 @@ inline int64_t calc_timing_from_timebase(const int64_t i_timing_mtb,
 
 ///
 /// @brief Returns clock cycles
-/// @tparam T input and output type
+/// @tparam T input
+/// @tparam OT output
 /// @param[in] timing_in_ps timing parameter in ps
 /// @param[in] tck_in_ps  clock period in ps
 /// @param[in] inverse_corr_factor inverse correction factor  (defined by JEDEC)
+/// @param[out] o_value_nck the end calculation in nck
 /// @return the clock cycles of timing parameter (provided in ps)
 /// @note DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
-template<typename T>
-inline T calc_nck(const T i_timing_in_ps,
-                  const T i_tck_in_ps,
-                  const T i_inverse_corr_factor)
+template<typename T, typename OT>
+inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
+                                  const T& i_tck_in_ps,
+                                  GUARD_BAND i_inverse_corr_factor,
+                                  OT& o_val_nck)
 {
     // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
     T l_temp_nck = (i_timing_in_ps * 1000) / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
-
-    // Apply inverse of correction factor percentage
     l_temp_nck += i_inverse_corr_factor;
+    l_temp_nck = l_temp_nck / 1000;
 
-    return l_temp_nck / 1000;
+    //Check for overflow.
+    o_val_nck = l_temp_nck;
+
+    FAPI_ASSERT(o_val_nck == l_temp_nck,
+                fapi2::MSS_INVALID_CAST_CALC_NCK().
+                set_TIMING_PS(i_timing_in_ps).
+                set_NCK_NS(i_tck_in_ps).
+                set_CORRECTION_FACTOR(i_inverse_corr_factor),
+                "Bad cast for calc_nck. Output is: %d, after cast is %d", l_temp_nck, l_temp_nck);
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -138,7 +153,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
-                              uint64_t& o_timing );
+                              int64_t& o_timing );
 
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
 /// @param[in] i_mode fine refresh rate mode
@@ -151,5 +166,4 @@ fapi2::ReturnCode calc_trfc_dlr( const uint8_t i_refresh_mode,
                                  uint64_t& o_trfc_in_ps );
 
 } // mss
-
 #endif

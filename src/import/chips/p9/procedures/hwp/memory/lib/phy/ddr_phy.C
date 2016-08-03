@@ -600,7 +600,6 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     uint8_t l_wlo = 0;
     uint8_t l_dram_gen[MAX_DIMM_PER_PORT]    = {0};
     uint8_t l_dimm_type[MAX_DIMM_PER_PORT]   = {0};
-    uint8_t l_custom_dimm[MAX_DIMM_PER_PORT] = {0};
     uint8_t l_type_index = 0;
     uint8_t l_gen_index = 0;
 
@@ -608,13 +607,11 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     FAPI_TRY( mss::vpd_wlo(i_target, l_wlo) );
     FAPI_TRY( mss::eff_dram_gen(i_target, &(l_dram_gen[0])) );
     FAPI_TRY( mss::eff_dimm_type(i_target, &(l_dimm_type[0])) );
-    FAPI_TRY( mss::eff_custom_dimm(i_target, &(l_custom_dimm[0])) );
 
     // There's no way to configure the PHY for more than one value. However, we don't know if there's
     // a DIMM in one slot, the other or double drop. So we do a little gyration here to make sure
-    // we have one of the two values (and assume effective config caught a bad config.)
-    l_type_index = (l_custom_dimm[0] | l_custom_dimm[1]) == fapi2::ENUM_ATTR_EFF_CUSTOM_DIMM_YES ?
-                   2 : l_dimm_type[0] | l_dimm_type[1];
+    // we have one of the two values (and assume effective config caught a bad config
+    l_type_index = l_dimm_type[0] | l_dimm_type[1];
     l_gen_index = l_dram_gen[0] | l_dram_gen[1];
 
     // FOR NIMBUS PHY (as the protocol choice above is) BRS
