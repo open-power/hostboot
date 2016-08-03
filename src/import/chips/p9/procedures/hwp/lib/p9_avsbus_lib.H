@@ -176,7 +176,7 @@ uint32_t avsCRCcalc(uint32_t i_data);
 
 fapi2::ReturnCode
 avsInitExtVoltageControl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                         const p9avslib::avsBusNum i_avsBusNum,
+                         const uint8_t i_avsBusNum,
                          const uint8_t i_o2sBridgeNum);
 
 
