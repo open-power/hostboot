@@ -69,7 +69,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     fapi2::buffer<uint32_t> l_read_5 = 0;
     fapi2::buffer<uint32_t> l_read_6 = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_setup_sbe_config::  Entering ...");
 
     FAPI_DBG("Read Scratch8 for validity of Scratch register");
     //Getting SCRATCH_REGISTER_8 register value
@@ -271,7 +271,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
                                     l_read_scratch8));
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_setup_sbe_config: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -43,7 +43,7 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
 {
     fapi2::buffer<uint8_t> l_read_attr;
     fapi2::buffer<uint32_t> l_cfam_data;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_set_fsi_gp_shadow: Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_FSI_GP_SHADOWS_OVERWRITE, i_target_chip,
                            l_read_attr));
@@ -119,7 +119,7 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
                                         p9SetFsiGpShadow::PERV_CTRL1_FLUSHVALUE));
     }
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_set_fsi_gp_shadow: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;

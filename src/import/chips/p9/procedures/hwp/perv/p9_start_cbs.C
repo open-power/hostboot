@@ -59,7 +59,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     int l_timeout = 0;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_start_cbs: Entering ...");
 
     l_sbe_start_value = !i_sbe_start;
 
@@ -137,7 +137,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 fapi2::VDD_NEST_OBSERVE(),
                 "ERROR:VDD OFF, FSI2PIB  BIT 16 NOT SET");
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_start_cbs: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;

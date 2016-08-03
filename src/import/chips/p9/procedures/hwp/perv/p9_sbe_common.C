@@ -59,7 +59,7 @@ fapi2::ReturnCode p9_sbe_common_align_chiplets(const
 {
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_align_chiplets: Entering ...");
 
     FAPI_DBG("For all chiplets: exit flush");
     //Setting CPLT_CTRL0 register value
@@ -124,7 +124,7 @@ fapi2::ReturnCode p9_sbe_common_align_chiplets(const
     l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_CPLT_CTRL0_CLEAR, l_data64));
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_align_chiplets: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -154,7 +154,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
     fapi2::buffer<uint16_t> l_nsl_clkregion_status;
     fapi2::buffer<uint16_t> l_ary_clkregion_status;
     fapi2::buffer<uint16_t> l_regions;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_check_cc_status_function: Entering ...");
 
     l_reg_sl = i_clock_types.getBit<5>();
     l_reg_nsl = i_clock_types.getBit<6>();
@@ -269,7 +269,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
         }
     }
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_check_cc_status_function: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -283,7 +283,7 @@ fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
 {
     fapi2::buffer<uint64_t> l_read_reg;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_check_checkstop_function: Entering ...");
 
     FAPI_DBG("Check checkstop register");
     //Getting XFIR register value
@@ -295,7 +295,7 @@ fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
                 .set_READ_ALL_CHECKSTOP(l_read_reg),
                 "ERROR: COMBINE ALL CHECKSTOP ERROR");
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_check_checkstop_function: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -317,7 +317,7 @@ fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
         const fapi2::buffer<uint8_t> i_clock_cmd,
         fapi2::buffer<uint64_t>& o_exp_clock_status)
 {
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_check_status: Entering ...");
 
     if ( (i_reg) && (i_clock_cmd == 0b01) )
     {
@@ -335,7 +335,7 @@ fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
         }
     }
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_check_status: Exiting ...");
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -374,7 +374,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     bool l_reg_ary = false;
     fapi2::buffer<uint64_t> l_data64;
     int l_timeout = 0;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_clock_start_stop: Entering ...");
 
     i_regions.extractToRight<53, 11>(l_regions);
     i_clock_types.extractToRight<5, 3>(l_reg_all);
@@ -503,7 +503,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR ARRAY TYPE");
     }
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_clock_start_stop: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -524,7 +524,7 @@ fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
     fapi2::buffer <uint16_t> l_cplt_ctrl_init;
     fapi2::buffer<uint32_t> l_attr_pg;
     fapi2::buffer<uint64_t> l_data64;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_cplt_ctrl_action_function: Entering ...");
 
     l_attr_pg = i_attr_pg;
     l_attr_pg.invert();
@@ -550,7 +550,7 @@ fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
     l_data64.setBit<PERV_1_CPLT_CTRL0_TC_UNIT_SYNCCLK_MUXSEL_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL0_CLEAR, l_data64));
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_cplt_ctrl_action_function: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -565,7 +565,7 @@ fapi2::ReturnCode p9_sbe_common_flushmode(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
 {
     fapi2::buffer<uint64_t> l_data64;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_flushmode: Entering ...");
 
     FAPI_DBG("Clear flush_inhibit to go in to flush mode");
     //Setting CPLT_CTRL0 register value
@@ -574,7 +574,7 @@ fapi2::ReturnCode p9_sbe_common_flushmode(const
     l_data64.setBit<PERV_1_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL0_CLEAR, l_data64));
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_flushmode: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -591,7 +591,7 @@ fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
         fapi2::buffer<uint64_t>& o_pg_vector)
 {
     fapi2::buffer<uint8_t> l_read_attrunitpos;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_get_pg_vector: Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chip,
                            l_read_attrunitpos));
@@ -621,7 +621,7 @@ fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
         o_pg_vector.setBit<4>();
     }
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_get_pg_vector: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -636,7 +636,7 @@ fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets)
 {
     fapi2::buffer<uint64_t> l_data64;
-    FAPI_INF("Entering ...");
+    FAPI_INF("p9_sbe_common_set_scan_ratio: Entering ...");
 
     //Setting OPCG_ALIGN register value
     FAPI_TRY(fapi2::getScom(i_target_chiplets, PERV_OPCG_ALIGN, l_data64));
@@ -644,7 +644,7 @@ fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
     (0xE0);  //OPCG_ALIGN.SCAN_RATIO = 0xE0
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_OPCG_ALIGN, l_data64));
 
-    FAPI_INF("Exiting ...");
+    FAPI_INF("p9_sbe_common_set_scan_ratio: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
