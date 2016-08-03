@@ -100,4 +100,34 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_MT_PREAMBLE</rc>
+    <description>
+      Value in the VPD for PREAMBLE is not 0 or 1.
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
+    <description>Invalid cast or calculation for calc_nck</description>
+    <ffdc>TIMING_PS</ffdc>
+    <ffdc>NCK_NS</ffdc>
+    <ffdc>CORRECTION_FACTOR</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
