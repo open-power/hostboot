@@ -310,7 +310,7 @@ typedef std::vector< register_data_pair >  register_data_vector;
 // to see the bits like this than in a more compact algorithmic arrangement.
 
 // Systems without Spare Bytes (or with deconfigured spares)
-static std::vector< register_data_vector > data_bit_enable_no_spare =
+static const register_data_vector  data_bit_enable_no_spare[] =
 {
     // DHPY01
     {
@@ -329,7 +329,7 @@ static std::vector< register_data_vector > data_bit_enable_no_spare =
 };
 
 // Rank Pair will be added to the register address before writing
-static std::vector< register_data_vector > wrclk_enable_no_spare_x4 =
+static const register_data_vector wrclk_enable_no_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x8640},
@@ -341,7 +341,7 @@ static std::vector< register_data_vector > wrclk_enable_no_spare_x4 =
 };
 
 // Rank Pair will be added to the register address before writing
-static std::vector< register_data_vector > rdclk_enable_no_spare_x4 =
+static const register_data_vector  rdclk_enable_no_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x8640},
@@ -353,7 +353,7 @@ static std::vector< register_data_vector > rdclk_enable_no_spare_x4 =
 };
 
 // Systems With Spare Bytes Enabled
-static std::vector< register_data_vector > data_bit_enable_spare =
+static const register_data_vector data_bit_enable_spare[] =
 {
     // DHPY01
     {
@@ -371,7 +371,7 @@ static std::vector< register_data_vector > data_bit_enable_spare =
     },
 };
 
-static std::vector< register_data_vector > wrclk_enable_spare_x4 =
+static const register_data_vector wrclk_enable_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0, 0x8640},
@@ -382,7 +382,7 @@ static std::vector< register_data_vector > wrclk_enable_spare_x4 =
     },
 };
 
-static std::vector< register_data_vector > rdclk_enable_spare_x4 =
+static const register_data_vector  rdclk_enable_spare_x4[] =
 {
     {
         {MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0, 0x8640},
