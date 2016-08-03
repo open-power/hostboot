@@ -55,14 +55,14 @@ namespace ddr4
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 mrs05_data::mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
-    iv_ca_parity_latency(0),
-    iv_crc_error_clear(0),
-    iv_ca_parity_error_status(0),
-    iv_odt_input_buffer(fapi2::ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED),
-    iv_ca_parity(0),
-    iv_data_mask(0),
-    iv_write_dbi(0),
-    iv_read_dbi(0)
+    iv_ca_parity_latency(fapi2::ENUM_ATTR_EFF_CA_PARITY_LATENCY_DISABLE),
+    iv_crc_error_clear(fapi2::ENUM_ATTR_EFF_CRC_ERROR_CLEAR_CLEAR),
+    iv_ca_parity_error_status(fapi2::ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_CLEAR),
+    iv_odt_input_buffer(fapi2::ENUM_ATTR_EFF_ODT_INPUT_BUFF_DEACTIVATED),
+    iv_ca_parity(fapi2::ENUM_ATTR_EFF_CA_PARITY_DISABLE),
+    iv_data_mask(fapi2::ENUM_ATTR_EFF_DATA_MASK_DISABLE),
+    iv_write_dbi(fapi2::ENUM_ATTR_EFF_WRITE_DBI_DISABLE),
+    iv_read_dbi(fapi2::ENUM_ATTR_EFF_READ_DBI_DISABLE)
 {
     FAPI_TRY( mss::eff_ca_parity_latency(i_target, iv_ca_parity_latency) );
     FAPI_TRY( mss::eff_crc_error_clear(i_target, iv_crc_error_clear) );
