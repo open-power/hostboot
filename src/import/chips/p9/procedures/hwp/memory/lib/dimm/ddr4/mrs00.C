@@ -53,16 +53,17 @@ namespace ddr4
 /// @brief mrs0_data ctor
 /// @param[in] a fapi2::TARGET_TYPE_DIMM target
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Burst Length will always be set to fixed x8 (0)
+/// @note Burst Chop (x4) is not supported
 ///
 mrs00_data::mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
     iv_burst_length(0),
-    iv_read_burst_type(0),
+    iv_read_burst_type(fapi2::ENUM_ATTR_EFF_DRAM_RBT_SEQUENTIAL),
     iv_dll_reset(fapi2::ENUM_ATTR_EFF_DRAM_DLL_RESET_NO),
-    iv_test_mode(0),
+    iv_test_mode(fapi2::ENUM_ATTR_EFF_DRAM_TM_NORMAL),
     iv_write_recovery(0),
     iv_cas_latency(0)
 {
-    FAPI_TRY( mss::eff_dram_bl(i_target, iv_burst_length) );
     FAPI_TRY( mss::eff_dram_rbt(i_target, iv_read_burst_type) );
     FAPI_TRY( mss::eff_dram_cl(i_target, iv_cas_latency) );
     FAPI_TRY( mss::eff_dram_dll_reset(i_target, iv_dll_reset) );
