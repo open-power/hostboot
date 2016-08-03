@@ -26,4 +26,5 @@ PROCEDURE=p9_setup_evid
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
 OBJS+=p9_avsbus_lib.o
+OBJS+=p9_pstate_parameter_block.o
 $(call BUILD_PROCEDURE)

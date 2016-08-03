@@ -126,10 +126,11 @@ typedef uint16_t VidAVS;
 /// VPD #V Operating Points
 #define VPD_PV_POINTS 4
 #define VPD_PV_ORDER_STR {"PowerSave", "Nominal    ", "Turbo    ", "UltraTurbo"}
-#define POWERSAVE   0
-#define NOMINAL     1
+#define POWERSAVE   1
+#define NOMINAL     0
 #define TURBO       2
 #define ULTRA       3
+#define POWERBUS    4
 #define VPD_PV_ORDER {POWERSAVE, NOMINAL, TURBO, ULTRA}
 
 /// IDDQ readings,

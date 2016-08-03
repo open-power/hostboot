@@ -49,6 +49,7 @@
 #include <p9_setup_evid.H>
 #include <p9_avsbus_lib.H>
 #include <p9_avsbus_scom.H>
+#include <p9_pstate_parameter_block.H>
 
 enum P9_SETUP_EVID_CONSTANTS
 {
@@ -288,6 +289,10 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 
     // AVSBus configuration variables
     avsbus_attrs_t attrs;
+    AttributeList mvpd_attrs;
+    uint32_t attr_mvpd_data[PV_D][PV_W];
+    uint32_t valid_pdv_points;
+    uint8_t present_chiplets;
 
     // Read attribute -
     FAPI_TRY(avsInitAttributes(i_target, &attrs, i_action));
@@ -297,47 +302,54 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
     {
         // Initialize the buses
         FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                          p9avslib::AVSBUSVDD, BRIDGE_NUMBER),
+                                          attrs.vdd_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDD, bridge %d", BRIDGE_NUMBER);
         FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                          p9avslib::AVSBUSVDN, BRIDGE_NUMBER),
+                                          attrs.vdn_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
-        // Should not be needed, as same AVSBus and different rails
-        // should share same initialization information
-        //FAPI_TRY(avsInitExtVoltageControl(i_target,
-        //         p9avslib::AVSBUSVCS, BRIDGE_NUMBER),
-        //         "Initializing avsBus VCS, bridge %d", BRIDGE_NUMBER);
+        // Get #V data from MVPD to program VDD/VDN and VCS voltage values
+        FAPI_TRY(proc_get_mvpd_data(i_target, &mvpd_attrs, attr_mvpd_data, &valid_pdv_points, &present_chiplets));
 
-        // Set Boot VDD Voltage
+        // Set Boot VDD Voltage - PowerSave Voltage from the MVPD data
         FAPI_TRY(avsVoltageWrite(i_target,
                                  attrs.vdd_bus_num,
                                  BRIDGE_NUMBER,
                                  attrs.vdd_rail_select,
-                                 (uint32_t)attrs.vdd_voltage_mv),
+                                 attr_mvpd_data[POWERSAVE][1]),
                  "Setting VDD voltage via AVSBus %d, Bridge %d",
                  attrs.vdd_bus_num,
                  BRIDGE_NUMBER);
 
-        // Set Boot VDN Voltage
+        // Set Boot VDN Voltage - PowerBus Voltage from the MVPD data
         FAPI_TRY(avsVoltageWrite(i_target,
                                  attrs.vdn_bus_num,
                                  BRIDGE_NUMBER,
                                  attrs.vdn_rail_select,
-                                 (uint32_t)attrs.vdn_voltage_mv),
+                                 attr_mvpd_data[POWERBUS][1]),
                  "Setting VDN voltage via AVSBus %d, Bridge %d",
                  attrs.vdn_bus_num,
                  BRIDGE_NUMBER);
 
-        // Set Boot VCS Voltage
-        FAPI_TRY(avsVoltageWrite(i_target,
-                                 attrs.vcs_bus_num,
-                                 BRIDGE_NUMBER,
-                                 attrs.vcs_rail_select,
-                                 (uint32_t)attrs.vcs_voltage_mv),
-                 "Setting VCS voltage via AVSBus %d, Bridge %d",
-                 attrs.vcs_bus_num,
-                 BRIDGE_NUMBER);
+        // Set Boot VCS Voltage - UltraTurbo Voltage from the MVPD data
+        if(attrs.vcs_bus_num == 0xFF)
+        {
+
+            FAPI_INF("VCS rail is not connected to AVSBus. Skipping VCS programming");
+
+        }
+        else
+        {
+
+            FAPI_TRY(avsVoltageWrite(i_target,
+                                     attrs.vcs_bus_num,
+                                     BRIDGE_NUMBER,
+                                     attrs.vcs_rail_select,
+                                     attr_mvpd_data[ULTRA][1]),
+                     "Setting VCS voltage via AVSBus %d, Bridge %d",
+                     attrs.vcs_bus_num,
+                     BRIDGE_NUMBER);
+        }
     }
 
 fapi_try_exit:
