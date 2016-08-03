@@ -55,16 +55,16 @@ namespace ddr4
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
-    iv_max_pd_mode(0),
-    iv_temp_refresh_range(0),
-    iv_temp_ref_mode(0),
-    iv_vref_mon(0),
-    iv_cs_cmd_latency(0),
-    iv_ref_abort(0),
+    iv_max_pd_mode(fapi2::ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE),
+    iv_temp_refresh_range(fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_NORMAL),
+    iv_temp_ref_mode(fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE),
+    iv_vref_mon(fapi2::ENUM_ATTR_EFF_INTERNAL_VREF_MONITOR_DISABLE),
+    iv_cs_cmd_latency(fapi2::ENUM_ATTR_EFF_CS_CMD_LATENCY_DISABLE),
+    iv_ref_abort(fapi2::ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE),
     iv_rd_pre_train_mode(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE),
-    iv_rd_preamble(0),
-    iv_wr_preamble(0),
-    iv_ppr(0)
+    iv_rd_preamble(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE),
+    iv_wr_preamble(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_1NCLK),
+    iv_ppr(fapi2::ENUM_ATTR_EFF_DRAM_PPR_NOT_SUPPORTED)
 {
     FAPI_TRY( mss::eff_max_powerdown_mode(i_target, iv_max_pd_mode) );
     FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range) );
