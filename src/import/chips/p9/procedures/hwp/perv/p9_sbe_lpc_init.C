@@ -46,7 +46,7 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
                                   fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     fapi2::buffer<uint64_t> l_data64;
-    FAPI_DBG("Entering ...");
+    FAPI_DBG("p9_sbe_lpc_init: Entering ...");
 
     // set LPC clock mux select to internal clock
     //Setting CPLT_CTRL0 register value
@@ -65,7 +65,7 @@ fapi2::ReturnCode p9_sbe_lpc_init(const
     FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_OR, l_data64));
     FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_CLEAR, l_data64));
 
-    FAPI_DBG("Exiting ...");
+    FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
