@@ -358,30 +358,19 @@ fapi_try_exit:
 /// @brief reset rc_config2
 /// @param[in] i_target fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note Burst length is always BL8
 ///
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
-    uint8_t is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
 
     // Bogus Centaur SIM number from init file - use 8 per Bialas 2/16
     // ---48:52, 0b00000, (def_is_sim); # CONSEQ_PASS  sim value---
     // 48:52, 0b01000, (def_is_bl8); # CONSEQ_PASS  8 from SWyatt
     // 48:52, 0b01111, any;          # CONSEQ_PASS  16 min for BL4, or OTF
-    if (is_sim)
-    {
-        l_data.insertFromRight<TT::CONSEQ_PASS, TT::CONSEQ_PASS_LEN>(0b01000);
-    }
-    else
-    {
-        uint8_t l_bl = 0;
 
-        FAPI_TRY( mss::eff_dram_bl(i_target, l_bl) );
-        l_data.insertFromRight<TT::CONSEQ_PASS, TT::CONSEQ_PASS_LEN>(
-            l_bl == fapi2::ENUM_ATTR_EFF_DRAM_BL_BL8 ? 0b01000 : 0b01111);
-    }
+    l_data.insertFromRight<TT::CONSEQ_PASS, TT::CONSEQ_PASS_LEN>( 0b01000 );
 
     // 57:58, 0b11, any;  # BURST_WINDOW, compare all 8 beats (AS recommended)
     l_data.insertFromRight<TT::BURST_WINDOW, TT::BURST_WINDOW_LEN>(0b11);
