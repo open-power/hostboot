@@ -664,6 +664,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::reset_write_clock_enable(p, l_pairs) );
         FAPI_TRY( mss::dp16::reset_read_clock_enable(p, l_pairs) );
 
+        // Reset Read VREF according to ATTR_MSS_VPD_MT_VREF_MC_RD value
+        FAPI_TRY( mss::dp16::reset_rd_vref(p) );
+
         // Write Control reset
         FAPI_TRY( mss::wc::reset(p) );
 
