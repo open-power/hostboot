@@ -60,6 +60,7 @@
 
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>
+#include    <vfs/vfs.H>
 
 namespace   THREAD_ACTIVATE
 {
@@ -204,7 +205,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
 
         //Not worth taking the system down, just assume
         //we only have half the cache available.
-        errlCommit(l_errl,HWPF_COMP_ID);
+        errlCommit(l_errl,ISTEP_COMP_ID);
         cacheDeconfig = true;
     }
 
@@ -218,6 +219,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
 void activate_threads( errlHndl_t& io_rtaskRetErrl )
 {
     errlHndl_t  l_errl  =   NULL;
+    bool l_wakeup_lib_loaded = false;
 
     TRACFCOMP( g_fapiTd,
                "activate_threads entry" );
@@ -312,7 +314,21 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         // --------------------------------------------------------------------
         //Enable the special wake-up on master core
-        FAPI_INF("\tEnable special wake-up on master core");
+        FAPI_INF("Enable special wake-up on master core");
+
+        //Need to explicitly load the library that has the wakeup HWP in it
+        if( !VFS::module_is_loaded( "libp9_cpuWkup.so" ) )
+        {
+            l_errl = VFS::module_load( "libp9_cpuWkup.so" );
+            if ( l_errl )
+            {
+                //  load module returned with errl set
+                TRACFCOMP( g_fapiTd,ERR_MRK"activate_threads: Could not load libp9_cpuWkup module" );
+                // break from do loop if error occured
+                break;
+            }
+            l_wakeup_lib_loaded = true;
+        }
 
         FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
                         l_fapiCore,
@@ -460,6 +476,25 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         }
 
     } while(0);
+
+    //make sure we always unload the module if we loaded it
+    if( l_wakeup_lib_loaded )
+    {
+        errlHndl_t l_tmpErrl =
+          VFS::module_unload( "libp9_cpuWkup.so" );
+        if ( l_tmpErrl )
+        {
+            TRACFCOMP( g_fapiTd,ERR_MRK"thread_activate: Error unloading libp9_cpuWkup module" );
+            if(l_errl)
+            {
+                errlCommit( l_tmpErrl, ISTEP_COMP_ID );
+            }
+            else
+            {
+                l_errl = l_tmpErrl;
+            }
+        }
+    }
 
     TRACFCOMP( g_fapiTd,
                "activate_threads exit" );

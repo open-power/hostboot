@@ -39,8 +39,9 @@ SUBDIRS+=istep16.d
 SUBDIRS+=istep20.d
 SUBDIRS+=istep21.d
 SUBDIRS+=pm.d
-SUBDIRS += p9_stop_util.d
-SUBDIRS += mss.d
+SUBDIRS+=p9_stop_util.d
+SUBDIRS+=mss.d
+SUBDIRS+=cpuWkup.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o

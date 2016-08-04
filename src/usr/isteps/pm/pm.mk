@@ -70,7 +70,6 @@ include ${HWP_PATH}/p9_hcode_image_build.mk
 include ${HWP_PATH}/p9_pm_stop_gpe_init.mk
 include ${HWP_PATH}/p9_pm_pfet_init.mk
 include ${HWP_PATH}/p9_pm_reset.mk
-include ${HWP_PATH}/p9_cpu_special_wakeup.mk
 include ${HWP_PATH}/p9_pm_occ_sram_init.mk
 include ${HWP_PATH}/p9_pm_occ_gpe_init.mk
 include ${HWP_PATH}/p9_pm_ppm_firinit.mk

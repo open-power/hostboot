@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/istep16/makefile $
+# $Source: src/usr/isteps/cpuWkup/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -23,32 +23,20 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
-MODULE = istep16
+MODULE = p9_cpuWkup
 PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-
-OBJS += call_host_activate_master.o
-OBJS += call_host_activate_slave_cores.o
-OBJS += call_host_secure_rng.o
-OBJS += call_mss_scrub.o
-OBJS += call_host_ipl_complete.o
-
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
 include ${ROOTPATH}/procedure.rules.mk
-include  ${PROCEDURES_PATH}/hwp/pm/p9_block_wakeup_intr.mk
-include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
-include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup.mk
 include ${ROOTPATH}/config.mk
 
-
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/

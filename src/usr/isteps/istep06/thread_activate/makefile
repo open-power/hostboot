@@ -53,7 +53,5 @@ VPATH += ${HWP_PATH}
 include ${ROOTPATH}/procedure.rules.mk
 # p9_thread_control.o brought in by p9_thread_control.mk
 include $(HWP_PATH_1)/p9_thread_control.mk
-# p9_cpu_special_wakeup.o brought in by p9_cpu_special_wakeup.mk
-include $(HWP_PATH_2)/p9_cpu_special_wakeup.mk
 include ${ROOTPATH}/config.mk
 
