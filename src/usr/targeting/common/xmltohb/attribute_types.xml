@@ -27379,7 +27379,7 @@ DEPRECATED!!!!
 
 
 <attribute>
-    <id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id>
+    <id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP</id>
     <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -27389,7 +27389,7 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27411,7 +27411,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id>
+    <id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN</id>
     <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -27421,7 +27421,7 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27443,7 +27443,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id>
+    <id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP</id>
     <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -27453,7 +27453,7 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27476,7 +27476,7 @@ DEPRECATED!!!!
 
 
 <attribute>
-    <id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id>
+    <id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN</id>
     <description>Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -27486,7 +27486,7 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27606,8 +27606,8 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MT_DIMM_RCD_IBT</id>
-    <description>Place holder description</description>
+    <id>MSS_VPD_MT_DIMM_RCD_IBT_CA</id>
+    <description>Register Clock Driver, Input Bus Termination for Command/Address in tens of Ohms</description>
     <simpleType>
       <uint8_t></uint8_t>
       <array>2,2</array>
@@ -27616,7 +27616,55 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT</id>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_DIMM_RCD_IBT_CKE</id>
+    <description>Register Clock Driver, Input Bus Termination for Clock Enable in tens of Ohms.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_DIMM_RCD_IBT_CS</id>
+    <description>Register Clock Driver, Input Bus Termination for Chip Select in tens of Ohms.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_DIMM_RCD_IBT_ODT</id>
+    <description>Register Clock Driver, Input Bus Termination for Clock Enable in tens of Ohms.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27703,22 +27751,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MT_MC_DRV_IMP_ADDR</id>
-    <description>Place holder description</description>
-    <simpleType>
-      <uint8_t></uint8_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_VPD_MT_MC_DRV_IMP_CLK</id>
     <description>Place holder description</description>
     <simpleType>
@@ -27735,7 +27767,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MT_MC_DRV_IMP_CNTL</id>
+    <id>MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR</id>
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -27745,7 +27777,42 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_MC_DRV_IMP_CNTL</id>
+    <description>Memory Controller side Drive Impedance for Clock Enable,
+    ODT, Parity, and Reset Lines in Ohms.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
       <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_MC_DRV_IMP_CSCID</id>
+    <description>
+    Memory Controller side Drive Impedance for Chip Select and Chip ID Lines in Ohms.
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27767,22 +27834,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MT_MC_DRV_IMP_SPCKE</id>
-    <description>Place holder description</description>
-    <simpleType>
-      <uint8_t></uint8_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
     <description>Place holder description</description>
     <simpleType>
@@ -27794,6 +27845,24 @@ DEPRECATED!!!!
     <readable/>
     <hwpfToHbAttrMap>
       <id>ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_VPD_MT_PREAMBLE</id>
+    <description>Number of clocks used for preamble.
+    Calibration only uses 1 nCK preamble (DEFAULT).
+    Mainline has both 1 nCK and 2 nCK preamble option.</description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MT_PREAMBLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

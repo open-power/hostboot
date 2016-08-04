@@ -1497,10 +1497,10 @@
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C0</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C1</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_ADDR_C2</id></attribute>
-    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id></attribute>
-    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id></attribute>
-    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id></attribute>
-    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP</id></attribute>
+    <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id></attribute>
     <attribute><id>MSS_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id></attribute>
@@ -1572,17 +1572,21 @@
     <attribute><id>VPD_MR_TSYS_DATA</id></attribute>
     <attribute><id>MSS_VPD_MT_CKE_PRI_MAP</id></attribute>
     <attribute><id>MSS_VPD_MT_CKE_PWR_MAP</id></attribute>
-    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT_CA</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT_CKE</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT_CS</id></attribute>
+    <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT_ODT</id></attribute>
+    <attribute><id>MSS_VPD_MT_PREAMBLE</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CSCID</id></attribute>
+    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR</id></attribute>
     <attribute><id>MSS_VPD_MT_DIMM_RCD_OUTPUT_TIMING</id></attribute>
     <attribute><id>MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id></attribute>
     <attribute><id>MSS_VPD_MT_DRAM_RTT_NOM</id></attribute>
     <attribute><id>MSS_VPD_MT_DRAM_RTT_PARK</id></attribute>
     <attribute><id>MSS_VPD_MT_DRAM_RTT_WR</id></attribute>
-    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_ADDR</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CLK</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_DRV_IMP_CNTL</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_DRV_IMP_DQ_DQS</id></attribute>
-    <attribute><id>MSS_VPD_MT_MC_DRV_IMP_SPCKE</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_ADDR</id></attribute>
     <attribute><id>MSS_VPD_MT_MC_SLEW_RATE_CLK</id></attribute>

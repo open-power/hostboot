@@ -69,10 +69,10 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT</id>
+        <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Register Clock Driver, Input Bus Termination in tens of Ohms.
+            Register Clock Driver, Input Bus Termination for Command/Address in tens of Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -81,7 +81,58 @@
         <mssUnits>ohm</mssUnits>
         <mssBlobStart>6</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
-        <mssAccessorName>vpd_mt_dimm_rcd_ibt</mssAccessorName>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt_ca</mssAccessorName>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Clock Driver, Input Bus Termination for Clock Enable in tens of Ohms.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
+        <mssUnits>ohm</mssUnits>
+        <mssBlobStart>10</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt_cke</mssAccessorName>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Clock Driver, Input Bus Termination for Chip Select in tens of Ohms.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
+        <mssUnits>ohm</mssUnits>
+        <mssBlobStart>14</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt_cs</mssAccessorName>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Clock Driver, Input Bus Termination for On Die Termination in tens of Ohms.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
+        <mssUnits>ohm</mssUnits>
+        <mssBlobStart>18</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt_odt</mssAccessorName>
         <array>2 2</array>
     </attribute>
 
@@ -96,10 +147,10 @@
         <writeable/>
         <enum>OHM34 = 34, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>10</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>22</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_dram_drv_imp_dq_dqs</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
@@ -113,10 +164,10 @@
         <writeable/>
         <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>18</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>38</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_dram_rtt_nom</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
@@ -130,10 +181,10 @@
         <writeable/>
         <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>26</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>54</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_dram_rtt_park</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
@@ -147,10 +198,10 @@
         <writeable/>
         <enum>DISABLE = 0, OHM80 = 80, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>34</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>70</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_dram_rtt_wr</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
@@ -173,7 +224,7 @@
         <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>42</mssBlobStart>
+        <mssBlobStart>86</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_rd_up</mssAccessorName>
         <array>2</array>
@@ -199,7 +250,7 @@
         <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>50</mssBlobStart>
+        <mssBlobStart>94</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_wr_down</mssAccessorName>
         <array>2</array>
@@ -225,7 +276,7 @@
         <valueType>uint32</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>58</mssBlobStart>
+        <mssBlobStart>102</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_wr_up</mssAccessorName>
         <array>2</array>
@@ -249,7 +300,7 @@
         <valueType>uint64</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>66</mssBlobStart>
+        <mssBlobStart>110</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_ctle_cap</mssAccessorName>
         <array>2</array>
@@ -273,26 +324,9 @@
         <valueType>uint64</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>82</mssBlobStart>
+        <mssBlobStart>126</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_ctle_res</mssAccessorName>
-        <array>2</array>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Memory Controller side Drive Impedance for Address Lines in Ohms.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <enum>OHM30 = 30, OHM40 = 40</enum>
-        <mssUnits>ohm</mssUnits>
-        <mssBlobStart>98</mssBlobStart>
-        <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mt_mc_drv_imp_addr</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -307,9 +341,26 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>100</mssBlobStart>
+        <mssBlobStart>142</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_clk</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>OHM30 = 30, OHM40 = 40</enum>
+        <mssUnits>ohm</mssUnits>
+        <mssBlobStart>144</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -317,16 +368,33 @@
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Memory Controller side Drive Impedance for Control Lines in Ohms.
+            Memory Controller side Drive Impedance for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>102</mssBlobStart>
+        <mssBlobStart>146</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_cntl</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Memory Controller side Drive Impedance for Chip Select and Chip ID Lines in Ohms.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>OHM30 = 30, OHM40 = 40</enum>
+        <mssUnits>ohm</mssUnits>
+        <mssBlobStart>148</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_cscid</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -334,51 +402,34 @@
         <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Memory Controller side Drive Impedance for Data and Data Strobe Lines in Ohms.
+            Memory Controller side Drive Impedance for [PORT][DP16] Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>104</mssBlobStart>
-        <mssBlobLength>2</mssBlobLength>
+        <mssBlobStart>150</mssBlobStart>
+        <mssBlobLength>10</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
-        <array>2</array>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Memory Controller side Drive Impedance for Clock Enable Spare Line in Ohms.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <enum>OHM30 = 30, OHM40 = 40</enum>
-        <mssUnits>ohm</mssUnits>
-        <mssBlobStart>106</mssBlobStart>
-        <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mt_mc_drv_imp_spcke</mssAccessorName>
-        <array>2</array>
+        <array>2 5</array>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Memory Controller side Receiver Impedance for Data and Data Strobe Lines in Ohms.
+            Memory Controller side Receiver Impedance for [PORT][DP16] Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
+        <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>108</mssBlobStart>
-        <mssBlobLength>2</mssBlobLength>
+        <mssBlobStart>160</mssBlobStart>
+        <mssBlobLength>10</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
-        <array>2</array>
+        <array>2 5</array>
     </attribute>
 
     <attribute>
@@ -391,10 +442,10 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>110</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>170</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_odt_rd</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
     </attribute>
 
     <attribute>
@@ -407,10 +458,26 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>118</mssBlobStart>
-        <mssBlobLength>8</mssBlobLength>
+        <mssBlobStart>186</mssBlobStart>
+        <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_odt_wr</mssAccessorName>
-        <array>2 2 2</array>
+        <array>2 2 4</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MT_PREAMBLE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Number of clocks used for preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssBlobStart>202</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_preamble</mssAccessorName>
+        <array>2</array>
     </attribute>
 
     <attribute>
@@ -423,7 +490,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits></mssUnits>
-        <mssBlobStart>126</mssBlobStart>
+        <mssBlobStart>204</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_vref_dram_wr</mssAccessorName>
         <array>2</array>
@@ -440,7 +507,7 @@
         <writeable/>
         <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
         <mssUnits>percent of Vdd</mssUnits>
-        <mssBlobStart>128</mssBlobStart>
+        <mssBlobStart>206</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_vref_mc_rd</mssAccessorName>
         <array>2</array>
@@ -456,7 +523,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits>num</mssUnits>
-        <mssBlobStart>136</mssBlobStart>
+        <mssBlobStart>214</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
         <mssAccessorName>vpd_mt_windage_rd_ctr</mssAccessorName>
         <array>2</array>

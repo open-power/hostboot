@@ -421,7 +421,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0</id>
+        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
@@ -432,12 +432,12 @@
         <mssUnits>tick</mssUnits>
         <mssBlobStart>50</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mr_mc_phase_rot_d0_clk0</mssAccessorName>
+        <mssAccessorName>vpd_mr_mc_phase_rot_d0_clkp</mssAccessorName>
         <array>2</array>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1</id>
+        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
@@ -448,12 +448,12 @@
         <mssUnits>tick</mssUnits>
         <mssBlobStart>52</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mr_mc_phase_rot_d0_clk1</mssAccessorName>
+        <mssAccessorName>vpd_mr_mc_phase_rot_d0_clkn</mssAccessorName>
         <array>2</array>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0</id>
+        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
@@ -464,12 +464,12 @@
         <mssUnits>tick</mssUnits>
         <mssBlobStart>54</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mr_mc_phase_rot_d1_clk0</mssAccessorName>
+        <mssAccessorName>vpd_mr_mc_phase_rot_d1_clkp</mssAccessorName>
         <array>2</array>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1</id>
+        <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
@@ -480,7 +480,7 @@
         <mssUnits>tick</mssUnits>
         <mssBlobStart>56</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
-        <mssAccessorName>vpd_mr_mc_phase_rot_d1_clk1</mssAccessorName>
+        <mssAccessorName>vpd_mr_mc_phase_rot_d1_clkn</mssAccessorName>
         <array>2</array>
     </attribute>
 

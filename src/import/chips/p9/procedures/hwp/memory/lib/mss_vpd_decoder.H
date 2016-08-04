@@ -99,13 +99,13 @@ fapi_try_exit:
 }
 
 ///
-/// @brief ATTR_MSS_VPD_MT_DIMM_RCD_IBT decode and set (array)
+/// @brief ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA decode and set (array)
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Register Clock Driver, Input Bus Termination in tens of Ohms.
+/// @note  Register Clock Driver, Input Bus Termination for Command/Address in tens of Ohms.
 ///
-inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_ca(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
     uint8_t l_value[2][2];
@@ -120,8 +120,95 @@ inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt(const fapi2::Target<fapi2::TARGET_T
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
     }
 
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DIMM_RCD_IBT, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_DIMM_RCD_IBT start: 6, len: 4");
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA start: 6, len: 4");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Register Clock Driver, Input Bus Termination for Clock Enable in tens of Ohms.
+///
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2][2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 4 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 10 + (l_index * l_length);
+        memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE start: 10, len: 4");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Register Clock Driver, Input Bus Termination for Chip Select in tens of Ohms.
+///
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2][2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 4 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 14 + (l_index * l_length);
+        memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS start: 14, len: 4");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Register Clock Driver, Input Bus Termination for On Die Termination in tens of Ohms.
+///
+inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_odt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2][2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 4 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 18 + (l_index * l_length);
+        memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT start: 18, len: 4");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -137,20 +224,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 10 + (l_index * l_length);
+        const uint64_t l_start = 22 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS start: 10, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS start: 22, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -166,20 +253,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 18 + (l_index * l_length);
+        const uint64_t l_start = 38 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DRAM_RTT_NOM, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_NOM start: 18, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_NOM start: 38, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -195,20 +282,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 26 + (l_index * l_length);
+        const uint64_t l_start = 54 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DRAM_RTT_PARK, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_PARK start: 26, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_PARK start: 54, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -224,20 +311,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 34 + (l_index * l_length);
+        const uint64_t l_start = 70 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_DRAM_RTT_WR, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_WR start: 34, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_DRAM_RTT_WR start: 70, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -271,7 +358,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::T
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 42 + (l_index * l_length);
+        const uint64_t l_start = 86 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -281,7 +368,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::T
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP start: 42, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP start: 86, len: 8");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -315,7 +402,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2:
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 50 + (l_index * l_length);
+        const uint64_t l_start = 94 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -325,7 +412,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2:
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN start: 50, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_DOWN start: 94, len: 8");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -359,7 +446,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::T
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 58 + (l_index * l_length);
+        const uint64_t l_start = 102 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -369,7 +456,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::T
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP start: 58, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_WR_UP start: 102, len: 8");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -401,7 +488,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 66 + (l_index * l_length);
+        const uint64_t l_start = 110 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -411,7 +498,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP start: 66, len: 16");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_CTLE_CAP start: 110, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -443,7 +530,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 82 + (l_index * l_length);
+        const uint64_t l_start = 126 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -453,36 +540,7 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES start: 82, len: 16");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR decode and set (array)
-/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
-/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Memory Controller side Drive Impedance for Address Lines in Ohms.
-///
-inline fapi2::ReturnCode vpd_mt_mc_drv_imp_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        const std::vector<uint8_t*>& i_blobs)
-{
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
-    {
-        const uint64_t l_index = mss::index(l_mca);
-        const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 98 + (l_index * l_length);
-        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_ADDR start: 98, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DQ_CTLE_RES start: 126, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -506,12 +564,41 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 100 + (l_index * l_length);
+        const uint64_t l_start = 142 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK start: 100, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK start: 142, len: 2");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
+///
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cmd_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 2 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 144 + (l_index * l_length);
+        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR start: 144, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -522,7 +609,7 @@ fapi_try_exit:
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Memory Controller side Drive Impedance for Control Lines in Ohms.
+/// @note  Memory Controller side Drive Impedance for Clock Enable, ODT, Parity, and Reset Lines in Ohms.
 ///
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
@@ -535,12 +622,41 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGE
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 102 + (l_index * l_length);
+        const uint64_t l_start = 146 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL start: 102, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL start: 146, len: 2");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Memory Controller side Drive Impedance for Chip Select and Chip ID Lines in Ohms.
+///
+inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cscid(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 2 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 148 + (l_index * l_length);
+        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID start: 148, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -551,54 +667,25 @@ fapi_try_exit:
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Memory Controller side Drive Impedance for Data and Data Strobe Lines in Ohms.
+/// @note  Memory Controller side Drive Impedance for [PORT][DP16] Data and Data Strobe Lines in Ohms.
 ///
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
+    uint8_t l_value[2][5];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
+    const uint64_t l_length = 10 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 104 + (l_index * l_length);
-        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
+        const uint64_t l_start = 150 + (l_index * l_length);
+        memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS start: 104, len: 2");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE decode and set (array)
-/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
-/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
-/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Memory Controller side Drive Impedance for Clock Enable Spare Line in Ohms.
-///
-inline fapi2::ReturnCode vpd_mt_mc_drv_imp_spcke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        const std::vector<uint8_t*>& i_blobs)
-{
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
-    {
-        const uint64_t l_index = mss::index(l_mca);
-        const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 106 + (l_index * l_length);
-        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_SPCKE start: 106, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS start: 150, len: 10");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -609,25 +696,25 @@ fapi_try_exit:
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-/// @note  Memory Controller side Receiver Impedance for Data and Data Strobe Lines in Ohms.
+/// @note  Memory Controller side Receiver Impedance for [PORT][DP16] Data and Data Strobe Lines in Ohms.
 ///
 inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
+    uint8_t l_value[2][5];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
+    const uint64_t l_length = 10 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 108 + (l_index * l_length);
-        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
+        const uint64_t l_start = 160 + (l_index * l_length);
+        memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS start: 108, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS start: 160, len: 10");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -643,20 +730,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                        const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 110 + (l_index * l_length);
+        const uint64_t l_start = 170 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_ODT_RD, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_ODT_RD start: 110, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_ODT_RD start: 170, len: 16");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -672,20 +759,49 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                        const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][2];
+    uint8_t l_value[2][2][4];
     const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
+    const uint64_t l_length = 16 / l_mcas.size();
 
     for (const auto& l_mca : l_mcas)
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 118 + (l_index * l_length);
+        const uint64_t l_start = 186 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_ODT_WR, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_ODT_WR start: 118, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_ODT_WR start: 186, len: 16");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief ATTR_MSS_VPD_MT_PREAMBLE decode and set (array)
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  Number of clocks used for preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
+///
+inline fapi2::ReturnCode vpd_mt_preamble(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+        const std::vector<uint8_t*>& i_blobs)
+{
+    uint8_t l_value[2];
+    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const uint64_t l_length = 2 / l_mcas.size();
+
+    for (const auto& l_mca : l_mcas)
+    {
+        const uint64_t l_index = mss::index(l_mca);
+        const uint8_t* l_blob = i_blobs[l_index];
+        const uint64_t l_start = 202 + (l_index * l_length);
+        memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_PREAMBLE, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MT_PREAMBLE start: 202, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -709,12 +825,12 @@ inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_T
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 126 + (l_index * l_length);
+        const uint64_t l_start = 204 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_VREF_DRAM_WR, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_VREF_DRAM_WR start: 126, len: 2");
+              "Unable to decode and set ATTR_MSS_VPD_MT_VREF_DRAM_WR start: 204, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -738,7 +854,7 @@ inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYP
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 128 + (l_index * l_length);
+        const uint64_t l_start = 206 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -748,7 +864,7 @@ inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYP
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_VREF_MC_RD, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_VREF_MC_RD start: 128, len: 8");
+              "Unable to decode and set ATTR_MSS_VPD_MT_VREF_MC_RD start: 206, len: 8");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -772,7 +888,7 @@ inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_index = mss::index(l_mca);
         const uint8_t* l_blob = i_blobs[l_index];
-        const uint64_t l_start = 136 + (l_index * l_length);
+        const uint64_t l_start = 214 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
     }
 
@@ -782,7 +898,7 @@ inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_WINDAGE_RD_CTR, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MT_WINDAGE_RD_CTR start: 136, len: 4");
+              "Unable to decode and set ATTR_MSS_VPD_MT_WINDAGE_RD_CTR start: 214, len: 4");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1292,80 +1408,80 @@ fapi_try_exit:
 }
 
 ///
-/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0 decode and set
+/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP decode and set
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blob the VPD blob for this MCS
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clkp(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
     memcpy(&l_value, i_blob + 50, 2);
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK0 start: 50, len: 2");
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP start: 50, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1 decode and set
+/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN decode and set
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blob the VPD blob for this MCS
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d0_clkn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
     memcpy(&l_value, i_blob + 52, 2);
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLK1 start: 52, len: 2");
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN start: 52, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0 decode and set
+/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP decode and set
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blob the VPD blob for this MCS
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk0(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clkp(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
     memcpy(&l_value, i_blob + 54, 2);
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK0 start: 54, len: 2");
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP start: 54, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1 decode and set
+/// @brief ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN decode and set
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
 /// @param[in] i_blob the VPD blob for this MCS
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Phase rotator delay value of Clock for Dimm#_CLK# in ticks. Ticks are 1/128 of one cycle of clock.
 ///
-inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clk1(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+inline fapi2::ReturnCode vpd_mr_mc_phase_rot_d1_clkn(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const uint8_t* i_blob)
 {
     uint8_t l_value[2];
 
     memcpy(&l_value, i_blob + 56, 2);
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1, i_target, l_value),
-              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLK1 start: 56, len: 2");
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN start: 56, len: 2");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1747,7 +1863,10 @@ inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
     FAPI_TRY (decoder::vpd_mt_0_version_layout(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_1_version_data(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_2_signature_hash(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), i_mt_blob) );
-    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt_ca(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt_cke(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt_cs(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_dimm_rcd_ibt_odt(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_dram_drv_imp_dq_dqs(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_dram_rtt_nom(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_dram_rtt_park(i_target, i_mt_blob) );
@@ -1757,14 +1876,15 @@ inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
     FAPI_TRY (decoder::vpd_mt_mc_dq_acboost_wr_up(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_dq_ctle_cap(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_dq_ctle_res(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_addr(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_drv_imp_clk(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_cmd_addr(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_drv_imp_cntl(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_cscid(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_drv_imp_dq_dqs(i_target, i_mt_blob) );
-    FAPI_TRY (decoder::vpd_mt_mc_drv_imp_spcke(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_mc_rcv_imp_dq_dqs(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_odt_rd(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_odt_wr(i_target, i_mt_blob) );
+    FAPI_TRY (decoder::vpd_mt_preamble(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_vref_dram_wr(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_vref_mc_rd(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_windage_rd_ctr(i_target, i_mt_blob) );
@@ -1793,10 +1913,10 @@ inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c0(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c1(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_addr_c2(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clk0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clk1(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clk0(i_target, i_mr_blob) );
-    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clk1(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clkp(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d0_clkn(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clkp(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_mr_mc_phase_rot_d1_clkn(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_actn(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_addr_casn_a15(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_mc_phase_rot_cmd_addr_rasn_a16(i_target, i_mr_blob) );
