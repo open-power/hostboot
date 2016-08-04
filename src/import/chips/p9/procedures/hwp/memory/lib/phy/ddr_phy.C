@@ -44,6 +44,7 @@
 #include <lib/phy/phy_cntrl.H>
 #include <lib/phy/apb.H>
 #include <lib/phy/adr32s.H>
+#include <lib/phy/adr.H>
 
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
@@ -674,6 +675,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Reset the CTLE controls from the values in VPD
         FAPI_TRY( mss::dp16::reset_ctle_cntl(p) );
+
+        // Shove the ADR delay values from VPD into the ADR delay registers
+        FAPI_TRY( mss::adr::reset_delay(p) );
     }
 
 fapi_try_exit:
