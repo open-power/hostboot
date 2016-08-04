@@ -81,6 +81,17 @@ chip p9_mcbist
         capture     req nonzero("MCBISTFIR");
     };
 
+    ############################################################################
+    # P9 MCBIST command registers
+    ############################################################################
+
+    register MCBIST_CNTL
+    {
+        name        "P9 MCBIST target MCBIST Control Register";
+        scomaddr    0x070123DB;
+        capture     group default;
+    };
+
 };
 
  ##############################################################################
