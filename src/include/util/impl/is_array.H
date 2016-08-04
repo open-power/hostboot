@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/is_array.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/type_add.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
-#include <util/impl/is_ptr.H>
-#include <util/impl/enable_if.H>
-#include <util/impl/is_array.H>
 
-/* vim: set filetype=cpp : */
+#ifndef __UTIL_IMPL_IS_ARRAY_H
+#define __UTIL_IMPL_IS_ARRAY_H
+
+namespace std
+{
+
+template<typename T>
+struct is_array : std::false_type { };
+
+template<typename T>
+struct is_array<T[]> : std::true_type { };
+
+template<typename T, size_t N>
+struct is_array<T[N]> : std::true_type { };
+
+}
+
+#endif
