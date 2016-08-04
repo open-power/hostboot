@@ -356,4 +356,21 @@
   </gard>
 </hwpError>
 
+<hwpError>
+  <rc>RC_MSS_INVALID_VPD_MT_VREF_MC_RD</rc>
+  <description>
+    Invalid MC RD_VREF value in VPD
+  </description>
+  <ffdc>VALUE</ffdc>
+  <ffdc>VREF_MAX</ffdc>
+  <ffdc>VREF_MIN</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET</target>
+  </deconfigure>
+</hwpError>
+
 </hwpErrors>

@@ -123,6 +123,15 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         // any of this for some time.
         static constexpr uint64_t DLL_PER_DP16 = 2;
 
+        // Maximum and minimum RD_VREF percentage of VDD. We only test against max and min because
+        // there are so many allowable values.
+        static constexpr uint64_t MAX_RD_VREF = fapi2::ENUM_ATTR_MSS_VPD_MT_VREF_MC_RD_VDD91875;
+        static constexpr uint64_t MIN_RD_VREF = fapi2::ENUM_ATTR_MSS_VPD_MT_VREF_MC_RD_VDD31208;
+
+        // Constants used for converting RD_VREF percentage to DAC settings, normalized to integers
+        static constexpr uint64_t RD_VREF_DVDD = 12;
+        static constexpr uint64_t RD_VREF_DAC_STEP = 6500;
+
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_LOWER_REG;
@@ -137,6 +146,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         static const std::vector< std::pair<uint64_t, uint64_t> > AC_BOOST_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DATA_BIT_DIR1;
 
         enum
@@ -161,8 +171,31 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             CTLE_ODD_CAP_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_CAP_LEN,
             CTLE_ODD_RES = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_RES,
             CTLE_ODD_RES_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_RES_LEN,
+
+            RD_VREF_BYTE0_NIB0 = MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB0,
+            RD_VREF_BYTE0_NIB0_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB0_LEN,
+            RD_VREF_BYTE0_NIB1 = MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB1,
+            RD_VREF_BYTE0_NIB1_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0_01_NIB1_LEN,
+            RD_VREF_BYTE1_NIB2 = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB2,
+            RD_VREF_BYTE1_NIB2_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB2_LEN,
+            RD_VREF_BYTE1_NIB3 = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB3,
+            RD_VREF_BYTE1_NIB3_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB3_LEN,
         };
 };
+
+///
+/// @brief Given a RD_VREF value, create a PHY 'standard' bit field for that percentage.
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_vref the value from the mss_vpd_mt_vref_mc_rd attribute for your target
+/// @param[out] o_bitfield value of DAC bitfield for given VREF setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
+        const uint32_t i_vref,
+        uint64_t& o_bitfield );
 
 namespace dp16
 {
@@ -528,6 +561,16 @@ template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<T>& i_target );
 
 ///
+/// @brief Configure Read VREF Registers
+/// @tparam T the fapi2::TargetType
+/// @tparam TT the target traits
+/// @param[in] i_target a fapi2 target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_rd_vref( const fapi2::Target<T>& i_target );
+
+///
 /// Specializations
 ///
 
@@ -597,6 +640,13 @@ fapi2::ReturnCode reset_io_tx_config0( const fapi2::Target<fapi2::TARGET_TYPE_MC
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Configure Read VREF Registers
+/// @param[in] i_target a MCA target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+fapi2::ReturnCode reset_rd_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 } // close namespace dp16
 } // close namespace mss

@@ -210,6 +210,74 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_4, MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_4 },
 };
 
+// Definition of the DP16 RD_VREF Control registers
+// DP16 RD_VREF Control registers all come in pairs - one per 8 bits
+// 5 DP16 per MCA gives us 10  Registers.
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CNTRL_REG =
+{
+    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0 },
+    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1 },
+    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2 },
+    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3 },
+    { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4 },
+};
+
+///
+/// @brief Given a RD_VREF value, create a PHY 'standard' bit field for that percentage.
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_vref the value from the mss_vpd_mt_vref_mc_rd attribute for your target
+/// @param[out] o_bitfield value of DAC bitfield for given VREF setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
+        const uint32_t i_vref,
+        uint64_t& o_bitfield )
+{
+    FAPI_INF("rd_vref_bitfield_helper for target %s seeing vref percentage: %d", c_str(i_target), i_vref);
+
+    // Zero is a special "no-op" value, which we can get if the VPD attributes aren't
+    // set up. This can happen for an MCA with no functional DIMM present.
+    if (i_vref == 0)
+    {
+        o_bitfield = 0;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+    else if ( (i_vref > TT::MAX_RD_VREF) || (i_vref < TT::MIN_RD_VREF) )
+    {
+        // Set up some constexprs to work around linker error when pushing traits values into ffdc
+        constexpr uint64_t l_max = TT::MAX_RD_VREF;
+        constexpr uint64_t l_min = TT::MIN_RD_VREF;
+
+        FAPI_ASSERT( false,
+                     fapi2::MSS_INVALID_VPD_MT_VREF_MC_RD()
+                     .set_VALUE(i_vref)
+                     .set_VREF_MAX(l_max)
+                     .set_VREF_MIN(l_min)
+                     .set_TARGET(i_target),
+                     "Target %s VPD_MT_VREF_MC_RD percentage out of bounds (%d - %d): %d",
+                     c_str(i_target),
+                     TT::MAX_RD_VREF,
+                     TT::MIN_RD_VREF,
+                     i_vref );
+    }
+    else
+    {
+        // Per R. King, VREF equation is:
+        // Vref = 1.1025 for DAC < 15
+        // Vref = 1.2 - .0065 * DAC for DAC >= 15
+        // where DAC is simply the 7-bit field value
+        // note values multiplied by 10 to make everything an integer
+        o_bitfield = TT::RD_VREF_DVDD * (100000 - i_vref) / TT::RD_VREF_DAC_STEP;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace dp16
 {
 
@@ -836,6 +904,50 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x0040) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configure Read VREF Registers
+/// @param[in] i_target a MCA target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_data;
+    uint64_t l_vref_bitfield = 0;
+    uint8_t is_sim = 0;
+    uint32_t l_vref = 0;
+
+    FAPI_TRY( mss::vpd_mt_vref_mc_rd(i_target, l_vref) );
+
+    FAPI_TRY( rd_vref_bitfield_helper(i_target, l_vref, l_vref_bitfield) );
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    // Leave the values as-is if we're on VBU or Awan, since we know that works. Use the real value for unit test and HW
+    if (!is_sim)
+    {
+        // Do a read/modify/write
+        FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+
+        for (auto& l_regpair : l_data)
+        {
+            // Write the same value for all the DQ and DQS nibbles
+            l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_vref_bitfield);
+            l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
+            l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB2, TT::RD_VREF_BYTE1_NIB2_LEN>(l_vref_bitfield);
+            l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB3, TT::RD_VREF_BYTE1_NIB3_LEN>(l_vref_bitfield);
+        }
+
+        FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF byte0 and byte1");
+
+        FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
