@@ -179,6 +179,7 @@ EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi)
 EXTENDED_MODULES += xz
 EXTENDED_MODULES += p9_stop_util
 EXTENDED_MODULES += isteps_mss
+EXTENDED_MODULES += p9_cpuWkup
 
 
 #***************************************
@@ -273,6 +274,7 @@ RUNTIME_MODULES += pm_rt
 RUNTIME_MODULES += pnor_rt
 RUNTIME_MODULES += fapi2_rt
 RUNTIME_MODULES += secureboot_rt
+RUNTIME_MODULES += p9_cpuWkup
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt

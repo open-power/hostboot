@@ -147,6 +147,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libistep16.so),
+        DEP_LIB(libp9_cpuWkup.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
