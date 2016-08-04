@@ -399,6 +399,39 @@
     <attribute>
       <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
     </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_PREAMBLE</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKP</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D0_CLKN</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKP</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_D1_CLKN</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CA</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CKE</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_CS</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
