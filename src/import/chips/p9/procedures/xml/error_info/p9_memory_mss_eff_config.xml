@@ -84,4 +84,20 @@
     </deconfigure>
     </hwpError>
 
+   <hwpError>
+    <rc>RC_MSS_INVALID_VPD_VREF_DRAM_WR_RANGE</rc>
+    <description>
+      Value in the VPD for VREF dram WR range is outside of the JEDEC spec's range.
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    </hwpError>
+
 </hwpErrors>
