@@ -169,7 +169,7 @@ inline void warn_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    const T i_spd_data,
                                    const char* i_err_str)
 {
-    // Don't print warning conditional is true
+    // Don't print warning conditional if true
     if(!i_conditional)
     {
         FAPI_IMP("%s. %s. Byte %d, Data returned: %d.",

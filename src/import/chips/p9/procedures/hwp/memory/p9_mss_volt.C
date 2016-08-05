@@ -34,13 +34,23 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-
-
-#include <fapi2.H>
-#include <mss.H>
 #include <p9_mss_volt.H>
-#include <vector>
 
+// std lib
+#include <vector>
+#include <map>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/spd/spd_factory.H>
+#include <lib/spd/common/spd_decoder.H>
+#include <lib/eff_config/attr_setters.H>
+#include <lib/utils/c_str.H>
+#include <lib/utils/pos.H>
+#include <lib/utils/find.H>
+#include <lib/utils/checker.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCS;

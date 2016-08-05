@@ -36,16 +36,19 @@
 #ifndef _MSS_CAS_LATENCY_H_
 #define _MSS_CAS_LATENCY_H_
 
+// std lib
 #include <map>
 #include <memory>
 #include <cstdint>
 
+// fapi2
 #include <fapi2.H>
-#include <lib/spd/spd_decoder.H>
+
+// mss lib
+#include <lib/spd/common/spd_decoder.H>
 
 namespace mss
 {
-
 
 enum constants : std::uint64_t
 {

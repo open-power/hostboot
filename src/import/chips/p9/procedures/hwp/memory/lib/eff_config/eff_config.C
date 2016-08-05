@@ -32,17 +32,18 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+// fapi2
 #include <fapi2.H>
 #include <vpd_access.H>
-#include <mss.H>
-#include <lib/mss_vpd_decoder.H>
 
+// mss lib
 #include <lib/eff_config/eff_config.H>
+#include <lib/mss_vpd_decoder.H>
+#include <lib/spd/spd_factory.H>
+#include <lib/spd/common/spd_decoder.H>
 #include <lib/eff_config/timing.H>
-#include <lib/spd/spd_decoder.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
-
 #include <lib/utils/fake_vpd.H>
 
 using fapi2::TARGET_TYPE_MCA;
@@ -56,114 +57,6 @@ namespace mss
 /////////////////////////
 // Non-member function implementations
 /////////////////////////
-
-// TK - Refactor functions to make them more
-// testable with next larger change set of decoder
-// and eff_config refactoring. Currently,
-// goal of achieving VBU value is achieved. - AAM
-
-///
-/// @brief Returns Logical ranks in Primary SDRAM type
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode prim_sdram_logical_ranks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_ranks)
-{
-    uint8_t l_signal_loading = 0;
-    uint8_t l_ranks_per_dimm = 0;
-    FAPI_TRY( i_pDecoder->prim_sdram_signal_loading(i_target, l_signal_loading) );
-    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_ranks_per_dimm) );
-
-    if(l_signal_loading == spd::SINGLE_LOAD_STACK)
-    {
-        uint8_t l_die_count = 0;
-        FAPI_TRY( i_pDecoder->prim_sdram_die_count(i_target, l_die_count) );
-
-        o_logical_ranks = l_ranks_per_dimm * l_die_count;
-    }
-    else
-    {
-        // Covers case for MONOLITHIC & MULTI_LOAD_STACK
-        o_logical_ranks = l_ranks_per_dimm;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Returns Logical ranks in Secondary SDRAM type
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode sec_sdram_logical_ranks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_ranks)
-{
-    uint8_t l_signal_loading = 0;
-    uint8_t l_ranks_per_dimm = 0;
-
-    FAPI_TRY( i_pDecoder->sec_sdram_signal_loading(i_target, l_signal_loading) );
-    FAPI_TRY( i_pDecoder->num_package_ranks_per_dimm(i_target, l_ranks_per_dimm) );
-
-    if(l_signal_loading == spd::SINGLE_LOAD_STACK)
-    {
-        uint8_t l_die_count = 0;
-        FAPI_TRY( i_pDecoder->sec_sdram_die_count(i_target, l_die_count) );
-
-        o_logical_ranks = l_ranks_per_dimm * l_die_count;
-    }
-    else
-    {
-        // Covers case for MONOLITHIC & MULTI_LOAD_STACK
-        o_logical_ranks = l_ranks_per_dimm;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-///
-/// @brief Returns Logical ranks per DIMM
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode logical_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_rank_per_dimm)
-{
-    uint8_t l_rank_mix = 0;
-
-    FAPI_TRY( i_pDecoder->rank_mix(i_target, l_rank_mix) );
-
-    if(l_rank_mix == spd::SYMMETRICAL)
-    {
-        FAPI_TRY( prim_sdram_logical_ranks(i_target, i_pDecoder, o_logical_rank_per_dimm) );
-    }
-    else
-    {
-        // Rank mix is ASYMMETRICAL
-        uint8_t l_prim_logical_rank_per_dimm = 0;
-        uint8_t l_sec_logical_rank_per_dimm = 0;
-
-        FAPI_TRY( prim_sdram_logical_ranks(i_target, i_pDecoder, l_prim_logical_rank_per_dimm) );
-        FAPI_TRY( sec_sdram_logical_ranks(i_target, i_pDecoder, l_sec_logical_rank_per_dimm) );
-
-        o_logical_rank_per_dimm = l_prim_logical_rank_per_dimm + l_sec_logical_rank_per_dimm;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief IBT helper - maps from VPD definition of IBT to the RCD control word bit fields
@@ -334,7 +227,7 @@ fapi2::ReturnCode eff_config::ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIM
 
     // Get & update MCS attribute
     FAPI_TRY( eff_num_ranks_per_dimm(l_mcs, &l_attrs_ranks_per_dimm[0][0]) );
-    FAPI_TRY( logical_ranks_per_dimm(i_target, iv_pDecoder, l_ranks_per_dimm) );
+    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(i_target, l_ranks_per_dimm) );
 
     l_attrs_ranks_per_dimm[l_port_num][l_dimm_num] = l_ranks_per_dimm;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, l_mcs, l_attrs_ranks_per_dimm) );
@@ -415,7 +308,7 @@ fapi2::ReturnCode eff_config::dimm_size(const fapi2::Target<TARGET_TYPE_DIMM>& i
     FAPI_TRY( iv_pDecoder->device_width(i_target, l_sdram_width) );
     FAPI_TRY( iv_pDecoder->prim_bus_width(i_target, l_bus_width) );
     FAPI_TRY( iv_pDecoder->sdram_density(i_target, l_sdram_density) );
-    FAPI_TRY( logical_ranks_per_dimm(i_target, iv_pDecoder, l_logical_rank_per_dimm) );
+    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(i_target, l_logical_rank_per_dimm) );
 
     {
         // Calculate dimm size
@@ -736,7 +629,7 @@ fapi2::ReturnCode eff_config::dram_bank_bits(const fapi2::Target<TARGET_TYPE_DIM
     uint8_t l_attrs_bank_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_bank_bits(l_mcs, &l_attrs_bank_bits[0][0]) );
-    FAPI_TRY( iv_pDecoder->banks(i_target, l_bank_bits) );
+    FAPI_TRY( iv_pDecoder->bank_bits(i_target, l_bank_bits) );
 
     l_attrs_bank_bits[l_port_num][l_dimm_num] = l_bank_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_BANK_BITS, l_mcs, l_attrs_bank_bits) );

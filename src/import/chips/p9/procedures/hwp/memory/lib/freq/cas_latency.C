@@ -33,16 +33,21 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
+// std lib
 #include <limits.h>
 #include <algorithm>
 
+// fapi2
 #include <fapi2.H>
-#include <mss.H>
+
+// mss lib
+#include <lib/spd/common/spd_decoder.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/cycle_time.H>
 #include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
 #include <lib/utils/find.H>
+#include <lib/utils/checker.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;

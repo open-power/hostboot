@@ -35,9 +35,14 @@
 #ifndef _MSS_EFF_CONFIG_H_
 #define _MSS_EFF_CONFIG_H_
 
-#include <fapi2.H>
+// std lib
 #include <cstdint>
-#include <lib/spd/spd_decoder.H>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/spd/common/spd_decoder.H>
 
 namespace mss
 {
@@ -751,41 +756,6 @@ class eff_config
         fapi2::ReturnCode decode_vpd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
 };// eff_config
-
-
-
-///
-/// @brief Returns Logical ranks in Primary SDRAM type
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode prim_sdram_logical_ranks(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_ranks);
-
-///
-/// @brief Returns Logical ranks in Secondary SDRAM type
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode sec_sdram_logical_ranks(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_ranks);
-
-///
-/// @brief Returns Logical ranks per DIMM
-/// @param[in] i_target dimm target
-/// @param[in] i_pDecoder shared pointer to the SPD decoder
-/// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode logical_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const std::shared_ptr<spd::decoder>& i_pDecoder,
-        uint8_t& o_logical_rank_per_dimm);
 
 } // mss
 
