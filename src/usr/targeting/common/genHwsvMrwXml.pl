@@ -23,7 +23,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# Author:   Van Lee    vanlee@us.ibm.com
 #
 # Usage:
 #
@@ -3634,6 +3633,12 @@ sub generate_proc
         addProcPmAttrs( $proc, $node );
         print "    <!-- End PM_ attributes -->\n";
     }
+
+    # Pull the value from the system policy we grabbed earlier
+    print "    <attribute>\n";
+    print "        <id>BOOT_FREQ_MHZ</id>\n";
+    print "        <default>$reqPol->{'boot-frequency'}->{content}</default>\n";
+    print "    </attribute>\n";
 
 
     my $nXpY = "n" . $node . "p" . $proc;

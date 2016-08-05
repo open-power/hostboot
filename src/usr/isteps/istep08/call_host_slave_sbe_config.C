@@ -69,73 +69,6 @@ using namespace TARGETING;
 namespace ISTEP_08
 {
 //******************************************************************************
-// set_proc_boot_voltage_vid
-//******************************************************************************
-errlHndl_t set_proc_boot_voltage_vid()
-{
-    errlHndl_t l_errl = NULL;
-    IStepError l_stepError;
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-             "ENTER set_proc_boot_voltage_vid()");
-    do
-    {
-        // Get the top level target/system target
-        Target* l_pTopLevelTarget = NULL;
-        targetService().getTopLevelTarget(l_pTopLevelTarget);
-
-        // If there is no top level target, terminate
-        assert(l_pTopLevelTarget, "ERROR: Top level "
-              "target not found - slave_sbe.C::set_proc_boot_voltage_vid");
-
-        // Get all Procs
-        PredicateCTM l_proc(CLASS_CHIP, TYPE_PROC);
-        PredicateIsFunctional l_functional;
-        PredicatePostfixExpr l_procs;
-
-        l_procs.push(&l_proc).push(&l_functional).And();
-
-        TargetRangeFilter l_filter( targetService().begin(),
-                                    targetService().end(),
-                                    &l_procs );
-
-        //@TODO: RTC:153745 add this get ATTR
-        /*
-        ATTR_BOOT_FREQ_MHZ_type l_boot_freq_mhz =
-                   l_pTopLevelTarget->getAttr<ATTR_BOOT_FREQ_MHZ>();
-        for(; l_filter; ++l_filter)
-        {
-
-            l_errl = FREQVOLTSVC::runProcGetVoltage(*l_filter,
-                                                    l_boot_freq_mhz);
-            if( l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR: calling runProcGetVoltage for Proc "
-                            "Target HUID[0x%08X]",
-                            l_filter->getAttr<ATTR_HUID>());
-
-
-                // Deconfig the processor
-                l_errl->addHwCallout(*l_filter,
-                        HWAS::SRCI_PRIORITY_LOW,
-                        HWAS::DECONFIG,
-                        HWAS::GARD_NULL);
-
-
-                // Commit error log
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-        }
-*/
-
-    } while( 0 );
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-             "EXIT set_proc_boot_voltage_vid()");
-    return l_errl;
-}
-
-//******************************************************************************
 // call_host_slave_sbe function
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
@@ -182,45 +115,6 @@ void* call_host_slave_sbe_config(void *io_pArgs)
             }
         }
     } // end of cycling through all processor chips
-
-#ifdef CONFIG_HTMGT
-    // Set system frequency attributes
-    l_errl = FREQVOLTSVC::setSysFreq();
-    if (l_errl )
-    {
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
-
-        // Commit Error
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-#endif // CONFIG_HTMGT
-
-    // If there is no FSP, set ATTR_PROC_BOOT_VOLTAGE_VID
-    if (!INITSERVICE::spBaseServicesEnabled())
-    {
-        l_errl = set_proc_boot_voltage_vid();
-        if( l_errl )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Error setting PROC_BOOT_VOLTAGE_VID: "
-                     "slave_sbe.C::call_host_slave_sbe_config()" );
-            // Create IStep error log
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit Error
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-
-        // Enable SBE interrupt for OP systems
-        TARGETING::Target* l_sys = NULL;
-        targetService().getTopLevelTarget(l_sys);
-        assert( l_sys != NULL );
-
-        //@TODO: RTC:153745 Add this set ATTR call
-        //TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Enabling SBE interrupt for OP systems");
-        //l_sys->setAttr<ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE>(0);
-    }
 
     // Resolve the side characteristics of the Processor SBE Seeproms
 #if 0

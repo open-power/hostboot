@@ -1120,6 +1120,7 @@
     <!-- End processor characteristics for HDAT -->
 
     <attribute><id>LPC_BASE_ADDR</id></attribute>
+    <attribute><id>BOOT_FREQ_MHZ</id></attribute>
 
 </targetType>
 
