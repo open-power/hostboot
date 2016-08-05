@@ -467,17 +467,41 @@ class variable_buffer
         }
 
         ///
-        /// @brief Invert bit
+        /// @brief  invert a bit or range of bits in a buffer
         /// @tparam SB Start bit in buffer to invert.
         /// @tparam L Number of consecutive bits from start bit to
         /// invert, defaults to 1
         /// @return FAPI2_RC_SUCCESS on success
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
         ///
-        template< bits_type SB, bits_type L = 1 >
-        inline fapi2::ReturnCodes flipBit(void);
+        inline fapi2::ReturnCodes flipBit( bits_type SB, bits_type L = 1)
+        {
+            ReturnCodes rc;
+
+            // make sure we are within our container
+            if((SB + L) <= this->iv_perceived_bit_length)
+            {
+                // loop for L bits flipping as you go
+                for( bits_type i = 0; i < L; i++)
+                {
+                    bits_type bit = SB + i;
+
+                    if(this->isBitSet(bit))
+                    {
+                        rc = this->clearBit(bit);
+                    }
+                    else
+                    {
+                        rc = this->setBit(bit);
+                    }
+                }
+            }
+            else
+            {
+                rc = FAPI2_RC_OVERFLOW;
+            }
+
+            return rc;
+        }
 
         ///
         /// @brief Get the value of a bit in the buffer
@@ -581,13 +605,21 @@ class variable_buffer
         /// @tparam SB Start bit in buffer to test.
         /// @tparam L Number of consecutive bits from start bit to
         /// test, defaults to 1
-        /// @note Asserting that all the parameters are known at
-        /// compile time so this can be templated only. If that is not
-        /// the case we can add a function parameter version.
-        /// @return Number of bits set in range
         ///
-        template< bits_type SB, bits_type L = 1 >
-        inline bits_type getNumBitsSet(void) const;
+        inline bits_type getNumBitsSet(bits_type SB, bits_type L = 1) const
+        {
+            bits_type number_of_bits_set = 0;
+
+            for(bits_type i = 0; i < L; i++)
+            {
+                if( this->isBitSet(SB + i) )
+                {
+                    number_of_bits_set++;
+                }
+            }
+
+            return number_of_bits_set;
+        }
 
         ///
         /// @brief Set and entire buffer to X's
