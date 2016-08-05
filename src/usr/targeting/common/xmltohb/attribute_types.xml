@@ -6607,7 +6607,7 @@ DEPRECATED!!!!
 <attribute>
     <id>BOOT_FREQ_MHZ</id>
     <description>
-       Boot frequency in MHZ.  Default is 50% of nominal.
+       EQ Boot frequency in MHZ.
     </description>
     <simpleType>
         <uint32_t>
@@ -14792,7 +14792,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PROC_BOOT_VOLTAGE_VID</id>
+    <id>PROC_BOOT_VOLTAGE_VID</id><!-- deprecated -->
     <description>
         Proc Boot Voltage
     </description>
