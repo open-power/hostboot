@@ -6233,11 +6233,12 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <default>0x0000000000000000</default>
+            <default>0x0003FFFFFC000000</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_ADU_UNTRUSTED_BAR_SIZE</id>
         <macro>DIRECT</macro>
@@ -6347,11 +6348,12 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <default>0x0000000000000000</default>
+            <default>0x0003FFFFFC000000</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PSI_UNTRUSTED_BAR0_SIZE</id>
         <macro>DIRECT</macro>
@@ -6389,11 +6391,12 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint64_t>
-            <default>0x0000000000000000</default>
+            <default>0x0003FFFFFC000000</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PSI_UNTRUSTED_BAR1_SIZE</id>
         <macro>DIRECT</macro>
@@ -13278,11 +13281,12 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         64-bit address representing BAR RA
     </description>
   <simpleType>
-      <uint64_t></uint64_t>
+      <uint64_t>
+          <default>0x0000000000000000</default>
+      </uint64_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>non-volatile</persistency>
   <readable/>
-  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PBA_UNTRUSTED_BAR_BASE_ADDR</id>
       <macro>DIRECT</macro>
@@ -13297,9 +13301,11 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         mask applied to RA 23:43
     </description>
   <simpleType>
-      <uint64_t></uint64_t>
+      <uint64_t>
+          <default>0x0000000003F00000</default>
+      </uint64_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>volatile</persistency>
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
