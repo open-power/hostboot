@@ -27,11 +27,6 @@
 
 // $Id$
 // $Source$
-//-----------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2015
-// *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
-//-----------------------------------------------------------------------------
 
 /// \file ocb_firmware_registers.h
 /// \brief C register structs for the OCB unit
