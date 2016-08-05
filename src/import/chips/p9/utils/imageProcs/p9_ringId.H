@@ -42,6 +42,17 @@ typedef struct
     uint64_t     scanRegionType;
 } GenRingIdList;
 
+typedef enum RingVariant   // Base variables
+{
+    BASE     = 0x00,
+    CC       = 0x01,
+    RL       = 0x02,
+    OVERRIDE = 0x03,
+    OVERLAY  = 0x04,
+    NUM_RING_VARIANTS = 0x05,
+    NOT_VALID = 0xff
+} RingVariant_t;
+
 typedef struct
 {
     uint8_t  variant[3];
