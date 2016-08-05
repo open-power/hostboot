@@ -40,6 +40,7 @@
 #include "p9_xip_image.h"
 #include "p9_hcode_image_defines.H"
 #include "p9_stop_util.H"
+#include "p9_ringId.H"
 #include "p9_tor.H"
 
 using namespace stopImageSection;
@@ -758,7 +759,7 @@ extern "C"
                                          i_ddLevel,
                                          ((PLAT_CME == i_platId) ? P9_TOR::CME : P9_TOR::SGPE),
                                          ringType,
-                                         P9_TOR::BASE,
+                                         BASE,
                                          i_instanceId,
                                          &i_pBuf1,
                                          tempBufLength );
@@ -848,7 +849,7 @@ extern "C"
                                          i_ddLevel,
                                          ((PLAT_CME == i_platId) ? P9_TOR::CME : P9_TOR::SGPE),
                                          i_ringType,
-                                         P9_TOR::OVERRIDE,
+                                         OVERRIDE,
                                          i_instanceId,
                                          &i_pTempBuf,
                                          io_bufLength );

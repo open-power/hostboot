@@ -26,6 +26,7 @@
 #define _P9_TOR_H_
 
 #include "p9_ring_id.h"
+#include "p9_ringId.H"
 
 namespace P9_TOR
 {
@@ -102,18 +103,6 @@ typedef enum RingType      // Different type of Rings
     ALLRING  = 0x02
 } RingType_t;
 
-
-
-typedef enum RingVariant   // Base variables
-{
-    BASE     = 0x00,
-    CC       = 0x01,
-    RL       = 0x02,
-    OVERRIDE = 0x03,
-    OVERLAY  = 0x04,
-    NUM_RING_VARIANTS = 0x05,
-    NOT_VALID = 0xff
-} RingVariant_t;
 
 
 //
