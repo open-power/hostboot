@@ -190,6 +190,7 @@ sub manipulateImages
         # FSP workaround to keep original bin names
         my $fsp_file = (-e $bin_file)? $bin_file : "";
         my $fsp_prefix = "";
+
         # Header Phase - only necessary if bin file exists
         if (-e $bin_file)
         {
@@ -256,7 +257,18 @@ sub manipulateImages
             }
             elsif( ($sectionHash{$layoutKey}{sha512perEC} eq "yes") )
             {
-                # Placeholder for sha512perEC partitions
+                # sha512perEC partitions
+                if ($secureboot)
+                {
+                    # Add secure container header
+                    # @TODO RTC:155374 Remove when official signing supported
+                    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                }
+                else
+                {
+                    # Don't add any header if not in secureboot mode
+                    run_command("cp $bin_file $tempImages{HDR_PHASE}");
+                }
             }
             else
             {
