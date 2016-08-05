@@ -50,6 +50,7 @@
 #endif
 
 #include <prdfBitString.H>
+#include <mem/prdfMemRank.H>
 
 //------------------------------------------------------------------------------
 
@@ -100,6 +101,24 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
  */
 uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
                    uint64_t i_address);
+
+//##############################################################################
+//##                  MCBIST/Maintenance Command wrappers
+//##############################################################################
+
+/**
+ * @brief  Starts Background Scrubbing.
+ * @param  i_trgt MCBIST or MBA target.
+ * @param  i_rank Will start background scrubbing on the first address of this
+ *                slave rank. To ensure the command is started on a master rank
+ *                boundary, make sure the slave rank value is 0.
+ * @param  i_port The MCBIST port. Not used for MBA.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t startBgScrub( TARGETING::TargetHandle_t i_trgt,
+                       const MemRank & i_rank,
+                       uint8_t i_port = 0xff );
 
 } // end namespace PlatServices
 
