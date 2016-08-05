@@ -43,7 +43,68 @@ using fapi2::TARGET_TYPE_SYSTEM;
 
 namespace mss
 {
+//ADR clock registers - one pair per clock leg
+const std::vector< std::pair<uint64_t, uint64_t> > adrTraits<TARGET_TYPE_MCA>::IO_TX_FET_SLICE_CLK_REG =
+{
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS },
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS },
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE6_POS },
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE7_POS },
+};
+//ADR command/address registers
+const std::vector< std::pair<uint64_t, uint64_t> > adrTraits<TARGET_TYPE_MCA>::IO_TX_FET_SLICE_CMD_ADDR_REG =
+{
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //ADDR0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE5_POS }, //ADDR1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //ADDR2
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE4_POS }, //ADDR3
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE6_POS }, //ADDR4
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //ADDR5
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //ADDR6
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE7_POS }, //ADDR7
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //ADDR8
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //ADDR9
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE5_POS }, //ADDR10
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //ADDR11
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //ADDR12
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //ADDR13
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //ADDR14/WEN
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //ADDR15/CAS
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //ADDR16/RAS
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE4_POS }, //ADDR17/RAS
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE7_POS }, //BA0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE4_POS }, //BA1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //BG0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE5_POS }, //BG1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //ACT_N
 
+};
+//ADR control registers
+const std::vector< std::pair<uint64_t, uint64_t> > adrTraits<TARGET_TYPE_MCA>::IO_TX_FET_SLICE_CNTL_REG =
+{
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //CKE0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //CKE1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE6_POS }, //CKE2
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE4_POS }, //CKE3
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //ODT0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE6_POS }, //ODT1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //ODT2
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE2_POS }, //ODT3
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //PARITY
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR3, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE7_POS }, //RESET_N
+};
+//ADR chip select chip id registers
+const std::vector< std::pair<uint64_t, uint64_t> > adrTraits<TARGET_TYPE_MCA>::IO_TX_FET_SLICE_CSCID_REG =
+{
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //CS0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //CS1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR2, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //CS2
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE3_POS }, //CS3
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP0_P0_ADR0, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE5_POS }, //CID0
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE0_POS }, //CID1
+    { MCA_DDRPHY_ADR_IO_FET_SLICE_EN_MAP1_P0_ADR1, adrTraits<TARGET_TYPE_MCA>::ADR_IO_FET_SLICE_EN_LANE1_POS }, //CID2
+
+};
 namespace adr
 {
 
@@ -138,6 +199,246 @@ fapi2::ReturnCode reset_delay( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
         }
 
         FAPI_TRY( mss::putScom(i_target, l_dest.iv_reg, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the clock driver impedances - MCS specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_imp_clk( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //defines traits class
+    typedef adrTraits<TARGET_TYPE_MCA> TT;
+
+    //gets the termination value for the attribute
+    uint8_t l_attr_value = 0;
+    FAPI_TRY(mss::vpd_mt_mc_drv_imp_clk(i_target, l_attr_value));
+
+    //checks the attr value
+    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM30 &&
+       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM40 )
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CLK()
+                    .set_VALUE(l_attr_value)
+                    .set_MCA_TARGET(i_target),
+                    "%s value is not valid: %u",
+                    c_str(i_target),
+                    l_attr_value);
+    }
+
+    //loops and sets the value in each register
+    //Note: does RMW as other functions set the other lanes
+    for(const auto& l_reg_info : TT::IO_TX_FET_SLICE_CLK_REG)
+    {
+        fapi2::buffer<uint64_t> l_value;
+
+        //read
+        FAPI_TRY(mss::getScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+        //modify
+        if(l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CLK_OHM30)
+        {
+            l_value.setBit(l_reg_info.second);
+        }
+        else
+        {
+            l_value.clearBit(l_reg_info.second);
+        }
+
+        //write
+        FAPI_TRY(mss::putScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the command/address driver impedances - MCS specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_imp_cmd_addr( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //defines traits class
+    typedef adrTraits<TARGET_TYPE_MCA> TT;
+
+    //gets the termination value for the attribute
+    uint8_t l_attr_value = 0;
+    FAPI_TRY(mss::vpd_mt_mc_drv_imp_cmd_addr(i_target, l_attr_value));
+
+    //checks the attr value
+    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM30 &&
+       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM40 )
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CMD_ADDR()
+                    .set_VALUE(l_attr_value)
+                    .set_MCA_TARGET(i_target),
+                    "%s value is not valid: %u",
+                    c_str(i_target),
+                    l_attr_value);
+    }
+
+    //loops and sets the value in each register
+    //Note: does RMW as other functions set the other lanes
+    for(const auto& l_reg_info : TT::IO_TX_FET_SLICE_CMD_ADDR_REG)
+    {
+        fapi2::buffer<uint64_t> l_value;
+
+        //read
+        FAPI_TRY(mss::getScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+        //modify
+        if(l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CMD_ADDR_OHM30)
+        {
+            l_value.setBit(l_reg_info.second);
+        }
+        else
+        {
+            l_value.clearBit(l_reg_info.second);
+        }
+
+        //write
+        FAPI_TRY(mss::putScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the control driver impedances - MCS specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_imp_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //defines traits class
+    typedef adrTraits<TARGET_TYPE_MCA> TT;
+
+    //gets the termination value for the attribute
+    uint8_t l_attr_value = 0;
+    FAPI_TRY(mss::vpd_mt_mc_drv_imp_cntl(i_target, l_attr_value));
+
+    //checks the attr value
+    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM30 &&
+       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM40 )
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CNTL()
+                    .set_VALUE(l_attr_value)
+                    .set_MCA_TARGET(i_target),
+                    "%s value is not valid: %u",
+                    c_str(i_target),
+                    l_attr_value);
+    }
+
+    //loops and sets the value in each register
+    //Note: does RMW as other functions set the other lanes
+    for(const auto& l_reg_info : TT::IO_TX_FET_SLICE_CNTL_REG)
+    {
+        fapi2::buffer<uint64_t> l_value;
+
+        //read
+        FAPI_TRY(mss::getScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+        //modify
+        if(l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CNTL_OHM30)
+        {
+            l_value.setBit(l_reg_info.second);
+        }
+        else
+        {
+            l_value.clearBit(l_reg_info.second);
+        }
+
+        //write
+        FAPI_TRY(mss::putScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the chip select/chip id driver impedances - MCS specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_imp_cscid( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //defines traits class
+    typedef adrTraits<TARGET_TYPE_MCA> TT;
+
+    //gets the termination value for the attribute
+    uint8_t l_attr_value = 0;
+    FAPI_TRY(mss::vpd_mt_mc_drv_imp_cscid(i_target, l_attr_value));
+
+    //checks the attr value
+    if(l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM30 &&
+       l_attr_value != fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM40 )
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_INVALID_VPD_MT_MC_DRV_IMP_CSCID()
+                    .set_VALUE(l_attr_value)
+                    .set_MCA_TARGET(i_target),
+                    "%s value is not valid: %u",
+                    c_str(i_target),
+                    l_attr_value);
+    }
+
+    //loops and sets the value in each register
+    //Note: does RMW as other functions set the other lanes
+    for(const auto& l_reg_info : TT::IO_TX_FET_SLICE_CSCID_REG)
+    {
+        fapi2::buffer<uint64_t> l_value;
+
+        //read
+        FAPI_TRY(mss::getScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
+        //modify
+        if(l_attr_value == fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_CSCID_OHM30)
+        {
+            l_value.setBit(l_reg_info.second);
+        }
+        else
+        {
+            l_value.clearBit(l_reg_info.second);
+        }
+
+        //write
+        FAPI_TRY(mss::putScom(i_target,
+                              l_reg_info.first,
+                              l_value));
+
     }
 
 fapi_try_exit:
