@@ -209,6 +209,27 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_3, MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_3 },
     { MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_4, MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_4 },
 };
+// Definition of the IO TX FET slice registers
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::IO_TX_FET_SLICE_REG
+{
+    MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0,
+    MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_1,
+    MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_2,
+    MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_3,
+    MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_4,
+};
+
+// Definition of the IO TX PFET slice registers
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::IO_TX_PFET_TERM_REG
+{
+    MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0,
+    MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_1,
+    MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_2,
+    MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_3,
+    MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_4,
+};
 
 // Definition of the DP16 RD_VREF Control registers
 // DP16 RD_VREF Control registers all come in pairs - one per 8 bits
@@ -947,6 +968,272 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
         FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF byte0 and byte1");
 
         FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets the register value for DQ/DQS driver impedance from the VPD value - TARGET_TYPE_MCA specialization
+/// @param[in] i_target the port in question
+/// @param[out] o_reg_value value to push into the registers
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode get_dq_dqs_drv_imp_field_value( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        fapi2::buffer<uint8_t>* o_reg_value )
+{
+    //traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    //disable is Hi-Z state, no slices enabled
+    constexpr uint8_t REG_VALUE_DISABLE = 0x00;
+    //left justifies values as that's the lower order bit for IBM
+    //these registers enable 240 Ohm slices in parallel
+    //the impedance becomes 240/N - N being the number of slices enabled
+    //thus 34 Ohms is all seven slices enabled.
+    constexpr uint8_t REG_VALUE_240OHM = 0b01000000;
+    constexpr uint8_t REG_VALUE_120OHM = 0b01100000;
+    constexpr uint8_t REG_VALUE_80OHM  = 0b01110000;
+    constexpr uint8_t REG_VALUE_60OHM  = 0b01111000;
+    constexpr uint8_t REG_VALUE_48OHM  = 0b01111100;
+    constexpr uint8_t REG_VALUE_40OHM  = 0b01111110;
+    constexpr uint8_t REG_VALUE_34OHM  = 0b01111111;
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_vpd_value[TT::DP_COUNT] = {};
+
+    //goes the attr get
+    FAPI_TRY(vpd_mt_mc_drv_imp_dq_dqs(i_target, l_vpd_value));
+
+    //loops through all of the DP's
+    for(uint8_t dp = 0; dp < TT::DP_COUNT; ++dp)
+    {
+
+        switch(l_vpd_value[dp])
+        {
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_DISABLE:
+                o_reg_value[dp] = REG_VALUE_DISABLE;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM240:
+                o_reg_value[dp] = REG_VALUE_240OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM120:
+                o_reg_value[dp] = REG_VALUE_120OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM80:
+                o_reg_value[dp] = REG_VALUE_80OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM60:
+                o_reg_value[dp] = REG_VALUE_60OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM48:
+                o_reg_value[dp] = REG_VALUE_48OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM40:
+                o_reg_value[dp] = REG_VALUE_40OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_DRV_IMP_DQ_DQS_OHM34:
+                o_reg_value[dp] = REG_VALUE_34OHM;
+                break;
+
+            //all non-enum values are errors, set current error and exit
+            default:
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_VPD_VALUE_MC_DRV_IMP_DQ_DQS()
+                            .set_VALUE(l_vpd_value[dp])
+                            .set_DP(dp)
+                            .set_MCA_TARGET(i_target),
+                            "%s DQ_DQS %s impedance value is not valid: %u for DP[%u]",
+                            c_str(i_target),
+                            "driver",
+                            l_vpd_value[dp],
+                            dp);
+                break;
+        }
+
+        //successfully got the value, print an info statement for debug
+        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "DRV", dp, l_vpd_value,
+                 o_reg_value);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the DQ/DQS driver impedances - TARGET_TYPE_MCA specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_dq_dqs_drv_imp( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    constexpr uint64_t NFET_LOC = TT::IO_TX_FET_SLICE_EN_N_WR;
+    constexpr uint64_t NFET_LEN = TT::IO_TX_FET_SLICE_EN_N_WR_LEN;
+    constexpr uint64_t PFET_LOC = TT::IO_TX_FET_SLICE_EN_P_WR;
+    constexpr uint64_t PFET_LEN = TT::IO_TX_FET_SLICE_EN_P_WR_LEN;
+
+    fapi2::buffer<uint8_t> l_field_value[TT::DP_COUNT];
+
+    //gets the field value
+    FAPI_TRY(get_dq_dqs_drv_imp_field_value(i_target, l_field_value));
+
+    //loops through all DP's and sets the register values
+    for(uint8_t dp = 0; dp < TT::DP_COUNT ; ++dp)
+    {
+        //sets up the scom value
+        const auto l_scom_value = fapi2::buffer<uint64_t>()
+                                  .insertFromRight<NFET_LOC, NFET_LEN>(l_field_value[dp])
+                                  .insertFromRight<PFET_LOC, PFET_LEN>(l_field_value[dp]);
+
+        //blasts those scoms
+        FAPI_TRY(mss::putScom( i_target,
+                               TT::IO_TX_FET_SLICE_REG[dp],
+                               l_scom_value ));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets the register value for DQ/DQS receiver impedance from the VPD value - MCA specialization
+/// @param[in] i_target the port in question
+/// @param[out] o_reg_value value to push into the registers
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode get_dq_dqs_rcv_imp_field_value( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        fapi2::buffer<uint8_t>* o_reg_value )
+{
+    //traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    //disable is Hi-Z state, no slices enabled
+    constexpr uint8_t REG_VALUE_DISABLE = 0x00;
+    //left justifies values as that's the lower order bit for IBM
+    //these registers enable 240 Ohm slices in parallel
+    //the impedance becomes 240/N - N being the number of slices enabled
+    //thus 34 Ohms is all seven slices enabled.
+    constexpr uint8_t REG_VALUE_240OHM = 0b01000000;
+    constexpr uint8_t REG_VALUE_120OHM = 0b01100000;
+    constexpr uint8_t REG_VALUE_80OHM  = 0b01110000;
+    constexpr uint8_t REG_VALUE_60OHM  = 0b01111000;
+    constexpr uint8_t REG_VALUE_48OHM  = 0b01111100;
+    constexpr uint8_t REG_VALUE_40OHM  = 0b01111110;
+    constexpr uint8_t REG_VALUE_34OHM  = 0b01111111;
+
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_vpd_value[TT::DP_COUNT] = {};
+
+    //goes the attr get
+    FAPI_TRY(vpd_mt_mc_rcv_imp_dq_dqs(i_target, l_vpd_value));
+
+    //loops through and checks each value for the DP
+    for(uint8_t dp = 0; dp < TT::DP_COUNT; ++dp)
+    {
+
+        switch(l_vpd_value[dp])
+        {
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_DISABLE:
+                o_reg_value[dp] = REG_VALUE_DISABLE;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM240:
+                o_reg_value[dp] = REG_VALUE_240OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM120:
+                o_reg_value[dp] = REG_VALUE_120OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM80:
+                o_reg_value[dp] = REG_VALUE_80OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM60:
+                o_reg_value[dp] = REG_VALUE_60OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM48:
+                o_reg_value[dp] = REG_VALUE_48OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM40:
+                o_reg_value[dp] = REG_VALUE_40OHM;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_VPD_MT_MC_RCV_IMP_DQ_DQS_OHM34:
+                o_reg_value[dp] = REG_VALUE_34OHM;
+                break;
+
+            //all non-enum values are errors, set current error and exit
+            default:
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_VPD_VALUE_MC_RCV_IMP_DQ_DQS()
+                            .set_VALUE(l_vpd_value[dp])
+                            .set_DP(dp)
+                            .set_MCA_TARGET(i_target),
+                            "%s DQ_DQS %s impedance value is not valid: %u for DP[%u]",
+                            c_str(i_target),
+                            "receiver",
+                            l_vpd_value[dp],
+                            dp);
+                break;
+        }
+
+        //successfully got the value, print an info statement for debug
+        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "RCV", dp, l_vpd_value,
+                 o_reg_value);
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the DQ/DQS receiver impedances - MCA specialization
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template<>
+fapi2::ReturnCode reset_dq_dqs_rcv_imp( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    //traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    constexpr uint64_t LOC = TT::IO_TX_PFET_TERM_EN_P_WR;
+    constexpr uint64_t LEN = TT::IO_TX_PFET_TERM_EN_P_WR_LEN;
+
+    fapi2::buffer<uint8_t> l_field_value[TT::DP_COUNT];
+
+    //gets the field value
+    FAPI_TRY(get_dq_dqs_rcv_imp_field_value(i_target, l_field_value));
+
+    //loops through all DP's and sets the register values
+    for(uint8_t dp = 0; dp < TT::DP_COUNT ; ++dp)
+    {
+        //sets up the scom value
+        const auto l_scom_value = fapi2::buffer<uint64_t>().insertFromRight<LOC, LEN>(l_field_value[dp]);
+
+        //blasts those scoms
+        FAPI_TRY(mss::putScom( i_target,
+                               TT::IO_TX_PFET_TERM_REG[dp],
+                               l_scom_value ));
+
     }
 
 fapi_try_exit:
