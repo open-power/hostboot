@@ -32,14 +32,20 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
-#include <map>
-#include <vector>
 
-#include <fapi2.H>
 #include <p9_mss_eff_config.H>
-#include <lib/utils/pos.H>
-#include <lib/spd/spd_decoder.H>
+
+// std
+#include <map>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/spd/common/spd_decoder.H>
+#include <lib/spd/spd_factory.H>
 #include <lib/eff_config/eff_config.H>
+#include <lib/utils/pos.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/find.H>
 
