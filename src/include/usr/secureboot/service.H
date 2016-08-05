@@ -45,6 +45,8 @@ namespace SECUREBOOT
     // Processor Security Switch Register Details
     const uint64_t PROC_SECURITY_SWITCH_REGISTER = 0x00010005;
     const uint64_t
+          PROC_SECURITY_SWITCH_JUMPER_STATE_MASK = 0x8000000000000000ull;
+    const uint64_t
           PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK = 0x4000000000000000ull;
     const uint64_t
           PROC_SECURITY_SWITCH_PROTECT_I2C_SEEPROM_MASK = 0x0100000000000000ull;
@@ -74,6 +76,28 @@ namespace SECUREBOOT
     /** @brief Determines if Secureboot is enabled.
      */
     bool enabled();
+
+    /** @brief Returns the state of the secure jumper as reported by the master
+     *      processor.
+     *
+     *  @par Detailed Description:
+     *      Returns the state of the secure jumper as reported by the master
+     *      processor.  This should NOT be used to determine whether security is
+     *      enabled, because several conditions are aggregated together to
+     *      determine that.  To query whether security is actually enabled or
+     *      not, call the enabled() API.  This is a limited-use API intended to
+     *      be called by trusted boot code to determine whether a system shipped
+     *      with a secure jumper applied or removed, in order to decide
+     *      whether to enforce the "TPM Required" policy or not.
+     *
+     *  @return Boolean indicating acting master processor's secure jumper state
+     *  @retval true Jumper is configured to request HW security.  This does not
+     *      necessarily imply security is enabled, because an open SBE can
+     *      override the HW policy.  Use the enabled() API to determine whether
+     *      security is actually enabled.
+     *  @retval false Jumper is configured to disble HW security.
+     */
+    bool getJumperState();
 
     /**
      * @brief Verify Signed Container

@@ -49,12 +49,19 @@ namespace SECUREBOOT
         assert(NULL == l_errl);
     }
 
-    bool Settings::getEnabled()
+    bool Settings::getEnabled() const
     {
-        return 0 != (iv_regValue & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK);
+        return 0 != (getSecuritySwitch()
+                     & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK);
     }
 
-    uint64_t Settings::getSecuritySwitch()
+    bool Settings::getJumperState() const
+    {
+        return 0 != (getSecuritySwitch()
+                     & PROC_SECURITY_SWITCH_JUMPER_STATE_MASK);
+    }
+
+    uint64_t Settings::getSecuritySwitch() const
     {
         return iv_regValue;
     }

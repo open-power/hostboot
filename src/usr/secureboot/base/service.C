@@ -253,6 +253,9 @@ void secureSbeSeeproms( void )
     return;
 }
 
-
+bool getJumperState()
+{
+    return Singleton<Settings>::instance().getJumperState();
+}
 
 }  //namespace SECUREBOOT
