@@ -30,6 +30,7 @@
 using namespace fapi2;
 
 constexpr auto literal_0b0111 = 0b0111;
+constexpr auto literal_0 = 0;
 
 fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0)
 {
@@ -49,6 +50,10 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0)
 
             {
                 l_scom_buffer.insert<uint64_t> (literal_0b0111, 46, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0, 62, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5010810ull, l_scom_buffer);

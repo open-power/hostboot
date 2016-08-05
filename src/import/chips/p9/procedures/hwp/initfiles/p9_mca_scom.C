@@ -30,6 +30,8 @@
 using namespace fapi2;
 
 constexpr auto literal_0b0100 = 0b0100;
+constexpr auto literal_0b11100 = 0b11100;
+constexpr auto literal_0b110 = 0b110;
 constexpr auto literal_0x1 = 0x1;
 constexpr auto literal_4 = 4;
 constexpr auto literal_1 = 1;
@@ -62,6 +64,7 @@ constexpr auto literal_11 = 11;
 constexpr auto literal_12 = 12;
 constexpr auto literal_267 = 267;
 constexpr auto literal_1866 = 1866;
+constexpr auto literal_0b011000 = 0b011000;
 constexpr auto literal_597 = 597;
 constexpr auto literal_768 = 768;
 constexpr auto literal_939 = 939;
@@ -89,8 +92,11 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             }
 
             {
-                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_CR_OFF = 0x0;
-                l_scom_buffer.insert<uint64_t> (l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_CR_OFF, 62, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b11100, 50, 5, 59 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b110, 37, 3, 61 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer);
@@ -777,6 +783,28 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x701090cull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x701090eull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x701090eull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b011000, 24, 6, 58 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x701090eull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x701090eull)");
                 break;
             }
         }

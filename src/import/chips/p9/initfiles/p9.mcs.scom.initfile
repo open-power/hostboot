@@ -71,9 +71,10 @@ target_type 0 TARGET_TYPE_MCS;
 
 
 ##########################
-# MC TEAM DICTATED INITS #
+# DD1 WORKAROUNDS
 ##########################
 
+# If cache scope prediciton logic is active, must disable fp_m bit, so fp ops will go fetch 128 bytes (for potential mdi update)
 espy  MC01.PBI01.SCOMFIR.MCMODE1_DISABLE_FP_M_BIT [when=S] {
   spyv;
   ON;
@@ -85,18 +86,9 @@ ispy  MC01.PBI01.SCOMFIR.MCPERF1_MERGE_CAPACITY_LIMIT [when=S] {
   0b0111;
 }
 
-# MOVED MC01.PORT... TO MCA PER BEN GASS'S DLL OVERRIDE
-#
-#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_SQ_LFSR_CNTL [when=S] {
-#  spyv;
-#  0b0100;
-#
-#espy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_EN_ALT_CR [when=S] {
-#  spyv;
-#  OFF;
-#}
-#
-#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=S] {
-#  spyv;
-#  0b000000;
-#}
+# Turns off SRQ pf drop
+ispy  MC01.PBI01.SCOMFIR.MCPERF1_ENABLE_PF_DROP_SRQ [when=S] {
+  spyv;
+  0;
+}
+

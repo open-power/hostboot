@@ -39,27 +39,27 @@
 #-- REFERENCES FOR FILE
 #--******************************************************************************
 # Files used to check what target type attributes are
-#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
-#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_mcs_attributes.xml
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml
 #      Example:
 #           <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
 #           <targetType>TARGET_TYPE_MCS</targetType>
 # File used to see if attribute is 1D or 2D array
-#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/output/gen/attribute_ids.H
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/output/gen/attribute_ids.H
 #      Example:
 #           typedef uint8_t ATTR_EFF_DIMM_TYPE_Type[2][2];
 # File for finding correct spydef name
 #      1st find the spydef file this ekb build is looking at by finding SPYDEF_FILE_LOCATION in file below
-#           /gsa/ausgsa/home/s/l/sleung/ekb/ekb/tools/ifCompiler/scan_procedures.mk
+#           /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/tools/ifCompiler/scan_procedures.mk
 #      2nd open *.spydef in that dir and search for spy names
-#           /afs/awd/projects/eclipz/lab/p9/vbu_models/n10_e9050_tp046_ec150u01a_soa_sc_u138_01/edc/*.spydef
+#           /afs/awd/projects/eclipz/lab/p9/vbu_models/n10_e9067_tp058_ec163uXXa_soa_sq_u190_01/edc/*.spydef
 #      (File comes from actually building a vbu file and looking at the spydef)
 #      Example:
 #           idial MCP.PORT1.SRQ.PC.MBAREF0Q_CFG_TRFC {
 # Wrapper file calling this
-#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/hwp/memory/p9_mss_scominit.C
 # Output file generated
-#      /gsa/ausgsa/home/s/l/sleung/ekb/ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
+#      /afs/awd/projects/eclipz/pz6/usr/sleung/ekb/chips/p9/procedures/hwp/initfiles/p9_mca_scom.C
 #
 # COMMON DEBUG
 #      -debug5.16.i6.d
@@ -434,19 +434,17 @@ ispy  MCP.PORT0.SRQ.PC.MBASTR0Q_CFG_TXSDLL [when=S] {
 
 
 ####################################################
-# Force clock enable high DD1 Periodics Issue
+# DD1 WORKAROUNDS
 ####################################################
+
+# Force clock enable high DD1 Periodics Issue
 
 espy  MCP.PORT0.SRQ.MBA_FARB0Q_CFG_OE_ALWAYS_ON [when=S]{
   spyv;
   ON;
 }
 
-
-
-####################################################
-# MCS SCOMS MOVED HERE (USING BEN GASS DLL OVERRIDE)
-####################################################
+# Epsilon Settings per Power Bus Spreadsheet
 
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_JITTER_EPSILON [when=S] {
   spyv;
@@ -478,17 +476,32 @@ ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
   SYS.ATTR_PROC_EPS_READ_CYCLES_T2 / 4;
 }
 
-# MC TEAM DICTATED INITS #
+# HW366164 - SRQ Fullness Control
 
-# HW366164
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_SQ_LFSR_CNTL [when=S] {
   spyv;
   0b0100;
 }
 
+# Number of RMW buffers available
 
-espy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_EN_ALT_CR [when=S] {
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_NUM_RMW_BUF [when=S] {
   spyv;
-  OFF;
+  0b11100;
 }
+
+# All rctrl ops through tag FIFO (bit 0)
+# Serialize CMDLIST pf drop through rctrl (bit 1)
+# (bit 0 keep at 0)
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S] {
+  spyv;
+  0b110;
+}
+
+# Max 24 64-byte read buffers (HW375534)
+ispy  MCP.PORT0.SRQ.MBA_RRQ0Q_CFG_RDBUFF_CAPACITY_LIMIT [when=S] {
+  spyv;
+  0b011000;
+}
+
 

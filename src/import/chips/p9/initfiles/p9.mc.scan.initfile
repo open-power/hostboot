@@ -11,7 +11,7 @@ target_type 0 TARGET_TYPE_MCBIST;
 # }
 
 ##########################
-# MC TEAM DICTATED INITS #
+# DD1 WORKAROUNDS
 ##########################
 
 # FOR DD1 Prefetch Limit needs to be scan init to 0 because SCOM is broken (HW366248)
@@ -31,6 +31,25 @@ ispy  MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
 ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
   0b000000;
+}
+
+# Static hpc_wr/ig_wr CL reservation
+# Complicated order dependent sequence to do with SCOMs, easier with scans
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
 }
 
 
