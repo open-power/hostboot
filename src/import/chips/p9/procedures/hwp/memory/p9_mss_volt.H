@@ -39,8 +39,6 @@
 
 #include <fapi2.H>
 #include <vector>
-#include <lib/spd/spd_decoder.H>
-#include <lib/eff_config/attr_setters.H>
 
 typedef fapi2::ReturnCode (*p9_mss_volt_FP_t) (const std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS>>&);
 
