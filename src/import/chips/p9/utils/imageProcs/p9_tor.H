@@ -25,7 +25,6 @@
 #ifndef _P9_TOR_H_
 #define _P9_TOR_H_
 
-#include "p9_ring_identification.H"
 #include "p9_ring_id.h"
 
 namespace P9_TOR
