@@ -274,5 +274,14 @@ template<fapi2::TargetType T>
 fapi2::ReturnCode rank_pair_primary_to_dimm(const fapi2::Target<T>& i_target, const uint64_t i_rp,
         fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm);
 
+///
+/// @brief Sets up the IO impedances (ADR DRV's and DP DRV's/RCV's)
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target the target (MCA/MCBIST or MBA?)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T>
+fapi2::ReturnCode reset_io_impedances(const fapi2::Target<T>& i_target);
+
 }
 #endif
