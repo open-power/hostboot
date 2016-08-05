@@ -36,13 +36,17 @@
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
-#include <cstring>
-#include <cstdint>
-
-#include <fapi2.H>
-#include <mss.H>
 #include <p9_mss_freq.H>
-#include <lib/spd/spd_decoder.H>
+
+// std lib
+#include <map>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/spd/common/spd_decoder.H>
+#include <lib/spd/spd_factory.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/utils/c_str.H>
 #include <lib/freq/cycle_time.H>
