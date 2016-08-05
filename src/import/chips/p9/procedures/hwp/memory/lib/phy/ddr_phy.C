@@ -626,6 +626,26 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Sets up the IO impedances (ADR DRV's and DP DRV's/RCV's) - MCA specialization
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target the target (MCA/MCBIST or MBA?)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode reset_io_impedances(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+
+    FAPI_TRY( mss::dp16::reset_dq_dqs_drv_imp(i_target) );
+    FAPI_TRY( mss::dp16::reset_dq_dqs_rcv_imp(i_target) );
+    FAPI_TRY( mss::adr::reset_imp_clk(i_target) );
+    FAPI_TRY( mss::adr::reset_imp_cmd_addr(i_target) );
+    FAPI_TRY( mss::adr::reset_imp_cntl(i_target) );
+    FAPI_TRY( mss::adr::reset_imp_cscid(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Perform initializations for the PHY
 /// @param[in] i_target the MCBIST which has the PHYs to initialize
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -681,6 +701,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Shove the ADR delay values from VPD into the ADR delay registers
         FAPI_TRY( mss::adr::reset_delay(p) );
+
+        //resets all of the IO impedances
+        FAPI_TRY( mss::reset_io_impedances(p) );
     }
 
 fapi_try_exit:
