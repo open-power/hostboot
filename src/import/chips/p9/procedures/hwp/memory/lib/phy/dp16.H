@@ -148,6 +148,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DATA_BIT_DIR1;
+        static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
+        static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
 
         enum
         {
@@ -180,6 +182,17 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             RD_VREF_BYTE1_NIB2_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB2_LEN,
             RD_VREF_BYTE1_NIB3 = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB3,
             RD_VREF_BYTE1_NIB3_LEN = MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0_01_NIB3_LEN,
+
+            IO_TX_FET_SLICE = MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0,
+            IO_TX_FET_SLICE_EN_N_WR = MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0_01_EN_N_WR,
+            IO_TX_FET_SLICE_EN_N_WR_LEN = MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0_01_EN_N_WR_LEN,
+            IO_TX_FET_SLICE_EN_P_WR = MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0_01_EN_P_WR,
+            IO_TX_FET_SLICE_EN_P_WR_LEN = MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0_01_EN_P_WR_LEN,
+
+            IO_TX_PFET_TERM = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0,
+            IO_TX_PFET_TERM_EN_P_WR = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR,
+            IO_TX_PFET_TERM_EN_P_WR_LEN = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR_LEN,
+
         };
 };
 
@@ -216,7 +229,7 @@ inline fapi2::ReturnCode read_dll_cntl( const fapi2::Target<T>& i_target, fapi2:
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
     static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL registers
     const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
 
     FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
@@ -243,7 +256,7 @@ inline fapi2::ReturnCode write_dll_cntl( const fapi2::Target<T>& i_target, const
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
     static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own DLL registers
     const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
 
     FAPI_INF("dll_cntl dp16<%d,%d>: 0x%016lx", I, D, i_data);
@@ -268,7 +281,7 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
 /// @tparam P the type of the std::pair elements
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_data the value of both of the the registers (upper and lower bytes)
+/// @param[out] o_data the value of both of the registers (upper and lower bytes)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
@@ -277,7 +290,7 @@ inline fapi2::ReturnCode read_ac_boost_cntl( const fapi2::Target<T>& i_target,
 {
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost registers
     FAPI_TRY( mss::getScom(i_target, TT::AC_BOOST_CNTRL_REG[I].first, o_data.first) );
     FAPI_TRY( mss::getScom(i_target, TT::AC_BOOST_CNTRL_REG[I].second, o_data.second) );
     FAPI_INF("ac_boost_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, o_data.first, o_data.second);
@@ -330,7 +343,7 @@ inline fapi2::ReturnCode read_ac_boost_cntl( const fapi2::Target<T>& i_target,
 /// @tparam P the type of the std::pair elements
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
-/// @param[in] i_data the value of both of the the registers (upper and lower bytes)
+/// @param[in] i_data the value of both of the registers (upper and lower bytes)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
@@ -339,7 +352,7 @@ inline fapi2::ReturnCode write_ac_boost_cntl( const fapi2::Target<T>& i_target,
 {
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost registers
     FAPI_INF("ac_boost_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, i_data.first, i_data.second);
     FAPI_TRY( mss::putScom(i_target, TT::AC_BOOST_CNTRL_REG[I].first, i_data.first) );
     FAPI_TRY( mss::putScom(i_target, TT::AC_BOOST_CNTRL_REG[I].second, i_data.second) );
@@ -402,7 +415,7 @@ fapi2::ReturnCode reset_ac_boost_cntl( const fapi2::Target<T>& i_target );
 /// @tparam P the type of the std::pair elements
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_data the value of both of the the registers (upper and lower bytes)
+/// @param[out] o_data the value of both of the registers (upper and lower bytes)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
@@ -411,7 +424,7 @@ inline fapi2::ReturnCode read_ctle_cntl( const fapi2::Target<T>& i_target,
 {
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost registers
     FAPI_TRY( mss::getScom(i_target, TT::CTLE_CNTRL_REG[I].first, o_data.first) );
     FAPI_TRY( mss::getScom(i_target, TT::CTLE_CNTRL_REG[I].second, o_data.second) );
     FAPI_INF("ctle_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, o_data.first, o_data.second);
@@ -427,7 +440,7 @@ fapi_try_exit:
 /// @tparam P the type of the std::pair elements
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
-/// @param[in] i_data the value of both of the the registers (upper and lower bytes)
+/// @param[in] i_data the value of both of the registers (upper and lower bytes)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
@@ -436,7 +449,7 @@ inline fapi2::ReturnCode write_ctle_cntl( const fapi2::Target<T>& i_target,
 {
     static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
 
-    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost registers
     FAPI_INF("ctle_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, i_data.first, i_data.second);
     FAPI_TRY( mss::putScom(i_target, TT::CTLE_CNTRL_REG[I].first, i_data.first) );
     FAPI_TRY( mss::putScom(i_target, TT::CTLE_CNTRL_REG[I].second, i_data.second) );
@@ -721,6 +734,138 @@ fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<fapi2::TARGET_TYPE
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode reset_rd_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+///
+/// @brief sets up the DQ/DQS driver impedances
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode reset_dq_dqs_drv_imp( const fapi2::Target<T>& i_target );
+
+///
+/// @brief sets the register value for DQ/DQS driver impedance from the VPD value
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
+/// @param[out] o_reg_value values to push into the registers
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode get_dq_dqs_drv_imp_field_value( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint8_t>* o_reg_value );
+
+///
+/// @brief Read dq_dqs_drv_imp
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of both of the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_dq_dqs_drv_imp( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    //one register per DP
+    FAPI_TRY( mss::getScom(i_target, TT::IO_TX_FET_SLICE_REG[I], o_data) );
+    FAPI_INF("dq_dqs_drv_imp dp16<%d>: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write dq_dqs_drv_imp
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of both of the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_dq_dqs_drv_imp( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    //one register per DP
+    FAPI_INF("dq_dqs_drv_imp dp16<%d>: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::IO_TX_FET_SLICE_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief sets up the DQ/DQS receiver impedances
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode reset_dq_dqs_rcv_imp( const fapi2::Target<T>& i_target );
+
+///
+/// @brief sets the register value for DQ/DQS receiver impedance from the VPD value
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
+/// @param[out] o_reg_value values to push into the registers
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode get_dq_dqs_rcv_imp_field_value( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint8_t>* o_reg_value );
+
+///
+/// @brief Read dq_dqs_rcv_imp
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of both of the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_dq_dqs_rcv_imp( const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    //one register per DP
+    FAPI_TRY( mss::getScom(i_target, TT::IO_TX_PFET_TERM_REG[I], o_data) );
+    FAPI_INF("dq_dqs_rcv_imp dp16<%d>: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write dq_dqs_rcv_imp
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of both of the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_dq_dqs_rcv_imp( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    //one register per DP
+    FAPI_INF("dq_dqs_rcv_imp dp16<%d>: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::IO_TX_PFET_TERM_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // close namespace dp16
 } // close namespace mss

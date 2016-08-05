@@ -372,5 +372,97 @@
     <target>TARGET</target>
   </deconfigure>
 </hwpError>
+  
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_VALUE_MC_DRV_IMP_DQ_DQS</rc>
+<description>
+  Value in the VPD for MC_DRV_IMP_DQ_DQS is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<ffdc>DP</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
+
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_VALUE_MC_RCV_IMP_DQ_DQS</rc>
+<description>
+  Value in the VPD for MC_RCV_IMP_DQ_DQS is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<ffdc>DP</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
+
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_MT_MC_DRV_IMP_CLK</rc>
+<description>
+  Value in the VPD for MC_DRV_IMP_CLK is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
+
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_MT_MC_DRV_IMP_CMD_ADDR</rc>
+<description>
+  Value in the VPD for MC_DRV_IMP_CMD_ADDR is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
+
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_MT_MC_DRV_IMP_CNTL</rc>
+<description>
+  Value in the VPD for MC_DRV_IMP_CNTL is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
+
+<hwpError>
+<rc>RC_MSS_INVALID_VPD_MT_MC_DRV_IMP_CSCID</rc>
+<description>
+  Value in the VPD for MC_DRV_IMP_CSCID is not valid.
+</description>
+<ffdc>VALUE</ffdc>
+<callout>
+  <target>MCA_TARGET</target>
+  <priority>HIGH</priority>
+</callout>
+<deconfigure>
+  <target>MCA_TARGET</target>
+</deconfigure>
+</hwpError>
 
 </hwpErrors>
