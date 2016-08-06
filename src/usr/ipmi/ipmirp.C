@@ -40,6 +40,7 @@
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <sys/vfs.h>
 
 #include <targeting/common/commontargeting.H>
@@ -459,6 +460,9 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
             break;
         }
 
+        // tell the istep dispacher to stop executing isteps
+        INITSERVICE::stopIpl();
+
         // register for the post memory flush callback
         INITSERVICE::registerShutdownEvent(iv_msgQ,
                         IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
@@ -469,6 +473,7 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
 
         // initiate the shutdown processing in the background
         INITSERVICE::doShutdown(SHUTDOWN_STATUS_GOOD,true);
+
 
     } while (0);
 
@@ -563,6 +568,7 @@ void IpmiRP::execute(void)
 
     while (true)
     {
+
         msg_t* msg = msg_wait(iv_msgQ);
 
         const IPMI::msg_type msg_type =
@@ -682,11 +688,37 @@ void IpmiRP::execute(void)
 
                 iv_shutdown_msg = msg;   // Reply to this message
 
-
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(NULL, "IPMI: shutdown complete");
+            CONSOLE::displayf(NULL, "IPMI: shutdown complete\n");
             CONSOLE::flush();
 #endif
+
+            }
+            break;
+
+            // begin a graceful reboot initated by us
+        case IPMI::MSG_STATE_INITATE_POWER_CYCLE:
+            {
+                msg_free(msg);
+
+#ifdef CONFIG_CONSOLE
+                CONSOLE::displayf(NULL, "IPMI: Initiate power cycle");
+                CONSOLE::flush();
+#endif
+                // setup the power cmd modifier to tell the bmc to
+                // do a power reset
+                iv_chassis_power_mod = IPMI::CHASSIS_POWER_RESET;
+
+                // register for the post memory flush callback
+                INITSERVICE::registerShutdownEvent(iv_msgQ,
+                        IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
+                        INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
+
+                iv_graceful_shutdown_pending = true;
+                lwsync();
+
+                // initiate the shutdown processing in the background
+                INITSERVICE::doShutdown(SHUTDOWN_STATUS_GOOD,true);
 
             }
             break;
@@ -1044,6 +1076,17 @@ namespace IPMI
         }
 
         return err;
+    }
+
+    ///
+    /// @brief  kick off a reboot
+    ///
+    void initiateReboot()
+    {
+        static msg_q_t mq = Singleton<IpmiRP>::instance().msgQueue();
+        msg_t * msg = msg_allocate();
+        msg->type =  IPMI::MSG_STATE_INITATE_POWER_CYCLE;
+        msg_send(mq, msg);
     }
 
     ///
