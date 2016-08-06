@@ -54,8 +54,11 @@ namespace IPMI
 
         MSG_STATE_GRACEFUL_SHUTDOWN,
 
+        // initate a reboot request
+        MSG_STATE_INITATE_POWER_CYCLE,
+
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_STATE_GRACEFUL_SHUTDOWN,
+        MSG_LAST_TYPE = MSG_STATE_INITATE_POWER_CYCLE,
     };
 
     // chassis power off request types
@@ -345,6 +348,11 @@ namespace IPMI
      */
     size_t max_buffer(void);
 
+    /**
+     * Tells ipmirp to start a graceful reboot sequence
+     *
+     */
+    void initiateReboot();
 
     /**
      * Structure to return BMC/IPMI information in

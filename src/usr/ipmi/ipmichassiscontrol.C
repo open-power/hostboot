@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <ipmi/ipmichassiscontrol.H>
 #include <ipmi/ipmiif.H>
+#include <initservice/istepdispatcherif.H>
 
 /******************************************************************************/
 // Globals/Constants
@@ -74,6 +75,10 @@ errlHndl_t chassisControl(const uint8_t i_chassisControlState )
     {
         IPMI_TRAC("Chassis control : BMC returned not ok CC[%x]",cc);
     }
+
+    // power off command has been sent to the BMC, tell the istep dispacher to
+    // stop executing steps.
+    INITSERVICE::stopIpl();
 
     return err_ipmi;
 }

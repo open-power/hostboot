@@ -41,6 +41,7 @@
 #include <sys/misc.h>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <console/consoleif.H>
 #include <config.h>
 #include <ipmi/ipmiif.H>
@@ -291,8 +292,7 @@ errlHndl_t resolveProcessorSbeSeeproms()
 
 #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting  To "
-                              "Perform SBE Update\n");
-
+                              "Perform SBE Update");
             CONSOLE::flush();
 #endif
 
@@ -1163,25 +1163,12 @@ errlHndl_t sbePreRebootIpmiCalls( void )
         TRACFCOMP( g_trac_sbe,"sbePreRebootIpmiCalls: "
                    "requesting chassis power cycle");
 
-        // Request BMC to do power cycle that sends shutdown
-        // and reset the host
-        err = IPMI::chassisControl(IPMI::CHASSIS_POWER_CYCLE);
-        if(err)
-        {
-            TRACFCOMP( g_trac_sbe,
-                ERR_MRK"sbePreRebootIpmiCalls: "
-                "FAIL executing chassisiControl"
-                "Error Log rc=0x%.4X eid=0x%.8X "
-                "plid=0x%.8X ",
-                err->reasonCode(),
-                err->eid(),
-                err->plid());
+        // tell the istepdispacher to stop
+        INITSERVICE::stopIpl();
 
-                err->collectTrace(SBE_COMP_NAME);
-         }
+        // initate a graceful power cycle
+        INITSERVICE::requestReboot();
 
-
-        
     }while(0);
 
     TRACFCOMP( g_trac_sbe, EXIT_MRK"sbePreRebootIpmiCalls");
