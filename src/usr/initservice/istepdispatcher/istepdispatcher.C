@@ -67,7 +67,7 @@
 #include <pnor/pnorif.H>
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
-#include <ipmi/ipmichassiscontrol.H> 
+#include <ipmi/ipmichassiscontrol.H>
 #include <config.h>
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiif.H>
@@ -123,7 +123,8 @@ IStepDispatcher::IStepDispatcher() :
     iv_istepToCompleteBeforeShutdown(0),
     iv_substepToCompleteBeforeShutdown(0),
     iv_acceptIstepMessages(true),
-    iv_newGardRecord(false)
+    iv_newGardRecord(false),
+    iv_stopIpl(false)
 
 {
     mutex_init(&iv_bkPtMutex);
@@ -382,6 +383,25 @@ errlHndl_t IStepDispatcher::executeAllISteps()
         substep = 0;
         while (substep < g_isteps[istep].numitems)
         {
+            if( iv_stopIpl == true )
+            {
+#ifdef CONFIG_BMC_IPMI
+                // if we came in here and we are connected to a BMC, then
+                // we are in the process of an orderly shutdown, reset the
+                // watchdog to give ample time for the graceful shutdown
+                // to proceed.
+                errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
+                if(err_ipmi)
+                {
+                    TRACFCOMP(g_trac_initsvc,
+                            "init: ERROR: reset IPMI watchdog Failed");
+                    err_ipmi->collectTrace("INITSVC", 1024);
+                    errlCommit(err_ipmi, INITSVC_COMP_ID );
+                }
+#endif
+                stop();
+            }
+
             err = doIstep(istep, substep, l_doReconfig);
 
             if (l_doReconfig)
@@ -569,26 +589,24 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                     "not increment reboot count.");
                             }
 
+                            // discontinue isteps
+                            iv_stopIpl = true;
+
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host
-                            err = IPMI::chassisControl
-                                    (IPMI::CHASSIS_POWER_CYCLE);
-                            if (err)
-                            {
-                                TRACFCOMP(g_trac_initsvc, ERR_MRK
-                                "FAIL executing chassisControl command");
-                                break;
-                            }
+                            requestReboot();
+
                             #endif
                             #ifdef CONFIG_CONSOLE
                             CONSOLE::displayf(NULL,
                                "System Shutting Down "
-                               "To Perform Reconfiguration\n");
+                               "To Perform Reconfiguration");
                             CONSOLE::flush();
                             #endif
                             #ifndef CONFIG_BMC_IPMI
                             shutdownDuringIpl();
                             #endif
+
                         }
                     }
                     // else return the error from doIstep
@@ -619,6 +637,29 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::executeAllISteps()");
 
     return err;
+}
+
+
+
+//-----------------------------------------------------------------------------
+// IStepDispatcher::stop()
+// ---------------------------------------------------------------------------
+void IStepDispatcher::stop()
+{
+
+#ifdef CONFIG_CONSOLE
+    CONSOLE::displayf(NULL,"Stopping istep dispatcher");
+    CONSOLE::flush();
+#endif
+
+    TRACFCOMP(g_trac_initsvc, "IStepDispatcher::stop() - Stopping istep"
+            "dispatcher.");
+
+    printk( "IStepDispatcher stopping" );
+    while(1)
+    {
+        task_yield();
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -1333,7 +1374,12 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleShutdownMsg");
 }
 
-
+#ifdef CONFIG_BMC_IPMI
+void IStepDispatcher::requestReboot()
+{
+    IPMI::initiateReboot();
+}
+#endif
 // ----------------------------------------------------------------------------
 // IStepDispatcher::shutdownDuringIpl()
 // ----------------------------------------------------------------------------
@@ -1387,6 +1433,20 @@ void IStepDispatcher::shutdownDuringIpl()
         INITSERVICE::doShutdown(SHUTDOWN_NOT_RECONFIG_LOOP);
     }
 
+}
+// -----------------------------------------------------------------------------
+// IStepDispatcher::setStopIpl()
+// -----------------------------------------------------------------------------
+void IStepDispatcher::setStopIpl()
+{
+    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::setStopIpl");
+
+    mutex_lock(&iv_mutex);
+    iv_stopIpl = true;
+    mutex_unlock(&iv_mutex);
+
+    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::setStopIpl");
+    return;
 }
 
 // ----------------------------------------------------------------------------
@@ -2018,6 +2078,16 @@ void setAcceptIstepMessages(bool i_accept)
 void setNewGardRecord()
 {
     return IStepDispatcher::getTheInstance().setNewGardRecord();
+}
+#ifdef CONFIG_BMC_IPMI
+void requestReboot()
+{
+    IStepDispatcher::getTheInstance().requestReboot();
+}
+#endif
+void stopIpl()
+{
+    return IStepDispatcher::getTheInstance().setStopIpl();
 }
 
 // ----------------------------------------------------------------------------

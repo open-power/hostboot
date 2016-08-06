@@ -203,6 +203,25 @@ public:
      */
     void setNewGardRecord();
 
+    /**
+     * @brief This function will set a boolean true which tells the istep
+     * dispacher to stop executing steps
+     */
+    void setStopIpl();
+
+    /**
+     * @brief This function will stop the istep dispacher from continuing to
+     * execute steps
+     */
+    void stop();
+#ifdef CONFIG_BMC_IPMI
+    /**
+     * @brief This function will trigger a reboot via ipmi commands
+     */
+    void requestReboot();
+#endif
+
+
 protected:
 
     /**
@@ -423,6 +442,10 @@ private:
 
     // Instance variable to state if a new gard record was committed
     bool iv_newGardRecord;
+
+    // Instance variable to state if a power off is in progress and
+    // the istep dispatcher should stop executing steps
+    bool iv_stopIpl;
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;
