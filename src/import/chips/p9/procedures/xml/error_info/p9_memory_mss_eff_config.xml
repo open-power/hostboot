@@ -36,7 +36,7 @@
 
 <hwpErrors>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_INVALID_TEMP_REF_RANGE</rc>
     <description>
       Invalid Temperature refresh range recieved
@@ -50,9 +50,9 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
     <description>
       Invalid fine refresh mode recieved
@@ -66,9 +66,9 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_INVALID_KEY</rc>
     <description>
       Conditional that tests whether a certain key value is located in a map.
@@ -82,9 +82,9 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_INVALID_VPD_VREF_DRAM_WR_RANGE</rc>
     <description>
       Value in the VPD for VREF dram WR range is outside of the JEDEC spec's range.
@@ -98,6 +98,6 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
 
 </hwpErrors>

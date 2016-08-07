@@ -56,10 +56,19 @@ class eff_config
         // state of decoder timebases, target, fapi2 positions,
         // and clock period eliminate code duplication.
 
-        //
-        // @brief Constructor
-        //
-        eff_config() = default;
+        ///
+        /// @brief Constructor
+        /// @tparam T, the fapi2::TargetType of the target
+        /// @param[in] i_target, the fapi2::Target which we're configuring
+        /// @param[out] o_rc, a return code which determines the success of the constructor
+        ///
+        template< fapi2::TargetType T >
+        eff_config( const fapi2::Target<T>& i_target, fapi2::ReturnCode& o_rc )
+        {
+            // Decode the VPD for this MCS and stick it in the attributes.
+            o_rc = decode_vpd(i_target);
+            return;
+        }
 
         //
         // @brief Destructor
@@ -768,6 +777,7 @@ class eff_config
         ///
         fapi2::ReturnCode dram_trtp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
+    private:
         ///
         /// @brief Grab the VPD blobs and decode into attributes
         /// @param[in] i_target FAPI2 target (MCS)

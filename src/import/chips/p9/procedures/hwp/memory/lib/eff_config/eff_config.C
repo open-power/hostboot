@@ -3398,8 +3398,11 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
 {
-    uint8_t l_mt_blob[mss::VPD_KEYWORD_MAX];
-    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX];
+    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {0};
+    std::vector<uint8_t*> l_mt_blobs(PORTS_PER_MCS, nullptr);
+
+    // For sanity. Not sure this will break us, but we're certainly making assumptions below.
+    static_assert(MAX_DIMM_PER_PORT == 2, "Max DIMM per port isn't 2");
 
     // Get MT data
     {
@@ -3415,8 +3418,41 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
         }
 
         // For MT we need to fill in the rank information
-        // TODO RTC:157758 Seems the interface is incorrect, but we're just returning fake VPD here anyway
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
+        // But, of course, the rank information can differ per port. However, the vpd interface doesn't
+        // allow this in a straight-forward way. So, we have to get VPD blobs for MCS which contain
+        // ports which have the rank configuration in question. This means, basically, we pass a MCS MT
+        // blob to the decoder for each MCA, regardless of whether the port configurations are the same.
+        for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
+        {
+            uint8_t* l_mt_blob = new uint8_t[mss::VPD_KEYWORD_MAX];
+            uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
+
+            // Make sure the mt blob is all 0's. In the event that we get an MCA who has 0 ranks (no DIMM)
+            // we don't want to get the VPD (that will fail) but we can't give up. Cronus will
+            // give us MCA with 0 DIMM, so we'll just use a 0-filled VPD for those MCA.
+            memset(l_mt_blob, 0, mss::VPD_KEYWORD_MAX);
+
+            for (const auto& d : find_targets<TARGET_TYPE_DIMM>(p))
+            {
+                uint8_t l_num_master_ranks = 0;
+                FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
+                l_rank_count_dimm[mss::index(d)] = l_num_master_ranks;
+            }
+
+            // This value will, of course, be 0 if there is no DIMM in the port.
+            l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
+            l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+
+            // Get the MCS blob for this specific rank combination *only if* we have DIMM. Remember,
+            // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.
+            if ((l_vpd_info.iv_rank_count_dimm_0 != 0) || (l_vpd_info.iv_rank_count_dimm_1 != 0))
+            {
+                FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
+            }
+
+            // Put it in the vector in the right place.
+            l_mt_blobs[mss::index(p)] = l_mt_blob;
+        }
     }
 
     // Get MR data
@@ -3433,13 +3469,31 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
         }
 
         // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
-        FAPI_TRY( mss::freq(mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
+        FAPI_TRY( mss::freq(find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
+
+        // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
+        // is connected to a controller which has 0 DIMM installed. In this case, we won't have
+        // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
+        // there's no freq, we us a 0 filled VPD.
+        if (l_vpd_info.iv_freq_mhz != 0)
+        {
+            FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
+        }
     }
 
-    FAPI_TRY( mss::eff_decode(i_target, l_mt_blob, l_mr_blob) );
+    FAPI_TRY( mss::eff_decode(i_target, l_mt_blobs, l_mr_blob) );
 
 fapi_try_exit:
+
+    // delete the mt blobs
+    for (auto p : l_mt_blobs)
+    {
+        if (p != nullptr)
+        {
+            delete[] p;
+        }
+    }
+
     return fapi2::current_err;
 }
 
