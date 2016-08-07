@@ -50,14 +50,14 @@
 ///
 fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 {
-    mss::eff_config l_eff_config;
+    fapi2::ReturnCode l_rc;
+    std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+
+    mss::eff_config l_eff_config(i_target, l_rc);
+    FAPI_TRY(l_rc, "Unable to decode VPD for %s", mss::c_str(i_target) );
 
     // Caches
-    std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
-
-    // Decode the VPD for this MCS and stick it in the attributes.
-    FAPI_TRY( l_eff_config.decode_vpd(i_target) );
 
     for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
