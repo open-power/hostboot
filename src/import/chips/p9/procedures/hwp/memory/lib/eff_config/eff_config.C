@@ -2681,7 +2681,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::geardown_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_geardown_mode(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2691,9 +2690,15 @@ fapi2::ReturnCode eff_config::geardown_mode(const fapi2::Target<TARGET_TYPE_DIMM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    // Attribute storage
+    uint8_t l_2n_autoset = 0;
+    FAPI_TRY( mss::vpd_mr_mc_2n_mode_autoset(i_target, l_2n_autoset) );
+
     FAPI_TRY( eff_geardown_mode(l_mcs, l_attrs_geardown_mode.data()) );
 
-    l_attrs_geardown_mode[l_port_num] = 0x00;
+    // TODO RTC:158856 Mirrored eff attribute from vpd attribute.
+    // Geardown maps directly to autoset = 0 gets 1/2 rate, 1 get 1/4 rate.
+    l_attrs_geardown_mode[l_port_num] = l_2n_autoset;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_GEARDOWN_MODE,
                             l_mcs,
