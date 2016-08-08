@@ -93,7 +93,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dram_dqs_time(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tccd_l(l_dimm) );
         FAPI_TRY( l_eff_config.data_mask(l_dimm) );
-        FAPI_TRY( l_eff_config.rtt_park(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc00(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc01(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_rc02(l_dimm) );
@@ -130,7 +129,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dll_enable(l_dimm) );
         FAPI_TRY( l_eff_config.dll_reset(l_dimm) );
         FAPI_TRY( l_eff_config.dram_ron(l_dimm) );
-        FAPI_TRY( l_eff_config.rtt_nom(l_dimm) );
         FAPI_TRY( l_eff_config.write_level_enable(l_dimm) );
         FAPI_TRY( l_eff_config.output_buffer(l_dimm) );
         FAPI_TRY( l_eff_config.vref_dq_train_value(l_dimm) );
@@ -159,7 +157,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.mpr_page(l_dimm) );
         FAPI_TRY( l_eff_config.mpr_mode(l_dimm) );
         FAPI_TRY( l_eff_config.write_crc(l_dimm) );
-        FAPI_TRY( l_eff_config.rtt_write(l_dimm) );
         FAPI_TRY( l_eff_config.zqcal_interval(l_dimm) );
         FAPI_TRY( l_eff_config.memcal_interval(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trp(l_dimm) );
