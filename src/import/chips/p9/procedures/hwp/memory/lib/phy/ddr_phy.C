@@ -836,8 +836,8 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
 
-    FAPI_TRY( mss::eff_odt_rd(i_target, &(l_odt_rd[0][0])) );
-    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
+    FAPI_TRY( mss::vpd_mt_odt_rd(i_target, &(l_odt_rd[0][0])) );
+    FAPI_TRY( mss::vpd_mt_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
     // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
     // So there's not much point in looping over DIMM or ranks.
