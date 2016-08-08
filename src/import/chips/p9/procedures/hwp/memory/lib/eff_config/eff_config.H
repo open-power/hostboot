@@ -201,19 +201,6 @@ class eff_config
         fapi2::ReturnCode dram_dqs_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for ODT RD
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode odt_read(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
-        /// @brief Determines & sets effective config for ODT WR
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode odt_write(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-        ///
         /// @brief Determines & sets effective config for tCCD_L
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
