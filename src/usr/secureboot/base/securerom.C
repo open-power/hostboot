@@ -87,12 +87,9 @@ errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
  * @brief Hash concatenation of 2 Blobs
  *
  */
-errlHndl_t hashConcatBlobs(const void* i_blob1, size_t i_blob1Size,
-                           const void* i_blob2, size_t i_blob2Size,
-                           SHA512_t o_buf)
+errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
 {
-    return Singleton<SecureROM>::instance().hashConcatBlobs(i_blob1,
-                                    i_blob1Size, i_blob2, i_blob2Size, o_buf);
+    return Singleton<SecureROM>::instance().hashConcatBlobs(i_blobs, o_buf);
 }
 
 /*
@@ -439,30 +436,25 @@ errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf) co
 }
 
 /**
- * @brief Hash concatenation of 2 Blobs
+ * @brief Hash concatenation of N Blobs
  */
-errlHndl_t SecureROM::hashConcatBlobs(const void* i_blob1, size_t i_blob1Size,
-                                      const void* i_blob2, size_t i_blob2Size,
+errlHndl_t SecureROM::hashConcatBlobs(const blobPair_t &i_blobs,
                                       SHA512_t o_buf) const
 {
     errlHndl_t l_errl = NULL;
-
-    assert(i_blob1 != NULL);
-    assert(i_blob2 != NULL);
-
-    size_t l_concatSize = i_blob1Size + i_blob2Size;
-    uint8_t* l_concatBuf = new uint8_t[l_concatSize]();
-
-    // Copy first blob
-    memcpy(l_concatBuf, i_blob1, i_blob1Size);
-    // Copy second blob
-    memcpy(l_concatBuf + i_blob1Size, i_blob2, i_blob2Size);
+    std::vector<uint8_t> l_concatBuf;
+    for (blobPair_t::const_iterator it = i_blobs.begin();
+         it != i_blobs.end(); ++it)
+    {
+        assert(it->first != NULL, "SecureROM::hashConcatBlobs: User passed in NULL blob pointer");
+        uint8_t* l_blob =  static_cast<uint8_t*>(it->first);
+        size_t l_blobSize = it->second;
+        l_concatBuf.insert(l_concatBuf.end(), l_blob, l_blob + l_blobSize);
+    }
 
     // Call hash blob on new concatenated buffer
-    l_errl = hashBlob(l_concatBuf,l_concatSize,o_buf);
+    l_errl = hashBlob(&l_concatBuf[0],l_concatBuf.size(),o_buf);
 
-    delete[] l_concatBuf;
-    l_concatBuf = NULL;
     return l_errl;
 }
 

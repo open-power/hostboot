@@ -397,11 +397,14 @@ uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
                                                         i_hashPageTableOffset);
 
     // Concatenate previous page table entry with current page data
+    std::vector< std::pair<void*,size_t> > l_blobs;
+    l_blobs.push_back(std::make_pair<void*,size_t>(l_prevPageTableEntry,
+                                                   HASH_PAGE_TABLE_ENTRY_SIZE));
+    l_blobs.push_back(std::make_pair<void*,size_t>(
+                                        reinterpret_cast<void*>(l_pnorVaddr),
+                                        PAGE_SIZE));
     SHA512_t l_curPageHash = {0};
-    SECUREBOOT::hashConcatBlobs(l_prevPageTableEntry,
-                                HASH_PAGE_TABLE_ENTRY_SIZE,
-                                reinterpret_cast<void*>(l_pnorVaddr), PAGE_SIZE,
-                                l_curPageHash);
+    SECUREBOOT::hashConcatBlobs(l_blobs, l_curPageHash);
 
     // Compare existing hash page table entry with the derived one.
     if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)

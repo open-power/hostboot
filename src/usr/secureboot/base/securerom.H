@@ -28,6 +28,9 @@
 
 #include <errl/errlentry.H>
 #include <secureboot/rom.H>
+#include <utility>
+
+typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 
 /** @class SecureROM
  *  @brief Class for loading and interacting with SecureROM in memory
@@ -77,20 +80,18 @@ class SecureROM
         void getHwHashKeys(sha2_hash_t o_hash);
 
         /*
-         * @brief Hash the concatenation of two Blobs
+         * @brief Hash the concatenation of N Blobs
          *
-         *  Asserts if either blobs are NULL
+         * Asserts if any blob pointer is NULL
          *
-         * @param[in]  i_blob1      Void pointer to effective address of blob1
-         * @param[in]  i_blob1Size  Size of blob1 in bytes
-         * @param[in]  i_blob2      Void pointer to effective address of blob2
-         * @param[in]  i_blob2Size  Size of blob2 in bytes
-         * @param[out] o_hash       SHA512 hash
+         * @param[in]  i_blobs     Vector of pairs composed of a void
+         *                         pointer to effective address and size
+         *                         of the blob to concatenate
+         * @param[out] o_buf       SHA512 hash
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t hashConcatBlobs (const void* i_blob1, size_t i_blob1Size,
-                                    const void* i_blob2, size_t i_blob2Size,
+        errlHndl_t hashConcatBlobs (const blobPair_t &i_blobs,
                                     SHA512_t o_buf) const;
 
     protected:
