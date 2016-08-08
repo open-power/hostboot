@@ -232,7 +232,7 @@ fapi2::ReturnCode pm_occ_fir_init(
     FAPI_TRY(l_occFir.setMalfAlert(CME_ERR_NOTIFY),
              "ERROR: Failed to set Malf alert");
     FAPI_TRY(l_occFir.setRecvAttn(STOP_RCV_NOTIFY_PRD),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setMalfAlert(OCC_HB_NOTIFY),
              "ERROR: Failed to set Malf alert");
     FAPI_TRY(l_occFir.mask(GPE0_WD_TIMEOUT),
@@ -243,32 +243,32 @@ fapi2::ReturnCode pm_occ_fir_init(
              "ERROR: Failed to set Malf alert");
     FAPI_TRY(l_occFir.mask(GPE3_WD_TIMEOUT),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(GPE0_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(GPE1_ERR),
-             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.setRecvAttn(GPE0_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(GPE1_ERR),
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvIntr(GPE2_ERR),
-             "ERROR: Failed to set recovery interrupt");
+             "ERROR: Failed to set recovery on interrupt");
     FAPI_TRY(l_occFir.setMalfAlert(GPE3_ERR),
              "ERROR: Failed to set Malf alert");
     FAPI_TRY(l_occFir.mask(OCB_ERR),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_UE),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_CE),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_READ_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_WRITE_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_DATAOUT_PERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_OCI_WDATA_PARITY),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_OCI_BE_PARITY_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRT_OCI_ADDR_PARITY_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.mask(GPE0_HALTED),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(GPE1_HALTED),
@@ -289,76 +289,70 @@ fapi2::ReturnCode pm_occ_fir_init(
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.mask(PPC405_DBGSTOPACK),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_DB_OCI_TIMEOUT),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_DB_OCI_RDATA_PARITY),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_DB_OCI_SLVERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_PIB_ADDR_PARITY_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_DB_PIB_DATA_PARITY_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_IDC0_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_IDC1_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_IDC2_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(OCB_IDC3_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(SRT_FSM_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(JTAGACC_ERR),
-             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_DB_OCI_TIMEOUT),
+             "ERROR: Failed to set recoverable atention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_DB_OCI_RDATA_PARITY),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_DB_OCI_SLVERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_PIB_ADDR_PARITY_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_DB_PIB_DATA_PARITY_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_IDC0_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_IDC1_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_IDC2_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(OCB_IDC3_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(SRT_FSM_ERR),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(JTAGACC_ERR),
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.mask(SPARE_ERR_38),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_UE),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_occFir.mask(C405_ECC_CE),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.mask(C405_OCI_MC_CHK),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_CE),
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(C405_OCI_MC_CHK),
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRAM_SPARE_DIRERR0),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRAM_SPARE_DIRERR1),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRAM_SPARE_DIRERR2),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(SRAM_SPARE_DIRERR3),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(GPE0_OCISLV_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(GPE1_OCISLV_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(GPE2_OCISLV_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(GPE3_OCISLV_ERR),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(C405ICU_M_TIMEOUT),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
+    FAPI_TRY(l_occFir.setRecvAttn(C405DCU_M_TIMEOUT),
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(OCC_CMPLX_FAULT),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_occFir.mask(OCC_CMPLX_NOTIFY),
-             "ERROR: Failed to mask bit");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.setRecvAttn(OCC_CMPLX_NOTIFY),
-             "ERROR: Failed to set recovery attention");
+             "ERROR: Failed to set recoverable attention");
     FAPI_TRY(l_occFir.mask(SPARE_59),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setRecvAttn(SPARE_59),
-             "ERROR: Failed to set recovery attention");
     FAPI_TRY(l_occFir.mask(SPARE_60),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setRecvAttn(SPARE_60),
-             "ERROR: Failed to set recovery attention");
     FAPI_TRY(l_occFir.mask(SPARE_61),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_occFir.setRecvAttn(SPARE_61),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_occFir.setRecvAttn(FIR_PARITY_ERR_DUP),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_occFir.setRecvAttn(FIR_PARITY_ERR),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_occFir.mask(FIR_PARITY_ERR_DUP),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_occFir.mask(FIR_PARITY_ERR),
+             "ERROR: Failed to mask bit");
 
     if (firinit_done_flag)
     {
