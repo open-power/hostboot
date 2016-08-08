@@ -1117,6 +1117,11 @@ sub getFileContributors
         chomp($curAuthorEmail);
         push(@gitAuthors, $curAuthorEmail);
     }
+    # Internal mirror, add IBM as contributor
+    elsif ($ENV{'MIRROR'} == 1)
+    {
+        push(@gitAuthors, "\@ibm.com>");
+    }
 
     foreach my $contributor (@gitAuthors)
     {
