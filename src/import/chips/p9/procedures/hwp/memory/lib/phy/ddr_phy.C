@@ -671,6 +671,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Reset the AC Boost controls from the values in VPD
         FAPI_TRY( mss::dp16::reset_ac_boost_cntl(p) );
+
+        // Reset the CTLE controls from the values in VPD
+        FAPI_TRY( mss::dp16::reset_ctle_cntl(p) );
     }
 
 fapi_try_exit:
