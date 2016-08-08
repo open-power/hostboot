@@ -66,7 +66,7 @@ mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     FAPI_TRY( mss::eff_dram_ron(i_target, iv_odic) );
     FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency) );
     FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable) );
-    FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
+    FAPI_TRY( mss::vpd_mt_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
     FAPI_TRY( mss::eff_dram_tdqs(i_target, iv_tdqs) );
     FAPI_TRY( mss::eff_dram_output_buffer(i_target, iv_qoff) );
 
@@ -120,7 +120,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     // Indexed by denominator. So, if RQZ is 240, and you have OHM240, then you're looking
     // for index 1. So this doesn't correspond directly with the table in the JEDEC spec,
     // as that's not in "denominator order."
-    //                                      0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    //                                   0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
     constexpr uint8_t rtt_nom_map[8] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
 
     size_t l_rtt_nom_index = 0;
@@ -143,7 +143,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     // We have to be careful about 0
     l_rtt_nom_index = (i_data.iv_rtt_nom[mss::index(i_rank)] == 0) ?
-                      0 : fapi2::ENUM_ATTR_EFF_DRAM_RTT_NOM_OHM240 / i_data.iv_rtt_nom[mss::index(i_rank)];
+                      0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_NOM_OHM240 / i_data.iv_rtt_nom[mss::index(i_rank)];
 
     // Map from RTT_NOM array to the value in the map
     l_rtt_nom_buffer = rtt_nom_map[l_rtt_nom_index];

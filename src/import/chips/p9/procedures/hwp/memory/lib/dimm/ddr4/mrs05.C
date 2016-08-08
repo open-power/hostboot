@@ -68,7 +68,7 @@ mrs05_data::mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     FAPI_TRY( mss::eff_crc_error_clear(i_target, iv_crc_error_clear) );
     FAPI_TRY( mss::eff_ca_parity_error_status(i_target, iv_ca_parity_error_status) );
     FAPI_TRY( mss::eff_odt_input_buff(i_target, iv_odt_input_buffer) );
-    FAPI_TRY( mss::eff_rtt_park(i_target, &(iv_rtt_park[0])) );
+    FAPI_TRY( mss::vpd_mt_dram_rtt_park(i_target, &(iv_rtt_park[0])) );
     FAPI_TRY( mss::eff_ca_parity(i_target, iv_ca_parity) );
     FAPI_TRY( mss::eff_data_mask(i_target, iv_data_mask) );
     FAPI_TRY( mss::eff_write_dbi(i_target, iv_write_dbi) );
@@ -152,9 +152,9 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     // We have to be careful about 0
     l_rtt_park_index = (i_data.iv_rtt_park[mss::index(i_rank)] == 0) ?
-                       0 : fapi2::ENUM_ATTR_EFF_RTT_PARK_240OHM / i_data.iv_rtt_park[mss::index(i_rank)];
+                       0 : fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_PARK_240OHM / i_data.iv_rtt_park[mss::index(i_rank)];
 
-    // Map from RTT_NOM array to the value in the map
+    // Map from RTT_PARK array to the value in the map
     l_rtt_park_buffer = rtt_park_map[l_rtt_park_index];
 
     FAPI_INF("MR5 rank %d attributes: CAPL: 0x%x(0x%x), CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "

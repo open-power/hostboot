@@ -61,7 +61,7 @@
        <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
           FOR LAB USE ONLY: Frequency override of this memory channel in MT/s
-	  comprising of up to three DIMMs.
+          comprising of up to three DIMMs.
           Set by config file or an attribute writing program.
           Consumed by mss_freq.
           The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
@@ -1808,24 +1808,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_RTT_PARK</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RTT_Park value. This is for DDR4 MRS5.
-            Computed in mss_eff_cnfg. Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
-        <writeable/>
-        <array> 2 2 4</array>
-        <mssAccessorName>eff_rtt_park</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_CA_PARITY</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -2959,48 +2941,6 @@
         <array>2 2</array>
         <writeable/>
         <mssAccessorName>eff_dram_ron</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_RTT_NOM</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DRAM Rtt_Nom.
-            Used in various locations and comes from the MT keyword of the VPD
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>
-          DISABLE = 0,
-          OHM20 = 20,
-          OHM30 = 30,
-          OHM34 = 34,
-          OHM40 = 40,
-          OHM48 = 48,
-          OHM60 = 60,
-          OHM80 = 80,
-          OHM120 = 120,
-          OHM240 = 240
-        </enum>
-        <array> 2 2 4</array>
-        <writeable/>
-        <mssAccessorName>eff_dram_rtt_nom</mssAccessorName>
-    </attribute>
-
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_RTT_WR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DRAM Rtt_WR.
-            Used in various locations and comes from the MT keyword of the VPD
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
-        <array>2 2 4</array>
-        <writeable/>
-        <mssAccessorName>eff_dram_rtt_wr</mssAccessorName>
     </attribute>
 
     <attribute>

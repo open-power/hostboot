@@ -853,38 +853,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for RTT Park
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::rtt_park(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-
-    // Attribute to set num dimm ranks is a pre-requisite
-    uint8_t l_attrs_rtt_park[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    std::vector< uint64_t > l_ranks;
-
-    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-    const auto l_dimm_num = index(i_target);
-
-    FAPI_TRY( eff_rtt_park(l_mcs, &l_attrs_rtt_park[0][0][0]) );
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
-
-    for(const auto& l_rank : l_ranks)
-    {
-        l_attrs_rtt_park[l_port_num][l_dimm_num][index(l_rank)] = 0x00;
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_RTT_PARK, l_mcs, l_attrs_rtt_park) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-///
 /// @brief Determines & sets effective config for DIMM RC00
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -1875,37 +1843,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for RTT NOM
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::rtt_nom(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-
-    uint8_t l_attrs_rtt_nom[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    std::vector< uint64_t > l_ranks;
-
-    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-    const auto l_dimm_num = index(i_target);
-
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
-    FAPI_TRY( eff_dram_rtt_nom(l_mcs, &l_attrs_rtt_nom[0][0][0]) );
-
-    for(const auto& l_rank : l_ranks)
-    {
-        l_attrs_rtt_nom[l_port_num][l_dimm_num][index(l_rank)] = 0x28;
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_NOM, l_mcs, l_attrs_rtt_nom),
-              "Failed setting attribute for BL");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Determines & sets effective config for Write Level Enable
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -2785,38 +2722,6 @@ fapi2::ReturnCode eff_config::write_crc(const fapi2::Target<TARGET_TYPE_DIMM>& i
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_write_crc, PORTS_PER_MCS)),
               "Failed setting attribute for WRITE_CRC");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Determines & sets effective config for RTT Write
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::rtt_write(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-
-    uint8_t l_attrs_rtt_wr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    std::vector< uint64_t > l_ranks;
-
-    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
-    const auto l_dimm_num = index(i_target);
-
-    // Attribute to set num dimm ranks is a pre-requisite
-    FAPI_TRY( eff_dram_rtt_wr(l_mcs, &l_attrs_rtt_wr[0][0][0]) );
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
-
-    for(const auto& l_rank : l_ranks)
-    {
-        l_attrs_rtt_wr[l_port_num][l_dimm_num][index(l_rank)] = 0x00;
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RTT_WR, l_mcs, l_attrs_rtt_wr),
-              "Failed setting attribute for BL");
 
 fapi_try_exit:
     return fapi2::current_err;

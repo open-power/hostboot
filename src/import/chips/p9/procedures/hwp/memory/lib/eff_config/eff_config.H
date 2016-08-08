@@ -208,13 +208,6 @@ class eff_config
         fapi2::ReturnCode dram_tccd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for RTT Park
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
         /// @brief Determines & sets effective config for DIMM RC00
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -470,13 +463,6 @@ class eff_config
         fapi2::ReturnCode dram_ron(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for RTT NOM
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
         /// @brief Determines & sets effective config for Write Level Enable
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -679,13 +665,6 @@ class eff_config
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode write_crc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
-        /// @brief Determines & sets effective config for RTT Write
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode rtt_write(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for ZQ Calibration
