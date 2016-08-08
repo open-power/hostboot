@@ -61,10 +61,6 @@ namespace Util
         MSG_TYPE_TRACE          =       0x00,
         MSG_TYPE_ATTRDUMP       =       0x01,
 
-
-        ISTEP_CONFIG_BIT        =       0x8000000000000000,
-        MPIPL_CONFIG_BIT        =       0x2000000000000000,
-
     };
 
     /**
@@ -85,11 +81,11 @@ namespace Util
      *  These scom addresses are always accessible and any errors are commited
      *  internally
      * @param[in] i_addr        Scom address of mailbox reg to write
-     * @param[in] i_data        Data to write to mailbox (only 0:31 are valid)
+     * @param[in] i_data        Data to write to mailbox
      *
      * @return none
      */
-      void writeScratchReg(uint64_t i_addr, uint64_t i_data);
+    void writeScratchReg(uint64_t i_addr, uint32_t i_data);
 
     /**
      * @brief This function reads data to mailbox scratch reg
@@ -97,9 +93,9 @@ namespace Util
      *  internally
      * @param[in] i_addr        Scom address of mailbox reg to read
      *
-     * @return Data in mailbox scratch reg (only 0:31 are valid)
+     * @return Data in mailbox scratch reg
      */
-      uint64_t readScratchReg(uint64_t i_addr);
+    uint32_t readScratchReg(uint64_t i_addr);
 };
 
 #endif //UTILMEM_H

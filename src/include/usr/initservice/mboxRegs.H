@@ -29,14 +29,31 @@ namespace INITSERVICE
 {
 namespace SPLESS
 {
-    const   uint32_t    MBOX_SCRATCH_REG1               =   0x00050038;
-    const   uint32_t    MBOX_SCRATCH_REG2               =   0x00050039;
-    const   uint32_t    MBOX_SCRATCH_REG3               =   0x0005003a;
-    const   uint32_t    MBOX_SCRATCH_REG4               =   0x0005003b;
-    const   uint32_t    MBOX_SCRATCH_REG5               =   0x0005003c;
-    const   uint32_t    MBOX_SCRATCH_REG6               =   0x0005003d;
-    const   uint32_t    MBOX_SCRATCH_REG7               =   0x0005003e;
-    const   uint32_t    MBOX_SCRATCH_REG8               =   0x0005003f;
+    const   uint32_t    MBOX_SCRATCH_REG1 =   0x00050038; //CFAM 2838
+    const   uint32_t    MBOX_SCRATCH_REG2 =   0x00050039; //CFAM 2839
+    const   uint32_t    MBOX_SCRATCH_REG3 =   0x0005003a; //CFAM 283A
+    const   uint32_t    MBOX_SCRATCH_REG4 =   0x0005003b; //CFAM 283B
+    const   uint32_t    MBOX_SCRATCH_REG5 =   0x0005003c; //CFAM 283C
+    const   uint32_t    MBOX_SCRATCH_REG6 =   0x0005003d; //CFAM 283D
+    const   uint32_t    MBOX_SCRATCH_REG7 =   0x0005003e; //CFAM 283E
+    const   uint32_t    MBOX_SCRATCH_REG8 =   0x0005003f; //CFAM 283F
+
+
+    // Mailbox Scratch Register 3
+    union MboxScratch3_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t istepMode:1;       //0
+            uint32_t goToRuntime:1;     //1
+            uint32_t isMpipl:1;         //2
+            uint32_t fspAttached:1;     //3
+            uint32_t sbeFFDC:1;         //4
+            uint32_t sbeInternalFFDC:1; //5
+            uint32_t reserved:26;       //6:31
+        } PACKED;
+    };
 };
 };
 #endif
