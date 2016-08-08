@@ -201,38 +201,38 @@ fapi2::ReturnCode pm_pba_fir_init(
              "ERROR: Failed to clear PBA FIR");
 
     /*  Set the action and mask for the PBA LFIR bits */
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_APAR_ERR),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_RDADRERR_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_RDDATATO_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_SUE_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UE_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CE_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_SLAVE_INIT),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_WRPAR_ERR),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_APAR_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDADRERR_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDDATATO_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_SUE_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UE_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_CE_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_SLAVE_INIT),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_WRPAR_ERR),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_REREQTO),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UNEXPCRESP),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UNEXPDATA),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_PARITY_ERR),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_WRADRERR_FW),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_BADCRESP),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_ACKDEAD_FW_RD),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CRESPTO),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UNEXPCRESP),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UNEXPDATA),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_PARITY_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_WRADRERR_FW),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_BADCRESP),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_RD),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_CRESPTO),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_SETUP_ERR),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_PB_ACK_DEAD),
@@ -257,12 +257,12 @@ fapi2::ReturnCode pm_pba_fir_init(
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_OCI_DATERR),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_INTERNAL_ERR),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_ILLEGAL_CACHE_OP),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_BAD_REG_ADDR),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_INTERNAL_ERR),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_ILLEGAL_CACHE_OP),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_BAD_REG_ADDR),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXPUSH_WRERR),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_ERR),
@@ -281,18 +281,18 @@ fapi2::ReturnCode pm_pba_fir_init(
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_RSVERR),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_ACKDEAD_FW_WR),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_WR),
+             "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_41),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_42),
              "ERROR: Failed to mask bit");
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_43),
              "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_FIR_PARITY_ERR2),
-             "ERROR: Failed to set recovery attention");
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_FIR_PARITY_ERR),
-             "ERROR: Failed to set recovery attention");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_FIR_PARITY_ERR2),
+             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_FIR_PARITY_ERR),
+             "ERROR: Failed to mask bit");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
                            i_target, firinit_done_flag),
