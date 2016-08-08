@@ -1,8 +1,9 @@
-/#-- $Id: mba_def.initfile,v 1.84 2016/05/25 17:55:58 dcadiga Exp $
+/#-- $Id: mba_def.initfile,v 1.85 2016/08/04 14:22:25 dcadiga Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.85|dcadiga |08/01/16| Removed Al from W2R TIMERS TSV Hardware (13-12-11 DIMMs)
 #--     1.84|dcadiga |05/20/16| Removed Al from W2R TIMERS
 #--     1.83|sglancy |03/10/16| Fixed RCD parity bug
 #--     1.82|sglancy |03/07/16| Updated RDTAG timing for DDR4 RCD Parity
@@ -522,7 +523,7 @@ define  def_mba_tmr0q_RW_dlys16 = ((def_ddr4_1600_13_12_11_LR)||(def_ddr4_1600_1
 #new  19,20,21
 
 
-define  def_mba_tmr0q_WRSM_dlys15 = ((def_ddr4_1600_11_11_11    )||(def_ddr4_1600_11_11_11_2N )||(def_ddr4_1600_11_11_11R   )||(def_ddr4_1600_11_11_11_LR )||(def_ddr4_1600_11_11_11_L2 ));
+define  def_mba_tmr0q_WRSM_dlys15 = ((def_ddr4_1600_11_11_11    )||(def_ddr4_1600_11_11_11_2N )||(def_ddr4_1600_11_11_11R   )||(def_ddr4_1600_11_11_11_LR )||(def_ddr4_1600_11_11_11_L2 )||(def_ddr4_1600_13_12_11)||(def_ddr4_1600_13_12_11_2N));
 define  def_mba_tmr0q_WRSM_dlys19 = (def_ddr3_1066_6_6_6_group);
 define  def_mba_tmr0q_WRSM_dlys20 = (def_ddr3_1066_7_7_7_group);
 define  def_mba_tmr0q_WRSM_dlys21 = (def_ddr3_1066_8_8_8_group);
@@ -530,7 +531,7 @@ define  def_mba_tmr0q_WRSM_dlys21 = (def_ddr3_1066_8_8_8_group);
 define  def_mba_tmr0q_WRSM_dlys23 = ((def_ddr3_1333_8_8_8       )||(def_ddr3_1333_8_8_8_2N    )||(def_ddr3_1333_8_8_8R      )||(def_ddr3_1333_8_8_8_LR    )||(def_ddr3_1333_8_8_8_L2));
 define  def_mba_tmr0q_WRSM_dlys24 = ((def_ddr3_1333_9_9_9       )||(def_ddr3_1333_9_9_9_2N    )||(def_ddr3_1333_9_9_9R      )||(def_ddr3_1333_9_9_9_LR    )||(def_ddr3_1333_9_9_9_L2    ));
 define  def_mba_tmr0q_WRSM_dlys25 = ((def_ddr4_1600_9_9_9       )||(def_ddr4_1600_9_9_9_2N    )||(def_ddr4_1600_9_9_9R      )||(def_ddr4_1600_9_9_9_LR    )||(def_ddr4_1600_9_9_9_L2    ));
-define  def_mba_tmr0q_WRSM_dlys26 = ((def_ddr3_1600_9_9_9       )||(def_ddr3_1600_9_9_9_2N    )||(def_ddr3_1600_9_9_9R      )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10    )||(def_ddr4_1600_10_10_10_2N )||(def_ddr4_1600_10_10_10R   )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2 )||(def_ddr4_1600_13_12_11)||(def_ddr4_1600_13_12_11_2N));
+define  def_mba_tmr0q_WRSM_dlys26 = ((def_ddr3_1600_9_9_9       )||(def_ddr3_1600_9_9_9_2N    )||(def_ddr3_1600_9_9_9R      )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10    )||(def_ddr4_1600_10_10_10_2N )||(def_ddr4_1600_10_10_10R   )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2 ));
 define  def_mba_tmr0q_WRSM_dlys27 = ((def_ddr3_1600_10_10_10    )||(def_ddr3_1600_10_10_10_2N )||(def_ddr3_1600_10_10_10R   )||(def_ddr3_1600_10_10_10_LR )||(def_ddr3_1600_10_10_10_L2 ));
 define  def_mba_tmr0q_WRSM_dlys28 = (def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2 || (def_ddr3_1600_11_11_11    )||(def_ddr3_1600_11_11_11_2N )||(def_ddr3_1600_11_11_11R   )||(def_ddr3_1600_11_11_11_LR )||(def_ddr3_1600_11_11_11_L2 )||(def_ddr4_1866_11_11_11    )||(def_ddr4_1866_11_11_11_2N )||(def_ddr4_1866_11_11_11R   )||(def_ddr4_1866_11_11_11_LR )||(def_ddr4_1866_11_11_11_L2 ));
 define  def_mba_tmr0q_WRSM_dlys29 = ((def_ddr4_1866_12_12_12    )||(def_ddr4_1866_12_12_12_2N )||(def_ddr4_1866_12_12_12R   )||(def_ddr4_1866_12_12_12_LR )||(def_ddr4_1866_12_12_12_L2 ));
@@ -553,11 +554,11 @@ define  def_mba_tmr1q_RRSBG_dlys6 = ((def_ddr4_2133_13_13_13    )||( def_ddr4_21
 
 #new all 0
 define  def_mba_tmr1q_WRSBG_dlys0   = ((def_ddr3_1066_6_6_6_group )||( def_ddr3_1066_7_7_7_group )||( def_ddr3_1066_8_8_8_group )||( def_ddr3_1333_8_8_8       )||( def_ddr3_1333_9_9_9       )||( def_ddr3_1600_9_9_9       )||( def_ddr3_1600_10_10_10    )||( def_ddr3_1600_11_11_11    )||( def_ddr3_1866_11_11_11    )||( def_ddr3_1866_12_12_12    )||( def_ddr3_1333_8_8_8_2N    )||( def_ddr3_1333_9_9_9_2N    )||( def_ddr3_1600_9_9_9_2N    )||( def_ddr3_1600_10_10_10_2N )||( def_ddr3_1600_11_11_11_2N )||( def_ddr3_1866_11_11_11_2N )||( def_ddr3_1866_12_12_12_2N )||( def_ddr3_1333_8_8_8R      )||( def_ddr3_1333_9_9_9R      )||( def_ddr3_1600_9_9_9R      )||( def_ddr3_1600_10_10_10R   )||( def_ddr3_1600_11_11_11R   )||( def_ddr3_1866_11_11_11R   )||( def_ddr3_1866_12_12_12R   )||( def_ddr3_1333_8_8_8_LR    )||( def_ddr3_1333_9_9_9_LR    )||( def_ddr3_1600_9_9_9_LR    )||( def_ddr3_1600_10_10_10_LR )||( def_ddr3_1600_11_11_11_LR )||( def_ddr3_1866_11_11_11_LR )||( def_ddr3_1866_12_12_12_LR )||( def_ddr3_1333_8_8_8_L2    )||( def_ddr3_1333_9_9_9_L2    )||( def_ddr3_1600_9_9_9_L2    )||( def_ddr3_1600_10_10_10_L2 )||( def_ddr3_1600_11_11_11_L2 )||( def_ddr3_1866_11_11_11_L2 )||( def_ddr3_1866_12_12_12_L2));
-define  def_mba_tmr1q_WRSBG_dlys19  = ((def_ddr4_1600_11_11_11    )||( def_ddr4_1600_11_11_11_2N )||( def_ddr4_1600_11_11_11R   )||( def_ddr4_1600_11_11_11_LR )||( def_ddr4_1600_11_11_11_L2));
+define  def_mba_tmr1q_WRSBG_dlys19  = ((def_ddr4_1600_11_11_11    )||( def_ddr4_1600_11_11_11_2N )||( def_ddr4_1600_11_11_11R   )||( def_ddr4_1600_11_11_11_LR )||( def_ddr4_1600_11_11_11_L2)||(def_ddr4_1600_13_12_11)||(def_ddr4_1600_13_12_11_2N));
 define  def_mba_tmr1q_WRSBG_dlys26  = ((def_ddr4_1600_9_9_9       )||( def_ddr4_1600_9_9_9_2N    )||( def_ddr4_1600_9_9_9R      )||( def_ddr4_1600_9_9_9_LR    )||( def_ddr4_1600_9_9_9_L2));
 define  def_mba_tmr1q_WRSBG_dlys27  = ((def_ddr4_1600_10_10_10    )||( def_ddr4_1600_10_10_10_2N )||( def_ddr4_1600_10_10_10R   )||( def_ddr4_1600_10_10_10_LR )||( def_ddr4_1600_10_10_10_L2));
 define  def_mba_tmr1q_WRSBG_dlys29  = (def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2  );
-define  def_mba_tmr1q_WRSBG_dlys30  = ((def_ddr4_1866_11_11_11    )||( def_ddr4_1866_11_11_11_2N )||( def_ddr4_1866_11_11_11R   )||( def_ddr4_1866_11_11_11_LR )||( def_ddr4_1866_11_11_11_L2)||(def_ddr4_1600_13_12_11)||(def_ddr4_1600_13_12_11_2N));
+define  def_mba_tmr1q_WRSBG_dlys30  = ((def_ddr4_1866_11_11_11    )||( def_ddr4_1866_11_11_11_2N )||( def_ddr4_1866_11_11_11R   )||( def_ddr4_1866_11_11_11_LR )||( def_ddr4_1866_11_11_11_L2));
 define  def_mba_tmr1q_WRSBG_dlys31  = ((def_ddr4_1866_12_12_12    )||( def_ddr4_1866_12_12_12_2N )||( def_ddr4_1866_12_12_12R   )||( def_ddr4_1866_12_12_12_LR )||( def_ddr4_1866_12_12_12_L2));
 #define  def_mba_tmr1q_WRSBG_dlys32  = (def_ddr4_1866_13_13_13    ||def_ddr4_1866_13_13_13_2N ||def_ddr4_1866_13_13_13R   ||def_ddr4_1866_13_13_13_LR ||def_ddr4_1866_13_13_13_L2  );
 #define  def_mba_tmr1q_WRSBG_dlys33 = ((def_ddr4_2133_12_12_12    )||( def_ddr4_2133_12_12_12_2N )||( def_ddr4_2133_12_12_12R   )||( def_ddr4_2133_12_12_12_LR )||( def_ddr4_2133_12_12_12_L2));
