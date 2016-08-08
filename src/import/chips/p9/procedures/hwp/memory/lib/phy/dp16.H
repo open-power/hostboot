@@ -126,6 +126,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > AC_BOOST_CNTRL_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< uint64_t > DATA_BIT_DIR1;
 
         enum
@@ -141,6 +142,15 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             AC_BOOST_WR_UP_LEN = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0_01_S0ACENSLICEPDRV_DC_LEN,
             AC_BOOST_RD_UP = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1_01_S0ACENSLICEPTERM_DC,
             AC_BOOST_RD_UP_LEN = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1_01_S0ACENSLICEPTERM_DC_LEN,
+
+            CTLE_EVEN_CAP = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_2_DQSEL_CAP,
+            CTLE_EVEN_CAP_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_2_DQSEL_CAP_LEN,
+            CTLE_EVEN_RES = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_2_DQSEL_RES,
+            CTLE_EVEN_RES_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_2_DQSEL_RES_LEN,
+            CTLE_ODD_CAP = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_CAP,
+            CTLE_ODD_CAP_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_CAP_LEN,
+            CTLE_ODD_RES = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_RES,
+            CTLE_ODD_RES_LEN = MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0_01_NIB_1_3_DQSEL_RES_LEN,
         };
 };
 
@@ -264,6 +274,66 @@ fapi_try_exit:
 ///
 template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode reset_ac_boost_cntl( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Read CTLE
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam P the type of the std::pair elements
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of both of the the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_ctle_cntl( const fapi2::Target<T>& i_target,
+        std::pair<P, P>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    FAPI_TRY( mss::getScom(i_target, TT::CTLE_CNTRL_REG[I].first, o_data.first) );
+    FAPI_TRY( mss::getScom(i_target, TT::CTLE_CNTRL_REG[I].second, o_data.second) );
+    FAPI_INF("ctle_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, o_data.first, o_data.second);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write CTLE
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam P the type of the std::pair elements
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of both of the the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_ctle_cntl( const fapi2::Target<T>& i_target,
+        const std::pair<P, P>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    // The pair represents the upper and lower bytes of the DP16 - each has its own boost regiters
+    FAPI_INF("ctle_cntl dp16<%d>: 0x%016lx, 0x%016lx", I, i_data.first, i_data.second);
+    FAPI_TRY( mss::putScom(i_target, TT::CTLE_CNTRL_REG[I].first, i_data.first) );
+    FAPI_TRY( mss::putScom(i_target, TT::CTLE_CNTRL_REG[I].second, i_data.second) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset CTLE - for all DP16 in the target
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Set the DLL cal reset (begins DLL cal operations)
