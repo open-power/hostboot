@@ -54,14 +54,14 @@ namespace Util
     mutex_t g_mutex = MUTEX_INITIALIZER;
 
 
-    uint64_t readScratchReg(uint64_t i_addr)
+    uint32_t readScratchReg(uint64_t i_addr)
     {
         size_t l_size = sizeof(uint64_t);
-        uint64_t value = 0;
+        uint64_t l_value = 0;
 
         errlHndl_t l_errl =
           deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                     &value, l_size,
+                     &l_value, l_size,
                      DEVICE_SCOM_ADDRESS(i_addr));
 
         if (l_errl)
@@ -69,12 +69,14 @@ namespace Util
             errlCommit(l_errl, UTIL_COMP_ID);
         }
 
-        return value;
+        return static_cast<uint32_t>(l_value >> 32);
     }
 
-    void writeScratchReg(uint64_t i_addr, uint64_t i_data)
+    void writeScratchReg(uint64_t i_addr, uint32_t i_data)
     {
         size_t l_size = sizeof(uint64_t);
+        uint64_t l_value = static_cast<uint64_t>(i_data);
+        l_value <<= 32; //data is in top half of scom reg
 
         errlHndl_t l_errl =
           deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
@@ -93,9 +95,6 @@ namespace Util
         uint64_t l_bufAddr = i_addr;
         uint64_t l_bufSize = (i_size & MSG_DATA_SIZE_MASK) |
                              (i_usage << MSG_USAGE_SHIFT);
-
-        l_bufAddr <<=32;
-        l_bufSize <<=32;
 
         //Lock to prevent concurrent access
         mutex_lock(&g_mutex);

@@ -246,17 +246,18 @@ static void initializeAttributes(TargetService& i_targetService)
 
             // Check mbox scratch reg 3 for IPL boot options
             // Specifically istep mode (bit 0) and MPIPL (bit 2)
-            uint64_t l_data =
+            INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
+            l_scratch3.data32 =
               Util::readScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG3);
 
             // Targeting data defaults to non istep, only turn "on" if bit
             // is set so we don't tromp default setting
-            if ((l_data & Util::ISTEP_CONFIG_BIT) == Util::ISTEP_CONFIG_BIT)
+            if (l_scratch3.istepMode)
             {
                 l_pTopLevel->setAttr<ATTR_ISTEP_MODE>(1);
             }
 
-            if ((l_data & Util::MPIPL_CONFIG_BIT) == Util::MPIPL_CONFIG_BIT)
+            if (l_scratch3.isMpipl)
             {
                 l_isMpipl = true;
             }
