@@ -2965,38 +2965,6 @@
     </attribute>
 
     <attribute>
-      <id>ATTR_EFF_ODT_RD</id>
-      <targetType>TARGET_TYPE_MCS</targetType>
-      <description>
-        Read ODT.
-        Used in various locations and comes from the MT keyword of the VPD
-        creator: eff_config
-        consumer: various and initfiles
-        firmware notes: none</description>
-    <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <array>2 2 4</array>
-      <writeable/>
-      <mssAccessorName>eff_odt_rd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_EFF_ODT_WR</id>
-      <targetType>TARGET_TYPE_MCS</targetType>
-      <description>
-        Write ODT.
-        Used in various locations and comes from the MT keyword of the VPD
-        Creator: mss_eff_config
-        consumer: various and initfile
-        firmware notes: none</description>
-    <initToZero></initToZero>
-      <valueType>uint8</valueType>
-      <array>2 2 4</array>
-      <writeable/>
-      <mssAccessorName>eff_odt_wr</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DRAM_RON</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
