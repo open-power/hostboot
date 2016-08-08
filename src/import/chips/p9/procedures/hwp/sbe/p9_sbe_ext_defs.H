@@ -60,16 +60,22 @@ typedef union sbeMsgReg
 */
 typedef enum sbeState
 {
-    SBE_STATE_UNKNOWN = 0, ///< Unknown state - Initial (stable state)
-    SBE_STATE_FFDC = 1, ///< Waiting for SBE FFDC to be collected
-    SBE_STATE_IPLING = 2, ///< IPL'ing - autonomous mode (transient state)
-    SBE_STATE_ISTEP = 3, ///< IPL'ing - istep mode (transient state)
-    SBE_STATE_RUNTIME = 4, ///< SBE runtime (stable state)
-    SBE_STATE_DUMP = 5, ///< SBE dumping (transient state)
-    SBE_STATE_MPIPL = 6, ///< SBE mpipl (transient state)
-    SBE_STATE_FAILURE = 7, ///< SBE internal failure (stable state)
-    SBE_STATE_ABORT = 8, ///< SBE aborted
-    SBE_STATE_QUIESCE = 0xF, ///< SBE quiesce state
+    SBE_STATE_UNKNOWN = 0x0, // Unkown, initial state
+    SBE_STATE_FFDC_COLLECT = 0x1, // Waiting for FFDC collection after a reset
+    SBE_STATE_IPLING = 0x2, // IPL'ing - autonomous mode (transient)
+    SBE_STATE_ISTEP = 0x3, // ISTEP - Running IPL by steps (transient)
+    SBE_STATE_RUNTIME = 0x4, // SBE Runtime
+    SBE_STATE_MPIPL = 0x5, // MPIPL
+    SBE_STATE_DMT = 0x6, // Dead Man Timer State (transient)
+    SBE_STATE_DUMP = 0x7, // Dumping
+    SBE_STATE_FAILURE = 0x8, // Internal SBE failure
+    SBE_STATE_QUIESCE = 0x9, // Final state - needs SBE reset to get out
+    SBE_STATE_ABORT = 0xA, // SBE was asked to abort - need reset to get out
+
+    // Max States, Always keep it at the last of the enum and sequential
+    SBE_MAX_STATE = 0xB,
+    // Don't count this in the state, just to intialize the state variables
+    SBE_INVALID_STATE = 0xF,
 } sbeState_t;
 
 #endif //_P9_SBE_EXT_DEFS_H_
