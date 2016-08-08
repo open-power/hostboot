@@ -61,7 +61,7 @@ mrs02_data::mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
 {
     FAPI_TRY( mss::eff_dram_lpasr(i_target, iv_lpasr) );
     FAPI_TRY( mss::eff_dram_cwl(i_target, iv_cwl) );
-    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])) );
+    FAPI_TRY( mss::vpd_mt_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])) );
     FAPI_TRY( mss::eff_write_crc(i_target, iv_write_crc) );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -128,24 +128,20 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     switch (i_data.iv_dram_rtt_wr[i_rank])
     {
-        case fapi2::ENUM_ATTR_EFF_DRAM_RTT_WR_DISABLE:
+        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_DISABLE:
             l_rtt_wr_buffer = 0b000;
             break;
 
-        case fapi2::ENUM_ATTR_EFF_DRAM_RTT_WR_HIGHZ:
+        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_HIGHZ:
             l_rtt_wr_buffer = 0b011;
             break;
 
-        case fapi2::ENUM_ATTR_EFF_DRAM_RTT_WR_OHM240:
+        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM240:
             l_rtt_wr_buffer = 0b010;
             break;
 
-        case fapi2::ENUM_ATTR_EFF_DRAM_RTT_WR_OHM120:
+        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120:
             l_rtt_wr_buffer = 0b001;
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_DRAM_RTT_WR_OHM60:
-            l_rtt_wr_buffer = 0b100;
             break;
 
         default:
