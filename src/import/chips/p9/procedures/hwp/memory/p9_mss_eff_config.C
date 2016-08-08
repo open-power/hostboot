@@ -91,8 +91,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dram_row_bits(l_dimm) );
         FAPI_TRY( l_eff_config.custom_dimm(l_dimm) );
         FAPI_TRY( l_eff_config.dram_dqs_time(l_dimm) );
-        FAPI_TRY( l_eff_config.odt_read(l_dimm) );
-        FAPI_TRY( l_eff_config.odt_write(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tccd_l(l_dimm) );
         FAPI_TRY( l_eff_config.data_mask(l_dimm) );
         FAPI_TRY( l_eff_config.rtt_park(l_dimm) );
