@@ -165,6 +165,45 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief IBT helper - maps from VPD definition of IBT to the RCD control word bit fields
+/// @param[in] i_ibt the IBT from VPD (e.g., 10, 15, ...)
+/// @return the IBT bit field e.g., 00, 01 ... (right aligned)
+/// @note Unrecognized IBT values will force an assertion.
+///
+static uint64_t ibt_helper(const uint8_t i_ibt)
+{
+    switch(i_ibt)
+    {
+        // Off
+        case 0:
+            return 0b11;
+            break;
+
+        // 100Ohm
+        case 10:
+            return 0b00;
+            break;
+
+        // 150Ohm
+        case 15:
+            return 0b01;
+            break;
+
+        // 300Ohm
+        case 30:
+            return 0b10;
+            break;
+
+        default:
+            FAPI_ERR("unknown IBT value %d", i_ibt);
+            fapi2::Assert(false);
+    };
+
+    // Not reached, but 'return' off ...
+    return 0b11;
+}
+
 /////////////////////////
 // Member Method implementation
 /////////////////////////
@@ -1389,7 +1428,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc7x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dimm_rc_7x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Targets
@@ -1400,8 +1438,41 @@ fapi2::ReturnCode eff_config::dimm_rc7x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    fapi2::buffer<uint8_t> l_rcd7x = 0;
+
+    // All the IBT bit fields in the RCD control word are 2 bits long.
+    constexpr uint64_t LEN = 2;
+
+    // CA starts at bit 6, others are the same. So the field runs from START for LEN bits,
+    // for example CA field is bits 6:7
+    constexpr uint64_t CA_START = 6;
+    uint8_t l_ibt_ca = 0;
+
+    constexpr uint64_t CKE_START = 2;
+    uint8_t l_ibt_cke = 0;
+
+    constexpr uint64_t CS_START = 4;
+    uint8_t l_ibt_cs = 0;
+
+    constexpr uint64_t ODT_START = 0;
+    uint8_t l_ibt_odt = 0;
+
+    // Pull the individual settings from VPD, and shuffle them into RCD7x
+    FAPI_TRY( mss::vpd_mt_dimm_rcd_ibt_ca(i_target, l_ibt_ca) );
+    FAPI_TRY( mss::vpd_mt_dimm_rcd_ibt_cke(i_target, l_ibt_cke) );
+    FAPI_TRY( mss::vpd_mt_dimm_rcd_ibt_cs(i_target, l_ibt_cs) );
+    FAPI_TRY( mss::vpd_mt_dimm_rcd_ibt_odt(i_target, l_ibt_odt) );
+
+    l_rcd7x.insertFromRight<CA_START, LEN>( ibt_helper(l_ibt_ca) );
+    l_rcd7x.insertFromRight<CKE_START, LEN>( ibt_helper(l_ibt_cke) );
+    l_rcd7x.insertFromRight<CS_START, LEN>( ibt_helper(l_ibt_cs) );
+    l_rcd7x.insertFromRight<ODT_START, LEN>( ibt_helper(l_ibt_odt) );
+
+    FAPI_INF("RCD7x for %s is 0x%x", mss::c_str(i_target), uint8_t(l_rcd7x));
+
+    // Now write RCD7x out to the effective attribute
     FAPI_TRY( eff_dimm_ddr4_rc_7x(l_mcs, &l_attrs_dimm_rc_7x[0][0]) );
-    l_attrs_dimm_rc_7x[l_port_num][l_dimm_num] = 0x00;
+    l_attrs_dimm_rc_7x[l_port_num][l_dimm_num] = l_rcd7x;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_7x, l_mcs, l_attrs_dimm_rc_7x) );
 fapi_try_exit:
     return fapi2::current_err;
