@@ -974,25 +974,6 @@
         <mssAccessorName>eff_dimm_ddr4_rc_bx</mssAccessorName>
     </attribute>
 
-
-    <attribute>
-        <id>ATTR_EFF_DIMM_RCD_IBT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-          RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg.
-          Each memory channel will have a value.
-          creator: mss_eff_cnfg
-          consumer: mss_dram_init
-          firmware notes: none
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>eff_dimm_rcd_ibt</mssAccessorName>
-    </attribute>
-
     <attribute>
         <id>ATTR_EFF_DIMM_RCD_MIRROR_MODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
