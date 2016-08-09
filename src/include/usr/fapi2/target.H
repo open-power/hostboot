@@ -1105,9 +1105,70 @@ inline void toString(const Target<T, V> *i_target, char* io_buffer, size_t i_bsi
 {
     toString(*i_target, io_buffer, i_bsize);
 }
-
 ///
-/// @brief Get an enumerated target of a specific type
+/// @brief Get a target from its Type and instance info
+/// @tparam T The type of the target to return
+/// @tparam V type of the targets value
+/// @param[in] i_type   - Type of target to find
+/// @param[in] instance - instance of the target to find
+///
+/// @return Target<T>* pointer to a target of type T
+///
+/// NOTE: Function caller owns the object returned.
+///
+#ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
+template<TargetType T, typename V=fapi2::plat_target_handle_t>
+inline Target<T,V>* getTarget(TargetType i_type, uint8_t instance)
+{
+
+    Target<T,V> * l_target = NULL;
+
+    TARGETING::TYPE l_type = convertFapi2TypeToTargeting(i_type);
+
+    // get a list of all the targets
+    TARGETING::TargetService& l_targetService = TARGETING::targetService();
+    TARGETING::TargetRangeFilter l_targets(l_targetService.begin(),
+                                 l_targetService.end());
+
+    // create a check for the desired target type
+    TARGETING::PredicateCTM l_typePredicate;
+
+    l_typePredicate.setType(l_type);
+
+    // create a check for the FAPI_POS of a target
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_FAPI_POS>
+                               l_fapiPosAttr(instance);
+
+    TARGETING::PredicatePostfixExpr l_Query;
+
+    // look for the type and instance
+    l_Query.push(&l_typePredicate).push(&l_fapiPosAttr).And();
+
+    l_targets.setPredicate(&l_Query);
+
+    // reset l_targets to contain only the targets matching our predicates
+    l_targets.reset();
+
+    TARGETING::Target * l_t = NULL;
+
+    uint32_t l_count = 0;
+    for(; l_targets; ++l_targets, ++l_count)
+    {
+        l_t = *l_targets;
+    }
+
+    // we should not find more than one target
+    assert(!(l_count > 1));
+
+    if(l_count == 1)
+    {
+        l_target = new fapi2::Target<T,V>(l_t);
+    }
+
+    return l_target;
+
+}
+#endif
 /// @tparam T The type of the target
 /// @param[in] Ordinal representing the ordinal number of
 /// the desired target
