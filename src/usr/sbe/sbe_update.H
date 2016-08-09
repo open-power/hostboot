@@ -131,7 +131,7 @@ namespace SBE
     /*  Enums                                 */
     /******************************************/
     enum {
-        FIXED_SEEPROM_WORK_SPACE = 128 * 1024,
+        FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
         RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
@@ -537,6 +537,45 @@ namespace SBE
 
 
     /**
+     * @brief Select best cores to include in SBE Image.
+     *        The output is used to indicate to p8_xip_customize which cores
+     *        should be included in the SBE image.
+     *
+     * @param[in] i_target   Target processor to use for core selection
+     *
+     * @param[in] i_maxCores  Maximum number of cores to select for inclusion
+     *                        in the SBE Image
+     *
+     * @param[out] o_coreMask  Core Mask for the target that does not exceed
+     *                         the maximum number of cores
+     *                         NOTE: bits 8:31 = EC00:EC23
+     *                         This value is used as input into
+     *                         p9_xip_customize.C
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t selectBestCores(TARGETING::Target* i_target,
+                               size_t i_maxCores,
+                               uint32_t& o_coreMask);
+
+
+    /**
+     * @brief Reduces bits set in a bit mask until there is a
+     *        a maximum number of bits set.
+     *        NOTE: bits removed left-to-right
+     *
+     * @param[in] i_mask      Starting mask to be reduced
+     *
+     * @param[in] i_maxBits   Maximum number of bits that the
+     *                        returned Bit Mask can contain
+     *
+     * @return uint32_t       Bit Mask
+     */
+    uint32_t trimBitMask(uint32_t i_mask,
+                         size_t i_maxBits);
+
+
+    /**
      * @brief Checks the Nest Frequency value stored in the the version struct
      *        and compares it ot the NEST_FREQ_MHZ attribute of the system
      *
@@ -556,16 +595,16 @@ namespace SBE
 
     /**
      * @brief Calculates ECC size for a block of code or data allowing for
-     *        padding at device boundaries so 9-byte segment (8 bytes of code
+     *        padding at chip boundaries so 9-byte segment (8 bytes of code
      *        or data and 1 byte of ECC) does not straddle the boundary.
      *
-     * @param[in]  i_srcSz    Size of source code or data
+     * @param[in]  i_srcSz    Size of source (code or data)
      *
      * @param[in]  i_offset   Offset into device for storing destination
      *
-     * @param[in]  i_boundary Device boundary
+     * @param[in]  i_boundary Chip boundary
      *
-     * @return Size of source code or data with ECC and padding
+     * @return Size of source (code or data) with ECC and padding
      */
     size_t setECCSize(size_t i_srcSz,
                       const uint64_t i_offset = SBE_IMAGE_SEEPROM_ADDRESS,
@@ -573,19 +612,19 @@ namespace SBE
 
 
     /**
-     * @brief Injects ECC into a block of code or data.  Pads output at device
+     * @brief Injects ECC into a block of code or data.  Pads output at chip
      *        boundaries so 9-byte segment (8 bytes of code or data and 1 byte
      *        of ECC) does not straddle the boundary.
      *
-     * @param[in]  i_src      Location of source code or data without ECC
+     * @param[in]  i_src      Location of source (code or data) without ECC
      *
-     * @param[in]  i_srcSz    Size of source code or data
+     * @param[in]  i_srcSz    Size of source (code or data)
      *
      * @param[in]  i_offset   Offset into device for storing destination
      *
-     * @param[in]  i_boundary Device boundary
+     * @param[in]  i_boundary Chip boundary within the device
      *
-     * @param[out] o_dst      Location of destination code or data with ECC
+     * @param[out] o_dst      Location of destination (code or data) with ECC
      *
      * @return void
      */
@@ -598,19 +637,19 @@ namespace SBE
 
     /**
      * @brief Removes ECC from a block of code or data.  Removes padding at
-     *        device boundaries where 9-byte segment (8 bytes of code or data
-     *        and 1 byte of ECC) was moved to next device so as to not straddle
+     *        chip boundaries where 9-byte segment (8 bytes of code or data
+     *        and 1 byte of ECC) was moved to next chip so as to not straddle
      *        the boundary.
      *
-     * @param[in/out] io_src  Location of source code or data with ECC
+     * @param[in/out] io_src  Location of source (code or data) with ECC
      *
-     * @param[out] o_dst      Location of destination code or data without ECC
+     * @param[out] o_dst      Location of destination (code or data) without ECC
      *
-     * @param[in]  i_dstSz    Size of destination code or data
+     * @param[in]  i_dstSz    Size of destination (code or data)
      *
      * @param[in]  i_offset   Offset into device where source was stored
      *
-     * @param[in]  i_boundary Device boundary
+     * @param[in]  i_boundary Chip boundary
      *
      * @return     eccStatus  ECC status from removing ECC.
      */

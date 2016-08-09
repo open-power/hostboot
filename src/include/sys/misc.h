@@ -49,7 +49,7 @@ enum    p9SystemConsts
     /// max possible processors in a P9 system
     P9_MAX_PROCS        =   8,
     /// max EC (cores available in a processor )
-    P9_MAX_EC_PER_PROC  =   16,
+    P9_MAX_EC_PER_PROC  =   24,
 
 };
 
