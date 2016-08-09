@@ -84,6 +84,11 @@ static bool g_istep_mode        = false;
 static bool g_update_both_sides = false;
 static uint32_t g_current_nest_freq = 0;
 
+// ----------------------------------------
+// Global Variables HW Keys Hash Transition
+static bool    g_do_hw_keys_hash_transition = false;
+static uint8_t g_hw_keys_hash_transition_data[SBE::SBE_HW_KEY_HASH_SIZE]={0};
+
 using namespace ERRORLOG;
 using namespace TARGETING;
 
@@ -1518,15 +1523,51 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
             }
 
             io_sbeState.customizedImage_size = sbeImgSize;
-            io_sbeState.customizedImage_crc =
+
+            // Need to put seeprom-specific HW Keys' Hash into the
+            // customized SBE Image in Memory before calculating the CRCs
+
+            // Determine HW Keys' Hash for Seeprom0
+            err = determineHwKeysHash(reinterpret_cast<void*>
+                                       (SBE_IMG_VADDR),
+                                      io_sbeState.seeprom_0_ver);
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error from determineHwKeysHash()-SBE_SEEPROM0");
+                break;
+            }
+
+            // Calculate CRC for customized image with Seeprom0's HW Keys' Hash
+            io_sbeState.customizedImage_crc0 =
+                            Util::crc32_calc(reinterpret_cast<void*>
+                                             (SBE_IMG_VADDR),
+                                             sbeImgSize) ;
+
+            // Determine HW Keys' Hash for Seeprom1
+            err = determineHwKeysHash(reinterpret_cast<void*>
+                                       (SBE_IMG_VADDR),
+                                      io_sbeState.seeprom_1_ver);
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error from determineHwKeysHash()-SBE_SEEPROM1");
+                break;
+            }
+
+            // Calculate CRC for customized image with Seeprom1's HW Keys' Hash
+            io_sbeState.customizedImage_crc1 =
                             Util::crc32_calc(reinterpret_cast<void*>
                                              (SBE_IMG_VADDR),
                                              sbeImgSize) ;
 
             TRACUCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
-                       "maxSize=0x%X, actSize=0x%X, crc=0x%X",
+                       "maxSize=0x%X, actSize=0x%X, crc0=0x%.8X, crc1=0x%.8X",
                        FIXED_SEEPROM_WORK_SPACE, sbeImgSize,
-                       io_sbeState.customizedImage_crc);
+                       io_sbeState.customizedImage_crc0,
+                       io_sbeState.customizedImage_crc1);
 
 
 
@@ -1763,10 +1804,15 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
         int64_t rc_readBack_ECC_memcmp = 0;
         PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
 
+        void * hw_keys_hash_ptr = NULL;
+
         // This struct is always 8-byte aligned
         size_t sbeInfoSize = sizeof(sbeSeepromVersionInfo_t);
         size_t sbeInfoSize_ECC = (sbeInfoSize*9)/8;
 
+        // Only actually clear out first 80-bytes+ECC
+        size_t sbeInfoClearSize = SBE_INVALID_STRUCT_CLEAR_SIZE;
+        size_t sbeInfoClearSize_ECC = SBE_INVALID_STRUCT_CLEAR_SIZE_ECC;
 
         // Buffers for reading/writing SBE Version Information
         uint8_t * sbeInfo_data = static_cast<uint8_t*>(
@@ -1782,7 +1828,6 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                                                 malloc(sbeInfoSize_ECC));
 
         do{
-
 
             /*************************************************************/
             /*  Write Invalid SBE Version Information                    */
@@ -1808,9 +1853,11 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
             TRACDBIN( g_trac_sbe, "updateSeepromSide: Invalid Info ECC",
                       sbeInfo_data_ECC, sbeInfoSize_ECC);
 
+            // Only Write first 80 bytes + ECC of this image to preserve
+            // HW Keys Hash on SBE SEEPROM
             err = deviceWrite( io_sbeState.target,
                                sbeInfo_data_ECC,
-                               sbeInfoSize_ECC,
+                               sbeInfoClearSize_ECC,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS));
@@ -1832,7 +1879,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                 // Read Back Version Information
                 err = deviceRead( io_sbeState.target,
                                   sbeInfo_data_ECC_readBack,
-                                  sbeInfoSize_ECC,
+                                  sbeInfoClearSize_ECC,
                                   DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
                                              SBE_VERSION_SEEPROM_ADDRESS));
@@ -1850,16 +1897,16 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                 // Compare ECC data
                 rc_readBack_ECC_memcmp = memcmp( sbeInfo_data_ECC,
                                                  sbeInfo_data_ECC_readBack,
-                                                 sbeInfoSize_ECC);
+                                                 sbeInfoClearSize_ECC);
 
                 // Remove ECC
                 eccStatus = PNOR::ECC::removeECC( sbeInfo_data_ECC_readBack,
                                                   sbeInfo_data_readBack,
-                                                  sbeInfoSize);
+                                                  sbeInfoClearSize);
 
                 TRACUCOMP( g_trac_sbe, "updateSeepromSide(): eccStatus=%d, "
-                           "sizeof sI=%d, sI_ECC=%d, rc_ECC=%d",
-                           eccStatus, sbeInfoSize, sbeInfoSize_ECC,
+                           "sizeof sI_Clear=%d, sI_ECC=%d, rc_ECC=%d",
+                           eccStatus, sbeInfoClearSize, sbeInfoSize_ECC,
                            rc_readBack_ECC_memcmp);
 
                 // Fail if uncorrectable ECC or any data miscompare
@@ -1873,9 +1920,9 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                     TRACFCOMP( g_trac_sbe,ERR_MRK"updateSeepromSide() - ECC "
                                "ERROR or Data Miscimpare On SBE Version Read "
                                "Back: eccStatus=%d, rc_ECC=%d,  "
-                               "sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
+                               "sIi_Clear=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
                                eccStatus, rc_readBack_ECC_memcmp,
-                               sbeInfoSize, sbeInfoSize_ECC,
+                               sbeInfoClearSize, sbeInfoSize_ECC,
                                TARGETING::get_huid(io_sbeState.target),
                                io_sbeState.seeprom_side_to_update);
 
@@ -1889,7 +1936,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                      * @userdata1[0:15]     ECC Status
                      * @userdata1[16:31]    SEEPROM Side
                      * @userdata1[32:47]    RC on Data Compare with ECC
-                     * @userdata1[48:63]    <unused>
+                     * @userdata1[48:63]    Size - Clear - No Ecc
                      * @userdata2[0:31]     Size - No Ecc
                      * @userdata2[32:63]    Size - ECC
                      * @devdesc      ECC or Data Miscompare Fail Reading Back
@@ -1902,7 +1949,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                                              eccStatus,
                                              io_sbeState.seeprom_side_to_update,
                                              rc_readBack_ECC_memcmp,
-                                             0x0),
+                                             sbeInfoClearSize),
                                         TWO_UINT32_TO_UINT64(sbeInfoSize,
                                                              sbeInfoSize_ECC));
 
@@ -1950,6 +1997,16 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
 #endif
                                         imageWasUpdated );
 
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
+                           "From resolveImageHBBaddr(): HUID=0x%.8X, "
+                           "side=%d",
+                           TARGETING::get_huid(io_sbeState.target),
+                           io_sbeState.seeprom_side_to_update);
+                break;
+            }
+
             if (imageWasUpdated == true )
             {
                 TRACUCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - "
@@ -1957,6 +2014,44 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
             }
 
 #endif
+
+            // Since this function can be called recursively, make sure to use
+            // the correct new_seeprom_ver.data_crc and hw_keys_hash
+
+            io_sbeState.new_seeprom_ver.data_crc =
+                        // Use the correct Seeprom CRC
+                        io_sbeState.seeprom_side_to_update
+                           == EEPROM::SBE_PRIMARY ?
+                              io_sbeState.customizedImage_crc0 :
+                              io_sbeState.customizedImage_crc1;
+
+            memcpy( &(io_sbeState.new_seeprom_ver.hw_keys_hash),
+                    // Use the correct Seeprom HW Keys' Hash
+                    io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ?
+                        &(io_sbeState.seeprom_0_ver.hw_keys_hash) :
+                        &(io_sbeState.seeprom_1_ver.hw_keys_hash),
+                    SBE_HW_KEY_HASH_SIZE);
+
+            // Need to preserve HW Keys' Hash directly from SBE
+            // SEEPROM-To-Be-Updated
+            err = getHwKeysHashPtrFromSbeImage(
+                      reinterpret_cast<void*>(SBE_IMG_VADDR),
+                      hw_keys_hash_ptr);
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
+                           "From getHwKeysHashPtrFromSbeImage()" );
+
+                break;
+            }
+
+            // Copy HW Keys Hash from SBE Version Info Struct to
+            // Customized Image Memory
+            memcpy(hw_keys_hash_ptr,
+                   &io_sbeState.new_seeprom_ver.hw_keys_hash,
+                   SBE_HW_KEY_HASH_SIZE);
+
 
             // Inject ECC
             // clear out back half of page block to use as temp space
@@ -2174,7 +2269,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
             }
 
             // Check CRC and SEEPROM 0 CRC
-            if ( io_sbeState.customizedImage_crc !=
+            if ( io_sbeState.customizedImage_crc0 !=
                  io_sbeState.seeprom_0_ver.data_crc )
             {
                 crc_check_dirty = true;
@@ -2200,7 +2295,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                            "nest_freq=%d, isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
-                           io_sbeState.customizedImage_crc,
+                           io_sbeState.customizedImage_crc0,
                            io_sbeState.seeprom_0_ver.data_crc,
                            io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
                            isSimics_check);
@@ -2224,7 +2319,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
             }
 
             // Check CRC and SEEPROM 1 CRC
-            if ( io_sbeState.customizedImage_crc !=
+            if ( io_sbeState.customizedImage_crc1 !=
                  io_sbeState.seeprom_1_ver.data_crc )
             {
                 crc_check_dirty = true;
@@ -2250,7 +2345,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                            "nest_freq=%d, isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
-                           io_sbeState.customizedImage_crc,
+                           io_sbeState.customizedImage_crc1,
                            io_sbeState.seeprom_1_ver.data_crc,
                            io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch,
                            isSimics_check);
@@ -2356,9 +2451,13 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                         &(io_sbeState.pnorVersion),
                         SBE_IMAGE_VERSION_SIZE);
 
-                memcpy( &(io_sbeState.new_seeprom_ver.data_crc),
-                        &(io_sbeState.customizedImage_crc),
-                        sizeof(io_sbeState.new_seeprom_ver.data_crc));
+                // new_seeprom_ver.data_crc from one of the Seeproms
+                io_sbeState.new_seeprom_ver.data_crc =
+                        // Use the correct Seeprom CRC
+                        io_sbeState.seeprom_side_to_update
+                           == EEPROM::SBE_PRIMARY ?
+                              io_sbeState.customizedImage_crc0 :
+                              io_sbeState.customizedImage_crc1;
 
                 if (  io_sbeState.update_actions & UPDATE_SBE )
                 {
@@ -2394,9 +2493,8 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
 
                 if ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY )
                 {
-                    memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_0_data_crc),
-                           &(io_sbeState.customizedImage_crc),
-                          sizeof(io_sbeState.mvpdSbKeyword.seeprom_0_data_crc));
+                    io_sbeState.mvpdSbKeyword.seeprom_0_data_crc =
+                                io_sbeState.customizedImage_crc0;
 
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_0_short_version),
                            &(io_sbeState.pnorVersion),
@@ -2404,9 +2502,8 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                 }
                 else // EEPROM::SBE_Backup
                 {
-                    memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_1_data_crc),
-                           &(io_sbeState.customizedImage_crc),
-                          sizeof(io_sbeState.mvpdSbKeyword.seeprom_1_data_crc));
+                    io_sbeState.mvpdSbKeyword.seeprom_1_data_crc =
+                                io_sbeState.customizedImage_crc1;
 
                     memcpy(&(io_sbeState.mvpdSbKeyword.seeprom_1_short_version),
                            &(io_sbeState.pnorVersion),
@@ -3131,7 +3228,7 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
                                      SBE_INFO_LOG,
                                      TWO_UINT32_TO_UINT64(
                                          l_actions,
-                                         io_sbeState.customizedImage_crc),
+                                         io_sbeState.new_seeprom_ver.data_crc),
                                      TWO_UINT32_TO_UINT64(
                                          io_sbeState.seeprom_0_ver.data_crc,
                                          io_sbeState.seeprom_1_ver.data_crc));
@@ -4564,6 +4661,215 @@ TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: 
 
     }
 
+/////////////////////////////////////////////////////////////////////
+errlHndl_t determineHwKeysHash(const void* i_imgPtr,
+                               sbeSeepromVersionInfo_t& io_sbe_ver_info)
+{
+    errlHndl_t err = NULL;
+    SBE_HW_KEY_HASH_t* seeprom_hw_keys_hash_ptr = &io_sbe_ver_info.hw_keys_hash;
+    uint32_t  struct_version = io_sbe_ver_info.struct_version;
+    void * hw_keys_hash_ptr = NULL;
+
+    TRACUCOMP(g_trac_sbe,
+              ENTER_MRK"determineHwKeysHash: "
+              "seeprom_hw_keys_hash_ptr=%p, struct_version=0x%.8X, imgPtr=%p",
+              seeprom_hw_keys_hash_ptr, struct_version, i_imgPtr);
+
+
+
+    do{
+        // Determine which HW Keys' Hash to use based on this order of possible
+        // sources of this hash:
+        // 1) Key Transition Hash (from "SBKT" PNOR Section)
+        // 2) Seeprom SBE Version Info Struct (ie, it was saved on the Seeprom)
+        // 3) Customized SBE Image in Memory (which got the hash from "SBE" PNOR
+        //    section)
+        // The if/else{} blocks below handle these cases and make sure that the
+        // Seeprom SBE Version Info Struct and the Customized SBE Image in
+        // Memory are both using the same HW Keys' Hash.
+
+
+        // Find pointer to HW Keys Hash in customized image
+        err = getHwKeysHashPtrFromSbeImage(i_imgPtr,
+                                           hw_keys_hash_ptr);
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_sbe, ERR_MRK"determineHwKeysHash: - Error "
+                      "From getHwKeysHashPtrFromSbeImage()" );
+            break;
+        }
+
+        // Do Special Sequence for HW Keys Hash Transition
+        if (g_do_hw_keys_hash_transition)
+        {
+            // Use the new hash for the HW Keys Hash Transition
+            TRACFCOMP(g_trac_sbe,"determineHwKeysHash: Using Transition "
+                      "HW Keys Hash: g_ptr=%p, hw_keys_hash_ptr=%p. Writing "
+                      "to SBE Image and SBE Seeprom",
+                      g_hw_keys_hash_transition_data,
+                      hw_keys_hash_ptr);
+
+            // Write new HW Keys Hash to SBE Image in Memory
+            memcpy(hw_keys_hash_ptr,
+                   g_hw_keys_hash_transition_data,
+                   SBE_HW_KEY_HASH_SIZE);
+
+            // Write new HW Keys Hash to SBE Version Info Struct
+            memcpy(seeprom_hw_keys_hash_ptr,
+                   g_hw_keys_hash_transition_data,
+                   SBE_HW_KEY_HASH_SIZE);
+        }
+
+        // Normal Preservation of HW Keys Hash
+        else
+        {
+            // Use the existing Version Information Struct from the SEEPROM
+            if ((struct_version != STRUCT_VERSION_SIMICS ) &&
+                (struct_version >= STRUCT_VERSION_PRESERVE_HW_KEYS_HASH ))
+            {
+                // The HW Keys Hash in the struct should be used
+                // So copy the hash from the struct to customized Image
+                TRACUCOMP(g_trac_sbe,"determineHwKeysHash: Copy From Struct "
+                          "to Image: hw_keys_hash_ptr=%p, size=%d",
+                          hw_keys_hash_ptr,
+                          SBE_HW_KEY_HASH_SIZE);
+
+                // Copy HW Keys Hash from SBE Version Info Struct to
+                // Customized Image Memory
+                memcpy(hw_keys_hash_ptr,
+                       seeprom_hw_keys_hash_ptr,
+                       SBE_HW_KEY_HASH_SIZE);
+
+            }
+
+            // else branch covers STRUCT_VERSION_SIMICS and any version that
+            //      was not preserving the HW Keys Hash
+            else
+            {
+                // The HW Keys Hash needs to be saved in the Struct
+                TRACFCOMP(g_trac_sbe,"determineHwKeysHash: Copy From "
+                          "Image to Struct: hw_keys_hash_ptr=%p, size=%d",
+                          hw_keys_hash_ptr,
+                          SBE_HW_KEY_HASH_SIZE);
+
+                // Copy HW Keys Hash from Customized Image Memory to
+                // SBE SEEPROM Version Info Struct
+                memcpy(seeprom_hw_keys_hash_ptr,
+                       hw_keys_hash_ptr,
+                       SBE_HW_KEY_HASH_SIZE);
+
+            }
+        }
+
+    }while(0);
+
+    if (err)
+    {
+        TRACFCOMP(g_trac_sbe, EXIT_MRK"determineHwKeysHash: "
+                  "returning err rc=0x%X, plid=0x%X",
+                  ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+    }
+    else
+    {
+        TRACDBIN(g_trac_sbe,"determineHwKeysHash: hw_keys_hash_ptr",
+                 hw_keys_hash_ptr, SBE_HW_KEY_HASH_SIZE);
+
+        TRACUCOMP(g_trac_sbe, EXIT_MRK"determineHwKeysHash: "
+                  "(hash-start=0x%.8X)",
+                  *(reinterpret_cast<uint32_t*>(hw_keys_hash_ptr)));
+    }
+
+    return err;
+
+}
+
+/////////////////////////////////////////////////////////////////////
+errlHndl_t getHwKeysHashPtrFromSbeImage(const void*   i_imgPtr,
+                                        void*&  o_HwKeysHashPtr)
+{
+
+    TRACUCOMP( g_trac_sbe,
+               ENTER_MRK"getHwKeysHashFromSbeImage: imgPtr=%p",
+               i_imgPtr);
+
+    errlHndl_t err = NULL;
+    o_HwKeysHashPtr = NULL;
+    int rc = 0;
+    SbeXipSection pibmem0_Section;
+
+    do{
+
+        // Assert/fail if i_imgPtr == NULL
+        assert(i_imgPtr!=NULL,"getHwKeysHashFromSbeImage: i_imgPtr==NULL");
+
+        // Get info on PIBMEM0 section of customized SBE Image
+        rc = sbe_xip_get_section(i_imgPtr,
+                                 SBE_XIP_SECTION_PIBMEM0,
+                                 &pibmem0_Section);
+        if (rc)
+        {
+            // sbe_xip_get_section() returned a fail
+            TRACFCOMP( g_trac_sbe, ERR_MRK"getHwKeysHashFromSbeImage: "
+                       "sbe_xip_get_section() returned %d for getting "
+                       "SBE_XIP_SECTION_PIBMEM0 in i_imgPtr=%p",
+                       rc, i_imgPtr);
+
+            /*@
+             * @errortype
+             * @moduleid     SBE_GET_HW_KEYS_HASH_PTR
+             * @reasoncode   SBE_XIP_GET_SECTION_FAIL
+             * @userdata1    rc returned from sbe_xip_get_section()
+             * @userdata2    SBE Image Pointer i_imgPtr
+             * @devdesc      sbe_xip_get_section() failed to find
+             *               SBE_XIP_SECTION_PIBMEM0 in SBE Image
+             * @custdesc     A problem occurred while updating processor
+             *               boot code.
+             */
+            err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                SBE_GET_HW_KEYS_HASH_PTR,
+                                SBE_XIP_GET_SECTION_FAIL,
+                                rc,
+                                reinterpret_cast<uint64_t>(i_imgPtr),
+                                true /*Add HB SW Callout*/);
+
+            err->collectTrace(SBE_COMP_NAME);
+
+            break;
+        }
+
+        // The HW Keys Hash is stored at the offset of the customized
+        // image in memory (i_imgPtr) + the offset to the PIBMEM0 section
+        // (pibmem0_Section.iv_offset) + the offset to the Hash in that section
+        // (SBE_PIBMEM0_HW_KEYS_HASH_OFFSET)
+        o_HwKeysHashPtr = const_cast<void*>(reinterpret_cast<const void*>(
+                             (reinterpret_cast<const char*>(i_imgPtr)
+                              + pibmem0_Section.iv_offset
+                              + SBE_PIBMEM0_HW_KEYS_HASH_OFFSET)));
+
+        assert(o_HwKeysHashPtr != NULL,"getHwKeysHashPtrFromSbeImage: "
+                                       "o_HwKeysHashPtr==NULL")
+
+        TRACUCOMP(g_trac_sbe, INFO_MRK"getHwKeysHashPtrFromSbeImage: "
+                 "o_HwKeysHashPtr=%p (hash-start=0x%.8X) "
+                  "pibmem0_Section: iv_offset=0x%.8X, iv_size=0x%.8X,",
+                  o_HwKeysHashPtr,
+                  *(reinterpret_cast<uint32_t*>(o_HwKeysHashPtr)),
+                  pibmem0_Section.iv_offset,
+                  pibmem0_Section.iv_size);
+
+        TRACDBIN(g_trac_sbe,"getHwKeysHashPtrFromSbeImage: o_HwKeysHashPtr",
+                 o_HwKeysHashPtr, SBE_HW_KEY_HASH_SIZE);
+
+    }while(0);
+
+
+    TRACFCOMP(g_trac_sbe,EXIT_MRK"getHwKeysHashPtrFromSbeImage: "
+                         "o_HwKeysHashPtr = %p (hash-start=0x%.8X)",
+                         o_HwKeysHashPtr,
+                         *(reinterpret_cast<uint32_t*>(o_HwKeysHashPtr)));
+    return err;
+}
 
 
 } //end SBE Namespace

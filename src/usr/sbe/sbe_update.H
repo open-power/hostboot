@@ -44,7 +44,7 @@ namespace SBE
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
     // Number of versions supported
-    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x06;
+    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x07;
 
     // Size of supported versions - must be 8-byte aligned
     const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
@@ -55,6 +55,7 @@ namespace SBE
                         80,  // ver3: size of struct is 80 bytes
                         80,  // ver4: size of struct is 80 bytes
                         80,  // ver5: size of struct is 80 bytes
+                        144, // ver6: size of struct is 144 bytes
                       };
 
     // This enum provides the struct versions for sbeSeepromVersionInfo_t
@@ -65,7 +66,8 @@ namespace SBE
         STRUCT_VERSION_ORIGIN_GOLD = 0x3,
         STRUCT_VERSION_HBB_FIXUP = 0x4,
         STRUCT_VERSION_LOW_POWER_CHECK = 0x5,
-        STRUCT_VERSION_LATEST = 0x5,
+        STRUCT_VERSION_PRESERVE_HW_KEYS_HASH = 0x6,
+        STRUCT_VERSION_LATEST = 0x6,
         STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
     };
 
@@ -76,6 +78,20 @@ namespace SBE
     // Constant written to SBE SEEPROM version struct to invalidate the
     // struct and the image - 'INVALID\0'
     const uint64_t SBE_SEEPROM_STRUCT_INVALID = 0x494E56414C494400;
+
+    // NOTE:  Should only ever clear first 80 bytes+ECC to preserve HW Keys HASH
+    //        which is offset 80 bytes into struct
+    const size_t SBE_INVALID_STRUCT_CLEAR_SIZE = 80;
+    const size_t SBE_INVALID_STRUCT_CLEAR_SIZE_ECC =
+                             (SBE_INVALID_STRUCT_CLEAR_SIZE*9)/8;
+
+    // Array that holds 64 bytes of HW KEY HASH
+    const size_t SBE_HW_KEY_HASH_SIZE = 64;  // in bytes
+    typedef uint8_t SBE_HW_KEY_HASH_t[SBE_HW_KEY_HASH_SIZE];
+
+    // Offset of the HW Keys' Hash in the PIBMEM0 section of a
+    // customized SBE Image
+    const size_t SBE_PIBMEM0_HW_KEYS_HASH_OFFSET = 64;
 
     // Used for locations of SBE_Version and SBE Image on a SEEPROM
     const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x400; // 1KB
@@ -123,6 +139,10 @@ namespace SBE
     const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE = 0x40000012;
     const uint32_t MSG_IPL_MASTER_CORE       = 0x40000005;
 
+    // For preserving HW Keys Hash on the Seeproms
+    const uint32_t HW_KEYS_HASH_SIZE      = 64;  // size in bytes
+    const uint32_t HW_KEYS_HASH_ECC_SIZE  = (HW_KEYS_HASH_SIZE * 9)/8;
+
     /******************************************/
     /*  Enums                                 */
     /******************************************/
@@ -164,6 +184,7 @@ namespace SBE
         GOLDEN_SIDE = 1,
     };
 
+
     /******************************************/
     /*  Structs                               */
     /******************************************/
@@ -173,8 +194,11 @@ namespace SBE
      *
      * NOTE: For ECC purposes, this must be 8-byte aligned,
      *       so pad data if necessary
-     *       struct_version 1: size = 4+4+64 = 72 (aligned)
-     *       struct_version 2: size = 4+4+64+4+4 = 80 (aligned)
+     *       struct_version 1:   size = 4+4+64 = 72 (aligned)
+     *       struct_version 2    size = 4+4+64+4+4 = 80 (aligned)
+     *       struct_version 3    size = 4+4+64+4+1+3 = 80 (aligned)
+     *       struct_version 4-5  size = 4+4+64+4+1+1+2 = 80 (aligned)
+     *       struct_version 6:   size = 4+4+64+4+1+1+2+64 = 144 (aligned)
      */
     struct sbeSeepromVersionInfo_t
     {
@@ -190,11 +214,12 @@ namespace SBE
         // New parameters for version 4: fixed set if fixup of HBB occured
         uint8_t   fixed;
         uint8_t   unused[2]; // unused space
+        // New parameter for version 6: 64 bytes for HW Keys' Hash
+        uint8_t   hw_keys_hash[SBE_HW_KEY_HASH_SIZE];
     } PACKED;
 
     // This line forces a compile fail if struct is NOT 8-byte-alaigned
     CPPASSERT(0 == (sizeof(sbeSeepromVersionInfo_t) % 8));
-
 
     /**
      * @brief Struct of individual SBE entry in SBE and SBEC
@@ -265,7 +290,8 @@ namespace SBE
 
         // Customized Image Information for this Target
         size_t                   customizedImage_size;
-        uint32_t                 customizedImage_crc;
+        uint32_t                 customizedImage_crc0; // crc for Seeprom 0
+        uint32_t                 customizedImage_crc1; // crc for Seeprom 1
 
         // Update Fields and New Fields to be Written to the Target
         sbeUpdateActions_t            update_actions;
@@ -286,7 +312,9 @@ namespace SBE
           seeprom_1_ver_Nest_Freq_Mismatch(false),
           cur_seeprom_ver_Nest_Freq_Mismatch(false),
           mproc_nest_freq_mhz(0x0),
-          customizedImage_size(0x0), customizedImage_crc(0x0),
+          customizedImage_size(0x0),
+          customizedImage_crc0(0x0),
+          customizedImage_crc1(0x0),
           new_readBack_check(false),
           err_plid(0x0), err_eid(0x0), err_rc(0x0)
         {};
@@ -577,6 +605,42 @@ namespace SBE
      */
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState);
 
+
+    /**
+     * @brief Determines which HW Keys' Hash a given Processor should use
+     *        This function sets the appropriate HW Keys' Hash into the
+     *        customized SBE Image in memory.  It also updates the selected
+     *        SBE Version Struct (io_sbe_ver_info) with this HW Keys' Hash.
+     *
+     * @param[in] i_imgPtr    Pointer to SBE image in memory (already loaded)
+     *                        Memory from this pointer through
+     *                        i_actImgSize is expected to be pre-allocated
+     *                        Assert if i_imgPtr is NULL
+     *
+     * @param[io/out] io_sbe_ver_info  Struct containing state of SBE SEEPROM
+     *                                 that is updated based on the situation
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t determineHwKeysHash(const void* i_imgPtr,
+                                   sbeSeepromVersionInfo_t& io_sbe_ver_info);
+
+    /**
+     * @brief Gets the Memory location of HW Keys Hash from a given
+     *        Processor customized SBE Image.
+     *
+     * @param[in]  i_imgPtr   Pointer to SBE image in memory (already loaded)
+     *                        Memory from this pointer through
+     *                        i_actImgSize is expected to be pre-alloacted
+     *                        Assert if i_imgPtr is NULL
+     *
+     * @param[out] o_HwKeysHashPtr  Pointer to HW Keys Hash in Image
+     *             NOTE: o_HwKeysHashPtr != NULL with no error log present
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t getHwKeysHashPtrFromSbeImage(const void*  i_imgPtr,
+                                            void*& o_HwKeysHashPtr);
 
 } //end namespace SBE
 #endif

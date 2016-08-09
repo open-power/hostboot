@@ -61,6 +61,7 @@ enum sbeModuleId
     SBE_WRITE_SBE_IMAGE                 = 0x10,
     SBE_GET_SBE_IMAGE_SIZE              = 0x11,
     SBE_FIXUP_GOLDEN_HBB                = 0x12,
+    SBE_GET_HW_KEYS_HASH_PTR            = 0x13,
 };
 
 /**
@@ -101,7 +102,7 @@ enum sbeReasonCode
     SBE_IMAGE_GET_SET_SCALAR_FAIL       = SBE_COMP_ID | 0x16,
     SBE_NO_2000_MHZ_NEST_FREQ_CAP       = SBE_COMP_ID | 0x17,
     SBE_INCONSISTENT_NEST_FREQ          = SBE_COMP_ID | 0x18,
-
+    SBE_XIP_GET_SECTION_FAIL            = SBE_COMP_ID | 0x19,
 };
 
 };  // end SBE
