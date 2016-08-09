@@ -182,8 +182,66 @@ class SBEUpdateTest: public CxxTest::TestSuite
 {
   public:
 
-    // @TODO RTC:158044 testTrimBitMask removed after earlier review comment
-    //                  may still be needed.  Use Story 158044 to replace.
+    /**
+     * @brief This function will test __trimCoreMask
+     */
+    void  testTrimBitMask( void )
+    {
+
+        uint64_t fails = 0x0;
+        uint64_t total = 0x0;
+
+        do{
+
+            TRACFCOMP( g_trac_sbe,
+                       ENTER_MRK"testTrimBitMask()" );
+
+            struct
+            {
+                uint32_t inMask;
+                uint32_t maxBits;
+                uint32_t outMask;
+            } testData[] =
+            {
+                {0xFFFFFFFF, 10, 0x000003FF},
+                {0xFFFFFFFF, 32, 0xFFFFFFFF},
+                {0x0000FF00, 4,  0x00000F00},
+                {0x0000FA30, 3,  0x00000230},
+                {0x0000FF00, 8,  0x0000FF00},
+                {0x0000FF50, 16, 0x0000FF50},
+                {0x0000EC50, 4,  0x00000C50},
+                {0x000000FF, 5,  0x0000001F},
+                {0x000000FF, 8,  0x000000FF},
+                {0x11111111, 5,  0x00011111},
+                {0x55555555, 11, 0x00155555},
+            };
+            const uint32_t NUM_TESTS = sizeof(testData)/sizeof(testData[0]);
+
+            uint32_t retMask = 0;
+
+            for(uint32_t i=0; i < NUM_TESTS; i++)
+            {
+                retMask = trimBitMask(testData[i].inMask,
+                                      testData[i].maxBits);
+                total++;
+                if(retMask != testData[i].outMask)
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"testTrimBitMask() - i=%d, "
+                               "retMask=0x%.8X, expMask=0x%.8X",
+                               i, retMask, testData[i].outMask);
+                    TS_FAIL("testTrimBitMask() - Return data did not match "
+                            "expected data.");
+                }
+            }
+
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe,
+                   EXIT_MRK"testTrimBitMask - %d/%d fails",
+                   fails, total );
+    }
+
 
     /**
      * @brief This function will test SBE Update's ability

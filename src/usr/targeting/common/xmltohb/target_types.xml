@@ -954,6 +954,7 @@
     <attribute><id>EQ_GARD</id></attribute>
     <attribute><id>EC_GARD</id></attribute>
     <attribute><id>I2C_BUS_DIV_REF</id></attribute>
+    <attribute><id>I2C_BUS_DIV_REF_VALID</id></attribute>
     <attribute><id>NODE_POS</id></attribute>
     <attribute><id>BOOT_FREQ</id></attribute>
     <attribute><id>VCS_BOOT_VOLTAGE</id></attribute>
@@ -973,6 +974,20 @@
     <attribute><id>MC_SYNC_MODE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>OBUS_RATIO_VALUE</id></attribute>
+    <attribute><id>FUNCTIONAL_EQ_EC_VALID</id></attribute>
+    <attribute><id>FW_MODE_FLAGS_VALID</id></attribute>
+    <attribute><id>ISTEP_MODE</id></attribute>
+    <attribute><id>SBE_RUNTIME_MODE</id></attribute>
+    <attribute><id>IS_SP_MODE</id></attribute>
+    <attribute><id>SBE_FFDC_ENABLE</id></attribute>
+    <attribute><id>SBE_INTERNAL_FFDC_ENABLE</id></attribute>
+    <attribute><id>BOOT_FREQUENCY_VALID</id></attribute>
+    <attribute><id>BOOT_FREQ_MULT</id></attribute>
+    <attribute><id>HWP_CONTROL_FLAGS_VALID</id></attribute>
+    <attribute><id>CHIP_SELECTION_VALID</id></attribute>
+    <attribute><id>CHIP_SELECTION</id></attribute>
+    <attribute><id>SCRATCH6_VALID</id></attribute>
+    <attribute><id>SCRATCH7_VALID</id></attribute>
     <!-- proc_fbc_eff_config_links -->
     <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
     <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>

@@ -39,7 +39,8 @@ HWP_CUSTOMIZE_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
 EXTRAINCDIR += ${HWP_CUSTOMIZE_PATH}/
 HWP_ACCESSORS_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
 EXTRAINCDIR += ${HWP_ACCESSORS_PATH}/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
+HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
+EXTRAINCDIR += ${HWP_XIP_PATH}/
 UTILS_PATH  += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${UTILS_PATH}/
 
@@ -49,13 +50,17 @@ OBJS += sbe_resolve_sides.o
 SUBDIRS += test.d
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${HWP_CUSTOMIZE_PATH} ${HWP_ACCESSORS_PATH} ${UTILS_PATH}
+VPATH += ${HWP_CUSTOMIZE_PATH} ${HWP_ACCESSORS_PATH} ${HWP_XIP_PATH}
+VPATH += ${UTILS_PATH}
 
 include ${ROOTPATH}/procedure.rules.mk
 
-#include ${HWP_CUSTOMIZE_PATH}/p9_xip_customize.mk @TODO RTC:158044
-#include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk @TODO RTC:158044
-#include ${HWP_ACCESSORS_PATH}/p9_mvpd_ring_funcs.mk @TODO RTC:158044
-#include ${UTILS_PATH}/p9_scan_compression.mk @TODO RTC:158044
+include ${HWP_CUSTOMIZE_PATH}/p9_xip_customize.mk
+include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk
+include ${HWP_ACCESSORS_PATH}/p9_mvpd_ring_funcs.mk
+include ${HWP_XIP_PATH}/p9_xip_image.mk
+include ${UTILS_PATH}/p9_ring_identification.mk
+include ${UTILS_PATH}/p9_scan_compression.mk
+include ${UTILS_PATH}/p9_tor.mk
 
 include ${ROOTPATH}/config.mk
