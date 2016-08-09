@@ -389,20 +389,21 @@ extern "C"
                     "No match in mapping table");
 
         //Was a valid keyword name found?
-        FAPI_ASSERT(MAPPING_LAYOUT_INVALID != l_second,
-                    fapi2::GET_MEM_VPD_UNSUPPORTED_CONFIGURATION().
-                    set_MCS(fapi2::ATTR_MEMVPD_POS_Type(l_mcsPos)).
-                    set_FREQ(uint32_t(i_vpd_info.iv_freq_mhz)).
-                    set_DIMM0RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
-                    set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
-                    set_VPDMCSMASK(uint16_t(((l_mapping[l_index].mcsMaskMSB) << 8) |
-                                            l_mapping[l_index].mcsMaskLSB)).
-                    set_VPDFREQMASK(uint8_t(l_mapping[l_index].freqMask)).
-                    set_VPDRANKMASK(uint8_t(((l_mapping[l_index].rankMaskMSB) << 8) |
-                                            l_mapping[l_index].rankMaskLSB)).
-                    set_TARGET(i_target).
-                    set_VPDTYPE(i_vpd_info.iv_vpd_type),
-                    "Unsupported configuration");
+        // Cast needed due to implicit int of enums
+        FAPI_ASSERT( static_cast<char>(MAPPING_LAYOUT_INVALID) != l_second,
+                     fapi2::GET_MEM_VPD_UNSUPPORTED_CONFIGURATION().
+                     set_MCS(fapi2::ATTR_MEMVPD_POS_Type(l_mcsPos)).
+                     set_FREQ(uint32_t(i_vpd_info.iv_freq_mhz)).
+                     set_DIMM0RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
+                     set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
+                     set_VPDMCSMASK(uint16_t(((l_mapping[l_index].mcsMaskMSB) << 8) |
+                                             l_mapping[l_index].mcsMaskLSB)).
+                     set_VPDFREQMASK(uint8_t(l_mapping[l_index].freqMask)).
+                     set_VPDRANKMASK(uint8_t(((l_mapping[l_index].rankMaskMSB) << 8) |
+                                             l_mapping[l_index].rankMaskLSB)).
+                     set_TARGET(i_target).
+                     set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                     "Unsupported configuration");
 
         // build the keyword name
         o_keywordInfo.kwName[0] = l_first;
