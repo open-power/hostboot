@@ -105,7 +105,7 @@ use constant
     ARCH_LIMIT_MEMBUF_PER_DMI => 1,
     ARCH_LIMIT_EX_PER_EQ => MAX_EX_PER_PROC / MAX_EQ_PER_PROC,
     ARCH_LIMIT_MBA_PER_MEMBUF => MAX_MBA_PER_MEMBUF,
-    ARCH_LIMIT_MCS_PER_PROC => MAX_MCS_PER_PROC,
+    ARCH_LIMIT_MCS_PER_MCBIST => MAX_MCS_PER_PROC / MAX_MCBIST_PER_PROC,
     ARCH_LIMIT_XBUS_PER_PROC => MAX_XBUS_PER_PROC,
     ARCH_LIMIT_ABUS_PER_PROC => MAX_ABUS_PER_PROC,
     ARCH_LIMIT_L4_PER_MEMBUF => 1,
@@ -2971,7 +2971,7 @@ sub calcAndAddFapiPos
         $typeToLimit{"ex"}     = ARCH_LIMIT_EX_PER_EQ;
         $typeToLimit{"mba"}    = ARCH_LIMIT_MBA_PER_MEMBUF;
         $typeToLimit{"mcbist"} = ARCH_LIMIT_MCBIST_PER_PROC;
-        $typeToLimit{"mcs"}    = ARCH_LIMIT_MCS_PER_PROC;
+        $typeToLimit{"mcs"}    = ARCH_LIMIT_MCS_PER_MCBIST;
         $typeToLimit{"xbus"}   = ARCH_LIMIT_XBUS_PER_PROC;
         $typeToLimit{"abus"}   = ARCH_LIMIT_ABUS_PER_PROC;
         $typeToLimit{"l4"}     = ARCH_LIMIT_L4_PER_MEMBUF;
@@ -3030,7 +3030,7 @@ sub calcAndAddFapiPos
         $fapiPosHr->{$affinityPath} = $fapiPos;
 
         # Uncomment to emit debug trace to STDERR
-        # print STDERR "$fapiPos\n";
+        #print STDERR "$fapiPos\n";
 
         # Indented oddly to get the output XML to line up in the final output
         print "
