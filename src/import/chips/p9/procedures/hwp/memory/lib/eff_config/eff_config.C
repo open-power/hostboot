@@ -39,6 +39,7 @@
 
 // mss lib
 #include <lib/eff_config/eff_config.H>
+#include <lib/utils/fake_vpd.H>
 #include <lib/mss_vpd_decoder.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
@@ -47,7 +48,6 @@
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
-#include <lib/utils/fake_vpd.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -3495,78 +3495,92 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
     uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {0};
     uint8_t l_cke_blob[mss::VPD_KEYWORD_MAX] = {0};
     uint8_t l_dq_blob[mss::VPD_KEYWORD_MAX] = {0};
+
     std::vector<uint8_t*> l_mt_blobs(PORTS_PER_MCS, nullptr);
+    fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MT);
 
     // For sanity. Not sure this will break us, but we're certainly making assumptions below.
     static_assert(MAX_DIMM_PER_PORT == 2, "Max DIMM per port isn't 2");
 
-    // Get MT data
+    // We need to set up all VPD info before calling getVPD, the API assumes this
+    // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
+    FAPI_TRY( mss::freq(find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
+    FAPI_INF("%s. VPD info - dimm data rate: %d MT/s", c_str(i_target), l_vpd_info.iv_freq_mhz);
+
+    // Make sure to create 0 filled blobs for all the possible blobs, not just for the
+    // chiplets which are configured. This prevents the decoder from accessing nullptrs
+    // but the code which uses the VPD will only access the information for the chiplets
+    // which exist - so the 0's are meaningless
+    for (auto& b : l_mt_blobs)
     {
-        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MT);
-
-        // Check the max for giggles. Programming bug so we should assert.
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
-
-        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-        {
-            FAPI_ERR("VPD MT keyword is too big for our array");
-            fapi2::Assert(false);
-        }
-
-        // Make sure to create 0 filled blobs for all the possible blobs, not just for the
-        // chiplets which are configured. This prevents the decoder from accessing nullptrs
-        // but the code which uses the VPD will only access the information for the chiplets
-        // which exist - so the 0's are meaningless
-        for (auto& b : l_mt_blobs)
-        {
-            b = new uint8_t[mss::VPD_KEYWORD_MAX];
-            memset(b, 0, mss::VPD_KEYWORD_MAX);
-        }
-
-        // For MT we need to fill in the rank information
-        // But, of course, the rank information can differ per port. However, the vpd interface doesn't
-        // allow this in a straight-forward way. So, we have to get VPD blobs for MCS which contain
-        // ports which have the rank configuration in question. This means, basically, we pass a MCS MT
-        // blob to the decoder for each MCA, regardless of whether the port configurations are the same.
-        for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
-        {
-            // Find our blob in the vector of blob pointers
-            uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
-            uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
-
-            // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
-            // This will fill the VPD attributes with 0's which is perfectly ok.
-            for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
-            {
-                uint8_t l_num_master_ranks = 0;
-                FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
-                l_rank_count_dimm[mss::index(d)] = l_num_master_ranks;
-            }
-
-            // This value will, of course, be 0 if there is no DIMM in the port.
-            l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
-            l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
-
-            // Get the MCS blob for this specific rank combination *only if* we have DIMM. Remember,
-            // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.
-            if ((l_vpd_info.iv_rank_count_dimm_0 != 0) || (l_vpd_info.iv_rank_count_dimm_1 != 0))
-            {
-                // If getVPD returns us an error, then we don't have VPD for the DIMM configuration.
-                // This is the root of our plug-rules: if you want a configuration of DIMM to be
-                // supported, it needs to have VPD defined. Likewise, if you don't want a configuration
-                // of DIMM supported be sure to leave it out of the VPD. Note that we don't return a specific
-                // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
-                FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
-            }
-        }
+        b = new uint8_t[mss::VPD_KEYWORD_MAX];
+        memset(b, 0, mss::VPD_KEYWORD_MAX);
     }
 
-    // Get MR data
+    // For MT we need to fill in the rank information
+    // But, of course, the rank information can differ per port. However, the vpd interface doesn't
+    // allow this in a straight-forward way. So, we have to get VPD blobs for MCS which contain
+    // ports which have the rank configuration in question. This means, basically, we pass a MCS MT
+    // blob to the decoder for each MCA, regardless of whether the port configurations are the same.
+    for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MR);
+        // Find our blob in the vector of blob pointers
+        uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
+        uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
+
+        // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
+        // This will fill the VPD attributes with 0's which is perfectly ok.
+        for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
+        {
+            uint8_t l_num_master_ranks = 0;
+            FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
+            l_rank_count_dimm[mss::index(d)] = l_num_master_ranks;
+        }
+
+        // This value will, of course, be 0 if there is no DIMM in the port.
+        l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
+        l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+
+        FAPI_INF("%s. VPD info - rank count for dimm_0: %d, dimm_1: %d",
+                 c_str(i_target), l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
+
+        // Get the MCS blob for this specific rank combination *only if* we have DIMM. Remember,
+        // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.
+        if ((l_vpd_info.iv_rank_count_dimm_0 != 0) || (l_vpd_info.iv_rank_count_dimm_1 != 0))
+        {
+            // If getVPD returns us an error, then we don't have VPD for the DIMM configuration.
+            // This is the root of our plug-rules: if you want a configuration of DIMM to be
+            // supported, it needs to have VPD defined. Likewise, if you don't want a configuration
+            // of DIMM supported be sure to leave it out of the VPD. Note that we don't return a specific
+            // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
+            l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MT;
+
+            // Check the max for giggles. Programming bug so we should assert.
+            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+                      "Failed to retrieve MT size from VPD");
+
+            if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+            {
+                FAPI_ERR("VPD MT keyword is too big for our array");
+                fapi2::Assert(false);
+            }
+
+            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])),
+                      "Failed to retrieve MT VPD");
+        }
+    }// mca
+
+    // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
+    // is connected to a controller which has 0 DIMM installed. In this case, we won't have
+    // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
+    // there's no freq, we us a 0 filled VPD.
+    if (l_vpd_info.iv_freq_mhz != 0)
+    {
+        l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MR;
 
         // Check the max for giggles. Programming bug so we should assert.
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
+        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+                  "Failed to retrieve MR size from VPD");
 
         if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
         {
@@ -3574,50 +3588,47 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
             fapi2::Assert(false);
         }
 
-        // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
-        FAPI_TRY( mss::freq(find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
-
-        // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
-        // is connected to a controller which has 0 DIMM installed. In this case, we won't have
-        // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
-        // there's no freq, we us a 0 filled VPD.
-        if (l_vpd_info.iv_freq_mhz != 0)
-        {
-            FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
-        }
+        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])),
+                  "Failed to retrieve MR VPD");
     }
+
+    // Until CK/DQ integration is working, we differentiate getting our fake_vpd for those ids.
+    // This gives us an extended API we can use for testing which won't be seen by HB because we'd use this to limit it
+#ifndef __HOSTBOOT_MODULE
 
     // Get CKE data
+    l_vpd_info.iv_vpd_type = fapi2::MemVpdData::CK;
+
+    // Check the max for giggles. Programming bug so we should assert.
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+              "Failed to retrieve CK size from VPD");
+
+    if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
     {
-        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::CK);
-
-        // Check the max for giggles. Programming bug so we should assert.
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
-
-        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-        {
-            FAPI_ERR("VPD MR keyword is too big for our array");
-            fapi2::Assert(false);
-        }
-
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_cke_blob[0])) );
+        FAPI_ERR("VPD CK keyword is too big for our array");
+        fapi2::Assert(false);
     }
+
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_cke_blob[0])),
+              "Failed to retrieve DQ VPD");
 
     // Get DQ data
+    l_vpd_info.iv_vpd_type = fapi2::MemVpdData::DQ;
+
+    // Check the max for giggles. Programming bug so we should assert.
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+              "Failed to retrieve DQ size from VPD");
+
+    if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
     {
-        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::DQ);
-
-        // Check the max for giggles. Programming bug so we should assert.
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
-
-        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-        {
-            FAPI_ERR("VPD MR keyword is too big for our array");
-            fapi2::Assert(false);
-        }
-
-        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_dq_blob[0])) );
+        FAPI_ERR("VPD DQ keyword is too big for our array");
+        fapi2::Assert(false);
     }
+
+    FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_dq_blob[0])),
+              "Failed to retrieve DQ VPD");
+
+#endif
 
     FAPI_TRY( mss::eff_decode(i_target, l_mt_blobs, l_mr_blob, l_cke_blob, l_dq_blob) );
 
