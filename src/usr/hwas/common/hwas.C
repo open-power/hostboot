@@ -117,43 +117,6 @@ void enableHwasState(Target *i_target,
 }
 
 
-/**
- * @brief       simple helper fn to check IOX/PBIOX pairs in PG XBUS data
- *
- * @param[in]   i_pgData        XBUS data from PG keyword VPD
- *
- * @return bool                 pairs are valid
- *
- */
-bool areIoxPairsValid(uint16_t i_pgData)
-{
-    bool l_valid = true;
-
-    // Check that pairs are valid, that is, both good or both bad
-    for (uint8_t l_pair = 0;
-         l_pair <= 2;
-         l_pair++)
-    {
-        // Check if both are good in the pair
-        if ((i_pgData & VPD_CP00_PG_XBUS_IOX_PAIR[l_pair]) == 0)
-        {
-            continue;
-        }
-
-        // Check if both are bad in the pair
-        if ((i_pgData & VPD_CP00_PG_XBUS_IOX_PAIR[l_pair]) ==
-            VPD_CP00_PG_XBUS_IOX_PAIR[l_pair])
-        {
-            continue;
-        }
-
-        l_valid = false;
-        break;
-    }
-
-    return l_valid;
-}
-
 
 /**
  * @brief simple helper fn to check L3/L2/REFR triplets in PG EPx data
@@ -501,6 +464,10 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
 {
     bool l_chipFunctional = true;
 
+    ATTR_MODEL_type l_model = i_target->getAttr<ATTR_MODEL>();
+    uint16_t l_xbus = (l_model == MODEL_NIMBUS) ?
+      VPD_CP00_PG_XBUS_GOOD_NIMBUS : VPD_CP00_PG_XBUS_GOOD_CUMULUS;
+
     // Check all bits in FSI entry
     if (i_pgData[VPD_CP00_PG_FSI_INDEX] !=
         VPD_CP00_PG_FSI_GOOD)
@@ -577,18 +544,17 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
         l_chipFunctional = false;
     }
     else
-    // Check bits in XBUS entry, validating pairs in partial good region
+    // Check bits in XBUS entry, ignoring individual xbus targets
+    // Note that what is good is different bewteen Nimbus/Cumulus
     if (((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-          ~VPD_CP00_PG_XBUS_PG_MASK) != VPD_CP00_PG_XBUS_GOOD)
-        ||
-        (!areIoxPairsValid(i_pgData[VPD_CP00_PG_XBUS_INDEX])))
+          ~VPD_CP00_PG_XBUS_PG_MASK) != l_xbus))
     {
         HWAS_INF("pTarget %.8X - XBUS pgData[%d]: "
                  "actual 0x%04X, expected 0x%04X - bad",
                  i_target->getAttr<ATTR_HUID>(),
                  VPD_CP00_PG_XBUS_INDEX,
                  i_pgData[VPD_CP00_PG_XBUS_INDEX],
-                 VPD_CP00_PG_XBUS_GOOD);
+                 l_xbus);
         l_chipFunctional = false;
     }
 
@@ -605,9 +571,9 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     {
         ATTR_CHIP_UNIT_type indexXB =
             i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check pair of bits in XBUS entry
+        // Check bits in XBUS entry
         if ((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-             VPD_CP00_PG_XBUS_IOX_PAIR[indexXB]) != 0)
+             VPD_CP00_PG_XBUS_IOX[indexXB]) != 0)
         {
             HWAS_INF("pDesc %.8X - XBUS%d pgData[%d]: "
                      "actual 0x%04X, expected 0x%04X - bad",
@@ -615,7 +581,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      VPD_CP00_PG_XBUS_INDEX,
                      i_pgData[VPD_CP00_PG_XBUS_INDEX],
                      (i_pgData[VPD_CP00_PG_XBUS_INDEX] &
-                      ~VPD_CP00_PG_XBUS_IOX_PAIR[indexXB]));
+                      ~VPD_CP00_PG_XBUS_IOX[indexXB]));
             l_descFunctional = false;
         }
     }

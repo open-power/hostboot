@@ -41,9 +41,9 @@ BINARY_FILES = $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
 #found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
 BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
-BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:63898b079b07fdd997bafc6b3c45af96d1dc40a1
-BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:b3b907c2e80b68ffe96e924b9cb0db6735fe4532
-BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:cb2c6de3ad46cdd53605d156e22c4bda8d637a42
+BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:aee7240ae33ecd112aeae13a39958e5b713550a8
+BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:9b8788e39e9ae832701418e530d8cbdd502c9cb8
+BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:9503ceac065b78f93b7ad3d987ff482802c40e8c
 
 
 #Update to Centaur DD2.0 for CCIN 31E8

@@ -57,7 +57,7 @@ const uint16_t pgDataAllGood[HWAS::VPD_CP00_PG_DATA_ENTRIES] =
                       (uint16_t)HWAS::VPD_CP00_PG_N1_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_N2_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_N3_GOOD,
-                      (uint16_t)HWAS::VPD_CP00_PG_XBUS_GOOD,
+                      (uint16_t)HWAS::VPD_CP00_PG_XBUS_GOOD_CUMULUS,
                       (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_MCxx_GOOD,
                       (uint16_t)HWAS::VPD_CP00_PG_OBUS_GOOD,
@@ -296,9 +296,9 @@ public:
             TargetHandle_t pTarget = *pTarget_it;
             ATTR_MODEL_type l_model = pTarget->getAttr<ATTR_MODEL>();
             uint16_t l_xbus = (MODEL_NIMBUS == l_model)
-                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD |
-                                         VPD_CP00_PG_XBUS_IOX_PAIR[0])
-                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD;
+                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD_NIMBUS |
+                                         VPD_CP00_PG_XBUS_IOX[0])
+                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD_CUMULUS;
             uint16_t l_obus12 = (MODEL_NIMBUS == l_model)
                               ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
                               : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
@@ -538,9 +538,11 @@ public:
                  l_mask > 0;
                  l_mask >>= 1)
             {
-                // NOTE: Single bits of XBUS matched pairs will be turned
-                //       on or off individually while going through loop,
-                //       thus creating and testing mismatched pairs.
+                // NOTE: Xbus doesn't have matched pairs anymore
+                //       individual Xbus units (0x0400, 0x0200, and 0x0100)
+                //       can be bad and chip is still functional.  Any
+                //       other bit being incorrect should cause full chip
+                //       deconfig
                 if (pgData[VPD_CP00_PG_XBUS_INDEX] & l_mask)
                 {
                     // Turn off a bit that should be on
@@ -552,14 +554,31 @@ public:
                     pgData[VPD_CP00_PG_XBUS_INDEX] |= l_mask;
                 }
 
-                if (isChipFunctional(pTarget, pgData))
+                if (((uint16_t)(VPD_CP00_PG_XBUS_PG_MASK)) & l_mask)
                 {
-                    TS_FAIL("testHWASisChipFunctional>"
+                    //Chip should be functional
+                    if (!isChipFunctional(pTarget, pgData))
+                    {
+                        TS_FAIL("testHWASisChipFunctional>"
+                            "functional = 0x%x, should be true, "
+                            "XBUS = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_XBUS_INDEX],
+                            l_mask);
+                    }
+                }
+                else
+                {
+                    //Chip should be non functional
+                    if (isChipFunctional(pTarget, pgData))
+                    {
+                        TS_FAIL("testHWASisChipFunctional>"
                             "functional = 0x%x, should be false, "
                             "XBUS = 0x%04x, mask = 0x%04x.",
                             isChipFunctional(pTarget, pgData),
                             pgData[VPD_CP00_PG_XBUS_INDEX],
                             l_mask);
+                    }
                 }
 
                 // Restore the "all good" data
@@ -590,9 +609,9 @@ public:
             TargetHandle_t pTarget = *pTarget_it;
             ATTR_MODEL_type l_model = pTarget->getAttr<ATTR_MODEL>();
             uint16_t l_xbus = (MODEL_NIMBUS == l_model)
-                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD |
-                                         VPD_CP00_PG_XBUS_IOX_PAIR[0])
-                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD;
+                            ? (uint16_t)(VPD_CP00_PG_XBUS_GOOD_NIMBUS |
+                                         VPD_CP00_PG_XBUS_IOX[0])
+                            : (uint16_t)VPD_CP00_PG_XBUS_GOOD_CUMULUS;
             uint16_t l_obus12 = (MODEL_NIMBUS == l_model)
                               ? (uint16_t)VPD_CP00_PG_RESERVED_GOOD
                               : (uint16_t)VPD_CP00_PG_OBUS_GOOD;
@@ -758,7 +777,7 @@ public:
                         TS_TRACE( "testHWASisDescFunctional: "
                                   "XBUS%d is not functional", l_chipUnit);
                         pgData[VPD_CP00_PG_XBUS_INDEX] |=
-                            (uint16_t)VPD_CP00_PG_XBUS_IOX_PAIR[l_chipUnit];
+                            (uint16_t)VPD_CP00_PG_XBUS_IOX[l_chipUnit];
 
                         if (isDescFunctional(pDesc, pgData))
                         {

@@ -94,12 +94,6 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
 
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        if ( l_cpu_target  ==  l_pMasterProcTarget )
-        {
-            // we are just checking the Slave PCI's, skip the master
-            continue;
-        }
-
         // Compute the PCIE attribute config on all non-SP systems, since SP
         // won't be there to do it.
         if(!spBaseServicesEnabled)
