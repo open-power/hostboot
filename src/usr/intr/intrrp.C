@@ -1049,7 +1049,7 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
     uint32_t l_addr = PSI_BRIDGE_PSU_DOORBELL_REG;
     size_t scom_len = sizeof(uint64_t);
     uint64_t reg = 0x0;
-    uint64_t l_num_yields = 0;
+    uint64_t l_elapsed_time_ns = 0;
     TARGETING::Target* procTarget = NULL;
     TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
@@ -1074,15 +1074,15 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
             TRACDCOMP(g_trac_intr, "Host/SBE Mailbox "
                                    "response. Wait for Polling to handle"
                                    " response");
-            task_yield(); // allow PSU mbox task to handle
-            l_num_yields += 1;
+            nanosleep(0,10000);
+            l_elapsed_time_ns += 10000;
         }
         else
         {
             //Polling Complete
             break;
         }
-        if (l_num_yields > 30)
+        if (l_elapsed_time_ns > MAX_PSU_LONG_TIMEOUT_NS)
         {
             TRACFCOMP(g_trac_intr, "PSU Timeout hit");
             /*@ errorlog tag
