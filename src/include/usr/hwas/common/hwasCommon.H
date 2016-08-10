@@ -160,9 +160,13 @@ const uint32_t VPD_CP00_PG_N3_MCS01         = 0x0020;
 const uint32_t VPD_CP00_PG_XBUS_INDEX       = 6;
 // all good - 3:VITAL, 4:PRV, 5:IOX0*+, 6:IOX1+, 7:IOX2+,
 //            8:PBIOX0*, 9:PBIOX1, 10:PBIOX2, 14:PLLIOX
-const uint32_t VPD_CP00_PG_XBUS_GOOD        = 0xE01D;
-const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x07E0;
-const uint32_t VPD_CP00_PG_XBUS_IOX_PAIR[3] = {0x0480, 0x0240, 0x0120};
+// Nimbus doesn't physically have PBIOX0 and IOX0.  IOX0 is
+// taken care of by xbus links, need to handle PBIOX0 as part of
+// the full chiplet good
+const uint32_t VPD_CP00_PG_XBUS_GOOD_NIMBUS = 0xE09D;
+const uint32_t VPD_CP00_PG_XBUS_GOOD_CUMULUS= 0xE01D;
+const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x0700;
+const uint32_t VPD_CP00_PG_XBUS_IOX[3] = {0x0400, 0x0200, 0x0100};
 
 const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {7, 7, 8, 8}; // by MCS
 // all good - 3:VITAL, 4:PRV, 5:MCA01, 6:IOM01+, 7:IOM23+, 14:PLLMEM
