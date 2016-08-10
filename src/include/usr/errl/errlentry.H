@@ -585,13 +585,16 @@ public:
     /**
     * @brief Return the list of User Detail sections
     *
-    * @param[in] i_compId Component id associated with the sections to return
+    * @param[in] i_compId Component id associated with the data to return
+    * @param[in] i_subSect Subsection id associated with the data to return
     *
-    *            NOTE: You can pass COMP_ID 0 into this function for wildcard
+    *            //NOTE: You can pass COMP_ID or subsect 0 into this
+    *                    function for wildcard
     *
-    * @return vector of user details sections of specific component id
+    * @return vector of void pointers that point to the data buffer inside
+    *         of a user details section
     */
-    std::vector<ErrlUD*> getUDSections(compId_t i_compId);
+    std::vector<void*> getUDSections(compId_t i_compId, uint8_t i_subSect);
 
 private:
 

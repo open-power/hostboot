@@ -342,10 +342,11 @@ errlHndl_t verifyCfamAccessTarget(const TARGETING::Target* i_target,
 void checkPibMask(errlHndl_t& io_errLog )
 {
     //Delete the error if the mask matches the pib err
-    for(auto section : io_errLog->getUDSections(SCOM_COMP_ID))
+    for(auto data : io_errLog->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
     {
-        if((section->subSect() == SCOM::SCOM_UDT_PIB) &&
-        (reinterpret_cast<SCOM::UdPibInfo *>(section)->iv_pib_err == pib_err_mask))
+        //We get the raw data from the userdetails section, which in this
+        //case is the pib_err itself so just check it.
+        if(*reinterpret_cast<uint8_t *>(data) == pib_err_mask)
         {
             FAPI_ERR( "Ignoring error %.8X due to pib_err_mask=%.1X", io_errLog->plid(), pib_err_mask );
             delete io_errLog;
