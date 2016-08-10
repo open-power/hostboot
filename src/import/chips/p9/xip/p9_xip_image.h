@@ -1035,23 +1035,38 @@ p9_xip_find(void* i_image,
 
 
 
-/// Delete a section from a P9-XIP image in host memory
+/// Delete any section, except .header, from a P9-XIP image in host memory,
+/// even in-between sections, i.e. non-final sections.
 ///
 /// \param[in,out] io_image A pointer to a P9-XIP image in host memory.  The
 /// image is assumed to be consistent with the information contained in the
 /// header regarding the presence of and sizes of all sections. The image is
-/// also required to have been normalized.
+/// also required to have been normalized. In case of failure in this
+/// funtion, the io_image will get restored to its input value.
+///
+/// \param[out] o_imageBuf  A pointer to a pre-allocated buffer that MUST
+/// BE greater than or equal to the size of the \a io_image. The size of
+/// this buffer must be supplied in \a i_imageBufSize. If \a o_imageBuf
+/// is NULL, the supplied \a i_sectionId must be the final section in the
+/// image or this function will fail at deleting the section. On return
+/// from this function, o_imageBuf contains a copy of the initial input
+/// image \a io_image, but only if it's a valid buffer.
+///
+/// \param[in] i_imageBufSize The size of \a o_imageBuf buffer. It MUST
+/// BE greater than or equal to the size of \a io_image. However, if \a
+/// o_imageBuf is NULL, then this arg is ignored.
 ///
 /// \param[in] i_sectionId Identifies the section to be deleted.  See \ref
 /// p9_xip_sections.
 ///
 /// This API effectively deletes a section from a P9-XIP image held in host
-/// memory.  Unless the requested section \a i_section is already empty, only
-/// the final (highest address offset) section of the image may be deleted.
-/// Deleting the final section of the image means that the section size is set
-/// to 0, and the size of the image recorded in the header is reduced by the
-/// section size.  Any alignment padding of the now-last section is also
-/// removed.
+/// memory.  Deleting a section of the image means that the section size is
+/// set to 0, and the size of the image recorded in the header is reduced by
+/// the section size.  Any alignment padding of the in-between section is
+/// also handled, i.e. removed if final section and re-applied upon
+/// re-appending sections.  In the special case where \a o_imageBuf is
+/// NULL, unless the requested \a i_sectionId is already empty, only the final
+/// section (highest address offset) of the image may be deleted.
 ///
 /// \note This API does not check for or warn if other sections in the image
 /// reference the deleted section.
@@ -1060,7 +1075,11 @@ p9_xip_find(void* i_image,
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
 int
-p9_xip_delete_section(void* io_image, const int i_sectionId);
+p9_xip_delete_section(void* io_image, 
+                      void* o_imageBuf,
+                      const uint32_t i_imageBufSize,
+                      const int i_sectionId);
+
 
 
 #ifndef PPC_HYP
@@ -1422,8 +1441,14 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 /// Error associated with the disassembler occured.
 #define P9_XIP_DISASSEMBLER_ERROR 15
 
-/// hash collision creating the .fixed_toc section
+/// Hash collision creating the .fixed_toc section
 #define P9_XIP_HASH_COLLISION 16
+
+/// Invalid buffer. It had a NULL ptr.
+#define P9_XIP_NULL_BUFFER 17
+
+/// Image has been broken and unable to restore original image.
+#define P9_XIP_CANT_RESTORE_IMAGE 18
 
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
@@ -1446,6 +1471,8 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
         "P9_XIP_WOULD_OVERFLOW",     \
         "P9_XIP_DISASSEMBLER_ERROR", \
         "P9_XIP_HASH_COLLISION",     \
+        "P9_XIP_NULL_BUFFER",        \
+        "P9_XIP_CANT_RESTORE_IMAGE", \
     }
 
 /// Applications can use this macro to safely index the array of error

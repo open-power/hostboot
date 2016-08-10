@@ -51,7 +51,6 @@
 #include <endian.h>
 #include "p9_xip_image.h"
 
-
 ////////////////////////////////////////////////////////////////////////////
 // Local Functions
 ////////////////////////////////////////////////////////////////////////////
@@ -100,7 +99,6 @@ XIP_STATIC P9_XIP_ERROR_STRINGS(p9_xip_error_strings);
         fprintf(stderr, ##__VA_ARGS__);         \
         (x);                                    \
     })
-
 
 // Uncomment these if required for debugging, otherwise we get warnings from
 // GCC as they are not otherwise used.
@@ -635,6 +633,53 @@ xipImage2Section(const void* i_image,
 
     }
     while(0);
+
+    return rc;
+}
+
+
+// Delete the last, i.e., final, section of the image.
+
+XIP_STATIC int
+xipDeleteLastSection(void* io_image,
+                     const int i_sectionId)
+{
+    int rc, final;
+    P9XipSection section;
+
+    do
+    {
+
+        xipSetSectionOffset(io_image, i_sectionId, 0);
+        xipSetSectionSize(io_image, i_sectionId, 0);
+
+
+        // For cleanliness we also remove any alignment padding that had been
+        // appended between the now-last section and the deleted section, then
+        // re-establish the final alignment. The assumption is that all images
+        // always have the correct final alignment, so there is no way this
+        // could overflow a designated buffer space since the image size is
+        // the same or has been reduced.
+
+        rc = xipFinalSection(io_image, &final);
+
+        if (rc)
+        {
+            break;
+        }
+
+        rc = p9_xip_get_section(io_image, final, &section);
+
+        if (rc)
+        {
+            break;
+        }
+
+        xipSetImageSize(io_image, section.iv_offset + section.iv_size);
+        xipFinalAlignment(io_image);
+
+    }
+    while (0);
 
     return rc;
 }
@@ -2477,19 +2522,65 @@ p9_xip_write_uint64(void* io_image,
 
 
 int
-p9_xip_delete_section(void* io_image, const int i_sectionId)
+p9_xip_delete_section(void* io_image,
+                      void* o_imageBuf,
+                      const uint32_t i_imageBufSize,
+                      const int i_sectionId)
 {
     int rc, final;
     P9XipSection section;
+    size_t imageSize;
+    uint8_t bImageChanged = 0; // Tracks if io_image has been modified.
 
     do
     {
+
+        // Get image size. We'll need it a lot.
+
+        imageSize = xipImageSize(io_image);
+
+        // Parm check 1: imageBufSize
+        // - Must be >=imageSize for a valid imageBuf buffer
+
+        if (i_imageBufSize < imageSize && o_imageBuf != NULL)
+        {
+            rc = TRACE_ERRORX(P9_XIP_WOULD_OVERFLOW,
+                              "xip_delete_section(): imageBufSize too small");
+            break;
+        }
+
+        // Parm check 2: sectionId
+        // - It is illegal to remove the .header. It would kill the image.
+
+        if (i_sectionId == P9_XIP_SECTION_HEADER)
+        {
+            rc = TRACE_ERRORX(P9_XIP_SECTION_ERROR,
+                              "xip_delete_section(): It is illegal to remove .header");
+            break;
+        }
+
+        // Copy io_image to o_imageBuf if a valid imageBuf ptr is
+        //   supplied, i.e., imageBuf!=NULL.  We'll need a reference copy
+        //   of any delected section to be re-appended after the section
+        //   delete process is done.
+        if (o_imageBuf != NULL)
+        {
+            // We always return a copy of the original input image.
+            memcpy(o_imageBuf, io_image, imageSize);
+        }
+
+        // Check the image
+
         rc = xipQuickCheck(io_image, 1);
 
         if (rc)
         {
             break;
         }
+
+        // Deleting an empty section is a NOP.  Otherwise the section must be
+        // the final section of the image. Update the sizes and re-establish
+        // the final image alignment.
 
         rc = p9_xip_get_section(io_image, i_sectionId, &section);
 
@@ -2498,41 +2589,12 @@ p9_xip_delete_section(void* io_image, const int i_sectionId)
             break;
         }
 
-
-        // Deleting an empty section is a NOP.  Otherwise the section must be
-        // the final section of the image. Update the sizes and re-establish
-        // the final image alignment.
-
         if (section.iv_size == 0)
         {
             break;
         }
 
-        rc = xipFinalSection(io_image, &final);
-
-        if (rc)
-        {
-            break;
-        }
-
-        if (final != i_sectionId)
-        {
-            rc = TRACE_ERRORX(P9_XIP_SECTION_ERROR,
-                              "Attempt to delete non-final section %d\n",
-                              i_sectionId);
-            break;
-        }
-
-        xipSetSectionOffset(io_image, i_sectionId, 0);
-        xipSetSectionSize(io_image, i_sectionId, 0);
-
-
-        // For cleanliness we also remove any alignment padding that had been
-        // appended between the now-last section and the deleted section, then
-        // re-establish the final alignment. The assumption is that all images
-        // always have the correct final alignment, so there is no way this
-        // could overflow a designated buffer space since the image size is
-        // the same or has been reduced.
+        // Determine last image section.
 
         rc = xipFinalSection(io_image, &final);
 
@@ -2541,18 +2603,119 @@ p9_xip_delete_section(void* io_image, const int i_sectionId)
             break;
         }
 
-        rc = p9_xip_get_section(io_image, final, &section);
+        // Now, delete necessary sections in order of highest section offset
+        //   to the offset of the section, i_sectionId, to be removed.
 
-        if (rc)
+        if (final == i_sectionId)
         {
+            rc = xipDeleteLastSection(io_image, i_sectionId);
+
+            bImageChanged = 1;
+
             break;
         }
+        else
+        {
+            // Check for imageBuf ptr violation. If this fails, this is
+            //   catastrophic since we don't have a reference copy of the input
+            //   image (i.e, the memcpy of the image earlier wasn't executed.)
 
-        xipSetImageSize(io_image, section.iv_offset + section.iv_size);
-        xipFinalAlignment(io_image);
+            if (o_imageBuf == NULL)
+            {
+                rc = TRACE_ERRORX(P9_XIP_NULL_BUFFER,
+                                  "xip_delete_section(): Can't copy image into NULL buffer\n");
+                break;
+            }
+
+            // Delete sections, in order, that have offset addresses higher
+            //   than i_sectionId and make a note of the order which is to
+            //   be used when re-appending.  Then delete i_sectionId.
+
+            uint8_t sectionOrder[P9_XIP_SECTIONS];
+            uint8_t orderIdx = 0;
+
+            do
+            {
+
+                rc = xipFinalSection(io_image, &final);
+
+                if (rc)
+                {
+                    break;
+                }
+
+                // It is illegal to remove .header. It would kill the image.
+                if (final == P9_XIP_SECTION_HEADER)
+                {
+                    rc = TRACE_ERRORX(P9_XIP_SECTION_ERROR,
+                                      "xip_delete_section(): Code bug: Attempt to remove .header");
+                    break;
+                }
+
+                if (final != i_sectionId)
+                {
+                    sectionOrder[orderIdx] = final;
+                    orderIdx++;
+                }
+
+                rc = xipDeleteLastSection(io_image, final);
+
+                bImageChanged = 1;
+
+                if (rc)
+                {
+                    break;
+                }
+
+            }
+            while (final != i_sectionId);
+
+            if (rc)
+            {
+                break;
+            }
+
+            // Reappend previously deleted sections in original order
+
+            do
+            {
+
+                orderIdx--;
+                rc = p9_xip_get_section(o_imageBuf, sectionOrder[orderIdx], &section);
+
+                if (rc)
+                {
+                    break;
+                }
+
+                rc = p9_xip_append( io_image,
+                                    sectionOrder[orderIdx],
+                                    (void*)(((uint8_t*)o_imageBuf) + section.iv_offset),
+                                    (const uint32_t)section.iv_size,
+                                    (const uint32_t)imageSize,
+                                    NULL );
+
+                if (rc)
+                {
+                    break;
+                }
+
+            }
+            while (orderIdx);
+
+            break;
+        }
 
     }
     while (0);
+
+    // Restore broken input image in case of rc!=0. But only do so if input
+    //   image has changed.
+
+    if (rc && bImageChanged)
+    {
+        memcpy(io_image, o_imageBuf, imageSize);
+    }
 
     return rc;
 }
