@@ -378,7 +378,7 @@ struct mrs01_data
     mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
     uint8_t iv_dll_enable;
-    uint8_t iv_odic;
+    uint8_t iv_odic[MAX_RANK_PER_DIMM];
     uint8_t iv_additive_latency;
     uint8_t iv_wl_enable;
     uint8_t iv_tdqs;

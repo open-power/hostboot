@@ -161,7 +161,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
         FAPI_TRY( l_eff_config.dll_enable(l_dimm) );
         FAPI_TRY( l_eff_config.dll_reset(l_dimm) );
-        FAPI_TRY( l_eff_config.dram_ron(l_dimm) );
         FAPI_TRY( l_eff_config.write_level_enable(l_dimm) );
         FAPI_TRY( l_eff_config.output_buffer(l_dimm) );
         FAPI_TRY( l_eff_config.vref_dq_train_value(l_dimm) );

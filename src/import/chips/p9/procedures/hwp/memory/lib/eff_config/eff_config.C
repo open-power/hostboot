@@ -1726,35 +1726,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for RON
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::dram_ron(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dram_ron[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
-    const auto l_dimm_num = index(i_target);
-
-    FAPI_TRY( eff_dram_ron(l_mcs, &l_attrs_dram_ron[0][0]) );
-
-    l_attrs_dram_ron[l_port_num][l_dimm_num] = 0x22;
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_RON, l_mcs, l_attrs_dram_ron),
-              "Failed setting attribute for BL");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Determines & sets effective config for Write Level Enable
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -2467,7 +2438,8 @@ fapi2::ReturnCode eff_config::crc_wr_latency(const fapi2::Target<TARGET_TYPE_DIM
         //5              - 1866, 2133, 2400
         //6              - TBD
         //Nimbus only supports 1866->2400 on the current list
-        //2667 is not noted. as such, alway setting crc_wr_latency to 0x05 until JEDEC value is updated
+        //2667 is not noted. We will set crc_wr_latency to 0x05 until JEDEC value is updated
+        //When JEDEC defines the 2667 value we can change this, but leave the sim value as 0x05
         l_attrs_crc_wr_latency[l_port_num] = 0x05;
     }
 

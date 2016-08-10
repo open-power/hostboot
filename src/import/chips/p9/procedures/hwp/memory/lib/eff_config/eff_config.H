@@ -461,13 +461,6 @@ class eff_config
         fapi2::ReturnCode dll_enable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for RON
-        /// @param[in] i_target FAPI2 target
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode dram_ron(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
-
-        ///
         /// @brief Determines & sets effective config for Write Level Enable
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay

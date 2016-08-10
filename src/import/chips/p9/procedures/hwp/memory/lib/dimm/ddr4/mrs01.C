@@ -56,14 +56,13 @@ namespace ddr4
 ///
 mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
     iv_dll_enable(fapi2::ENUM_ATTR_EFF_DRAM_DLL_ENABLE_YES),
-    iv_odic(0),
     iv_additive_latency(0),
     iv_wl_enable(0),
     iv_tdqs(0),
     iv_qoff(0)
 {
     FAPI_TRY( mss::eff_dram_dll_enable(i_target, iv_dll_enable) );
-    FAPI_TRY( mss::eff_dram_ron(i_target, iv_odic) );
+    FAPI_TRY( mss::vpd_mt_dram_drv_imp_dq_dqs(i_target, &(iv_odic[0])) );
     FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency) );
     FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable) );
     FAPI_TRY( mss::vpd_mt_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
@@ -129,17 +128,18 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     fapi2::buffer<uint8_t> l_odic_buffer;
     fapi2::buffer<uint8_t> l_rtt_nom_buffer;
 
-    FAPI_ASSERT( ((i_data.iv_odic == fapi2::ENUM_ATTR_EFF_DRAM_RON_OHM34) ||
-                  (i_data.iv_odic == fapi2::ENUM_ATTR_EFF_DRAM_RON_OHM48)),
+    FAPI_ASSERT( ((i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34) ||
+                  (i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM48)),
                  fapi2::MSS_BAD_MR_PARAMETER()
                  .set_MR_NUMBER(1)
                  .set_PARAMETER(OUTPUT_IMPEDANCE)
-                 .set_PARAMETER_VALUE(i_data.iv_odic)
+                 .set_PARAMETER_VALUE(i_data.iv_odic[mss::index(i_rank)])
                  .set_DIMM_IN_ERROR(i_target),
-                 "Bad value for output driver impedance: %d (%s)", i_data.iv_odic, mss::c_str(i_target));
+                 "Bad value for output driver impedance: %d (%s)", i_data.iv_odic[mss::index(i_rank)], mss::c_str(i_target));
 
     // Map from impedance to bits in MRS1
-    l_odic_buffer = (i_data.iv_odic == fapi2::ENUM_ATTR_EFF_DRAM_RON_OHM34) ? odic_map[0] : odic_map[1];
+    l_odic_buffer = (i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34) ?
+                    odic_map[0] : odic_map[1];
 
     // We have to be careful about 0
     l_rtt_nom_index = (i_data.iv_rtt_nom[mss::index(i_rank)] == 0) ?
@@ -151,7 +151,8 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     // Print this here as opposed to the MRS01 ctor as we want to see the specific rtt now information
     FAPI_INF("MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
              "RTT_NOM: 0x%x(0x%x), TDQS: 0x%x, QOFF: 0x%x", i_rank,
-             i_data.iv_dll_enable, i_data.iv_odic, uint8_t(l_odic_buffer), uint8_t(l_additive_latency), i_data.iv_wl_enable,
+             i_data.iv_dll_enable, i_data.iv_odic[mss::index(i_rank)], uint8_t(l_odic_buffer), uint8_t(l_additive_latency),
+             i_data.iv_wl_enable,
              i_data.iv_rtt_nom[mss::index(i_rank)], uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
 
     io_inst.arr0.writeBit<A0>(i_data.iv_dll_enable);
