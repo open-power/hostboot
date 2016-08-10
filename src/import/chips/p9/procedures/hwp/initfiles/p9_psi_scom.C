@@ -52,7 +52,7 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0b00111001000000101111111111111, 0, 29, 18 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00111001000000101111111111111, 0, 29, 35 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012903ull, l_scom_buffer);
@@ -73,7 +73,7 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0b00000000000000000000000000000, 0, 29, 14 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00000000000000000000000000000, 0, 29, 35 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012906ull, l_scom_buffer);
@@ -94,7 +94,7 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0b11000110001010010000000000000, 0, 29, 14 );
+                l_scom_buffer.insert<uint64_t> (literal_0b11000110001010010000000000000, 0, 29, 35 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012907ull, l_scom_buffer);
@@ -115,11 +115,7 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x000, 16, 12, 27 );
-                l_scom_buffer.insert<uint64_t> (literal_0x000, 32, 12, 43 );
-                l_scom_buffer.insert<uint64_t> (literal_0x000, 48, 5, 59 );
-                l_scom_buffer.insert<uint64_t> (literal_0b00000, 16, 12, 27 );
-                l_scom_buffer.insert<uint64_t> (literal_0b00000, 32, 12, 43 );
+                l_scom_buffer.insert<uint64_t> (literal_0x000, 16, 12, 52 );
                 l_scom_buffer.insert<uint64_t> (literal_0b00000, 48, 5, 59 );
             }
 
