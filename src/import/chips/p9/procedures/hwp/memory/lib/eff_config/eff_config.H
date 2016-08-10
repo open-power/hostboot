@@ -65,9 +65,9 @@ class eff_config
         template< fapi2::TargetType T >
         eff_config( const fapi2::Target<T>& i_target, fapi2::ReturnCode& o_rc )
         {
-            // Decode the VPD for this MCS and stick it in the attributes.
-            o_rc = decode_vpd(i_target);
-            return;
+            // Leaving the fapi2::RaturnCode scaffolding in place as we'll likely need it
+            // in the future and this way it will be here. BRS
+            o_rc = fapi2::FAPI2_RC_SUCCESS;
         }
 
         //
@@ -743,7 +743,6 @@ class eff_config
         ///
         fapi2::ReturnCode dram_trtp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
-    private:
         ///
         /// @brief Grab the VPD blobs and decode into attributes
         /// @param[in] i_target FAPI2 target (MCS)
