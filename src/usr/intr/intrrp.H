@@ -218,7 +218,7 @@ namespace INTR
                 XIVE_RESET_UNIT_ENABLE = 0x8000000000000000,
                 ACK_HYPERVISOR_INT_REG_OFFSET = 0x830/sizeof(uint16_t),
                 POWERBUS_STATE_QUIESCE = 0xC000000000000000,
-                MAX_PSU_LONG_TIMEOUT_NS  = 100000*NS_PER_MSEC,
+                MAX_PSU_LONG_TIMEOUT_NS  = 5000*NS_PER_MSEC, //5 seconds
 
                 ESB_STATE_RESET   = 0,
                 ESB_STATE_OFF     = 1,
