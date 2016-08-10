@@ -1,0 +1,124 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_setup_bars_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Halt codes for p9_setup_bars -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_FSP_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      FSP BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_PSI_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      PSI BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_NPU_PHY0_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      NPU PHY0 BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_NPU_PHY1_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      NPU PHY1 BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_NPU_MMIO_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      NPU MMIO BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INVALID_MCD_NM_RANGE_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      Invalid configuration for MCD non-mirrored range
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NM_RANGE_IDX</ffdc>
+    <ffdc>NM_RANGE_BASE_ADDR</ffdc>
+    <ffdc>NM_RANGE_SIZE</ffdc>
+    <ffdc>NM_CHIP_BASE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INVALID_MCD_M_RANGE_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      Invalid configuration for MCD mirrored range
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>M_RANGE_IDX</ffdc>
+    <ffdc>M_RANGE_BASE_ADDR</ffdc>
+    <ffdc>M_RANGE_SIZE</ffdc>
+    <ffdc>M_CHIP_BASE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INVALID_MCD_GROUP_SIZE_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      Unsupported MCD group size
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RANGE_SIZE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
