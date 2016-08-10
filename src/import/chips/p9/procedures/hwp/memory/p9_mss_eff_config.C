@@ -54,7 +54,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
 
     mss::eff_config l_eff_config(i_target, l_rc);
-    FAPI_TRY(l_rc, "Unable to decode VPD for %s", mss::c_str(i_target) );
+    FAPI_TRY(l_rc, "Unable to construct eff_config object for for %s", mss::c_str(i_target) );
 
     // Caches
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
@@ -70,7 +70,34 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( mss::check::spd::invalid_cache(l_dimm,
                   l_it != l_factory_caches.end(),
                   l_dimm_pos),
-                  "Failed to get valid cache");
+                  "Failed to get valid cache (rank decoder)");
+
+        l_eff_config.iv_pDecoder = l_it->second;
+
+        // <sigh> This is a little hackery. We needed to decode the DIMM's master ranks, so we can decode the VPD
+        // for this entire MCS. Which means we need to re-do the cache find and check which stinks.
+        FAPI_TRY( l_eff_config.master_ranks_per_dimm(l_dimm) );
+    }
+
+    // We need to decode the VPD. We don't do this in the ctor as we need
+    // the rank information and for that we need the SPD caches (which we get above.)
+    // However, we need to do the VPD decode before the others so that they might
+    // be able to use VPD information to make decisions about setting up eff attributes.
+    FAPI_TRY( l_eff_config.decode_vpd(i_target),
+              "Unable to decode VPD for %s", mss::c_str(i_target) );
+
+    for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
+    {
+        const auto l_dimm_pos = mss::pos(l_dimm);
+
+        // TODO: RTC 152390
+        // Find decoder factory for this dimm position
+        auto l_it = l_factory_caches.find(l_dimm_pos);
+
+        FAPI_TRY( mss::check::spd::invalid_cache(l_dimm,
+                  l_it != l_factory_caches.end(),
+                  l_dimm_pos),
+                  "Failed to get valid cache (main decoder)");
 
         l_eff_config.iv_pDecoder = l_it->second;
 
@@ -79,7 +106,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dram_width(l_dimm) );
         FAPI_TRY( l_eff_config.dram_density(l_dimm) );
         FAPI_TRY( l_eff_config.ranks_per_dimm(l_dimm) );
-        FAPI_TRY( l_eff_config.master_ranks_per_dimm(l_dimm) );
+        // Master ranks done above
         FAPI_TRY( l_eff_config.primary_stack_type(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_size(l_dimm) );
         FAPI_TRY( l_eff_config.hybrid_memory_type(l_dimm) );
