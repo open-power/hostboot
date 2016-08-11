@@ -87,11 +87,11 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
 
     switch(i_temp_refresh_range)
     {
-        case fapi2::ENUM_ATTR_MRW_TEMP_REFRESH_RANGE_NORMAL:
+        case fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_NORMAL:
             l_multiplier = temp_mode::NORMAL;
             break;
 
-        case fapi2::ENUM_ATTR_MRW_TEMP_REFRESH_RANGE_EXTEND:
+        case fapi2::ENUM_ATTR_MSS_MRW_TEMP_REFRESH_RANGE_EXTEND:
             l_multiplier = temp_mode::EXTENDED;
             break;
 

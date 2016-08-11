@@ -25,350 +25,426 @@
 
 <attributes>
 
-    <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook Thermal Memory Power Limit</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook DIMM power curve percent uplift
-          for this system at max utilization.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook DIMM power curve percent uplift
+      for this system at max utilization.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook DIMM power curve percent uplift
-          for this system at idle utilization.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook DIMM power curve percent uplift
+      for this system at idle utilization.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_MEM_M_DRAM_CLOCKS</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook for the number of M DRAM clocks.
-          One approach to curbing DRAM power usage is by throttling
-          traffic through a programmable N commands over M window.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook for the number of M DRAM clocks.
+      One approach to curbing DRAM power usage is by throttling
+      traffic through a programmable N commands over M window.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_MAX_DRAM_DATABUS_UTIL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
-            Used to determine memory throttle values.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
+      Used to determine memory throttle values.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Option to control MCS prefetch retry threshold, for performance optimization.
-            This attribute controls the number of retries in the prefetch engine.
-            Retry threshold available ranges from 16 to 30.
-            Note: Values outside those ranges will default to 30.
-            In MRW.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Option to control MCS prefetch retry threshold, for performance optimization.
+      This attribute controls the number of retries in the prefetch engine.
+      Retry threshold available ranges from 16 to 30.
+      Note: Values outside those ranges will default to 30.
+      In MRW.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- Ineffective for Nimbus -->
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_POWER_CONTROL_REQUESTED</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Capable power control settings. In MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
-        <platInit/>
-        <mssAccessorName>mrw_power_control_requested</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Capable power control settings. In MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_power_control_requested</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook enablement of the HWP code to adjust the
-          VMEM regulator power limit based on number of installed DIMMs.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <platInit/>
-        <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook enablement of the HWP code to adjust the
+      VMEM regulator power limit based on number of installed DIMMs.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Machine Readable Workbook value for the maximum possible number
-          of dimms that can be installed under any of the VMEM regulators.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook value for the maximum possible number
+      of dimms that can be installed under any of the VMEM regulators.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_AVDD_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_avdd_offset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_AVDD_OFFSET_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_avdd_offset_disable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_VDD_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_vdd_offset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_VDD_OFFSET_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vdd_offset_disable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_VCS_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_vcs_offset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_VCS_OFFSET_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vcs_offset_disable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_VPP_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_vpp_offset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_VPP_OFFSET_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vpp_offset_disable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_VDDR_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_vddr_offset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_VDDR_OFFSET_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <platInit/>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vddr_offset_disable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MRW_FINE_REFRESH_MODE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Fine refresh mode.
-          Sets DDR4 MRS3.
-          Should be defaulted to normal mode.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-          NORMAL = 0,
-          FIXED_2X = 1,
-          FIXED_4X = 2,
-          FLY_2X = 5,
-          FLY_4X = 6
-        </enum>
-        <platInit/>
-        <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_FINE_REFRESH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Fine refresh mode.
+      Sets DDR4 MRS3.
+      Should be defaulted to normal mode.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NORMAL = 0,
+      FIXED_2X = 1,
+      FIXED_4X = 2,
+      FLY_2X = 5,
+      FLY_4X = 6
+    </enum>
+    <platInit/>
+    <initToZero/>
+    <default>NORMAL</default>
+    <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_TEMP_REFRESH_RANGE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Temperature refresh range.
-          Sets DDR4 MRS4.
-          Should be defaulted to extended range.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NORMAL = 0, EXTEND = 1</enum>
-        <platInit/>
-        <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_TEMP_REFRESH_RANGE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Temperature refresh range.
+      Sets DDR4 MRS4.
+      Should be defaulted to extended range.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NORMAL = 0, EXTEND = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <default>NORMAL</default>
+    <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
+  </attribute>
 
-    <attribute>
-        <id>ATTR_MRW_DRAMINIT_RESET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <mssAccessorName>mrw_draminit_reset_disable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>For resetting the phy delay values at the beginning of calling mss_draminit_training. YES means the vaules will be reset.</description>
+    <valueType>uint8</valueType>
+    <enum>YES = 0, NO = 1</enum>
+    <default>YES</default>
+    <initToZero/>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <platInit/>
+    <mssAccessorName>mrw_reset_delay_before_cal</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MRW_PREFETCH_ENABLE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
-      <valueType>uint8</valueType>
-      <enum>OFF = 0, ON = 1</enum>
-      <platInit/>
-      <mssAccessorName>mrw_prefetch_enable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_PREFETCH_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Value of on or off. Determines if prefetching enabled or not.</description>
+    <valueType>uint8</valueType>
+    <enum>ON = 0, OFF = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <default>ON</default>
+    <!-- Ineffective for Nimbus -->
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <mssAccessorName>mrw_prefetch_enable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MRW_CLEANER_ENABLE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Value of on or off.
-        Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
-        enabled or not. See chapter 7 of the Centaur Workbook.
-      </description>
-      <valueType>uint8</valueType>
-      <enum>OFF = 0, ON = 1</enum>
-      <platInit/>
-      <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_CLEANER_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Value of on or off.
+      Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
+      enabled or not. See chapter 7 of the Centaur Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <initToZero/>
+    <default>OFF</default>
+    <!-- Ineffective for Nimbus -->
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_GPO</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Global Offset in number of Clocks
-      </description>
-      <valueType>uint8</valueType>
-        <mssUnits> nck </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_offset_gpo</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_OFFSET_GPO</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Global Offset in number of Clocks. Delta from the value calculated or taken from VPD.
+    </description>
+    <valueType>int8</valueType>
+    <mssUnits> nck </mssUnits>
+    <initToZero/>
+    <default>0</default>
+    <platInit/>
+    <mssAccessorName>mrw_offset_gpo</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_RLO</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Read Latency Offset in number of Clocks
-      </description>
-      <valueType>uint8</valueType>
-        <mssUnits> nck </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_offset_rlo</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_OFFSET_RLO</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Read Latency Offset in number of Clocks. Delta from the value calculated or taken from VPD.
+    </description>
+    <valueType>int8</valueType>
+    <mssUnits> nck </mssUnits>
+    <initToZero/>
+    <default>0</default>
+    <platInit/>
+    <mssAccessorName>mrw_offset_rlo</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_WLO</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Write Latency Offset in number of Clocks
-      </description>
-      <valueType>uint8</valueType>
-        <mssUnits> nck </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_offset_wlo</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_OFFSET_WLO</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Write Latency Offset in number of Clocks
+    </description>
+    <valueType>int8</valueType>
+    <mssUnits> nck </mssUnits>
+    <initToZero/>
+    <default>0</default>
+    <platInit/>
+    <mssAccessorName>mrw_offset_wlo</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Describes the settings for periodic calibration for port 0:
-        Reading left to right. (DEFAULT: 0xD90C -> Byte 0(11011001), Byte 1(00001100))
-        For each bit: OFF = 0, ON = 1
-        Byte 0:
-        0: ZCAL
-        1: SYSCK_ALIGN
-        2 :RDCENTERING
-        3: RDLCK_ALING
-        4: DQS_ALIGN
-        5: RDCLK_UPDATE
-        6: PER_DUTYCYCLE
-        7: PERCAL_PWR_DIS
+  <attribute>
+    <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Describes the settings for periodic calibration for all ports:
+      Reading left to right. (DEFAULT: 0xD90C -> Byte 0(11011001), Byte 1(00001100))
+      For each bit: OFF = 0, ON = 1. Setting to 0 indicates to disable periodic memcal.
+      Byte 0:
+      0: ZCAL
+      1: SYSCK_ALIGN
+      2: RDCENTERING
+      3: RDLCK_ALIGN
+      4: DQS_ALIGN
+      5: RDCLK_UPDATE
+      6: PER_DUTYCYCLE
+      7: PERCAL_PWR_DIS
 
-        Byte 1:
-        0: PERCAL_REPEAT
-        1: PERCAL_REPEAT
-        2: PERCAL_REPEAT
-        3: SINGLE_BIT_MPR
-        4: MBA_CFG_0
-        5: MBA_CFG_1
-        6: SPARE
-        7: SPARE
-      </description>
-      <valueType>uint16</valueType>
-        <mssUnits> encoded settings for periodic calibration </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_periodic_memcal_mode_options</mssAccessorName>
-    </attribute>
+      Byte 1:
+      0: PERCAL_REPEAT
+      1: PERCAL_REPEAT
+      2: PERCAL_REPEAT
+      3: SINGLE_BIT_MPR
+      4: MBA_CFG_0
+      5: MBA_CFG_1
+      6: SPARE
+      7: SPARE
+    </description>
+    <valueType>uint16</valueType>
+    <mssUnits> encoded settings for periodic calibration </mssUnits>
+    <platInit/>
+    <default>0xD90C</default>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <mssAccessorName>mrw_periodic_memcal_mode_options</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_TSYS_ADR</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Phase rotator value for the memory sub-system clock in ticks.
-        Ticks are 1/128 of one cycle of clock.
-      </description>
-      <valueType>uint8</valueType>
-        <mssUnits> tick </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_tsys_adr</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Describes the settings for periodic ZQ calibration for all ports:
+      Reading left to right. For each bit: OFF = 0, ON = 1.
+      Setting to 0 indicates to disable periodic zqcal.
+      Byte 0:
+      0: ZQCAL
+      All others reserved for future use
+    </description>
+    <valueType>uint16</valueType>
+    <mssUnits> encoded settings for periodic calibration </mssUnits>
+    <platInit/>
+    <default>0x8000</default>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
+    <mssAccessorName>mrw_periodic_zqcal_mode_options</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_TSYS_DATA</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Phase rotator value for the memory sub-system data in ticks.
-        Ticks are 1/128 of one cycle of clock.
-      </description>
-      <valueType>uint8</valueType>
-        <mssUnits> tick </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_tsys_data</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_TSYS_ADR</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Phase rotator value for the memory sub-system clock in ticks.
+      Ticks are 1/128 of one cycle of clock.
+    </description>
+    <valueType>uint8</valueType>
+    <mssUnits> tick </mssUnits>
+    <platInit/>
+    <default>0x21</default>
+    <mssAccessorName>mrw_tsys_adr</mssAccessorName>
+  </attribute>
 
-    <attribute>
-      <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-        Allows user to manually turn on and off 2N Mode.
-        AUTO feature defaults to Signal Integrity generated setting.
-      </description>
-      <valueType>uint8</valueType>
-      <enum>OFF = 0, ON = 1, AUTO = 2 </enum>
-      <mssUnits> encoded settings for 2N Mode </mssUnits>
-      <platInit/>
-      <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
-    </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_TSYS_DATA</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Phase rotator value for the memory sub-system data in ticks.
+      Ticks are 1/128 of one cycle of clock.
+    </description>
+    <valueType>uint8</valueType>
+    <mssUnits> tick </mssUnits>
+    <default>0x18</default>
+    <platInit/>
+    <mssAccessorName>mrw_tsys_data</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Allows user to manually turn on and off 2N Mode.
+      AUTO indicates to use Signal Integrity generated setting (from VPD).
+    </description>
+    <valueType>uint8</valueType>
+    <enum>AUTO = 0, FORCE_TO_1N_MODE = 1, FORCE_TO_2N_MODE = 2 </enum>
+    <mssUnits> encoded settings for 2N Mode </mssUnits>
+    <platInit/>
+    <initToZero/>
+    <default>AUTO</default>
+    <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
+  </attribute>
 
 </attributes>

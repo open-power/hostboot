@@ -484,7 +484,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
     // Calculates appropriate tREFI based on fine refresh mode
     switch(l_refresh_mode)
     {
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
                                   l_temp_refresh_range,
@@ -492,8 +492,8 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
                       "Failed to calculate tREF1" );
             break;
 
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
                                   l_temp_refresh_range,
@@ -501,8 +501,8 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
                       "Failed to calculate tREF2" );
             break;
 
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
                                   l_temp_refresh_range,
@@ -579,19 +579,19 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
     // Selects appropriate tRFC based on fine refresh mode
     switch(l_refresh_mode)
     {
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
             FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC1" );
             break;
 
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
             FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_2(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC2" );
             break;
 
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
-        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
             FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_4(i_target, l_trfc_mtb),
                       "Failed to decode SPD for tRFC4" );
             break;
