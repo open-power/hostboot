@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ namespace   TARGETING
              *                  return errl !=  NULL  -> failure
              *
              */
-            errlHndl_t  syncSectionToFsp( 
+            errlHndl_t  syncSectionToFsp(
                                     TARGETING::SECTION_TYPE i_section_to_sync );
 
             /**
@@ -191,7 +191,7 @@ namespace   TARGETING
              *           TARGETING::MBOX_MSG_TYPE passed in to define the
              *           message sending policy.
              *
-             *  @param[in/out] i_msg 
+             *  @param[in/out] i_msg
              *                    This parameter is used as both input and an
              *                    output parameter. If the message is sent
              *                    synchronusly the response will be populated
@@ -251,7 +251,7 @@ namespace   TARGETING
      *  @brief  Handles synchronization of all RW targeting attributes from
      *          hostboot to the fsp; the following sections are
      *          synchronized.
-     * 
+     *
      *           1). SECTION_TYPE_PNOR_RW
      *           2). SECTION_TYPE_HEAP_PNOR_INIT
      *           3). SECTION_TYPE_HEAP_PNOR_ZERO_INIT
@@ -267,7 +267,7 @@ namespace   TARGETING
      *  @brief  Handles synchronization of all RW targeting attributes from
      *          the fsp to hostboot; the following sections are
      *          synchronized.
-     * 
+     *
      *           1). SECTION_TYPE_PNOR_RW
      *           2). SECTION_TYPE_HEAP_PNOR_INIT
      *           3). SECTION_TYPE_HEAP_PNOR_ZERO_INIT
@@ -279,14 +279,7 @@ namespace   TARGETING
      */
     errlHndl_t syncAllAttributesFromFsp();
 
-    /**
-     *  @brief  A temporary hack to set attributes that HDAT needs.
-     *          To be removed by RTC: 143191
-     *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
-     */
-    errlHndl_t hdatAttrHack();
+
 
 } // namespace
 #endif
