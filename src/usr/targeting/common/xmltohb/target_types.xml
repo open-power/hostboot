@@ -488,6 +488,7 @@
     </attribute>
 
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute><id>TEMP_SENSOR_I2C_CONFIG</id></attribute>
 
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>

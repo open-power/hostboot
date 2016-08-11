@@ -1839,6 +1839,45 @@
 </attribute>
 
 <attribute>
+    <id>TEMP_SENSOR_I2C_CONFIG</id>
+    <description>Information needed to address an I2C slave device</description>
+    <complexType>
+        <description>Structure to define the addressing for an I2C
+                     slave device.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                         master</description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>TPM_INFO</id>
     <description>Information needed to address the TPM slaves</description>
     <complexType>
