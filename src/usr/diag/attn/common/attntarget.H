@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 
 #include "common/attnfwd.H"
 #include <map>
+#include <targeting/common/targetservice.H>
+
 
 namespace ATTN
 {
@@ -165,6 +167,34 @@ class TargetService
                 TARGETING::ATTRIBUTE_ID i_attribute,
                 TARGETING::TargetHandle_t i_target,
                 uint64_t & o_val);
+
+        /**
+         *  @brief Returns the master processor chip target handle
+         *
+         *  Returns the master processor chip target handle.  On systems
+         *  without an alternate master, it returns a handle to the only master,
+         *  if found (NULL otherwise).  On systems with multiple potential
+         *  masters, it returns a target handle to the acting master (NULL
+         *  otherwise).  If targeting information is not yet accessible (very
+         *  early in the host boot IPL), the returned target handle will be a
+         *  sentinel value representing the master (whichever it may be)
+         *
+         *  @param[out] o_masterProcChipTarget Target handle referring to the
+         *      current master processor chip (the one connected to PNOR)
+         *  @param[in]  i_pNodeTarget
+         *      Handle to the node target to search for the acting master
+         *      processor.  If NULL, HB will search whatever node it's
+         *      running on, and FSP will search the physical drawer containing
+         *      the lowest ordered fabric node ID.         *
+         *  @pre Target Service must be initialized
+         *
+         *  @post Master processor chip target returned or NULL is returned if
+         *  targetservice is not yet initialized or user passed an invalid node
+         *  target to get the master proc handle
+         */
+        void masterProcChipTargetHandle(
+            TARGETING::Target*& o_masterProcChipTargetHandle,
+            const TARGETING::Target* i_pNodeTarget = NULL) const;
 
         /**
          * @brief setImpl Set the active target service implementation.
@@ -335,6 +365,34 @@ class TargetServiceImpl
                 uint64_t & o_val);
 
         /**
+         *  @brief Returns the master processor chip target handle
+         *
+         *  Returns the master processor chip target handle.  On systems
+         *  without an alternate master, it returns a handle to the only master,
+         *  if found (NULL otherwise).  On systems with multiple potential
+         *  masters, it returns a target handle to the acting master (NULL
+         *  otherwise).  If targeting information is not yet accessible (very
+         *  early in the host boot IPL), the returned target handle will be a
+         *  sentinel value representing the master (whichever it may be)
+         *
+         *  @param[out] o_masterProcChipTarget Target handle referring to the
+         *      current master processor chip (the one connected to PNOR)
+         *  @param[in]  i_pNodeTarget
+         *      Handle to the node target to search for the acting master
+         *      processor.  If NULL, HB will search whatever node it's
+         *      running on, and FSP will search the physical drawer containing
+         *      the lowest ordered fabric node ID.         *
+         *  @pre Target Service must be initialized
+         *
+         *  @post Master processor chip target returned or NULL is returned if
+         *  targetservice is not yet initialized or user passed an invalid node
+         *  target to get the master proc handle
+         */
+        virtual void masterProcChipTargetHandle(
+            TARGETING::Target*& o_masterProcChipTargetHandle,
+            const TARGETING::Target* i_pNodeTarget = NULL) const;
+
+        /**
          * @brief installTargetService
          *
          * Make this the active target service implementation.
@@ -411,6 +469,14 @@ inline bool TargetService::getAttribute(
         uint64_t & o_val)
 {
     return iv_impl->getAttribute(i_attribute, i_target, o_val);
+}
+
+inline  void TargetService::masterProcChipTargetHandle(
+            TARGETING::Target*& o_masterProcChipTargetHandle,
+            const TARGETING::Target* i_pNodeTarget) const
+{
+    iv_impl->masterProcChipTargetHandle(o_masterProcChipTargetHandle,
+                                        i_pNodeTarget );
 }
 
 inline void TargetService::setImpl(TargetServiceImpl & i_impl)

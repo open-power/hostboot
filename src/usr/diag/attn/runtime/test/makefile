@@ -35,6 +35,6 @@ OBJS += attnfakereg.o
 
 MODULE = testattn_rt
 
-#TESTS = *.H  @RTC 155588 re-enable after cleaning up for P9
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

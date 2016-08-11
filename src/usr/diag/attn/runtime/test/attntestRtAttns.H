@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,7 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
             ATTN_SLOW(ENTER_MRK "AttnCheckForRtAttentionsTest::"
                                 "testCheckForCenAttentions");
 
+#if 0   // Don't have any Centaurs yet -- so wait. @TODO:RTC 159174
             FakePrd prd;
             prd.installPrd();
             FakeRegSvc fakeRegs;
@@ -164,7 +165,7 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
 
                 // Set the error for 4th Centaur
                 putScom( proc, 0x2000001, 0x0010000000000000ull );
-                putScom( mcs, 0x2011840, 0x0009000000000000ull );
+                putScom( mcs,  0x2011840, 0x0009000000000000ull );
 
                 AttentionList expAttn;
                 PRDF::AttnData attn ( mb, RECOVERABLE );
@@ -187,9 +188,12 @@ class AttnCheckForRtAttentionsTest : public CxxTest::TestSuite
                     break;
                 }
             }while (0);
+#endif    //  We don't have any Centaurs at this point in P9
 
             ATTN_SLOW(EXIT_MRK "AttnCheckForRtAttentionsTest::"
                                "testCheckForCenAttentions");
         }
+
+
 };
 #endif

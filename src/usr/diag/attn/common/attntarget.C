@@ -211,6 +211,14 @@ bool TargetServiceImpl::getAttribute(
     return found;
 }
 
+void TargetServiceImpl::masterProcChipTargetHandle(
+                  TARGETING::Target*& o_masterProcChipTargetHandle,
+                  const TARGETING::Target* i_pNodeTarget) const
+{
+    TARGETING::targetService().masterProcChipTargetHandle(
+                                     o_masterProcChipTargetHandle);
+}
+
 TYPE TargetServiceImpl::getType(TargetHandle_t i_target)
 {
     return i_target->getAttr<ATTR_TYPE>();

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnrandsource.C $            */
+/* $Source: src/usr/diag/attn/ipl/test/attnrandsource.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,6 +113,8 @@ void RandSource::run()
             d.attnType = getRandomAttentionType();
 
             l.push_back(d);
+            ATTN_TRACE("RandSource:run, Type:%d, Count:%d Iterations:%d",
+                        d.attnType, count, iterations );
         }
 
         iv_injectSink->putAttentions(l);

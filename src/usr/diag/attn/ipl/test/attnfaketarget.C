@@ -74,6 +74,18 @@ void FakeProcTargetService::getAllChips(
     }
 }
 
+void FakeProcTargetService::masterProcChipTargetHandle(
+             TARGETING::Target*& o_masterProcChipTargetHandle,
+             const TARGETING::Target* i_pNodeTarget) const
+{
+    ATTN_TRACE("FakeProc :: masterProcChipTargetHandle has %d",
+               iv_procs[0] );
+
+    // We just use the first proc(value 0) as the MASTER proc
+    o_masterProcChipTargetHandle = iv_procs[0];
+}
+
+
 bool FakeProcTargetService::getAttribute(
         TARGETING::ATTRIBUTE_ID i_attribute,
         TARGETING::TargetHandle_t i_target,
