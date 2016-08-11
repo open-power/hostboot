@@ -125,6 +125,16 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_LOWER_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_UPPER_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_SLAVE_LOWER_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_SLAVE_UPPER_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_EXTRA_REG;
+
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_SW_CNTRL_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_VREG_COARSE_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_VREG_CNTRL_REG;
+
         static const std::vector< std::pair<uint64_t, uint64_t> > AC_BOOST_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< uint64_t > DATA_BIT_DIR1;
@@ -211,9 +221,12 @@ fapi_try_exit:
 
 }
 
-//
-// Reseting the DLL registers TODO RTC:156518
-//
+///
+/// @brief Reset all of the DLL registers - Nimbus only
+/// @param[in] i_target an MCA
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
 /// @brief Read AC_BOOST_CNTL
