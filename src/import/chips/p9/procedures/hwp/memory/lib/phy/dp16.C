@@ -68,6 +68,111 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_DLL_CNTL0_P0_4, MCA_DDRPHY_DP16_DLL_CNTL1_P0_4 },
 };
 
+// Definition of the DP16 DLL DAC Lower registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_DAC_LOWER_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_0, MCA_DDRPHY_DP16_DLL_DAC_LOWER1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_1, MCA_DDRPHY_DP16_DLL_DAC_LOWER1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_2, MCA_DDRPHY_DP16_DLL_DAC_LOWER1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_3, MCA_DDRPHY_DP16_DLL_DAC_LOWER1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_DAC_LOWER0_P0_4, MCA_DDRPHY_DP16_DLL_DAC_LOWER1_P0_4 },
+};
+
+// Definition of the DP16 DLL DAC Upper registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_DAC_UPPER_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_0, MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_1, MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_2, MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_3, MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_DAC_UPPER0_P0_4, MCA_DDRPHY_DP16_DLL_DAC_UPPER1_P0_4 },
+};
+
+// Definition of the DP16 DLL Slave Lower registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_SLAVE_LOWER_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_0, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_1, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_2, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_3, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER0_P0_4, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_LOWER1_P0_4 },
+};
+
+// Definition of the DP16 DLL Slave Upper registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_SLAVE_UPPER_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_0, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_1, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_2, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_3, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER0_P0_4, MCA_DDRPHY_DP16_DLL_SLAVE_VREG_UPPER1_P0_4 },
+};
+
+// Definition of the DP16 DLL SW Control registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_SW_CNTRL_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_0, MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_1, MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_2, MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_3, MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_SW_CONTROL0_P0_4, MCA_DDRPHY_DP16_DLL_SW_CONTROL1_P0_4 },
+};
+
+// Definition of the DP16 DLL VREG Coarse registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_VREG_COARSE_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0, MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_1, MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_2, MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_3, MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_4, MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_4 },
+};
+
+// Definition of the DP16 DLL VREG Control registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_VREG_CNTRL_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0, MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_1, MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_2, MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_3, MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_4, MCA_DDRPHY_DP16_DLL_VREG_CONTROL1_P0_4 },
+};
+
+
+// Definition of the DP16 DLL Extra registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Config Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_EXTRA_REG =
+{
+    { MCA_DDRPHY_DP16_DLL_EXTRA0_P0_0, MCA_DDRPHY_DP16_DLL_EXTRA1_P0_0 },
+    { MCA_DDRPHY_DP16_DLL_EXTRA0_P0_1, MCA_DDRPHY_DP16_DLL_EXTRA1_P0_1 },
+    { MCA_DDRPHY_DP16_DLL_EXTRA0_P0_2, MCA_DDRPHY_DP16_DLL_EXTRA1_P0_2 },
+    { MCA_DDRPHY_DP16_DLL_EXTRA0_P0_3, MCA_DDRPHY_DP16_DLL_EXTRA1_P0_3 },
+    { MCA_DDRPHY_DP16_DLL_EXTRA0_P0_4, MCA_DDRPHY_DP16_DLL_EXTRA1_P0_4 },
+};
+
 // Definition of the DP16 Data Bit Dir1 registers
 // All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
 const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1 =
@@ -705,6 +810,32 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
         l_start_bit += BIT_POSITION_DELTA;
         ++l_which_dp16;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset all of the DLL registers - Nimbus only
+/// @param[in] i_target an MCA
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
+    // magic numbers ...
+    // TK How about a little broadcast action here? BRS
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x8100) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_LOWER_REG,   0x8000) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_UPPER_REG,   0xffe0) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_UPPER_REG, 0xffe0) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_EXTRA_REG,       0x2020) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x0040) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
 
 fapi_try_exit:
     return fapi2::current_err;
