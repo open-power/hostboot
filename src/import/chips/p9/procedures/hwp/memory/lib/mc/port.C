@@ -42,6 +42,28 @@
 namespace mss
 {
 
+// Bit position settings for ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS
+// For each bit: OFF = 0, ON = 1
+// Byte 0:
+constexpr uint64_t BIT_ZCAL = 0;            //      0: ZCAL
+constexpr uint64_t BIT_SYSCLK_ALIGN = 1;    //      1: SYSCK_ALIGN
+constexpr uint64_t BIT_RDCENTERING = 2;     //      2: RDCENTERING
+constexpr uint64_t BIT_RDLCK_ALIGN = 3;     //      3: RDLCK_ALIGN
+constexpr uint64_t BIT_DQS_ALIGN = 4;       //      4: DQS_ALIGN
+constexpr uint64_t BIT_RDCLK_UPDATE = 5;    //      5: RDCLK_UPDATE
+constexpr uint64_t BIT_PER_DUTYCYCLE = 6;   //      6: PER_DUTYCYCLE
+constexpr uint64_t BIT_PERCAL_PWR_DIS = 7;  //      7: PERCAL_PWR_DIS
+
+// Byte 1:
+constexpr uint64_t BIT_PERCAL_REPEAT_0 = 8; //       0: PERCAL_REPEAT
+constexpr uint64_t BIT_PERCAL_REPEAT_1 = 9; //       1: PERCAL_REPEAT
+constexpr uint64_t BIT_PERCAL_REPEAT = 10;  //       2: PERCAL_REPEAT
+constexpr uint64_t BIT_SINGLE_BIT_MPR = 11; //       3: SINGLE_BIT_MPR
+constexpr uint64_t BIT_MBA_CFG_0 = 12;      //       4: MBA_CFG_0
+constexpr uint64_t BIT_MBA_CFG_1 = 13;      //       5: MBA_CFG_1
+constexpr uint64_t BIT_SPARE_6 = 14;        //       6: SPARE
+constexpr uint64_t BIT_SPARE_7 = 15;        //       7: SPARE
+
 ///
 /// @brief Enable the MC Periodic calibration functionality - MCA specialization
 /// @param[in] i_target the target
@@ -54,6 +76,8 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     uint32_t l_memcal_interval = 0;
     uint32_t l_zqcal_interval = 0;
+    fapi2::buffer<uint16_t> l_per_memcal_mode_options = 0;
+    fapi2::buffer<uint16_t> l_per_zqcal_mode_options = 0;
 
     fapi2::buffer<uint64_t> l_periodic_cal_config;
     fapi2::buffer<uint64_t> l_phy_zqcal_config;
@@ -69,10 +93,16 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     FAPI_TRY( mss::eff_memcal_interval(i_target, l_memcal_interval) );
     FAPI_TRY( mss::eff_zqcal_interval(i_target, l_zqcal_interval) );
 
+    FAPI_TRY( mss::mrw_periodic_memcal_mode_options(l_per_memcal_mode_options) );
+    FAPI_INF("mrw_periodic_memcal_mode_options: 0x%02x", l_per_memcal_mode_options);
+
+    FAPI_TRY( mss::mrw_periodic_zqcal_mode_options(l_per_zqcal_mode_options) );
+    FAPI_INF("mrw_periodic_zqcal_mode_options: 0x%02x", l_per_memcal_mode_options);
+
     // TODO RTC:155854 We haven't done the work for calculating init cal periods
     // in effective config yet, and the MC setup below is hard wired for sim
 
-    FAPI_DBG("memcal interval %dck, zqcal interval %dck", l_memcal_interval, l_zqcal_interval);
+    FAPI_INF("memcal interval %dck, zqcal interval %dck", l_memcal_interval, l_zqcal_interval);
 
     // I think we can do these in any event BRS
     {
@@ -97,7 +127,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
     }
 
     // ZQCAL
-    if (l_zqcal_interval != 0)
+    if (l_per_zqcal_mode_options != 0)
     {
         std::vector<uint64_t> l_ranks;
 
@@ -144,7 +174,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         l_periodic_cal_config.writeBit<TT::PER_ENA_ZCAL>(is_sim ? 0 : 1);
 
         // Write the ZQCAL periodic config
-        FAPI_DBG("zcal periodic config: 0x%016lx", l_phy_zqcal_config);
+        FAPI_INF("zcal periodic config: 0x%016lx", l_phy_zqcal_config);
         FAPI_TRY( mss::putScom(i_target, TT::PHY_ZQCAL_REG, l_phy_zqcal_config) );
 
         // Write the ZQCAL timer reload register
@@ -164,14 +194,14 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             fapi2::buffer<uint64_t> l_zcal_timer_reload;
             l_zcal_timer_reload.insertFromRight<TT::ZCAL_TIMER_RELOAD_VALUE, TT::ZCAL_TIMER_RELOAD_VALUE_LEN>(
                 is_sim ? (l_zqcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_zqcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
-            FAPI_DBG("zcal timer reload: 0x%016lx", l_zcal_timer_reload);
+            FAPI_INF("zcal timer reload: 0x%016lx", l_zcal_timer_reload);
             FAPI_TRY( mss::putScom(i_target, TT::PHY_ZCAL_TIMER_RELOAD_REG, l_zcal_timer_reload) );
         }
 
     }
 
     // MEMCAL
-    if (l_memcal_interval != 0)
+    if (l_per_memcal_mode_options != 0)
     {
         // Setup the periodic enable rank pair field in the phy cal config and the mc. This used to be shared
         // between the MC and the PHY in Centaur but no longer is - so we write the same data in two registers.
@@ -186,7 +216,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             l_rank_config.setBit(pair);
         }
 
-        FAPI_DBG("periodic ranks: 0x%016lx", l_rank_config);
+        FAPI_INF("periodic ranks: 0x%016lx", l_rank_config);
 
         //
         // Configure the controller
@@ -240,19 +270,22 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         // #       48:63   ,       0x01D1,       any                                             ;       # 464 = 114ms @ 1600MHz
 
         // Add the ranks to the phy config
-        l_periodic_cal_config.insert<TT::PER_ZCAL_ENA_RANK, TT::PER_ZCAL_ENA_RANK_LEN>(l_rank_config);
+        if (l_per_memcal_mode_options.getBit<BIT_ZCAL>())
+        {
+            l_periodic_cal_config.insert<TT::PER_ZCAL_ENA_RANK, TT::PER_ZCAL_ENA_RANK_LEN>(l_rank_config);
+        }
 
         // If we're in sim, enable the fast-sim mode
         l_periodic_cal_config.writeBit<TT::PER_FAST_SIM_CNTR>(is_sim);
 
-        l_periodic_cal_config.setBit<TT::PER_ENA_SYSCLK_ALIGN>();
+        l_periodic_cal_config.writeBit<TT::PER_ENA_SYSCLK_ALIGN>( l_per_memcal_mode_options.getBit<BIT_SYSCLK_ALIGN>() );
 
         // Per John Bialas 5/16:  "... periodic read centering does not work ... We are re-evaluating fixing it for DD2"
 #ifdef PERIODIC_READ_CENTERING_FIX
-        l_periodic_cal_config.setBit<TT::PER_ENA_READ_CTR>();
+        l_periodic_cal_config.writeBit<TT::PER_ENA_READ_CTR>( l_per_memcal_mode_options.getBit<BIT_RDCENTERING>() );
 #endif
-        l_periodic_cal_config.setBit<TT::PER_ENA_RDCLK_ALIGN>();
-        l_periodic_cal_config.setBit<TT::PER_ENA_DQS_ALIGN>();
+        l_periodic_cal_config.writeBit<TT::PER_ENA_RDCLK_ALIGN>(l_per_memcal_mode_options.getBit<BIT_RDLCK_ALIGN>() );
+        l_periodic_cal_config.writeBit<TT::PER_ENA_DQS_ALIGN>( l_per_memcal_mode_options.getBit<BIT_DQS_ALIGN>() );
 
         // Per John Bialas 5/16: "DD2_FIX_DIS should not be asserted, ie. we do want to use the centaur DD2 fixes"
 
@@ -273,7 +306,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
             fapi2::buffer<uint64_t> l_cal_timer_reload;
             l_cal_timer_reload.insertFromRight<TT::PC_CAL_TIMER_RELOAD_VALUE, TT::PC_CAL_TIMER_RELOAD_VALUE_LEN>(
                 is_sim ? (l_memcal_interval / TT::MAGIC_NUMBER_SIM) + 1 : (l_memcal_interval / TT::MAGIC_NUMBER_NOT_SIM) + 1);
-            FAPI_DBG("phy cal timer reload: 0x%016lx", l_cal_timer_reload);
+            FAPI_INF("phy cal timer reload: 0x%016lx", l_cal_timer_reload);
             FAPI_TRY( mss::putScom(i_target, TT::PHY_CAL_TIMER_RELOAD_REG, l_cal_timer_reload ) );
         }
 
