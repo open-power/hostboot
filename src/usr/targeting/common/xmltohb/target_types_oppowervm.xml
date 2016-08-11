@@ -57,6 +57,13 @@
     <attribute><id>HYPERVISOR_IPL_DESTINATION</id></attribute>
     <attribute><id>SLCA_INDEX</id></attribute>
     <attribute><id>SLCA_RID</id></attribute>
+    <attribute><id>OPEN_POWER_PM_MODE</id></attribute>
+    <attribute><id>OPEN_POWER_PM_MODE_FREQ_PERCENT</id></attribute>
+    <attribute><id>IPS_ENABLE</id></attribute>
+    <attribute><id>IPS_ENTER_TIME_SECONDS</id></attribute>
+    <attribute><id>IPS_ENTER_UTILIZATION_PERCENT</id></attribute>
+    <attribute><id>IPS_EXIT_TIME_SECONDS</id></attribute>
+    <attribute><id>IPS_EXIT_UTILIZATION_PERCENT</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

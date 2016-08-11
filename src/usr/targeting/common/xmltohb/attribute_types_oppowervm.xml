@@ -515,4 +515,119 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>OPEN_POWER_PM_MODE</id>
+    <description>
+      Power management mode the system should use.
+      Valid values: 1 = Nominal (default),
+      5 = Static Power Save (percentage below nominal whose value
+      is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT),
+      6 = Dynamic Power Save - Favor Energy (DPS-FE),
+      10 = Dynamic Power Save - Favor Performance (DPS-FP),
+      11 = Fixed Frequency Override - (percentage above nominal whose
+      value is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default> <!-- Nominal -->
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_PM_MODE_FREQ_PERCENT</id>
+    <description>
+        Percentage from nominal that the processors should run at when
+        OPEN_POWER_PM_MODE is set to Static Power Save or
+        Fixed Frequency Override (ignored on all other modes).
+        Unit is in tenths of a percent (150 = 15.0%).
+        Static Power Save (5): percentage to decrease frequency,
+        Fixed Frequency Override (11): percentage to increase frequency
+    </description>
+    <simpleType><uint16_t></uint16_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IPS_ENABLE</id>
+    <description>
+        Indicates if Idle Power Save is enabled.  This is independent of
+        the OPEN_POWER_PM_MODE (DPS and IPS can be enabled at the same time).
+        Valid Values: 0 = Disabled (default), 1 = Enabled.
+        See IPS_ENTER / IPS_EXIT attributes for IPS configuration.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default> <!-- disabled -->
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IPS_ENTER_TIME_SECONDS</id>
+    <description>
+        When IPS is enabled, this defines the delay time in seconds
+        (between 10 and 600) to enter Idle Power Save.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>240</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IPS_ENTER_UTILIZATION_PERCENT</id>
+    <description>
+        When IPS is enabled, this defines the utilization threshold as a
+        percent (between 0 and 100) to enter Idle Power Save.  This value
+        should be less than IPS_EXIT_UTILIZATION_PERCENT.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>8</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IPS_EXIT_TIME_SECONDS</id>
+    <description>
+        When IPS is enabled, this defines the delay time in seconds
+        (between 10 and 600) to exit Idle Power Save.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>10</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>IPS_EXIT_UTILIZATION_PERCENT</id>
+    <description>
+        When IPS is enabled, this defines the utilization threshold as a
+        percent (between 0 and 100) to exit Idle Power Save.  This value
+        should be greater than IPS_ENTER_UTILIZATION_PERCENT.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>12</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
