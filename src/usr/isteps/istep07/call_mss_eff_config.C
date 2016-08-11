@@ -48,7 +48,6 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <targeting/attrsync.H>
 
 // HWP
 #include    <p9_mss_eff_config.H>
@@ -150,8 +149,6 @@ void*    call_mss_eff_config( void *io_pArgs )
     errlHndl_t l_err = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
-
-    TARGETING::hdatAttrHack();
 
     TARGETING::Target* l_sys = NULL;
     targetService().getTopLevelTarget(l_sys);
