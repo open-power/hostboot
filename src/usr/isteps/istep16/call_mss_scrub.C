@@ -54,10 +54,7 @@ void* call_mss_scrub (void *io_pArgs)
         return NULL;
     }
 
-    errlHndl_t l_errl = NULL;
-
-//TODO RTC:147390 Enable background scrubbing
-//     errlHndl_t l_errl = PRDF::startScrub();
+    errlHndl_t l_errl = PRDF::startScrub();
 
     if ( NULL != l_errl )
     {
