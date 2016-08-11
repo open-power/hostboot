@@ -112,6 +112,7 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_nx_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_vas_scom.mk
 
 # proc_xbus_scominit : Apply scom inits to Xbus
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_scominit.mk

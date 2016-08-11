@@ -725,6 +725,11 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
             case 0x05012c49:                
             case 0x05013148:                
             case 0x05013149:
+            case 0x03011803:
+            case 0x03011806:
+            case 0x03011807:
+            case 0x0301184e:
+            case 0x0301184f:
                 TRACFCOMP( g_trac_scom, "Skipping scom to %.8X!", i_addr );
                 skipit = true;
             default:                
