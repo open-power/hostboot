@@ -564,6 +564,18 @@ def magic_instruction_callback(user_arg, cpu, arg):
         if 'cache' not in mem_object:
             hb_tracBinaryBuffer = hb_tracBinaryBuffer + hb_hrmor - per_node*node_num
 
+        # In 'cache' mode look to see if there is a secure section at HRMOR-8K
+        #  If so, add 8K to hb_tracBinaryBuffer as that is where the memory
+        #  space really starts
+        else:
+            for entry in mem_map_entries:
+                #print ">> %d:%s" % (entry[0], entry[1])
+                if (entry[0] == (hb_hrmor - 8192)):
+                    #print "cache at HRMOR-8K found: Adding  8k (8192) to "\
+                    #      "hb_tracBinaryBuffer (0x%x)"%(hb_tracBinaryBuffer)
+                    hb_tracBinaryBuffer += 8192;
+                    break
+
         tracbin = ["hbTracBINARY","hbTracBINARY1","hbTracBINARY2","hbTracBINARY3"]
         tracmerg = ["hbTracMERG","hbTracMERG1","hbTracMERG2","hbTracMERG3"]
 
