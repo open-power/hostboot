@@ -84,8 +84,6 @@ errlHndl_t checkForIplAttentions()
     //       testing purposes. However for this case
     //       of getting an attribute, we can just
     //       modify the attribute for testing.
-    //       For the master proc, I don't think we
-    //       really need to alter it for testing.
     // ------------------------------------------------
 
     // We have an ATTRIBUTE that indicates all procs
@@ -98,9 +96,9 @@ errlHndl_t checkForIplAttentions()
     // Do we want to check ALL procs ?
     if (0 == l_useAllProcs)
     {
-        // Just the master (so early IPL)
-        TARGETING::targetService().masterProcChipTargetHandle(
-                                            l_MasterProcTarget);
+        getTargetService().masterProcChipTargetHandle(
+                                              l_MasterProcTarget);
+
         list.push_back(l_MasterProcTarget);
     } // end if just master proc
     else

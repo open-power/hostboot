@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfakesys.C $               */
+/* $Source: src/usr/diag/attn/ipl/test/attnfakesys.C $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@ errlHndl_t FakeSystem::putScom(
 
     mutex_lock(&iv_mutex);
 
+    ATTN_TRACE("FakeSystem::putScom Target:%d Addr:%X",
+                i_target, i_address);
     err = putReg(i_target, i_address, i_data);
 
     mutex_unlock(&iv_mutex);
@@ -67,6 +69,9 @@ errlHndl_t FakeSystem::getScom(
 {
     mutex_lock(&iv_mutex);
 
+
+    ATTN_TRACE("FakeSystem::getScom Target:%d Addr:%X",
+                i_target, i_address);
     o_data = getReg(i_target, i_address);
 
     mutex_unlock(&iv_mutex);
@@ -106,6 +111,7 @@ bool FakeSystem::wait(uint64_t i_maxWaitNs)
 
         previous = count;
         count = iv_attentions.size();
+        ATTN_TRACE("FakeSystem::wait attnCount:%d", count);
 
         mutex_unlock(&iv_mutex);
 
@@ -132,6 +138,8 @@ void FakeSystem::wait()
 
     while(!iv_attentions.empty())
     {
+        ATTN_TRACE("FakeSystem::wait attnCount:%d",
+                    iv_attentions.size());
         sync_cond_wait(&iv_cond, &iv_mutex);
     }
 
@@ -181,7 +189,7 @@ void FakeSystem::putRegUnsafe(
         uint64_t i_address,
         uint64_t i_data)
 {
-    ATTN_DBG("FakeSystem::putReg: tgt: %p, add: %016x, data: %016x",
+    ATTN_TRACE("FakeSystem::putReg: tgt: %p, add: %016x, data: %016x",
             i_target, i_address, i_data);
 
     iv_regs[i_target][i_address] = i_data;
@@ -288,6 +296,9 @@ errlHndl_t FakeSystem::makeAttnCallbacks(
             if(k.first == TYPE_NA
                     || (k.first == type && k.second == ait->attnType))
             {
+                ATTN_TRACE("FakeSystem::makeAttnCallbacks i_set:%d",
+                           i_set);
+
                 if(i_set)
                 {
                     err = (*it->second).processPutAttention(
@@ -326,7 +337,7 @@ errlHndl_t FakeSystem::putAttentions(
 
     while(ait != i_list.end())
     {
-        ATTN_DBG("FakeSystem::putAttention: tgt: %p, type: %d",
+        ATTN_TRACE("FakeSystem::putAttention: tgt: %p, type: %d",
                 ait->targetHndl, ait->attnType);
 
         iv_attentions[*ait]++;
@@ -343,7 +354,7 @@ errlHndl_t FakeSystem::putAttentions(
 void FakeSystem::clearAttentionUnsafe(
         const AttnData & i_attn)
 {
-    ATTN_DBG("FakeSystem::clearAttention: tgt: %p, type: %d",
+    ATTN_TRACE("FakeSystem::clearAttnUnsafe: tgt: %p, type: %d",
             i_attn.targetHndl, i_attn.attnType);
 
     // clear the attention and then
@@ -437,7 +448,7 @@ void FakeSystem::dump()
 
     while(it != iv_attentions.end())
     {
-        ATTN_DBG("target: %p, type: %d, count: %d",
+        ATTN_TRACE("target: %p, type: %d, count: %d",
                 it->first.targetHndl, it->first.attnType, it->second);
 
         ++it;

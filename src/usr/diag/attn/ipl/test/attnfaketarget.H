@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfaketarget.H $            */
+/* $Source: src/usr/diag/attn/ipl/test/attnfaketarget.H $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,6 +208,10 @@ class FakeProcTargetService : public TargetServiceImpl
                 TARGETING::ATTRIBUTE_ID i_attribute,
                 TARGETING::TargetHandle_t i_target,
                 uint64_t & o_val);
+
+        virtual void masterProcChipTargetHandle(
+            TARGETING::Target*& o_masterProcChipTargetHandle,
+            const TARGETING::Target* i_pNodeTarget = NULL) const;
 
         /**
          * @brief dtor
