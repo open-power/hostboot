@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.114 2016/05/24 09:34:53 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.117 2016/08/24 09:21:15 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.117 |preeragh|24-AUG-16| Bad Bits update fix scenario x4 and x8
+//   1.116 |preeragh|17-AUG-16| Added BOX Schmoo
+//   1.115 |preeragh|28-JUL-16| Add Bad Bits Update at Sanity
 //   1.114 |preeragh|24-MAY-16| FW Fixes, delete str fixes
 //   1.113 |preeragh|18-MAY-16| RD_EYE Fixes to Print Report
 //   1.112 |preeragh|29-MAR-16| Print Target Info Sanity checks
@@ -299,8 +302,8 @@ extern "C"
         FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d", shmoo_mask);
         // Check if all bytes/bits are in a pass condition initially .Otherwise quit
 
-        //Value of l_attr_schmoo_test_type_u8 are  0x01,     0x02,   0x04,      0x08,   0x10 ===
-        //                                       "MCBIST","WR_EYE","RD_EYE","WRT_DQS","RD_DQS" resp.
+        //Value of l_attr_schmoo_test_type_u8 are  0x01,     0x02,   0x04,      0x08,   0x10       16        32 ===
+        //                                       "MCBIST","WR_EYE","RD_EYE","WRT_DQS","RD_DQS"  "RD_GATE"   "BOX" resp.
 
         if (l_attr_schmoo_test_type_u8 == 0)
         {
@@ -318,7 +321,17 @@ extern "C"
                 return rc;
             }
         }
-
+	//runs the box shmoo
+	else if (l_attr_schmoo_test_type_u8 == BOX) {
+	    rc=get_all_noms(i_target);
+            if(rc) return rc;
+            if(l_attr_schmoo_multiple_setup_call_u8==0) {
+                rc=schmoo_setup_mcb(i_target);
+                if(rc) return rc;
+            }
+	    rc=do_box_shmoo(i_target);
+            if(rc) return rc;
+	}
         else if (l_attr_schmoo_test_type_u8 == 8)
         {
             if (l_rankpgrp0[0] != 255)
@@ -553,9 +566,22 @@ extern "C"
         uint8_t l_faulted_dimm = 255;
         uint8_t l_memory_health = 0;
         uint8_t l_max_byte = 10;
+		uint8_t l_count = 0;
+		uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE]; // 10 byte array of bad bits
+		uint8_t l_dramWidth = 0; 
 
         struct Subtest_info l_sub_info[30];
 
+	//------------------------------------------------------    
+    // Get l_dramWidth
+    //------------------------------------------------------  
+		FAPI_INF("Preet - checking sanity ");	
+		rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
+			if(rc)
+				{
+					FAPI_ERR("Error getting DRAM width on %s.",i_target.toEcmdString());
+					return rc;
+				}
         rc = schmoo_setup_mcb(i_target);
         if (rc) return rc;
         //FAPI_INF("%s:  starting  mcbist now",i_target.toEcmdString());
@@ -595,6 +621,31 @@ extern "C"
                             } else {
                                 l_faulted_dimm = 0;
                             }
+							
+							// x8 mode:
+							if(l_dramWidth == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
+								{
+									l_dqBitmap[l_byte] = 0xff; 
+								}
+							// x4 mode
+                            else if ((l_dramWidth == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) && (l_nibble == 0))
+							{	
+								l_dqBitmap[l_byte] = 0x0f; 
+							}
+							else
+							{
+								l_dqBitmap[l_byte] = 0xf0;
+							}
+                                FAPI_INF("Warning dimm_bad bits found ---> Updating Bad Bits: port%d, dimm%d, rank%d, l_dqBitmap[%d] = %02x",
+                                l_p, l_faulted_dimm, rank, l_byte, l_dqBitmap[l_byte]);
+								l_count++;
+                            
+							rc = dimmSetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank,l_dqBitmap);
+							if (rc)
+							{
+								FAPI_ERR("Error from dimmGetBadDqBitmap on %s.",i_target.toEcmdString());
+								return rc;
+							}   
                             break;
                         }
 
@@ -602,6 +653,11 @@ extern "C"
 
                     }
                 }
+				if(l_count == 1)
+				{
+					l_memory_health = 0;
+					l_count = 0;
+				}
             }
         }
 
@@ -609,13 +665,19 @@ extern "C"
         //////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
         if (l_memory_health)
         {
-            FAPI_INF("generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",i_target.toEcmdString(),
-                     l_faulted_port, l_faulted_rank, l_faulted_dimm);
-            const fapi::Target & MBA_CHIPLET = i_target;
-            const uint8_t & MBA_PORT_NUMBER = l_faulted_port;
-            const uint8_t & MBA_DIMM_NUMBER = l_faulted_dimm;
-            FAPI_SET_HWP_ERROR(rc, RC_MSS_GENERIC_SHMOO_MCBIST_FAILED);
-            return rc;
+            // Insert here bad bit mask stuff 
+			// Update the bad DQ Bitmap for l_port, l_dimm, l_rank
+			//const fapi::Target & MBA_CHIPLET = i_target;
+            //const uint8_t & MBA_PORT_NUMBER = l_faulted_port;
+            //const uint8_t & MBA_DIMM_NUMBER = l_faulted_dimm;
+			if(l_count > 1)
+			// Create new log. For now Only Print Warning and dont create HWP_ERROR. 
+            {
+					FAPI_INF("Warning !! generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",i_target.toEcmdString(),
+                    l_faulted_port, l_faulted_rank, l_faulted_dimm);	
+					//FAPI_SET_HWP_ERROR(rc, RC_MSS_GENERIC_SHMOO_MCBIST_FAILED);
+					//return rc;
+			}
         }
 
         return rc;
@@ -1359,7 +1421,133 @@ extern "C"
         return rc;
     }
     
+    //runs the box shmoo going to +5 and -5 ticks
+    fapi::ReturnCode generic_shmoo::do_box_shmoo(const fapi::Target & i_target)
+    {
+        fapi::ReturnCode rc;
+        ecmdDataBufferBase data_buffer_64(64);
+	uint8_t l_p;
+	uint8_t l_rank;
+	uint8_t l_dq;
+	uint8_t l_n;
+	uint8_t rank=0;
+        uint8_t l_SCHMOO_NIBBLES=18;
+        input_type_t l_input_type_e = WR_DQ;
+        access_type_t l_access_type_e = WRITE;
+	
+	uint8_t delay_train_step_size;
+	rc = FAPI_ATTR_GET( ATTR_MRW_WR_VREF_CHECK_VREF_STEP_SIZE, NULL, delay_train_step_size);
+        if(rc) return rc;
+	
+	for(l_p = 0; l_p < MAX_PORT; l_p++) {
 
+             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+             {
+            	 //l_dq+l_n*4=bit;
+            	 //////
+            	 rank=valid_rank1[l_p][l_rank];
+            	 //printf ("Current Rank : %d",rank );
+
+            	 for(l_dq = 0; l_dq < 4; l_dq++) {
+            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]+delay_train_step_size);
+            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
+            		if(rc) return rc;
+            	     }
+            	 }
+             }
+       }
+
+       rc=do_mcbist_reset(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
+           return rc;
+       }
+       rc=do_mcbist_test(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
+           return rc;
+       }
+
+       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
+       if (rc) return rc;
+       
+       if(data_buffer_64.isBitSet(2)) {
+          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
+	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+          FAPI_ERR("FOUND FAILING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       else {
+          FAPI_INF("FOUND PASSING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       
+       for(l_p = 0; l_p < MAX_PORT; l_p++) {
+
+             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+             {
+            	 //l_dq+l_n*4=bit;
+            	 //////
+            	 rank=valid_rank1[l_p][l_rank];
+            	 //printf ("Current Rank : %d",rank );
+
+            	 for(l_dq = 0; l_dq < 4; l_dq++) {
+            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]-delay_train_step_size);
+
+            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
+            		if(rc) return rc;
+            	     }
+            	 }
+             }
+       }
+
+       
+       rc=do_mcbist_reset(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
+           return rc;
+       }
+       rc=do_mcbist_test(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
+           return rc;
+       }
+		    
+       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
+       if (rc) return rc;
+       
+       if(data_buffer_64.isBitSet(2)) {
+          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
+	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+          FAPI_ERR("FOUND FAILING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       else {
+          FAPI_INF("FOUND PASSING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+	
+	for(l_p = 0; l_p < MAX_PORT; l_p++)
+        {
+            for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+            {
+        	//l_dq+l_n*4=bit;
+        	//////
+        	rank=valid_rank1[l_p][l_rank];
+        	//printf("Valid rank of %d %d %d %d %d %d %d %d",valid_rank1[0],valid_rank1[1],valid_rank1[2],valid_rank1[3],valid_rank1[4],valid_rank1[5],valid_rank1[6],valid_rank1[7]);
+        	for(l_dq = 0; l_dq < 4; l_dq++) {
+        	    for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+        		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]);
+        		if(rc) return rc;
+        		//l_dq+l_n*4=l_dq+l_n*4+4;
+        	    }
+        	}
+            }
+        }
+	return rc;
+    }
     
 
     fapi::ReturnCode generic_shmoo::knob_update_bin(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag)
