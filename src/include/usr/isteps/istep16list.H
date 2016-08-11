@@ -131,11 +131,8 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(16,04,"mss_scrub"),
-                // @todo RTC:137389 - removed for P9 bringup
-                //ISTEP_16::call_mss_scrub,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_16::call_mss_scrub,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(16,05,"host_ipl_complete"),
@@ -148,6 +145,7 @@ const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libistep16.so),
         DEP_LIB(libp9_cpuWkup.so),
+        DEP_LIB(libisteps_mss.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
