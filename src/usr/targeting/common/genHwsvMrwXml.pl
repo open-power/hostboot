@@ -234,15 +234,6 @@ push @systemAttr,
     "ASYNC_NEST_FREQ_MHZ", $reqPol->{'proc_pb_frequency'}->{content},
     "FREQ_PCIE_MHZ", $reqPol->{'proc_pcie_frequency'}->{content},
     "FREQ_X_MHZ", $reqPol->{'proc_x_frequency'}->{content},
-# TODO: RTC 155880
-# The attributes in this block have their names changed from ATTR_x to ATTR_x_MHZ (above).
-# The old definitions are left assigned in this block in order to avoid FSP CI failure.
-# They are to be removed when code in FSP are updated to use the new names.
-    "FREQ_A", $reqPol->{'proc_a_frequency'}->{content},
-    "FREQ_PB", $reqPol->{'proc_pb_frequency'}->{content},
-    "FREQ_PCIE", $reqPol->{'proc_pcie_frequency'}->{content},
-    "FREQ_X", $reqPol->{'proc_x_frequency'}->{content},
-# End TODO: RTC 155880
     "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
     "MSS_MBA_CACHELINE_INTERLEAVE_MODE",
         $reqPol->{'mss_mba_cacheline_interleave_mode'},

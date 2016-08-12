@@ -806,17 +806,6 @@
     <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
     <attribute><id>MSS_INTERLEAVE_ENABLE</id></attribute>
 
-<!--- TODO: RTC 155880
-      The attributes in this block have their names changed from ATTR_x to ATTR_x_MHZ.
-      The old definitions are left in this block in order to avoid build break in FSP.
-      They are to be removed when code in FSP are  updated to use the new names. -->
-    <attribute><id>FREQ_PCIE</id></attribute>
-    <attribute><id>FREQ_A</id></attribute>
-    <attribute><id>FREQ_PB</id></attribute>
-    <attribute><id>FREQ_X</id></attribute>
-<!-- End TODO -->
-
-
 <!-- Enable memory voltages -->
     <attribute><id>SUPPORTS_DYNAMIC_MEM_VOLT</id></attribute>
     <attribute><id>MSS_VDD_PROGRAM</id></attribute>
