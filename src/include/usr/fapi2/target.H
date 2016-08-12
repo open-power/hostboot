@@ -928,6 +928,7 @@ Target<K, V>::getOtherEnd(fapi2::Target<T, V>& o_target,
     }
     else
     {
+        l_rc = FAPI2_RC_SUCCESS;
         fapi2_peerTarget = fapi2::Target<T>(l_peerTargetList[0]);
     }
     o_target = fapi2_peerTarget;
