@@ -110,9 +110,10 @@
 /** Virtual memory block priorities */
 enum BlockPriority
 {
-    PNOR_PRIORITY = 0, //No dependencies
-    VFS_PRIORITY  = (PNOR_PRIORITY + 1), //Dependent on PNOR
-    ATTR_PRIORITY = (PNOR_PRIORITY + 1), //Dependent on PNOR
+    PNOR_PRIORITY  = 0, //No dependencies
+    SPNOR_PRIORITY = (PNOR_PRIORITY + 1), //Dependent on PNOR
+    VFS_PRIORITY   = (SPNOR_PRIORITY + 1), //Dependent on PNOR and SPNOR
+    ATTR_PRIORITY  = (SPNOR_PRIORITY + 1), //Dependent on PNOR and SPNOR
 };
 
 /**

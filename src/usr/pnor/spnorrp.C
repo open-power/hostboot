@@ -357,18 +357,26 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
-        l_errhdl = setPermission(l_securePayloadStart + o_rec->textSize,
-                                       l_info.size - o_rec->textSize,
-                                       WRITABLE | WRITE_TRACKED);
-        if(l_errhdl)
+        uint64_t unprotectedPayloadSize = l_info.size - o_rec->textSize;
+        if (unprotectedPayloadSize) // only write track a non-zero range
         {
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
+            l_errhdl = setPermission(l_securePayloadStart + o_rec->textSize,
+                                       unprotectedPayloadSize,
+                                       WRITABLE | WRITE_TRACKED);
+            if(l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
                                   "failed on data section");
-            break;
-        }
+                break;
+            }
 
+            // Register the write tracked memory range to be flushed on
+            // shutdown.
+            INITSERVICE::registerBlock(l_securePayloadStart + o_rec->textSize,
+                                        unprotectedPayloadSize, SPNOR_PRIORITY);
+        }
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
-                              "complete");
+                              "and register block complete");
     } while(0);
 
     if( l_errhdl )
@@ -413,30 +421,13 @@ void SPnorRP::waitForMessage()
         message = msg_wait( iv_msgQ );
         if( message )
         {
-            if( message->type !=  PNOR::MSG_SHUTDOWN )
-            {
-                // data[0] = virtual address requested
-                // data[1] = address to place contents
-                eff_addr = reinterpret_cast<uint8_t*>(message->data[0]);
-                user_addr = reinterpret_cast<uint8_t*>(message->data[1]);
-            }
+            // data[0] = virtual address requested
+            // data[1] = address to place contents
+            eff_addr = reinterpret_cast<uint8_t*>(message->data[0]);
+            user_addr = reinterpret_cast<uint8_t*>(message->data[1]);
 
             switch(message->type)
             {
-                case( PNOR::MSG_SHUTDOWN ):
-                    {
-                        // we got a message saying there is a shutdown
-                        // TODO RTC 156118
-                        // As we secure more sections we are going to
-                        // encounter sections that flush data back to PNOR
-                        // We'll need to have:
-                        // a) Register a cleanup handler with the init service
-                        //    to actually call shutdown
-                        // b) Add code to the handler to flush any dirty write
-                        //    tracked pages back to PNOR
-                    }
-                    break;
-
                 case( MSG_MM_RP_READ ):
                     {
                         uint64_t delta = VMM_VADDR_SPNOR_DELTA;
@@ -523,23 +514,13 @@ void SPnorRP::waitForMessage()
                 case( MSG_MM_RP_WRITE ):
                     {
                         TRACDCOMP( g_trac_pnor, "SPnorRP::waitForMessage "
-                            "someone is trying to write to a secure section!");
-                        // TODO RTC 156118
-                        // As we secure more sections we are going to
-                        // encounter sections that flush data back to PNOR
-                        // dirty writes need to be flushed back to PNOR
-                        assert(false); // should never get here
-                        // Notes from Nick:
-                        // we're going to have to implement a flush handler to
-                        // commit any write tracked pages (unprotected areas)
-                        // back to PNOR. And we'll have to
-                        // INITSERVICE::registerBlock( ..) when we set up
-                        // permissions on load for each set of pages that
-                        // in a write tracked area so that it will be flushed
-                        // appropriately. And we'll need to use a
-                        // "BlockPriority" between pnor and VFS enums in
-                        // src/include/usr/vmmconst.h so that we get flushed in
-                        // the right order
+                            "writing to an unsecured area of section.");
+
+                        // calculate unsecured address (in PnorRP) by
+                        // subtracting two deltas from secure address
+                        uint8_t* dest = eff_addr - VMM_VADDR_SPNOR_DELTA
+                                                  - VMM_VADDR_SPNOR_DELTA;
+                        memcpy(dest, user_addr, PAGESIZE);
                     }
                     break;
 
