@@ -310,11 +310,11 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
 
 
 #if __HOSTBOOT_RUNTIME
-        //true => FSP present, false =>OP HBRT
-        bool isFSP_HBRT = INITSERVICE::spBaseServicesEnabled();
-
-        if(((i_type == TARGETING::TYPE_EX) || (i_type == TARGETING::TYPE_CORE)) &&
-            (!g_wakeupInProgress) && (!isFSP_HBRT) && !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
+        if(((i_type == TARGETING::TYPE_EQ) ||
+            (i_type == TARGETING::TYPE_EX) ||
+            (i_type == TARGETING::TYPE_CORE)) &&
+            (!g_wakeupInProgress) &&
+            !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
         {
             TRACFCOMP(g_trac_scom,"Determining if Special Wakeup is needed..");
             bool l_needsWakeup = true;

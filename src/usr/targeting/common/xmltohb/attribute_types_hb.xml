@@ -1024,6 +1024,24 @@
     <writeable/>
     <hbOnly/>
 </attribute>
+
+<attribute>
+    <id>SPCWKUP_COUNT</id>
+    <description>
+        Keep track of the calls to Special Wakeup. Increment for each
+        call to enable, decrement for each call to disable. Not
+        thread-safe, used at runtime which is single-threaded.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 <attribute>
     <id>IPMI_INSTANCE</id>
     <description>Holds the IPMI instance number for this entity.</description>
