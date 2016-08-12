@@ -488,9 +488,6 @@ errlHndl_t disableSpecialWakeup()
 
     for( const auto & l_core: l_cores )
     {
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Iterating all cores in system - "
-                   "This is core: %d", l_numCores);
         l_numCores += 1;
 
         const fapi2::Target<fapi2::TARGET_TYPE_CORE>

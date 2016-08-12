@@ -29,6 +29,11 @@ MODULE = scom_rt
 #include common ojects between hostboot and runtime hostboot
 include ../scom.mk
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+
 #include unique object modules - currently none
 OBJS += handleSpecialWakeup.o
 

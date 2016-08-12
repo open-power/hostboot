@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/disableSW.H $                                    */
+/* $Source: src/usr/scom/runtime/handleSpecialWakeup.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,13 +33,13 @@ extern "C"
  * @brief This function handles the enable and disable of the special
  *        wakeup that allows scom operations on idle cores.
  *
- * @param[in] i_exTarget      - EX Target core
- * @param[in] i_enableDisable - enable (true), disable (false)
+ * @param[in] i_target   - EQ/EX/Core target
+ * @param[in] i_enable   - enable (true), disable (false)
  *
- * @return errlHndl_t         - error handle
+ * @return errlHndl_t    - error handle
  */
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
-                               bool i_enableDisable);
+errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable);
+
 }
 
 #endif

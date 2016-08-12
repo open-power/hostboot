@@ -99,6 +99,14 @@ enum MemoryError_t
 #define HBRT_PM_LOAD    0
 #define HBRT_PM_RELOAD  1
 
+/**
+ *  Wakeup mode for the wakeup() interface
+ *      HBRT_WKUP_FORCE_AWAKE: force a core awake
+ *      HBRT_WKUP_CLEAR_FORCE: clear a previous force
+ */
+#define HBRT_WKUP_FORCE_AWAKE  0
+#define HBRT_WKUP_CLEAR_FORCE  1
+
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
  *
@@ -221,8 +229,8 @@ typedef struct hostInterfaces
     /**
      *  @brief Force a core to be awake, or clear the force
      *  @param[in] i_core  Core to wake (based on devtree defn)
-     *  @param[in] i_mode  0=force awake
-     *                     1=clear force
+     *  @param[in] i_mode  HBRT_WKUP_FORCE_AWAKE
+     *                     HBRT_WKUP_CLEAR_FORCE
      *  @return non-zero return code on error
      *  @platform FSP, OpenPOWER
      */

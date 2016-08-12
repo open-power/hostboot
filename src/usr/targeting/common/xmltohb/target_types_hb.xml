@@ -233,6 +233,7 @@
     <attribute>
         <id>HBRT_HYP_ID</id>
     </attribute>
+    <attribute><id>SPCWKUP_COUNT</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -241,6 +242,12 @@
     <attribute>
         <id>HBRT_HYP_ID</id>
     </attribute>
+    <attribute><id>SPCWKUP_COUNT</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-eq-power9</id>
+    <attribute><id>SPCWKUP_COUNT</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
