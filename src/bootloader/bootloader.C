@@ -112,7 +112,7 @@ namespace Bootloader{
                        (l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR,
                        (l_hbbEcc) ? (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC
                                   : l_hbbLength,
-                   BYTESIZE);
+                       WORDSIZE);
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_WORKING_HANDLEMMIO_RTN);
 
             PNOR::ECC::eccStatus rc = PNOR::ECC::CLEAN;
@@ -188,7 +188,7 @@ namespace Bootloader{
                     uint32_t i_size,
                     MMIOLoadStoreSizes i_ld_st_size)
     {
-        BOOTLOADER_TRACE(BTLDR_TRC_HANDLEMMIO_START);
+        BOOTLOADER_TRACE(BTLDR_TRC_HANDLEMMIO_START + i_ld_st_size);
 
         // Set base addresses, Ignore HRMOR setting
         uint64_t l_srcAddr_base = i_srcAddr | IGNORE_HRMOR_MASK;

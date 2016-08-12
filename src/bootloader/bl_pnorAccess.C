@@ -129,7 +129,7 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
         Bootloader::handleMMIO(i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH,
                     reinterpret_cast<uint64_t>(l_tocBuffer),
                     (PNOR::TOC_SIZE),
-                    Bootloader::BYTESIZE);
+                    Bootloader::WORDSIZE);
 
         BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_TOC1_HANDLEMMIO_RTN);
 
@@ -147,7 +147,7 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
             Bootloader::handleMMIO(o_pnorStart,
                               reinterpret_cast<uint64_t>(l_tocBuffer),
                               (PNOR::TOC_SIZE),
-                              Bootloader::BYTESIZE);
+                              Bootloader::WORDSIZE);
 
             o_errCode = 0;
             readTOC(l_tocBuffer, o_errCode, o_TOC, o_pnorStart, i_pnorEnd);
