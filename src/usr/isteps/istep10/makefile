@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,8 +25,31 @@
 ROOTPATH = ../../../..
 MODULE = istep10
 
+NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+INITFILES_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles
+
+
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${NEST_HWP_PATH}
+EXTRAINCDIR += ${INITFILES_HWP_PATH}
+
 OBJS += call_proc_build_smp.o
 OBJS += call_host_slave_sbe_update.o
 OBJS += call_host_update_redundant_tpm.o
+
+VPATH += ${NEST_HWP_PATH}
+VPATH += ${INITFILES_HWP_PATH}
+
+#Required include before all the procedure.mk are included
+include ${ROOTPATH}/procedure.rules.mk
+
+#Include all the procedure makefiles
+include $(NEST_HWP_PATH)/p9_build_smp.mk
+include ${INITFILES_HWP_PATH}/p9_fbc_ab_hp_scom.mk
+include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp_scom.mk
 
 include ${ROOTPATH}/config.mk
