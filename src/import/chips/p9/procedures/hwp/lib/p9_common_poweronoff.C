@@ -67,8 +67,8 @@ const uint64_t PPM_PFSNS[2] =   { C_PPM_PFSNS,
                                   EQ_PPM_PFSNS
                                 };
 
-enum { CYCLES_PER_MS = 500000,
-       INST_PER_LOOP = 8,
+enum { FSM_IDLE_POLLING_HW_NS_DELAY = 10000,
+       FSM_IDLE_POLLING_SIM_CYCLE_DELAY = 40000,
        PFET_STATE_LENGTH = 2,
        VXX_PG_SEL_LEN = 4
      };
@@ -158,11 +158,14 @@ p9_common_poweronoff(
         //   Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)
         //      – Timeout value = 1ms
         FAPI_DBG("Polling for power gate sequencer state: FSM idle");
-        l_loopsPerMs = CYCLES_PER_MS / INST_PER_LOOP;
+        l_loopsPerMs = 1E6 / FSM_IDLE_POLLING_HW_NS_DELAY;
 
         // Note that the Lamda assumes that l_data already contains the
         do
         {
+            fapi2::delay(FSM_IDLE_POLLING_HW_NS_DELAY,
+                         FSM_IDLE_POLLING_SIM_CYCLE_DELAY);
+
             FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                      "getScom failed for address PPM_PFCS"); // poll
         }
@@ -200,13 +203,16 @@ p9_common_poweronoff(
         //   Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)
         //      – Timeout value = 1ms
         FAPI_DBG("Polling for power gate sequencer state: FSM idle");
-        l_loopsPerMs = CYCLES_PER_MS / INST_PER_LOOP;
+        l_loopsPerMs = 1E6 / FSM_IDLE_POLLING_HW_NS_DELAY;
 
         do
         {
+            fapi2::delay(FSM_IDLE_POLLING_HW_NS_DELAY,
+                         FSM_IDLE_POLLING_SIM_CYCLE_DELAY);
+
             FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                      "getScom failed for address PPM_PFCS");  // poll
-            FAPI_DBG("timeout l_loopsPerMs. %x", l_loopsPerMs);
+            //FAPI_DBG("timeout l_loopsPerMs. %x", l_loopsPerMs);
         }
         while ((l_data.getBit < VCS_PG_STATE_BIT + PG_STATE_IDLE_OFFSET > ()
                 == 0 ) && (--l_loopsPerMs != 0));
