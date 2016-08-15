@@ -13104,7 +13104,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
     <description>Machine Readable Workbook Thermal Memory Power Limit</description>
     <simpleType>
         <uint32_t></uint32_t>
@@ -13112,7 +13112,7 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -15707,7 +15707,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+    <id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
     <description>Machine Readable Workbook DIMM power curve percent uplift for this system</description>
     <simpleType>
         <uint8_t></uint8_t>
@@ -15715,13 +15715,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+        <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+    <id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
     <description>
             Machine Readable Workbook DIMM power
             curve percent uplife idle for this system
@@ -15732,7 +15732,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+        <id>ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -15752,7 +15752,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
     <description>Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).  Used to determine memory throttle values.</description>
     <simpleType>
         <uint32_t></uint32_t>
@@ -15760,7 +15760,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_MAX_DRAM_DATABUS_UTIL</id>
+        <id>ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -16801,7 +16801,7 @@ DEPRECATED!!!!
 </attribute>
 
 <enumerationType>
-    <id>MRW_POWER_CONTROL_REQUESTED</id>
+    <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
     <description>
         Enumeration defining the type of power control requested
     </description>
@@ -16825,7 +16825,7 @@ DEPRECATED!!!!
 </enumerationType>
 
 <attribute>
-    <id>MRW_POWER_CONTROL_REQUESTED</id>
+    <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
     <description>
         Type of memory power control requested
 
@@ -16842,7 +16842,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_POWER_CONTROL_REQUESTED</id>
+        <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -17896,7 +17896,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+    <id>MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
     <description>Machine Readable Workbook enablement of the HWP code to adjust
     the VMEM regulator power limit based on number of installed DIMMs.
     </description>
@@ -17908,13 +17908,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+        <id>ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+    <id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
     <description>Machine Readable Workbook value for the maximum possible number
     of dimms that can be installed under any of the VMEM regulators.
     </description>
@@ -17926,7 +17926,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+        <id>ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -18782,7 +18782,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+    <id>MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
     <description>
     Option to control MCS prefetch retry threshold, for performance
     optimization. This attribute controls the number of retries in the
@@ -18796,7 +18796,7 @@ DEPRECATED!!!!
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+        <id>ATTR_MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -25381,7 +25381,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+    <id>MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
     <description>
       Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
     </description>
@@ -25392,13 +25392,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+      <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+    <id>MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
     <description>
       Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot
     </description>
@@ -25409,13 +25409,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+      <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_MEM_M_DRAM_CLOCKS</id>
+    <id>MSS_MRW_MEM_M_DRAM_CLOCKS</id>
     <description>
       Machine Readable Workbook for the number of M DRAM clocks.
       One approach to curbing DRAM power usage is by throttling
@@ -25428,13 +25428,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_MEM_M_DRAM_CLOCKS</id>
+      <id>ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_AVDD_OFFSET_DISABLE</id>
+    <id>MSS_MRW_AVDD_OFFSET_DISABLE</id>
     <description>
       Used for to determine whether to apply an offset to AVDD. Supplied by MRW.
     </description>
@@ -25445,13 +25445,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_AVDD_OFFSET_DISABLE</id>
+      <id>ATTR_MSS_MRW_AVDD_OFFSET_DISABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_VDD_OFFSET_DISABLE</id>
+    <id>MSS_MRW_VDD_OFFSET_DISABLE</id>
     <description>
       Used for to determine whether to apply an offset to VDD. Supplied by MRW
     </description>
@@ -25462,13 +25462,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_VDD_OFFSET_DISABLE</id>
+      <id>ATTR_MSS_MRW_VDD_OFFSET_DISABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_VCS_OFFSET_DISABLE</id>
+    <id>MSS_MRW_VCS_OFFSET_DISABLE</id>
     <description>
       Used for to determine whether to apply an offset to VCS. Supplied by MRW.
     </description>
@@ -25479,13 +25479,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_VCS_OFFSET_DISABLE</id>
+      <id>ATTR_MSS_MRW_VCS_OFFSET_DISABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_VPP_OFFSET_DISABLE</id>
+    <id>MSS_MRW_VPP_OFFSET_DISABLE</id>
     <description>
       Used for to determine whether to apply an offset to VPP. Supplied by MRW.
     </description>
@@ -25496,13 +25496,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_VPP_OFFSET_DISABLE</id>
+      <id>ATTR_MSS_MRW_VPP_OFFSET_DISABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_VDDR_OFFSET_DISABLE</id>
+    <id>MSS_MRW_VDDR_OFFSET_DISABLE</id>
     <description>
       Used for to determine whether to apply an offset to VDDR. Supplied by MRW.
     </description>
@@ -25513,13 +25513,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_VDDR_OFFSET_DISABLE</id>
+      <id>ATTR_MSS_MRW_VDDR_OFFSET_DISABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_FINE_REFRESH_MODE</id>
+    <id>MSS_MRW_FINE_REFRESH_MODE</id>
     <description>
       Fine refresh mode.
       Should be defaulted to normal mode.
@@ -25532,7 +25532,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_FINE_REFRESH_MODE</id>
+      <id>ATTR_MSS_MRW_FINE_REFRESH_MODE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -25559,7 +25559,7 @@ DEPRECATED!!!!
 
 
 <attribute>
-    <id>MRW_TEMP_REFRESH_RANGE</id>
+    <id>MSS_MRW_TEMP_REFRESH_RANGE</id>
     <description>
       Temp ref range.
       Should be defaulted to extended range.
@@ -25572,11 +25572,69 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_TEMP_REFRESH_RANGE</id>
+      <id>ATTR_MSS_MRW_TEMP_REFRESH_RANGE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MSS_MRW_RESET_DELAY_BEFORE_CAL</id>
+    <description>
+      For resetting the phy delay values at the beginning of
+      calling mss_draminit_training. YES means the values will be reset.
+    </description>
+    <simpleType>
+      <uint8_t>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+    <description>
+      Describes the settings for periodic calibration for all ports:
+      Reading left to right
+    </description>
+    <simpleType>
+      <uint16_t>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS</id>
+    <description>
+      Describes the settings for periodic ZQ calibration for all ports:
+      Reading left to right. For each bit: OFF = 0, ON = 1.
+      Setting to 0 indicates to disable periodic zqcal.
+      Byte 0:
+      0: ZQCAL
+      All others reserved for future use
+    </description>
+    <simpleType>
+      <uint16_t>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 <attribute>
     <id>MSS_VPD_MR_0_VERSION_LAYOUT</id>
@@ -28512,7 +28570,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_PREFETCH_ENABLE</id>
+    <id>MSS_MRW_PREFETCH_ENABLE</id>
     <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
     <simpleType>
       <uint8_t></uint8_t>
@@ -28520,13 +28578,13 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_PREFETCH_ENABLE</id>
+      <id>ATTR_MSS_MRW_PREFETCH_ENABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MRW_CLEANER_ENABLE</id>
+    <id>MSS_MRW_CLEANER_ENABLE</id>
     <description>
       Value of on or off.
       Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
@@ -28538,7 +28596,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-      <id>ATTR_MRW_CLEANER_ENABLE</id>
+      <id>ATTR_MSS_MRW_CLEANER_ENABLE</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

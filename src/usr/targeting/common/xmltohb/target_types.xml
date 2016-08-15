@@ -619,7 +619,7 @@
     <attribute><id>DMI_EREPAIR_THRESHOLD_MNFG</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
-    <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
+    <attribute><id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
@@ -631,14 +631,16 @@
     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
     <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
     <attribute><id>MEM_MIRROR_PLACEMENT_POLICY</id></attribute>
-    <attribute><id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
-    <attribute><id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id></attribute>
+    <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
+    <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id></attribute>
+    <attribute><id>MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS</id></attribute>
     <attribute><id>MRW_MEM_THROTTLE_DENOMINATOR</id></attribute>
-    <attribute><id>MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
+    <attribute><id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
     <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id></attribute>
-    <attribute><id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
-    <attribute><id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
+    <attribute><id>MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
+    <attribute><id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
+    <attribute><id>MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id></attribute>
     <attribute><id>PM_SYSTEM_IVRMS_ENABLED</id></attribute>
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
@@ -651,7 +653,7 @@
     <attribute><id>MNFG_XBUS_MIN_EYE_WIDTH</id></attribute>
     <attribute><id>REDUNDANT_CLOCKS</id></attribute>
     <attribute><id>MSS_DRAMINIT_RESET_DISABLE</id></attribute>
-    <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
+    <attribute><id>MSS_MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MNFG_TH_P8EX_L2_CACHE_CES</id></attribute>
     <attribute><id>MNFG_TH_P8EX_L2_DIR_CES</id></attribute>
     <attribute><id>MNFG_TH_P8EX_L3_CACHE_CES</id></attribute>
@@ -735,28 +737,29 @@
     <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
     <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
     <attribute><id>PIB_I2C_NEST_PLL</id></attribute>
-    <attribute><id>MRW_PREFETCH_ENABLE</id></attribute>
-    <attribute><id>MRW_CLEANER_ENABLE</id></attribute>
+    <attribute><id>MSS_MRW_PREFETCH_ENABLE</id></attribute>
+    <attribute><id>MSS_MRW_CLEANER_ENABLE</id></attribute>
     <attribute><id>MRW_DRAMINIT_RESET_DISABLE</id></attribute>
     <attribute><id>MSS_VDDR_OVERIDE_SPD</id></attribute>
-    <attribute><id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id></attribute>
-    <attribute><id>MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id></attribute>
-    <attribute><id>MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
-    <attribute><id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
-    <attribute><id>MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id></attribute>
-    <attribute><id>MRW_MEM_M_DRAM_CLOCKS</id></attribute>
-    <attribute><id>MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
-    <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
-    <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
-    <attribute><id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
-    <attribute><id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
-    <attribute><id>MRW_AVDD_OFFSET_DISABLE</id></attribute>
-    <attribute><id>MRW_VDD_OFFSET_DISABLE</id></attribute>
-    <attribute><id>MRW_VCS_OFFSET_DISABLE</id></attribute>
-    <attribute><id>MRW_VPP_OFFSET_DISABLE</id></attribute>
-    <attribute><id>MRW_VDDR_OFFSET_DISABLE</id></attribute>
-    <attribute><id>MRW_FINE_REFRESH_MODE</id></attribute>
-    <attribute><id>MRW_TEMP_REFRESH_RANGE</id></attribute>
+    <attribute><id>MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id></attribute>
+    <attribute><id>MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id></attribute>
+    <attribute><id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
+    <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
+    <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id></attribute>
+    <attribute><id>MSS_MRW_MEM_M_DRAM_CLOCKS</id></attribute>
+    <attribute><id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id></attribute>
+    <attribute><id>MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
+    <attribute><id>MSS_MRW_POWER_CONTROL_REQUESTED</id></attribute>
+    <attribute><id>MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
+    <attribute><id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
+    <attribute><id>MSS_MRW_AVDD_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_MRW_VDD_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_MRW_VCS_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_MRW_VPP_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_MRW_VDDR_OFFSET_DISABLE</id></attribute>
+    <attribute><id>MSS_MRW_FINE_REFRESH_MODE</id></attribute>
+    <attribute><id>MSS_MRW_TEMP_REFRESH_RANGE</id></attribute>
+    <attribute><id>MSS_MRW_RESET_DELAY_BEFORE_CAL</id></attribute>
     <attribute><id>MSS_VPD_MR_0_VERSION_LAYOUT</id></attribute>
     <attribute><id>MSS_VPD_MR_1_VERSION_DATA</id></attribute>
     <attribute><id>MSS_VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
