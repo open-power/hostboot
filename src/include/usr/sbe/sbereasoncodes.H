@@ -100,8 +100,7 @@ enum sbeReasonCode
     SBE_MASTER_VERSION_DOWNLEVEL        = SBE_COMP_ID | 0x15,
     SBE_IMAGE_GET_SET_SCALAR_FAIL       = SBE_COMP_ID | 0x16,
 
-    HBBL_INVALID_INPUT                  = SBE_COMP_ID | 0x17,
-    HBBL_INVALID_INSTRUCTION            = SBE_COMP_ID | 0x18,
+    HBBL_END_DATA_NOT_FOUND             = SBE_COMP_ID | 0x17,
 
 };
 

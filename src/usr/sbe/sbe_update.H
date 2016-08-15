@@ -95,6 +95,15 @@ namespace SBE
     const uint64_t NONSECURE_VER_EYECATCH = 0x56455253494F4E00; //'VERSION\0'
     const uint32_t SUPPORTED_TOC_VER = 0x00000001;
 
+    // PNOR HBBL Partition constants
+    const uint64_t HBBL_START_ADDRESS  = 0x0000000000003000;
+    const size_t   HBBL_MAX_SIZE       = 20*KILOBYTE;         // 20KB
+    const uint64_t HBBL_END_EYECATCHER = 0x4842424C656E6400;  // 'HBBLend\0'
+
+    // Cacheline Size and Mask
+    const uint64_t CACHELINE_SIZE = 128;
+    const uint64_t CACHELINE_MASK = CACHELINE_SIZE - 1;
+
     // MVPD SB Keyword contants
     const size_t  MVPD_SB_RECORD_SIZE = 129;
 
@@ -226,6 +235,15 @@ namespace SBE
         uint32_t eyeCatch;                      // Expected to contain 'SBE\0'
         uint32_t tocVersion;                    // Version of SBE TOC
         sbeTocEntry_t entries[MAX_SBE_ENTRIES]; // Image entries
+    } PACKED;
+
+    /**
+     * @brief Layout of Hostboot Bootloader (HBBL) end of load data
+     */
+    struct hbblEndData_t
+    {
+        uint64_t eyecatcher;                 // Expected to contain 'HBBLend\0'
+        uint64_t address;                    // bootloader.ld end_load_address
     } PACKED;
 
     /**
@@ -375,6 +393,26 @@ namespace SBE
      */
     errlHndl_t readPNORVersion(void*& i_pnorImgHdrPtr,
                                sbe_image_version_t& o_version);
+
+
+    /**
+     * @brief Append HBBL Immage to SBE Image
+     *
+     * @param[in] i_section          Pointer to HBBL Image to append
+     *
+     * @param[in] i_section_size     Cacheline size of HBBL Image
+     *
+     * @param[in] i_image            Pointer to SBE image in memory (non-ecc)
+     *
+     * @param[in/out] io_image_size  in: space available for enlarged XIP image
+     *                               out: size of enlarged XIP image
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t appendHbblToSbe(void*     i_section,
+                               uint32_t  i_section_size,
+                               void*     i_image,
+                               uint32_t& io_image_size);
 
 
     /**
@@ -591,6 +629,20 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState);
+
+
+    /**
+     * @brief Calculates size for a block of code or data such that the block
+     *        can be aligned on cachelines.
+     *
+     * @param[in]  i_size     Size of block code or data
+     *
+     * @return Size of block adjusted to cacheline boundary
+     */
+    inline size_t setCachelineSize(size_t i_size)
+    {
+        return (i_size + CACHELINE_MASK) & ~(CACHELINE_MASK);
+    }
 
 
     /**
