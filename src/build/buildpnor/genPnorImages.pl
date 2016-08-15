@@ -56,6 +56,9 @@ use constant SHA_TRUNCATE_SIZE => 32;
 use constant VFS_EXTENDED_MODULE_MAX => 128;
 # VfsSystemModule struct size
 use constant VFS_MODULE_TABLE_ENTRY_SIZE => 112;
+# VFS Module table max size
+use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
+                                          * VFS_MODULE_TABLE_ENTRY_SIZE;
 
 ################################################################################
 # I/O parsing
@@ -223,6 +226,12 @@ sub manipulateImages
                             # Remove VFS module table from bin file
                             run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} skip=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
                             run_command("cp $tempImages{TEMP_BIN} $bin_file");
+                            # Pad after hash page table to have the VFS module table end at a 4K boundary
+                            my $hashPageTableSize = -s $tempImages{hashPageTable};
+                            my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
+                            run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
+
+
                             # Payload text section
                             run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
                         }

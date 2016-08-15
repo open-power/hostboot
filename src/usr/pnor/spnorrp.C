@@ -293,7 +293,17 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // Note: the textSize we get back is untrusted until verification
         // completes and should not be treated as correct until then.
         SECUREBOOT::ContainerHeader l_conHdr(l_unsecuredAddr);
-        o_rec->textSize = ALIGN_PAGE(l_conHdr.payloadTextSize());
+        o_rec->textSize = l_conHdr.payloadTextSize();
+        // TODO RTC: 159911 Only check page boundary alignment when there are
+        // both protected and unprotected sections of the partition.
+        if ( (i_id == HB_EXT_CODE) || (i_id == HB_DATA) )
+        {
+            // Split the mod math out of the assert as the trace would not display
+            // otherwise.
+            bool l_onPageBoundary = !(o_rec->textSize % PAGESIZE);
+            assert( l_onPageBoundary, "payloadTextSize is not on a page boundary for %s",
+                    l_info.name);
+        }
 
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
                     "in temp space is 0x%.16llX\n"
