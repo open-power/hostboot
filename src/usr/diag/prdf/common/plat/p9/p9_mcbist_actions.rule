@@ -31,6 +31,6 @@ actionclass mcbist_program_complete
 /** MCBIST program complete workaround...TBD */
 actionclass mcbist_program_complete_workaround
 {
-    TBDDefaultCallout;
+    funccall("CmdCompleteDd1Workaround");
 };
 
