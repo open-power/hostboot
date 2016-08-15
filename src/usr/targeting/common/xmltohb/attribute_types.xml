@@ -7891,52 +7891,6 @@ DEPRECATED!!!!
      versions, these EFF versions can be deleted -->
 
 <attribute>
-    <id>EFF_ODT_RD</id>
-    <description>
-      Read ODT.
-      Used in various locations and comes from the MT keyword of the VPD
-      creator: eff_config
-      consumer: various and initfiles
-      firmware notes: none
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_ODT_RD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_ODT_WR</id>
-    <description>
-      Write ODT.
-      Used in various locations and comes from the MT keyword of the VPD
-      Creator: mss_eff_config
-      consumer: various and initfile
-      firmware notes: none
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>2,2,4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_ODT_WR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_DRAM_RON</id>
     <description>
       DRAM Ron.
@@ -9217,30 +9171,6 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DIMM_RCD_IBT</id>
-    <description>
-      RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg.
-      Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: mss_dram_init
-      firmware notes: none
-      IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-        <array>2,2</array><!-- [drop][port] -->
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DIMM_RCD_IBT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -13705,28 +13635,6 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_ODT_INPUT_BUFF</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_RTT_PARK</id>
-    <description>
-      RTT_Park value. This is for DDR4 MRS5.
-      Computed in mss_eff_cnfg. Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>2, 2, 4</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_RTT_PARK</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

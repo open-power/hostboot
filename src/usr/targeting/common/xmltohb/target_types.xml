@@ -1319,7 +1319,6 @@
     <attribute><id>EFF_DIMM_DDR4_RC_9x</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_Ax</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_Bx</id></attribute>
-    <attribute><id>EFF_DIMM_RCD_IBT</id></attribute>
     <attribute><id>EFF_DIMM_RCD_MIRROR_MODE</id></attribute>
     <attribute><id>EFF_SCHMOO_MODE</id></attribute>
     <attribute><id>EFF_SCHMOO_ADDR_MODE</id></attribute>
@@ -1372,7 +1371,6 @@
     <attribute><id>EFF_CRC_ERROR_CLEAR</id></attribute>
     <attribute><id>EFF_CA_PARITY_ERROR_STATUS</id></attribute>
     <attribute><id>EFF_ODT_INPUT_BUFF</id></attribute>
-    <attribute><id>EFF_RTT_PARK</id></attribute>
     <attribute><id>EFF_CA_PARITY</id></attribute>
     <attribute><id>EFF_DATA_MASK</id></attribute>
     <attribute><id>EFF_WRITE_DBI</id></attribute>
@@ -1461,8 +1459,6 @@
     <attribute><id>EFF_DIMM_DDR4_F74BCDx</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_F74BCEx</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_F74BCFx</id></attribute>
-    <attribute><id>EFF_ODT_RD</id></attribute>
-    <attribute><id>EFF_ODT_WR</id></attribute>
     <attribute><id>EFF_DRAM_RON</id></attribute>
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
