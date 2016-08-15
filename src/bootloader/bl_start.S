@@ -30,6 +30,8 @@
 .set SBE_HB_PNORBOOTSIDE, sbe_hb_structures+5  ;// uint8_t
 .set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
 .set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
+.set HBBL_END_EYECATCHER, 0x4842424C656E6400   ;// 'HBBLend.'
+.set HBBL_END_ADDRESS,    end_load_address
 
 .section .text.bootloaderasm
 
@@ -215,3 +217,12 @@ bootloader_trace:
 .global bootloader_hbbSection
 bootloader_hbbSection:
     .space 32
+
+    .balign 16
+.global bootloader_end_eyecatcher
+bootloader_end_eyecatcher:
+    .quad HBBL_END_EYECATCHER
+
+.global bootloader_end_address
+bootloader_end_address:
+    .quad HBBL_END_ADDRESS

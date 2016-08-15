@@ -60,6 +60,8 @@
 
 //Procedures
 #include <p9_xip_customize.H>
+#include <p9_xip_section_append.H>
+#include <p9_xip_image.h>
 
 // ----------------------------------------------
 // Trace definitions
@@ -734,6 +736,146 @@ namespace SBE
 
 
 /////////////////////////////////////////////////////////////////////
+    errlHndl_t findHBBLInPnor(void*& o_imgPtr,
+                              size_t& o_imgSize)
+    {
+        errlHndl_t err = NULL;
+        PNOR::SectionInfo_t pnorInfo;
+        hbblEndData_t* hbblEndData = NULL;
+        PNOR::SectionId pnorSectionId = PNOR::HB_BOOTLOADER;
+
+        o_imgPtr = NULL;
+        o_imgSize = 0;
+
+        TRACDCOMP( g_trac_sbe,
+                   ENTER_MRK"findHBBLInPnor()" );
+
+        do{
+            // Get SBE PNOR section info from PNOR RP
+            err = getSectionInfo( pnorSectionId,
+                                  pnorInfo );
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"findHBBLInPnor: Error calling "
+                           "getSectionInfo() rc=0x%.4X",
+                           err->reasonCode() );
+                break;
+            }
+
+            TRACUCOMP( g_trac_sbe,
+                       INFO_MRK"findHBBLInPnor: sectionId=0x%X. "
+                       "pnor vaddr = 0x%.16X",
+                       pnorSectionId, pnorInfo.vaddr);
+
+            // Look for HBBL end data on 16-byte boundary start at offset 0x2C00
+            uint64_t hbblAbsoluteEnd = pnorInfo.vaddr + pnorInfo.size;
+            uint64_t hbblAddr = pnorInfo.vaddr + 0x2C00;
+            while( hbblAddr < hbblAbsoluteEnd )
+            {
+                hbblEndData = reinterpret_cast<hbblEndData_t*>(hbblAddr);
+
+                if( HBBL_END_EYECATCHER == hbblEndData->eyecatcher )
+                {
+                    TRACUCOMP( g_trac_sbe,
+                               INFO_MRK"findHBBLInPnor: hbblEndData = %p, "
+                               "hbblEndData.address = 0x%.16X",
+                               hbblEndData, hbblEndData->address);
+                    break;
+                }
+
+                hbblAddr += sizeof(hbblEndData_t);
+            }
+
+            if( hbblAddr >= hbblAbsoluteEnd )
+            {
+                //The HBBL partition does not have the HBBL end data
+                TRACFCOMP( g_trac_sbe, ERR_MRK"findHBBLInPnor: HBBL partition "
+                           "does not have the HBBL end data" );
+
+                /*@
+                 * @errortype
+                 * @moduleid     HBBL_FIND_IN_PNOR
+                 * @reasoncode   HBBL_END_DATA_NOT_FOUND
+                 * @userdata1    HBBL PNOR Section Address
+                 * @userdata2    HBBL PNOR Section Size
+                 * @devdesc      HBBL partition did not have end data
+                 * @custdesc     A problem occurred while updating processor
+                 *               boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    HBBL_FIND_IN_PNOR,
+                                    HBBL_END_DATA_NOT_FOUND,
+                                    pnorInfo.vaddr,
+                                    pnorInfo.size);
+                err->collectTrace(SBE_COMP_NAME);
+                err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+
+                break;
+            }
+
+            o_imgPtr = reinterpret_cast<void*>( pnorInfo.vaddr );
+            o_imgSize = hbblEndData->address - HBBL_START_ADDRESS;
+
+        }while(0);
+
+        TRACDCOMP( g_trac_sbe,
+                   EXIT_MRK"findHBBLInPnor(): o_imgPtr=%p, o_imgSize=0x%X",
+                   o_imgPtr, o_imgSize );
+
+        return err;
+    }
+
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t appendHbblToSbe(void*     i_section,
+                               uint32_t  i_section_size,
+                               void*     i_image,
+                               uint32_t& io_image_size)
+    {
+        errlHndl_t err = NULL;
+
+        TRACUCOMP( g_trac_sbe,
+                   ENTER_MRK"appendHbblToSbe(): i_section=%p, "
+                            "i_section_size=0x%X, i_image=%p, "
+                            "io_image_size=0x%X",
+                            i_section, i_section_size,
+                            i_image, io_image_size);
+
+        do{
+            // Invoke p9_xip_section_append to append HBBL image to SBE image
+            FAPI_INVOKE_HWP( err,
+                             p9_xip_section_append,
+                             i_section,
+                             i_section_size,
+                             P9_XIP_SECTION_SBE_HBBL,
+                             i_image,
+                             io_image_size );
+
+            // Check the return code
+            if(err)
+            {
+                TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
+                           "p9_xip_section_append failed, rc=0x%X",
+                           err->reasonCode() );
+
+                // exit loop
+                break;
+            }
+
+        }while(0);
+
+        TRACUCOMP( g_trac_sbe,
+                   EXIT_MRK"appendHbblToSbe(): i_image=%p, "
+                   "io_image_size=0x%X, RC=0x%X",
+                   i_image, io_image_size, ERRL_GETRC_SAFE(err) );
+
+        return err;
+    }
+
+
+/////////////////////////////////////////////////////////////////////
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
                                    void* i_sbePnorPtr,
                                    size_t i_maxImgSize,
@@ -788,7 +930,7 @@ namespace SBE
             coreCount = __builtin_popcount(coreMask);
             procIOMask = coreMask;
 
-            while( coreCount >= 0 )
+            while( coreCount >= 0 ) // @TODO RTC:138226 Is 0 right check value?
             {
                 if( !INITSERVICE::spBaseServicesEnabled() )  // FSP not present ==> ok to call @TODO RTC:160466
                 {
@@ -827,11 +969,13 @@ namespace SBE
                     // exit loop
                     break;
                 }
-                /* @TODO RTC:138226 RC does not exist in P9 yet,
-                                    need to check if it will exist */
+                /* @TODO RTC:138226 Both RCs exist in P9,
+                                    need to check what to use */
                 // Look for a specific return code
                 else if ( rc_fapi.isRC(
-                          fapi2::RC_XIPC_IMAGE_WOULD_OVERFLOW) )
+                          fapi2::RC_XIPC_IMAGE_WOULD_OVERFLOW) ||
+                          rc_fapi.isRC(
+                          fapi2::RC_XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS) )
                 {
                         // This is a specific return code from p9_xip_customize
                         // where the cores sent in couldn't fit, but possibly
@@ -1355,6 +1499,8 @@ namespace SBE
 
         errlHndl_t err = NULL;
         bool skip_customization = false;
+        void *tmp_pnorImage = NULL;
+        uint32_t tmp_pnorImageSz = 0;
 
         do{
 
@@ -1475,18 +1621,83 @@ namespace SBE
 
 
             /*******************************************/
-            /*  Customize SBE Image from PNOR and      */
+            /*  Get PNOR HBBL Information              */
+            /*******************************************/
+            void* hbblPnorPtr = NULL;
+            size_t hbblPnorImageSize = 0;
+            size_t hbblCachelineSize = 0;
+
+            err = findHBBLInPnor(hbblPnorPtr,
+                                 hbblPnorImageSize);
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error getting HBBL Version from PNOR, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
+                           "hbblPnorPtr=%p, hbblPnorImageSize=0x%08X (%d)",
+                           hbblPnorPtr, hbblPnorImageSize, hbblPnorImageSize);
+            }
+
+            hbblCachelineSize = setCachelineSize(hbblPnorImageSize);
+
+            TRACUCOMP( g_trac_sbe, "getSbeInfoState() - HBBL: "
+                       "maxSize=0x%X, actSize=0x%X, cachelineSize=0x%X",
+                       HBBL_MAX_SIZE, hbblPnorImageSize,
+                       hbblCachelineSize);
+
+
+            /*******************************************/
+            /*  Append HBBL Image from PNOR to SBE     */
+            /*  Image from PNOR                        */
+            /*******************************************/
+            if ( skip_customization == false )
+            {
+                // copy SBE image from PNOR to memory
+                tmp_pnorImageSz = static_cast<uint32_t>(
+                                      sbePnorImageSize + hbblCachelineSize);
+                tmp_pnorImage = malloc(tmp_pnorImageSz);
+                memcpy ( tmp_pnorImage,
+                         sbePnorPtr,
+                         sbePnorImageSize);
+
+                err = appendHbblToSbe(hbblPnorPtr,       // HBBL Image to append
+                                      hbblCachelineSize, // Size of HBBL Image
+                                      tmp_pnorImage,     // SBE Image
+                                      tmp_pnorImageSz);  // Available/used
+            }
+
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error from procAppendHbblToSbe(), "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+
+            /*******************************************/
+            /*  Customize SBE/HBBL Image and           */
             /*  Calculate CRC of the image             */
             /*******************************************/
             size_t sbeImgSize = 0;
             if ( skip_customization == false )
             {
                 err = procCustomizeSbeImg(io_sbeState.target,
-                                sbePnorPtr,     //SBE vaddr in PNOR
-                                FIXED_SEEPROM_WORK_SPACE,  //max size
-                                reinterpret_cast<void*>
-                                (SBE_IMG_VADDR),  //destination
-                                sbeImgSize);
+                                          tmp_pnorImage,  //SBE in memory
+                                          FIXED_SEEPROM_WORK_SPACE,  //max size
+                                          reinterpret_cast<void*>
+                                              (SBE_IMG_VADDR),  //destination
+                                          sbeImgSize);
             }
 
             if(err)
@@ -1509,6 +1720,7 @@ namespace SBE
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X",
                        FIXED_SEEPROM_WORK_SPACE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
+
 
             /*******************************************/
             /*  Get MVPD SBE Version Information       */
@@ -1596,6 +1808,8 @@ namespace SBE
                        io_sbeState.alt_seeprom_side);
 
         }while(0);
+
+        free(tmp_pnorImage);
 
         return err;
 
@@ -2199,6 +2413,18 @@ namespace SBE
                            io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
                            isSimics_check);
             }
+            else
+            {
+                TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
+                           "flagged as clean: pnor=%d, crc=%d "
+                           "(custom=0x%X/s0=0x%X), nest_freq=%d, isSimics=%d",
+                           TARGETING::get_huid(io_sbeState.target),
+                           pnor_check_dirty, crc_check_dirty,
+                           io_sbeState.customizedImage_crc,
+                           io_sbeState.seeprom_0_ver.data_crc,
+                           io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch,
+                           isSimics_check);
+            }
 
             /**************************************************************/
             /*  Compare SEEPROM 1 with PNOR and Customized Image CRC --   */
@@ -2242,6 +2468,18 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X), "
                            "nest_freq=%d, isSimics=%d",
+                           TARGETING::get_huid(io_sbeState.target),
+                           pnor_check_dirty, crc_check_dirty,
+                           io_sbeState.customizedImage_crc,
+                           io_sbeState.seeprom_1_ver.data_crc,
+                           io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch,
+                           isSimics_check);
+            }
+            else
+            {
+                TRACUCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
+                           "flagged as clean: pnor=%d, crc=%d "
+                           "(custom=0x%X/s1=0x%X), nest_freq=%d, isSimics=%d",
                            TARGETING::get_huid(io_sbeState.target),
                            pnor_check_dirty, crc_check_dirty,
                            io_sbeState.customizedImage_crc,
