@@ -211,6 +211,11 @@ group gMCBISTFIR filter singlebit
      */
     (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround;
 
+    /** MCBISTFIR[10,12]
+     *  MCBIST Command Complete
+     */
+    (rMCBISTFIR, bit(10,12)) ? mcbist_program_complete;
+
     /** MCBISTFIR[13]
      *  SCOM_RECOVERABLE_REG_PE
      */
