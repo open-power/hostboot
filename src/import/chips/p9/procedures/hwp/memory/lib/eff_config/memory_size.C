@@ -53,14 +53,16 @@ namespace mss
 template<>
 fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_size )
 {
-    uint32_t l_sizes[MAX_DIMM_PER_PORT];
+    // Don't try to get cute and read the attributes once and loop over the array.
+    // Cronus honors initToZero which would work, but HB might not and so we might get
+    // crap in some of the attributes (which we shouldn't access as there's no DIMM there)
+    uint32_t l_sizes = 0;
     o_size = 0;
 
-    FAPI_TRY( mss::eff_dimm_size(i_target, &(l_sizes[0])) );
-
-    for (size_t i = 0; i < MAX_DIMM_PER_PORT; ++i)
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
-        o_size += l_sizes[i];
+        FAPI_TRY( mss::eff_dimm_size(d, l_sizes) );
+        o_size += l_sizes;
     }
 
 fapi_try_exit:
@@ -78,18 +80,11 @@ fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
 {
     o_size = 0;
 
-    for (const auto& mcs : mss::find_targets<fapi2::TARGET_TYPE_MCS>(i_target))
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
-        uint32_t l_sizes[PORTS_PER_MCS][MAX_DIMM_PER_PORT];
-        FAPI_TRY( mss::eff_dimm_size(mcs, &(l_sizes[0][0])) );
-
-        for (size_t i = 0; i < PORTS_PER_MCS; ++i)
-        {
-            for (size_t j = 0; j < MAX_DIMM_PER_PORT; ++j)
-            {
-                o_size += l_sizes[i][j];
-            }
-        }
+        uint64_t l_size = 0;
+        FAPI_TRY( eff_memory_size(p, l_size) );
+        o_size += l_size;
     }
 
 fapi_try_exit:
