@@ -50,6 +50,7 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
+    MAX_RANKS_DIMM1 = 2,           ///< DIMM1 (inner DIMM) can't be a 4R DIMM
     MAX_PRIMARY_RANKS_PER_PORT = 4,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM
@@ -116,6 +117,7 @@ enum states
     YES_N = 0,
     NO_N = 1,
     INVALID = 0xFF,
+    NO_CHIP_SELECT_ACTIVE = 0xFF,
 
     // This needs to be an attribute I think - BRS. Used as a boolean.
     CAL_ABORT_ON_ERROR = 1,
