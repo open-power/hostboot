@@ -95,6 +95,8 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_id_attr(
     return (p9_fbc_utils_get_chip_id_attr(l_procChip, o_chip_id));
 }
 
+// Specialization for chiplet targets.  See doxygen in header file.
+template<>
 fapi2::ReturnCode p9_fbc_utils_get_chip_id_attr(
     const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
     uint8_t& o_chip_id)
@@ -150,6 +152,8 @@ fapi2::ReturnCode p9_fbc_utils_get_group_id_attr(
     return (p9_fbc_utils_get_group_id_attr(l_procChip, o_group_id));
 }
 
+// Specialization for chiplet targets.  See doxygen in header file.
+template<>
 fapi2::ReturnCode p9_fbc_utils_get_group_id_attr(
     const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
     uint8_t& o_group_id)
