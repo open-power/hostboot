@@ -690,8 +690,14 @@ void AttrOverrideSync::triggerAttrSync()
 
         if(l_fType == fapi2::TARGET_TYPE_NONE)
         {
-            //Didn't allocate fapi2 target, don't need to free
             continue; //not a FAPI2 target -- skip to next target
+        }
+
+        //skip if not functional
+        if(l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional
+           != true)
+        {
+            continue;
         }
 
         TARGETING::EntityPath phys_path_ptr =
@@ -709,7 +715,7 @@ void AttrOverrideSync::triggerAttrSync()
         uint8_t l_node = 0;
         l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
 
-        //Loop on all fapi targets under this target type
+        //Loop on all fapi ATTR under this target type
         size_t l_elems = 0;
         const AttributeSyncInfo * l_attrs =
                             get_fapi_target_attr_array(l_fType, l_elems);

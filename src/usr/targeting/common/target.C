@@ -54,6 +54,10 @@ namespace TARGETING
 #define TARG_NAMESPACE "TARGETING::"
 #define TARG_CLASS "Target::"
 
+//P9 number of MC/CORE units contained per level
+//Both happen to be the same, so use one constant
+#define P9_UNIT_PER_LEVEL 2
+
 // Static function pointer variable allocation
 pCallbackFuncPtr Target::cv_pCallbackFuncPtr = NULL;
 
@@ -496,15 +500,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             {
                 o_pos = l_element.instance;
             }
-            else if ((l_element.type == TYPE_EX) ||
-                     (l_element.type == TYPE_L4) ||
-                     (l_element.type == TYPE_MCS) ||
+            else if ((l_element.type == TYPE_L4) ||
                      (l_element.type == TYPE_MBA) ||
                      (l_element.type == TYPE_XBUS) ||
                      (l_element.type == TYPE_ABUS) ||
-                     (l_element.type == TYPE_CORE) ||
                      (l_element.type == TYPE_EQ) ||
-                     (l_element.type == TYPE_MCA) ||
                      (l_element.type == TYPE_MCBIST) ||
                      (l_element.type == TYPE_MI) ||
                      (l_element.type == TYPE_CAPP) ||
@@ -518,6 +518,33 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                      (l_element.type == TYPE_PHB))
             {
                 o_unitPos = l_element.instance;
+            }
+            //Factor in that MCS and MCAs numbering is relative
+            //to their parent.  Thus MCA 1 behind MCS1 behind MCBIST 1
+            //is pos 7.  Below is the physical path showing containment:
+            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS0/MCA0 --> unitPos = 0
+            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS0/MCA1 --> unitPos = 1
+            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS1/MCA0 --> unitPos = 2
+            // Physical:/Sys0/Node0/Proc0/MCBIST0/MCS1/MCA1 --> unitPos = 3
+            // Physical:/Sys0/Node0/Proc0/MCBIST1/MCS0/MCA0 --> unitPos = 4
+            // etc
+            //
+            // physical:sys-0/node-0/proc-1/eq-1/ex-1/core-0 --> unitPos = 4
+            // physical:sys-0/node-0/proc-1/eq-1/ex-1/core-1 --> unitPos = 5
+            // physical:sys-0/node-0/proc-1/eq-2/ex-0/core-0 --> unitPos = 6
+            // physical:sys-0/node-0/proc-1/eq-2/ex-0/core-1 --> unitPos = 7
+
+            //Note that this ALSO applies to EX/EC units relative to their
+            //quad.  So for now the magical number is "2" for everything
+            //TODO RTC 160598 -- find a better way to do this
+            else if ((l_element.type == TYPE_EX) ||
+                     (l_element.type == TYPE_CORE) ||
+                     (l_element.type == TYPE_MCS) ||
+                     (l_element.type == TYPE_MCA))
+            {
+                //previous o_unitPos was MCBIST/MCS or EQ/EX.
+                // Multiply by 2 and add in instance number
+                o_unitPos = (o_unitPos*P9_UNIT_PER_LEVEL) + l_element.instance;
             }
         }
 
@@ -554,6 +581,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                     (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
                     (o_node == AttributeTank::ATTR_NODE_NA))
                 {
+                    TRACFCOMP(g_trac_targeting,"o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos, o_unitPos, o_node);
                     targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
                 }
             }
