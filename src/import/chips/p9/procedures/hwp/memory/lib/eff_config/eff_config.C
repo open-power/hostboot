@@ -2489,7 +2489,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::mpr_read_format(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_rd_format(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2501,7 +2500,8 @@ fapi2::ReturnCode eff_config::mpr_read_format(const fapi2::Target<TARGET_TYPE_DI
 
     FAPI_TRY( eff_mpr_rd_format(l_mcs, l_attrs_mpr_rd_format.data()) );
 
-    l_attrs_mpr_rd_format[l_port_num] = 0x00;
+    //Serial format is standard for Nimbus and needed for PHY calibration (draminit_training)
+    l_attrs_mpr_rd_format[l_port_num] = fapi2::ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MPR_RD_FORMAT,
                             l_mcs,
@@ -2519,7 +2519,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::crc_wr_latency(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_crc_wr_latency(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2529,9 +2528,30 @@ fapi2::ReturnCode eff_config::crc_wr_latency(const fapi2::Target<TARGET_TYPE_DIM
     // Current index
     const auto l_port_num = index(l_mca);
 
+    //keep simulation to values we know work
+    uint8_t is_sim = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+
     FAPI_TRY( eff_crc_wr_latency(l_mcs, l_attrs_crc_wr_latency.data()) );
 
-    l_attrs_crc_wr_latency[l_port_num] = 0x04;
+    //keep simulation to values we know work
+    if(is_sim)
+    {
+        l_attrs_crc_wr_latency[l_port_num] = 0x05;
+    }
+    //set the attribute according to frequency
+    else
+    {
+        //TODO RTC:159481 - update CRC write latency to include 2667
+        //currently, JEDEC defines the following
+        //crc wr latency - freq
+        //4              - 1600
+        //5              - 1866, 2133, 2400
+        //6              - TBD
+        //Nimbus only supports 1866->2400 on the current list
+        //2667 is not noted. as such, alway setting crc_wr_latency to 0x05 until JEDEC value is updated
+        l_attrs_crc_wr_latency[l_port_num] = 0x05;
+    }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CRC_WR_LATENCY,
                             l_mcs,
@@ -2549,7 +2569,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::temp_readout(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_temp_readout(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2561,7 +2580,8 @@ fapi2::ReturnCode eff_config::temp_readout(const fapi2::Target<TARGET_TYPE_DIMM>
 
     FAPI_TRY( eff_temp_readout(l_mcs, l_attrs_temp_readout.data()) );
 
-    l_attrs_temp_readout[l_port_num] = 0x00;
+    //Disabled for mainline mode
+    l_attrs_temp_readout[l_port_num] = fapi2::ENUM_ATTR_EFF_TEMP_READOUT_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_TEMP_READOUT,
                             l_mcs,
@@ -2579,7 +2599,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::per_dram_addressability(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_per_dram_access(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2591,7 +2610,8 @@ fapi2::ReturnCode eff_config::per_dram_addressability(const fapi2::Target<TARGET
 
     FAPI_TRY( eff_per_dram_access(l_mcs, l_attrs_per_dram_access.data()) );
 
-    l_attrs_per_dram_access[l_port_num] = 0x00;
+    //PDA is disabled in mainline functionality
+    l_attrs_per_dram_access[l_port_num] = fapi2::ENUM_ATTR_EFF_PER_DRAM_ACCESS_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_PER_DRAM_ACCESS,
                             l_mcs,
@@ -2644,7 +2664,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::mpr_page(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_page(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2656,7 +2675,8 @@ fapi2::ReturnCode eff_config::mpr_page(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     FAPI_TRY( eff_mpr_page(l_mcs, l_attrs_mpr_page.data()) );
 
-    l_attrs_mpr_page[l_port_num] = 0x00;
+    //page0 is needed for PHY calibration algorithm (run in draminit_training)
+    l_attrs_mpr_page[l_port_num] = fapi2::ENUM_ATTR_EFF_MPR_PAGE_PG0;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MPR_PAGE,
                             l_mcs,
@@ -2674,7 +2694,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::mpr_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     std::vector<uint8_t> l_attrs_mpr_mode(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2686,7 +2705,8 @@ fapi2::ReturnCode eff_config::mpr_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     FAPI_TRY( eff_mpr_mode(l_mcs, l_attrs_mpr_mode.data()) );
 
-    l_attrs_mpr_mode[l_port_num] = 0x00;
+    //MPR mode is disabled for mainline functionality
+    l_attrs_mpr_mode[l_port_num] = fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_MPR_MODE,
                             l_mcs,
