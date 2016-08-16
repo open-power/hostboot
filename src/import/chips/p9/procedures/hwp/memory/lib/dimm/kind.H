@@ -94,7 +94,7 @@ class kind
         ///
         /// @brief operator==() - are two kinds the same?
         /// @param[in] i_rhs the right hand side of the comparison statement
-        /// @return boll true iff the two kind are of the same kind
+        /// @return bool true iff the two kind are of the same kind
         /// @warning this does not compare the targets (iv_target,) just the values
         ///
         inline bool operator==(const kind& i_rhs) const

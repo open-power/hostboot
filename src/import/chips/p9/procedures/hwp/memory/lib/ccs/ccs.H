@@ -198,86 +198,89 @@ class instruction_t
         /// @param[in] i_arr1 the initial value for arr1, defaults to 0
         ///
         instruction_t( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target = fapi2::Target<fapi2::TARGET_TYPE_DIMM>(),
-                       uint64_t i_rank = 0xFF,
+                       uint64_t i_rank = NO_CHIP_SELECT_ACTIVE,
                        const fapi2::buffer<uint64_t> i_arr0 = 0,
                        const fapi2::buffer<uint64_t> i_arr1 = 0):
             arr0(i_arr0),
             arr1(i_arr1)
         {
-
-            static const uint64_t CS_N[mss::MAX_RANK_PER_DIMM] =
+            // For DIMM0 .first is the CSN_0_1 setting, .second is the CSN_2_3 setting.
+            // For DIMM1 .first is the CSN_2_3 setting, .second is the CSN_0_1 setting.
+            static const std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
             {
-                // DCS0 L DCS1 H => Rank 0
-                0b01,
-                // DCS0 H DCS1 L => Rank 1
-                0b10,
+                // CS0 L CS1 H => CS2 => H CS3 => H Rank 0
+                { 0b01, 0b11 },
+
+                // CS0 H CS1 L => CS2 => H CS3 => H Rank 1
+                { 0b10, 0b11 },
+
+                // CS0 H CS1 H => CS2 => L CS3 => H Rank 2
+                { 0b11, 0b01 },
+
+                // CS0 H CS1 H => CS2 => H CS3 => L Rank 3
+                { 0b11, 0b10 },
             };
 
-            // Start be deselcting everything and we'll clear the bits we want.
-            arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(0b11);
-            arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(0b11);
-
             // If the rank indicates nothing selected (active low) then we're done.
-            if (i_rank == 0xFF)
+            if (i_rank == NO_CHIP_SELECT_ACTIVE)
             {
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1, TT::ARR0_DDR_CSN_0_1_LEN>(0b11);
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3, TT::ARR0_DDR_CSN_2_3_LEN>(0b11);
                 return;
             }
 
             //
-            // Note: This needs to be able to handle all DIMM, stacked, encoded CS_n, etc. This
-            // ain't gonna cut it. Turn this in to a dispatched funtion like c_str() and rcd_load() BRS
+            // Note: This likely needs to be able to handle all DIMM, stacked, encoded CS_n, etc. This
+            // might not cut it. Turn this in to a dispatched funtion like c_str() and rcd_load() BRS
             //
 
             // Direct CS mode - just clear the CS_N you're interested in.
             // Setup the chip select based on which dimm in the slot and the rank
             if (mss::index(i_target) == 0)
             {
+                // Sanity check the incoming rank. It has to be 0-3 since we're DIMM0
+                // Assert since this is a programming error
+                if (i_rank >= MAX_RANK_PER_DIMM)
+                {
+                    FAPI_ERR("DIMM0 %s CCS instruction looking for bad rank/chip select (%d)",
+                             mss::c_str(i_target), i_rank);
+                    fapi2::Assert(false);
+                    // Not reached but fapi2::Assert isn't [[no return]] so the compiler thinks we're going
+                    // to run off the array but we're not so this makes the compiler happy.
+                    return;
+                }
+
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
-                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[i_rank]);
-            }
-            else
-            {
+                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[i_rank].first);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
-                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[i_rank]);
-            }
-
-#ifdef QUAD_ENCODED_CS
-            // Implement the Encoded QuadCS Mode DCS, DC mapping and stuff the resulting
-            // bits in to the proper location for the CCS instruction (perhaps we need
-            // to be a template - p9n CCS is different from Centaur ... make initializing
-            // the instruction a policy of the ccsTraits ... BRS)
-
-            // Lookup table for CS_N and CID indexed by rank for Quad encoded CS modee
-            // First bits 0:1 is DCS1_n:DCS2_n. Second bits 0:1 are CID 0:1 bit 2 is CID 2
-            static const std::pair< uint8_t, uint8_t > CS_CID[mss::MAX_RANK_PER_DIMM] =
-            {
-                // DCS0 L DCS1 H CID L:L => Rank 0
-                { 0b01000000, 0b00000000 },
-                // DCS0 L DCS1 H CID H:H => Rank 1
-                { 0b01000000, 0b11000000 },
-                // DCS0 H DCS1 L CID L:L => Rank 2
-                { 0b10000000, 0b00000000 },
-                // DCS0 H DCS1 L CID H:H => Rank 3
-                { 0b10000000, 0b11000000 },
-            };
-
-            // Setup the chip select based on which dimm in the slot and the rank
-            if (mss::index(i_target) == 0)
-            {
-                arr0.insert<TT::ARR0_DDR_CSN_0_1,
-                            TT::ARR0_DDR_CSN_0_1_LEN>(CS_CID[i_rank].first);
+                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[i_rank].second);
             }
             else
             {
-                arr0.insert<TT::ARR0_DDR_CSN_2_3,
-                            TT::ARR0_DDR_CSN_2_3_LEN>(CS_CID[i_rank].first);
-            }
+                // DIMM1's ranks are {4,5,6,7} so we subract the mid-point rank to normalize i_rank for DIMM1
+                const uint64_t l_effective_rank = i_rank - RANK_MID_POINT;
 
-            arr0.insert<TT::ARR0_DDR_CID_0_1,
-                        TT::ARR0_DDR_CID_0_1_LEN>(CS_CID[i_rank].second);
-            arr0.writeBit<TT::ARR0_DDR_CID_2>(
-                fapi2::buffer<uint8_t>(CS_CID[i_rank].second).getBit<2>());
-#endif
+                // Sanity check that we don't have more than 2 ranks on DIMM1. Effective Config
+                // should have caught this with the plug rules, but we will select the rank in the
+                // wrong DIMM with this CCS instruction if we blew it, so lets check ... We can assert
+                // our way out of this as this is a code bug in Effective Config, so they should have
+                // reported a real error long ago ...
+                if (l_effective_rank >= MAX_RANKS_DIMM1)
+                {
+                    FAPI_ERR("DIMM1 %s CCS instruction looking for bad rank/chip select (%d, %d)",
+                             mss::c_str(i_target), i_rank, l_effective_rank);
+                    fapi2::Assert(false);
+                    // Not reached but fapi2::Assert isn't [[no return]] so the compiler thinks we're going
+                    // to run off the array but we're not so this makes the compiler happy.
+                    return;
+                }
+
+                // Deselect ranks on DIMM0
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
+                                     TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[l_effective_rank].second);
+                arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
+                                     TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[l_effective_rank].first);
+            }
         }
 };
 
@@ -358,8 +361,8 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0b11);
     rcd_boilerplate_arr0.setBit<TT::ARR0_DDR_BANK_GROUP_0>();
 
-    // RCD always goes to rank 0. All we need to know is which DIMM we are on the port
-    return instruction_t<T>(i_target, 0, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    // RCD always goes to the 0th rank on the DIMM; either 0 or 4.
+    return instruction_t<T>(i_target, (mss::index(i_target) == 0) ? 0 : 4, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
@@ -422,8 +425,9 @@ inline instruction_t<T> des_command()
     // ACT is high no-care
     // RAS, CAS, WE no-care
 
-    // Device Deslect wants CS_n always high (select nothing using rank 0xFF)
-    return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), 0xFF, rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+    // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
+    return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), NO_CHIP_SELECT_ACTIVE,
+                            rcd_boilerplate_arr0, rcd_boilerplate_arr1);
 }
 
 ///
