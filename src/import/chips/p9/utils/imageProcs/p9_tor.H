@@ -297,6 +297,9 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 /// It contain details of p9 Ring which is used for scanning operation.
 /// TOR API supports HW image format  only
 ///
+/// \param[in]  i_magic A uint64_t variable to indicate XIP image format
+/// ring section passed
+///
 /// \param[in]  i_ringId A enum to indicate unique ID for the ring
 ///
 /// \param[in]  i_ddLevel A variable to indicate chip DD level. TOR API
@@ -328,6 +331,7 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
+                          uint64_t        i_magic,          // Image Magic Number
                           uint16_t       i_ddLevel,
                           RingID         i_ringId,
                           PpeType_t      i_PpeType,
