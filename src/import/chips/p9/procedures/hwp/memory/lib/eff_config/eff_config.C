@@ -413,7 +413,6 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
                         "%s Incorrect Fine Refresh Mode received: %d ",
                         mss::c_str(i_target),
                         l_refresh_mode);
-
             break;
     }
 
@@ -557,7 +556,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for refresh cycle time (logical ranks) (tRFC_DLR)
+/// @brief Determines & sets effective config for refresh cycle time (different logical ranks - tRFC_DLR)
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
@@ -566,22 +565,43 @@ fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
+    uint8_t l_refresh_mode = 0;
+    uint8_t l_density = 0;
+    uint64_t l_tCK_in_ps = 0;
+    uint64_t l_trfc_dlr_in_ps = 0;
+    uint8_t l_trfc_dlr_in_nck = 0;
     std::vector<uint8_t> l_mcs_attrs_trfc_dlr(PORTS_PER_MCS, 0);
 
-    // Retrieve MCS attribute data
-    FAPI_TRY( eff_dram_trfc_dlr(l_mcs, l_mcs_attrs_trfc_dlr.data()),
-              "Failed to retrieve tRFC_DLR attribute" );
+    // Retrieve map params
+    FAPI_TRY( iv_pDecoder->sdram_density(i_target, l_density), "Failed to get sdram density");
+    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode), "Failed to get MRW attribute for fine refresh mode" );
 
-    // TK - RIT skeleton. Need to finish - BRS
-    l_mcs_attrs_trfc_dlr[l_port_num] = 0x90;
-    FAPI_INF("Hardwired tRFC_DLR: %d", l_mcs_attrs_trfc_dlr[l_port_num]);
+    FAPI_INF("Retrieved SDRAM density: %d, fine refresh mode: %d",
+             l_density, l_refresh_mode);
+
+    // Calculate refresh cycle time in ps
+    FAPI_TRY( calc_trfc_dlr(l_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
+
+    // Calculate clock period (tCK) from selected freq from mss_freq
+    FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
+
+    // Calculate refresh cycle time in nck
+    l_trfc_dlr_in_nck = calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+    FAPI_INF("Calculated clock period (tCK): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
+             l_tCK_in_ps, l_trfc_dlr_in_ps, l_trfc_dlr_in_nck);
+
+    // Retrieve MCS attribute data
+    FAPI_TRY( eff_dram_trfc_dlr(l_mcs, l_mcs_attrs_trfc_dlr.data()), "Failed to retrieve tRFC_DLR attribute" );
 
     // Update MCS attribute
-    // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+    l_mcs_attrs_trfc_dlr[l_port_num] = l_trfc_dlr_in_nck;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC_DLR,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trfc_dlr, PORTS_PER_MCS) ),
               "Failed to set tRFC_DLR attribute" );
+
 fapi_try_exit:
     return fapi2::current_err;
 
@@ -594,9 +614,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::rcd_mirror_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_mirror_mode[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -605,13 +622,19 @@ fapi2::ReturnCode eff_config::rcd_mirror_mode(const fapi2::Target<TARGET_TYPE_DI
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_mirror_mode = 0;
+    uint8_t l_attrs_mirror_mode[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
     FAPI_TRY( eff_dimm_rcd_mirror_mode(l_mcs, &l_attrs_mirror_mode[0][0]) );
-    l_attrs_mirror_mode[l_port_num][l_dimm_num] = 0x01;
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
+
+    // Update MCS attribute
+    l_attrs_mirror_mode[l_port_num][l_dimm_num] = l_mirror_mode;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RCD_MIRROR_MODE, l_mcs, l_attrs_mirror_mode) );
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -636,8 +659,6 @@ fapi2::ReturnCode eff_config::dram_bank_bits(const fapi2::Target<TARGET_TYPE_DIM
 
 fapi_try_exit:
     return fapi2::current_err;
-
-
 }
 
 ///
@@ -662,8 +683,6 @@ fapi2::ReturnCode eff_config::dram_row_bits(const fapi2::Target<TARGET_TYPE_DIMM
 
 fapi_try_exit:
     return fapi2::current_err;
-
-
 }
 
 ///

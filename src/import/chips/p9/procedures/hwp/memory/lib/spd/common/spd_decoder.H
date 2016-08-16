@@ -380,9 +380,7 @@ class decoder
         std::shared_ptr<dimm_module_decoder> iv_module_decoder;
         std::vector<uint8_t> iv_spd_data;
 
-        ///
-        /// @brief Default constructor
-        ///
+        // Default constructor deleted
         decoder() = delete;
 
         ///

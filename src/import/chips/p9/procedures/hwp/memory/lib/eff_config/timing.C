@@ -72,7 +72,6 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
     // 16Gb - TBD
 };
 
-
 /// @brief Calculates refresh interval time
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_temp_refresh_range temperature refresh range
@@ -112,6 +111,53 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
               o_timing, l_quotient, l_remainder, TREFI_BASE );
 
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+/// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
+/// @param[in] i_mode fine refresh rate mode
+/// @param[in] i_density SDRAM density
+/// @param[out] o_trfc_in_ps timing val in ps
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode calc_trfc_dlr(const uint8_t i_refresh_mode,
+                                const uint8_t i_density,
+                                uint64_t& o_trfc_in_ps)
+{
+    bool l_is_val_found = 0;
+
+    // Selects appropriate tRFC based on fine refresh mode
+    switch(i_refresh_mode)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
+            l_is_val_found = find_value_from_key(TRFC_DLR1, i_density, o_trfc_in_ps);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
+            l_is_val_found = find_value_from_key(TRFC_DLR2, i_density, o_trfc_in_ps);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
+        case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
+            l_is_val_found = find_value_from_key(TRFC_DLR4, i_density, o_trfc_in_ps);
+            break;
+
+        default:
+            // Fine Refresh Mode will be a platform attribute set by the MRW,
+            // which they "shouldn't" mess up as long as use "attribute" enums.
+            // if openpower messes this up we can at least catch it
+            FAPI_ERR( "Incorrect Fine Refresh Mode received: %d ", i_refresh_mode);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }// switch
+
+    if(l_is_val_found)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_ERR("Unable to find tRFC (ps) from map with SDRAM density key %d", i_density);
+    return fapi2::FAPI2_RC_FALSE;
 }
 
 }// mss

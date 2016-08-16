@@ -139,6 +139,17 @@ fapi_try_exit:
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
                               uint64_t& o_timing );
+
+/// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
+/// @param[in] i_mode fine refresh rate mode
+/// @param[in] i_density SDRAM density
+/// @param[out] o_trfc_in_ps timing val in ps
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode calc_trfc_dlr( const uint8_t i_refresh_mode,
+                                 const uint8_t i_density,
+                                 uint64_t& o_trfc_in_ps );
+
 } // mss
 
 #endif

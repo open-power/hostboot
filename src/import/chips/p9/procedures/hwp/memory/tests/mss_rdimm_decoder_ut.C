@@ -300,7 +300,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 136 (Bit 0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.register_to_dram_addr_mapping( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
