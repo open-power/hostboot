@@ -477,14 +477,10 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    // This shouldn't be null so there is a specific decoder we are wanting to populate
-    std::shared_ptr<decoder> l_pDecoder(i_pDecoder);
-
     // Custom decoder provided (usually done for testing)
     // Populate custom spd caches maps one dimm at a time
-    o_factory_caches.emplace( std::make_pair( pos(i_target), l_pDecoder ) );
+    o_factory_caches.emplace( std::make_pair( pos(i_target), i_pDecoder ) );
 
-    // TK - else what do we want here
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
