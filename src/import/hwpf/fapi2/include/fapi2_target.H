@@ -497,7 +497,7 @@ inline void toString(const Target<T, V>* i_target, char* i_buffer, size_t i_bsiz
 /// the desired target
 /// @return Target<T> the target requested
 ///
-template<TargetType T, typename V>
+template<TargetType T, typename V = plat_target_handle_t>
 inline Target<T, V> getTarget(uint64_t Ordinal);
 
 // Why has the been removed? For starters, the API name
