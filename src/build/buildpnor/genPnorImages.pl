@@ -30,7 +30,8 @@ use File::Basename;
 use Cwd qw(abs_path cwd);
 use lib dirname abs_path($0);
 use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
-                 loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints);
+                 loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
+                 getSwSignatures getBinDataFromFile);
 use Getopt::Long qw(:config pass_through);
 
 ################################################################################
@@ -86,6 +87,35 @@ if ($help)
 {
     usage();
     exit 0;
+}
+
+# Hardcoded defined order that binfiles should be handled.
+my %partitionDeps = ( HBB => 0,
+                      HBI => 1);
+
+# Custom sort to ensure images are handled in the correct dependency order.
+# If a dependency is not specified in the hash used, use default behavior.
+sub partitionDepSort
+{
+    # If $a exists but $b does not, set $a < $b
+    if (exists $partitionDeps{$a} && !exists $partitionDeps{$b})
+    {
+        -1
+    }
+    # If $a does not exists but $b does, set $a > $b
+    elsif (!exists $partitionDeps{$a} && exists $partitionDeps{$b})
+    {
+        1
+    }
+    # If both $a and $b exist, actually compare values.
+    elsif (exists $partitionDeps{$a} && exists $partitionDeps{$b})
+    {
+        if ($partitionDeps{$a} < $partitionDeps{$b}) {-1}
+        elsif ($partitionDeps{$a} > $partitionDeps{$b}) {1}
+        else {0}
+    }
+    # If neither $a or $b have a dependency, order doesn't matter
+    else {0}
 }
 
 ################################################################################
@@ -173,14 +203,15 @@ sub manipulateImages
         VFS_MODULE_TABLE => => "$bin_dir/$parallelPrefix.vfs_module_table.bin",
         TEMP_BIN => "$bin_dir/$parallelPrefix.temp.bin",
         PAYLOAD_TEXT => "$bin_dir/$parallelPrefix.payload_text.bin",
-        PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.protected_payload.bin"
+        PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.protected_payload.bin",
+        HBB_SW_SIG_FILE =>  "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
     );
 
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
     my %hashPageTablePartitions = (HBI => 1);
 
-    foreach my $key ( keys %{$i_binFilesRef})
+    foreach my $key (sort partitionDepSort  keys %{$i_binFilesRef})
     {
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
@@ -213,7 +244,16 @@ sub manipulateImages
                 {
                     if (exists $hashPageTablePartitions{$eyeCatch})
                     {
-                        $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch);
+                        if ($eyeCatch eq "HBI")
+                        {
+                            # Pass HBB sw signatures as the salt entry.
+                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,
+                                                                    getBinDataFromFile($tempImages{HBB_SW_SIG_FILE}));
+                        }
+                        else
+                        {
+                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch);
+                        }
                     }
                     # Add hash page table
                     if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
@@ -230,7 +270,6 @@ sub manipulateImages
                             my $hashPageTableSize = -s $tempImages{hashPageTable};
                             my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
                             run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
-
 
                             # Payload text section
                             run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
@@ -260,6 +299,13 @@ sub manipulateImages
                     if($eyeCatch eq "HBB")
                     {
                         run_command("echo \"000000000007EF8000000000080000000000000008280000\" | xxd -r -ps -seek 6 - $tempImages{HDR_PHASE}");
+                        # Save off HBB sw signatures for use by HBI
+                        open (HBB_SW_SIG_FILE, ">", $tempImages{HBB_SW_SIG_FILE}) or die "Error opening file $tempImages{HBB_SW_SIG_FILE}: $!\n";
+                        binmode HBB_SW_SIG_FILE;
+                        print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
+                        die "Error reading of $tempImages{HBB_SW_SIG_FILE} failed" if $!;
+                        close HBB_SW_SIG_FILE;
+                        die "Error closing of $tempImages{HBB_SW_SIG_FILE} failed" if $!;
                     }
                 }
                 # Add simiple version header
@@ -425,7 +471,7 @@ sub truncate_sha
 ################################################################################
 sub genHashPageTable
 {
-    my ($bin_file, $eyeCatch) = @_;
+    my ($bin_file, $eyeCatch, $saltData) = @_;
 
     # Open the file
     my $hashPageTableFile = "$bin_dir/$eyeCatch.page_hash_table";
@@ -437,11 +483,20 @@ sub genHashPageTable
 
     # Enter Salt as first entry
     my $salt_entry = 0;
-    for (my $i = 0; $i < SHA_TRUNCATE_SIZE; $i++)
+    if (defined $saltData)
     {
-        $salt_entry .= sha512(rand(0x7FFFFFFFFFFFFFFF));
+        # Use input salt data
+        $salt_entry = truncate_sha(sha512($saltData));
     }
-    $salt_entry = truncate_sha(sha512($salt_entry));
+    else
+    {
+        # Generate random salt data
+        for (my $i = 0; $i < SHA_TRUNCATE_SIZE; $i++)
+        {
+            $salt_entry .= sha512(rand(0x7FFFFFFFFFFFFFFF));
+        }
+        $salt_entry = truncate_sha(sha512($salt_entry));
+    }
     my @hashes = ($salt_entry);
     print OUTBINFILE $salt_entry;
 

@@ -28,7 +28,8 @@ package PnorUtils;
 
 use Exporter 'import';
 @EXPORT_OK = qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
-                loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints);
+                loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
+                getSwSignatures getBinDataFromFile);
 use strict;
 
 my $TRAC_ERR = 0;
@@ -395,6 +396,86 @@ sub adjustHbiPhysSize
             }
         }
     }
+}
+
+###############################################################################
+# getSwSignatures -   Extracts concatenation of sw signatures from secure
+#                     container header. Simplified to skip around to the data
+#                     needed.
+################################################################################
+sub getSwSignatures
+{
+    my ($i_file) = @_;
+
+    # Constants defined in ROM code.
+    use constant ecid_size => 16; #bytes
+    use constant sw_key_size => 132; #bytes
+
+    # Offsets defined in secure boot PLDD.
+    # Relative offset are based on the previous constant
+    use constant sw_key_count_offset => 450; #bytes
+    use constant relative_offset_to_hw_ecid_count => 73; #bytes
+    # Offset assuming Default of ECID count = 0 and SW count = 1
+    use constant relative_offset_to_sw_ecid_count => 626; #bytes
+    # Offset assuming Default of ECID count = 0
+    use constant relative_offset_to_sw_signatures => 1; #bytes
+
+    # Header info
+    my $sw_key_count = 0;
+    my $hw_ecid_count = 0;
+    my $sw_ecid_count = 0;
+    my $sw_signatures = 0;
+
+    # Get header data from file
+    my $header_data = getBinDataFromFile($i_file);
+
+    # get sw key count
+    my $cur_offset = sw_key_count_offset;
+    $sw_key_count  = unpack("x$cur_offset C", $header_data);
+
+    # get hw ecid counts
+    $cur_offset += relative_offset_to_hw_ecid_count;
+    $hw_ecid_count = unpack("x$cur_offset C", $header_data);
+
+    # Variable size elements of a secure header
+    # Note 1 sw_key is already considered in above constants
+    my $num_optional_keys = ($sw_key_count > 1) ?
+                             ($sw_key_count - 1) : 0;
+    my $variable_size_offset = ($num_optional_keys * sw_key_size)
+                                + ($hw_ecid_count * ecid_size);
+
+    # get sw ecid count
+    $cur_offset +=  relative_offset_to_sw_ecid_count + $variable_size_offset;
+    $sw_ecid_count = unpack("x$cur_offset C", $header_data);
+
+    # Variable size elements of a secure header
+    $variable_size_offset = ($sw_ecid_count * ecid_size);
+
+    # get sw signatures
+    $cur_offset +=  relative_offset_to_sw_signatures + $variable_size_offset;
+    # Get concatenation of all possible sw signatures
+    $sw_signatures = substr($header_data, $cur_offset,
+                            $sw_key_count*sw_key_size);
+
+    return $sw_signatures;
+}
+
+###############################################################################
+# getBinDataFromFile -   Extracts binary data from a given file into a variable
+################################################################################
+sub getBinDataFromFile
+{
+    my ($i_file) = @_;
+
+    my $data = 0;
+    open (BINFILE, "<", $i_file) or die "Error opening file $i_file: $!\n";
+    binmode BINFILE;
+    read(BINFILE,$data,PAGE_SIZE);
+    die "Error reading of $i_file failed" if $!;
+    close(BINFILE);
+    die "Error closing $i_file failed" if $!;
+
+    return $data;
 }
 
 1;

@@ -88,6 +88,8 @@ GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 # Paramemter passed into GEN_PNOR_IMAGE_SCRIPT. Note zero filled images pass
 # EMPTY as their file name. This is so the script knows it needs to generate
 # them, rather than use an input.
+# Note: HBI depends on HBB for sw signatures. Ensure that both are passed into
+#       the same --systemBinFiles parameter for genPnorImages
 GEN_DEFAULT_BIN_FILES = HBB=${BASE_IMAGE},HBI=${EXT_IMAGE},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY
 DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
 
