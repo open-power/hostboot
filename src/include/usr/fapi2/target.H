@@ -1114,11 +1114,55 @@ inline void toString(const Target<T, V> *i_target, char* io_buffer, size_t i_bsi
 /// @return Target<T> the target requested
 ///
 template<TargetType T, typename V>
-inline Target<T, V> getTarget(uint64_t Ordinal)
+inline Target<T, V> getTarget(uint64_t i_ordinal_id )
 {
-  //@TODO RTC:129517
-    // For testing
-    return Target<T>(Ordinal);
+    uint16_t  l_fapi_pos = 0;
+    TARGETING::Target * l_platTarget = nullptr;
+
+    // get the top-level target
+    TARGETING::Target * l_pSys;
+    TARGETING::targetService().getTopLevelTarget(l_pSys);
+    TARGETING::PredicateCTM l_tPred(TARGETING::CLASS_NA,
+           fapi2::convertFapi2TypeToTargeting(T));
+
+    // get a list of all targets of type T
+    TARGETING::TargetHandleList l_TargetList;
+    TARGETING::targetService().getAssociated( l_TargetList, l_pSys,
+           TARGETING::TargetService::CHILD,
+           TARGETING::TargetService::ALL,
+           &l_tPred);
+
+    if (!l_TargetList.empty())
+    {
+        FAPI_DBG("getTarget: Ordinal: %.8X", i_ordinal_id );
+
+        // Iterate through all targets and find out matching
+        // FAPI_POS target
+        for( auto & l_target_elem : l_TargetList)
+        {
+            l_fapi_pos = l_target_elem->getAttr<TARGETING::ATTR_FAPI_POS>();
+            if (l_fapi_pos == i_ordinal_id )
+            {
+                l_platTarget = l_target_elem;
+
+                FAPI_DBG("getTarget() - FAPI_POS: (%.8X) HUID: (%.8X)",
+                      l_fapi_pos,
+                      TARGETING::get_huid(l_target_elem));
+                break;
+            }
+        }
+    }
+
+    // Target list is empty or Target of Ordinal not Found
+    if (l_platTarget == nullptr)
+    {
+        FAPI_ERR("getTarget(): empty TargetList of T or Target of Ordinal not Found");
+        assert(false);
+    }
+
+    // Create a fapi2 target & return
+    Target<T> l_fapi2_target(l_platTarget);
+    return l_fapi2_target;
 }
 
 ///
