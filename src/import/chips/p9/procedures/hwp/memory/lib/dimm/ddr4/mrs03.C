@@ -55,14 +55,14 @@ namespace ddr4
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 mrs03_data::mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
-    iv_mpr_mode(0),
-    iv_mpr_page(0),
+    iv_mpr_mode(fapi2::ENUM_ATTR_EFF_MPR_MODE_DISABLE),
+    iv_mpr_page(fapi2::ENUM_ATTR_EFF_MPR_PAGE_PG0),
     iv_geardown(0),
-    iv_pda(0),
+    iv_pda(fapi2::ENUM_ATTR_EFF_PER_DRAM_ACCESS_DISABLE),
     iv_crc_wr_latency(0),
-    iv_temp_readout(0),
+    iv_temp_readout(fapi2::ENUM_ATTR_EFF_TEMP_READOUT_DISABLE),
     iv_fine_refresh(0),
-    iv_read_format(0)
+    iv_read_format(fapi2::ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL)
 {
     FAPI_TRY( mss::eff_mpr_mode(i_target, iv_mpr_mode) );
     FAPI_TRY( mss::eff_mpr_page(i_target, iv_mpr_page) );
@@ -123,7 +123,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     constexpr uint64_t LOWEST_WL = 4;
     constexpr uint64_t WL_COUNT = 3;
     //                                                 4  5  6
-    constexpr uint8_t crc_wr_latency_map[WL_COUNT] = { 1, 2, 3 };
+    constexpr uint8_t crc_wr_latency_map[WL_COUNT] = { 0, 1, 2 };
 
     fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
 
