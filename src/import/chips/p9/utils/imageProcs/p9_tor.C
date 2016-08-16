@@ -531,8 +531,20 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
     uint32_t ringSize = 0;
     int temp = (i_ddLevel >> 2) + 4;    // converting byte  to word counter
     uint32_t* deltaRingRS4_4B;
-    uint32_t spge_offset = *((uint32_t*)i_ringSection + temp);
-    temp = htobe32(spge_offset);
+    uint32_t spge_offset = 0;
+
+    if (i_magic == P9_XIP_MAGIC_HW)
+    {
+        spge_offset = *((uint32_t*)i_ringSection + temp);  //DD level offset index
+        temp = htobe32(spge_offset);
+    }
+    else if (i_magic == P9_XIP_MAGIC_SGPE)
+    {
+        spge_offset = 0;
+        i_ddLevel = 0;
+        temp = htobe32(spge_offset);
+    }
+
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
     uint8_t iv_num_variant  = (uint8_t)sizeof(EQ::RingVariants) / sizeof(uint16_t);
@@ -808,8 +820,20 @@ int get_ring_from_cme_image ( void*
     uint32_t ringSize = 0;
     int temp = (i_ddLevel >> 2) + 2;  // converting byte  to word counter
     uint32_t* deltaRingRS4_4B;
-    uint32_t cme_offset = *((uint32_t*)i_ringSection + temp);
-    temp = htobe32(cme_offset);
+    uint32_t cme_offset = 0;
+
+    if (i_magic == P9_XIP_MAGIC_HW)
+    {
+        cme_offset = *((uint32_t*)i_ringSection + temp);  //DD level offset index
+        temp = htobe32(cme_offset);
+    }
+    else if (i_magic == P9_XIP_MAGIC_CME)
+    {
+        cme_offset = 0;
+        i_ddLevel = 0;
+        temp = htobe32(cme_offset);
+    }
+
     GenRingIdList* ring_id_list_common = NULL;
     GenRingIdList* ring_id_list_instance = NULL;
     uint8_t iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
@@ -1146,29 +1170,42 @@ int tor_access_ring(  void*
     }
     else if( i_magic ==  P9_XIP_MAGIC_SEEPROM)
     {
-        if ( i_PpeType == CME)
+        if ( i_PpeType == CME || i_PpeType == SGPE
+             || i_RingBlockType == GET_DD_LEVEL_RINGS
+             || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
-            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n "\
-                   " CME rings not populated on SEEPROM image       \n");
-            return IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_CME;
+            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n");
+            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
         }
-        else if (i_PpeType == SGPE)
+        else
         {
-            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n "\
-                   "SGPE rings not populated on SEEPROM image       \n");
-            return IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_SGPE;
+            ddLevelOffset = 0;
+            temp1 = 0;
         }
-        else if (i_RingBlockType == GET_DD_LEVEL_RINGS)
+    }
+    else if( i_magic ==  P9_XIP_MAGIC_CME)
+    {
+        if ( i_PpeType == SBE || i_PpeType == SGPE
+             || i_RingBlockType == GET_DD_LEVEL_RINGS
+             || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
-            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n "\
-                   " DD level ring copy are not supported   \n");
-            return IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL;
+            MY_INF("Ambiguity on input PARMS for calling CME Ring copy API. \n");
+            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
         }
-        else if (i_RingBlockType == GET_PPE_LEVEL_RINGS )
+        else
         {
-            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n "\
-                   " PPE level ring copy are not supported   \n");
-            return IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL;
+            ddLevelOffset = 0;
+            temp1 = 0;
+        }
+    }
+    else if( i_magic ==  P9_XIP_MAGIC_SGPE)
+    {
+        if ( i_PpeType == SBE || i_PpeType == CME
+             || i_RingBlockType == GET_DD_LEVEL_RINGS
+             || i_RingBlockType == GET_PPE_LEVEL_RINGS )
+        {
+            MY_INF("Ambiguity on input PARMS for calling SGPE Ring copy API. \n");
+            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
         }
         else
         {
@@ -1785,13 +1822,13 @@ int tor_access_ring(  void*
             }
             else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                MY_INF("\t After SBE single ring call, Ring container is available in the image \n");
+                MY_INF("\t After CME single ring call, Ring container is available in the image \n");
                 return rc;
             }
 
             if(i_dbgl > 1)
             {
-                MY_INF("TOR_ACCESS_RING(11): After get_ring_from_sbe_image Size %d \n",
+                MY_INF("TOR_ACCESS_RING(11): After get_ring_from_cme_image Size %d \n",
                        io_ringBlockSize );
             }
         }
@@ -1824,13 +1861,13 @@ int tor_access_ring(  void*
             }
             else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                MY_INF("\t After SBE single ring call, Ring container is available in the image \n");
+                MY_INF("\t After SGPE single ring call, Ring container is available in the image \n");
                 return rc;
             }
 
             if(i_dbgl > 1)
             {
-                MY_INF("TOR_ACCESS_RING(12): After get_ring_from_sbe_image Size %d \n",
+                MY_INF("TOR_ACCESS_RING(12): After get_ring_from_sgpe_image Size %d \n",
                        io_ringBlockSize );
             }
         }
@@ -1846,13 +1883,14 @@ int tor_access_ring(  void*
 /////////////////////////////////////////////////////////////////////////////////////
 
 int tor_get_single_ring ( void*         i_ringSection,  // ring section pointer
+                          uint64_t      i_magic,          // Image Magic Number
                           uint16_t      i_ddLevel,        // DD level info
                           RingID        i_ringId,         // Ring ID info
                           PpeType_t     i_PpeType,        // ppe Type info
                           RingVariant_t i_RingVariant,    // ring variant info -Base, CC, RL,OR,OL
                           uint8_t       i_instanceId,     // chiplet Instance Id
                           void**        io_ringBlockPtr,  // Output void pointer
-                          uint32_t&     io_ringBlockSize,  //  size of ring
+                          uint32_t&     io_ringBlockSize, //  size of ring
                           uint32_t      i_dbgl )
 {
 
@@ -1870,7 +1908,7 @@ int tor_get_single_ring ( void*         i_ringSection,  // ring section pointer
 
     rc = tor_access_ring(
              i_ringSection,
-             P9_XIP_MAGIC_HW,
+             i_magic,
              i_ringId,
              i_ddLevel,
              i_PpeType,
@@ -1904,7 +1942,7 @@ int tor_get_block_of_rings ( void*           i_ringSection,
                              uint8_t         i_instanceId,
                              void**          io_ringBlockPtr,
                              uint32_t&       io_ringBlockSize,
-                             uint32_t      i_dbgl )
+                             uint32_t        i_dbgl )
 {
     if(i_dbgl > 1)
     {
@@ -2000,7 +2038,6 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
                       uint32_t        i_dbgl        )
 {
     uint32_t   rc = 0;
-    uint32_t   dbgl = 2;
     char       i_ringName[25];
     uint16_t   l_ringTypeBuf = 0;
     uint16_t*  l_ringTypeStart = &l_ringTypeBuf;
@@ -2049,7 +2086,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
         return rc;
     }
 
-    if(dbgl > 1)
+    if(i_dbgl > 1)
     {
         MY_INF(" TOR_APPEND_RING(4):  Ring offset  address %d \n",
                l_torOffsetSlot );
