@@ -55,7 +55,7 @@ namespace ddr4
 /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
-    iv_dll_enable(0),
+    iv_dll_enable(fapi2::ENUM_ATTR_EFF_DRAM_DLL_ENABLE_YES),
     iv_odic(0),
     iv_additive_latency(0),
     iv_wl_enable(0),
