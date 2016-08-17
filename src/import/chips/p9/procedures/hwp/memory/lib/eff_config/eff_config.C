@@ -1655,7 +1655,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dll_reset(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dll_reset[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Targets
@@ -1668,7 +1667,8 @@ fapi2::ReturnCode eff_config::dll_reset(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     FAPI_TRY( eff_dram_dll_reset(l_mcs, &l_attrs_dll_reset[0][0]) );
 
-    l_attrs_dll_reset[l_port_num][l_dimm_num] = 0x01;
+    // Default is to not reset DLLs during IPL.
+    l_attrs_dll_reset[l_port_num][l_dimm_num] = fapi2::ENUM_ATTR_EFF_DRAM_DLL_RESET_NO;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_DLL_RESET, l_mcs, l_attrs_dll_reset),
               "Failed setting attribute for BL");
@@ -1684,7 +1684,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dll_enable(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     uint8_t l_attrs_dll_enable[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Targets
@@ -1697,7 +1696,8 @@ fapi2::ReturnCode eff_config::dll_enable(const fapi2::Target<TARGET_TYPE_DIMM>& 
 
     FAPI_TRY( eff_dram_dll_enable(l_mcs, &l_attrs_dll_enable[0][0]) );
 
-    l_attrs_dll_enable[l_port_num][l_dimm_num] = 0x00;
+    // Enable DLLs by default.
+    l_attrs_dll_enable[l_port_num][l_dimm_num] = fapi2::ENUM_ATTR_EFF_DRAM_DLL_ENABLE_YES;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_DLL_ENABLE, l_mcs, l_attrs_dll_enable),
               "Failed setting attribute for BL");
