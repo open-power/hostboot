@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_htm_adu_ctrl
 OBJS+=p9_adu_coherent_utils.o
+OBJS+=p9_fbc_utils.o
 $(call BUILD_PROCEDURE)

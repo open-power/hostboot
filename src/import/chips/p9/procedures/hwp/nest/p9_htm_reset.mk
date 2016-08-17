@@ -25,4 +25,5 @@
 PROCEDURE=p9_htm_reset
 OBJS+=p9_htm_adu_ctrl.o
 OBJS+=p9_adu_coherent_utils.o
+OBJS+=p9_fbc_utils.o
 $(call BUILD_PROCEDURE)
