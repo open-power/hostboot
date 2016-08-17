@@ -62,27 +62,24 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_utils_to_throttle( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
-        std::vector<uint8_t> l_databus_util(mss::PORTS_PER_MCS, 0);
+        uint32_t l_databus_util = 0;
         std::vector<uint32_t> l_throttled_cmds(mss::PORTS_PER_MCS, 0);
 
         uint32_t l_dram_clocks = 0;
         FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
 
-        // TK - Who sets this attribute? OCC? Not set in eff_config for p8 - AAM
-        // If set by OCC can they just pass in value as a parameter? - AAM
-        FAPI_TRY( mss::databus_util( i_target, l_databus_util.data()) );
+        FAPI_TRY( mss::mrw_max_dram_databus_util(l_databus_util) );
 
         for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
         {
             const auto l_port_num = mss::index( l_mca );
 
-            FAPI_INF( "MRW dram clock window: %d, databus utilization[%d]: %d",
+            FAPI_INF( "MRW dram clock window: %d, databus utilization: %d",
                       l_dram_clocks,
-                      l_port_num,
-                      l_databus_util[l_port_num] );
+                      l_databus_util );
 
             // Calculate programmable N address operations within M dram clock window
-            l_throttled_cmds[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
+            l_throttled_cmds[l_port_num] = mss::throttled_cmds( l_databus_util, l_dram_clocks );
 
             FAPI_INF( "Calculated N commands per port [%d] = %d",
                       l_port_num,
