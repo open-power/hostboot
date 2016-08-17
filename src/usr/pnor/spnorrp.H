@@ -150,5 +150,29 @@ class SPnorRP
      */
     errlHndl_t setPermission(void* va, uint64_t size,
                                        uint64_t accessType) const;
+
+    /**
+     * @brief  Handles any additional section specific verification checks.
+     * @param[in]  i_vaddr - vaddr of PNOR section to verify. Includes header
+     *                       NULL will assert
+     * @param[in]  i_secId - PNOR section id to verify
+     * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
+     */
+    errlHndl_t miscSectionVerification(const uint8_t *i_vaddr,
+                                       PNOR::SectionId i_secId) const;
+
+    /**
+     * @brief  Check if HBB and HBI were part of the same build
+     *         Calculate HBB sw signatures hash and compare that to the build
+     *         time hash of HBB sw signatures. The build time HBB hash is stored
+     *         in the first entry (SALT) of HBI's hash page table.
+     * @param[in]  i_vaddr - vaddr points to start of hash page table of HBI
+     *                       NOTE: Since this expects the vaddr to point to the
+     *                       start of the hash page table, the secureboot header
+     *                       must be skipped prior by the caller.
+     *                       NULL will assert
+     * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
+     */
+    errlHndl_t baseExtVersCheck(const uint8_t *i_vaddr) const;
 };
 #endif

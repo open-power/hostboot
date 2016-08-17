@@ -70,9 +70,7 @@ void ContainerHeader::parse_header(const void* i_header)
     safeMemCpyAndInc(&iv_headerInfo.sw_hdr.ecid, l_hdr, l_size);
 
     /*---- Parse ROM_sw_sig_raw ----*/
-    // Get SW keys
-    l_size = iv_headerInfo.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
-    safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr, l_size);
+    safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr, iv_totalSwKeysSize);
 
     // After parsing check if header is valid, do some quick bound checks
     validate();
@@ -117,6 +115,17 @@ void ContainerHeader::print() const
     TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.sw_hdr.payload_size );
     TRACFBIN(g_trac_secure,"payload_hash", iv_headerInfo.sw_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
+    /*---- Print ROM_sw_sig_raw ----*/
+    TRACFBIN(g_trac_secure,"sw_sig_p", iv_headerInfo.sw_sig.sw_sig_p, sizeof(ecc_key_t));
+    if (iv_headerInfo.hw_prefix_hdr.sw_key_count>1)
+    {
+        TRACFBIN(g_trac_secure,"sw_sig_q", iv_headerInfo.sw_sig.sw_sig_q, sizeof(ecc_key_t));
+    }
+    if (iv_headerInfo.hw_prefix_hdr.sw_key_count>2)
+    {
+        TRACFBIN(g_trac_secure,"sw_sig_r", iv_headerInfo.sw_sig.sw_sig_r, sizeof(ecc_key_t));
+    }
+
     TRACFCOMP(g_trac_secure, EXIT_MRK"ContainerHeader::print");
 #endif
 }
@@ -144,6 +153,11 @@ const ecc_key_t* ContainerHeader::sw_keys() const
 const SHA512_t* ContainerHeader::swKeyHash() const
 {
     return &iv_headerInfo.hw_prefix_hdr.payload_hash;
+}
+
+const ecc_key_t* ContainerHeader::sw_sigs() const
+{
+    return &iv_headerInfo.sw_sig.sw_sig_p;
 }
 
 void ContainerHeader::validate()

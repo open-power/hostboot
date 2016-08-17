@@ -104,6 +104,7 @@ namespace PNOR
         MOD_SPNORRP_VERIFYSECTIONS      = 0xD4, /**< SPnorRP::verifySections */
         MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
         MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
+        MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
     };
 
     enum PNORReasonCode
@@ -162,6 +163,7 @@ namespace PNOR
         RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
         RC_GETSECTIONINFO_FAILED     = PNOR_COMP_ID | 0x2B,
+        RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2C,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

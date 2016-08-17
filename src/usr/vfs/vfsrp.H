@@ -31,6 +31,7 @@
 #include <sys/msg.h>
 #include <vector>
 #include <sys/sync.h>
+#include <secureboot/service.H>
 
 // Forward declarations
 struct msg_t;
@@ -38,11 +39,6 @@ class SecureROMTest;
 
 namespace VFS
 {
-    // Size of a single entry (in Bytes) in a PNOR hash page table.
-    // Set in buildpnor.pl
-    const size_t HASH_PAGE_TABLE_ENTRY_SIZE = 32;
-    typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
-
     void vfs_msg_handler(void * unused);
 
     /**

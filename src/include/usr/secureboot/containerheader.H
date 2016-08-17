@@ -95,6 +95,12 @@ class ContainerHeader
          */
         const ecc_key_t* sw_keys() const;
 
+        /**
+         * @brief Retrieves pointer to first sw signature
+         * @return ecc_key_t* - ptr to first sw signature
+         */
+        const ecc_key_t* sw_sigs() const;
+
         // @TODO RTC: 155374 remove, SecureROMTest will use iv_isValid.
         /**
          * @brief Returns if the parsed header is a valid secureboot one. This

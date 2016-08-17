@@ -39,6 +39,7 @@
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
 #include <secureboot/trustedbootif.H>
+#include <secureboot/header.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -336,11 +337,19 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         {
             l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, l_info.size
                                                         + PAGESIZE); // header
-
             if (l_errhdl)
             {
-                TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections"
-                      " - section with id %X failed verification",i_id);
+                TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections - section "
+                      "with id 0x%08X failed verifyContainer", i_id);
+                failedVerify = true;
+                break;
+            }
+
+            l_errhdl = miscSectionVerification(l_tempAddr, i_id);
+            if (l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections  - section "
+                     " with id 0x%08X failed miscSectionVerification", i_id);
                 failedVerify = true;
                 break;
             }
@@ -685,4 +694,90 @@ errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
     // Replace with call to secure provider to unload the section
     errlHndl_t pError=NULL;
     return pError;
+}
+
+errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
+                                            SectionId i_secId) const
+{
+    errlHndl_t l_errl = NULL;
+    assert(i_vaddr != NULL);
+
+    TRACFCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d", i_secId);
+
+    // Do any additional verification needed for a specific PNOR section
+    switch (i_secId) {
+        case HB_EXT_CODE:
+            // Compare HBB and HBI versions. Pass the vaddr of HBI's hash page
+            // table by skipping past the container header.
+            l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
+            break;
+        default:
+            break;
+    }
+
+    return l_errl;
+}
+
+errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
+{
+    errlHndl_t l_errl = NULL;
+    assert(i_vaddr != NULL);
+
+    // Check if measured and build time hashes of HBB sw signatures match.
+    // Query the HBB header
+    const void* l_pHbbHeader = NULL;
+    SECUREBOOT::baseHeader().getHeader(l_pHbbHeader);
+    // Fatal code bug if either address is NULL
+    assert(l_pHbbHeader!=NULL,"ERORR: Cached header address is NULL");
+    // Build a container header object from the raw header
+    SECUREBOOT::ContainerHeader l_hbbContainerHeader(l_pHbbHeader);
+
+    // Calculate hash of HBB's sw signatures
+    SHA512_t l_hashSwSigs = {0};
+    SECUREBOOT::hashBlob(l_hbbContainerHeader.sw_sigs(),
+                         l_hbbContainerHeader.totalSwKeysSize(),
+                         l_hashSwSigs);
+
+    // Get build time hash of HBB's sw signatures. The hash of HBB's sw
+    // signatures are stored in the first entry (SALT) of HBI's hash page
+    // table. The first entry of HBI's hash pagle starts immediately after the
+    // header so we can simply cast the vaddr to get our first entry (SALT)
+    // Note: It is expected that i_vaddr points to the start of HBI's hash
+    //       page table.
+    const PAGE_TABLE_ENTRY_t* l_hashPageTableSaltEntry =
+                           reinterpret_cast<const PAGE_TABLE_ENTRY_t*>(i_vaddr);
+
+    // Throw an error if the hashes do not match to the truncated length
+    // of a hash page table entry.
+    if ( memcmp(l_hashSwSigs, l_hashPageTableSaltEntry,
+                HASH_PAGE_TABLE_ENTRY_SIZE) != 0 )
+    {
+        TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck Hostboot Base and Extended image mismatch");
+        TRACFBIN(g_trac_pnor,"SPnorRP:::baseExtVersCheck Measured sw key hash",
+                            l_hashSwSigs, HASH_PAGE_TABLE_ENTRY_SIZE);
+        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
+                        l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MOD_SPNORRP_BASE_EXT_VER_CHK
+         * @reasoncode      RC_BASE_EXT_MISMATCH
+         * @userdata1       0
+         * @userdata2       0
+         * @devdesc         Hostboot Base and Extend code do not match versions.
+         * @custdesc        Firmware level mismatch.
+         *
+         */
+        l_errl = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
+             MOD_SPNORRP_BASE_EXT_VER_CHK,           //  moduleid
+             RC_BASE_EXT_MISMATCH,                    //  reason Code
+             0,
+             0
+            );
+        l_errl->collectTrace(PNOR_COMP_NAME);
+    }
+
+    return l_errl;
 }

@@ -37,7 +37,13 @@ typedef std::vector< std::pair<void*,size_t> > blobPair_t;
 typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
                 SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
 
+
 extern trace_desc_t* g_trac_secure;
+
+// Size of a single entry (in Bytes) in a PNOR hash page table.
+// Set in buildpnor.pl
+const size_t HASH_PAGE_TABLE_ENTRY_SIZE = 32;
+typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
 
 namespace SECUREBOOT
 {

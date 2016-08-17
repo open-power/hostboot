@@ -157,7 +157,6 @@ errlHndl_t VfsRp::_init()
 
         // Discover PNOR virtual address of extended image
         PNOR::SectionInfo_t l_pnor_info;
-
         err = PNOR::getSectionInfo(PNOR::HB_EXT_CODE, l_pnor_info);
         if(err)
         {
@@ -218,6 +217,7 @@ errlHndl_t VfsRp::_init()
                  l_pnor_info.size,                       //  user2 = size
                  true /*Add HB Software Callout*/
                 );
+            break;
         }
     } while(0);
 
