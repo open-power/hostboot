@@ -1802,7 +1802,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum>DEACTIVATED = 0, ACTIVATED = 1</enum>
+        <enum>ACTIVATED = 0, DEACTIVATED = 1</enum>
         <writeable/>
         <array>2</array>
         <mssAccessorName>eff_odt_input_buff</mssAccessorName>
