@@ -57,7 +57,7 @@ namespace ddr4
 mrs00_data::mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
     iv_burst_length(0),
     iv_read_burst_type(0),
-    iv_dll_reset(0),
+    iv_dll_reset(fapi2::ENUM_ATTR_EFF_DRAM_DLL_RESET_NO),
     iv_test_mode(0),
     iv_write_recovery(0),
     iv_cas_latency(0)
