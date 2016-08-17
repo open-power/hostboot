@@ -61,7 +61,7 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_vref_mon(0),
     iv_cs_cmd_latency(0),
     iv_ref_abort(0),
-    iv_rd_pre_train_mode(0),
+    iv_rd_pre_train_mode(fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE),
     iv_rd_preamble(0),
     iv_wr_preamble(0),
     iv_ppr(0)
