@@ -512,7 +512,6 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->status = IN_PROGRESS;
         p->log = 0;
         p->timer = 0;
-        p->restartCommand = false;
         p->memSize = 0;
         p->timeoutCnt = 0;
 
@@ -830,7 +829,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
 
     uint64_t workItem;
-    bool restart;
     TargetHandle_t targetMba;
     ecmdDataBufferBase startAddr(64), endAddr(64);
     mss_MaintCmd * cmd = NULL;
@@ -849,7 +847,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     uint64_t monitorId = CommandMonitor::INVALID_MONITOR_ID;
     i_wfp.timeoutCnt = 0; // reset for new work item
     workItem = *i_wfp.workItem;
-    restart = i_wfp.restartCommand;
     targetMba = getTarget(i_wfp);
     cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
 
@@ -877,8 +874,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             // For MNFG mode, check CE also
             stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
         }
-        // setup the address range.
-        // assume the full range for now
+
+        // Start the next command on the full range of memory behind the target.
 
         fapirc = mss_get_address_range(
                 fapiMba,
@@ -892,80 +889,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             MDIA_FAST("sm: get_address_range failed");
             break;
         }
-
-        if(restart)
-        {
-            // bump the starting address if we are restarting
-            // a command
-
-            mss_IncrementAddress incrementCmd(fapiMba);
-
-            MDIA_FAST("sm: increment address on: %x",
-                    get_huid(targetMba));
-
-            fapirc = incrementCmd.setupAndExecuteCmd();
-
-            err = fapiRcToErrl(fapirc);
-
-            if(err)
-            {
-                MDIA_FAST("sm: setupAndExecuteCmd failed");
-                break;
-            }
-
-            // read the address out so it can be passed
-            // to the command being restarted
-
-            uint64_t address;
-            size_t size = sizeof(address);
-
-            err = deviceRead(
-                    targetMba,
-                    &address,
-                    size,
-                    DEVICE_SCOM_ADDRESS(MBA01_MBMACAQ));
-
-            if(err)
-            {
-                MDIA_FAST("sm: reading address failed");
-
-                break;
-            }
-
-            startAddr.setDoubleWord(0, address);
-            startAddr.insert(static_cast<uint32_t>(0), 40, 24); // addr is 0:39
-
-            switch(workItem)
-            {
-                case START_RANDOM_PATTERN:
-                    static_cast<mss_SuperFastRandomInit *>(
-                            cmd)->setStartAddr(startAddr);
-                    break;
-                case START_SCRUB:
-                    static_cast<mss_SuperFastRead *>(
-                            cmd)->setStartAddr(startAddr);
-                    break;
-                case START_PATTERN_0:
-                case START_PATTERN_1:
-                case START_PATTERN_2:
-                case START_PATTERN_3:
-                case START_PATTERN_4:
-                case START_PATTERN_5:
-                case START_PATTERN_6:
-                case START_PATTERN_7:
-                    static_cast<mss_SuperFastInit *>(
-                            cmd)->setStartAddr(startAddr);
-                    break;
-                default:
-                    MDIA_ERR("sm: unrecognized maint command type %d:",
-                            workItem);
-                    break;
-            }
-        }
-
-        else
-        {
-            // new command...use the full range
 
             switch(workItem)
             {
@@ -1025,7 +948,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         get_huid(targetMba));
                 break;
             }
-        }
 
         mutex_lock(&iv_mutex);
 
@@ -1185,9 +1107,6 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             case COMMAND_COMPLETE:
 
                 // command stopped or complete at end of last rank
-
-                wfp.restartCommand = false;
-
                 // move to the next command
 
                 ++wfp.workItem;
