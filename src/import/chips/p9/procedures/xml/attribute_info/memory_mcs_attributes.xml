@@ -2121,21 +2121,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_DATABUS_UTIL</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <!-- TK Do we need an attr per port & dimm ? P8 only had an attr per port AAM -->
-        <!-- TK Does OCC set this for their use, if so, name attr appropriately? AAM  -->
-        <description>
-          DRAM data bus utilization percent to use to determine cfg_nm_n_per_port
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>databus_util</mssAccessorName>
-    </attribute>
-
-    <attribute>
       <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
       <targetType>TARGET_TYPE_MCS</targetType>
       <!-- TK Do we need an attr per port & dimm ? P8 only had an attr per port AAM -->

@@ -231,11 +231,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         }
 
         {
-            uint8_t l_databus_util[mss::PORTS_PER_MCS] = {0x5A, 0x5A};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_DATABUS_UTIL, i_target, l_databus_util ) );
-        }
-
-        {
             uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
         }

@@ -89,6 +89,7 @@
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
   </attribute>
 
@@ -102,6 +103,8 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
   </attribute>
 
@@ -128,7 +131,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Capable power control settings. In MRW.</description>
     <valueType>uint8</valueType>
-    <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
@@ -243,6 +246,7 @@
     <platInit/>
     <initToZero/>
     <default>NORMAL</default>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
   </attribute>
 
@@ -259,6 +263,7 @@
     <platInit/>
     <initToZero/>
     <default>NORMAL</default>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
   </attribute>
 
@@ -305,48 +310,6 @@
     <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_OFFSET_GPO</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Global Offset in number of Clocks. Delta from the value calculated or taken from VPD.
-    </description>
-    <valueType>int8</valueType>
-    <mssUnits> nck </mssUnits>
-    <initToZero/>
-    <default>0</default>
-    <platInit/>
-    <mssAccessorName>mrw_offset_gpo</mssAccessorName>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_OFFSET_RLO</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Read Latency Offset in number of Clocks. Delta from the value calculated or taken from VPD.
-    </description>
-    <valueType>int8</valueType>
-    <mssUnits> nck </mssUnits>
-    <initToZero/>
-    <default>0</default>
-    <platInit/>
-    <mssAccessorName>mrw_offset_rlo</mssAccessorName>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_OFFSET_WLO</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Write Latency Offset in number of Clocks
-    </description>
-    <valueType>int8</valueType>
-    <mssUnits> nck </mssUnits>
-    <initToZero/>
-    <default>0</default>
-    <platInit/>
-    <mssAccessorName>mrw_offset_wlo</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -404,34 +367,6 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_TSYS_ADR</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Phase rotator value for the memory sub-system clock in ticks.
-      Ticks are 1/128 of one cycle of clock.
-    </description>
-    <valueType>uint8</valueType>
-    <mssUnits> tick </mssUnits>
-    <platInit/>
-    <default>0x21</default>
-    <mssAccessorName>mrw_tsys_adr</mssAccessorName>
-  </attribute>
-
-  <attribute>
-    <id>ATTR_MSS_MRW_TSYS_DATA</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      Phase rotator value for the memory sub-system data in ticks.
-      Ticks are 1/128 of one cycle of clock.
-    </description>
-    <valueType>uint8</valueType>
-    <mssUnits> tick </mssUnits>
-    <default>0x18</default>
-    <platInit/>
-    <mssAccessorName>mrw_tsys_data</mssAccessorName>
-  </attribute>
-
-  <attribute>
     <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -444,6 +379,7 @@
     <platInit/>
     <initToZero/>
     <default>AUTO</default>
+    <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
   </attribute>
 
