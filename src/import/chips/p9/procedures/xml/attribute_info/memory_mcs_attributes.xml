@@ -419,7 +419,8 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
-        <enum>ENABLE = 0, DISABLE = 1</enum>
+        <enum>YES = 1, NO = 0</enum>
+        <default>YES</default>
         <writeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_dll_enable</mssAccessorName>
