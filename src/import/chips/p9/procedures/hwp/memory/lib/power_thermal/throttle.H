@@ -56,7 +56,7 @@ enum throttle_const : size_t
 /// Equation:  (DRAM data bus utilization Percent / 100 ) = ((N * 4) / M )
 /// Dram data bus utilization is 4X the address bus utilization
 ///
-inline uint32_t throttled_cmds(const uint8_t i_databus_util, const uint32_t i_num_dram_clocks)
+inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_num_dram_clocks)
 {
     constexpr uint64_t l_divisor = DRAM_BUS_UTILS * PERCENT_CONVERSION;
     const uint64_t l_dividend = i_databus_util * i_num_dram_clocks;
