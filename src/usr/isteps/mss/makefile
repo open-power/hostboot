@@ -46,6 +46,8 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
 
@@ -74,5 +76,7 @@ VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
