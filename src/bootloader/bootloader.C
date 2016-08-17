@@ -213,9 +213,9 @@ namespace Bootloader{
                              : "r" (l_srcAddr)       // input,  %1
                              : );                    // no impacts
 
-                // Cache-inhibited store byte.
-                // stbcix      BOP1,Ref_G0,BOP2
-                asm volatile("stbcix %0,0,%1"
+                // Store byte.
+                // stbx      BOP1,Ref_G0,BOP2
+                asm volatile("stbx %0,0,%1"
                              :: "r" (l_targetGPR) , "r" (l_destAddr));
             }
             else if(i_ld_st_size == WORDSIZE)
@@ -227,9 +227,9 @@ namespace Bootloader{
                              : "r" (l_srcAddr)       // input,  %1
                              : );                    // no impacts
 
-                // Cache-inhibited store word.
-                // stwcix      BOP1,Ref_G0,BOP2
-                asm volatile("stwcix %0,0,%1"
+                // store word.
+                // stwx      BOP1,Ref_G0,BOP2
+                asm volatile("stwx %0,0,%1"
                              :: "r" (l_targetGPR) , "r" (l_destAddr));
             }
             else
@@ -241,9 +241,9 @@ namespace Bootloader{
                              : "r" (l_srcAddr)       // input,  %1
                              : );                    // no impacts
 
-                // Cache-inhibited store double word.
-                // stdcix      BOP1,Ref_G0,BOP2
-                asm volatile("stdcix %0,0,%1"
+                // Store double word.
+                // stdx      BOP1,Ref_G0,BOP2
+                asm volatile("stdx %0,0,%1"
                              :: "r" (l_targetGPR) , "r" (l_destAddr));
             }
         }
