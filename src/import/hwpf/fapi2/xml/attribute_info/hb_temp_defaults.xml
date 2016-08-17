@@ -379,22 +379,7 @@
       <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
     </attribute>
     <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_WLO</id>
-    </attribute>
-    <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_GPO</id>
-    </attribute>
-    <attribute>
-      <id>ATTR_MSS_MRW_OFFSET_RLO</id>
-    </attribute>
-    <attribute>
       <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
-    </attribute>
-    <attribute>
-      <id>ATTR_MSS_MRW_TSYS_ADR</id>
-    </attribute>
-    <attribute>
-      <id>ATTR_MSS_MRW_TSYS_DATA</id>
     </attribute>
     <attribute>
       <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
