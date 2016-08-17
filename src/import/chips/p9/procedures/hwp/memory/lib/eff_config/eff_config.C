@@ -2037,7 +2037,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::odt_input_buffer(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
+    // keeping this value as 0x01, given that we know that that works in sim
+    constexpr uint8_t SIM_VALUE = 0x01;
     std::vector<uint8_t> l_attrs_odt_input_buffer(PORTS_PER_MCS, 0);
 
     // Targets
@@ -2047,9 +2048,15 @@ fapi2::ReturnCode eff_config::odt_input_buffer(const fapi2::Target<TARGET_TYPE_D
     // Current index
     const auto l_port_num = index(l_mca);
 
+    //keep simulation to values we know work
+    uint8_t is_sim = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+
+
     FAPI_TRY( eff_odt_input_buff(l_mcs, l_attrs_odt_input_buffer.data()) );
 
-    l_attrs_odt_input_buffer[l_port_num] = 0x01;
+    //sim vs actual hardware value
+    l_attrs_odt_input_buffer[l_port_num] = is_sim ? SIM_VALUE : fapi2::ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_ODT_INPUT_BUFF,
                             l_mcs,
@@ -2176,14 +2183,13 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::read_preamble_train(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
     std::vector<uint8_t> l_attrs_rd_preamble_train(PORTS_PER_MCS, 0);
     FAPI_TRY( eff_rd_preamble_train(l_mcs, l_attrs_rd_preamble_train.data()) );
 
-    l_attrs_rd_preamble_train[l_port_num] = 0x00;
+    l_attrs_rd_preamble_train[l_port_num] = fapi2::ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_RD_PREAMBLE_TRAIN,
                             l_mcs,
