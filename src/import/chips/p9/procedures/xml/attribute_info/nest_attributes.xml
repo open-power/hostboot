@@ -406,6 +406,7 @@
     TRUE = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -422,6 +423,7 @@
     TRUE = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -435,6 +437,7 @@
   <valueType>uint8</valueType>
   <array>7</array>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -448,6 +451,7 @@
   <valueType>uint8</valueType>
   <array>7</array>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -461,6 +465,7 @@
   <valueType>uint8</valueType>
   <array>4</array>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -474,6 +479,7 @@
   <valueType>uint8</valueType>
   <array>4</array>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -488,6 +494,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -505,6 +512,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -523,6 +531,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -537,6 +546,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -554,6 +564,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -572,6 +583,7 @@
     ON = 0x1
   </enum>
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
