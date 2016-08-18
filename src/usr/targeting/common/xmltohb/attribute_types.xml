@@ -10209,10 +10209,22 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
 
 <attribute>
     <id>MSS_MCS_GROUP_32</id>
-    <description>Data Structure from eff grouping to setup bars to help determine different groups
-   Non- Mirroring [0-7] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
- //  Mirroring      [8-15] 0 -- MCS size //1-- No of MCS/group //2-- Total group size //3 -- Base address// 4-11 - MCS ID number// 12 --Alter.Bar //13 - A.Group Size // 14 - A.Base address
-Measured in GB</description>
+    <description>
+       Data Structure from eff grouping to setup bars to help determine
+       different groups
+       Non-Mirroring array[0-7]  [0.17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of non-mirroring;
+                                          3-- Base address; 4-11-- PortID number in group;
+                                         12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
+                                         14-- Alt Group size (0); 15-- Alt Group size(1);
+                                         16-- Alt Base address (0); 17-- Alt Base address (1);
+
+                                         13-- Alternate Group Size; 14-- Alternate Base address
+       Mirroring     array[8-15] [0:17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
+                                          3-- Base address; 4-11-- PortID number;
+                                         12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
+                                         14-- Alt Group size (0); 15-- Alt Group size(1);
+                                         16-- Alt Base address (0); 17-- Alt Base address (1);
+    </description>
     <simpleType>
         <uint32_t>
         </uint32_t>
