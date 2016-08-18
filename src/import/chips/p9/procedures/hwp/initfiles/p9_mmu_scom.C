@@ -29,9 +29,9 @@
 
 using namespace fapi2;
 
-constexpr auto literal_0x04000C = 0x04000C;
-constexpr auto literal_0x000000 = 0x000000;
-constexpr auto literal_0x009F78 = 0x009F78;
+constexpr auto literal_0x04000C0000000000 = 0x04000C0000000000;
+constexpr auto literal_0x0000000000000000 = 0x0000000000000000;
+constexpr auto literal_0x009F780000000000 = 0x009F780000000000;
 constexpr auto literal_0x0000FAF8000F = 0x0000FAF8000F;
 constexpr auto literal_0x000000000000 = 0x000000000000;
 constexpr auto literal_0x9000FAFC00FC = 0x9000FAFC00FC;
@@ -56,7 +56,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x04000C, 0, 22, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x04000C0000000000, 0, 22, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c03ull, l_scom_buffer);
@@ -77,7 +77,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x000000, 0, 22, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x0000000000000000, 0, 22, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c06ull, l_scom_buffer);
@@ -98,7 +98,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x009F78, 0, 22, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x009F780000000000, 0, 22, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c07ull, l_scom_buffer);

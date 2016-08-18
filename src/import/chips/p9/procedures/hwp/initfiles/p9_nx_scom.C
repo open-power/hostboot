@@ -29,16 +29,18 @@
 
 using namespace fapi2;
 
-constexpr auto literal_0x1100088303E = 0x1100088303E;
-constexpr auto literal_0x0208577C1C0 = 0x0208577C1C0;
-constexpr auto literal_0x6E1FF77CFC0 = 0x6E1FF77CFC0;
+constexpr auto literal_0b0 = 0b0;
+constexpr auto literal_0b1 = 0b1;
+constexpr auto literal_0b11 = 0b11;
+constexpr auto literal_0b00 = 0b00;
 constexpr auto literal_1 = 1;
 constexpr auto literal_0xFC = 0xFC;
 constexpr auto literal_8 = 8;
 constexpr auto literal_2 = 2;
-constexpr auto literal_0x0000C20801F90FFC = 0x0000C20801F90FFC;
-constexpr auto literal_0x000300063E040000 = 0x000300063E040000;
-constexpr auto literal_0x00033DF7FE06F800 = 0x00033DF7FE06F800;
+constexpr auto literal_0b111111 = 0b111111;
+constexpr auto literal_0b11111111 = 0b11111111;
+constexpr auto literal_0b000000 = 0b000000;
+constexpr auto literal_0b00000000 = 0b00000000;
 
 fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -249,7 +251,49 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x1100088303E, 0, 44, 20 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 25, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 26, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 27, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 28, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 29, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 2, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 30, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 3, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b11, 40, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 42, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 43, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011083ull, l_scom_buffer);
@@ -270,7 +314,49 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0208577C1C0, 0, 44, 20 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 25, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 26, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 27, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 28, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 29, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 2, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 30, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 3, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00, 40, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 42, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 43, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011086ull, l_scom_buffer);
@@ -291,7 +377,49 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6E1FF77CFC0, 0, 44, 20 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 25, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 26, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 27, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 28, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 29, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 2, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 30, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 3, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00, 40, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 42, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 43, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011087ull, l_scom_buffer);
@@ -514,7 +642,43 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0000C20801F90FFC, 0, 50, 14 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b111111, 25, 6, 58 );
+                l_scom_buffer.insert<uint64_t> (literal_0b11, 2, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b11111111, 40, 8, 56 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 48, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 49, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011103ull, l_scom_buffer);
@@ -536,7 +700,43 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x000300063E040000, 0, 50, 14 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b000000, 25, 6, 58 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00, 2, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00000000, 40, 8, 56 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 48, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 49, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011106ull, l_scom_buffer);
@@ -558,7 +758,43 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x00033DF7FE06F800, 0, 50, 14 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 0, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 10, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 11, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 12, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 13, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 14, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 15, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 16, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 17, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 18, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 19, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 1, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 20, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 21, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 22, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 23, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 24, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b000000, 25, 6, 58 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00, 2, 2, 62 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 31, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 32, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 33, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 34, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 35, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 36, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 37, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 38, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 39, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b00000000, 40, 8, 56 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 48, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 49, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 4, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 5, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 6, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 7, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b0, 8, 1, 63 );
+                l_scom_buffer.insert<uint64_t> (literal_0b1, 9, 1, 63 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x2011107ull, l_scom_buffer);
