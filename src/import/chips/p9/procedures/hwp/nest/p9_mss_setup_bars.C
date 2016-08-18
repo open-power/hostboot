@@ -590,9 +590,9 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
         }
         else
         {
-            o_mcsBarData.MCFGPA_HOLE_valid[ii] = 0;
-            o_mcsBarData.MCFGPA_HOLE_LOWER_addr[ii] = 0;
-            o_mcsBarData.MCFGPA_HOLE_UPPER_addr[ii] = 0;
+            o_mcsBarData.MCFGPMA_HOLE_valid[ii] = 0;
+            o_mcsBarData.MCFGPMA_HOLE_LOWER_addr[ii] = 0;
+            o_mcsBarData.MCFGPMA_HOLE_UPPER_addr[ii] = 0;
         }
 
     }
@@ -875,10 +875,17 @@ fapi2::ReturnCode writeMCBarData(
                                        MCS_MCFGP_GROUP_SIZE_LEN>(
                                            l_data.MCFGP_group_size);
 
-            // Group base address (bits 24:47)
+            // Group base address (bits 24:47) 0b000000000000000000000001 = 4GB
+            // 000000001 (base addr of 4GB)
+            // 000000010 (base addr of 8GB)
+            // 000000100 (base addr of 16GB)
+            // 000001000 (base addr of 32GB)
+            // 000010000 (base addr of 64GB)
+            // 000100000 (base addr of 128GB)
+            // 001000000 (base addr of 256GB)
             l_scomData.insertFromRight<MCS_MCFGP_GROUP_BASE_ADDRESS,
                                        MCS_MCFGP_GROUP_BASE_ADDRESS_LEN>(
-                                           l_data.MCFGP_groupBaseAddr);
+                                           (l_data.MCFGP_groupBaseAddr >> 2));
         }
 
         // Channel per group (bits 1:4)
@@ -915,10 +922,17 @@ fapi2::ReturnCode writeMCBarData(
                                        MCS_MCFGPM_GROUP_SIZE_LEN>(
                                            l_data.MCFGPM_group_size);
 
-            // Group base address (bits 24:47)
+            // Group base address (bits 24:47), 0b000000000000000000000001 = 4GB
+            // 000000001 (base addr of 4GB)
+            // 000000010 (base addr of 8GB)
+            // 000000100 (base addr of 16GB)
+            // 000001000 (base addr of 32GB)
+            // 000010000 (base addr of 64GB)
+            // 000100000 (base addr of 128GB)
+            // 001000000 (base addr of 256GB)
             l_scomData.insertFromRight<MCS_MCFGPM_GROUP_BASE_ADDRESS,
                                        MCS_MCFGPM_GROUP_BASE_ADDRESS_LEN>(
-                                           l_data.MCFGPM_groupBaseAddr);
+                                           (l_data.MCFGPM_groupBaseAddr >> 2));
 
         }
 
@@ -938,13 +952,15 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.setBit<MCS_MCFGPA_HOLE0_VALID>();
 
             // Hole 0 lower addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE0_LOWER_ADDRESS,
                                        MCS_MCFGPA_HOLE0_LOWER_ADDRESS_LEN>(
-                                           l_data.MCFGPA_HOLE_LOWER_addr[0]);
+                                           (l_data.MCFGPA_HOLE_LOWER_addr[0] >> 2));
             // Hole 0 upper addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE0_UPPER_ADDRESS,
                                        MCS_MCFGPA_HOLE0_UPPER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_UPPER_addr[0]);
+                                           (l_data.MCFGPMA_HOLE_UPPER_addr[0] >> 2));
         }
 
         // Hole 1
@@ -954,13 +970,15 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.setBit<MCS_MCFGPA_HOLE0_VALID>();
 
             // Hole 1 lower addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE1_LOWER_ADDRESS,
                                        MCS_MCFGPA_HOLE1_LOWER_ADDRESS_LEN>(
-                                           l_data.MCFGPA_HOLE_LOWER_addr[1]);
+                                           (l_data.MCFGPA_HOLE_LOWER_addr[1] >> 2));
             // Hole 1 upper addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE1_UPPER_ADDRESS,
                                        MCS_MCFGPA_HOLE1_UPPER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_UPPER_addr[1]);
+                                           (l_data.MCFGPMA_HOLE_UPPER_addr[1] >> 2));
         }
 
         // Write to reg
@@ -979,29 +997,33 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.setBit<MCS_MCFGPMA_HOLE0_VALID>();
 
             // Hole 0 lower addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE0_LOWER_ADDRESS,
                                        MCS_MCFGPMA_HOLE0_LOWER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_LOWER_addr[0]);
+                                           ( l_data.MCFGPMA_HOLE_LOWER_addr[0] >> 2));
             // Hole 0 upper addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE0_UPPER_ADDRESS,
                                        MCS_MCFGPMA_HOLE0_UPPER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_UPPER_addr[0]);
+                                           (l_data.MCFGPMA_HOLE_UPPER_addr[0] >> 2));
         }
 
         // Hole 1
         if (l_data.MCFGPMA_HOLE_valid[1] == true)
         {
             // MCFGPMA HOLE1 valid (bit 0)
+            // 0b0000000001 = 4GB
             l_scomData.setBit<MCS_MCFGPMA_HOLE1_VALID>();
 
             // Hole 1 lower addr
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE1_LOWER_ADDRESS,
                                        MCS_MCFGPMA_HOLE1_LOWER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_LOWER_addr[1]);
+                                           (l_data.MCFGPMA_HOLE_LOWER_addr[1] >> 2));
             // Hole 1 upper addr
+            // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE1_UPPER_ADDRESS,
                                        MCS_MCFGPMA_HOLE1_UPPER_ADDRESS_LEN>(
-                                           l_data.MCFGPMA_HOLE_UPPER_addr[1]);
+                                           (l_data.MCFGPMA_HOLE_UPPER_addr[1] >> 2));
         }
 
         // Write to reg
