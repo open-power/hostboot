@@ -140,6 +140,10 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
             l_rtt_wr_buffer = 0b010;
             break;
 
+        case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM80:
+            l_rtt_wr_buffer = 0b100;
+            break;
+
         case fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_RTT_WR_OHM120:
             l_rtt_wr_buffer = 0b001;
             break;
