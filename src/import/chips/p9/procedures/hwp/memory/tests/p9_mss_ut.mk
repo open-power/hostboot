@@ -48,5 +48,7 @@ $(WRAPPER)_DEPLIBS+=p9_mss_freq_drift
 $(WRAPPER)_DEPLIBS+=p9_mss_scominit
 $(WRAPPER)_DEPLIBS+=p9_mss_thermal_init
 
+$(WRAPPER)_COMMONFLAGS+=-fno-var-tracking-assignments
+
 $(WRAPPER)_LDFLAGS+= -Wl,-rpath=$(SQLITE3_LIB_DIR) -L$(SQLITE3_LIB_DIR) -lsqlite3 -lrt
 $(call BUILD_WRAPPER)
