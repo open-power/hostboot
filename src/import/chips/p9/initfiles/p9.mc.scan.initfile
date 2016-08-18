@@ -1,14 +1,7 @@
 SyntaxVersion = 3
 
-target_type 0 TARGET_TYPE_MCBIST;
+target_type 0 TARGET_TYPE_PROC_CHIP;
 
-# RELIC FROM sample.mc.scan.initfile
-# unconditional idial, test binary data input
-## TODO: test when side eCMD release available (supporting putspy to mcbist target type)
-# ispy MCP.PORT0.WRITE.ASYNC_INJ [when=L] {
-#   spyv;
-#   0b101;
-# }
 
 ##########################
 # DD1 WORKAROUNDS
@@ -16,6 +9,7 @@ target_type 0 TARGET_TYPE_MCBIST;
 
 # FOR DD1 Prefetch Limit needs to be scan init to 0 because SCOM is broken (HW366248)
 #      Always OR-ed with previous value. Essentially we can only set bits, not clear. So we want to scan init to 0.
+#      these are n1 n3
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
   0b000000;
@@ -32,9 +26,26 @@ ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
   0b000000;
 }
+ispy  MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
+ispy  MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
+  spyv;
+  0b000000;
+}
 
 # Static hpc_wr/ig_wr CL reservation
 # Complicated order dependent sequence to do with SCOMs, easier with scans
+# these are n1 n3
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
   spyv;
   8;
@@ -51,5 +62,19 @@ ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
   spyv;
   8;
 }
-
-
+ispy  MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}
+ispy  MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_WR_RSVD_LOWER_OR_STATIC_LIMIT [when=L] {
+  spyv;
+  8;
+}

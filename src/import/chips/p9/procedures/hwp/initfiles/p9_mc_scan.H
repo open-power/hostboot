@@ -35,12 +35,12 @@
     p9_mc_scan(TGT0);
 #endif
 
-typedef fapi2::ReturnCode (*p9_mc_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
+typedef fapi2::ReturnCode (*p9_mc_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT0);
+    fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0);
 
 }
 
