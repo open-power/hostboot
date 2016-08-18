@@ -250,6 +250,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     }// dimm
 
+    // Check plug rules. We check the MCS, and this will iterate down to children as needed.
+    FAPI_TRY( l_eff_config.enforce_plug_rules(i_target) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
