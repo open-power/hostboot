@@ -42,6 +42,7 @@
 // mss lib
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/spd/rdimm/rdimm_decoder.H>
+#include <lib/spd/rdimm/raw_cards.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/c_str.H>
 #include <lib/utils/find.H>
@@ -64,11 +65,16 @@ namespace spd
 /// @param[in] i_target dimm target
 /// @param[in] i_spd_data SPD data vector
 /// @param[in] i_module_decoder shared_ptr to dimm module decoder
+/// @param[in] i_raw_card raw card data structure
 ///
 decoder::decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                  const std::vector<uint8_t>& i_spd_data,
-                 const std::shared_ptr<dimm_module_decoder>& i_module_decoder)
-    :  iv_module_decoder(i_module_decoder), iv_spd_data(i_spd_data), iv_target(i_target)
+                 const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
+                 const raw_card_t& i_raw_card)
+    : iv_module_decoder(i_module_decoder),
+      iv_spd_data(i_spd_data),
+      iv_raw_card(i_raw_card),
+      iv_target(i_target)
 {}
 
 ///

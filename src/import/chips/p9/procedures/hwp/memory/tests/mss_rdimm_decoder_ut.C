@@ -167,16 +167,6 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
 
                 {
                     //////////////////////////////
-                    /// SPD Byte 128 (Bits 7~5)
-                    /////////////////////////////
-                    uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x1; // from VBU fake SPD
-                    REQUIRE_FALSE( l_decoder.raw_card_extension(l_decoder_output) );
-                    REQUIRE( l_expected == l_decoder_output);
-                }
-
-                {
-                    //////////////////////////////
                     /// SPD Byte 129 (Bits 3~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
@@ -197,31 +187,11 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
 
                 {
                     //////////////////////////////
-                    /// SPD Byte 130 (Bits 4~0)
+                    /// SPD Byte 130 (Bits 7~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x3; // from VBU fake SPD
-                    REQUIRE_FALSE( l_decoder.reference_raw_card(l_decoder_output) );
-                    REQUIRE( l_expected == l_decoder_output);
-                }
-
-                {
-                    //////////////////////////////
-                    /// SPD Byte 130 (Bits 6~5)
-                    /////////////////////////////
-                    uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x1; // from VBU fake SPD
-                    REQUIRE_FALSE( l_decoder.reference_raw_card_rev(l_decoder_output) );
-                    REQUIRE( l_expected == l_decoder_output);
-                }
-
-                {
-                    //////////////////////////////
-                    /// SPD Byte 130 (Bit 7)
-                    /////////////////////////////
-                    uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
-                    REQUIRE_FALSE( l_decoder.reference_raw_card_extension(l_decoder_output) );
+                    uint8_t l_expected = 0x23; // from VBU fake SPD
+                    REQUIRE_FALSE( spd::reference_raw_card(l_dimm, l_spd, l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
 
@@ -310,7 +280,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 1~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.cke_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -320,7 +290,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 3~2)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.odt_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -330,7 +300,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 5~4)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x2; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.ca_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -340,7 +310,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 7~6)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.cs_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -350,7 +320,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 138 (Bits 1~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.b_side_clk_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -360,7 +330,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 138 (Bits 3~2)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.a_side_clk_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -512,7 +482,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 1~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.cke_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -522,18 +492,27 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 137 (Bits 3~2)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.odt_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
 
+                {
+                    //////////////////////////////
+                    /// SPD Byte 137 (Bits 5~4)
+                    /////////////////////////////
+                    uint8_t l_decoder_output = 0;
+                    uint8_t l_expected = 0x2; // from VBU fake SPD
+                    REQUIRE_FALSE( l_decoder.ca_signal_output_driver( l_decoder_output) );
+                    REQUIRE( l_expected == l_decoder_output);
+                }
 
                 {
                     //////////////////////////////
                     /// SPD Byte 137 (Bits 7~6)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x01; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.cs_signal_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -543,7 +522,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 138 (Bits 1~0)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.b_side_clk_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }
@@ -553,7 +532,7 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
                     /// SPD Byte 138 (Bits 3~2)
                     /////////////////////////////
                     uint8_t l_decoder_output = 0;
-                    uint8_t l_expected = 0x0; // from VBU fake SPD
+                    uint8_t l_expected = 0x1; // from VBU fake SPD
                     REQUIRE_FALSE( l_decoder.a_side_clk_output_driver( l_decoder_output) );
                     REQUIRE( l_expected == l_decoder_output);
                 }

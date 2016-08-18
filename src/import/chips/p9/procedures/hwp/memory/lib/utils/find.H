@@ -290,20 +290,21 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
                          OT& o_value)
 {
     // Comparator lambda expression
-    auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_value)
+    const auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_value)
     {
         return (i_lhs.first < i_value);
     };
 
     // Find iterator to matching key (if it exists)
-    auto l_value_iterator  =  std::lower_bound(i_vector_of_pairs.begin(),
-                              i_vector_of_pairs.end(),
-                              i_key,
-                              compare);
+    const auto l_value_iterator  =  std::lower_bound(i_vector_of_pairs.begin(),
+                                    i_vector_of_pairs.end(),
+                                    i_key,
+                                    compare);
 
     // Did you find it? Let me know.
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_key != l_value_iterator->first) )
     {
+        FAPI_ERR("Did not find a mapping value to key: %d", i_key);
         return false;
     }
 
@@ -323,9 +324,10 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
 /// @return the value corresponding to the key
 /// @note To use on short arrays. O(N), simple search
 ///
-
 template<typename T, typename OT, size_t N>
-fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N], const T& i_key, OT& o_value)
+fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N],
+                                       const T& i_key,
+                                       OT& o_value)
 {
     // TK Use sort and binary search for larger arrays
     if (i_array == nullptr)

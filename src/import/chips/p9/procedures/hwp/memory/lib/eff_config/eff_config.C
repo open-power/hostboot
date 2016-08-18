@@ -42,6 +42,7 @@
 #include <lib/mss_vpd_decoder.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
+#include <lib/spd/rdimm/raw_cards.H>
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
@@ -55,6 +56,29 @@ using fapi2::TARGET_TYPE_MCBIST;
 
 namespace mss
 {
+
+enum rc10_encode : uint8_t
+{
+    DDR4_1866 = 0x01,
+    DDR4_2133 = 0x02,
+    DDR4_2400 = 0x03,
+    DDR4_2666 = 0x04,
+};
+
+enum rc13_encode : uint8_t
+{
+    DIRECT_CS_MODE = 0,
+    LRDIMM = 0,
+    RDIMM = 1,
+};
+
+enum rc3x_encode : uint8_t
+{
+    MT1860_TO_MT1880 = 0x1F,
+    MT2120_TO_MT2140 = 0x2C,
+    MT2380_TO_MT2400 = 0x39,
+    MT2660_TO_MT2680 = 0x47,
+};
 
 /////////////////////////
 // Non-member function implementations
@@ -130,7 +154,6 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }// dram_gen
-
 
 ///
 /// @brief Determines & sets effective config for DIMM type from SPD
@@ -609,10 +632,11 @@ fapi2::ReturnCode eff_config::rcd_mirror_mode(const fapi2::Target<TARGET_TYPE_DI
     uint8_t l_attrs_mirror_mode[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dimm_rcd_mirror_mode(l_mcs, &l_attrs_mirror_mode[0][0]) );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
 
     // Update MCS attribute
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
     l_attrs_mirror_mode[l_port_num][l_dimm_num] = l_mirror_mode;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RCD_MIRROR_MODE, l_mcs, l_attrs_mirror_mode) );
 
 fapi_try_exit:
@@ -767,9 +791,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc00(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc00[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -778,8 +799,14 @@ fapi2::ReturnCode eff_config::dimm_rc00(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc00[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc00(l_mcs, &l_attrs_dimm_rc00[0][0]) );
-    l_attrs_dimm_rc00[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc00[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc00;
+
+    FAPI_INF("%s: RC00 settting: %d", c_str(i_target), l_attrs_dimm_rc00[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC00, l_mcs, l_attrs_dimm_rc00) );
 
 fapi_try_exit:
@@ -793,9 +820,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc01(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc01[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -804,9 +828,16 @@ fapi2::ReturnCode eff_config::dimm_rc01(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc01[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc01(l_mcs, &l_attrs_dimm_rc01[0][0]) );
-    l_attrs_dimm_rc01[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc01[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc01;
+
+    FAPI_INF("%s: RC01 settting: %d", c_str(i_target), l_attrs_dimm_rc01[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC01, l_mcs, l_attrs_dimm_rc01) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -818,9 +849,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc02(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc02[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -829,9 +857,16 @@ fapi2::ReturnCode eff_config::dimm_rc02(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc02[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc02(l_mcs, &l_attrs_dimm_rc02[0][0]) );
-    l_attrs_dimm_rc02[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc02[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc02;
+
+    FAPI_INF("%s: RC02 settting: %d", c_str(i_target), l_attrs_dimm_rc02[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC02, l_mcs, l_attrs_dimm_rc02) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -843,9 +878,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc03[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -854,13 +886,40 @@ fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    fapi2::buffer<uint8_t> l_buffer;
+
+    uint8_t l_attrs_dimm_rc03[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_cs_output_drive = 0;
+    uint8_t l_ca_output_drive = 0;
+
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->cs_signal_output_driver(l_cs_output_drive) );
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->ca_signal_output_driver(l_ca_output_drive) );
+
+    FAPI_INF( "%s: Retrieved register output drive, for CA: %d, CS: %d",
+              c_str(i_target), l_ca_output_drive, l_cs_output_drive );
+
+    // Lets construct encoding byte for RCD setting
+    {
+        // Buffer insert constants for CS and CA output drive
+        constexpr size_t CS_START = 4;
+        constexpr size_t CA_START = 6;
+        constexpr size_t LEN = 2;
+
+        l_buffer.insertFromRight<CA_START, LEN>(l_ca_output_drive)
+        .insertFromRight<CS_START, LEN>(l_cs_output_drive);
+    }
+    // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc03(l_mcs, &l_attrs_dimm_rc03[0][0]) );
-    l_attrs_dimm_rc03[l_port_num][l_dimm_num] = 0x06;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc03[l_port_num][l_dimm_num] = l_buffer;
+
+    FAPI_INF("%s: RC03 settting: %d", c_str(i_target), l_attrs_dimm_rc03[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC03, l_mcs, l_attrs_dimm_rc03) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC04
@@ -869,9 +928,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc04[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -880,9 +936,38 @@ fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    uint8_t l_attrs_dimm_rc04[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_odt_output_drive = 0;
+    uint8_t l_cke_output_drive = 0;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->odt_signal_output_driver(l_odt_output_drive) );
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->cke_signal_output_driver(l_cke_output_drive) );
+
+    FAPI_INF( "%s: Retrieved signal driver output, for CKE: %d, ODT: %d",
+              c_str(i_target), l_cke_output_drive, l_odt_output_drive );
+
+    // Lets construct encoding byte for RCD setting
+    {
+        // Buffer insert constants for ODT and CKE output drive
+        constexpr size_t CKE_START = 6;
+        constexpr size_t ODT_START = 4;
+        constexpr size_t LEN = 2;
+
+        l_buffer.insertFromRight<CKE_START, LEN>(l_cke_output_drive)
+        .insertFromRight<ODT_START, LEN>(l_odt_output_drive);
+    }
+
+    // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc04(l_mcs, &l_attrs_dimm_rc04[0][0]) );
-    l_attrs_dimm_rc04[l_port_num][l_dimm_num] = 0x05;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc04[l_port_num][l_dimm_num] = l_buffer;
+
+    FAPI_INF("%s: RC04 setting: %d", c_str(i_target), l_attrs_dimm_rc04[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC04, l_mcs, l_attrs_dimm_rc04) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -894,9 +979,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc05[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -905,9 +987,38 @@ fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    uint8_t l_attrs_dimm_rc05[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_a_side_output_drive = 0;
+    uint8_t l_b_side_output_drive = 0;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->a_side_clk_output_driver(l_a_side_output_drive) );
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->b_side_clk_output_driver(l_b_side_output_drive) );
+
+    FAPI_INF( "%s: Retrieved register output drive for clock, b-side (Y0,Y2): %d, a-side (Y1,Y3): %d",
+              c_str(i_target), l_b_side_output_drive, l_a_side_output_drive );
+
+    {
+        // Buffer insert constants for ODT and CKE output drive
+        constexpr size_t B_START = 6;
+        constexpr size_t A_START = 4;
+        constexpr size_t LEN = 2;
+
+        // Lets construct encoding byte for RCD setting
+        l_buffer.insertFromRight<B_START, LEN>(l_b_side_output_drive)
+        .insertFromRight<A_START, LEN>(l_a_side_output_drive);
+    }
+
+    // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc05(l_mcs, &l_attrs_dimm_rc05[0][0]) );
-    l_attrs_dimm_rc05[l_port_num][l_dimm_num] = 0x05;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc05[l_port_num][l_dimm_num] = l_buffer;
+
+    FAPI_INF( "%s: RC05 setting: %d", c_str(i_target), l_attrs_dimm_rc05[l_port_num][l_dimm_num] )
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC05, l_mcs, l_attrs_dimm_rc05) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -919,9 +1030,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc06_07(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc06_07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -930,9 +1038,16 @@ fapi2::ReturnCode eff_config::dimm_rc06_07(const fapi2::Target<TARGET_TYPE_DIMM>
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc06_07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc06_07(l_mcs, &l_attrs_dimm_rc06_07[0][0]) );
-    l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] = 0xf;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc06_07;
+
+    FAPI_INF( "%s: RC06_07 setting: %d", c_str(i_target), l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC06_07, l_mcs, l_attrs_dimm_rc06_07) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -944,9 +1059,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc08(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -955,9 +1067,16 @@ fapi2::ReturnCode eff_config::dimm_rc08(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc08(l_mcs, &l_attrs_dimm_rc08[0][0]) );
-    l_attrs_dimm_rc08[l_port_num][l_dimm_num] = 0x3;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc08[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc08;
+
+    FAPI_INF( "%s: RC08 setting: %d", c_str(i_target), l_attrs_dimm_rc08[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC08, l_mcs, l_attrs_dimm_rc08) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -969,9 +1088,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc09(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -980,9 +1096,18 @@ fapi2::ReturnCode eff_config::dimm_rc09(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // TODO - RTC 160118: Clean up eff_config boiler plate that can moved into helper functions
+
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc09(l_mcs, &l_attrs_dimm_rc09[0][0]) );
-    l_attrs_dimm_rc09[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc09[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc09;
+
+    FAPI_INF( "%s: RC09 setting: %d", c_str(i_target), l_attrs_dimm_rc09[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC09, l_mcs, l_attrs_dimm_rc09) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -994,9 +1119,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc10[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1005,13 +1127,45 @@ fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    uint64_t l_freq = 0;
+
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc10[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc10(l_mcs, &l_attrs_dimm_rc10[0][0]) );
-    l_attrs_dimm_rc10[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    FAPI_TRY( mss::freq( mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_freq ) );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            l_attrs_dimm_rc10[l_port_num][l_dimm_num] = rc10_encode::DDR4_1866;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            l_attrs_dimm_rc10[l_port_num][l_dimm_num] = rc10_encode::DDR4_2133;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            l_attrs_dimm_rc10[l_port_num][l_dimm_num] = rc10_encode::DDR4_2400;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            l_attrs_dimm_rc10[l_port_num][l_dimm_num] = rc10_encode::DDR4_2666;
+            break;
+
+        default:
+            FAPI_ERR("Invalid frequency for rc10 encoding received: %d", l_freq);
+            return fapi2::FAPI2_RC_FALSE;
+            break;
+    }
+
+    FAPI_INF( "%s: RC10 setting: %d", c_str(i_target), l_attrs_dimm_rc10[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC10, l_mcs, l_attrs_dimm_rc10) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC11
@@ -1020,9 +1174,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc11(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc11[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1031,9 +1182,16 @@ fapi2::ReturnCode eff_config::dimm_rc11(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc11[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc11(l_mcs, &l_attrs_dimm_rc11[0][0]) );
-    l_attrs_dimm_rc11[l_port_num][l_dimm_num] = 0xe;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc11[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0b;
+
+    FAPI_INF( "%s: RC11 setting: %d", c_str(i_target), l_attrs_dimm_rc11[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC11, l_mcs, l_attrs_dimm_rc11) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1045,9 +1203,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc12(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc12[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1056,9 +1211,16 @@ fapi2::ReturnCode eff_config::dimm_rc12(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc12[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc12(l_mcs, &l_attrs_dimm_rc12[0][0]) );
-    l_attrs_dimm_rc12[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc12[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0c;
+
+    FAPI_INF( "%s: R12 setting: %d", c_str(i_target), l_attrs_dimm_rc12[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC12, l_mcs, l_attrs_dimm_rc12) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1070,9 +1232,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc13(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc13[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1081,9 +1240,52 @@ fapi2::ReturnCode eff_config::dimm_rc13(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    uint8_t l_attrs_dimm_rc13[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    fapi2::buffer<uint8_t> l_buffer;
+
+    // TODO - RTC 160116: Fix RC0D chip select setting for LRDIMMs
+    constexpr uint8_t l_cs_mode = rc13_encode::DIRECT_CS_MODE;
+    uint8_t l_mirror_mode = 0;
+    uint8_t l_dimm_type = 0;
+    uint8_t l_module_type = 0;
+
+    FAPI_TRY( spd::base_module_type(i_target, iv_pDecoder->iv_spd_data, l_module_type) );
+
+    l_dimm_type = (l_module_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
+                  rc13_encode::RDIMM :
+                  rc13_encode::LRDIMM;
+
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
+
+    // Lets construct encoding byte for RCD setting
+    {
+        // CS
+        constexpr size_t CS_START = 6;
+        constexpr size_t CS_LEN = 2;
+
+        // DIMM TYPE
+        constexpr size_t DIMM_TYPE_START = 5;
+        constexpr size_t DIMM_TYPE_LEN = 1;
+
+        // MIRROR mode
+        constexpr size_t MIRROR_START = 4;
+        constexpr size_t MIRROR_LEN = 1;
+
+        l_buffer.insertFromRight<CS_START, CS_LEN>(l_cs_mode)
+        .insertFromRight<DIMM_TYPE_START, DIMM_TYPE_LEN>(l_dimm_type)
+        .insertFromRight<MIRROR_START, MIRROR_LEN>(l_mirror_mode);
+    }
+
+    // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc13(l_mcs, &l_attrs_dimm_rc13[0][0]) );
-    l_attrs_dimm_rc13[l_port_num][l_dimm_num] = 0xC;
+
+    // Update MCS attribute
+    FAPI_TRY( spd::base_module_type(i_target, iv_pDecoder->iv_spd_data, l_dimm_type) );
+    l_attrs_dimm_rc13[l_port_num][l_dimm_num] = l_buffer;
+
+    FAPI_INF( "%s: RC13 setting: %d", c_str(i_target), l_attrs_dimm_rc13[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC13, l_mcs, l_attrs_dimm_rc13) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1095,9 +1297,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc14[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1106,9 +1305,16 @@ fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc14[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc14(l_mcs, &l_attrs_dimm_rc14[0][0]) );
-    l_attrs_dimm_rc14[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc14[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0e;
+
+    FAPI_INF( "%s: RC14 setting: %d", c_str(i_target), l_attrs_dimm_rc14[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC14, l_mcs, l_attrs_dimm_rc14) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1120,9 +1326,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc15(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc15[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1131,14 +1334,19 @@ fapi2::ReturnCode eff_config::dimm_rc15(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc15[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc15(l_mcs, &l_attrs_dimm_rc15[0][0]) );
-    l_attrs_dimm_rc15[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc15[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0f;
+
+    FAPI_INF( "%s: RC15 setting: %d", c_str(i_target), l_attrs_dimm_rc15[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC15, l_mcs, l_attrs_dimm_rc15) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_1x
@@ -1147,9 +1355,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc1x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_1x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1158,14 +1363,19 @@ fapi2::ReturnCode eff_config::dimm_rc1x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_1x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_1x(l_mcs, &l_attrs_dimm_rc_1x[0][0]) );
-    l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc1x;
+
+    FAPI_INF( "%s: RC1X setting: %d", c_str(i_target), l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_1x, l_mcs, l_attrs_dimm_rc_1x) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_2x
@@ -1174,9 +1384,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc2x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_2x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1185,13 +1392,19 @@ fapi2::ReturnCode eff_config::dimm_rc2x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_2x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_2x(l_mcs, &l_attrs_dimm_rc_2x[0][0]) );
-    l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc2x;
+
+    FAPI_INF( "%s: RC2X setting: %d", c_str(i_target), l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_2x, l_mcs, l_attrs_dimm_rc_2x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_3x
@@ -1200,9 +1413,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_3x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1211,13 +1421,46 @@ fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    uint64_t l_freq = 0;
+    uint8_t l_attrs_dimm_rc_3x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Retrieve MCS attribute data
     FAPI_TRY( eff_dimm_ddr4_rc_3x(l_mcs, &l_attrs_dimm_rc_3x[0][0]) );
-    l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = 0x39;
+
+    // Update MCS attribute
+    FAPI_TRY( freq(find_target<TARGET_TYPE_MCBIST>(l_mcs), l_freq) );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = rc3x_encode::MT1860_TO_MT1880;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = rc3x_encode::MT2120_TO_MT2140;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = rc3x_encode::MT2380_TO_MT2400;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] = rc3x_encode::MT2660_TO_MT2680;
+            break;
+
+        default:
+            FAPI_ERR("Invalid frequency for rc_3x encoding received: %d", l_freq);
+            return fapi2::FAPI2_RC_FALSE;
+            break;
+    }
+
+    FAPI_INF( "%s: RC3X setting: %d", c_str(i_target), l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_3x, l_mcs, l_attrs_dimm_rc_3x) );
+
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_4x
@@ -1226,9 +1469,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc4x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_4x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1237,13 +1477,19 @@ fapi2::ReturnCode eff_config::dimm_rc4x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_4x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_4x(l_mcs, &l_attrs_dimm_rc_4x[0][0]) );
-    l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc4x;
+
+    FAPI_INF( "%s: RC4X setting: %d", c_str(i_target), l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_4x, l_mcs, l_attrs_dimm_rc_4x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_5x
@@ -1252,9 +1498,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc5x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_5x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1263,13 +1506,19 @@ fapi2::ReturnCode eff_config::dimm_rc5x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_5x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_5x(l_mcs, &l_attrs_dimm_rc_5x[0][0]) );
-    l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc5x;
+
+    FAPI_INF( "%s: RC5X setting: %d", c_str(i_target), l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_5x, l_mcs, l_attrs_dimm_rc_5x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_6x
@@ -1278,9 +1527,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc6x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_6x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1289,13 +1535,19 @@ fapi2::ReturnCode eff_config::dimm_rc6x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_6x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_6x(l_mcs, &l_attrs_dimm_rc_6x[0][0]) );
-    l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc6x;
+
+    FAPI_INF( "%s: RC6X setting: %d", c_str(i_target), l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_6x, l_mcs, l_attrs_dimm_rc_6x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_7x
@@ -1344,16 +1596,16 @@ fapi2::ReturnCode eff_config::dimm_rc7x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     l_rcd7x.insertFromRight<CS_START, LEN>( ibt_helper(l_ibt_cs) );
     l_rcd7x.insertFromRight<ODT_START, LEN>( ibt_helper(l_ibt_odt) );
 
-    FAPI_INF("RCD7x for %s is 0x%x", mss::c_str(i_target), uint8_t(l_rcd7x));
-
     // Now write RCD7x out to the effective attribute
     FAPI_TRY( eff_dimm_ddr4_rc_7x(l_mcs, &l_attrs_dimm_rc_7x[0][0]) );
     l_attrs_dimm_rc_7x[l_port_num][l_dimm_num] = l_rcd7x;
+
+    FAPI_INF( "%s: RC7X setting is 0x%x", mss::c_str(i_target), l_attrs_dimm_rc_7x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_7x, l_mcs, l_attrs_dimm_rc_7x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_8x
@@ -1362,9 +1614,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc8x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_8x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1373,13 +1622,19 @@ fapi2::ReturnCode eff_config::dimm_rc8x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_8x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_8x(l_mcs, &l_attrs_dimm_rc_8x[0][0]) );
-    l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc8x;
+
+    FAPI_INF( "%s: RC8X setting: %d", c_str(i_target), l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_8x, l_mcs, l_attrs_dimm_rc_8x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_9x
@@ -1388,9 +1643,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc9x(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_9x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1399,13 +1651,19 @@ fapi2::ReturnCode eff_config::dimm_rc9x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_9x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_9x(l_mcs, &l_attrs_dimm_rc_9x[0][0]) );
-    l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc9x;
+
+    FAPI_INF( "%s: RC9X setting: %d", c_str(i_target), l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_9x, l_mcs, l_attrs_dimm_rc_9x) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_AX
@@ -1414,9 +1672,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rcax(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_ax[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1425,13 +1680,19 @@ fapi2::ReturnCode eff_config::dimm_rcax(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_ax[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_ax(l_mcs, &l_attrs_dimm_rc_ax[0][0]) );
-    l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] = 0x00;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rcax;
+
+    FAPI_INF( "%s: RCAX setting: %d", c_str(i_target), l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Ax, l_mcs, l_attrs_dimm_rc_ax) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM RC_BX
@@ -1440,9 +1701,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rcbx(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    // TK - RIT skeleton. Need to finish - AAM
-    uint8_t l_attrs_dimm_rc_bx[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1451,8 +1709,14 @@ fapi2::ReturnCode eff_config::dimm_rcbx(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
+    // Retrieve MCS attribute data
+    uint8_t l_attrs_dimm_rc_bx[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_bx(l_mcs, &l_attrs_dimm_rc_bx[0][0]) );
-    l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] = 0x07;
+
+    // Update MCS attribute
+    l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rcbx;
+
+    FAPI_INF( "%s: RCBX setting: %d", c_str(i_target), l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Bx, l_mcs, l_attrs_dimm_rc_bx) );
 
 fapi_try_exit:
@@ -1568,7 +1832,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Determines & sets effective config for cwl
 /// @param[in] i_target FAPI2 target
@@ -1656,7 +1919,6 @@ fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for lpasr

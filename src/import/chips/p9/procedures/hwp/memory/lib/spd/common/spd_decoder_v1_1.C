@@ -59,11 +59,14 @@ namespace spd
 /// @brief ctor
 /// @param[in] i_target dimm target
 /// @param[in] i_spd_data SPD data vector
+/// @param[in] i_module_decoder shared_ptr to dimm module decoder
+/// @param[in] i_raw_card raw card data structure
 ///
 decoder_v1_1::decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                            const std::vector<uint8_t>& i_spd_data,
-                           const std::shared_ptr<dimm_module_decoder>& i_module_decoder)
-    : decoder(i_target, i_spd_data, i_module_decoder)
+                           const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
+                           const raw_card_t& i_raw_card)
+    : decoder(i_target, i_spd_data, i_module_decoder, i_raw_card)
 {}
 
 ///

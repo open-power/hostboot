@@ -147,21 +147,6 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes raw card extension
-        /// @param[out] o_output raw card rev
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 128 (Bits 7~5)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 48
-        ///
-        virtual fapi2::ReturnCode raw_card_extension(uint8_t& o_output)
-        {
-            o_output = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
         /// @brief Decodes front module maximum thickness max, in mm
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -186,51 +171,6 @@ class dimm_module_decoder
         /// @note Page 4.1.2.12 - 48
         ///
         virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output)
-        {
-            o_output = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief Decodes reference raw card
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bits 4~0)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card(uint8_t& o_output)
-        {
-            o_output = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief Decodes reference raw card revision
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bits 6~5)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card_rev(uint8_t& o_output)
-        {
-            o_output = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief Decodes reference raw card extension
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bit 7)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card_extension(uint8_t& o_output)
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -483,17 +423,6 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         virtual fapi2::ReturnCode max_module_nominal_height(uint8_t& o_output) override;
 
         ///
-        /// @brief Decodes raw card extension
-        /// @param[out] o_output raw card rev
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 128 (Bits 7~5)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 48
-        ///
-        virtual fapi2::ReturnCode raw_card_extension(uint8_t& o_output) override;
-
-        ///
         /// @brief Decodes front module maximum thickness max, in mm
         /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
@@ -514,39 +443,6 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         /// @note Page 4.1.2.12 - 48
         ///
         virtual fapi2::ReturnCode back_module_max_thickness(uint8_t& o_output) override;
-
-        ///
-        /// @brief Decodes reference raw card
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bits 4~0)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card(uint8_t& o_output) override;
-
-        ///
-        /// @brief Decodes reference raw card revision
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bits 6~5)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card_rev(uint8_t& o_output) override;
-
-        ///
-        /// @brief Decodes reference raw card extension
-        /// @param[out] o_output encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note SPD Byte 130 (Bit 7)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 49
-        ///
-        virtual fapi2::ReturnCode reference_raw_card_extension(uint8_t& o_output) override;
 
         ///
         /// @brief Decodes number of registers used on RDIMM

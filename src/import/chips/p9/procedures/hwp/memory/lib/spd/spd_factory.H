@@ -109,6 +109,21 @@ fapi2::ReturnCode dram_device_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    uint8_t& o_value);
 
 ///
+/// @brief Decodes reference raw card
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_output encoding from SPD
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 130 (Bits 7~0)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @Note Page 4.1.2.12 - 49
+///
+fapi2::ReturnCode reference_raw_card(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const std::vector<uint8_t>& i_spd_data,
+                                     uint8_t& o_output);
+
+///
 /// @brief       Object factory to select correct decoder
 /// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD data
