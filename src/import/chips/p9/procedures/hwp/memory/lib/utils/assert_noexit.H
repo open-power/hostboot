@@ -22,3 +22,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file assert_noexit.H
+/// @brief MSS specific assert, but don't exit macro
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_ASSERT_NOEXIT_H_
+#define _MSS_ASSERT_NOEXIT_H_
+
+#include <fapi2.H>
+
+///
+/// @brief Create an error log based on __conditional__,
+/// the FFDC gathering function is called and the
+/// trace is output as a FAPI error trace. An error log
+/// is created. fapi2::current_err is set to indicate there was
+/// an error so the caller can ripple thru accordingly
+/// The caller is responsible for handling the error object.
+///
+/// @param[in] __conditional__ the condition to assert
+/// @param[in] __ffdc__ the FFDC gathering function
+/// @param[in] ... varargs, as input to FAPI_ERR
+///
+#define MSS_ASSERT_NOEXIT( __conditional__, __ffdc__, ... )             \
+    if (! (__conditional__))                                            \
+    {                                                                   \
+        __ffdc__.execute(fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);        \
+        FAPI_ERR(__VA_ARGS__);                                          \
+        fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;         \
+    }
+
+#endif

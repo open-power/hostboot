@@ -22,5 +22,101 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file p9_memory_mss_pulg_rules.xml -->
+<!-- @brief Error xml for reporing plug rules -->
+<!-- -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 2 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_TYPE_MIX</rc>
+    <description>
+      The DIMM called out differed in DIMM type than the majority on the port
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>MAJORITY_DIMM_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_RANK_CONFIG</rc>
+    <description>
+      The DIMM called out represent an unsupported rank configuration
+    </description>
+    <ffdc>RANKS_ON_DIMM0</ffdc>
+    <ffdc>RANKS_ON_DIMM1</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_SINGLE_DIMM_IN_WRONG_SLOT</rc>
+    <description>
+      The lone DIMM plugged in to the called out port is in the wrong slot
+    </description>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_RANKS_DIMM1</rc>
+    <description>
+      The DIMM called out is in 'slot 1' but contains more ranks than the other DIMM on this port.
+      DIMM which contain the greatest number of master ranks must be in the slot furthest from the controller.
+    </description>
+    <ffdc>RANKS_ON_DIMM0</ffdc>
+    <ffdc>RANKS_ON_DIMM1</ffdc>
+    <callout>
+      <target>DIMM1_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM1_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_PRIMARY_RANK_COUNT</rc>
+    <description>
+      The port called out has DIMM installed who's master ranks, when totaled,
+      exceeded the number primary ranks allowed on a port
+    </description>
+    <ffdc>TOTAL_RANKS</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

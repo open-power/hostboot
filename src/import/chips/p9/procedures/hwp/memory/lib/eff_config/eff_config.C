@@ -208,7 +208,6 @@ fapi2::ReturnCode eff_config::dram_density(const fapi2::Target<TARGET_TYPE_DIMM>
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -232,11 +231,8 @@ fapi2::ReturnCode eff_config::ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIM
     l_attrs_ranks_per_dimm[l_port_num][l_dimm_num] = l_ranks_per_dimm;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, l_mcs, l_attrs_ranks_per_dimm) );
 
-
 fapi_try_exit:
     return fapi2::current_err;
-
-
 }
 
 ///
@@ -331,7 +327,6 @@ fapi2::ReturnCode eff_config::dimm_size(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -357,8 +352,7 @@ fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE
 
 fapi_try_exit:
     return fapi2::current_err;
-
-}// dimm_type
+}
 
 ///
 /// @brief Determines & sets effective config for refresh interval time (tREFI)
@@ -552,7 +546,6 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -604,7 +597,6 @@ fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -709,7 +701,6 @@ fapi2::ReturnCode eff_config::custom_dimm(const fapi2::Target<TARGET_TYPE_DIMM>&
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -735,7 +726,6 @@ fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<TARGET_TYPE_DIMM
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
@@ -3238,7 +3228,15 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
             // give us MCA with 0 DIMM, so we'll just use a 0-filled VPD for those MCA.
             memset(l_mt_blob, 0, mss::VPD_KEYWORD_MAX);
 
-            for (const auto& d : find_targets<TARGET_TYPE_DIMM>(p))
+            const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
+
+            // If we don't have any DIMM, then just move about our business.
+            if (l_dimms.size() == 0)
+            {
+                continue;
+            }
+
+            for (const auto& d : l_dimms)
             {
                 uint8_t l_num_master_ranks = 0;
                 FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
@@ -3253,6 +3251,11 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
             // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.
             if ((l_vpd_info.iv_rank_count_dimm_0 != 0) || (l_vpd_info.iv_rank_count_dimm_1 != 0))
             {
+                // If getVPD returns us an error, then we don't have VPD for the DIMM configuration.
+                // This is the root of our plug-rules: if you want a configuration of DIMM to be
+                // supported, it needs to have VPD defined. Likewise, if you don't want a configuration
+                // of DIMM supported be sure to leave it out of the VPD. Note that we don't return a specific
+                // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
                 FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
             }
 

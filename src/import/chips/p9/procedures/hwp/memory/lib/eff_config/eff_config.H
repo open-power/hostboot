@@ -748,7 +748,21 @@ class eff_config
         ///
         fapi2::ReturnCode decode_vpd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
 
-};// eff_config
+        ///
+        /// @brief Enforce the plug-rules per MCS
+        /// @param[in] i_target FAPI2 target (MCS)
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+        ///
+        fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target);
+
+        ///
+        /// @brief Enforce the plug-rules per MCA
+        /// @param[in] i_target FAPI2 target (MCA)
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+        ///
+        fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+}; // eff_config
 
 } // mss
 

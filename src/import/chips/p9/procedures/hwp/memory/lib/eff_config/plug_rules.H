@@ -22,3 +22,88 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file plug_rules.H
+/// @brief Enforcement of rules for plugging in DIMM
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_PLUG_RULES_H_
+#define _MSS_PLUG_RULES_H_
+
+#include <fapi2.H>
+#include <cstdint>
+#include <lib/dimm/kind.H>
+
+namespace mss
+{
+
+namespace plug_rule
+{
+
+///
+/// @brief Helper to find the best represented DIMM type in a vector of dimm::kind
+/// @param[in, out] io_kinds a vector of dimm::kind
+/// @return std::pair representing the type and the count.
+/// @note the vector of kinds comes back sorted by DIMM type.
+///
+std::pair<uint8_t, uint64_t> dimm_type_helper(std::vector<dimm::kind>& io_kinds);
+
+///
+/// @brief Rank violation helper
+/// Used to record a rank configuration violation. Broken out from other checking
+/// so that we can throw a rank violation directly from VPD processing.
+/// @tparam T target type for the error log
+/// @param[in] i_target the target which constrains the rank violation checking
+/// @param[in] l_dimm0_ranks the number of ranks on the DIMM in slot 0
+/// @param[in] l_dimm1_ranks the number of ranks on the DIMM in slot 1
+/// @note Commits the proper error log; does little else
+/// @note Not presently used, but also not compiled in - left here because I think we're
+/// gonna need it eventually.
+///
+template< fapi2::TargetType T >
+inline void rank_violation(const fapi2::Target<T> i_target, const uint8_t l_dimm0_ranks, const uint8_t l_dimm1_ranks)
+{
+    // fapi2::current_err will NOT be set which is important for the caller - they can return
+    // the original ReturnCode which got us here.
+    FAPI_ERR("Rank config on %s violates the rank configuration rules. DIMM0 ranks: %d DIMM1 ranks: %d",
+             mss::c_str(i_target), l_dimm0_ranks, l_dimm1_ranks);
+
+    fapi2::MSS_PLUG_RULES_INVALID_RANK_CONFIG()
+    .set_RANKS_ON_DIMM0(l_dimm0_ranks)
+    .set_RANKS_ON_DIMM1(l_dimm1_ranks)
+    .set_TARGET(i_target).execute(fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);
+}
+
+///
+/// @brief Enforce no mixing DIMM types
+/// @param[in] i_kinds a vector of DIMM (sorted while procesing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
+/// @note This function will commit error logs representing the mixing failure
+/// @note The list of DIMM represents all the DIMM to check. So, if you want to
+/// check the consistency of types across an MCS, give the list of DIMM on that MCS.
+/// If you want to check across an MCBIST, system, etc., give that list of DIMM.
+///
+fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds);
+
+///
+/// @brief Enforce rank configs
+/// Enforces rank configurations which are not part of the VPD/rank config thing.
+/// @note Reads an MRW attribute to further limit rank configs.
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const std::vector<dimm::kind>& i_kinds);
+
+} // plug_rule
+} // mss
+
+#endif // _MSS_PLUG_RULES_H_
