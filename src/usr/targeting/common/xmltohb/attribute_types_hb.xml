@@ -1344,6 +1344,22 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
+    <id>LOCATION_CODE</id>
+    <description>Location string for OpenPOWER (only). Used in open power
+        systems to indicate the location of the part.  Typically the same
+        as the silkscreen on the motherboard.
+    </description>
+    <simpleType>
+        <string>
+            <default>undef</default>
+            <sizeInclNull>32</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>MBVPD_VERSION</id>
     <description>MBVPD Version
     </description>

@@ -104,6 +104,11 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
+    <id>chip</id>
+    <attribute><id>LOCATION_CODE</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
         <id>FSI_MASTER_MUTEX</id>
@@ -237,6 +242,11 @@
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>lcard-dimm-jedec</id>
+    <attribute><id>LOCATION_CODE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

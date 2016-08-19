@@ -99,6 +99,36 @@ enum BuildConstants
     CEN_ID_TAG          = 0x80000000,
 };
 
+void str_chomp(char* i_str)
+{
+    size_t len = strlen(i_str);
+    ssize_t i;
+
+    //Walk from the back of the str and find first
+    //non white space char
+    for(i = (len-1); i >=0; i--)
+    {
+        if((i_str[i] != ' ') &&
+           (i_str[i] != '\t') &&
+           (i_str[i] != '\n') &&
+           (i_str[i] != '\v') &&
+           (i_str[i] != '\f') &&
+           (i_str[i] != '\r'))
+        {
+            //real char --> exit loop
+            break;
+        }
+    }
+
+    // put end of str after first real char
+    // note if we fell through loop 'i' will be -1
+    // so we will return an empty str
+    i_str[i+1] = '\0';
+
+    return;
+}
+
+
 errlHndl_t readSPD(TARGETING::Target * i_dimm,
                    std::vector<uint8_t> &io_data,
                    uint8_t i_keyword)
@@ -914,19 +944,33 @@ errlHndl_t bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     i_dt->addPropertyString(xscomNode, "ecid", ecid_ascii);
     CPPASSERT(sizeof(ATTR_ECID_type) == 16);
 
-    //Add location string
-    TARGETING::EntityPath ep = i_pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
-    i_dt->addPropertyString(xscomNode, "location",ep.toString());
+    //Add location string.  Try location code first, if that isn't
+    //populated then fall back to phys path
+    ATTR_LOCATION_CODE_type l_loc_str = {'\0'};
+    if(i_pProc->tryGetAttr<ATTR_LOCATION_CODE>(l_loc_str)
+       && strlen(l_loc_str))
+    {
+        i_dt->addPropertyString(xscomNode, "ibm,slot-location-code",l_loc_str);
+    }
+    else
+    {
+        TARGETING::EntityPath ep =
+          i_pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        i_dt->addPropertyString(xscomNode, "ibm,slot-location-code",
+                                ep.toString());
+    }
 
     //Add Product Part Number
-    TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+    TARGETING::ATTR_PART_NUMBER_type l_pn = {'\0'};
     i_pProc->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+    str_chomp(reinterpret_cast<char*>(l_pn));
     i_dt->addPropertyString(xscomNode, "part-number",
                             reinterpret_cast<char*>(&l_pn[0]));
 
     //Add Product Serial Number
-    TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+    TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'\0'};
     i_pProc->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+    str_chomp(reinterpret_cast<char*>(l_sn));
     i_dt->addPropertyString(xscomNode, "serial-number",
                             reinterpret_cast<char*>(&l_sn[0]));
 
@@ -934,8 +978,27 @@ errlHndl_t bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     errhdl = readVPD(i_pProc, l_data,  DeviceFW::MVPD, MVPD::VINI, MVPD::DR);
     if (errhdl) { return errhdl; }
     l_data.push_back('\0');
+    str_chomp(reinterpret_cast<char*>(&l_data[0]));
+
+    //Slight hack to distinguish IBM vs non IBM processors
+    if(strcmp(reinterpret_cast<char*>(&l_data[0]), "PROCESSOR MODULE") == 0)
+    {
+        //tweak it to say "IBM PROC MODULE".  Note new string is smaller
+        strcpy (reinterpret_cast<char*>(&l_data[0]),
+                "IBM PROC MODULE");
+    }
     i_dt->addPropertyString(xscomNode, "board-info",
                             reinterpret_cast<char*>(&l_data[0]));
+
+    //Add Vendor.  First full word of DR, space delimited for P8
+    char* l_loc = strchr(reinterpret_cast<char*>(&l_data[0]), ' ');
+    if(l_loc) //Found insert a NULL char, otherwise it is the full string
+    {
+        *l_loc = '\0';
+    }
+    i_dt->addPropertyString(xscomNode, "vendor",
+                            reinterpret_cast<char*>(&l_data[0]));
+
 
     //Add Powerbus frequency
     i_dt->addPropertyCell32(xscomNode, "powerbus-frequency-mhz",
@@ -1652,6 +1715,7 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
                     else
                     {
                         foundvpd = true;
+                        str_chomp(drBuf);
                         i_dt->addPropertyString(rootNode, "model", drBuf);
                     }
                 }
@@ -1674,6 +1738,7 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
                 else
                 {
                     foundvpd = true;
+                    str_chomp(mmBuf);
                     i_dt->addPropertyString(rootNode, "model", mmBuf);
                 }
             }
@@ -1738,16 +1803,37 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
                 }
             }
 
+            //Add Vendor
+            std::vector<uint8_t> l_data;
+            errhdl = readVPD(l_pNode, l_data,  DeviceFW::PVPD,
+                             PVPD::OPFR, PVPD::VN);
+            // just delete any errors we get, this isn't critical
+            if( errhdl )
+            {
+                delete errhdl;
+                errhdl = NULL;
+                i_dt->addPropertyString(rootNode, "vendor", "unavailable");
+            }
+            else
+            {
+                l_data.push_back('\0');
+                str_chomp(reinterpret_cast<char*>(&l_data[0]));
+                i_dt->addPropertyString(rootNode, "vendor",
+                                        reinterpret_cast<char*>(&l_data[0]));
+            }
+
             //Add FRU info
             //Add Product Part Number
-            TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+            TARGETING::ATTR_PART_NUMBER_type l_pn = {'\0'};
             l_pNode->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+            str_chomp(reinterpret_cast<char*>(&l_pn[0]));
             i_dt->addPropertyString(rootNode, "part-number",
                                     reinterpret_cast<char*>(&l_pn[0]));
 
             //Add Product Serial Number
-            TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+            TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'\0'};
             l_pNode->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+            str_chomp(reinterpret_cast<char*>(&l_sn[0]));
             i_dt->addPropertyString(rootNode, "serial-number",
                                     reinterpret_cast<char*>(&l_sn[0]));
         }
@@ -1992,10 +2078,35 @@ errlHndl_t bld_fdt_dimm(devTree * i_dt, dtOffset_t i_membNode, Target* i_memBuf)
                 uint64_t propertyCells[2] = {l_portdimm, l_bytes};
                 i_dt->addPropertyCells64(dimmNode, "reg", propertyCells, 2);
 
-
-                TARGETING::EntityPath ep =
-                  l_dimm->getAttr<TARGETING::ATTR_PHYS_PATH>();
-                i_dt->addPropertyString(dimmNode, "location",ep.toString());
+                //Add location string.  Try location code first, if that isn't
+                //populated then fall back to phys path
+                ATTR_LOCATION_CODE_type l_loc_str = {'\0'};
+                char * l_pstr = l_loc_str;
+                if(l_dimm->tryGetAttr<ATTR_LOCATION_CODE>(l_loc_str) &&
+                   strlen(l_loc_str))
+                {
+                    //check to see if membuffer has loc string... if so
+                    //then it is on a pluggable card, need to prepend
+                    char l_tmp_str[(ATTR_LOCATION_CODE_max_chars*2) +1] ={'\0'};
+                    ATTR_LOCATION_CODE_type l_mb_str = {'\0'};
+                    if(i_memBuf->tryGetAttr<ATTR_LOCATION_CODE>(l_mb_str)
+                       && strlen(l_mb_str))
+                    {
+                        strcpy(l_tmp_str, l_mb_str);
+                        strcat(l_tmp_str, "-");
+                        strcat(l_tmp_str, l_loc_str);
+                        l_pstr = l_tmp_str;
+                    }
+                    i_dt->addPropertyString(dimmNode, "ibm,slot-location-code",
+                                            l_pstr);
+                }
+                else
+                {
+                    TARGETING::EntityPath ep =
+                      l_dimm->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                    i_dt->addPropertyString(dimmNode, "ibm,slot-location-code",
+                                            ep.toString());
+                }
 
                 if(l_dimm->getAttr<TARGETING::ATTR_HWAS_STATE>().present
                    != true)
@@ -2004,12 +2115,15 @@ errlHndl_t bld_fdt_dimm(devTree * i_dt, dtOffset_t i_membNode, Target* i_memBuf)
                     continue;
                 }
 
-                i_dt->addProperty(dimmNode, "present");
-                //Set property to indicate fault (not using)
+                //Set property to indicate disabled (not using)
                 if(l_dimm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional
                    != true)
                 {
-                    i_dt->addProperty(dimmNode, "fault");
+                    i_dt->addPropertyString(dimmNode, "status", "disabled");
+                }
+                else
+                {
+                    i_dt->addPropertyString(dimmNode, "status", "okay");
                 }
 
                 //Set Manufacturer's Name - Use JEDEC standard MFG ID
@@ -2021,20 +2135,13 @@ errlHndl_t bld_fdt_dimm(devTree * i_dt, dtOffset_t i_membNode, Target* i_memBuf)
                 //Set DDR type - Use Basic SPD Memory Type
                 errhdl = readSPD(l_dimm, l_data,  SPD::BASIC_MEMORY_TYPE);
                 if (errhdl) { break; }
-                const char * ddr_type = "unknown";
-                if (SPD::SPD_DDR3 == l_data[0])
-                {
-                    ddr_type = "ddr3";
-                }else if (SPD::SPD_DDR4 == l_data[0])
-                {
-                    ddr_type = "ddr4";
-                }
-                i_dt->addPropertyString(dimmNode, "spd-memory-type", ddr_type);
+                i_dt->addPropertyCell32(dimmNode, "memory-id", l_data[0]);
 
                 //Set Product Part/Model Number
                 errhdl = readSPD(l_dimm, l_data,  SPD::MODULE_PART_NUMBER);
                 if (errhdl) { break; }
                 l_data.push_back('\0');
+                str_chomp(reinterpret_cast<char*>(&l_data[0]));
                 i_dt->addPropertyString(dimmNode, "part-number",
                                         reinterpret_cast<char*>(&l_data[0]));
 
@@ -2220,9 +2327,28 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             i_dt->addPropertyCell32(membNode, "#address-cells", 1);
             i_dt->addPropertyCell32(membNode, "#size-cells", 1);
 
-            TARGETING::EntityPath ep =
-              l_mb->getAttr<TARGETING::ATTR_PHYS_PATH>();
-            i_dt->addPropertyString(membNode, "location",ep.toString());
+            //If the CENTAUR_ECID_FRU_ID is 0xFF then this membuf is on a
+            //fru (riser card).  Add location string.
+            //  Try location code first, if that isn't
+            //populated then fall back to phys path
+            if(l_mb->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>() == 0xFF)
+            {
+
+                ATTR_LOCATION_CODE_type l_loc_str = {'\0'};
+                if(l_mb->tryGetAttr<ATTR_LOCATION_CODE>(l_loc_str)
+                   && strlen(l_loc_str))
+                {
+                    i_dt->addPropertyString(membNode, "ibm,slot-location-code",
+                                            l_loc_str);
+                }
+                else
+                {
+                    TARGETING::EntityPath ep =
+                      l_mb->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                    i_dt->addPropertyString(membNode, "ibm,slot-location-code",
+                                            ep.toString());
+                }
+            }
 
             // Add dimm info
             errhdl = bld_fdt_dimm(i_dt, membNode, l_mb);
@@ -2232,8 +2358,6 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             {
                 continue;
             }
-
-            i_dt->addProperty(membNode, "present");
 
             //Add some info to the memory buffer
             i_dt->addPropertyCell32(membNode, "frequency-mhz",
@@ -2246,14 +2370,16 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             if(l_mb->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>() == 0xFF)
             {
                 //Add Product Part Number
-                TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+                TARGETING::ATTR_PART_NUMBER_type l_pn = {'\0'};
                 l_mb->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+                str_chomp(reinterpret_cast<char*>(&l_pn[0]));
                 i_dt->addPropertyString(membNode, "part-number",
                                         reinterpret_cast<char*>(&l_pn[0]));
 
                 //Add Product Serial Number
-                TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+                TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'\0'};
                 l_mb->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+                str_chomp(reinterpret_cast<char*>(&l_sn[0]));
                 i_dt->addPropertyString(membNode, "serial-number",
                                         reinterpret_cast<char*>(&l_sn[0]));
 
@@ -2262,6 +2388,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                                  CVPD::OPFR, CVPD::DR);
                 if (errhdl) { break; }
                 l_data.push_back('\0');
+                str_chomp(reinterpret_cast<char*>(&l_data[0]));
                 i_dt->addPropertyString(membNode, "board-info",
                                         reinterpret_cast<char*>(&l_data[0]));
 
@@ -2270,17 +2397,22 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                                  CVPD::OPFR, CVPD::VN);
                 if (errhdl) { break; }
                 l_data.push_back('\0');
+                str_chomp(reinterpret_cast<char*>(&l_data[0]));
                 i_dt->addPropertyString(membNode, "vendor",
                                         reinterpret_cast<char*>(&l_data[0]));
             }
 
-            //Set property to indicate fault (not using)
-            //and don't add anything else (OPAL keys off of it to
-            //actively use the chip)
+            //Set property to indicate disabled (not using)
+            //and don't add anything else (OPAL keys off of the rest
+            //of the dev tree info to actively use the chip)
             if(l_mb->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
             {
-                i_dt->addProperty(membNode, "fault");
+                i_dt->addPropertyString(membNode, "status", "disabled");
                 continue;
+            }
+            else
+            {
+                i_dt->addPropertyString(membNode, "status", "okay");
             }
 
             // Add membuf ECIDs
@@ -2762,6 +2894,73 @@ void bld_fdt_mnfgMode(devTree * i_dt, bool i_smallTree)
     return;
 }
 
+void parse_add_version_str(devTree * i_dt, dtOffset_t& i_fwNode, char* i_ver)
+{
+    // PNOR version strings are not easily consumable
+    // Split them up into property/version
+    // The following strings are supported:
+    const char * cmp_str[] = {"open-power", "buildroot", "skiboot",
+    "hostboot-binaries", "hostboot", "linux", "petitboot", "occ",
+    "capp-ucode"};
+    bool found = false;
+    size_t ver_len = strlen(i_ver);
+
+    // Loop on all strings looking for a match
+    // Example input is
+    //   "open-power-firestone-v1.8"
+    //   "linux-4.4.6-openpower1-8420e0f"
+    // Desired output in devtree is
+    //   open-power = "firestone-v1.8";
+    //   linux = "4.4.6-openpower1-8420e0f";
+    for(size_t i = 0; i < (sizeof(cmp_str)/sizeof(cmp_str[0])) && !found; i++)
+    {
+        //If the size of the input is less than search key, can't be it... skip
+        size_t key_len = strlen(cmp_str[i]);
+        if (ver_len < key_len) continue;
+
+        if(memcmp(i_ver, cmp_str[i], key_len) == 0)
+        {
+            //Found a match, copy
+            char * l_prop = i_ver+key_len+1; //increment past "key-"
+            i_dt->addPropertyString(i_fwNode, cmp_str[i], l_prop );
+            found = true; //Stop looking
+        }
+    }
+
+    // If not found need to check for "xml" as it doesn't follow a well known
+    // pattern since the system name is in the key
+    // ie "firestone-xml-15e3718" --> firestone-xml = "15e3718"
+    if(!found)
+    {
+        const char * l_key = "xml";
+        char * loc =
+         reinterpret_cast<char*> (memmem(i_ver, ver_len, l_key, strlen(l_key)));
+        if(loc) //Found
+        {
+            //Drop a NULL char in the "-" after the xml to make two strings
+            size_t l_endofprop = (loc-i_ver) + strlen(l_key);
+            i_ver[l_endofprop] = NULL;
+            char * l_prop = i_ver+l_endofprop+1; //increment past "key-"
+            i_dt->addPropertyString(i_fwNode, i_ver, l_prop );
+            found = true; //Stop looking
+        }
+    }
+
+    // If didn't find any expected key
+    // just add as key to first '-', and everything after is property value
+    if(!found)
+    {
+        char* l_loc = strchr(i_ver, '-');
+        if(l_loc) //Found
+        {
+            //Drop a NULL char in the found "-" to make two strings
+            *l_loc = '\0';
+            l_loc++;
+            i_dt->addPropertyString(i_fwNode, i_ver, l_loc );
+        }
+    }
+}
+
 errlHndl_t bld_fdt_fw_info(devTree * i_dt, bool i_smallTree)
 {
     // Nothing to do for small trees currently.
@@ -2775,7 +2974,7 @@ errlHndl_t bld_fdt_fw_info(devTree * i_dt, bool i_smallTree)
     {
         /* Find the / node and add a vpd node under it. */
         dtOffset_t rootNode = i_dt->findNode("/");
-        dtOffset_t fwNode = i_dt->addNode(rootNode, "ibm,firmware");
+        dtOffset_t fwNode = i_dt->addNode(rootNode, "ibm,firmware-versions");
 
         // Grab a system object to work with
         TARGETING::Target* sys = NULL;
@@ -2800,7 +2999,8 @@ errlHndl_t bld_fdt_fw_info(devTree * i_dt, bool i_smallTree)
             {
                 //Add existing version string
                 l_data.push_back('\0');
-                i_dt->addProperty(fwNode,reinterpret_cast<char*>(&l_data[0]));
+                parse_add_version_str(i_dt, fwNode,
+                                      reinterpret_cast<char*>(&l_data[0]));
 
                 //Clear for next version string
                 l_data.clear();

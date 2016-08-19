@@ -182,7 +182,6 @@ sub printAttribute
     $filter{PCIE_NUM_LANES}                 = 1;
     $filter{PHB_NUM}                        = 1;
     $filter{IOP_NUM}                        = 1;
-    $filter{LOCATION_CODE}                  = 1;
     $filter{MCS_NUM}                        = 1;
     $filter{SCHEMATIC_INTERFACE}            = 1;
     $filter{ENTITY_ID}                      = 1;

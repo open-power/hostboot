@@ -409,6 +409,28 @@ sub processBmc
     }
 }
 
+sub customizeLocation
+{
+    my $targetObj = shift;
+    my $target = shift;
+
+    ##If this target is on a daughter card/socket serverwiz only represents a
+    ##single instance and the unique location code is on the connector.  Search
+    ##for a connector in the parent tree -- if found then set, otherwise don't
+    ##touch
+    my $parent_target = $targetObj->getTargetParent($target);
+    while ( $targetObj->getTargetType($parent_target) ne "card-motherboard" ) {
+        my $parent_class = $targetObj->getAttribute($parent_target, "CLASS");
+        if ( $parent_class eq "CONNECTOR" ) {
+            $targetObj->copyAttribute($parent_target,$target,"LOCATION_CODE");
+            last;
+        }
+
+        #get parent's parent
+        $parent_target = $targetObj->getTargetParent($parent_target);
+    }
+ }
+
 
 sub parseBitwise
 {
@@ -444,12 +466,10 @@ sub processProcessor
     ## The grandparent is guaranteed to be socket.
     my $socket_target =
        $targetObj->getTargetParent($targetObj->getTargetParent($target));
-    $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
 
     ## Module attibutes are inherited into the proc target
     my $module_target =
        $targetObj->getTargetParent($target);
-    $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
 
     ## Copy all attributes from module
     foreach my $attr (sort (keys
@@ -457,6 +477,8 @@ sub processProcessor
     {
         $targetObj->copyAttribute($module_target,$target,$attr);
     }
+
+    customizeLocation($targetObj,$target);
 
     ## Copy PCIE attributes from socket
     ## Copy Position attribute from socket
@@ -1098,6 +1120,8 @@ sub processMembuf
         return;
     }
 
+    customizeLocation($targetObj,$target);
+
     processMembufVpdAssociation($targetObj,$target);
 
     ## finds which gpio expander that controls vddr regs for membufs
@@ -1145,6 +1169,14 @@ sub processMembuf
          }
     }
 
+    ## Customize all the dimm locations under this membuf
+    my $dimms=$targetObj->findConnections($target,"I2C","SPD");
+    if ($dimms ne "") {
+        foreach my $dimm (@{$dimms->{CONN}}) {
+            my $dimm_target = $targetObj->getTargetParent($dimm->{DEST_PARENT});
+            customizeLocation($targetObj, $dimm_target);
+        }
+    }
 
     ## Process MEMBUF to DIMM I2C connections
     my @addr_map=('0','0','0','0','0','0','0','0');

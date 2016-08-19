@@ -204,6 +204,8 @@ else
     handleTgtPtrAttributesHb(\$attributes, \%Target_t);
 }
 
+cleanupNullStrAttributeDefaults($attributes);
+
 # Open the output files and write them
 if( !($cfgSrcOutputDir =~ "none") )
 {
@@ -708,6 +710,48 @@ sub getPeerHuid
 
     return $peerHUID;
 }
+
+sub cleanupNullStrAttributeDefaults
+{
+    my($attributes) = @_;
+
+
+    ## The perl xml parser will convert a "empty" default ATTR
+    ## type for a string into a hash -- which will result in a
+    ## string of "0" being placed in the bin instead of ""
+    ## Real strings work fine though -- go figure.  Do a simple
+    ## loop to clean them up
+
+    my %strAttrList;
+
+    ## Build list of ATTR that are <simpleType><string>
+    foreach my $attribute (@{$attributes->{attribute}})
+    {
+        if (exists $attribute->{simpleType} &&
+            exists $attribute->{simpleType}->{string})
+        {
+            #Only add once
+            if(!exists($strAttrList{$attribute->{id}}))
+            {
+                $strAttrList{$attribute->{id}} = 1;
+            }
+        }
+    }
+
+    foreach my $targetInstance (@{$attributes->{targetInstance}})
+    {
+        foreach my $attr (@{$targetInstance->{attribute}})
+        {
+            if (exists $attr->{default} &&
+                exists $strAttrList{$attr->{id}} &&
+                (ref $attr->{default} eq ref {}))
+            {
+                $attr->{default} = "";
+            }
+        }
+    }
+}
+
 
 sub SOURCE_FILE_GENERATION_FUNCTIONS { }
 
