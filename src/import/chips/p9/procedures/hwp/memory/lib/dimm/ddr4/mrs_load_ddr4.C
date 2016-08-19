@@ -60,8 +60,12 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_INF("ddr4::mrs_load %s", mss::c_str(i_target));
 
-    // Per DDR4MRS02 table 104 - timing requirements
-    static const uint64_t tMRD = 8;
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    constexpr uint64_t tMRD = 8;
+    constexpr uint64_t tZQinit = 1024;
+    uint64_t l_freq = 0;
+    uint64_t tDLLK = 0;
+    fapi2::buffer<uint16_t> l_cal_steps;
 
     static std::vector< mrs_data<TARGET_TYPE_MCBIST> > l_mrs_data =
     {
@@ -78,6 +82,11 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     std::vector< uint64_t > l_ranks;
     FAPI_TRY( mss::ranks(i_target, l_ranks) );
 
+    // Calculate tDLLK from our frequency. Magic numbers (in clocks) from the DDR4 spec
+    FAPI_TRY( mss::freq(mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_freq) );
+    tDLLK = (l_freq < fapi2::ENUM_ATTR_MSS_FREQ_MT2133) ? 597 : 768;
+
+    // Load MRS
     for (const auto& d : l_mrs_data)
     {
         for (const auto& r : l_ranks)
@@ -109,6 +118,37 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
             FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", uint8_t(d.iv_mrs), d.iv_delay,
                      l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), r);
             FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", uint8_t(d.iv_mrs), d.iv_delay,
+                     l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), r);
+
+            // Add both to the CCS program
+            io_inst.push_back(l_inst_a_side);
+            io_inst.push_back(l_inst_b_side);
+        }
+    }
+
+    // Load ZQ Cal Long instruction only if the bit in the cal steps says to do so.
+    FAPI_TRY( mss::cal_step_enable(i_target, l_cal_steps) );
+
+    if (l_cal_steps.getBit<EXT_ZQCAL>() != 0)
+    {
+        for (const auto& r : l_ranks)
+        {
+            // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
+            ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_a_side = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_target, r);
+            ccs::instruction_t<TARGET_TYPE_MCBIST> l_inst_b_side;
+
+            FAPI_TRY( mss::address_mirror(i_target, r, l_inst_a_side) );
+            l_inst_b_side = mss::address_invert(l_inst_a_side);
+
+            l_inst_a_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + tZQinit);
+            l_inst_b_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + tZQinit);
+
+            // There's nothing to decode here.
+            FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d a-side",
+                     l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), r);
+            FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d b-side",
                      l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), r);
 
             // Add both to the CCS program
