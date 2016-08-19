@@ -280,7 +280,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         l_info.size += PAGESIZE; // add a page to size to account for the header
 
         // it's a coding error if l_info.vaddr is not in secure space
-        assert(l_info.vaddr >= SBASE_VADDR);
+        assert(l_info.vaddr >= SBASE_VADDR, "For section %s, getSectionInfo"
+            " returned a non secure space address", l_info.name);
 
         // Note: A pointer to virtual memory in one PNOR space can be converted
         // to a pointer to any of the other two PNOR spaces and visa versa.
@@ -337,7 +338,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
                              l_tempAddr, 128);
 
         // store secure space pointer in load record
-        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr) + PAGESIZE;
 
         TRACFCOMP(g_trac_pnor,"section start address in secure space is "
                               "0x%.16llX",o_rec->secAddr);
@@ -391,14 +392,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // keep track of info size in load record
         o_rec->infoSize = l_totalContainerSize - PAGESIZE;
 
-        // skip the header to block secure header access
-        uint8_t* l_securePayloadStart = o_rec->secAddr + PAGESIZE;
-
         // set permissions on the secured pages to writable
-        l_errhdl = setPermission(o_rec->secAddr,
-                                          o_rec->textSize + PAGESIZE, WRITABLE);
-        // TODO RTC 156118 - change above two lines of code to below:
-        //l_errhdl = setPermission(l_securePayloadStart, o_rec->textSize, WRITABLE);
+        l_errhdl = setPermission(o_rec->secAddr, o_rec->textSize, WRITABLE);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
@@ -425,7 +420,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
                     "payload",
                     l_info.name);
 
-            l_errhdl = setPermission(l_securePayloadStart + o_rec->textSize,
+            l_errhdl = setPermission(o_rec->secAddr + o_rec->textSize,
                                        unprotectedPayloadSize,
                                        WRITABLE | WRITE_TRACKED);
             if(l_errhdl)
@@ -437,7 +432,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
             // Register the write tracked memory range to be flushed on
             // shutdown.
-            INITSERVICE::registerBlock(l_securePayloadStart + o_rec->textSize,
+            INITSERVICE::registerBlock(o_rec->secAddr + o_rec->textSize,
                                         unprotectedPayloadSize, SPNOR_PRIORITY);
         }
         else
@@ -506,10 +501,7 @@ void SPnorRP::waitForMessage()
                         // check and see if our cached section information
                         // is obsolete and if so, change it
                         if ( (eff_addr < l_rec.secAddr) ||
-                             (eff_addr >= (l_rec.secAddr + l_rec.infoSize
-                                                                   + PAGESIZE))
-                            // TODO RTC 156118 remove the PAGESIZE adjustment
-                            // as soon as getSectionInfo offset change is in
+                             (eff_addr >= (l_rec.secAddr + l_rec.infoSize))
                            )
                         {
                             bool l_found = false;
@@ -522,8 +514,7 @@ void SPnorRP::waitForMessage()
                                 LoadRecord* l_record = (*i).second;
                                 if ( (eff_addr >= l_record->secAddr) &&
                                      (eff_addr < (l_record->secAddr +
-                                                l_record->infoSize + PAGESIZE))
-                                    // TODO RTC 156118 also remove this PAGESIZE
+                                                l_record->infoSize))
                                    )
                                 {
                                     l_rec = *l_record;
@@ -555,10 +546,7 @@ void SPnorRP::waitForMessage()
                         // whether it is part of the secure payload.
                         // by the way, this if could be removed to make this
                         // purely arithmetic
-                        if (eff_addr >= (l_rec.secAddr + l_rec.textSize
-                                                                 + PAGESIZE))
-                        // TODO RTC 156118 remove the PAGESIZE adjustment after
-                        // the getSectionOffset stuff gets closed out
+                        if (eff_addr >= (l_rec.secAddr + l_rec.textSize))
                         {
                             delta += VMM_VADDR_SPNOR_DELTA;
                         }
@@ -571,10 +559,7 @@ void SPnorRP::waitForMessage()
                         memcpy(user_addr, eff_addr - delta, PAGESIZE);
                         // if the page came from temp space then free up
                         // the temp page now that we're done with it
-                        if (eff_addr < (l_rec.secAddr + l_rec.textSize
-                                                                   + PAGESIZE))
-                        // TODO RTC 156118 remove the PAGESIZE adjustment here
-                        // as well for the same reason as above
+                        if (eff_addr < (l_rec.secAddr + l_rec.textSize))
                         {
                             mm_remove_pages(RELEASE, eff_addr - delta,
                                             PAGESIZE);
