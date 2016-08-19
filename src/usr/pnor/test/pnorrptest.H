@@ -72,8 +72,9 @@ class PnorRpTest : public CxxTest::TestSuite
             PNOR::HB_DATA,        /**< Hostboot Data */
             PNOR::DIMM_JEDEC_VPD, /**< DIMM JEDEC VPD */
             PNOR::MODULE_VPD,     /**< Module VPD */
+            PNOR::RINGOVD,        /**< Ring override data */
         };
-        uint64_t numSections = 5;
+        uint64_t numSections = 6;
 
         for( uint64_t idx = 0; idx < numSections; idx++)
         {
