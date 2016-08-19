@@ -106,7 +106,7 @@ struct EffGroupingSysAttrs
 
     // Public data
     uint8_t iv_selectiveMode = 0;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
-    uint8_t iv_enhancedNoMirrorMode = 0; // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING
+    uint8_t iv_hwMirrorEnabled = 0;      // ATTR_MRW_HW_MIRRORING_ENABLE
     uint8_t iv_fabricAddrBarMode = 0;    // ATTR_PROC_FABRIC_ADDR_BAR_MODE
     uint8_t iv_groupsAllowed = 0;        // ATTR_MSS_INTERLEAVE_ENABLE
 };
@@ -125,10 +125,10 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
              "Error getting ATTR_MEM_MIRROR_PLACEMENT_POLICY, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Get enhanced grouping option
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING,
-                           FAPI_SYSTEM, iv_enhancedNoMirrorMode),
-             "Error getting ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, l_rc 0x%.8X",
+    // Get mirror option
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE,
+                           FAPI_SYSTEM, iv_hwMirrorEnabled),
+             "Error getting ATTR_MRW_HW_MIRRORING_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Get Fabric address BAR mode
@@ -146,7 +146,7 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
     // Display attribute values
     FAPI_INF("EffGroupingSysAttrs: ");
     FAPI_INF("   ATTR_MEM_MIRROR_PLACEMENT_POLICY 0x%.8X", iv_selectiveMode);
-    FAPI_INF("   ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING 0x%.8X", iv_enhancedNoMirrorMode);
+    FAPI_INF("   ATTR_MRW_HW_MIRRORING_ENABLE 0x%.8X", iv_hwMirrorEnabled);
     FAPI_INF("   ATTR_PROC_FABRIC_ADDR_BAR_MODE 0x%.8X", iv_fabricAddrBarMode);
     FAPI_INF("   ATTR_MSS_INTERLEAVE_ENABLE 0x%.8X", iv_groupsAllowed);
 
@@ -773,7 +773,7 @@ void EffGroupingBaseSizeData::setBaseSizeData(
     }
 
     // Process mirrored ranges
-    if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+    if (i_sysAttrs.iv_hwMirrorEnabled)
     {
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
@@ -1145,7 +1145,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
              (uint64_t)fapi2::current_err);
 
     // Mirror mode attribute setting
-    if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+    if (i_sysAttrs.iv_hwMirrorEnabled)
     {
 
         // Set ATTR_PROC_MIRROR_BASES
@@ -1195,7 +1195,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
     FAPI_INF("ATTR_PROC_OCC_SANDBOX_BASE_ADDR: 0x%.16llX", iv_occ_sandbox_base);
 
     // Display mirror mode attribute values
-    if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+    if (i_sysAttrs.iv_hwMirrorEnabled)
     {
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
@@ -1261,13 +1261,12 @@ fapi2::ReturnCode grouping_checkValidAttributes(
     fapi2::ReturnCode l_rc;
 
     // If mirror is disabled, then can not be in FLIPPED mode
-    if (i_sysAttrs.iv_enhancedNoMirrorMode)
+    if (!i_sysAttrs.iv_hwMirrorEnabled)
     {
         FAPI_ASSERT(i_sysAttrs.iv_selectiveMode !=
                     fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED,
                     fapi2::MSS_EFF_CONFIG_MIRROR_DISABLED()
-                    .set_MRW_ENHANCED_GROUPING_NO_MIRRORING(
-                        i_sysAttrs.iv_enhancedNoMirrorMode)
+                    .set_MRW_HW_MIRRORING_ENABLE(i_sysAttrs.iv_hwMirrorEnabled)
                     .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
                     "grouping_checkValidAttributes: Error: Mirroring disabled "
                     "but ATTR_MEM_MIRROR_PLACEMENT_POLICY is in FLIPPED mode");
@@ -2442,7 +2441,7 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
     }
 
     // Display mirror groups
-    if (!i_sysAttrs.iv_enhancedNoMirrorMode)
+    if (i_sysAttrs.iv_hwMirrorEnabled)
     {
         for (uint8_t ii = 0; ii < i_groupData.iv_numGroups; ii++)
         {
@@ -2590,7 +2589,7 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     FAPI_INF("Total non-mirrored size %u GB", l_groupData.iv_totalSizeNonMirr);
 
-    if (!l_sysAttrs.iv_enhancedNoMirrorMode)
+    if (l_sysAttrs.iv_hwMirrorEnabled)
     {
         // Calculate base and alt-base addresses
         FAPI_TRY(grouping_calcMirrorMemory(i_target, l_procAttrs, l_groupData),
@@ -2599,7 +2598,7 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     }
     else
     {
-        // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING is true
+        // ATTR_MRW_HW_MIRRORING_ENABLE is false
         // Calculate base and alt-base addresses
         grouping_calcNonMirrorMemory(l_procAttrs, l_groupData);
     }
