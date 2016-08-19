@@ -116,6 +116,7 @@ class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
             // ARR0
             ARR0_DDR_ADDRESS_0_13 = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13,
             ARR0_DDR_ADDRESS_0_13_LEN = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13_LEN,
+            ARR0_DDR_ADDRESS_10 = 10, // ADR10 is the 10th bit from the left in Nimbus ARR0
             ARR0_DDR_ADDRESS_17 = MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_17,
             ARR0_DDR_BANK_GROUP_1 = MCBIST_CCS_INST_ARR0_00_DDR_BANK_GROUP_1,
             ARR0_DDR_RESETN = MCBIST_CCS_INST_ARR0_00_DDR_RESETN,
@@ -305,6 +306,8 @@ class program
 
 ///
 /// @brief Common setup for all MRS/RCD instructions
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in,out] i_arr0 fapi2::buffer<uint64_t> representing the ARR0 of the instruction
 /// @return void
 ///
@@ -328,7 +331,8 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 
 ///
 /// @brief Create, initialize an RCD (RCW - JEDEC) CCS command
-/// @tparam T the fapi2 type of the unit which contains the CCS engine
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
 /// @return the RCD CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
@@ -360,7 +364,8 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
 ///
 /// @brief Create, initialize an MRS CCS command
-/// @tparam T the fapi2 type of the unit which contains the CCS engine
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target  the DIMM this instruction is headed for
 /// @param[in] i_rank the rank on this dimm
 /// @param[in] i_mrs the specific MRS
@@ -394,7 +399,8 @@ inline instruction_t<T> mrs_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
 ///
 /// @brief Create, initialize a JEDEC Device Deselect CCS command
-/// @tparam T the fapi2 type of the unit containing the CCS engine
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @return the Device Deselect CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
@@ -422,6 +428,8 @@ inline instruction_t<T> des_command()
 
 ///
 /// @brief Create, initialize an instruction which indicates an initial cal
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_rp the rank-pair (rank) to cal
 /// @return the initial cal instruction
 ///
@@ -450,6 +458,40 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
     return l_inst;
 }
 
+///
+/// @brief Setup ZQ Long instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target  the DIMM this instruction is headed for
+/// @param[in] i_rank the rank on this dimm
+/// @return the MRS CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> zqcl_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank )
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(0b1111);
+
+    // ACT is high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
+
+    // RAS/CAS high, WE low
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_16>();
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_15>();
+    l_boilerplate_arr0.clearBit<TT::ARR0_DDR_ADDRESS_14>();
+
+    // ADDR10/AP is high
+    l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
+
+    return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+}
+
 //
 // These functions are a little sugar to keep callers from doing the traits-dance to get the
 // appropriate bit field
@@ -457,8 +499,8 @@ inline instruction_t<T> initial_cal_command(const uint64_t i_rp)
 
 ///
 /// @brief Select the port(s) to be used by the CCS
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
 /// @return void
@@ -483,8 +525,8 @@ fapi_try_exit:
 ///
 /// @brief User sets to a '1'b to tell the Hdw to stop CCS whenever failure occurs. When a
 ///        '0'b, Hdw will continue CCS even if a failure occurs.
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in]  the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @param[in] i_value true iff stop whenever failure occurs.
@@ -498,8 +540,8 @@ inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buf
 
 ///
 /// @brief Disable ECC checking on the CCS arrays
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @return void
@@ -514,8 +556,8 @@ inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buf
 ///
 /// @brief User sets to a '1'b to force the Hdw to ignore any array ue or sue errors
 ///        during CCS command fetching.
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @param[in] i_value true iff ignore any array ue or sue errors.
@@ -529,8 +571,8 @@ inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buff
 
 ///
 /// @brief DDr calibration counter
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @param[in] i_count the count to wait for DDR cal to complete.
@@ -564,8 +606,8 @@ void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_
 
 ///
 /// @brief Read the modeq register appropriate for this target
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -579,8 +621,8 @@ inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buf
 
 ///
 /// @brief Write the modeq register appropriate for this target
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -593,9 +635,8 @@ inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fap
 
 ///
 /// @brief Execute a set of CCS instructions - multiple ports
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam P the fapi2::TargetType of the ports - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
@@ -608,9 +649,8 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
 ///
 /// @brief Execute a set of CCS instructions - single port
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam P the fapi2::TargetType of the ports - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_port the port
@@ -628,16 +668,19 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
 ///
 /// @brief Execute a CCS array already loaded in to the engine
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target, ccs::program<T>& i_program);
+
 ///
 /// @brief Start or stop the CCS engine
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_start_stop bool MSS_CCS_START for starting MSS_CCS_STOP otherwise
 /// @return FAPI2_RC_SUCCESS iff success
@@ -647,6 +690,8 @@ fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, bool i_start_sto
 
 ///
 /// @brief Query the status of the CCS engine
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[out] io_status The query result first being the result, second the type
 /// @return FAPI2_RC_SUCCESS iff success
