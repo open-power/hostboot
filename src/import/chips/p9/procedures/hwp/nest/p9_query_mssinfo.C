@@ -74,7 +74,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
     uint64_t occ_base;
     uint64_t occ_size;
     uint8_t  mirror_policy;
-    uint8_t  no_mirror;
+    uint8_t  l_mirrorEnabled;
     char     chipid[200];
     char l_target_string[fapi2::MAX_ECMD_STRING_LEN];
 
@@ -196,14 +196,14 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
                  (uint64_t)fapi2::current_err);
 
         //Mirrored memory attributes read if enabled
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING,
-                               i_vect_pu_targets[i].getParent<fapi2::TARGET_TYPE_SYSTEM>(), no_mirror),
-                 "Error reading ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, l_rc 0x%.8X",
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE,
+                               i_vect_pu_targets[i].getParent<fapi2::TARGET_TYPE_SYSTEM>(), l_mirrorEnabled),
+                 "Error reading ATTR_MRW_HW_MIRRORING_ENABLE, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
-        FAPI_DBG("p9_query_mssinfo: Current no_mirror=%u!\n", no_mirror);
+        FAPI_DBG("p9_query_mssinfo: Current l_mirrorEnabled=%u!\n", l_mirrorEnabled);
 
-        if (no_mirror == 0)
+        if (l_mirrorEnabled == 1)
         {
             // ATTR_PROC_MIRROR_SIZES
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_SIZES, i_vect_pu_targets[i], mirror_sizes),
@@ -293,7 +293,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
         // Print out memory reservations
         //------------------------------------------------------------------------------------------------------------------------
         if(((mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL ) ||
-            (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)    ) && (no_mirror == 0) )
+            (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)    ) && (l_mirrorEnabled == 1) )
         {
             // ATTR_PROC_NHTM_BAR_BASE_ADDR: Get Nest Hardware Trace Macro (NHTM) bar base addr
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_vect_pu_targets[i], nhtm_base),
