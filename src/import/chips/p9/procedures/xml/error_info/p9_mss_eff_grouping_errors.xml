@@ -32,10 +32,10 @@
     <description>
         Mirroring is disabled but Mirror placement policy is flipped.
         Firmware error.
-        - ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING is true
+        - ATTR_MRW_HW_MIRRORING_ENABLE is true
         - ATTR_MEM_MIRROR_PLACEMENT_POLICY is FLIPPED
     </description>
-    <ffdc>MRW_ENHANCED_GROUPING_NO_MIRRORING</ffdc>
+    <ffdc>MRW_HW_MIRRORING_ENABLE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
       <procedure>CODE</procedure>
