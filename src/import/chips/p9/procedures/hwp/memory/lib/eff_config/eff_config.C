@@ -2861,21 +2861,16 @@ fapi2::ReturnCode eff_config::geardown_mode(const fapi2::Target<TARGET_TYPE_DIMM
     // Attribute storage
     uint8_t l_2n_autoset = 0;
     uint8_t l_2n_mrw_mode = 0;
-    FAPI_TRY( mss::vpd_mr_mc_2n_mode_autoset(i_target, l_2n_autoset) );
+    FAPI_TRY( mss::vpd_mr_mc_2n_mode_autoset(l_mcs, l_2n_autoset) );
     FAPI_TRY( mss::mrw_dram_2n_mode(l_2n_mrw_mode) );
 
     // Geardown maps directly to autoset = 0 gets 1/2 rate, 1 get 1/4 rate.
     FAPI_TRY( eff_geardown_mode(l_mcs, l_attrs_geardown_mode.data()) );
 
     // If the MRW states 'auto' we use what's in VPD, otherwise we use what's in the MRW.
-    // (Errr ... does this make sense? The MRW is really just another form of VPD ...)
-    if (l_2n_mrw_mode != fapi2::ENUM_ATTR_MSS_MRW_DRAM_2N_MODE_AUTO)
-    {
-        // MRW values are 1 and 2 (to make room for 0 being the default.) So we subtract one.
-        l_2n_autoset = l_2n_mrw_mode - 1;
-    }
-
-    l_attrs_geardown_mode[l_port_num] = l_2n_autoset;
+    // We remove 1 from the value as that matches the expectations in the MR perfectly.
+    l_attrs_geardown_mode[l_port_num] = (l_2n_mrw_mode != fapi2::ENUM_ATTR_MSS_MRW_DRAM_2N_MODE_AUTO) ?
+                                        l_2n_mrw_mode - 1 : l_2n_autoset - 1;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_GEARDOWN_MODE,
                             l_mcs,

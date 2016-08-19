@@ -25,7 +25,7 @@
 <attributes>
     <attribute>
         <id>ATTR_MSS_VPD_MR_0_VERSION_LAYOUT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
         </description>
@@ -40,7 +40,7 @@
 
     <attribute>
         <id>ATTR_MSS_VPD_MR_1_VERSION_DATA</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
         </description>
@@ -55,7 +55,7 @@
 
     <attribute>
         <id>ATTR_MSS_VPD_MR_2_SIGNATURE_HASH</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
         </description>
@@ -69,6 +69,54 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_VPD_MR_DPHY_GPO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Global phy offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssBlobStart>6</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_dphy_gpo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MR_DPHY_RLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Read latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssBlobStart>8</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_dphy_rlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MR_DPHY_WLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Write latency offset in number of clocks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>nCK</mssUnits>
+        <mssBlobStart>10</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_dphy_wlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -78,7 +126,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>6</mssBlobStart>
+        <mssBlobStart>12</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a00</mssAccessorName>
         <array>2</array>
@@ -94,7 +142,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>8</mssBlobStart>
+        <mssBlobStart>14</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a01</mssAccessorName>
         <array>2</array>
@@ -110,7 +158,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>10</mssBlobStart>
+        <mssBlobStart>16</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a02</mssAccessorName>
         <array>2</array>
@@ -126,7 +174,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>12</mssBlobStart>
+        <mssBlobStart>18</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a03</mssAccessorName>
         <array>2</array>
@@ -142,7 +190,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>14</mssBlobStart>
+        <mssBlobStart>20</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a04</mssAccessorName>
         <array>2</array>
@@ -158,7 +206,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>16</mssBlobStart>
+        <mssBlobStart>22</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a05</mssAccessorName>
         <array>2</array>
@@ -174,7 +222,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>18</mssBlobStart>
+        <mssBlobStart>24</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a06</mssAccessorName>
         <array>2</array>
@@ -190,7 +238,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>20</mssBlobStart>
+        <mssBlobStart>26</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a07</mssAccessorName>
         <array>2</array>
@@ -206,7 +254,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>22</mssBlobStart>
+        <mssBlobStart>28</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a08</mssAccessorName>
         <array>2</array>
@@ -222,7 +270,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>24</mssBlobStart>
+        <mssBlobStart>30</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a09</mssAccessorName>
         <array>2</array>
@@ -238,7 +286,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>26</mssBlobStart>
+        <mssBlobStart>32</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a10</mssAccessorName>
         <array>2</array>
@@ -254,7 +302,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>28</mssBlobStart>
+        <mssBlobStart>34</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a11</mssAccessorName>
         <array>2</array>
@@ -270,7 +318,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>30</mssBlobStart>
+        <mssBlobStart>36</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a12</mssAccessorName>
         <array>2</array>
@@ -286,7 +334,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>32</mssBlobStart>
+        <mssBlobStart>38</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a13</mssAccessorName>
         <array>2</array>
@@ -302,7 +350,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>34</mssBlobStart>
+        <mssBlobStart>40</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_a17</mssAccessorName>
         <array>2</array>
@@ -318,7 +366,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>36</mssBlobStart>
+        <mssBlobStart>42</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_ba0</mssAccessorName>
         <array>2</array>
@@ -334,7 +382,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>38</mssBlobStart>
+        <mssBlobStart>44</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_ba1</mssAccessorName>
         <array>2</array>
@@ -350,7 +398,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>40</mssBlobStart>
+        <mssBlobStart>46</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_bg0</mssAccessorName>
         <array>2</array>
@@ -366,7 +414,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>42</mssBlobStart>
+        <mssBlobStart>48</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_bg1</mssAccessorName>
         <array>2</array>
@@ -382,7 +430,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>44</mssBlobStart>
+        <mssBlobStart>50</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_c0</mssAccessorName>
         <array>2</array>
@@ -398,7 +446,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>46</mssBlobStart>
+        <mssBlobStart>52</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_c1</mssAccessorName>
         <array>2</array>
@@ -414,7 +462,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>48</mssBlobStart>
+        <mssBlobStart>54</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_addr_c2</mssAccessorName>
         <array>2</array>
@@ -430,7 +478,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>50</mssBlobStart>
+        <mssBlobStart>56</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_d0_clkp</mssAccessorName>
         <array>2</array>
@@ -446,7 +494,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>52</mssBlobStart>
+        <mssBlobStart>58</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_d0_clkn</mssAccessorName>
         <array>2</array>
@@ -462,7 +510,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>54</mssBlobStart>
+        <mssBlobStart>60</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_d1_clkp</mssAccessorName>
         <array>2</array>
@@ -478,7 +526,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>56</mssBlobStart>
+        <mssBlobStart>62</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_d1_clkn</mssAccessorName>
         <array>2</array>
@@ -494,7 +542,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>58</mssBlobStart>
+        <mssBlobStart>64</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cmd_actn</mssAccessorName>
         <array>2</array>
@@ -510,7 +558,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>60</mssBlobStart>
+        <mssBlobStart>66</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_casn_a15</mssAccessorName>
         <array>2</array>
@@ -526,7 +574,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>62</mssBlobStart>
+        <mssBlobStart>68</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_rasn_a16</mssAccessorName>
         <array>2</array>
@@ -542,7 +590,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>64</mssBlobStart>
+        <mssBlobStart>70</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_wen_a14</mssAccessorName>
         <array>2</array>
@@ -558,7 +606,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>66</mssBlobStart>
+        <mssBlobStart>72</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cmd_par</mssAccessorName>
         <array>2</array>
@@ -574,7 +622,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>68</mssBlobStart>
+        <mssBlobStart>74</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_cke0</mssAccessorName>
         <array>2</array>
@@ -590,7 +638,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>70</mssBlobStart>
+        <mssBlobStart>76</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_cke1</mssAccessorName>
         <array>2</array>
@@ -606,7 +654,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>72</mssBlobStart>
+        <mssBlobStart>78</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_cke0</mssAccessorName>
         <array>2</array>
@@ -622,7 +670,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>74</mssBlobStart>
+        <mssBlobStart>80</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_cke1</mssAccessorName>
         <array>2</array>
@@ -638,7 +686,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>76</mssBlobStart>
+        <mssBlobStart>82</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_csn0</mssAccessorName>
         <array>2</array>
@@ -654,7 +702,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>78</mssBlobStart>
+        <mssBlobStart>84</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_csn1</mssAccessorName>
         <array>2</array>
@@ -670,7 +718,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>80</mssBlobStart>
+        <mssBlobStart>86</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_csn0</mssAccessorName>
         <array>2</array>
@@ -686,7 +734,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>82</mssBlobStart>
+        <mssBlobStart>88</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_csn1</mssAccessorName>
         <array>2</array>
@@ -702,7 +750,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>84</mssBlobStart>
+        <mssBlobStart>90</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_odt0</mssAccessorName>
         <array>2</array>
@@ -718,7 +766,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>86</mssBlobStart>
+        <mssBlobStart>92</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d0_odt1</mssAccessorName>
         <array>2</array>
@@ -734,7 +782,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>88</mssBlobStart>
+        <mssBlobStart>94</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_odt0</mssAccessorName>
         <array>2</array>
@@ -750,7 +798,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>tick</mssUnits>
-        <mssBlobStart>90</mssBlobStart>
+        <mssBlobStart>96</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_phase_rot_cntl_d1_odt1</mssAccessorName>
         <array>2</array>
@@ -761,15 +809,51 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Default value for 2N Mode from Signal Integrity.
+            0x01 = 1N Mode , 0x02 = 2N Mode
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssUnits>num</mssUnits>
-        <mssBlobStart>92</mssBlobStart>
-        <mssBlobLength>2</mssBlobLength>
+        <mssUnits></mssUnits>
+        <mssBlobStart>98</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
         <mssAccessorName>vpd_mr_mc_2n_mode_autoset</mssAccessorName>
-        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MR_TSYS_ADR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            ADR WRClk Phase Rotator Offset Value in ticks. Ticks are 1/128 of one cycle of clock.
+            Phase Rotator Static Offset value used to determine the Phase of the WrClk with respect to SysClk.
+            For zero delay simulations, or simulations where the delay of the SysClk tree and the WrClk tree are equal,
+            Set this field to 60h
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>tick</mssUnits>
+        <mssBlobStart>99</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mr_tsys_adr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_VPD_MR_TSYS_DATA</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DP16 WrClk Phase Rotator Offset Value in ticks. Ticks are 1/128 of one cycle of clock.
+            Phase Rotator Static Offset value used to determine the Phase of the WrClk with respect to SysClk.
+            For zero delay simulations, or simulations where the delay of the SysClk tree and the WrClk tree are equal,
+            Set this field to 60h
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>tick</mssUnits>
+        <mssBlobStart>100</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mr_tsys_data</mssAccessorName>
     </attribute>
 
 </attributes>
