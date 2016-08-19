@@ -927,13 +927,12 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-    <id>ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+    <id>ATTR_MRW_HW_MIRRORING_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-       If this attribute sets to TRUE, supports MCS grouping  with out mirroring.
-       If this attribute to FALSE, IBM Power system Mirroring support enabled.
-       This instructs the grouping code to group contiguous memory controllers
-       of the same size together. Provided by the MRW.
+       TRUE : HW mirroring is enabled.
+       FALSE : HW mirroring is disabled.
+       Provided by the MRW.
     </description>
     <valueType>uint8</valueType>
     <platInit/>

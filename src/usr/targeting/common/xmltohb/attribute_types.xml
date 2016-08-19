@@ -15919,9 +15919,11 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+    <id>MRW_HW_MIRRORING_ENABLE</id>
     <description>
-       The MRW for a system should set this to TRUE for systems that do not want to suport MCS groupings larget than 2.  Mirroring  also must be disabled and is unusable. IBM systems, such as Tuleta, should set this attribute to FALSE.  Stradale based systems should set this to TRUE.  This instructs the grouping code to group contiguous memory controllers of the same size together.
+       0 : HW mirroring is disabled.
+       1 : HW mirroring is enabled.
+       Provided by the MRW.
     </description>
     <simpleType>
         <uint8_t></uint8_t>
@@ -15929,7 +15931,7 @@ DEPRECATED!!!!
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+        <id>ATTR_MRW_HW_MIRRORING_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

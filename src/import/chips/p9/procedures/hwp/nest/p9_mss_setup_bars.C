@@ -1062,7 +1062,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    uint8_t l_enhancedNoMirrorMode = 0;
+    uint8_t l_hwMirrorEnabled = 0;
     uint8_t l_mem_ipl_complete = 1;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -1099,9 +1099,9 @@ fapi2::ReturnCode p9_mss_setup_bars(
              (uint64_t)fapi2::current_err);
 
     // Get mirror policy
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING,
-                           FAPI_SYSTEM, l_enhancedNoMirrorMode),
-             "Error getting ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, "
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE,
+                           FAPI_SYSTEM, l_hwMirrorEnabled),
+             "Error getting ATTR_MRW_HW_MIRRORING_ENABLE, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
 
     // Setup BAR for Nimbus
