@@ -164,23 +164,9 @@ chip p9_ec
     };
 
 
-    ############################################################################
-    # EC Chiplet PLL Registers
-    ############################################################################
+# Include registers not defined by the xml
+.include "p9_ec_regs.rule";
 
-    register EC_ERROR_REG
-    {
-        name        "EC Chiplet PCB SLAVE ERROR REG";
-        scomaddr    0x100F001F;
-        capture     group PllFIRs;
-    };
-
-    register EC_CONFIG_REG
-    {
-        name        "EC Chiplet PCB SLAVE CONFIG REG";
-        scomaddr    0x100F001E;
-        capture     group PllFIRs;
-    };
 };
 
  ##############################################################################
@@ -254,324 +240,74 @@ rule rEC_LFIR
 group gEC_LFIR filter singlebit
 {
     /** EC_LFIR[0]
-     *  
+     *  CFIR internal parity error
      */
-    (rEC_LFIR, bit(0)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(0)) ? self_th_32perDay;
 
     /** EC_LFIR[1]
-     *  
+     *  Errors from Control
      */
-    (rEC_LFIR, bit(1)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(1)) ? defaultMaskedError;
 
     /** EC_LFIR[2]
-     *  
+     *  local err from CC (PCB error)
      */
-    (rEC_LFIR, bit(2)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(2)) ? defaultMaskedError;
 
     /** EC_LFIR[3]
-     *  
+     *  local err from CC
      */
-    (rEC_LFIR, bit(3)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(3)) ? defaultMaskedError;
 
     /** EC_LFIR[4]
-     *  
+     *  local err from PSC
      */
-    (rEC_LFIR, bit(4)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(4)) ? defaultMaskedError;
 
     /** EC_LFIR[5]
-     *  
+     *  local err from PSC (parity error)
      */
-    (rEC_LFIR, bit(5)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(5)) ? defaultMaskedError;
 
     /** EC_LFIR[6]
-     *  
+     *  local err from Thermal (parity error)
      */
-    (rEC_LFIR, bit(6)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(6)) ? defaultMaskedError;
 
     /** EC_LFIR[7]
-     *  
+     *  local err from Thermal (PCB error
      */
-    (rEC_LFIR, bit(7)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(7)) ? defaultMaskedError;
 
     /** EC_LFIR[8]
-     *  
+     *  trip critical thermal local err
      */
-    (rEC_LFIR, bit(8)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(8)) ? defaultMaskedError;
 
     /** EC_LFIR[9]
-     *  
+     *  trip fatal thermal local error
      */
-    (rEC_LFIR, bit(9)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(9)) ? defaultMaskedError;
 
     /** EC_LFIR[10]
-     *  
+     *  therm volttrip error
      */
-    (rEC_LFIR, bit(10)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(10)) ? defaultMaskedError;
 
     /** EC_LFIR[11]
-     *  
+     *  local err from Debug ( error)
      */
-    (rEC_LFIR, bit(11)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(11)) ? defaultMaskedError;
 
-    /** EC_LFIR[12]
-     *  
+    /** EC_LFIR[12:40]
+     *  spare
      */
-    (rEC_LFIR, bit(12)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[13]
-     *  
-     */
-    (rEC_LFIR, bit(13)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[14]
-     *  
-     */
-    (rEC_LFIR, bit(14)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[15]
-     *  
-     */
-    (rEC_LFIR, bit(15)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[16]
-     *  
-     */
-    (rEC_LFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[17]
-     *  
-     */
-    (rEC_LFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[18]
-     *  
-     */
-    (rEC_LFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[19]
-     *  
-     */
-    (rEC_LFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[20]
-     *  
-     */
-    (rEC_LFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[21]
-     *  
-     */
-    (rEC_LFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[22]
-     *  
-     */
-    (rEC_LFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[23]
-     *  
-     */
-    (rEC_LFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[24]
-     *  
-     */
-    (rEC_LFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[25]
-     *  
-     */
-    (rEC_LFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[26]
-     *  
-     */
-    (rEC_LFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[27]
-     *  
-     */
-    (rEC_LFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[28]
-     *  
-     */
-    (rEC_LFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[29]
-     *  
-     */
-    (rEC_LFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[30]
-     *  
-     */
-    (rEC_LFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[31]
-     *  
-     */
-    (rEC_LFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[32]
-     *  
-     */
-    (rEC_LFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[33]
-     *  
-     */
-    (rEC_LFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[34]
-     *  
-     */
-    (rEC_LFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[35]
-     *  
-     */
-    (rEC_LFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[36]
-     *  
-     */
-    (rEC_LFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[37]
-     *  
-     */
-    (rEC_LFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[38]
-     *  
-     */
-    (rEC_LFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[39]
-     *  
-     */
-    (rEC_LFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[40]
-     *  
-     */
-    (rEC_LFIR, bit(40)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** EC_LFIR[41]
-     *  
+     *  malfunction alert broadcast via OOB
      */
-    (rEC_LFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[42]
-     *  
-     */
-    (rEC_LFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[43]
-     *  
-     */
-    (rEC_LFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[44]
-     *  
-     */
-    (rEC_LFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[45]
-     *  
-     */
-    (rEC_LFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[46]
-     *  
-     */
-    (rEC_LFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[47]
-     *  
-     */
-    (rEC_LFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[48]
-     *  
-     */
-    (rEC_LFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[49]
-     *  
-     */
-    (rEC_LFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[50]
-     *  
-     */
-    (rEC_LFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[51]
-     *  
-     */
-    (rEC_LFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[52]
-     *  
-     */
-    (rEC_LFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[53]
-     *  
-     */
-    (rEC_LFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[54]
-     *  
-     */
-    (rEC_LFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[55]
-     *  
-     */
-    (rEC_LFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[56]
-     *  
-     */
-    (rEC_LFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[57]
-     *  
-     */
-    (rEC_LFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[58]
-     *  
-     */
-    (rEC_LFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[59]
-     *  
-     */
-    (rEC_LFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[60]
-     *  
-     */
-    (rEC_LFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[61]
-     *  
-     */
-    (rEC_LFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[62]
-     *  
-     */
-    (rEC_LFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** EC_LFIR[63]
-     *  
-     */
-    (rEC_LFIR, bit(63)) ? TBDDefaultCallout;
+    (rEC_LFIR, bit(41)) ? defaultMaskedError;
 
 };
 
@@ -592,324 +328,369 @@ rule rCOREFIR
 group gCOREFIR filter singlebit
 {
     /** COREFIR[0]
-     *  
+     *  IFU SRAM Recoverable error
      */
-    (rCOREFIR, bit(0)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(0)) ? self_th_5perHour;
 
     /** COREFIR[1]
-     *  
+     *  TC Checkstop
      */
-    (rCOREFIR, bit(1)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(1)) ? self_th_1;
 
     /** COREFIR[2]
-     *  
+     *  Regfile Recoverable error from IFU
      */
-    (rCOREFIR, bit(2)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(2)) ? self_th_5perHour;
 
     /** COREFIR[3]
-     *  
+     *  Regfile core checkstop
      */
-    (rCOREFIR, bit(3)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(3)) ? self_th_1;
+
+    /** COREFIR[3]
+     *  Regfile core checkstop
+     */
+    (rCOREFIR, bit(3)) ? self_th_1;
 
     /** COREFIR[4]
-     *  
+     *  IF Logic Recovery Err
      */
-    (rCOREFIR, bit(4)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(4)) ? self_th_5perHour;
 
     /** COREFIR[5]
-     *  
+     *  If Logic Checkstop
      */
-    (rCOREFIR, bit(5)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(5)) ? self_th_1;
 
-    /** COREFIR[6]
-     *  
+    /** COREFIR[5]
+     *  If Logic Checkstop
      */
-    (rCOREFIR, bit(6)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(5)) ? self_th_1;
 
-    /** COREFIR[7]
-     *  
+    /** COREFIR[6:7]
+     *  spare
      */
-    (rCOREFIR, bit(7)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(6|7)) ? defaultMaskedError;
 
     /** COREFIR[8]
-     *  
+     *  Recovery core checkstop
      */
-    (rCOREFIR, bit(8)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(8)) ? self_th_1;
+
+    /** COREFIR[8]
+     *  Recovery core checkstop
+     */
+    (rCOREFIR, bit(8)) ? self_th_1;
 
     /** COREFIR[9]
-     *  
+     *  ISU Register File Recoverable Error
      */
-    (rCOREFIR, bit(9)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(9)) ? self_th_5perHour;
 
     /** COREFIR[10]
-     *  
+     *  ISU Regifle Core Checkstop Err
      */
-    (rCOREFIR, bit(10)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(10)) ? self_th_1;
+
+    /** COREFIR[10]
+     *  ISU Regifle Core Checkstop Err
+     */
+    (rCOREFIR, bit(10)) ? self_th_1;
 
     /** COREFIR[11]
-     *  
+     *  ISU Logic Recoverable Error
      */
-    (rCOREFIR, bit(11)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(11)) ? self_th_5perHour;
 
     /** COREFIR[12]
-     *  
+     *  ISU Logic Core Checkstop Err
      */
-    (rCOREFIR, bit(12)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(12)) ? self_th_1;
 
     /** COREFIR[13]
      *  
      */
-    (rCOREFIR, bit(13)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(13)) ? defaultMaskedError;
 
     /** COREFIR[14]
      *  
      */
-    (rCOREFIR, bit(14)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(14)) ? defaultMaskedError;
 
     /** COREFIR[15]
-     *  
+     *  LSU or IFU detected UE from L2
      */
-    (rCOREFIR, bit(15)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(15)) ? defaultMaskedError;
 
     /** COREFIR[16]
-     *  
+     *  L2 UE over threshold error
      */
-    (rCOREFIR, bit(16)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(16)) ? defaultMaskedError;
 
     /** COREFIR[17]
-     *  
+     *  UE on a cache inhibited operation
      */
-    (rCOREFIR, bit(17)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(17)) ? defaultMaskedError;
 
     /** COREFIR[18]
      *  
      */
-    (rCOREFIR, bit(18)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(18)) ? defaultMaskedError;
 
     /** COREFIR[19]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(19)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(19)) ? defaultMaskedError;
 
     /** COREFIR[20]
-     *  
+     *  ISU checkstop MSR corrupted
      */
-    (rCOREFIR, bit(20)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(20)) ? self_th_1;
 
-    /** COREFIR[21]
-     *  
+    /** COREFIR[21:23]
+     *  spare
      */
-    (rCOREFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** COREFIR[22]
-     *  
-     */
-    (rCOREFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** COREFIR[23]
-     *  
-     */
-    (rCOREFIR, bit(23)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(21|22|23)) ? defaultMaskedError;
 
     /** COREFIR[24]
-     *  
+     *  VSU recoverable logic error
      */
-    (rCOREFIR, bit(24)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(24)) ? self_th_5perHour;
 
     /** COREFIR[25]
-     *  
+     *  VS Logic core checkstop
      */
-    (rCOREFIR, bit(25)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(25)) ? self_th_1;
+
+    /** COREFIR[25]
+     *  VS Logic core checkstop
+     */
+    (rCOREFIR, bit(25)) ? self_th_1;
 
     /** COREFIR[26]
-     *  
+     *  Core errors while in maintenance mode
      */
-    (rCOREFIR, bit(26)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(26)) ? level2_th_1;
+
+    /** COREFIR[26]
+     *  Core errors while in maintenance mode
+     */
+    (rCOREFIR, bit(26)) ? level2_th_1;
 
     /** COREFIR[27]
-     *  
+     *  DFU recoverable error
      */
-    (rCOREFIR, bit(27)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(27)) ? self_th_5perHour;
 
     /** COREFIR[28]
-     *  
+     *  PC System Checkstop (recovery disabled)
      */
-    (rCOREFIR, bit(28)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(28)) ? self_th_1;
 
     /** COREFIR[29]
-     *  
+     *  LSU SRAM recoverable error
      */
-    (rCOREFIR, bit(29)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(29)) ? self_th_5perHour;
 
     /** COREFIR[30]
-     *  
+     *  LSU Set Delete Err
      */
-    (rCOREFIR, bit(30)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(30)) ? self_th_1;
 
     /** COREFIR[31]
-     *  
+     *  LSU Reg File Recoverable
      */
-    (rCOREFIR, bit(31)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(31)) ? self_th_5perHour;
 
     /** COREFIR[32]
-     *  
+     *  LSU Reg core checkstop
      */
-    (rCOREFIR, bit(32)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(32)) ? self_th_1;
+
+    /** COREFIR[32]
+     *  LSU Reg core checkstop
+     */
+    (rCOREFIR, bit(32)) ? self_th_1;
 
     /** COREFIR[33]
-     *  
+     *  Special recovery error, tlb multi-hit
      */
-    (rCOREFIR, bit(33)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(33)) ? threshold_and_mask;
 
     /** COREFIR[34]
-     *  
+     *  LSU SLB multihit error
      */
-    (rCOREFIR, bit(34)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(34)) ? threshold_and_mask;
 
     /** COREFIR[35]
-     *  
+     *  LSU ERAT multihit error
      */
-    (rCOREFIR, bit(35)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(35)) ? threshold_and_mask;
 
     /** COREFIR[36]
-     *  
+     *  Forward Progress Error
      */
-    (rCOREFIR, bit(36)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(36)) ? self_th_1;
+
+    /** COREFIR[36]
+     *  Forward Progress Error
+     */
+    (rCOREFIR, bit(36)) ? self_th_1;
 
     /** COREFIR[37]
-     *  
+     *  LSU logic recoverable error
      */
-    (rCOREFIR, bit(37)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(37)) ? self_th_5perHour;
 
     /** COREFIR[38]
-     *  
+     *  LSU logic core checkstop error
      */
-    (rCOREFIR, bit(38)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(38)) ? self_th_1;
+
+    /** COREFIR[38]
+     *  LSU logic core checkstop error
+     */
+    (rCOREFIR, bit(38)) ? self_th_1;
 
     /** COREFIR[39]
      *  
      */
-    (rCOREFIR, bit(39)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(39)) ? defaultMaskedError;
 
     /** COREFIR[40]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(40)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(40)) ? defaultMaskedError;
 
     /** COREFIR[41]
-     *  
+     *  LSU system checkstop
      */
-    (rCOREFIR, bit(41)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(41)) ? self_th_1;
 
     /** COREFIR[42]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(42)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(42)) ? defaultMaskedError;
 
     /** COREFIR[43]
-     *  
+     *  Thread Hang caused recovery
      */
-    (rCOREFIR, bit(43)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(43)) ? self_level2_th_5perHour;
 
     /** COREFIR[44]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(44)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(44)) ? defaultMaskedError;
 
     /** COREFIR[45]
-     *  
+     *  PC core cs
      */
-    (rCOREFIR, bit(45)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(45)) ? self_th_1;
+
+    /** COREFIR[45]
+     *  PC core cs
+     */
+    (rCOREFIR, bit(45)) ? self_th_1;
 
     /** COREFIR[46]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(46)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(46)) ? defaultMaskedError;
 
     /** COREFIR[47]
-     *  
+     *  Timebase facility unrecoverable error.
      */
-    (rCOREFIR, bit(47)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(47)) ? defaultMaskedError;
 
     /** COREFIR[48]
-     *  
+     *  Hypervisor resource parity error
      */
-    (rCOREFIR, bit(48)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(48)) ? self_th_1;
 
-    /** COREFIR[49]
-     *  
+    /** COREFIR[48]
+     *  Hypervisor resource parity error
      */
-    (rCOREFIR, bit(49)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(48)) ? self_th_1;
 
-    /** COREFIR[50]
-     *  
+    /** COREFIR[49:51]
+     *  spare
      */
-    (rCOREFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** COREFIR[51]
-     *  
-     */
-    (rCOREFIR, bit(51)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(49|50|51)) ? defaultMaskedError;
 
     /** COREFIR[52]
-     *  
+     *  Core Hang, recovery failed
      */
-    (rCOREFIR, bit(52)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(52)) ? self_th_1;
+
+    /** COREFIR[52]
+     *  Core Hang, recovery failed
+     */
+    (rCOREFIR, bit(52)) ? self_th_1;
 
     /** COREFIR[53]
-     *  
+     *  Internal Core Hang, recovery attemped
      */
-    (rCOREFIR, bit(53)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(53)) ? defaultMaskedError;
 
     /** COREFIR[54]
-     *  
+     *  spare
      */
-    (rCOREFIR, bit(54)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(54)) ? defaultMaskedError;
 
     /** COREFIR[55]
      *  
      */
-    (rCOREFIR, bit(55)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(55)) ? defaultMaskedError;
 
     /** COREFIR[56]
-     *  
+     *  Other Core Recoverable error
      */
-    (rCOREFIR, bit(56)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(56)) ? defaultMaskedError;
 
     /** COREFIR[57]
-     *  
+     *  Other Core Core Checkstop
      */
-    (rCOREFIR, bit(57)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(57)) ? self_th_1;
+
+    /** COREFIR[57]
+     *  Other Core Core Checkstop
+     */
+    (rCOREFIR, bit(57)) ? self_th_1;
 
     /** COREFIR[58]
-     *  
+     *  Core chiplet error causing checkstop
      */
-    (rCOREFIR, bit(58)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(58)) ? self_th_1;
 
     /** COREFIR[59]
-     *  
+     *  SCOM error handling
      */
-    (rCOREFIR, bit(59)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(59)) ? defaultMaskedError;
 
     /** COREFIR[60]
-     *  
+     *  debug checkstop on trigger
      */
-    (rCOREFIR, bit(60)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(60)) ? self_th_32perDay;
 
     /** COREFIR[61]
-     *  
+     *  SCOM or Recoverable error inject
      */
-    (rCOREFIR, bit(61)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(61)) ? defaultMaskedError;
 
     /** COREFIR[62]
-     *  
+     *  Firmware injected checkstop
      */
-    (rCOREFIR, bit(62)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(62)) ? defaultMaskedError;
 
     /** COREFIR[63]
-     *  
+     *  PHYP injected core checkstop
      */
-    (rCOREFIR, bit(63)) ? TBDDefaultCallout;
+    (rCOREFIR, bit(63)) ? level2_th_1;
+
+    /** COREFIR[63]
+     *  PHYP injected core checkstop
+     */
+    (rCOREFIR, bit(63)) ? level2_th_1;
 
 };
 
@@ -926,4 +707,6 @@ group gCOREFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_ec_actions.rule";
 

@@ -151,6 +151,10 @@ chip p9_phb
         capture     req nonzero("ETUFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_phb_regs.rule";
+
 };
 
  ##############################################################################
@@ -204,324 +208,154 @@ rule rPHBNFIR
 group gPHBNFIR filter singlebit
 {
     /** PHBNFIR[0]
-     *  
+     *  BAR Parity Error
      */
-    (rPHBNFIR, bit(0)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(0)) ? self_th_1;
 
     /** PHBNFIR[1]
      *  
      */
-    (rPHBNFIR, bit(1)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(1)) ? defaultMaskedError;
 
     /** PHBNFIR[2]
-     *  
+     *  Power Bus to PEC CE
      */
-    (rPHBNFIR, bit(2)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(2)) ? self_th_32perDay;
 
     /** PHBNFIR[3]
      *  
      */
-    (rPHBNFIR, bit(3)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(3)) ? defaultMaskedError;
 
     /** PHBNFIR[4]
      *  
      */
-    (rPHBNFIR, bit(4)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(4)) ? defaultMaskedError;
 
     /** PHBNFIR[5]
-     *  
+     *  Array CE
      */
-    (rPHBNFIR, bit(5)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(5)) ? self_th_32perDay;
 
     /** PHBNFIR[6]
      *  
      */
-    (rPHBNFIR, bit(6)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(6)) ? defaultMaskedError;
 
     /** PHBNFIR[7]
      *  
      */
-    (rPHBNFIR, bit(7)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(7)) ? defaultMaskedError;
 
     /** PHBNFIR[8]
-     *  
+     *  Register Array Parity Error
      */
-    (rPHBNFIR, bit(8)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(8)) ? self_th_1;
 
     /** PHBNFIR[9]
-     *  
+     *  Power Bus Interface Parity Error
      */
-    (rPHBNFIR, bit(9)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(9)) ? self_th_1;
 
     /** PHBNFIR[10]
-     *  
+     *  Power Bus Data Hang
      */
-    (rPHBNFIR, bit(10)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(10)) ? defaultMaskedError;
 
     /** PHBNFIR[11]
-     *  
+     *  Power Bus Hang
      */
-    (rPHBNFIR, bit(11)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(11)) ? defaultMaskedError;
 
     /** PHBNFIR[12]
      *  
      */
-    (rPHBNFIR, bit(12)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(12)) ? defaultMaskedError;
 
     /** PHBNFIR[13]
      *  
      */
-    (rPHBNFIR, bit(13)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(13)) ? defaultMaskedError;
 
     /** PHBNFIR[14]
      *  
      */
-    (rPHBNFIR, bit(14)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(14)) ? defaultMaskedError;
 
     /** PHBNFIR[15]
      *  
      */
-    (rPHBNFIR, bit(15)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(15)) ? defaultMaskedError;
 
     /** PHBNFIR[16]
      *  
      */
-    (rPHBNFIR, bit(16)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(16)) ? defaultMaskedError;
 
     /** PHBNFIR[17]
-     *  
+     *  Hardware Error
      */
-    (rPHBNFIR, bit(17)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(17)) ? self_th_1;
 
     /** PHBNFIR[18]
-     *  
+     *  Unsolicited Power Bus Data
      */
-    (rPHBNFIR, bit(18)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(18)) ? level2_th_1;
 
     /** PHBNFIR[19]
-     *  
+     *  UnExpected Combined Response
      */
-    (rPHBNFIR, bit(19)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(19)) ? level2_th_1;
 
     /** PHBNFIR[20]
      *  
      */
-    (rPHBNFIR, bit(20)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(20)) ? defaultMaskedError;
 
     /** PHBNFIR[21]
      *  
      */
-    (rPHBNFIR, bit(21)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(21)) ? defaultMaskedError;
 
     /** PHBNFIR[22]
      *  
      */
-    (rPHBNFIR, bit(22)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(22)) ? defaultMaskedError;
 
     /** PHBNFIR[23]
      *  
      */
-    (rPHBNFIR, bit(23)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(23)) ? defaultMaskedError;
 
     /** PHBNFIR[24]
      *  
      */
-    (rPHBNFIR, bit(24)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(24)) ? defaultMaskedError;
 
     /** PHBNFIR[25]
      *  
      */
-    (rPHBNFIR, bit(25)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(25)) ? defaultMaskedError;
 
     /** PHBNFIR[26]
-     *  
+     *  Software Defined
      */
-    (rPHBNFIR, bit(26)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(26)) ? defaultMaskedError;
 
     /** PHBNFIR[27]
-     *  
+     *  PEC SCOM Engine Error
      */
-    (rPHBNFIR, bit(27)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(27)) ? defaultMaskedError;
 
     /** PHBNFIR[28]
-     *  
+     *  scom error
      */
-    (rPHBNFIR, bit(28)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(28)) ? defaultMaskedError;
 
     /** PHBNFIR[29]
-     *  
+     *  scom error
      */
-    (rPHBNFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[30]
-     *  
-     */
-    (rPHBNFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[31]
-     *  
-     */
-    (rPHBNFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[32]
-     *  
-     */
-    (rPHBNFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[33]
-     *  
-     */
-    (rPHBNFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[34]
-     *  
-     */
-    (rPHBNFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[35]
-     *  
-     */
-    (rPHBNFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[36]
-     *  
-     */
-    (rPHBNFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[37]
-     *  
-     */
-    (rPHBNFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[38]
-     *  
-     */
-    (rPHBNFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[39]
-     *  
-     */
-    (rPHBNFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[40]
-     *  
-     */
-    (rPHBNFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[41]
-     *  
-     */
-    (rPHBNFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[42]
-     *  
-     */
-    (rPHBNFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[43]
-     *  
-     */
-    (rPHBNFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[44]
-     *  
-     */
-    (rPHBNFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[45]
-     *  
-     */
-    (rPHBNFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[46]
-     *  
-     */
-    (rPHBNFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[47]
-     *  
-     */
-    (rPHBNFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[48]
-     *  
-     */
-    (rPHBNFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[49]
-     *  
-     */
-    (rPHBNFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[50]
-     *  
-     */
-    (rPHBNFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[51]
-     *  
-     */
-    (rPHBNFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[52]
-     *  
-     */
-    (rPHBNFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[53]
-     *  
-     */
-    (rPHBNFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[54]
-     *  
-     */
-    (rPHBNFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[55]
-     *  
-     */
-    (rPHBNFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[56]
-     *  
-     */
-    (rPHBNFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[57]
-     *  
-     */
-    (rPHBNFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[58]
-     *  
-     */
-    (rPHBNFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[59]
-     *  
-     */
-    (rPHBNFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[60]
-     *  
-     */
-    (rPHBNFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[61]
-     *  
-     */
-    (rPHBNFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[62]
-     *  
-     */
-    (rPHBNFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** PHBNFIR[63]
-     *  
-     */
-    (rPHBNFIR, bit(63)) ? TBDDefaultCallout;
+    (rPHBNFIR, bit(29)) ? defaultMaskedError;
 
 };
 
@@ -540,324 +374,289 @@ rule rPCIFIR
 group gPCIFIR filter singlebit
 {
     /** PCIFIR[0]
-     *  
+     *  A0LINK_FMR_ERROR
      */
-    (rPCIFIR, bit(0)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(0)) ? self_th_1;
 
     /** PCIFIR[1]
-     *  
+     *  A1LINK_FMR_ERROR
      */
-    (rPCIFIR, bit(1)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(1)) ? self_th_1;
 
     /** PCIFIR[2]
-     *  
+     *  A2LINK_FMR_ERROR
      */
-    (rPCIFIR, bit(2)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(2)) ? self_th_1;
 
     /** PCIFIR[3]
-     *  
+     *  A0LINK_PSR_ERR
      */
-    (rPCIFIR, bit(3)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(3)) ? self_th_1;
 
     /** PCIFIR[4]
-     *  
+     *  A1LINK_PSR_ERR
      */
-    (rPCIFIR, bit(4)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(4)) ? self_th_1;
 
     /** PCIFIR[5]
-     *  
+     *  A2LINK_PSR_ERR
      */
-    (rPCIFIR, bit(5)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(5)) ? self_th_1;
 
     /** PCIFIR[6]
      *  
      */
-    (rPCIFIR, bit(6)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(6)) ? defaultMaskedError;
 
     /** PCIFIR[7]
-     *  
+     *  A0LINK_PSR_SUE_ERR
      */
-    (rPCIFIR, bit(7)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(7)) ? defaultMaskedError;
 
     /** PCIFIR[8]
-     *  
+     *  A0LINK_PSR_UNC_ERR
      */
-    (rPCIFIR, bit(8)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(8)) ? self_th_1;
 
     /** PCIFIR[9]
      *  
      */
-    (rPCIFIR, bit(9)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(9)) ? defaultMaskedError;
 
     /** PCIFIR[10]
-     *  
+     *  A1LINK_PSR_SUE_ERR
      */
-    (rPCIFIR, bit(10)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(10)) ? defaultMaskedError;
 
     /** PCIFIR[11]
-     *  
+     *  A1LINK_PSR_UNC_ERR
      */
-    (rPCIFIR, bit(11)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(11)) ? self_th_1;
 
     /** PCIFIR[12]
      *  
      */
-    (rPCIFIR, bit(12)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(12)) ? defaultMaskedError;
 
     /** PCIFIR[13]
-     *  
+     *  A2LINK_PSR_SUE_ERR
      */
-    (rPCIFIR, bit(13)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(13)) ? defaultMaskedError;
 
     /** PCIFIR[14]
-     *  
+     *  A2LINK_PSR_UNC_ERR
      */
-    (rPCIFIR, bit(14)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(14)) ? self_th_1;
 
     /** PCIFIR[15]
-     *  
+     *  A0LINK_FMR_COR_ERR_HI
      */
-    (rPCIFIR, bit(15)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(15)) ? self_th_32perDay;
 
     /** PCIFIR[16]
-     *  
+     *  A0LINK_FMR_COR_ERR_LO
      */
-    (rPCIFIR, bit(16)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(16)) ? self_th_32perDay;
 
     /** PCIFIR[17]
-     *  
+     *  A0LINK_FMR_SUE_ERR_HI
      */
-    (rPCIFIR, bit(17)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(17)) ? defaultMaskedError;
 
     /** PCIFIR[18]
-     *  
+     *  A0LINK_FMR_SUE_ERR_LO
      */
-    (rPCIFIR, bit(18)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(18)) ? defaultMaskedError;
 
     /** PCIFIR[19]
-     *  
+     *  A0LINK_FMR_UNC_ERR_HI
      */
-    (rPCIFIR, bit(19)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(19)) ? self_th_1;
 
     /** PCIFIR[20]
-     *  
+     *  A0LINK_FMR_UNC_ERR_LO
      */
-    (rPCIFIR, bit(20)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(20)) ? self_th_1;
 
     /** PCIFIR[21]
-     *  
+     *  A1LINK_FMR_COR_ERR_HI
      */
-    (rPCIFIR, bit(21)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(21)) ? self_th_32perDay;
 
     /** PCIFIR[22]
-     *  
+     *  A1LINK_FMR_COR_ERR_LO
      */
-    (rPCIFIR, bit(22)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(22)) ? self_th_32perDay;
 
     /** PCIFIR[23]
-     *  
+     *  A1LINK_FMR_SUE_ERR_HI
      */
-    (rPCIFIR, bit(23)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(23)) ? defaultMaskedError;
 
     /** PCIFIR[24]
-     *  
+     *  A1LINK_FMR_SUE_ERR_LO
      */
-    (rPCIFIR, bit(24)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(24)) ? defaultMaskedError;
 
     /** PCIFIR[25]
-     *  
+     *  A1LINK_FMR_UNC_ERR_HI
      */
-    (rPCIFIR, bit(25)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(25)) ? self_th_1;
 
     /** PCIFIR[26]
-     *  
+     *  A1LINK_FMR_UNC_ERR_LO
      */
-    (rPCIFIR, bit(26)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(26)) ? self_th_1;
 
     /** PCIFIR[27]
-     *  
+     *  A2LINK_FMR_COR_ERR_HI
      */
-    (rPCIFIR, bit(27)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(27)) ? self_th_32perDay;
 
     /** PCIFIR[28]
-     *  
+     *  A2LINK_FMR_COR_ERR_LO
      */
-    (rPCIFIR, bit(28)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(28)) ? self_th_32perDay;
 
     /** PCIFIR[29]
-     *  
+     *  A2LINK_FMR_SUE_ERR_HI
      */
-    (rPCIFIR, bit(29)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(29)) ? defaultMaskedError;
 
     /** PCIFIR[30]
-     *  
+     *  A2LINK_FMR_SUE_ERR_LO
      */
-    (rPCIFIR, bit(30)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(30)) ? defaultMaskedError;
 
     /** PCIFIR[31]
-     *  
+     *  A2LINK_FMR_UNC_ERR_HI
      */
-    (rPCIFIR, bit(31)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(31)) ? self_th_1;
 
     /** PCIFIR[32]
-     *  
+     *  A2LINK_FMR_UNC_ERR_LO
      */
-    (rPCIFIR, bit(32)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(32)) ? self_th_1;
 
     /** PCIFIR[33]
-     *  
+     *  A0_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (rPCIFIR, bit(33)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(33)) ? self_th_1;
 
     /** PCIFIR[34]
-     *  
+     *  A1_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (rPCIFIR, bit(34)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(34)) ? self_th_1;
 
     /** PCIFIR[35]
-     *  
+     *  A2_OBS_CR_OVERFLOW_FIR_ERR
      */
-    (rPCIFIR, bit(35)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(35)) ? self_th_1;
 
     /** PCIFIR[36]
-     *  
+     *  FIR_SCOM_ERR_DUP
      */
-    (rPCIFIR, bit(36)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(36)) ? defaultMaskedError;
 
     /** PCIFIR[37]
-     *  
+     *  FIR_SCOM_ERR
      */
-    (rPCIFIR, bit(37)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(37)) ? defaultMaskedError;
 
     /** PCIFIR[38]
-     *  
+     *  SPARE
      */
-    (rPCIFIR, bit(38)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(38)) ? defaultMaskedError;
 
     /** PCIFIR[39]
-     *  
+     *  MB11_SPATTN
      */
-    (rPCIFIR, bit(39)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(39)) ? defaultMaskedError;
 
     /** PCIFIR[40]
-     *  
+     *  MB20_SPATTN
      */
-    (rPCIFIR, bit(40)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(40)) ? defaultMaskedError;
 
     /** PCIFIR[41]
-     *  
+     *  MB21_SPATTN
      */
-    (rPCIFIR, bit(41)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(41)) ? defaultMaskedError;
 
     /** PCIFIR[42]
-     *  
+     *  MB30_SPATTN
      */
-    (rPCIFIR, bit(42)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(42)) ? defaultMaskedError;
 
     /** PCIFIR[43]
-     *  
+     *  MB31_SPATTN
      */
-    (rPCIFIR, bit(43)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(43)) ? defaultMaskedError;
 
     /** PCIFIR[44]
-     *  
+     *  MB40_SPATTN
      */
-    (rPCIFIR, bit(44)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(44)) ? defaultMaskedError;
 
     /** PCIFIR[45]
-     *  
+     *  MB41_SPATTN
      */
-    (rPCIFIR, bit(45)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(45)) ? defaultMaskedError;
 
     /** PCIFIR[46]
-     *  
+     *  MB50_SPATTN
      */
-    (rPCIFIR, bit(46)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(46)) ? defaultMaskedError;
 
     /** PCIFIR[47]
-     *  
+     *  MB51_SPATTN
      */
-    (rPCIFIR, bit(47)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(47)) ? defaultMaskedError;
 
-    /** PCIFIR[48]
-     *  
+    /** PCIFIR[48:51]
+     *  spare
      */
-    (rPCIFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** PCIFIR[49]
-     *  
-     */
-    (rPCIFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** PCIFIR[50]
-     *  
-     */
-    (rPCIFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** PCIFIR[51]
-     *  
-     */
-    (rPCIFIR, bit(51)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(48|49|50|51)) ? defaultMaskedError;
 
     /** PCIFIR[52]
-     *  
+     *  DOB01_ERR
      */
-    (rPCIFIR, bit(52)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(52)) ? self_th_1;
 
     /** PCIFIR[53]
-     *  
+     *  DOB23_ERR
      */
-    (rPCIFIR, bit(53)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(53)) ? self_th_1;
 
     /** PCIFIR[54]
-     *  
+     *  DOB45_ERR
      */
-    (rPCIFIR, bit(54)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(54)) ? self_th_1;
 
     /** PCIFIR[55]
-     *  
+     *  DIB01_ERR
      */
-    (rPCIFIR, bit(55)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(55)) ? self_th_1;
 
     /** PCIFIR[56]
-     *  
+     *  DIB23_ERR
      */
-    (rPCIFIR, bit(56)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(56)) ? self_th_1;
 
     /** PCIFIR[57]
-     *  
+     *  DIB45_ERR
      */
-    (rPCIFIR, bit(57)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(57)) ? self_th_1;
 
     /** PCIFIR[58]
-     *  
+     *  FIR_SCOM_ERR_DUP
      */
-    (rPCIFIR, bit(58)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(58)) ? defaultMaskedError;
 
     /** PCIFIR[59]
-     *  
+     *  FIR_SCOM_ERR
      */
-    (rPCIFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** PCIFIR[60]
-     *  
-     */
-    (rPCIFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** PCIFIR[61]
-     *  
-     */
-    (rPCIFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** PCIFIR[62]
-     *  
-     */
-    (rPCIFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** PCIFIR[63]
-     *  
-     */
-    (rPCIFIR, bit(63)) ? TBDDefaultCallout;
+    (rPCIFIR, bit(59)) ? defaultMaskedError;
 
 };
 
@@ -876,324 +675,319 @@ rule rETUFIR
 group gETUFIR filter singlebit
 {
     /** ETUFIR[0]
-     *  
+     *  AIB_COMMAND_INVALID
      */
-    (rETUFIR, bit(0)) ? TBDDefaultCallout;
+    (rETUFIR, bit(0)) ? defaultMaskedError;
 
     /** ETUFIR[1]
-     *  
+     *  AIB_ADDRESS_INVALID
      */
-    (rETUFIR, bit(1)) ? TBDDefaultCallout;
+    (rETUFIR, bit(1)) ? defaultMaskedError;
 
     /** ETUFIR[2]
-     *  
+     *  AIB_ACCESS_ERROR
      */
-    (rETUFIR, bit(2)) ? TBDDefaultCallout;
+    (rETUFIR, bit(2)) ? defaultMaskedError;
 
     /** ETUFIR[3]
-     *  
+     *  PAPR_OUTBOUND_INJECT_ERROR
      */
-    (rETUFIR, bit(3)) ? TBDDefaultCallout;
+    (rETUFIR, bit(3)) ? defaultMaskedError;
 
     /** ETUFIR[4]
-     *  
+     *  AIB_FATAL_CLASS_ERROR
      */
-    (rETUFIR, bit(4)) ? TBDDefaultCallout;
+    (rETUFIR, bit(4)) ? defaultMaskedError;
 
     /** ETUFIR[5]
-     *  
+     *  spare
      */
-    (rETUFIR, bit(5)) ? TBDDefaultCallout;
+    (rETUFIR, bit(5)) ? defaultMaskedError;
 
     /** ETUFIR[6]
-     *  
+     *  AIB_INF_CLASS_ERROR
      */
-    (rETUFIR, bit(6)) ? TBDDefaultCallout;
+    (rETUFIR, bit(6)) ? defaultMaskedError;
 
     /** ETUFIR[7]
-     *  
+     *  PE_STOP_STATE_SIGNALED
      */
-    (rETUFIR, bit(7)) ? TBDDefaultCallout;
+    (rETUFIR, bit(7)) ? defaultMaskedError;
 
     /** ETUFIR[8]
-     *  
+     *  OUT_COMMON_ARRAY_FATAL_ERROR
      */
-    (rETUFIR, bit(8)) ? TBDDefaultCallout;
+    (rETUFIR, bit(8)) ? defaultMaskedError;
 
     /** ETUFIR[9]
-     *  
+     *  OUT_COMMON_LATCH_FATAL_ERROR
      */
-    (rETUFIR, bit(9)) ? TBDDefaultCallout;
+    (rETUFIR, bit(9)) ? defaultMaskedError;
 
     /** ETUFIR[10]
-     *  
+     *  OUT_COMMON_LOGIC_FATAL_ERROR
      */
-    (rETUFIR, bit(10)) ? TBDDefaultCallout;
+    (rETUFIR, bit(10)) ? defaultMaskedError;
 
     /** ETUFIR[11]
-     *  
+     *  BLIF_OUT_INTERFACE_PARITY_ERROR
      */
-    (rETUFIR, bit(11)) ? TBDDefaultCallout;
+    (rETUFIR, bit(11)) ? defaultMaskedError;
 
     /** ETUFIR[12]
-     *  
+     *  CFG_WRITE_CA_OR_UR_RESPONSE
      */
-    (rETUFIR, bit(12)) ? TBDDefaultCallout;
+    (rETUFIR, bit(12)) ? defaultMaskedError;
 
     /** ETUFIR[13]
-     *  
+     *  MMIO_REQUEST_TIMEOUT
      */
-    (rETUFIR, bit(13)) ? TBDDefaultCallout;
+    (rETUFIR, bit(13)) ? defaultMaskedError;
 
     /** ETUFIR[14]
-     *  
+     *  OUT_RRB_SOURCED_ERROR
      */
-    (rETUFIR, bit(14)) ? TBDDefaultCallout;
+    (rETUFIR, bit(14)) ? defaultMaskedError;
 
     /** ETUFIR[15]
-     *  
+     *  CFG_LOGIC_SIGNALED_ERROR
      */
-    (rETUFIR, bit(15)) ? TBDDefaultCallout;
+    (rETUFIR, bit(15)) ? defaultMaskedError;
 
     /** ETUFIR[16]
-     *  
+     *  RSB_REG_REQUEST_ADDRESS_ERROR
      */
-    (rETUFIR, bit(16)) ? TBDDefaultCallout;
+    (rETUFIR, bit(16)) ? defaultMaskedError;
 
     /** ETUFIR[17]
-     *  
+     *  RSB_FDA_FATAL_ERROR
      */
-    (rETUFIR, bit(17)) ? TBDDefaultCallout;
+    (rETUFIR, bit(17)) ? defaultMaskedError;
 
     /** ETUFIR[18]
-     *  
+     *  RSB_FDA_INF_ERROR
      */
-    (rETUFIR, bit(18)) ? TBDDefaultCallout;
+    (rETUFIR, bit(18)) ? defaultMaskedError;
 
     /** ETUFIR[19]
-     *  
+     *  RSB_FDB_FATAL_ERROR
      */
-    (rETUFIR, bit(19)) ? TBDDefaultCallout;
+    (rETUFIR, bit(19)) ? defaultMaskedError;
 
     /** ETUFIR[20]
-     *  
+     *  RSB_FDB_INF_ERROR
      */
-    (rETUFIR, bit(20)) ? TBDDefaultCallout;
+    (rETUFIR, bit(20)) ? defaultMaskedError;
 
     /** ETUFIR[21]
-     *  
+     *  RSB_ERR_FATAL_ERROR
      */
-    (rETUFIR, bit(21)) ? TBDDefaultCallout;
+    (rETUFIR, bit(21)) ? defaultMaskedError;
 
     /** ETUFIR[22]
-     *  
+     *  RSB_ERR_INF_ERROR
      */
-    (rETUFIR, bit(22)) ? TBDDefaultCallout;
+    (rETUFIR, bit(22)) ? defaultMaskedError;
 
     /** ETUFIR[23]
-     *  
+     *  RSB_DBG_FATAL_ERROR
      */
-    (rETUFIR, bit(23)) ? TBDDefaultCallout;
+    (rETUFIR, bit(23)) ? defaultMaskedError;
 
     /** ETUFIR[24]
-     *  
+     *  RSB_DBG_INF_ERROR
      */
-    (rETUFIR, bit(24)) ? TBDDefaultCallout;
+    (rETUFIR, bit(24)) ? defaultMaskedError;
 
     /** ETUFIR[25]
-     *  
+     *  PCIE_REQUEST_ACCESS_ERROR
      */
-    (rETUFIR, bit(25)) ? TBDDefaultCallout;
+    (rETUFIR, bit(25)) ? defaultMaskedError;
 
     /** ETUFIR[26]
-     *  
+     *  RSB_BUS_LOGIC_ERROR
      */
-    (rETUFIR, bit(26)) ? TBDDefaultCallout;
+    (rETUFIR, bit(26)) ? defaultMaskedError;
 
     /** ETUFIR[27]
-     *  
+     *  RSB_UVI_FATAL_ERROR
      */
-    (rETUFIR, bit(27)) ? TBDDefaultCallout;
+    (rETUFIR, bit(27)) ? defaultMaskedError;
 
     /** ETUFIR[28]
-     *  
+     *  RSB_UVI_INF_ERROR
      */
-    (rETUFIR, bit(28)) ? TBDDefaultCallout;
+    (rETUFIR, bit(28)) ? defaultMaskedError;
 
     /** ETUFIR[29]
-     *  
+     *  SCOM_FATAL_ERROR
      */
-    (rETUFIR, bit(29)) ? TBDDefaultCallout;
+    (rETUFIR, bit(29)) ? defaultMaskedError;
 
     /** ETUFIR[30]
-     *  
+     *  SCOM_INF_ERROR
      */
-    (rETUFIR, bit(30)) ? TBDDefaultCallout;
+    (rETUFIR, bit(30)) ? defaultMaskedError;
 
     /** ETUFIR[31]
-     *  
+     *  PCIE_MACRO_ERROR_ACTIVE_STATUS
      */
-    (rETUFIR, bit(31)) ? TBDDefaultCallout;
+    (rETUFIR, bit(31)) ? defaultMaskedError;
 
     /** ETUFIR[32]
-     *  
+     *  ARB_IODA_FATAL_ERROR
      */
-    (rETUFIR, bit(32)) ? TBDDefaultCallout;
+    (rETUFIR, bit(32)) ? defaultMaskedError;
 
     /** ETUFIR[33]
-     *  
+     *  ARB_MSI_PE_MATCH_ERROR
      */
-    (rETUFIR, bit(33)) ? TBDDefaultCallout;
+    (rETUFIR, bit(33)) ? defaultMaskedError;
 
     /** ETUFIR[34]
-     *  
+     *  ARB_MSI_ADDRESS_ERROR
      */
-    (rETUFIR, bit(34)) ? TBDDefaultCallout;
+    (rETUFIR, bit(34)) ? defaultMaskedError;
 
     /** ETUFIR[35]
-     *  
+     *  ARB_TVT_ERROR
      */
-    (rETUFIR, bit(35)) ? TBDDefaultCallout;
+    (rETUFIR, bit(35)) ? defaultMaskedError;
 
     /** ETUFIR[36]
-     *  
+     *  ARB_RCVD_FATAL_ERROR_MSG
      */
-    (rETUFIR, bit(36)) ? TBDDefaultCallout;
+    (rETUFIR, bit(36)) ? defaultMaskedError;
 
     /** ETUFIR[37]
-     *  
+     *  ARB_RCVD_NONFATAL_ERROR_MSG
      */
-    (rETUFIR, bit(37)) ? TBDDefaultCallout;
+    (rETUFIR, bit(37)) ? defaultMaskedError;
 
     /** ETUFIR[38]
-     *  
+     *  ARB_RCVD_CORRECTIBLE_ERROR_MSG
      */
-    (rETUFIR, bit(38)) ? TBDDefaultCallout;
+    (rETUFIR, bit(38)) ? defaultMaskedError;
 
     /** ETUFIR[39]
-     *  
+     *  PAPR_INBOUND_INJECT_ERROR
      */
-    (rETUFIR, bit(39)) ? TBDDefaultCallout;
+    (rETUFIR, bit(39)) ? defaultMaskedError;
 
     /** ETUFIR[40]
-     *  
+     *  ARB_COMMON_FATAL_ERROR
      */
-    (rETUFIR, bit(40)) ? TBDDefaultCallout;
+    (rETUFIR, bit(40)) ? defaultMaskedError;
 
     /** ETUFIR[41]
-     *  
+     *  ARB_TABLE_BAR_DISABLED_ERROR
      */
-    (rETUFIR, bit(41)) ? TBDDefaultCallout;
+    (rETUFIR, bit(41)) ? defaultMaskedError;
 
     /** ETUFIR[42]
-     *  
+     *  ARB_BLIF_COMPLETION_ERROR
      */
-    (rETUFIR, bit(42)) ? TBDDefaultCallout;
+    (rETUFIR, bit(42)) ? defaultMaskedError;
 
     /** ETUFIR[43]
-     *  
+     *  ARB_PCT_TIMEOUT_ERROR
      */
-    (rETUFIR, bit(43)) ? TBDDefaultCallout;
+    (rETUFIR, bit(43)) ? defaultMaskedError;
 
     /** ETUFIR[44]
-     *  
+     *  ARB_ECC_CORRECTABLE_ERROR
      */
-    (rETUFIR, bit(44)) ? TBDDefaultCallout;
+    (rETUFIR, bit(44)) ? defaultMaskedError;
 
     /** ETUFIR[45]
-     *  
+     *  ARB_ECC_UNCORRECTABLE_ERROR
      */
-    (rETUFIR, bit(45)) ? TBDDefaultCallout;
+    (rETUFIR, bit(45)) ? defaultMaskedError;
 
     /** ETUFIR[46]
-     *  
+     *  ARB_TLP_POISON_SIGNALED
      */
-    (rETUFIR, bit(46)) ? TBDDefaultCallout;
+    (rETUFIR, bit(46)) ? defaultMaskedError;
 
     /** ETUFIR[47]
-     *  
+     *  ARB_RTT_PENUM_INVALID_ERROR
      */
-    (rETUFIR, bit(47)) ? TBDDefaultCallout;
+    (rETUFIR, bit(47)) ? defaultMaskedError;
 
     /** ETUFIR[48]
-     *  
+     *  MRG_COMMON_FATAL_ERROR
      */
-    (rETUFIR, bit(48)) ? TBDDefaultCallout;
+    (rETUFIR, bit(48)) ? defaultMaskedError;
 
     /** ETUFIR[49]
-     *  
+     *  MRG_TABLE_BAR_DISABLED_ERROR
      */
-    (rETUFIR, bit(49)) ? TBDDefaultCallout;
+    (rETUFIR, bit(49)) ? defaultMaskedError;
 
     /** ETUFIR[50]
-     *  
+     *  MRG_ECC_CORRECTABLE_ERROR
      */
-    (rETUFIR, bit(50)) ? TBDDefaultCallout;
+    (rETUFIR, bit(50)) ? defaultMaskedError;
 
     /** ETUFIR[51]
-     *  
+     *  MRG_ECC_UNCORRECTABLE_ERROR
      */
-    (rETUFIR, bit(51)) ? TBDDefaultCallout;
+    (rETUFIR, bit(51)) ? defaultMaskedError;
 
     /** ETUFIR[52]
-     *  
+     *  MRG_AIB2_TX_TIMEOUT_ERROR
      */
-    (rETUFIR, bit(52)) ? TBDDefaultCallout;
+    (rETUFIR, bit(52)) ? defaultMaskedError;
 
     /** ETUFIR[53]
-     *  
+     *  MRG_MRT_ERROR
      */
-    (rETUFIR, bit(53)) ? TBDDefaultCallout;
+    (rETUFIR, bit(53)) ? defaultMaskedError;
 
-    /** ETUFIR[54]
-     *  
+    /** ETUFIR[54:55]
+     *  spare
      */
-    (rETUFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** ETUFIR[55]
-     *  
-     */
-    (rETUFIR, bit(55)) ? TBDDefaultCallout;
+    (rETUFIR, bit(54|55)) ? defaultMaskedError;
 
     /** ETUFIR[56]
-     *  
+     *  TCE_IODA_PAGE_ACCESS_ERROR
      */
-    (rETUFIR, bit(56)) ? TBDDefaultCallout;
+    (rETUFIR, bit(56)) ? defaultMaskedError;
 
     /** ETUFIR[57]
-     *  
+     *  TCE_REQUEST_TIMEOUT_ERROR
      */
-    (rETUFIR, bit(57)) ? TBDDefaultCallout;
+    (rETUFIR, bit(57)) ? defaultMaskedError;
 
     /** ETUFIR[58]
-     *  
+     *  TCE_UNEXPECTED_RESPONSE_ERROR
      */
-    (rETUFIR, bit(58)) ? TBDDefaultCallout;
+    (rETUFIR, bit(58)) ? defaultMaskedError;
 
     /** ETUFIR[59]
-     *  
+     *  TCE_COMMON_FATAL_ERROR
      */
-    (rETUFIR, bit(59)) ? TBDDefaultCallout;
+    (rETUFIR, bit(59)) ? defaultMaskedError;
 
     /** ETUFIR[60]
-     *  
+     *  TCE_ECC_CORRECTABLE_ERROR
      */
-    (rETUFIR, bit(60)) ? TBDDefaultCallout;
+    (rETUFIR, bit(60)) ? defaultMaskedError;
 
     /** ETUFIR[61]
-     *  
+     *  TCE_ECC_UNCORRECTABLE_ERROR
      */
-    (rETUFIR, bit(61)) ? TBDDefaultCallout;
+    (rETUFIR, bit(61)) ? defaultMaskedError;
 
     /** ETUFIR[62]
-     *  
+     *  spare
      */
-    (rETUFIR, bit(62)) ? TBDDefaultCallout;
+    (rETUFIR, bit(62)) ? defaultMaskedError;
 
     /** ETUFIR[63]
-     *  
+     *  FIR_INTERNAL_PARITY_ERROR
      */
-    (rETUFIR, bit(63)) ? TBDDefaultCallout;
+    (rETUFIR, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -1210,4 +1004,6 @@ group gETUFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_phb_actions.rule";
 

@@ -151,6 +151,10 @@ chip p9_mca
         capture     req nonzero("DDRPHYFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_mca_regs.rule";
+
 };
 
  ##############################################################################
@@ -216,324 +220,89 @@ rule rMCACALFIR
 group gMCACALFIR filter singlebit
 {
     /** MCACALFIR[0]
-     *  
+     *  A MBA recoverable error has occurred.
      */
-    (rMCACALFIR, bit(0)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(0)) ? self_th_1;
 
     /** MCACALFIR[1]
      *  
      */
-    (rMCACALFIR, bit(1)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(1)) ? defaultMaskedError;
 
     /** MCACALFIR[2]
-     *  
+     *  Excessive refreshes to a single rank.
      */
-    (rMCACALFIR, bit(2)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(2)) ? self_th_32perDay;
 
     /** MCACALFIR[3]
-     *  
+     *  Err detected in the MBA debug WAT logic
      */
-    (rMCACALFIR, bit(3)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(3)) ? defaultMaskedError;
 
     /** MCACALFIR[4]
      *  
      */
-    (rMCACALFIR, bit(4)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(4)) ? defaultMaskedError;
 
     /** MCACALFIR[5]
-     *  
+     *  Calibration complete indication xout
      */
-    (rMCACALFIR, bit(5)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(5)) ? self_th_1;
 
     /** MCACALFIR[6]
-     *  
+     *  Emergency Throttle
      */
-    (rMCACALFIR, bit(6)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(6)) ? defaultMaskedError;
 
     /** MCACALFIR[7]
-     *  
+     *  DDR cal reset timeout
      */
-    (rMCACALFIR, bit(7)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(7)) ? self_th_1;
 
     /** MCACALFIR[8]
-     *  
+     *  event_n active on DDR interface
      */
-    (rMCACALFIR, bit(8)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(8)) ? defaultMaskedError;
 
     /** MCACALFIR[9]
-     *  
+     *  WRQ or RRQ is in a hung state.
      */
-    (rMCACALFIR, bit(9)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(9)) ? self_th_1;
 
     /** MCACALFIR[10]
-     *  
+     *  State machine one hot error.
      */
-    (rMCACALFIR, bit(10)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(10)) ? self_th_1;
 
     /** MCACALFIR[11]
-     *  
+     *  Sequencer error crossing async interface
      */
-    (rMCACALFIR, bit(11)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(11)) ? self_th_1;
 
     /** MCACALFIR[12]
-     *  
+     *  Address PE  internal to seq.
      */
-    (rMCACALFIR, bit(12)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(12)) ? self_th_1;
 
     /** MCACALFIR[13]
      *  
      */
-    (rMCACALFIR, bit(13)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(13)) ? defaultMaskedError;
 
     /** MCACALFIR[14]
-     *  
+     *  RCD during periodic cal
      */
-    (rMCACALFIR, bit(14)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(14)) ? threshold_and_mask;
 
     /** MCACALFIR[15]
-     *  
+     *  scom error
      */
-    (rMCACALFIR, bit(15)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(15)) ? defaultMaskedError;
 
     /** MCACALFIR[16]
-     *  
+     *  scom error
      */
-    (rMCACALFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[17]
-     *  
-     */
-    (rMCACALFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[18]
-     *  
-     */
-    (rMCACALFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[19]
-     *  
-     */
-    (rMCACALFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[20]
-     *  
-     */
-    (rMCACALFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[21]
-     *  
-     */
-    (rMCACALFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[22]
-     *  
-     */
-    (rMCACALFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[23]
-     *  
-     */
-    (rMCACALFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[24]
-     *  
-     */
-    (rMCACALFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[25]
-     *  
-     */
-    (rMCACALFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[26]
-     *  
-     */
-    (rMCACALFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[27]
-     *  
-     */
-    (rMCACALFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[28]
-     *  
-     */
-    (rMCACALFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[29]
-     *  
-     */
-    (rMCACALFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[30]
-     *  
-     */
-    (rMCACALFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[31]
-     *  
-     */
-    (rMCACALFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[32]
-     *  
-     */
-    (rMCACALFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[33]
-     *  
-     */
-    (rMCACALFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[34]
-     *  
-     */
-    (rMCACALFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[35]
-     *  
-     */
-    (rMCACALFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[36]
-     *  
-     */
-    (rMCACALFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[37]
-     *  
-     */
-    (rMCACALFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[38]
-     *  
-     */
-    (rMCACALFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[39]
-     *  
-     */
-    (rMCACALFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[40]
-     *  
-     */
-    (rMCACALFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[41]
-     *  
-     */
-    (rMCACALFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[42]
-     *  
-     */
-    (rMCACALFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[43]
-     *  
-     */
-    (rMCACALFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[44]
-     *  
-     */
-    (rMCACALFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[45]
-     *  
-     */
-    (rMCACALFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[46]
-     *  
-     */
-    (rMCACALFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[47]
-     *  
-     */
-    (rMCACALFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[48]
-     *  
-     */
-    (rMCACALFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[49]
-     *  
-     */
-    (rMCACALFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[50]
-     *  
-     */
-    (rMCACALFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[51]
-     *  
-     */
-    (rMCACALFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[52]
-     *  
-     */
-    (rMCACALFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[53]
-     *  
-     */
-    (rMCACALFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[54]
-     *  
-     */
-    (rMCACALFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[55]
-     *  
-     */
-    (rMCACALFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[56]
-     *  
-     */
-    (rMCACALFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[57]
-     *  
-     */
-    (rMCACALFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[58]
-     *  
-     */
-    (rMCACALFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[59]
-     *  
-     */
-    (rMCACALFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[60]
-     *  
-     */
-    (rMCACALFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[61]
-     *  
-     */
-    (rMCACALFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[62]
-     *  
-     */
-    (rMCACALFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** MCACALFIR[63]
-     *  
-     */
-    (rMCACALFIR, bit(63)) ? TBDDefaultCallout;
+    (rMCACALFIR, bit(16)) ? defaultMaskedError;
 
 };
 
@@ -555,325 +324,250 @@ rule rMCAECCFIR
 
 group gMCAECCFIR filter singlebit
 {
-    /** MCAECCFIR[0]
-     *  
+    /** MCAECCFIR[0:7]
+     *  Mainline read MPE
      */
-    (rMCAECCFIR, bit(0)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[1]
-     *  
-     */
-    (rMCAECCFIR, bit(1)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[2]
-     *  
-     */
-    (rMCAECCFIR, bit(2)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[3]
-     *  
-     */
-    (rMCAECCFIR, bit(3)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[4]
-     *  
-     */
-    (rMCAECCFIR, bit(4)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[5]
-     *  
-     */
-    (rMCAECCFIR, bit(5)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[6]
-     *  
-     */
-    (rMCAECCFIR, bit(6)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[7]
-     *  
-     */
-    (rMCAECCFIR, bit(7)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(0|1|2|3|4|5|6|7)) ? verify_chip_mark;
 
     /** MCAECCFIR[8]
-     *  
+     *  Mainline read NCE
      */
-    (rMCAECCFIR, bit(8)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(8)) ? mainline_ce_ue_handling;
 
     /** MCAECCFIR[9]
-     *  
+     *  Mainline read TCE
      */
-    (rMCAECCFIR, bit(9)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(9)) ? mainline_ce_ue_handling;
 
     /** MCAECCFIR[10]
-     *  
+     *  Mainline read SCE
      */
-    (rMCAECCFIR, bit(10)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(10)) ? defaultMaskedError;
 
     /** MCAECCFIR[11]
-     *  
+     *  Mainline read MCE
      */
-    (rMCAECCFIR, bit(11)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(11)) ? defaultMaskedError;
 
     /** MCAECCFIR[12]
-     *  
+     *  Mainline read SUE
      */
-    (rMCAECCFIR, bit(12)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(12)) ? defaultMaskedError;
 
     /** MCAECCFIR[13]
-     *  
+     *  Mainline read AUE
      */
-    (rMCAECCFIR, bit(13)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(13)) ? mainline_ce_ue_handling;
 
     /** MCAECCFIR[14]
-     *  
+     *  Mainline read UE
      */
-    (rMCAECCFIR, bit(14)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(14)) ? mainline_ce_ue_handling;
 
     /** MCAECCFIR[15]
      *  
      */
-    (rMCAECCFIR, bit(15)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(15)) ? defaultMaskedError;
 
     /** MCAECCFIR[16]
      *  
      */
-    (rMCAECCFIR, bit(16)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(16)) ? defaultMaskedError;
 
     /** MCAECCFIR[17]
      *  
      */
-    (rMCAECCFIR, bit(17)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(17)) ? defaultMaskedError;
 
     /** MCAECCFIR[18]
-     *  
+     *  Mainline read IRCD
      */
-    (rMCAECCFIR, bit(18)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(18)) ? defaultMaskedError;
 
     /** MCAECCFIR[19]
-     *  
+     *  Mainline read IMPE
      */
-    (rMCAECCFIR, bit(19)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(19)) ? defaultMaskedError;
 
-    /** MCAECCFIR[20]
-     *  
+    /** MCAECCFIR[20:27]
+     *  Maintenance MPE
      */
-    (rMCAECCFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[21]
-     *  
-     */
-    (rMCAECCFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[22]
-     *  
-     */
-    (rMCAECCFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[23]
-     *  
-     */
-    (rMCAECCFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[24]
-     *  
-     */
-    (rMCAECCFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[25]
-     *  
-     */
-    (rMCAECCFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[26]
-     *  
-     */
-    (rMCAECCFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[27]
-     *  
-     */
-    (rMCAECCFIR, bit(27)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(20|21|22|23|24|25|26|27)) ? defaultMaskedError;
 
     /** MCAECCFIR[28]
-     *  
+     *  Maintenance NCE
      */
-    (rMCAECCFIR, bit(28)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(28)) ? defaultMaskedError;
 
     /** MCAECCFIR[29]
-     *  
+     *  Maintenance TCE
      */
-    (rMCAECCFIR, bit(29)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(29)) ? defaultMaskedError;
 
     /** MCAECCFIR[30]
-     *  
+     *  Maintenance SCE
      */
-    (rMCAECCFIR, bit(30)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(30)) ? defaultMaskedError;
 
     /** MCAECCFIR[31]
-     *  
+     *  Maintenance MCE
      */
-    (rMCAECCFIR, bit(31)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(31)) ? defaultMaskedError;
 
     /** MCAECCFIR[32]
-     *  
+     *  Maintenance SUE
      */
-    (rMCAECCFIR, bit(32)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(32)) ? defaultMaskedError;
 
     /** MCAECCFIR[33]
-     *  
+     *  Maintenance AUE
      */
-    (rMCAECCFIR, bit(33)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(33)) ? defaultMaskedError;
 
     /** MCAECCFIR[34]
-     *  
+     *  Maintenance UE
      */
-    (rMCAECCFIR, bit(34)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(34)) ? defaultMaskedError;
 
     /** MCAECCFIR[35]
      *  
      */
-    (rMCAECCFIR, bit(35)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(35)) ? defaultMaskedError;
 
     /** MCAECCFIR[36]
      *  
      */
-    (rMCAECCFIR, bit(36)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(36)) ? defaultMaskedError;
 
     /** MCAECCFIR[37]
      *  
      */
-    (rMCAECCFIR, bit(37)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(37)) ? defaultMaskedError;
 
     /** MCAECCFIR[38]
-     *  
+     *  Maintenance IRCD
      */
-    (rMCAECCFIR, bit(38)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(38)) ? defaultMaskedError;
 
     /** MCAECCFIR[39]
-     *  
+     *  Maintenance IMPE
      */
-    (rMCAECCFIR, bit(39)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(39)) ? defaultMaskedError;
 
     /** MCAECCFIR[40]
-     *  
+     *  spare
      */
-    (rMCAECCFIR, bit(40)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(40)) ? defaultMaskedError;
 
     /** MCAECCFIR[41]
-     *  
+     *  SCOM_PARITY_CLASS_STATUS
      */
-    (rMCAECCFIR, bit(41)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(41)) ? threshold_and_mask;
 
     /** MCAECCFIR[42]
-     *  
+     *  SCOM_PARITY_CLASS_RECOVERABLE
      */
-    (rMCAECCFIR, bit(42)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(42)) ? self_th_1;
 
     /** MCAECCFIR[43]
-     *  
+     *  SCOM_PARITY_CLASS_UNRECOVERABLE
      */
-    (rMCAECCFIR, bit(43)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(43)) ? self_th_1;
 
     /** MCAECCFIR[44]
-     *  
+     *  ECC_CORRECTOR_INTERNAL_PARITY_ERROR
      */
-    (rMCAECCFIR, bit(44)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(44)) ? self_th_1;
 
     /** MCAECCFIR[45]
-     *  
+     *  WRITE_RMW_CE
      */
-    (rMCAECCFIR, bit(45)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(45)) ? self_th_32perDay;
 
     /** MCAECCFIR[46]
-     *  
+     *  WRITE_RMW_UE
      */
-    (rMCAECCFIR, bit(46)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(46)) ? self_th_1;
 
     /** MCAECCFIR[47]
-     *  
+     *  WRITE_RMW_SUE
      */
-    (rMCAECCFIR, bit(47)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(47)) ? defaultMaskedError;
 
     /** MCAECCFIR[48]
-     *  
+     *  WDF_OVERRUN_ERROR_0
      */
-    (rMCAECCFIR, bit(48)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(48)) ? self_th_1;
 
     /** MCAECCFIR[49]
-     *  
+     *  WDF_OVERRUN_ERROR_1
      */
-    (rMCAECCFIR, bit(49)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(49)) ? self_th_1;
 
     /** MCAECCFIR[50]
-     *  
+     *  WDF_SCOM_SEQUENCE_ERROR
      */
-    (rMCAECCFIR, bit(50)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(50)) ? self_th_1;
 
     /** MCAECCFIR[51]
-     *  
+     *  WDF_STATE_MACHINE_ERROR
      */
-    (rMCAECCFIR, bit(51)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(51)) ? self_th_1;
 
     /** MCAECCFIR[52]
-     *  
+     *  WDF_MISC_REGISTER_PARITY_ERROR
      */
-    (rMCAECCFIR, bit(52)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(52)) ? self_th_1;
 
     /** MCAECCFIR[53]
-     *  
+     *  WRT_SCOM_SEQUENCE_ERROR
      */
-    (rMCAECCFIR, bit(53)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(53)) ? self_th_1;
 
     /** MCAECCFIR[54]
-     *  
+     *  WRT_MISC_REGISTER_PARITY_ERROR
      */
-    (rMCAECCFIR, bit(54)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(54)) ? self_th_1;
 
     /** MCAECCFIR[55]
-     *  
+     *  ECC_GENERATOR_INTERNAL_PARITY_ERROR
      */
-    (rMCAECCFIR, bit(55)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(55)) ? self_th_1;
 
     /** MCAECCFIR[56]
-     *  
+     *  READ_BUFFER_OVERFLOW_ERROR
      */
-    (rMCAECCFIR, bit(56)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(56)) ? self_th_1;
 
     /** MCAECCFIR[57]
-     *  
+     *  WDF_ASYNC_INTERFACE_ERROR
      */
-    (rMCAECCFIR, bit(57)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(57)) ? self_th_1;
 
     /** MCAECCFIR[58]
-     *  
+     *  READ_ASYNC_INTERFACE_PARITY_ERROR
      */
-    (rMCAECCFIR, bit(58)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(58)) ? self_th_1;
 
     /** MCAECCFIR[59]
-     *  
+     *  READ_ASYNC_INTERFACE_SEQUENCE_ERROR
      */
-    (rMCAECCFIR, bit(59)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(59)) ? self_th_1;
 
-    /** MCAECCFIR[60]
-     *  
+    /** MCAECCFIR[60:61]
+     *  spare
      */
-    (rMCAECCFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** MCAECCFIR[61]
-     *  
-     */
-    (rMCAECCFIR, bit(61)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(60|61)) ? defaultMaskedError;
 
     /** MCAECCFIR[62]
-     *  
+     *  INTERNAL_SCOM_ERROR
      */
-    (rMCAECCFIR, bit(62)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(62)) ? threshold_and_mask;
 
     /** MCAECCFIR[63]
-     *  
+     *  INTERNAL_SCOM_ERROR_COPY
      */
-    (rMCAECCFIR, bit(63)) ? TBDDefaultCallout;
+    (rMCAECCFIR, bit(63)) ? threshold_and_mask;
 
 };
 
@@ -891,325 +585,50 @@ rule rDDRPHYFIR
 
 group gDDRPHYFIR filter singlebit
 {
-    /** DDRPHYFIR[0]
-     *  
-     */
-    (rDDRPHYFIR, bit(0)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[1]
-     *  
-     */
-    (rDDRPHYFIR, bit(1)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[2]
-     *  
-     */
-    (rDDRPHYFIR, bit(2)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[3]
-     *  
-     */
-    (rDDRPHYFIR, bit(3)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[4]
-     *  
-     */
-    (rDDRPHYFIR, bit(4)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[5]
-     *  
-     */
-    (rDDRPHYFIR, bit(5)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[6]
-     *  
-     */
-    (rDDRPHYFIR, bit(6)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[7]
-     *  
-     */
-    (rDDRPHYFIR, bit(7)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[8]
-     *  
-     */
-    (rDDRPHYFIR, bit(8)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[9]
-     *  
-     */
-    (rDDRPHYFIR, bit(9)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[10]
-     *  
-     */
-    (rDDRPHYFIR, bit(10)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[11]
-     *  
-     */
-    (rDDRPHYFIR, bit(11)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[12]
-     *  
-     */
-    (rDDRPHYFIR, bit(12)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[13]
-     *  
-     */
-    (rDDRPHYFIR, bit(13)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[14]
-     *  
-     */
-    (rDDRPHYFIR, bit(14)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[15]
-     *  
-     */
-    (rDDRPHYFIR, bit(15)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[16]
-     *  
-     */
-    (rDDRPHYFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[17]
-     *  
-     */
-    (rDDRPHYFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[18]
-     *  
-     */
-    (rDDRPHYFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[19]
-     *  
-     */
-    (rDDRPHYFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[20]
-     *  
-     */
-    (rDDRPHYFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[21]
-     *  
-     */
-    (rDDRPHYFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[22]
-     *  
-     */
-    (rDDRPHYFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[23]
-     *  
-     */
-    (rDDRPHYFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[24]
-     *  
-     */
-    (rDDRPHYFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[25]
-     *  
-     */
-    (rDDRPHYFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[26]
-     *  
-     */
-    (rDDRPHYFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[27]
-     *  
-     */
-    (rDDRPHYFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[28]
-     *  
-     */
-    (rDDRPHYFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[29]
-     *  
-     */
-    (rDDRPHYFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[30]
-     *  
-     */
-    (rDDRPHYFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[31]
-     *  
-     */
-    (rDDRPHYFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[32]
-     *  
-     */
-    (rDDRPHYFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[33]
-     *  
-     */
-    (rDDRPHYFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[34]
-     *  
-     */
-    (rDDRPHYFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[35]
-     *  
-     */
-    (rDDRPHYFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[36]
-     *  
-     */
-    (rDDRPHYFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[37]
-     *  
-     */
-    (rDDRPHYFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[38]
-     *  
-     */
-    (rDDRPHYFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[39]
-     *  
-     */
-    (rDDRPHYFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[40]
-     *  
-     */
-    (rDDRPHYFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[41]
-     *  
-     */
-    (rDDRPHYFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[42]
-     *  
-     */
-    (rDDRPHYFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[43]
-     *  
-     */
-    (rDDRPHYFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[44]
-     *  
-     */
-    (rDDRPHYFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[45]
-     *  
-     */
-    (rDDRPHYFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[46]
-     *  
-     */
-    (rDDRPHYFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[47]
-     *  
-     */
-    (rDDRPHYFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[48]
-     *  
-     */
-    (rDDRPHYFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[49]
-     *  
-     */
-    (rDDRPHYFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[50]
-     *  
-     */
-    (rDDRPHYFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[51]
-     *  
-     */
-    (rDDRPHYFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[52]
-     *  
-     */
-    (rDDRPHYFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[53]
-     *  
-     */
-    (rDDRPHYFIR, bit(53)) ? TBDDefaultCallout;
-
     /** DDRPHYFIR[54]
      *  
      */
-    (rDDRPHYFIR, bit(54)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(54)) ? defaultMaskedError;
 
     /** DDRPHYFIR[55]
      *  
      */
-    (rDDRPHYFIR, bit(55)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(55)) ? defaultMaskedError;
 
     /** DDRPHYFIR[56]
-     *  
+     *  DDRPHY Parity errors
      */
-    (rDDRPHYFIR, bit(56)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(56)) ? self_th_32perDay;
 
     /** DDRPHYFIR[57]
      *  
      */
-    (rDDRPHYFIR, bit(57)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(57)) ? defaultMaskedError;
 
     /** DDRPHYFIR[58]
      *  
      */
-    (rDDRPHYFIR, bit(58)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(58)) ? defaultMaskedError;
 
     /** DDRPHYFIR[59]
      *  
      */
-    (rDDRPHYFIR, bit(59)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(59)) ? defaultMaskedError;
 
     /** DDRPHYFIR[60]
-     *  
+     *  Register PE 4 bit impact
      */
-    (rDDRPHYFIR, bit(60)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(60)) ? self_th_1;
 
     /** DDRPHYFIR[61]
-     *  
+     *  Register PE 1 bit impact
      */
-    (rDDRPHYFIR, bit(61)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(61)) ? self_th_1;
 
     /** DDRPHYFIR[62]
-     *  
+     *  Register PE with no system impact
      */
-    (rDDRPHYFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** DDRPHYFIR[63]
-     *  
-     */
-    (rDDRPHYFIR, bit(63)) ? TBDDefaultCallout;
+    (rDDRPHYFIR, bit(62)) ? threshold_and_mask;
 
 };
 
@@ -1226,4 +645,6 @@ group gDDRPHYFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_mca_actions.rule";
 

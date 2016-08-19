@@ -104,6 +104,10 @@ chip p9_eq
         capture     req nonzero("EQ_LFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_eq_regs.rule";
+
 };
 
  ##############################################################################
@@ -193,324 +197,154 @@ rule rEQ_LFIR
 group gEQ_LFIR filter singlebit
 {
     /** EQ_LFIR[0]
-     *  
+     *  CFIR internal parity error
      */
-    (rEQ_LFIR, bit(0)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(0)) ? self_th_32perDay;
 
     /** EQ_LFIR[1]
-     *  
+     *  Errors from Control
      */
-    (rEQ_LFIR, bit(1)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(1)) ? defaultMaskedError;
 
     /** EQ_LFIR[2]
-     *  
+     *  local err from CC (PCB error)
      */
-    (rEQ_LFIR, bit(2)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(2)) ? defaultMaskedError;
 
     /** EQ_LFIR[3]
-     *  
+     *  local err from CC
      */
-    (rEQ_LFIR, bit(3)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(3)) ? defaultMaskedError;
 
     /** EQ_LFIR[4]
-     *  
+     *  local err from PSC
      */
-    (rEQ_LFIR, bit(4)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(4)) ? defaultMaskedError;
 
     /** EQ_LFIR[5]
-     *  
+     *  local err from PSC (parity error)
      */
-    (rEQ_LFIR, bit(5)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(5)) ? defaultMaskedError;
 
     /** EQ_LFIR[6]
-     *  
+     *  local err from Thermal (parity error)
      */
-    (rEQ_LFIR, bit(6)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(6)) ? defaultMaskedError;
 
     /** EQ_LFIR[7]
-     *  
+     *  local err from Thermal (PCB error
      */
-    (rEQ_LFIR, bit(7)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(7)) ? defaultMaskedError;
 
     /** EQ_LFIR[8]
-     *  
+     *  trip critical thermal local err
      */
-    (rEQ_LFIR, bit(8)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(8)) ? defaultMaskedError;
 
     /** EQ_LFIR[9]
-     *  
+     *  trip fatal thermal local error
      */
-    (rEQ_LFIR, bit(9)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(9)) ? defaultMaskedError;
 
     /** EQ_LFIR[10]
-     *  
+     *  therm volttrip error
      */
-    (rEQ_LFIR, bit(10)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(10)) ? defaultMaskedError;
 
     /** EQ_LFIR[11]
-     *  
+     *  local err from Debug ( error)
      */
-    (rEQ_LFIR, bit(11)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(11)) ? defaultMaskedError;
 
     /** EQ_LFIR[12]
-     *  
+     *  local err from Trace Array0
      */
-    (rEQ_LFIR, bit(12)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(12)) ? defaultMaskedError;
 
     /** EQ_LFIR[13]
-     *  
+     *  local err from  Trace Array0
      */
-    (rEQ_LFIR, bit(13)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(13)) ? defaultMaskedError;
 
     /** EQ_LFIR[14]
-     *  
+     *  local err from L3 Trace Array1
      */
-    (rEQ_LFIR, bit(14)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(14)) ? defaultMaskedError;
 
     /** EQ_LFIR[15]
-     *  
+     *  local err from L3 Trace Array1
      */
-    (rEQ_LFIR, bit(15)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(15)) ? defaultMaskedError;
 
     /** EQ_LFIR[16]
-     *  
+     *  local err from L20 Trace Array
      */
-    (rEQ_LFIR, bit(16)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(16)) ? defaultMaskedError;
 
     /** EQ_LFIR[17]
-     *  
+     *  local err from L20 Trace Array
      */
-    (rEQ_LFIR, bit(17)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(17)) ? defaultMaskedError;
 
     /** EQ_LFIR[18]
-     *  
+     *  local err from L21 Trace Array
      */
-    (rEQ_LFIR, bit(18)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(18)) ? defaultMaskedError;
 
     /** EQ_LFIR[19]
-     *  
+     *  local err from L21 Trace Array
      */
-    (rEQ_LFIR, bit(19)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(19)) ? defaultMaskedError;
 
     /** EQ_LFIR[20]
-     *  
+     *  spare
      */
-    (rEQ_LFIR, bit(20)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(20)) ? defaultMaskedError;
 
     /** EQ_LFIR[21]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(21)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(21)) ? defaultMaskedError;
 
     /** EQ_LFIR[22]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(22)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(22)) ? defaultMaskedError;
 
     /** EQ_LFIR[23]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(23)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(23)) ? defaultMaskedError;
 
     /** EQ_LFIR[24]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(24)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(24)) ? defaultMaskedError;
 
     /** EQ_LFIR[25]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(25)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(25)) ? defaultMaskedError;
 
     /** EQ_LFIR[26]
-     *  
+     *  local err from duty cycle adjust
      */
-    (rEQ_LFIR, bit(26)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(26)) ? defaultMaskedError;
 
     /** EQ_LFIR[27]
-     *  
+     *  local err from skew adjust skewadj6way
      */
-    (rEQ_LFIR, bit(27)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(27)) ? defaultMaskedError;
 
-    /** EQ_LFIR[28]
-     *  
+    /** EQ_LFIR[28:40]
+     *  spare
      */
-    (rEQ_LFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[29]
-     *  
-     */
-    (rEQ_LFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[30]
-     *  
-     */
-    (rEQ_LFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[31]
-     *  
-     */
-    (rEQ_LFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[32]
-     *  
-     */
-    (rEQ_LFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[33]
-     *  
-     */
-    (rEQ_LFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[34]
-     *  
-     */
-    (rEQ_LFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[35]
-     *  
-     */
-    (rEQ_LFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[36]
-     *  
-     */
-    (rEQ_LFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[37]
-     *  
-     */
-    (rEQ_LFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[38]
-     *  
-     */
-    (rEQ_LFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[39]
-     *  
-     */
-    (rEQ_LFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[40]
-     *  
-     */
-    (rEQ_LFIR, bit(40)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** EQ_LFIR[41]
-     *  
+     *  Malfunction Alert broadcast via OOB
      */
-    (rEQ_LFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[42]
-     *  
-     */
-    (rEQ_LFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[43]
-     *  
-     */
-    (rEQ_LFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[44]
-     *  
-     */
-    (rEQ_LFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[45]
-     *  
-     */
-    (rEQ_LFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[46]
-     *  
-     */
-    (rEQ_LFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[47]
-     *  
-     */
-    (rEQ_LFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[48]
-     *  
-     */
-    (rEQ_LFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[49]
-     *  
-     */
-    (rEQ_LFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[50]
-     *  
-     */
-    (rEQ_LFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[51]
-     *  
-     */
-    (rEQ_LFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[52]
-     *  
-     */
-    (rEQ_LFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[53]
-     *  
-     */
-    (rEQ_LFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[54]
-     *  
-     */
-    (rEQ_LFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[55]
-     *  
-     */
-    (rEQ_LFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[56]
-     *  
-     */
-    (rEQ_LFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[57]
-     *  
-     */
-    (rEQ_LFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[58]
-     *  
-     */
-    (rEQ_LFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[59]
-     *  
-     */
-    (rEQ_LFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[60]
-     *  
-     */
-    (rEQ_LFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[61]
-     *  
-     */
-    (rEQ_LFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[62]
-     *  
-     */
-    (rEQ_LFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** EQ_LFIR[63]
-     *  
-     */
-    (rEQ_LFIR, bit(63)) ? TBDDefaultCallout;
+    (rEQ_LFIR, bit(41)) ? defaultMaskedError;
 
 };
 
@@ -527,6 +361,8 @@ group gEQ_LFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_eq_actions.rule";
 
 actionclass analyzeConnectedEX0 { analyze(connected(TYPE_EX, 0)); };
 actionclass analyzeConnectedEX1 { analyze(connected(TYPE_EX, 1)); };

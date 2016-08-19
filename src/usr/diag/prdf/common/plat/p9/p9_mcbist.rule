@@ -81,16 +81,9 @@ chip p9_mcbist
         capture     req nonzero("MCBISTFIR");
     };
 
-    ############################################################################
-    # P9 MCBIST command registers
-    ############################################################################
 
-    register MCBIST_CNTL
-    {
-        name        "P9 MCBIST target MCBIST Control Register";
-        scomaddr    0x070123DB;
-        capture     group default;
-    };
+# Include registers not defined by the xml
+.include "p9_mcbist_regs.rule";
 
 };
 
@@ -149,324 +142,104 @@ rule rMCBISTFIR
 group gMCBISTFIR filter singlebit
 {
     /** MCBISTFIR[0]
-     *  
+     *  INVALID_MAINT_ADDRESS
      */
-    (rMCBISTFIR, bit(0)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(0)) ? defaultMaskedError;
 
     /** MCBISTFIR[1]
      *  
      */
-    (rMCBISTFIR, bit(1)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(1)) ? defaultMaskedError;
 
     /** MCBISTFIR[2]
-     *  
+     *  INTERNAL_FSM_ERROR
      */
-    (rMCBISTFIR, bit(2)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(2)) ? self_th_1;
 
     /** MCBISTFIR[3]
-     *  
+     *  MCBIST_BRODCAST_OUT_OF_SYNC
      */
-    (rMCBISTFIR, bit(3)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(3)) ? self_th_1;
 
     /** MCBISTFIR[4]
-     *  
+     *  MCBIST_DATA_ERROR
      */
-    (rMCBISTFIR, bit(4)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(4)) ? defaultMaskedError;
 
     /** MCBISTFIR[5]
-     *  
+     *  Maintenance hard NCE ETE
      */
-    (rMCBISTFIR, bit(5)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(5)) ? defaultMaskedError;
 
     /** MCBISTFIR[6]
-     *  
+     *  Maintenance soft NCE ETE
      */
-    (rMCBISTFIR, bit(6)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(6)) ? defaultMaskedError;
 
     /** MCBISTFIR[7]
-     *  
+     *  Maintenance intermittent NCE ETE
      */
-    (rMCBISTFIR, bit(7)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(7)) ? defaultMaskedError;
 
     /** MCBISTFIR[8]
-     *  
+     *  Maintenance RCE ETE
      */
-    (rMCBISTFIR, bit(8)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(8)) ? defaultMaskedError;
 
     /** MCBISTFIR[9]
-     *  
+     *  Maintenance IMPE ETE
      */
-    (rMCBISTFIR, bit(9)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(9)) ? defaultMaskedError;
 
     /** MCBISTFIR[10]
-     *  MCBIST Command Complete
+     *  MCBIST program complete
      */
-    (rMCBISTFIR, bit(10)) ? analyzeMcbistCmdComplete;
+    (rMCBISTFIR, bit(10)) ? mcbist_program_complete;
 
     /** MCBISTFIR[11]
-     *  
+     *  MCBIST_CCS_SUBTEST_DONE
      */
-    (rMCBISTFIR, bit(11)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(11)) ? defaultMaskedError;
 
     /** MCBISTFIR[12]
-     *  
+     *  WAT_DEBUG_ATTN
      */
-    (rMCBISTFIR, bit(12)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(12)) ? defaultMaskedError;
+
+    /** MCBISTFIR[12]
+     *  MCBIST program complete - WAT workaround
+     */
+    (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround;
 
     /** MCBISTFIR[13]
-     *  
+     *  SCOM_RECOVERABLE_REG_PE
      */
-    (rMCBISTFIR, bit(13)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(13)) ? self_th_1;
 
     /** MCBISTFIR[14]
-     *  
+     *  SCOM_FATAL_REG_PE
      */
-    (rMCBISTFIR, bit(14)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(14)) ? self_th_1;
 
     /** MCBISTFIR[15]
-     *  
+     *  WAT_DEBUG_REG_PE
      */
-    (rMCBISTFIR, bit(15)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(15)) ? defaultMaskedError;
 
-    /** MCBISTFIR[16]
-     *  
+    /** MCBISTFIR[16:17]
+     *  spare
      */
-    (rMCBISTFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[17]
-     *  
-     */
-    (rMCBISTFIR, bit(17)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(16|17)) ? defaultMaskedError;
 
     /** MCBISTFIR[18]
-     *  
+     *  INTERNAL_SCOM_ERROR
      */
-    (rMCBISTFIR, bit(18)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(18)) ? threshold_and_mask;
 
     /** MCBISTFIR[19]
-     *  
+     *  INTERNAL_SCOM_ERROR_CLONE
      */
-    (rMCBISTFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[20]
-     *  
-     */
-    (rMCBISTFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[21]
-     *  
-     */
-    (rMCBISTFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[22]
-     *  
-     */
-    (rMCBISTFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[23]
-     *  
-     */
-    (rMCBISTFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[24]
-     *  
-     */
-    (rMCBISTFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[25]
-     *  
-     */
-    (rMCBISTFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[26]
-     *  
-     */
-    (rMCBISTFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[27]
-     *  
-     */
-    (rMCBISTFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[28]
-     *  
-     */
-    (rMCBISTFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[29]
-     *  
-     */
-    (rMCBISTFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[30]
-     *  
-     */
-    (rMCBISTFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[31]
-     *  
-     */
-    (rMCBISTFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[32]
-     *  
-     */
-    (rMCBISTFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[33]
-     *  
-     */
-    (rMCBISTFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[34]
-     *  
-     */
-    (rMCBISTFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[35]
-     *  
-     */
-    (rMCBISTFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[36]
-     *  
-     */
-    (rMCBISTFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[37]
-     *  
-     */
-    (rMCBISTFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[38]
-     *  
-     */
-    (rMCBISTFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[39]
-     *  
-     */
-    (rMCBISTFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[40]
-     *  
-     */
-    (rMCBISTFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[41]
-     *  
-     */
-    (rMCBISTFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[42]
-     *  
-     */
-    (rMCBISTFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[43]
-     *  
-     */
-    (rMCBISTFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[44]
-     *  
-     */
-    (rMCBISTFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[45]
-     *  
-     */
-    (rMCBISTFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[46]
-     *  
-     */
-    (rMCBISTFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[47]
-     *  
-     */
-    (rMCBISTFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[48]
-     *  
-     */
-    (rMCBISTFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[49]
-     *  
-     */
-    (rMCBISTFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[50]
-     *  
-     */
-    (rMCBISTFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[51]
-     *  
-     */
-    (rMCBISTFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[52]
-     *  
-     */
-    (rMCBISTFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[53]
-     *  
-     */
-    (rMCBISTFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[54]
-     *  
-     */
-    (rMCBISTFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[55]
-     *  
-     */
-    (rMCBISTFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[56]
-     *  
-     */
-    (rMCBISTFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[57]
-     *  
-     */
-    (rMCBISTFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[58]
-     *  
-     */
-    (rMCBISTFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[59]
-     *  
-     */
-    (rMCBISTFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[60]
-     *  
-     */
-    (rMCBISTFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[61]
-     *  
-     */
-    (rMCBISTFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[62]
-     *  
-     */
-    (rMCBISTFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** MCBISTFIR[63]
-     *  
-     */
-    (rMCBISTFIR, bit(63)) ? TBDDefaultCallout;
+    (rMCBISTFIR, bit(19)) ? threshold_and_mask;
 
 };
 
@@ -483,10 +256,6 @@ group gMCBISTFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
-
-/** Analyze MCBIST Command Complete attention */
-actionclass analyzeMcbistCmdComplete
-{
-    funccall("McbistCmdComplete");
-};
+# Include the chip-specific action set.
+.include "p9_mcbist_actions.rule";
 

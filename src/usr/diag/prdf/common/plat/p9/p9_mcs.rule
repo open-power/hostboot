@@ -79,6 +79,10 @@ chip p9_mcs
         capture     req nonzero("MCFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_mcs_regs.rule";
+
 };
 
  ##############################################################################
@@ -136,324 +140,109 @@ rule rMCFIR
 group gMCFIR filter singlebit
 {
     /** MCFIR[0]
-     *  
+     *  mc internal recoverable eror
      */
-    (rMCFIR, bit(0)) ? TBDDefaultCallout;
+    (rMCFIR, bit(0)) ? self_th_1;
 
     /** MCFIR[1]
-     *  
+     *  mc internal non recovervable error
      */
-    (rMCFIR, bit(1)) ? TBDDefaultCallout;
+    (rMCFIR, bit(1)) ? self_th_1;
 
     /** MCFIR[2]
-     *  
+     *  powerbus protocol error
      */
-    (rMCFIR, bit(2)) ? TBDDefaultCallout;
+    (rMCFIR, bit(2)) ? level2_dump_SH;
 
     /** MCFIR[3]
-     *  
+     *  bat with with incorrect tty pe
      */
-    (rMCFIR, bit(3)) ? TBDDefaultCallout;
+    (rMCFIR, bit(3)) ? defaultMaskedError;
 
     /** MCFIR[4]
-     *  
+     *  multiple bar
      */
-    (rMCFIR, bit(4)) ? TBDDefaultCallout;
+    (rMCFIR, bit(4)) ? level2_M_self_L_th_1;
 
     /** MCFIR[5]
-     *  
+     *  invalid address
      */
-    (rMCFIR, bit(5)) ? TBDDefaultCallout;
+    (rMCFIR, bit(5)) ? level2_dump_SH;
 
     /** MCFIR[6]
-     *  
+     *  illegal consumer access
      */
-    (rMCFIR, bit(6)) ? TBDDefaultCallout;
+    (rMCFIR, bit(6)) ? defaultMaskedError;
 
     /** MCFIR[7]
-     *  
+     *  illegal producer access
      */
-    (rMCFIR, bit(7)) ? TBDDefaultCallout;
+    (rMCFIR, bit(7)) ? defaultMaskedError;
 
     /** MCFIR[8]
-     *  
+     *  command list timeout
      */
-    (rMCFIR, bit(8)) ? TBDDefaultCallout;
+    (rMCFIR, bit(8)) ? level2_th_1;
 
     /** MCFIR[9]
-     *  
+     *  channel 0 timeout
      */
-    (rMCFIR, bit(9)) ? TBDDefaultCallout;
+    (rMCFIR, bit(9)) ? defaultMaskedError;
 
     /** MCFIR[10]
-     *  
+     *  channel 1 timeout
      */
-    (rMCFIR, bit(10)) ? TBDDefaultCallout;
+    (rMCFIR, bit(10)) ? defaultMaskedError;
 
     /** MCFIR[11]
-     *  
+     *  mcs wat0 event
      */
-    (rMCFIR, bit(11)) ? TBDDefaultCallout;
+    (rMCFIR, bit(11)) ? defaultMaskedError;
 
     /** MCFIR[12]
-     *  
+     *  mcs wat1 event
      */
-    (rMCFIR, bit(12)) ? TBDDefaultCallout;
+    (rMCFIR, bit(12)) ? defaultMaskedError;
 
     /** MCFIR[13]
-     *  
+     *  mcs wat2 event
      */
-    (rMCFIR, bit(13)) ? TBDDefaultCallout;
+    (rMCFIR, bit(13)) ? defaultMaskedError;
 
     /** MCFIR[14]
-     *  
+     *  mcs wat3 event
      */
-    (rMCFIR, bit(14)) ? TBDDefaultCallout;
+    (rMCFIR, bit(14)) ? defaultMaskedError;
 
     /** MCFIR[15]
-     *  
+     *  mirror action occurred
      */
-    (rMCFIR, bit(15)) ? TBDDefaultCallout;
+    (rMCFIR, bit(15)) ? defaultMaskedError;
 
     /** MCFIR[16]
-     *  
+     *  centaur sync command detected
      */
-    (rMCFIR, bit(16)) ? TBDDefaultCallout;
+    (rMCFIR, bit(16)) ? defaultMaskedError;
 
     /** MCFIR[17]
-     *  
+     *  debug config reg error
      */
-    (rMCFIR, bit(17)) ? TBDDefaultCallout;
+    (rMCFIR, bit(17)) ? defaultMaskedError;
 
-    /** MCFIR[18]
-     *  
+    /** MCFIR[18:23]
+     *  spare
      */
-    (rMCFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** MCFIR[19]
-     *  
-     */
-    (rMCFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** MCFIR[20]
-     *  
-     */
-    (rMCFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** MCFIR[21]
-     *  
-     */
-    (rMCFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** MCFIR[22]
-     *  
-     */
-    (rMCFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** MCFIR[23]
-     *  
-     */
-    (rMCFIR, bit(23)) ? TBDDefaultCallout;
+    (rMCFIR, bit(18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** MCFIR[24]
-     *  
+     *  scom ERROR
      */
-    (rMCFIR, bit(24)) ? TBDDefaultCallout;
+    (rMCFIR, bit(24)) ? defaultMaskedError;
 
     /** MCFIR[25]
-     *  
+     *  scom error
      */
-    (rMCFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** MCFIR[26]
-     *  
-     */
-    (rMCFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** MCFIR[27]
-     *  
-     */
-    (rMCFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** MCFIR[28]
-     *  
-     */
-    (rMCFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** MCFIR[29]
-     *  
-     */
-    (rMCFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** MCFIR[30]
-     *  
-     */
-    (rMCFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** MCFIR[31]
-     *  
-     */
-    (rMCFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** MCFIR[32]
-     *  
-     */
-    (rMCFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** MCFIR[33]
-     *  
-     */
-    (rMCFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** MCFIR[34]
-     *  
-     */
-    (rMCFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** MCFIR[35]
-     *  
-     */
-    (rMCFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** MCFIR[36]
-     *  
-     */
-    (rMCFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** MCFIR[37]
-     *  
-     */
-    (rMCFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** MCFIR[38]
-     *  
-     */
-    (rMCFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** MCFIR[39]
-     *  
-     */
-    (rMCFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** MCFIR[40]
-     *  
-     */
-    (rMCFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** MCFIR[41]
-     *  
-     */
-    (rMCFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** MCFIR[42]
-     *  
-     */
-    (rMCFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** MCFIR[43]
-     *  
-     */
-    (rMCFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** MCFIR[44]
-     *  
-     */
-    (rMCFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** MCFIR[45]
-     *  
-     */
-    (rMCFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** MCFIR[46]
-     *  
-     */
-    (rMCFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** MCFIR[47]
-     *  
-     */
-    (rMCFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** MCFIR[48]
-     *  
-     */
-    (rMCFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** MCFIR[49]
-     *  
-     */
-    (rMCFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** MCFIR[50]
-     *  
-     */
-    (rMCFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** MCFIR[51]
-     *  
-     */
-    (rMCFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** MCFIR[52]
-     *  
-     */
-    (rMCFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** MCFIR[53]
-     *  
-     */
-    (rMCFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** MCFIR[54]
-     *  
-     */
-    (rMCFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** MCFIR[55]
-     *  
-     */
-    (rMCFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** MCFIR[56]
-     *  
-     */
-    (rMCFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** MCFIR[57]
-     *  
-     */
-    (rMCFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** MCFIR[58]
-     *  
-     */
-    (rMCFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** MCFIR[59]
-     *  
-     */
-    (rMCFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** MCFIR[60]
-     *  
-     */
-    (rMCFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** MCFIR[61]
-     *  
-     */
-    (rMCFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** MCFIR[62]
-     *  
-     */
-    (rMCFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** MCFIR[63]
-     *  
-     */
-    (rMCFIR, bit(63)) ? TBDDefaultCallout;
+    (rMCFIR, bit(25)) ? defaultMaskedError;
 
 };
 
@@ -470,4 +259,6 @@ group gMCFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_mcs_actions.rule";
 
