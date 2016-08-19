@@ -25508,22 +25508,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>MSS_VPD_MR_2_SIGNATURE_FREQ_DROP</id>
-    <description>MR Keyword type, nibble 0 = freq bin (0 = 1600, 1 = 1866, 2 = 2133, 3 = 2400, 4 = 2667, 5 = 2933, 6 = 3200), nibble 1 = num dimms per port (1 = single drop, 2 = dual drop)</description>
-    <simpleType>
-      <uint8_t>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MR_2_SIGNATURE_FREQ_DROP</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_VPD_MR_2_SIGNATURE_HASH</id>
     <description>Hash Signature for the MR Keyword. The hash signature is 32bits for 256 bytes of data.</description>
     <simpleType>
@@ -27070,7 +27054,6 @@ DEPRECATED!!!!
     <description>Default value for 2N Mode from Signal Integrity.</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27118,10 +27101,14 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_VPD_MR_TSYS_ADR</id>
-    <description>Place holder description</description>
+    <description>
+    ADR WRClk Phase Rotator Offset Value in ticks. Ticks are 1/128 of one cycle of clock.
+    Phase Rotator Static Offset value used to determine the Phase of the WrClk with respect to SysClk.
+    For zero delay simulations, or simulations where the delay of the SysClk tree and the WrClk tree are equal,
+    Set this field to 60h
+    </description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27133,50 +27120,21 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>VPD_MR_TSYS_ADR</id>
-    <description>Place holder description</description>
-    <simpleType>
-      <uint8_t></uint8_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_VPD_MR_TSYS_ADR</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-
-<attribute>
     <id>MSS_VPD_MR_TSYS_DATA</id>
-    <description>Place holder description</description>
+    <description>
+    DP16 WrClk Phase Rotator Offset Value in ticks. Ticks are 1/128 of one cycle of clock.
+    Phase Rotator Static Offset value used to determine the Phase of the WrClk with respect to SysClk.
+    For zero delay simulations, or simulations where the delay of the SysClk tree and the WrClk tree are equal,
+    Set this field to 60h
+    </description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
       <id>ATTR_MSS_VPD_MR_TSYS_DATA</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>VPD_MR_TSYS_DATA</id>
-    <description>Place holder description</description>
-    <simpleType>
-      <uint8_t></uint8_t>
-      <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_VPD_MR_TSYS_DATA</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27355,24 +27313,6 @@ DEPRECATED!!!!
     <readable/>
     <hwpfToHbAttrMap>
       <id>ATTR_MSS_VPD_MT_2_SIGNATURE_HASH</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-
-
-<attribute>
-    <id>MSS_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
-    <description>Place holder description</description>
-    <simpleType>
-      <uint8_t>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <writeable/>
-    <readable/>
-    <hwpfToHbAttrMap>
-      <id>ATTR_MSS_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -27867,7 +27807,7 @@ DEPRECATED!!!!
     <id>MSS_VPD_MT_WINDAGE_RD_CTR</id>
     <description>Place holder description</description>
     <simpleType>
-      <uint16_t></uint16_t>
+      <int16_t></int16_t>
       <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -30432,6 +30372,63 @@ DEPRECATED!!!!
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_NX_RNG_BIST_THRESHOLD</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MR_DPHY_GPO</id>
+  <description>
+        Global phy offset in number of clocks
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+    <array>2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MR_DPHY_GPO</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MR_DPHY_RLO</id>
+  <description>
+        Read latency offset in number of clocks
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+    <array>2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MR_DPHY_RLO</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_MR_DPHY_WLO</id>
+  <description>
+        Write latency offset in number of clocks
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+    <array>2</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_MR_DPHY_WLO</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>

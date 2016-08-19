@@ -759,14 +759,6 @@
     <attribute><id>MSS_MRW_FINE_REFRESH_MODE</id></attribute>
     <attribute><id>MSS_MRW_TEMP_REFRESH_RANGE</id></attribute>
     <attribute><id>MSS_MRW_RESET_DELAY_BEFORE_CAL</id></attribute>
-    <attribute><id>MSS_VPD_MR_0_VERSION_LAYOUT</id></attribute>
-    <attribute><id>MSS_VPD_MR_1_VERSION_DATA</id></attribute>
-    <attribute><id>MSS_VPD_MR_2_SIGNATURE_FREQ_DROP</id></attribute>
-    <attribute><id>MSS_VPD_MR_2_SIGNATURE_HASH</id></attribute>
-    <attribute><id>MSS_VPD_MT_0_VERSION_LAYOUT</id></attribute>
-    <attribute><id>MSS_VPD_MT_1_VERSION_DATA</id></attribute>
-    <attribute><id>MSS_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id></attribute>
-    <attribute><id>MSS_VPD_MT_2_SIGNATURE_HASH</id></attribute>
     <attribute><id>MSS_MRW_DRAM_2N_MODE</id></attribute>
     <attribute><id>MRW_HW_MIRRORING_ENABLE</id></attribute>
 
@@ -1586,8 +1578,6 @@
     <attribute><id>MSS_VPD_MR_TSYS_ADR</id></attribute>
     <attribute><id>MSS_VPD_MR_TSYS_DATA</id></attribute>
     <attribute><id>VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
-    <attribute><id>VPD_MR_TSYS_ADR</id></attribute>
-    <attribute><id>VPD_MR_TSYS_DATA</id></attribute>
     <attribute><id>MSS_VPD_MT_CKE_PRI_MAP</id></attribute>
     <attribute><id>MSS_VPD_MT_CKE_PWR_MAP</id></attribute>
     <attribute><id>MSS_VPD_MT_DIMM_RCD_IBT_CA</id></attribute>
@@ -1684,6 +1674,15 @@
     <attribute><id>VPD_OVERRIDE_MT_ENABLE</id></attribute>
     <attribute><id>VPD_OVERRIDE_MR</id></attribute>
     <attribute><id>VPD_OVERRIDE_MR_ENABLE</id></attribute>
+    <attribute><id>MSS_VPD_MT_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>MSS_VPD_MT_1_VERSION_DATA</id></attribute>
+    <attribute><id>MSS_VPD_MT_2_SIGNATURE_HASH</id></attribute>
+    <attribute><id>MSS_VPD_MR_0_VERSION_LAYOUT</id></attribute>
+    <attribute><id>MSS_VPD_MR_1_VERSION_DATA</id></attribute>
+    <attribute><id>MSS_VPD_MR_2_SIGNATURE_HASH</id></attribute>
+    <attribute><id>MSS_VPD_MR_DPHY_GPO</id></attribute>
+    <attribute><id>MSS_VPD_MR_DPHY_RLO</id></attribute>
+    <attribute><id>MSS_VPD_MR_DPHY_WLO</id></attribute>
 </targetType>
 
 <targetType>
@@ -1844,9 +1843,6 @@
         <default>0xE0</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!-- GARD -->
-    </attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
 
