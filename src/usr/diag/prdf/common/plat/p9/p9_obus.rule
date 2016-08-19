@@ -230,6 +230,10 @@ chip p9_obus
         capture     req nonzero("OBPPEFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_obus_regs.rule";
+
 };
 
  ##############################################################################
@@ -318,324 +322,84 @@ rule rOB_LFIR
 group gOB_LFIR filter singlebit
 {
     /** OB_LFIR[0]
-     *  
+     *  CFIR internal parity error
      */
-    (rOB_LFIR, bit(0)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(0)) ? self_th_32perDay;
 
     /** OB_LFIR[1]
-     *  
+     *  Local errors from GPIO
      */
-    (rOB_LFIR, bit(1)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(1)) ? defaultMaskedError;
 
     /** OB_LFIR[2]
-     *  
+     *  local err from CC
      */
-    (rOB_LFIR, bit(2)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(2)) ? defaultMaskedError;
 
     /** OB_LFIR[3]
-     *  
+     *  local err from CC
      */
-    (rOB_LFIR, bit(3)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(3)) ? defaultMaskedError;
 
     /** OB_LFIR[4]
-     *  
+     *  local err from PSC
      */
-    (rOB_LFIR, bit(4)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(4)) ? defaultMaskedError;
 
     /** OB_LFIR[5]
-     *  
+     *  local err from PSC (parity error)
      */
-    (rOB_LFIR, bit(5)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(5)) ? defaultMaskedError;
 
     /** OB_LFIR[6]
-     *  
+     *  local err from Thermal (parity error)
      */
-    (rOB_LFIR, bit(6)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(6)) ? defaultMaskedError;
 
     /** OB_LFIR[7]
-     *  
+     *  local err from Thermal (PCB error
      */
-    (rOB_LFIR, bit(7)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(7)) ? defaultMaskedError;
 
     /** OB_LFIR[8]
-     *  
+     *  trip critical thermal local err
      */
-    (rOB_LFIR, bit(8)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(8)) ? defaultMaskedError;
 
     /** OB_LFIR[9]
-     *  
+     *  trip fatal thermal local error
      */
-    (rOB_LFIR, bit(9)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(9)) ? defaultMaskedError;
 
     /** OB_LFIR[10]
-     *  
+     *  therm volttrip error
      */
-    (rOB_LFIR, bit(10)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(10)) ? defaultMaskedError;
 
     /** OB_LFIR[11]
-     *  
+     *  local err from Debug ( error)
      */
-    (rOB_LFIR, bit(11)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(11)) ? defaultMaskedError;
 
     /** OB_LFIR[12]
-     *  
+     *  local err from Trace Array0
      */
-    (rOB_LFIR, bit(12)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(12)) ? defaultMaskedError;
 
     /** OB_LFIR[13]
-     *  
+     *  local err from Trace Array0
      */
-    (rOB_LFIR, bit(13)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(13)) ? defaultMaskedError;
 
-    /** OB_LFIR[14]
-     *  
+    /** OB_LFIR[14:40]
+     *  spare
      */
-    (rOB_LFIR, bit(14)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[15]
-     *  
-     */
-    (rOB_LFIR, bit(15)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[16]
-     *  
-     */
-    (rOB_LFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[17]
-     *  
-     */
-    (rOB_LFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[18]
-     *  
-     */
-    (rOB_LFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[19]
-     *  
-     */
-    (rOB_LFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[20]
-     *  
-     */
-    (rOB_LFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[21]
-     *  
-     */
-    (rOB_LFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[22]
-     *  
-     */
-    (rOB_LFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[23]
-     *  
-     */
-    (rOB_LFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[24]
-     *  
-     */
-    (rOB_LFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[25]
-     *  
-     */
-    (rOB_LFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[26]
-     *  
-     */
-    (rOB_LFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[27]
-     *  
-     */
-    (rOB_LFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[28]
-     *  
-     */
-    (rOB_LFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[29]
-     *  
-     */
-    (rOB_LFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[30]
-     *  
-     */
-    (rOB_LFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[31]
-     *  
-     */
-    (rOB_LFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[32]
-     *  
-     */
-    (rOB_LFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[33]
-     *  
-     */
-    (rOB_LFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[34]
-     *  
-     */
-    (rOB_LFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[35]
-     *  
-     */
-    (rOB_LFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[36]
-     *  
-     */
-    (rOB_LFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[37]
-     *  
-     */
-    (rOB_LFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[38]
-     *  
-     */
-    (rOB_LFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[39]
-     *  
-     */
-    (rOB_LFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[40]
-     *  
-     */
-    (rOB_LFIR, bit(40)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** OB_LFIR[41]
-     *  
+     *  Malfunction Alert broadcast via OOB
      */
-    (rOB_LFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[42]
-     *  
-     */
-    (rOB_LFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[43]
-     *  
-     */
-    (rOB_LFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[44]
-     *  
-     */
-    (rOB_LFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[45]
-     *  
-     */
-    (rOB_LFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[46]
-     *  
-     */
-    (rOB_LFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[47]
-     *  
-     */
-    (rOB_LFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[48]
-     *  
-     */
-    (rOB_LFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[49]
-     *  
-     */
-    (rOB_LFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[50]
-     *  
-     */
-    (rOB_LFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[51]
-     *  
-     */
-    (rOB_LFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[52]
-     *  
-     */
-    (rOB_LFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[53]
-     *  
-     */
-    (rOB_LFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[54]
-     *  
-     */
-    (rOB_LFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[55]
-     *  
-     */
-    (rOB_LFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[56]
-     *  
-     */
-    (rOB_LFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[57]
-     *  
-     */
-    (rOB_LFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[58]
-     *  
-     */
-    (rOB_LFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[59]
-     *  
-     */
-    (rOB_LFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[60]
-     *  
-     */
-    (rOB_LFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[61]
-     *  
-     */
-    (rOB_LFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[62]
-     *  
-     */
-    (rOB_LFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** OB_LFIR[63]
-     *  
-     */
-    (rOB_LFIR, bit(63)) ? TBDDefaultCallout;
+    (rOB_LFIR, bit(41)) ? defaultMaskedError;
 
 };
 
@@ -654,324 +418,319 @@ rule rIOOLFIR
 group gIOOLFIR filter singlebit
 {
     /** IOOLFIR[0]
-     *  
+     *  link0 trained
      */
-    (rIOOLFIR, bit(0)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(0)) ? defaultMaskedError;
 
     /** IOOLFIR[1]
-     *  
+     *  link1 trained
      */
-    (rIOOLFIR, bit(1)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(1)) ? defaultMaskedError;
 
     /** IOOLFIR[2]
-     *  
+     *  link0 op irq
      */
-    (rIOOLFIR, bit(2)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(2)) ? defaultMaskedError;
 
     /** IOOLFIR[3]
-     *  
+     *  link1 op irq
      */
-    (rIOOLFIR, bit(3)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(3)) ? defaultMaskedError;
 
     /** IOOLFIR[4]
-     *  
+     *  link0 replay threshold
      */
-    (rIOOLFIR, bit(4)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(4)) ? defaultMaskedError;
 
     /** IOOLFIR[5]
-     *  
+     *  link1 replay threshold
      */
-    (rIOOLFIR, bit(5)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(5)) ? defaultMaskedError;
 
     /** IOOLFIR[6]
-     *  
+     *  link0 crc error
      */
-    (rIOOLFIR, bit(6)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(6)) ? threshold_and_mask;
 
     /** IOOLFIR[7]
-     *  
+     *  link1 crc error
      */
-    (rIOOLFIR, bit(7)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(7)) ? threshold_and_mask;
 
     /** IOOLFIR[8]
-     *  
+     *  link0 nak received
      */
-    (rIOOLFIR, bit(8)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(8)) ? defaultMaskedError;
 
     /** IOOLFIR[9]
-     *  
+     *  link1 nak received
      */
-    (rIOOLFIR, bit(9)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(9)) ? defaultMaskedError;
 
     /** IOOLFIR[10]
-     *  
+     *  link0 replay buffer full
      */
-    (rIOOLFIR, bit(10)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(10)) ? defaultMaskedError;
 
     /** IOOLFIR[11]
-     *  
+     *  link1 replay buffer full
      */
-    (rIOOLFIR, bit(11)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(11)) ? defaultMaskedError;
 
     /** IOOLFIR[12]
-     *  
+     *  link0 sl ecc threshold
      */
-    (rIOOLFIR, bit(12)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(12)) ? defaultMaskedError;
 
     /** IOOLFIR[13]
-     *  
+     *  link1 sl ecc threshold
      */
-    (rIOOLFIR, bit(13)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(13)) ? defaultMaskedError;
 
     /** IOOLFIR[14]
-     *  
+     *  link0 sl ecc correctable
      */
-    (rIOOLFIR, bit(14)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(14)) ? threshold_and_mask;
 
     /** IOOLFIR[15]
-     *  
+     *  link1 sl ecc correctable
      */
-    (rIOOLFIR, bit(15)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(15)) ? threshold_and_mask;
 
     /** IOOLFIR[16]
-     *  
+     *  link0 sl ecc ue
      */
-    (rIOOLFIR, bit(16)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(16)) ? threshold_and_mask;
 
     /** IOOLFIR[17]
-     *  
+     *  link1 sl ecc ue
      */
-    (rIOOLFIR, bit(17)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(17)) ? threshold_and_mask;
 
     /** IOOLFIR[18]
-     *  
+     *  link0 retrain threshold
      */
-    (rIOOLFIR, bit(18)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(18)) ? defaultMaskedError;
 
     /** IOOLFIR[19]
-     *  
+     *  link1 retrain threshold
      */
-    (rIOOLFIR, bit(19)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(19)) ? defaultMaskedError;
 
     /** IOOLFIR[20]
-     *  
+     *  link0 loss block align
      */
-    (rIOOLFIR, bit(20)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(20)) ? defaultMaskedError;
 
     /** IOOLFIR[21]
-     *  
+     *  link1 loss block align
      */
-    (rIOOLFIR, bit(21)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(21)) ? defaultMaskedError;
 
     /** IOOLFIR[22]
-     *  
+     *  link0 invalid block
      */
-    (rIOOLFIR, bit(22)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(22)) ? defaultMaskedError;
 
     /** IOOLFIR[23]
-     *  
+     *  link1 invalid block
      */
-    (rIOOLFIR, bit(23)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(23)) ? defaultMaskedError;
 
     /** IOOLFIR[24]
-     *  
+     *  link0 deskew error
      */
-    (rIOOLFIR, bit(24)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(24)) ? defaultMaskedError;
 
     /** IOOLFIR[25]
-     *  
+     *  link1 deskew error
      */
-    (rIOOLFIR, bit(25)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(25)) ? defaultMaskedError;
 
     /** IOOLFIR[26]
-     *  
+     *  link0 deskew overflow
      */
-    (rIOOLFIR, bit(26)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(26)) ? defaultMaskedError;
 
     /** IOOLFIR[27]
-     *  
+     *  link1 deskew overflow
      */
-    (rIOOLFIR, bit(27)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(27)) ? defaultMaskedError;
 
     /** IOOLFIR[28]
-     *  
+     *  link0 sw retrain
      */
-    (rIOOLFIR, bit(28)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(28)) ? defaultMaskedError;
 
     /** IOOLFIR[29]
-     *  
+     *  link1 sw retrain
      */
-    (rIOOLFIR, bit(29)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(29)) ? defaultMaskedError;
 
     /** IOOLFIR[30]
-     *  
+     *  link0 ack queue overflow
      */
-    (rIOOLFIR, bit(30)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(30)) ? defaultMaskedError;
 
     /** IOOLFIR[31]
-     *  
+     *  link1 ack queue overflow
      */
-    (rIOOLFIR, bit(31)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(31)) ? defaultMaskedError;
 
     /** IOOLFIR[32]
-     *  
+     *  link0 ack queue underflow
      */
-    (rIOOLFIR, bit(32)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(32)) ? defaultMaskedError;
 
     /** IOOLFIR[33]
-     *  
+     *  link1 ack queue underflow
      */
-    (rIOOLFIR, bit(33)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(33)) ? defaultMaskedError;
 
     /** IOOLFIR[34]
-     *  
+     *  link0 num replay
      */
-    (rIOOLFIR, bit(34)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(34)) ? defaultMaskedError;
 
     /** IOOLFIR[35]
-     *  
+     *  link1 num replay
      */
-    (rIOOLFIR, bit(35)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(35)) ? defaultMaskedError;
 
     /** IOOLFIR[36]
-     *  
+     *  link0 training set received
      */
-    (rIOOLFIR, bit(36)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(36)) ? defaultMaskedError;
 
     /** IOOLFIR[37]
-     *  
+     *  link1 training set received
      */
-    (rIOOLFIR, bit(37)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(37)) ? defaultMaskedError;
 
     /** IOOLFIR[38]
-     *  
+     *  link0 prbs select error
      */
-    (rIOOLFIR, bit(38)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(38)) ? threshold_and_mask;
 
     /** IOOLFIR[39]
-     *  
+     *  link1 prbs select error
      */
-    (rIOOLFIR, bit(39)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(39)) ? threshold_and_mask;
 
     /** IOOLFIR[40]
-     *  
+     *  link0 tcomplete bad
      */
-    (rIOOLFIR, bit(40)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(40)) ? defaultMaskedError;
 
     /** IOOLFIR[41]
-     *  
+     *  link1 tcomplete bad
      */
-    (rIOOLFIR, bit(41)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(41)) ? defaultMaskedError;
 
-    /** IOOLFIR[42]
-     *  
+    /** IOOLFIR[42:43]
+     *  spare
      */
-    (rIOOLFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** IOOLFIR[43]
-     *  
-     */
-    (rIOOLFIR, bit(43)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(42|43)) ? defaultMaskedError;
 
     /** IOOLFIR[44]
      *  
      */
-    (rIOOLFIR, bit(44)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(44)) ? defaultMaskedError;
 
     /** IOOLFIR[45]
      *  
      */
-    (rIOOLFIR, bit(45)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(45)) ? defaultMaskedError;
 
     /** IOOLFIR[46]
-     *  
+     *  link0 too many crc errors
      */
-    (rIOOLFIR, bit(46)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(46)) ? defaultMaskedError;
 
     /** IOOLFIR[47]
-     *  
+     *  link1 too many crc errors
      */
-    (rIOOLFIR, bit(47)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(47)) ? defaultMaskedError;
 
     /** IOOLFIR[48]
-     *  
+     *  link0 npu error
      */
-    (rIOOLFIR, bit(48)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(48)) ? threshold_and_mask;
 
     /** IOOLFIR[49]
-     *  
+     *  link1 npu error
      */
-    (rIOOLFIR, bit(49)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(49)) ? threshold_and_mask;
 
     /** IOOLFIR[50]
-     *  
+     *  linkx npu error
      */
-    (rIOOLFIR, bit(50)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(50)) ? threshold_and_mask;
 
     /** IOOLFIR[51]
-     *  
+     *  osc switch
      */
-    (rIOOLFIR, bit(51)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(51)) ? threshold_and_mask;
 
     /** IOOLFIR[52]
-     *  
+     *  link0 correctable array error
      */
-    (rIOOLFIR, bit(52)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(52)) ? self_th_32perDay;
 
     /** IOOLFIR[53]
-     *  
+     *  link1 correctable array error
      */
-    (rIOOLFIR, bit(53)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(53)) ? self_th_32perDay;
 
     /** IOOLFIR[54]
-     *  
+     *  link0 uncorrectable array error
      */
-    (rIOOLFIR, bit(54)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(54)) ? self_th_32perDay;
 
     /** IOOLFIR[55]
      *  
      */
-    (rIOOLFIR, bit(55)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(55)) ? defaultMaskedError;
 
     /** IOOLFIR[56]
      *  
      */
-    (rIOOLFIR, bit(56)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(56)) ? defaultMaskedError;
 
     /** IOOLFIR[57]
      *  
      */
-    (rIOOLFIR, bit(57)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(57)) ? defaultMaskedError;
 
     /** IOOLFIR[58]
      *  
      */
-    (rIOOLFIR, bit(58)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(58)) ? defaultMaskedError;
 
     /** IOOLFIR[59]
      *  
      */
-    (rIOOLFIR, bit(59)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(59)) ? defaultMaskedError;
 
     /** IOOLFIR[60]
-     *  
+     *  link0 internal error
      */
-    (rIOOLFIR, bit(60)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(60)) ? self_th_1;
 
     /** IOOLFIR[61]
-     *  
+     *  link1 internal error
      */
-    (rIOOLFIR, bit(61)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(61)) ? self_th_1;
 
     /** IOOLFIR[62]
-     *  
+     *  fir scom err dup
      */
-    (rIOOLFIR, bit(62)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(62)) ? defaultMaskedError;
 
     /** IOOLFIR[63]
-     *  
+     *  fir scom err
      */
-    (rIOOLFIR, bit(63)) ? TBDDefaultCallout;
+    (rIOOLFIR, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -992,324 +751,34 @@ rule rIOOBFIR
 group gIOOBFIR filter singlebit
 {
     /** IOOBFIR[0]
-     *  
+     *  A RX state machine error
      */
-    (rIOOBFIR, bit(0)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(0)) ? defaultMaskedError;
 
     /** IOOBFIR[1]
-     *  
+     *  A TX state machine error
      */
-    (rIOOBFIR, bit(1)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(1)) ? defaultMaskedError;
 
     /** IOOBFIR[2]
      *  
      */
-    (rIOOBFIR, bit(2)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(2)) ? defaultMaskedError;
 
-    /** IOOBFIR[3]
-     *  
+    /** IOOBFIR[3:47]
+     *  spare
      */
-    (rIOOBFIR, bit(3)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[4]
-     *  
-     */
-    (rIOOBFIR, bit(4)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[5]
-     *  
-     */
-    (rIOOBFIR, bit(5)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[6]
-     *  
-     */
-    (rIOOBFIR, bit(6)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[7]
-     *  
-     */
-    (rIOOBFIR, bit(7)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[8]
-     *  
-     */
-    (rIOOBFIR, bit(8)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[9]
-     *  
-     */
-    (rIOOBFIR, bit(9)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[10]
-     *  
-     */
-    (rIOOBFIR, bit(10)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[11]
-     *  
-     */
-    (rIOOBFIR, bit(11)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[12]
-     *  
-     */
-    (rIOOBFIR, bit(12)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[13]
-     *  
-     */
-    (rIOOBFIR, bit(13)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[14]
-     *  
-     */
-    (rIOOBFIR, bit(14)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[15]
-     *  
-     */
-    (rIOOBFIR, bit(15)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[16]
-     *  
-     */
-    (rIOOBFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[17]
-     *  
-     */
-    (rIOOBFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[18]
-     *  
-     */
-    (rIOOBFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[19]
-     *  
-     */
-    (rIOOBFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[20]
-     *  
-     */
-    (rIOOBFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[21]
-     *  
-     */
-    (rIOOBFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[22]
-     *  
-     */
-    (rIOOBFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[23]
-     *  
-     */
-    (rIOOBFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[24]
-     *  
-     */
-    (rIOOBFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[25]
-     *  
-     */
-    (rIOOBFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[26]
-     *  
-     */
-    (rIOOBFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[27]
-     *  
-     */
-    (rIOOBFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[28]
-     *  
-     */
-    (rIOOBFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[29]
-     *  
-     */
-    (rIOOBFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[30]
-     *  
-     */
-    (rIOOBFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[31]
-     *  
-     */
-    (rIOOBFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[32]
-     *  
-     */
-    (rIOOBFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[33]
-     *  
-     */
-    (rIOOBFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[34]
-     *  
-     */
-    (rIOOBFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[35]
-     *  
-     */
-    (rIOOBFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[36]
-     *  
-     */
-    (rIOOBFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[37]
-     *  
-     */
-    (rIOOBFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[38]
-     *  
-     */
-    (rIOOBFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[39]
-     *  
-     */
-    (rIOOBFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[40]
-     *  
-     */
-    (rIOOBFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[41]
-     *  
-     */
-    (rIOOBFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[42]
-     *  
-     */
-    (rIOOBFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[43]
-     *  
-     */
-    (rIOOBFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[44]
-     *  
-     */
-    (rIOOBFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[45]
-     *  
-     */
-    (rIOOBFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[46]
-     *  
-     */
-    (rIOOBFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[47]
-     *  
-     */
-    (rIOOBFIR, bit(47)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47)) ? defaultMaskedError;
 
     /** IOOBFIR[48]
-     *  
+     *  scom error
      */
-    (rIOOBFIR, bit(48)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(48)) ? defaultMaskedError;
 
     /** IOOBFIR[49]
-     *  
+     *  scom error
      */
-    (rIOOBFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[50]
-     *  
-     */
-    (rIOOBFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[51]
-     *  
-     */
-    (rIOOBFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[52]
-     *  
-     */
-    (rIOOBFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[53]
-     *  
-     */
-    (rIOOBFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[54]
-     *  
-     */
-    (rIOOBFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[55]
-     *  
-     */
-    (rIOOBFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[56]
-     *  
-     */
-    (rIOOBFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[57]
-     *  
-     */
-    (rIOOBFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[58]
-     *  
-     */
-    (rIOOBFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[59]
-     *  
-     */
-    (rIOOBFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[60]
-     *  
-     */
-    (rIOOBFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[61]
-     *  
-     */
-    (rIOOBFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[62]
-     *  
-     */
-    (rIOOBFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** IOOBFIR[63]
-     *  
-     */
-    (rIOOBFIR, bit(63)) ? TBDDefaultCallout;
+    (rIOOBFIR, bit(49)) ? defaultMaskedError;
 
 };
 
@@ -1329,325 +798,55 @@ rule rOBPPEFIR
 
 group gOBPPEFIR filter singlebit
 {
-    /** OBPPEFIR[0]
-     *  
+    /** OBPPEFIR[0:3]
+     *  PPE general error.
      */
-    (rOBPPEFIR, bit(0)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[1]
-     *  
-     */
-    (rOBPPEFIR, bit(1)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[2]
-     *  
-     */
-    (rOBPPEFIR, bit(2)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[3]
-     *  
-     */
-    (rOBPPEFIR, bit(3)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(0|1|2|3)) ? self_th_1;
 
     /** OBPPEFIR[4]
-     *  
+     *  PPE halted.
      */
-    (rOBPPEFIR, bit(4)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(4)) ? defaultMaskedError;
 
     /** OBPPEFIR[5]
-     *  
+     *  PPE watchdog timer timed out.
      */
-    (rOBPPEFIR, bit(5)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(5)) ? defaultMaskedError;
 
     /** OBPPEFIR[6]
-     *  
+     *  PPE MMIO data in error.
      */
-    (rOBPPEFIR, bit(6)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(6)) ? defaultMaskedError;
 
     /** OBPPEFIR[7]
-     *  
+     *  PPE Arb missed scrub tick.
      */
-    (rOBPPEFIR, bit(7)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(7)) ? threshold_and_mask;
 
     /** OBPPEFIR[8]
-     *  
+     *  PPE  Arb ary ue error.
      */
-    (rOBPPEFIR, bit(8)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(8)) ? self_th_1;
 
     /** OBPPEFIR[9]
-     *  
+     *  PPE Arb ary ce error.
      */
-    (rOBPPEFIR, bit(9)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(9)) ? threshold_and_mask;
 
     /** OBPPEFIR[10]
-     *  
+     *  spare
      */
-    (rOBPPEFIR, bit(10)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(10)) ? defaultMaskedError;
 
     /** OBPPEFIR[11]
-     *  
+     *  scom error
      */
-    (rOBPPEFIR, bit(11)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(11)) ? defaultMaskedError;
 
     /** OBPPEFIR[12]
-     *  
+     *  scom error
      */
-    (rOBPPEFIR, bit(12)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[13]
-     *  
-     */
-    (rOBPPEFIR, bit(13)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[14]
-     *  
-     */
-    (rOBPPEFIR, bit(14)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[15]
-     *  
-     */
-    (rOBPPEFIR, bit(15)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[16]
-     *  
-     */
-    (rOBPPEFIR, bit(16)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[17]
-     *  
-     */
-    (rOBPPEFIR, bit(17)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[18]
-     *  
-     */
-    (rOBPPEFIR, bit(18)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[19]
-     *  
-     */
-    (rOBPPEFIR, bit(19)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[20]
-     *  
-     */
-    (rOBPPEFIR, bit(20)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[21]
-     *  
-     */
-    (rOBPPEFIR, bit(21)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[22]
-     *  
-     */
-    (rOBPPEFIR, bit(22)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[23]
-     *  
-     */
-    (rOBPPEFIR, bit(23)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[24]
-     *  
-     */
-    (rOBPPEFIR, bit(24)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[25]
-     *  
-     */
-    (rOBPPEFIR, bit(25)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[26]
-     *  
-     */
-    (rOBPPEFIR, bit(26)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[27]
-     *  
-     */
-    (rOBPPEFIR, bit(27)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[28]
-     *  
-     */
-    (rOBPPEFIR, bit(28)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[29]
-     *  
-     */
-    (rOBPPEFIR, bit(29)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[30]
-     *  
-     */
-    (rOBPPEFIR, bit(30)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[31]
-     *  
-     */
-    (rOBPPEFIR, bit(31)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[32]
-     *  
-     */
-    (rOBPPEFIR, bit(32)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[33]
-     *  
-     */
-    (rOBPPEFIR, bit(33)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[34]
-     *  
-     */
-    (rOBPPEFIR, bit(34)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[35]
-     *  
-     */
-    (rOBPPEFIR, bit(35)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[36]
-     *  
-     */
-    (rOBPPEFIR, bit(36)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[37]
-     *  
-     */
-    (rOBPPEFIR, bit(37)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[38]
-     *  
-     */
-    (rOBPPEFIR, bit(38)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[39]
-     *  
-     */
-    (rOBPPEFIR, bit(39)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[40]
-     *  
-     */
-    (rOBPPEFIR, bit(40)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[41]
-     *  
-     */
-    (rOBPPEFIR, bit(41)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[42]
-     *  
-     */
-    (rOBPPEFIR, bit(42)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[43]
-     *  
-     */
-    (rOBPPEFIR, bit(43)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[44]
-     *  
-     */
-    (rOBPPEFIR, bit(44)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[45]
-     *  
-     */
-    (rOBPPEFIR, bit(45)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[46]
-     *  
-     */
-    (rOBPPEFIR, bit(46)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[47]
-     *  
-     */
-    (rOBPPEFIR, bit(47)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[48]
-     *  
-     */
-    (rOBPPEFIR, bit(48)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[49]
-     *  
-     */
-    (rOBPPEFIR, bit(49)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[50]
-     *  
-     */
-    (rOBPPEFIR, bit(50)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[51]
-     *  
-     */
-    (rOBPPEFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[52]
-     *  
-     */
-    (rOBPPEFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[53]
-     *  
-     */
-    (rOBPPEFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[54]
-     *  
-     */
-    (rOBPPEFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[55]
-     *  
-     */
-    (rOBPPEFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[56]
-     *  
-     */
-    (rOBPPEFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[57]
-     *  
-     */
-    (rOBPPEFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[58]
-     *  
-     */
-    (rOBPPEFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[59]
-     *  
-     */
-    (rOBPPEFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[60]
-     *  
-     */
-    (rOBPPEFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[61]
-     *  
-     */
-    (rOBPPEFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[62]
-     *  
-     */
-    (rOBPPEFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** OBPPEFIR[63]
-     *  
-     */
-    (rOBPPEFIR, bit(63)) ? TBDDefaultCallout;
+    (rOBPPEFIR, bit(12)) ? defaultMaskedError;
 
 };
 
@@ -1664,4 +863,6 @@ group gOBPPEFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_obus_actions.rule";
 

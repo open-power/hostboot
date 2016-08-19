@@ -77,6 +77,12 @@ actionclass threshold32pday
     threshold( field(32 / day) );
 };
 
+/** Threshold of 5 per hour */
+actionclass threshold5phour
+{
+    threshold( field(5 / hour) );
+};
+
 ################################################################################
 #                       Threshold and Mask policy
 ################################################################################
@@ -85,18 +91,12 @@ actionclass threshold32pday
  * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
  * threshold in the field, instead just mask.
  */
-#actionclass thresholdAndMask
-#{
-#    threshold32pday;
-#    funccall("ClearServiceCallFlag");
-#};
-#
-#/** Callout self with "Threshold and Mask" policy. */
-#actionclass thresholdAndMask_self
-#{
-#    calloutSelfMed;
-#    thresholdAndMask;
-#};
+actionclass threshold_and_mask
+{
+    calloutSelfMed;
+    threshold32pday;
+    funccall("ClearServiceCallFlag");
+};
 
 ################################################################################
 #                               Special Flags                                  #
@@ -138,16 +138,41 @@ actionclass calloutSelfLowNoGard
 ################################################################################
 
 
-actionclass calloutSelfMedThr1
+actionclass self_th_1
 {
     calloutSelfMed;
     threshold1;
 };
 
-actionclass calloutSelfMedThr32PerDay
+actionclass self_th_5perHour
+{
+    calloutSelfMed;
+    threshold5phour;
+};
+
+actionclass self_th_32perDay
 {
     calloutSelfMed;
     threshold32pday;
+};
+
+actionclass level2_th_1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+actionclass level2_dump_SH
+{
+    level2_th_1;
+    dumpSH;
+};
+
+actionclass level2_M_self_L_th_1
+{
+    callout2ndLvlMed;
+    calloutSelfLow;
+    threshold1;
 };
 
 ################################################################################

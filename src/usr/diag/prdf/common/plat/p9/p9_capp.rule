@@ -79,6 +79,10 @@ chip p9_capp
         capture     req nonzero("CXAFIR");
     };
 
+
+# Include registers not defined by the xml
+.include "p9_capp_regs.rule";
+
 };
 
  ##############################################################################
@@ -131,324 +135,264 @@ rule rCXAFIR
 group gCXAFIR filter singlebit
 {
     /** CXAFIR[0]
-     *  
+     *  CXA Informational PE
      */
-    (rCXAFIR, bit(0)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(0)) ? defaultMaskedError;
 
     /** CXAFIR[1]
-     *  
+     *  CXA System Xstop PE
      */
-    (rCXAFIR, bit(1)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(1)) ? self_th_1;
 
     /** CXAFIR[2]
-     *  
+     *  CXA CE on Master array.
      */
-    (rCXAFIR, bit(2)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(2)) ? self_th_32perDay;
 
     /** CXAFIR[3]
-     *  
+     *  CXA UE on Master array.
      */
-    (rCXAFIR, bit(3)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(3)) ? self_th_1;
 
     /** CXAFIR[4]
      *  
      */
-    (rCXAFIR, bit(4)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(4)) ? defaultMaskedError;
 
     /** CXAFIR[5]
-     *  
+     *  Recovery sequencer hang detection
      */
-    (rCXAFIR, bit(5)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(5)) ? self_th_1;
 
     /** CXAFIR[6]
      *  
      */
-    (rCXAFIR, bit(6)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(6)) ? defaultMaskedError;
 
     /** CXAFIR[7]
      *  
      */
-    (rCXAFIR, bit(7)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(7)) ? defaultMaskedError;
 
     /** CXAFIR[8]
-     *  
+     *  Correctable error on Snooper array.
      */
-    (rCXAFIR, bit(8)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(8)) ? self_th_5perHour;
 
     /** CXAFIR[9]
-     *  
+     *  Uncorrectable error on Snooper array.
      */
-    (rCXAFIR, bit(9)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(9)) ? self_th_1;
 
     /** CXAFIR[10]
-     *  
+     *  RECOVERY_FAILED: CAPP recovery failed
      */
-    (rCXAFIR, bit(10)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(10)) ? self_th_1;
 
     /** CXAFIR[11]
      *  
      */
-    (rCXAFIR, bit(11)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(11)) ? defaultMaskedError;
 
     /** CXAFIR[12]
      *  
      */
-    (rCXAFIR, bit(12)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(12)) ? defaultMaskedError;
 
     /** CXAFIR[13]
      *  
      */
-    (rCXAFIR, bit(13)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(13)) ? defaultMaskedError;
 
     /** CXAFIR[14]
-     *  
+     *  spare
      */
-    (rCXAFIR, bit(14)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(14)) ? defaultMaskedError;
 
     /** CXAFIR[15]
-     *  
+     *  Scom satellite parity error
      */
-    (rCXAFIR, bit(15)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(15)) ? defaultMaskedError;
 
     /** CXAFIR[16]
-     *  
+     *  CXA System checkstop errors in master
      */
-    (rCXAFIR, bit(16)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(16)) ? self_th_1;
 
     /** CXAFIR[17]
-     *  
+     *  CXA System checkstop errors in Snooper
      */
-    (rCXAFIR, bit(17)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(17)) ? self_th_1;
 
     /** CXAFIR[18]
-     *  
+     *  CXA  transport System checkstop errors
      */
-    (rCXAFIR, bit(18)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(18)) ? self_th_1;
 
     /** CXAFIR[19]
-     *  
+     *  CXA Master uOP FIR 1 for lab use
      */
-    (rCXAFIR, bit(19)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(19)) ? defaultMaskedError;
 
     /** CXAFIR[20]
-     *  
+     *  CXA Master uOP FIR 2 for lab use
      */
-    (rCXAFIR, bit(20)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(20)) ? defaultMaskedError;
 
     /** CXAFIR[21]
-     *  
+     *  CXA Master uOP FIR 3 for lab use
      */
-    (rCXAFIR, bit(21)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(21)) ? defaultMaskedError;
 
     /** CXAFIR[22]
-     *  
+     *  Snooper uOP FIR 1 for lab use
      */
-    (rCXAFIR, bit(22)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(22)) ? defaultMaskedError;
 
     /** CXAFIR[23]
-     *  
+     *  Snooper uOP FIR 2 for lab use
      */
-    (rCXAFIR, bit(23)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(23)) ? defaultMaskedError;
 
     /** CXAFIR[24]
-     *  
+     *  Snooper uOP FIR 3 for lab use
      */
-    (rCXAFIR, bit(24)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(24)) ? defaultMaskedError;
 
     /** CXAFIR[25]
      *  
      */
-    (rCXAFIR, bit(25)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(25)) ? defaultMaskedError;
 
     /** CXAFIR[26]
      *  
      */
-    (rCXAFIR, bit(26)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(26)) ? defaultMaskedError;
 
     /** CXAFIR[27]
-     *  
+     *  CXA: Any PowerBus data hang poll error
      */
-    (rCXAFIR, bit(27)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(27)) ? defaultMaskedError;
 
     /** CXAFIR[28]
-     *  
+     *  CXA: PowerBus command hang error
      */
-    (rCXAFIR, bit(28)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(28)) ? defaultMaskedError;
 
     /** CXAFIR[29]
-     *  
+     *  CXA: PB Addr Error detected by APC
      */
-    (rCXAFIR, bit(29)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(29)) ? level2_th_1;
 
     /** CXAFIR[30]
-     *  
+     *  CXA PB Addr Err detected by APC
      */
-    (rCXAFIR, bit(30)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(30)) ? level2_th_1;
 
     /** CXAFIR[31]
      *  
      */
-    (rCXAFIR, bit(31)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(31)) ? defaultMaskedError;
 
     /** CXAFIR[32]
-     *  
+     *  APC ack_dead or ack_ed_dead
      */
-    (rCXAFIR, bit(32)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(32)) ? defaultMaskedError;
 
     /** CXAFIR[33]
-     *  
+     *  CXA Any PowerBus command hang error
      */
-    (rCXAFIR, bit(33)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(33)) ? defaultMaskedError;
 
     /** CXAFIR[34]
-     *  
+     *  CXA CE on data received from PB
      */
-    (rCXAFIR, bit(34)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(34)) ? self_th_5perHour;
 
     /** CXAFIR[35]
-     *  
+     *  CXA: UE on data received from PowerBus
      */
-    (rCXAFIR, bit(35)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(35)) ? defaultMaskedError;
 
     /** CXAFIR[36]
-     *  
+     *  CXA: SUE on data received from PowerBus
      */
-    (rCXAFIR, bit(36)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(36)) ? defaultMaskedError;
 
     /** CXAFIR[37]
      *  
      */
-    (rCXAFIR, bit(37)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(37)) ? defaultMaskedError;
 
     /** CXAFIR[38]
      *  
      */
-    (rCXAFIR, bit(38)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(38)) ? defaultMaskedError;
 
     /** CXAFIR[39]
      *  
      */
-    (rCXAFIR, bit(39)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(39)) ? defaultMaskedError;
 
     /** CXAFIR[40]
-     *  
+     *  CXA: PE on TLBI sequence number
      */
-    (rCXAFIR, bit(40)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(40)) ? level2_dump_SH;
 
     /** CXAFIR[41]
-     *  
+     *  APC received ack_dead or ack_ed_dead
      */
-    (rCXAFIR, bit(41)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(41)) ? defaultMaskedError;
 
     /** CXAFIR[42]
-     *  
+     *  TimeBase error
      */
-    (rCXAFIR, bit(42)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(42)) ? defaultMaskedError;
 
     /** CXAFIR[43]
-     *  
+     *  XPT Informational Error
      */
-    (rCXAFIR, bit(43)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(43)) ? defaultMaskedError;
 
     /** CXAFIR[44]
-     *  
+     *  Command_queue_CE
      */
-    (rCXAFIR, bit(44)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(44)) ? self_th_5perHour;
 
     /** CXAFIR[45]
-     *  
+     *  Command_queue_UE
      */
-    (rCXAFIR, bit(45)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(45)) ? self_th_1;
 
     /** CXAFIR[46]
      *  
      */
-    (rCXAFIR, bit(46)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(46)) ? defaultMaskedError;
 
     /** CXAFIR[47]
-     *  
+     *  spare
      */
-    (rCXAFIR, bit(47)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(47)) ? defaultMaskedError;
 
     /** CXAFIR[48]
-     *  
+     *  Hypervisor asserted
      */
-    (rCXAFIR, bit(48)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(48)) ? defaultMaskedError;
 
     /** CXAFIR[49]
-     *  
+     *  spare
      */
-    (rCXAFIR, bit(49)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(49)) ? defaultMaskedError;
 
     /** CXAFIR[50]
-     *  
+     *  SCOM err
      */
-    (rCXAFIR, bit(50)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(50)) ? defaultMaskedError;
 
     /** CXAFIR[51]
-     *  
+     *  SCOM err
      */
-    (rCXAFIR, bit(51)) ? TBDDefaultCallout;
-
-    /** CXAFIR[52]
-     *  
-     */
-    (rCXAFIR, bit(52)) ? TBDDefaultCallout;
-
-    /** CXAFIR[53]
-     *  
-     */
-    (rCXAFIR, bit(53)) ? TBDDefaultCallout;
-
-    /** CXAFIR[54]
-     *  
-     */
-    (rCXAFIR, bit(54)) ? TBDDefaultCallout;
-
-    /** CXAFIR[55]
-     *  
-     */
-    (rCXAFIR, bit(55)) ? TBDDefaultCallout;
-
-    /** CXAFIR[56]
-     *  
-     */
-    (rCXAFIR, bit(56)) ? TBDDefaultCallout;
-
-    /** CXAFIR[57]
-     *  
-     */
-    (rCXAFIR, bit(57)) ? TBDDefaultCallout;
-
-    /** CXAFIR[58]
-     *  
-     */
-    (rCXAFIR, bit(58)) ? TBDDefaultCallout;
-
-    /** CXAFIR[59]
-     *  
-     */
-    (rCXAFIR, bit(59)) ? TBDDefaultCallout;
-
-    /** CXAFIR[60]
-     *  
-     */
-    (rCXAFIR, bit(60)) ? TBDDefaultCallout;
-
-    /** CXAFIR[61]
-     *  
-     */
-    (rCXAFIR, bit(61)) ? TBDDefaultCallout;
-
-    /** CXAFIR[62]
-     *  
-     */
-    (rCXAFIR, bit(62)) ? TBDDefaultCallout;
-
-    /** CXAFIR[63]
-     *  
-     */
-    (rCXAFIR, bit(63)) ? TBDDefaultCallout;
+    (rCXAFIR, bit(51)) ? defaultMaskedError;
 
 };
 
@@ -465,4 +409,6 @@ group gCXAFIR filter singlebit
 
 # Include the common action set.
 .include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_capp_actions.rule";
 

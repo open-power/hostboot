@@ -46,3 +46,5 @@ prd_obj += prdfP9ProcDomain.o
 # rule plugin related
 prd_rule_plugin += prdfP9Proc.o
 prd_rule_plugin += prdfP9Pll.o
+prd_rule_plugin += prdfCommonPlugins.o
+
