@@ -55,7 +55,7 @@ const uint8_t MEM_PLL_FREQ_BUCKETS = 5;
 
 // MEM PLL frequency in MHz
 // index is bucket number
-const uint32_t MEM_PLL_FREQ_LIST[MEM_FREQ_BUCKETS] =
+const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
 {
     1866,
     2133,
