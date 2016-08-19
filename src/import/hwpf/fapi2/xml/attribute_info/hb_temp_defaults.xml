@@ -423,8 +423,19 @@
     <attribute>
       <id>ATTR_MSS_PORT_MAXPOWER</id>
     </attribute>
-    
-    <!-- =====================================================================
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_DPHY_RLO</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_DPHY_WLO</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_TSYS_ADR</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_VPD_MR_TSYS_DATA</id>
+    </attribute>
+<!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
 
