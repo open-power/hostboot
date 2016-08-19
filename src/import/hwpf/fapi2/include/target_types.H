@@ -116,6 +116,7 @@ enum TargetType
 
 enum TargetFilter : uint64_t
 {
+    TARGET_FILTER_NONE       = 0x0000000000000000,
     TARGET_FILTER_TP         = PlatTargetFilter::PLAT_TARGET_FILTER_TP,         // Pervasive 1
     TARGET_FILTER_NEST_NORTH = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_NORTH, // Pervasive 2
     TARGET_FILTER_NEST_EAST  = PlatTargetFilter::PLAT_TARGET_FILTER_NEST_EAST,  // Pervasive 3
