@@ -64,6 +64,7 @@ enum SectionId
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
     BACKUP_PART,     /**< Backup of TOC*/
     POWERVM,        /**< Power VM data */
+    RINGOVD,        /**< Ring override data */
     NUM_SECTIONS,   /**< Number of defined sections */
 
 

@@ -132,4 +132,12 @@ Layout Description
         <physicalRegionSize>0x500000</physicalRegionSize>
         <side>sideless</side>
     </section>
+    <section>
+        <description>Ref Image Ring Overrides (20K)</description>
+        <eyeCatch>RINGOVD</eyeCatch>
+        <physicalOffset>0x5F2000</physicalOffset>
+        <physicalRegionSize>0x5000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 </pnor>

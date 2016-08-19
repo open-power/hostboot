@@ -80,6 +80,7 @@ const char* cv_EYECATCHER[] = {
     "TESTRO",    /**< PNOR::TESTRO           : ReadOnly Test space for PNOR */
     "BACKUP_PART", /**PNOR::BACKUP_PART      : Backup of PART*/
     "POWERVM",   /**< PNOR::POWERVM          : Power VM data */
+    "RINGOVD",   /**< PNOR::RINGOVD          : Ring overrides */
 };
 
 /**

@@ -230,4 +230,12 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
+    <section>
+        <description>Ref Image Ring Overrides (20K)</description>
+        <eyeCatch>RINGOVD</eyeCatch>
+        <physicalOffset>0x2ACA000</physicalOffset>
+        <physicalRegionSize>0x5000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 </pnor>
