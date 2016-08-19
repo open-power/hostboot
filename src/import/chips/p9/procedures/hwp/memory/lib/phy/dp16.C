@@ -280,8 +280,8 @@ fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
                      .set_TARGET(i_target),
                      "Target %s VPD_MT_VREF_MC_RD percentage out of bounds (%d - %d): %d",
                      c_str(i_target),
-                     TT::MAX_RD_VREF,
-                     TT::MIN_RD_VREF,
+                     l_max,
+                     l_min,
                      i_vref );
     }
     else
