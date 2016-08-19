@@ -189,6 +189,7 @@ enum P9_HCD_CLK_CTRL_CONSTANTS
     CLK_REGION_ALL_BUT_EX_DPLL               = BITS64(4, 2) | BITS64(10, 2),
     CLK_REGION_ALL_BUT_EX_ANEP_DPLL          = BITS64(4, 2) | BIT64(11),
     CLK_REGION_ALL_BUT_PLL                   = BITS64(4, 10),
+    CLK_REGION_ALL_BUT_PLL_REFR              = BITS64(4, 8),
     CLK_REGION_ALL                           = BITS64(4, 11),
     CLK_THOLD_ALL                            = BITS64(48, 3)
 };
