@@ -198,12 +198,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.write_dbi(l_dimm) );
         FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
         FAPI_TRY( l_eff_config.data_mask(l_dimm) );
-        // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
-        {
-            uint16_t l_mss_vpd_mt_windage_rd_ctr[mss::PORTS_PER_MCS] = {0xDEAD, 0xBEEF};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_VPD_MT_WINDAGE_RD_CTR, i_target, l_mss_vpd_mt_windage_rd_ctr) );
-        }
 
+        // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
         {
             uint8_t l_vpd_rlo[mss::PORTS_PER_MCS] = {0x01, 0x01};
             FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_VPD_RLO, i_target, l_vpd_rlo ) );
