@@ -321,7 +321,7 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
     do
     {
         RequestContainer l_request;
-        if (!TARGETING::is_vpo())
+        if (TARGETING::is_vpo())
         {
             TRACFCOMP(g_trac_volt,
                 "hbVddrMsg::sendMsg skipped because of VPO environment");
