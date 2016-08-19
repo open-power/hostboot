@@ -25,7 +25,7 @@
 <attributes>
     <attribute>
         <id>ATTR_MSS_VPD_MT_0_VERSION_LAYOUT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MT Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.
         </description>
@@ -40,7 +40,7 @@
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_1_VERSION_DATA</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MT Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.
         </description>
@@ -55,7 +55,7 @@
 
     <attribute>
         <id>ATTR_MSS_VPD_MT_2_SIGNATURE_HASH</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Hash Signature for the MT Keyword. The hash signature is 32bits for 256 bytes of data.
         </description>
@@ -468,7 +468,8 @@
         <id>ATTR_MSS_VPD_MT_PREAMBLE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Number of clocks used for preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
+            Number of clocks used for read/write preamble. Calibration only uses 1 nCK preamble (DEFAULT). Mainline has both 1 nCK and 2 nCK preamble option.
+            "0" means 1 nCK preamble, "1" means 2 nCK preamble. Bit 3 for READ preamble, and Bit 7 for WRITE preamble. E.g. 0b 00010001
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -517,12 +518,12 @@
         <id>ATTR_MSS_VPD_MT_WINDAGE_RD_CTR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x8023 for example would mean "-35ps". If this is enabled, disable periodic rd_ctr in draminit_mc. Default
+            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps]. If this is enabled, disable periodic rd_ctr in draminit_mc. Default is 0
         </description>
         <initToZero></initToZero>
-        <valueType>uint16</valueType>
+        <valueType>int16</valueType>
         <writeable/>
-        <mssUnits>num</mssUnits>
+        <mssUnits>signed</mssUnits>
         <mssBlobStart>214</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
         <mssAccessorName>vpd_mt_windage_rd_ctr</mssAccessorName>
