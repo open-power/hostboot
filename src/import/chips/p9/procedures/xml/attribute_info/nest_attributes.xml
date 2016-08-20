@@ -706,6 +706,7 @@
        Not supposed to be writeable, PPE needs to resolve this issue in
        sberegaccess.C -->
   <writeable/>
+  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
