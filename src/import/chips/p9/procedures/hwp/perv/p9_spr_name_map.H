@@ -229,7 +229,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(TTR      ,922 , ECP.SD.TTR                                       ,FLAG_READ_WRITE ,SPR_SHARED         ,64)\
     _op_(TRACE    ,1006, N/A                                              ,FLAG_WRITE_ONLY ,SPR_SHARED         ,64)\
     _op_(HID      ,1008, ECP.PC.THRCTL.TCTLCOM.HID                        ,FLAG_READ_WRITE ,SPR_SHARED         ,64)\
-    _op_(PIR      ,1023, ECP.PC.PMU.SPR_CORE.PIR                          ,FLAG_WRITE_ONLY ,SPR_PER_VT         ,32)\
+    _op_(PIR      ,1023, ECP.PC.PMU.SPR_CORE.PIR                          ,FLAG_READ_ONLY  ,SPR_PER_VT         ,32)\
     _op_(NIA      ,2000, ECP.IFU.T<??T>_NIA                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(MSR      ,2001, ECP.SD.T<??T>_MSR                                ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(CR       ,2002, N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
