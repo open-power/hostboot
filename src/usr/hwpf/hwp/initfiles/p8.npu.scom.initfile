@@ -1,9 +1,8 @@
-#-- $Id: p8.npu.scom.initfile,v 1.7 2015/11/02 16:43:51 camille Exp $
+#-- $Id: p8.npu.scom.initfile,v 1.8 2016/08/11 16:54:48 camille Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
 #-- All Rights Reserved -- Property of IBM
-#-- ***  ***
 #--
 #-- TITLE       : p8.npu.scom.initfile
 #-- DESCRIPTION : Perform NPU configuration
@@ -175,7 +174,8 @@ scom 0x0000000008013D9E {
      bits,   	 scom_data        ;
 #   0:63,  	0xE00024020C000000      ;  --hw341060
 #   0:63,  	0xE00024820C000000      ;  --hw341036 
-    0:63,  	0xE00004820C000000      ;
+#   0:63,  	0xE00004820C000000      ;  --NDL errors during runtime SW361915 
+    0:63,  	0xE000048200000000      ;
     }
 
 # spy name  ES.NPU.NP_AT.REG.NPU_AT_FE_ER    (fence enable)
