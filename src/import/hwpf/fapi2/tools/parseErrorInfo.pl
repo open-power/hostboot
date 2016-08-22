@@ -351,7 +351,7 @@ sub addFfdcMethod
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} = "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
-        $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc";
+        $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
     }
 
     else
@@ -757,7 +757,7 @@ foreach my $argnum (0 .. $#ARGV)
 
             if($crffdcCount > 0)
             {
-                print EIFILE "\tRC.addErrorInfo(ffdc); \\\n}\n";
+                print EIFILE "\tRC.addErrorInfo(ffdc); \\\n}";
             }
 
         }
@@ -785,10 +785,52 @@ foreach my $argnum (0 .. $#ARGV)
             $eiEntryCount++;
         } #end foreach $collectTrace
 
+        # plaform (currently only SBE) PCB-PIB error defined in xml file,
+        # we will always add the set_address and set_pcb_pib_rc methods
+        # for this error type
+        if(exists $err->{platScomFail})
+        {
+            # Set the FFDC ID value in a global hash. The name is <rc>_pib_error
+            my $ffdcName = $err->{rc} . "_";
+            $ffdcName = $ffdcName . "address";
+            setFfdcIdValue($ffdcName);
+
+            # Add the address to the EI Object array if it doesn't already exist
+            my $objNum = addEntryToArray(\@eiObjects, "address");
+
+            # Add a method to the ffdc-gathering class
+            addFfdcMethod(\%methods, "address", $err->{rc},$ffdc_type,$objNum);
+
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_FFDC; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$ffdcName; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcSize = 8; \\\n";
+            $eiEntryCount++;
+
+            # Set the FFDC ID value in a global hash. The name is <rc>_pib_error
+            $ffdcName = $err->{rc} . "_";
+            $ffdcName = $ffdcName . "pcb_pib_rc";
+            setFfdcIdValue($ffdcName);
+
+            # Add the pibError to the EI Object array if it doesn't already exist
+            $objNum = addEntryToArray(\@eiObjects, "pcb_pib_rc");
+
+            # Add a method to the ffdc-gathering class
+            addFfdcMethod(\%methods, "pcb_pib_rc", $err->{rc},$ffdc_type,$objNum);
+
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_FFDC; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$ffdcName; \\\n";
+            $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcSize = 8; \\\n";
+            $eiEntryCount++;
+        } #end foreach $ffdc
+
+
         # Local FFDC
         foreach my $ffdc (@{$err->{ffdc}})
         {
-
             # Set the FFDC ID value in a global hash. The name is <rc>_<ffdc>
             my $ffdcName = $err->{rc} . "_";
             $ffdcName = $ffdcName . $ffdc;
@@ -1292,7 +1334,7 @@ foreach my $argnum (0 .. $#ARGV)
             print EIFILE "\tRC.addErrorInfo(l_objects, l_entries, $eiEntryCount); \\\n}";
         }
 
-        print EIFILE "\n";
+        print EIFILE "\n\n";
 
         #----------------------------------------------------------------------
         # Print the return code class to hwp_error_info.H
