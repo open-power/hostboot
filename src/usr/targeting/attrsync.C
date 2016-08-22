@@ -678,7 +678,7 @@ namespace TARGETING
                 for(TargetHandleList::const_iterator mca = l_mcaList.begin();
                     mca != l_mcaList.end(); ++mca)
                 {
-                    uint8_t effDimmSize[][2] = {{0x4,0x0},{0x4,0x0}};
+                    uint32_t effDimmSize[][2] = {{0x4,0x0},{0x4,0x0}};
                     (*mca)->setAttr<ATTR_EFF_DIMM_SIZE>(effDimmSize);
                 }
 

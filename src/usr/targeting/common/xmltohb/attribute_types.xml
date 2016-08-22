@@ -774,7 +774,7 @@
     <simpleType>
         <uint16_t>
         </uint16_t>
-        <array>2, 3, 4</array>
+        <array>2, 3, 2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -808,7 +808,7 @@
     <simpleType>
         <int16_t>
         </int16_t>
-        <array>2, 3, 4</array>
+        <array>2, 3, 2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8360,8 +8360,8 @@ DEPRECATED!!!!
       DIMM Size, in GB Used in various locations and is computed in mss_eff_cnfg.
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
+        <uint32_t>
+        </uint32_t>
         <array>2,2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -9504,6 +9504,8 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--TODO RTC:159746 we can remove the following attribute and update the one below
+    after the tmgt code gets updated to the correct type-->
 <attribute>
     <id>MSS_MEM_WATT_TARGET</id>
     <description>
@@ -9516,8 +9518,27 @@ DEPRECATED!!!!
     <simpleType>
         <uint32_t>
         </uint32_t>
-        <!--TODO RTC:153297 make this an array when tmgt issue is fixed-->
-<!--         <array>2</array> -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!--TODO RTC:159746 We need to remove the _TEMPORARY suffix from the following attribute once
+the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-->
+<attribute>
+    <id>MSS_MEM_WATT_TARGET_TEMPORARY</id>
+    <description>
+      Total memory power limit in cW for the dimms on the memory channel pair.
+      Used to compute the throttles on the channel and/or dimms.
+      creator: unknown.
+      consumer: mss_eff_config.
+      firmware notes: none.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -9881,6 +9902,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint32_t>
         </uint32_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -10194,7 +10216,7 @@ Measured in GB</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
-        <array>16,16</array>
+        <array>16,18</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12338,8 +12360,8 @@ Measured in GB</description>
       firmware notes: Platforms should initialize this attribute to AUTO (0)
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -13301,6 +13323,7 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t></uint8_t>
+        <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -15330,7 +15353,7 @@ Measured in GB</description>
   </description>
   <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2</array>
+      <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -19387,8 +19410,8 @@ DEPRECATED!!!!
       Provided by the Machine Readable Workbook after system characterization.
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint8_t>
+        </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
@@ -21481,8 +21504,8 @@ DEPRECATED!!!!
   <id>PROC_FABRIC_SYSTEM_ID</id>
   <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
   <simpleType>
-    <uint8_t>
-    </uint8_t>
+    <uint32_t>
+    </uint32_t>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
@@ -21761,9 +21784,7 @@ DEPRECATED!!!!
   </description>
   <simpleType>
     <uint8_t>
-      <default>0,0,0,0</default>
     </uint8_t>
-    <array>4</array>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -23390,7 +23411,7 @@ DEPRECATED!!!!
     </description>
     <simpleType>
       <uint32_t></uint32_t>
-      <array>4</array>
+      <array>7</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -23851,8 +23872,8 @@ DEPRECATED!!!!
       firmware notes: none
     </description>
     <simpleType>
-      <uint8_t>
-      </uint8_t>
+      <uint16_t>
+      </uint16_t>
       <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -24065,8 +24086,8 @@ DEPRECATED!!!!
       firmware notes: none
     </description>
     <simpleType>
-      <uint8_t>
-      </uint8_t>
+      <uint16_t>
+      </uint16_t>
       <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -27532,7 +27553,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27548,7 +27569,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27565,7 +27586,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27581,7 +27602,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27664,7 +27685,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
+      <array>2,5</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27680,7 +27701,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2</array>
+      <array>2, 5</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27794,7 +27815,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27810,7 +27831,7 @@ DEPRECATED!!!!
     <description>Place holder description</description>
     <simpleType>
       <uint8_t></uint8_t>
-      <array>2,2,2</array>
+      <array>2,2,4</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
@@ -27889,7 +27910,7 @@ DEPRECATED!!!!
     <id>MSS_VPD_MT_VREF_MC_RD</id>
     <description>Place holder description</description>
     <simpleType>
-      <uint8_t></uint8_t>
+      <uint32_t></uint32_t>
       <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -29734,8 +29755,8 @@ DEPRECATED!!!!
     0x06 = b00000110 (2 branches selected)
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
-    <array>2, 2</array>
+    <uint32_t></uint32_t>
+    <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -29754,8 +29775,8 @@ DEPRECATED!!!!
   0x06 = b00000110 (2 branches selected)
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
-    <array>2, 2</array>
+    <uint32_t></uint32_t>
+    <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -29774,8 +29795,8 @@ DEPRECATED!!!!
     0x06 = b00000110 (2 branches selected)
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
-    <array>2, 2</array>
+    <uint32_t></uint32_t>
+    <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -29795,8 +29816,8 @@ DEPRECATED!!!!
     0x03 = maximum capacitors selected)
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
-    <array>2, 5</array>
+    <uint64_t></uint64_t>
+    <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -29816,8 +29837,8 @@ DEPRECATED!!!!
     0x07 = min resistance)
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
-    <array>2, 5</array>
+    <uint64_t></uint64_t>
+    <array>2</array>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
@@ -29935,5 +29956,129 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>VDM_ENABLE</id>
+    <description>
+    Controls the enablement of Voltage Droop Monitors (VDM) in the system.
+
+    Producer:  Machine Readable Workbook
+
+    Consumers:
+    p9_pstate_parameter_block to set flag for CME QuadManager Hcode
+        reaction
+    p9_hcd_cache procedures to power on VDMs before CME booting
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_VDM_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPLL_DYNAMIC_FMAX_ENABLE</id>
+    <description>
+    Allow increased dynamic frequency in response to excess voltage margin
+    Controlled by VDM_OVERVOLT threshold value in VDM Configuration Register.
+
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPLL_DYNAMIC_FMIN_ENABLE</id>
+    <description>
+    Allow increased dynamic frequency in response to excess voltage margin
+    Controlled by VDM_OVERVOLT threshold value in VDM Configuration Register.
+
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPLL_DROOP_PROTECT_ENABLE</id>
+    <description>
+    Enable instantaneous frequency reduction in response to droop events
+    Controlled by VDM_DROOP_SMALL, _LARGE and _XTREME threshold values in VDM
+    Configuration Register. The amount of reduction is controlled by chip
+    initialization values
+
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPLL_VDM_RESPONSE</id>
+    <description>
+      Indicates the response of the DPLL frequency upon VDM events.  This
+      control will only apply if ATTR_DPLL_VDM_JUMP_ENABLE is ON;
+      Hardware WOF =  DROOP_PROTECT_OVERVOLT (slew to Fmax if margin exists)
+
+      Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_DPLL_VDM_RESPONSE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_DRAM_2N_MODE</id>
+    <description>
+      Allows user to manually turn on and off 2N Mode.
+      AUTO indicates to use Signal Integrity generated setting (from VPD).
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_MSS_MRW_DRAM_2N_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
