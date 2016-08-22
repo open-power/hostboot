@@ -70,7 +70,7 @@ enum SectionId
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
-    LAST_SECTION = TEST,  /**< Last section (for looping) */
+    LAST_SECTION = BMC_INV,  /**< Last section (for looping) */
     INVALID_SECTION = NUM_SECTIONS,  /**< Used for error cases, initialization */
 };
 
