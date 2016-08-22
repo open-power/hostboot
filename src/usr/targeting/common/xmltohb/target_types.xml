@@ -1141,6 +1141,8 @@
     <attribute><id>PROC_NX_RNG_FAILED_INT_ENABLE</id></attribute>
     <attribute><id>PROC_NX_RNG_FAILED_INT_ADDR</id></attribute>
 
+    <attribute><id>NEST_MEM_X_O_PCI_BYPASS</id></attribute>
+    <attribute><id>DPLL_BYPASS</id></attribute>
 
 </targetType>
 
