@@ -81,6 +81,11 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
         // MCA ADR32S control registers all come in pairs.
         static const std::vector<uint64_t> DLL_CNFG_REG;
         static const std::vector<uint64_t> OUTPUT_DRIVER_REG;
+        static const std::vector<uint64_t> DUTY_CYCLE_DISTORTION_REG;
+
+        // This fellow is needed for the reset_dcd template, so he's more like a real trait.
+        // Default starting place for duty cycle distortion algorithm
+        static constexpr uint64_t DCD_ADJUST_DEFAULT = 0b1000000;
 
         enum
         {
@@ -103,6 +108,11 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
             FLUSH = MCA_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0_ADR0_FLUSH,
             INIT_IO = MCA_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0_ADR0_INIT_IO,
 
+            DCD_CONTROL_DLL_ADJUST = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_ADJUST,
+            DCD_CONTROL_DLL_ADJUST_LEN = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_ADJUST_LEN,
+            DCD_CONTROL_DLL_CORRECT_EN = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_CORRECT_EN,
+            DCD_CONTROL_DLL_ITER_A = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_ITER_A,
+            DCD_CONTROL_DLL_COMPARE_OUT = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_COMPARE_OUT,
         };
 
 };
@@ -151,6 +161,80 @@ fapi_try_exit:
 //
 // Reseting the DLL registers TODO RTC:156518
 //
+
+///
+/// @brief Read DCD_CNTL
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode read_dcd_cntl( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+    FAPI_TRY( mss::getScom(i_target, TT::DUTY_CYCLE_DISTORTION_REG[I], o_data) );
+    FAPI_INF("dcd_cntl adrs32%d: 0x%016lx", I, o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write DCD_CNTL
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode write_dcd_cntl( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+
+    // Per datasheet, bit 15 must always be written 0 or we'll get a parity error
+    if (i_data.getBit<TT::DCD_CONTROL_DLL_COMPARE_OUT>() != 0)
+    {
+        FAPI_ERR("DCD DLL Compare out is set - will cause a parity error 0x%016lx (0x%016lx)",
+                 TT::DUTY_CYCLE_DISTORTION_REG[I], i_data);
+        fapi2::Assert(false);
+    }
+
+    FAPI_INF("dcd_cntl adr32s%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::DUTY_CYCLE_DISTORTION_REG[I], i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset DCD_CNTL
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode reset_dcd_cntl( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // All we need to write is the adjustment default, all the other bits are 0 (and
+    // the adujtment default accounts for this)
+    l_data.insertFromRight<TT::DCD_CONTROL_DLL_ADJUST, TT::DCD_CONTROL_DLL_ADJUST_LEN>(TT::DCD_ADJUST_DEFAULT);
+
+    for (const auto r : TT::DUTY_CYCLE_DISTORTION_REG)
+    {
+        FAPI_INF("reset dcd_cntl 0x%016lx: 0x%016lx", r, l_data);
+        FAPI_TRY( mss::putScom(i_target, r, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Set the DLL cal reset (begins DLL cal operations)
@@ -234,6 +318,28 @@ inline void set_init_io( fapi2::buffer<uint64_t>& o_data, const states i_state )
     FAPI_INF("set_init_io %s", (i_state == mss::LOW ? "low" : "high"));
     o_data.writeBit<TT::INIT_IO>(i_state);
 }
+
+///
+/// @brief Helper to iterate over ADR32S 'sides' when performing DCD cal
+/// @param[in] i_target the MCA to iterate for
+/// @param[in] i_reg the register (ADR0 or ADR1's register)
+/// @param[in] i_seed the seed value for the adjuster
+/// @param[in] i_side bool; true if this is side a, false for side b
+/// @param[out] o_value the value of the adjuster when the compare bit changes state
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode dcd_cal_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                  const uint64_t i_reg,
+                                  const uint64_t i_seed,
+                                  const bool i_side,
+                                  uint64_t& o_value );
+
+///
+/// @brief Perform ADR DCD calibration - Nimbus Only
+/// @param[in] i_target the MCBIST (controler) to perform calibration on
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 } // close namespace adr
 
