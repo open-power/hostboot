@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,8 +168,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
                  ( ( isCen && isSp && (!isX4 || isEcc)) ||  // all spares used
                    (!isCen &&         ( isSm || isEcc)) ) ) // SM or ECC used
             {
-                // This rank has both a steer and a chip mark. Call out the DIMM
-                // with the chip mark.
+                // All repairs on the rank have been used. Callout all repairs.
 
                 if ( NULL == errl )
                 {
@@ -177,11 +176,25 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
                                        PRDFSIG_RdrRepairsUsed );
                 }
 
-                MemoryMru memoryMru( i_mba, rank, mark.getCM() );
-                CalloutUtil::calloutMemoryMru( errl, memoryMru,
-                                               SRCI_PRIORITY_HIGH,
-                                               HWAS::DELAYED_DECONFIG,
-                                               HWAS::GARD_Predictive );
+                std::vector<CenSymbol> list;
+                list.push_back( mark.getCM() );
+                list.push_back( mark.getSM() );
+                list.push_back( sp0          );
+                list.push_back( sp1          );
+                list.push_back( ecc          );
+
+                for ( std::vector<CenSymbol>::iterator it = list.begin();
+                      it != list.end(); it++ )
+                {
+                    if ( !it->isValid() ) continue;
+
+                    CalloutUtil::calloutMemoryMru( errl,
+                                                   MemoryMru(i_mba, rank, *it),
+                                                   SRCI_PRIORITY_HIGH,
+                                                   HWAS::DELAYED_DECONFIG,
+                                                   HWAS::GARD_Predictive );
+                }
+
                 o_calloutMade = true;
             }
         }
