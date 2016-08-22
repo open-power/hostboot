@@ -50,18 +50,23 @@ enum P9_MEM_PLL_SETUP_Private_Constants
 };
 
 
-fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chiplet)
+fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     uint8_t l_read_attr = 0;
     fapi2::buffer<uint64_t> l_data64;
+    uint8_t l_mem_bypass;
 
     FAPI_INF("Entering ...");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chiplet, l_read_attr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NEST_MEM_X_O_PCI_BYPASS, i_target_chip, l_mem_bypass),
+             "Error from FAPI_ATTR_GET (ATTR_NEST_MEM_X_O_PCI_BYPASS");
 
-    if ( !l_read_attr )
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_read_attr),
+             "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
+
+    if (!l_read_attr )
     {
-        for (auto l_chplt_trgt :  i_target_chiplet.getChildren<fapi2::TARGET_TYPE_PERV>
+        for (auto l_chplt_trgt :  i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
              (fapi2::TARGET_FILTER_ALL_MC, fapi2::TARGET_STATE_FUNCTIONAL))
         {
             FAPI_DBG("Drop PLDY bypass of Progdelay logic");
@@ -76,42 +81,45 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             l_data64.clearBit<PERV_1_NET_CTRL1_CLK_DCC_BYPASS_EN>();
             FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL1_WAND, l_data64));
 
-            FAPI_DBG("Drop PLL test enable");
-            l_data64.flush<1>();
-            //NET_CTRL0.TP_PLL_TEST_EN_DC
-            l_data64.clearBit<PERV_1_NET_CTRL0_PLL_TEST_EN>();
-            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
+            if (l_mem_bypass == 0)
+            {
+                FAPI_DBG("Drop PLL test enable");
+                l_data64.flush<1>();
+                //NET_CTRL0.TP_PLL_TEST_EN_DC
+                l_data64.clearBit<PERV_1_NET_CTRL0_PLL_TEST_EN>();
+                FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
 
-            FAPI_DBG("Drop PLL reset");
-            l_data64.flush<1>();
-            //NET_CTRL0.TP_PLLRST_DC
-            l_data64.clearBit<PERV_1_NET_CTRL0_PLL_RESET>();
-            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
+                FAPI_DBG("Drop PLL reset");
+                l_data64.flush<1>();
+                //NET_CTRL0.TP_PLLRST_DC
+                l_data64.clearBit<PERV_1_NET_CTRL0_PLL_RESET>();
+                FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
 
-            fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
+                fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
 
-            FAPI_DBG("check PLL lock");
+                FAPI_DBG("check PLL lock");
 
-            //Getting PLL_LOCK_REG register value
-            FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_PLL_LOCK_REG,
-                                    l_data64)); //l_read_reg = PERV.PLL_LOCK_REG
-            FAPI_ASSERT(l_data64.getBit<0>() == 1,
-                        fapi2::MEM_PLL_LOCK_ERR()
-                        .set_MEM_PLL_READ(l_data64),
-                        "ERROR:MEM PLL LOCK NOT SET");
+                //Getting PLL_LOCK_REG register value
+                FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_PLL_LOCK_REG,
+                                        l_data64)); //l_read_reg = PERV.PLL_LOCK_REG
+                FAPI_ASSERT(l_data64.getBit<0>() == 1,
+                            fapi2::MEM_PLL_LOCK_ERR()
+                            .set_MEM_PLL_READ(l_data64),
+                            "ERROR:MEM PLL LOCK NOT SET");
 
-            FAPI_DBG("Drop PLL Bypass");
-            l_data64.flush<1>();
-            //NET_CTRL0.TP_PLLBYP_DC =  0
-            l_data64.clearBit<PERV_1_NET_CTRL0_PLL_BYPASS>();
-            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
+                FAPI_DBG("Drop PLL Bypass");
+                l_data64.flush<1>();
+                //NET_CTRL0.TP_PLLBYP_DC =  0
+                l_data64.clearBit<PERV_1_NET_CTRL0_PLL_BYPASS>();
+                FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WAND, l_data64));
 
-            //OPCG_ALIGN.scan_ratio=0b00011
-            FAPI_DBG("Set scan ratio to 4:1");
-            FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_OPCG_ALIGN, l_data64));
-            l_data64.insertFromRight<PERV_1_OPCG_ALIGN_SCAN_RATIO, PERV_1_OPCG_ALIGN_SCAN_RATIO_LEN>
-            (OPCG_ALIGN_SCAN_RATIO);
-            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_OPCG_ALIGN, l_data64));
+                //OPCG_ALIGN.scan_ratio=0b00011
+                FAPI_DBG("Set scan ratio to 4:1");
+                FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_OPCG_ALIGN, l_data64));
+                l_data64.insertFromRight<PERV_1_OPCG_ALIGN_SCAN_RATIO, PERV_1_OPCG_ALIGN_SCAN_RATIO_LEN>
+                (OPCG_ALIGN_SCAN_RATIO);
+                FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_OPCG_ALIGN, l_data64));
+            }
 
             //Reset PCB Slave error register
             FAPI_DBG("Reset PCB Slave error register");
