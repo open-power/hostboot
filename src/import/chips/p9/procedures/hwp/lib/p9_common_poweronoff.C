@@ -74,7 +74,7 @@ const uint64_t PPM_PFSNS[2] =   { C_PPM_PFSNS,
                                 };
 
 enum { FSM_IDLE_POLLING_HW_NS_DELAY = 10000,
-       FSM_IDLE_POLLING_SIM_CYCLE_DELAY = 80000,
+       FSM_IDLE_POLLING_SIM_CYCLE_DELAY = 320000,
        PFET_STATE_LENGTH = 2,
        VXX_PG_SEL_LEN = 4
      };
