@@ -38,13 +38,13 @@
 
 #include <stdint.h>
 #include <return_code.H>
+#include <attribute_ids.H>
+#include <attributeenums.H>
 #include <fapi2platattrmacros.H>
 #include <fapi2_attribute_service.H>
 #include <attribute_service.H>
 #include <attribute_plat_check.H>
-#include <attribute_ids.H>
 #include <targeting/common/attributes.H>
-#include <attributeenums.H>
 #include <target.H>
 #include <target_types.H>
 #include <hwpf_fapi2_reasoncodes.H>
