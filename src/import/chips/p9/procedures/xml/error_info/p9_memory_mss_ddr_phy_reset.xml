@@ -465,4 +465,22 @@
 </deconfigure>
 </hwpError>
 
+<hwpError>
+  <rc>RC_MSS_DUTY_CLOCK_DISTORTION_CAL_FAILED</rc>
+  <description>
+    The ADR duty clock distortion calibration algorithm failed
+  </description>
+  <ffdc>CURRENT_ADJUST</ffdc>
+  <ffdc>SIDE</ffdc>
+  <ffdc>REGISTER</ffdc>
+  <ffdc>REGISTER_VALUE</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET</target>
+  </deconfigure>
+</hwpError>
+
 </hwpErrors>
