@@ -779,6 +779,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
 
     my $macroSection = "";
     my $attrSection = "";
+    my $typeSection = "";
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -872,6 +873,10 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                             $fapiWriteable = 1;
                         }
 
+                        $typeSection .= "    static_assert(sizeof(TARGETING::ATTR_". $attribute->{id}."_type) ==
+                                        sizeof(fapi2::". $fapiAttr->{id}."_Type), \"Size of attribute ATTR_". $attribute->{id}."_type is not equal to the size of ".
+                                        $fapiAttr->{id}."_Type , types dont match \" );\n";
+
                         last;
                     }
                 }
@@ -909,6 +914,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                             . "platform supply writeable attribute.");
                     }
                 }
+
             }
 
             if($instantiated)
@@ -923,6 +929,11 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
 
     print $outFile $attrSection;
     print $outFile "};\n\n";
+    print $outFile "} // End namespace platAttrSvc\n\n";
+    print $outFile "} // End namespace fapi2\n\n";
+
+    print $outFile $typeSection;
+    print $outFile "\n\n";
     print $outFile $macroSection;
     print $outFile "\n";
 }
@@ -935,9 +946,6 @@ sub writeFapi2PlatAttrMacrosHeaderFileFooter {
     my($outFile) = @_;
 
 print $outFile <<VERBATIM;
-} // End namespace platAttrSvc
-
-} // End namespace fapi2
 
 #endif // FAPI_FAPIPLATATTRMACROS_H
 
@@ -2112,7 +2120,7 @@ sub writeAttrErrlCFile {
     print $outFile "        }\n";
     print $outFile "    } //switch\n";
     print $outFile "\n";
-    print $outFile "#endif //\@fixme-RTC:152874\n"; 
+    print $outFile "#endif //\@fixme-RTC:152874\n";
 
     print $outFile "    // if we generated one, copy the string into the buffer\n";
     print $outFile "    if (attrSize) { // we have something to output\n";
