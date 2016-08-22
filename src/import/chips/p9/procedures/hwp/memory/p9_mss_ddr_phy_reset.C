@@ -41,6 +41,7 @@
 
 #include <p9_mss_ddr_phy_reset.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/phy/adr32s.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
@@ -64,13 +65,15 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Initialize via scoms. Could be put in to p9_mss_scominit.C if that ever exists BRS.
+        // Initialize via scoms. Could be put in to p9_mss_scominit.C
         FAPI_TRY( mss::phy_scominit(i_target) );
 
         FAPI_TRY(mss::change_force_mclk_low(i_target, mss::HIGH),
                  "force_mclk_low (set high) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
-        //
+        // New for Nimbus - perform duty cycle clock distortion calibration
+        FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target) );
+
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
         FAPI_TRY( mss::dp16::reset_sysclk(i_target) );
 
