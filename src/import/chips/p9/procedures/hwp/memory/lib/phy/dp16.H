@@ -287,6 +287,43 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Read AC_BOOST_CNTL
+/// @tparam T fapi2 Target Type - derived
+/// @tparam P the type of the std::pair elements
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the dp16 instance's index
+/// @param[out] o_data the value of both of the the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_ac_boost_cntl( const fapi2::Target<T>& i_target,
+        const uint64_t i_dp,
+        std::pair<P, P>& o_data )
+{
+    switch (i_dp)
+    {
+        case(0):
+            return ( read_ac_boost_cntl<0>( i_target, o_data ) );
+
+        case(1):
+            return ( read_ac_boost_cntl<1>( i_target, o_data ) );
+
+        case(2):
+            return ( read_ac_boost_cntl<2>( i_target, o_data ) );
+
+        case(3):
+            return ( read_ac_boost_cntl<3>( i_target, o_data ) );
+
+        case(4):
+            return ( read_ac_boost_cntl<4>( i_target, o_data ) );
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
 /// @brief Write AC_BOOST_CNTL
 /// @tparam I DP16 instance
 /// @tparam T fapi2 Target Type - derived
@@ -309,6 +346,43 @@ inline fapi2::ReturnCode write_ac_boost_cntl( const fapi2::Target<T>& i_target,
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Write AC_BOOST_CNTL
+/// @tparam T fapi2 Target Type - derived
+/// @tparam P the type of the std::pair elements
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the dp16 instance's index
+/// @param[in] i_data the value of both of the the registers (upper and lower bytes)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename P, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_ac_boost_cntl( const fapi2::Target<T>& i_target,
+        const uint64_t i_dp,
+        const std::pair<P, P>& i_data )
+{
+    switch (i_dp)
+    {
+        case(0):
+            return ( write_ac_boost_cntl<0>( i_target, i_data ) );
+
+        case(1):
+            return ( write_ac_boost_cntl<1>( i_target, i_data ) );
+
+        case(2):
+            return ( write_ac_boost_cntl<2>( i_target, i_data ) );
+
+        case(3):
+            return ( write_ac_boost_cntl<3>( i_target, i_data ) );
+
+        case(4):
+            return ( write_ac_boost_cntl<4>( i_target, i_data ) );
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
 }
 
 ///
