@@ -34,6 +34,10 @@
   <description>setup clock mux settings</description>
   <valueType>uint32</valueType>
   <platInit/>
+  <!-- TODO: Story 155081
+       Not supposed to be writeable, PPE needs to resolve this issue in
+       p9_sbe_attr_setup.C -->
+  <writeable/>
 </attribute>
 
 <attribute>
@@ -629,26 +633,63 @@
 <attribute>
     <id>ATTR_CP_FILTER_BYPASS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>To skip the locking sequence and check for lock of CP PLL</description>
+    <description>To skip the locking sequence and check for lock of CP filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <!-- TODO: Story 155081
+         Not supposed to be writeable, PPE needs to resolve this issue in
+         p9_sbe_attr_setup.C -->
+    <writeable/>
 </attribute>
 
 <attribute>
     <id>ATTR_SS_FILTER_BYPASS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>To skip the locking sequence and check for lock of SS PLL</description>
+    <description>To skip the locking sequence and check for lock of SS filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <!-- TODO: Story 155081
+         Not supposed to be writeable, PPE needs to resolve this issue in
+         p9_sbe_attr_setup.C -->
+    <writeable/>
 </attribute>
 
 <attribute>
     <id>ATTR_IO_FILTER_BYPASS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>To skip the locking sequence and check for lock of IO PLL</description>
+    <description>To skip the locking sequence and check for lock of IO filter PLL</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <!-- TODO: Story 155081
+         Not supposed to be writeable, PPE needs to resolve this issue in
+         p9_sbe_attr_setup.C -->
+    <writeable/>
 </attribute>
+
+<attribute>
+    <id>ATTR_DPLL_BYPASS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Skip locking sequence and check for lock of DPLL</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <!-- TODO: Story 155081
+         Not supposed to be writeable, PPE needs to resolve this issue in
+         p9_sbe_attr_setup.C -->
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_NEST_MEM_X_O_PCI_BYPASS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>Skip the locking sequence and check for lock of NEST/MEM/XBUS/OBUS/PCI PLLs</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <!-- TODO: Story 155081
+         Not supposed to be writeable, PPE needs to resolve this issue in
+         p9_sbe_attr_setup.C -->
+    <writeable/>
+</attribute>
+
 
 <attribute>
   <id>ATTR_TARGET_HAS_POWER</id>

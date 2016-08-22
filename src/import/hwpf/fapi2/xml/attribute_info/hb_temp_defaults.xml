@@ -61,6 +61,11 @@
          <default>0</default>
      </attribute>
      <attribute>
+         <id>ATTR_CLOCK_PLL_MUX</id>
+         <default>80010800</default>
+     </attribute>
+
+     <attribute>
          <id>ATTR_OCC_LFIR</id>
      </attribute>
      <attribute>
@@ -230,6 +235,14 @@
     </attribute>
     <attribute>
         <id>ATTR_IO_FILTER_BYPASS</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_DPLL_BYPASS</id>
+        <default>0</default>    
+    </attribute>
+    <attribute>
+        <id>ATTR_NEST_MEM_X_O_PCI_BYPASS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ATTR_TARGET_HAS_POWER</id>

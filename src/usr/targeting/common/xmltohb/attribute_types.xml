@@ -29754,6 +29754,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_CP_FILTER_BYPASS</id>
       <macro>DIRECT</macro>
@@ -29772,6 +29773,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_SS_FILTER_BYPASS</id>
       <macro>DIRECT</macro>
@@ -29790,10 +29792,49 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
       <id>ATTR_IO_FILTER_BYPASS</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>DPLL_BYPASS</id>
+    <description>
+        Skip locking sequence and check for lock of DPLL
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_DPLL_BYPASS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>NEST_MEM_X_O_PCI_BYPASS</id>
+    <description>
+        Skip the locking sequence and check for lock of NEST/MEM/XBUS/OBUS/PCI PLLs
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_NEST_MEM_X_O_PCI_BYPASS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
