@@ -101,6 +101,9 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = MCBIST_MCBFD0Q;
 
+        static constexpr uint64_t DATA_ROTATE_CNFG_REG = MCBIST_MCBDRCRQ;
+        static constexpr uint64_t DATA_ROTATE_SEED_REG = MCBIST_MCBDRSRQ;
+
         static constexpr uint64_t START_ADDRESS_0 = MCBIST_MCBSA0Q;
         static constexpr uint64_t START_ADDRESS_1 = MCBIST_MCBSA1Q;
         static constexpr uint64_t START_ADDRESS_2 = MCBIST_MCBSA2Q;
@@ -110,6 +113,14 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static constexpr uint64_t END_ADDRESS_1 = MCBIST_MCBEA1Q;
         static constexpr uint64_t END_ADDRESS_2 = MCBIST_MCBEA2Q;
         static constexpr uint64_t END_ADDRESS_3 = MCBIST_MCBEA3Q;
+
+        static constexpr uint64_t RANDOM_DATA_SEED0 = MCBIST_MCBRDS0Q;
+        static constexpr uint64_t RANDOM_DATA_SEED1 = MCBIST_MCBRDS1Q;
+
+
+        // MCBIST Compare Masks, used to setup the ECC traps
+        // TK there is one reg per port, does writing to this one write to all?
+        static constexpr uint64_t COMPARE_MASK = MCA_MCBCM;
 
         static constexpr uint64_t PATTERN_COUNT = 4;
 
@@ -286,6 +297,28 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             CFG_AMAP_COL3_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL3_LEN,
             CFG_AMAP_COL2 = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2,
             CFG_AMAP_COL2_LEN = MCBIST_MCBAMR3A0Q_CFG_AMAP_COL2_LEN,
+
+            CFG_DATA_ROT_SEED1 = MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED,
+            CFG_DATA_ROT_SEED1_LEN = MCBIST_MCBDRSRQ_CFG_DATA_ROT_SEED_LEN,
+            CFG_DATA_ROT = MCBIST_MCBDRCRQ_CFG_DATA_ROT,
+            CFG_DATA_ROT_LEN = MCBIST_MCBDRCRQ_CFG_DATA_ROT_LEN,
+            CFG_DATA_ROT_SEED2 = MCBIST_MCBDRCRQ_CFG_DATA_ROT_SEED,
+            CFG_DATA_ROT_SEED2_LEN = MCBIST_MCBDRCRQ_CFG_DATA_ROT_SEED_LEN,
+            CFG_DATA_SEED_MODE = MCBIST_MCBDRCRQ_CFG_DATA_SEED_MODE,
+            CFG_DATA_SEED_MODE_LEN = MCBIST_MCBDRCRQ_CFG_DATA_SEED_MODE_LEN,
+
+            CFG_TRAP_CE_ENABLE = MCA_MCBCM_MCBIST_TRAP_CE_ENABLE,
+            CFG_TRAP_UE_ENABLE = MCA_MCBCM_MCBIST_TRAP_UE_ENABLE,
+            CFG_TRAP_MPE_ENABLE = MCA_MCBCM_MCBIST_TRAP_MPE_ENABLE,
+
+            CFG_DGEN_RNDD_SEED0 = MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0,
+            CFG_DGEN_RNDD_SEED0_LEN = MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0_LEN,
+            CFG_DGEN_RNDD_SEED1 = MCBIST_MCBRDS0Q_DGEN_RNDD_SEED1,
+            CFG_DGEN_RNDD_SEED1_LEN = MCBIST_MCBRDS0Q_DGEN_RNDD_SEED1_LEN,
+            CFG_DGEN_RNDD_SEED2 = MCBIST_MCBRDS1Q_DGEN_RNDD_SEED2,
+            CFG_DGEN_RNDD_SEED2_LEN = MCBIST_MCBRDS1Q_DGEN_RNDD_SEED2_LEN,
+            CFG_DGEN_RNDD_DATA_MAPPING = MCBIST_MCBRDS1Q_DGEN_RNDD_DATA_MAPPING,
+            CFG_DGEN_RNDD_DATA_MAPPING_LEN = MCBIST_MCBRDS1Q_DGEN_RNDD_DATA_MAPPING_LEN,
         };
 
 };
@@ -535,8 +568,75 @@ inline subtest_t<T> write_subtest()
     return l_subtest;
 }
 
+
 ///
-/// @brief Return a scrub subtest - configured simply
+/// @brief Return an alter subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> alter_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 1011 - we want subtest type to be a Alter
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::ALTER);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return an display subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> display_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 1100 - we want subtest type to be a Display
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::DISPLAY);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return an scrub subtest - configured simply
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @return mss::mcbist::subtest_t
@@ -617,39 +717,6 @@ inline subtest_t<T> read_subtest()
 
     // 0:3   = 0001 - we want subtest type to be a Read (R)
     l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ);
-
-    // - Not a special subtest, so no other configs associated
-    // 4     = 0    - we don't want to complement data for our Writes
-    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
-    // 7     = 0    - forward address generation
-    // 8     = 0    - non random address generation
-    // - Don't need to set up anything for LFSRs
-    // 9:11  = 000  - Fixed data mode
-
-    // 14:15 = 0 address select config registers 0
-
-    // By default we want to turn on ECC. Caller can turn it off.
-    l_subtest.change_ecc_mode(mss::ON);
-
-    return l_subtest;
-}
-
-///
-/// @brief Return a display subtest - configured simply
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T - derived
-/// @return mss::mcbist::subtest_t
-/// @note Turns on ECC mode for the returned subtest - caller can turn it off
-/// @note Configures for start/end address select bit as address config register 0
-///
-template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-inline subtest_t<T> display_subtest()
-{
-    // Starts life full of 0's
-    subtest_t<T> l_subtest;
-
-    // 0:3   = 1100 - we want subtest type to be a DISPLAY (R, slow)
-    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::DISPLAY);
 
     // - Not a special subtest, so no other configs associated
     // 4     = 0    - we don't want to complement data for our Writes
@@ -858,10 +925,15 @@ class program
             iv_addr_map1(0),
             iv_addr_map2(0),
             iv_addr_map3(0),
+            iv_data_rotate_cnfg(0),
+            iv_data_rotate_seed(0),
             iv_config(0),
             iv_control(0),
             iv_async(false),
-            iv_pattern(PATTERN_0)
+            iv_pattern(PATTERN_0),
+            iv_random24_data_seed(RANDOM24_SEEDS_0),
+            iv_random24_seed_map(RANDOM24_SEED_MAP_0),
+            iv_compare_mask(0)
         {
             // Enable the maintenance mode addressing
             change_maint_address_mode(mss::ON);
@@ -1296,6 +1368,40 @@ class program
         }
 
         ///
+        /// @brief Change the random address all address mode
+        /// @param[in] i_state mss::ON if you random addressing all addresses, mss::OFF if you don't
+        /// @return void
+        ///
+        inline void random_address_all( const mss::states i_state )
+        {
+            iv_config.writeBit<TT::RAND_ADDR_ALL_ADDR_MODE_EN>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the broadcast sync enable bit
+        /// @param[in] i_state mss::ON to enable the sync pulse, mss::OFF to disable
+        /// @return void
+        ///
+        inline void broadcast_sync_enable( const mss::states i_state )
+        {
+            iv_config.writeBit<TT::SYNC_EN>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the broadcast mode sync timbase count
+        /// @param[in] i_broadcast_timebase
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_broadcast_timebase( mss::mcbist::broadcast_timebase i_broadcast_timebase )
+        {
+            iv_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_broadcast_timebase);
+            return;
+        }
+
+        ///
         /// @brief Change the mcbist thresholds
         /// @param[in] i_thresholds the new thresholds/stop conditions
         /// @return void
@@ -1303,6 +1409,135 @@ class program
         inline void change_thresholds( const stop_conditions& i_thresholds )
         {
             iv_thresholds = i_thresholds;
+            return;
+        }
+
+        ///
+        /// @brief Change the data rotate value
+        /// @param[in] i_data_rotate
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_data_rotate( mss::mcbist::data_rotate_mode i_data_rotate )
+        {
+            iv_data_rotate_cnfg.insertFromRight<TT::CFG_DATA_ROT, TT::CFG_DATA_ROT_LEN>(i_data_rotate);
+            return;
+        }
+
+        ///
+        /// @brief Get the data rotate value
+        /// @note Assumes data is right aligned
+        /// @return the data rotate value config
+        ///
+        inline uint64_t get_data_rotate()
+        {
+            uint64_t l_data_rotate = 0;
+            iv_data_rotate_cnfg.extractToRight<TT::CFG_DATA_ROT, TT::CFG_DATA_ROT_LEN>(l_data_rotate);
+            return l_data_rotate;
+        }
+
+        ///
+        /// @brief Change the data seed mode value
+        /// @param[in] i_data_seed_mode
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_data_seed_mode( const mss::mcbist::data_seed_mode i_data_seed_mode )
+        {
+            iv_data_rotate_cnfg.insertFromRight<TT::CFG_DATA_SEED_MODE, TT::CFG_DATA_SEED_MODE_LEN>(i_data_seed_mode);
+            return;
+        }
+
+        ///
+        /// @brief Get the data seed mode value
+        /// @note Assumes data is right aligned
+        /// @return the data seed mode value
+        ///
+        inline uint64_t get_data_seed_mode()
+        {
+            uint64_t l_data_seed_mode = 0;
+            iv_data_rotate_cnfg.extractToRight<TT::CFG_DATA_SEED_MODE, TT::CFG_DATA_SEED_MODE_LEN>(l_data_seed_mode);
+            return l_data_seed_mode;
+        }
+
+        ///
+        /// @brief Change the data rotate seed for data bits 0:63
+        /// @param[in] i_width
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_data_rotate_seed1( const uint64_t i_data_rotate_seed1 )
+        {
+            iv_data_rotate_seed.insertFromRight<TT::CFG_DATA_ROT_SEED1, TT::CFG_DATA_ROT_SEED1_LEN>(i_data_rotate_seed1);
+            return;
+        }
+
+        ///
+        /// @brief Get the data rotate seed for data bits 0:63
+        /// @note Assumes data is right aligned
+        /// @return the data rotate seed for data bits 0:63
+        ///
+        inline uint64_t get_data_rotate_seed1()
+        {
+            uint64_t l_data_rotate_seed1 = 0;
+            iv_data_rotate_seed.extractToRight<TT::CFG_DATA_ROT_SEED1, TT::CFG_DATA_ROT_SEED1_LEN>(l_data_rotate_seed1);
+            return l_data_rotate_seed1;
+        }
+
+        ///
+        /// @brief Change the data rotate seed for data bits 64:79
+        /// @param[in] i_width
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_data_rotate_seed2( const uint64_t i_data_rotate_seed2 )
+        {
+            iv_data_rotate_cnfg.insertFromRight<TT::CFG_DATA_ROT_SEED2, TT::CFG_DATA_ROT_SEED2_LEN>(i_data_rotate_seed2);
+            return;
+        }
+
+        ///
+        /// @brief Get the data rotate seed for data bits 64:79
+        /// @note Assumes data is right aligned
+        /// @return the data rotate seed for data bits 64:79
+        ///
+        inline uint64_t get_data_rotate_seed2()
+        {
+            uint64_t l_data_rotate_seed2 = 0;
+            iv_data_rotate_cnfg.extractToRight<TT::CFG_DATA_ROT_SEED2, TT::CFG_DATA_ROT_SEED2_LEN>(l_data_rotate_seed2);
+            return l_data_rotate_seed2;
+        }
+
+        ///
+        /// @brief Change the compare mask CE trap enable
+        /// @param[in] i_state mss::ON to enable the trap, mss::OFF to disable the trap
+        /// @return void
+        ///
+        inline void change_ce_trap_enable( const mss::states i_state )
+        {
+            iv_compare_mask.writeBit<TT::CFG_TRAP_CE_ENABLE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the compare mask UE trap enable
+        /// @param[in] i_state mss::ON to enable the trap, mss::OFF to disable the trap
+        /// @return void
+        ///
+        inline void change_ue_trap_enable( const mss::states i_state )
+        {
+            iv_compare_mask.writeBit<TT::CFG_TRAP_UE_ENABLE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the compare mask MPE trap enable
+        /// @param[in] i_state mss::ON to enable the trap, mss::OFF to disable the trap
+        /// @return void
+        ///
+        inline void change_mpe_trap_enable( const mss::states i_state )
+        {
+            iv_compare_mask.writeBit<TT::CFG_TRAP_MPE_ENABLE>(i_state);
             return;
         }
 
@@ -1647,7 +1882,6 @@ class program
 
         ///
         /// @brief Enable or disable maint address mode
-        /// @param[in] i_program the program in question
         /// @param[in] i_mode mss::ON to enable
         /// @warn Address counter modes must be 0 for this to work.
         /// @note When enabled subtest complement bits become 3-bit port-dimm selector field
@@ -1659,7 +1893,6 @@ class program
             iv_addr_gen.writeBit<TT::MAINT_ADDR_MODE_EN>(i_mode);
             return;
         }
-
 
         ///
         /// @brief Enable or disable broadcast mode
@@ -1788,6 +2021,56 @@ class program
         }
 
         ///
+        /// @brief Store off the random 24b data seed index. We'll use this to write the 24b random data seeds when we load the program
+        /// @param[in] i_index an index such as mss::mcbist::RANDOM24_SEEDS_0
+        /// @return fapi2::ReturnCode checks for bad pattern index
+        /// @warning if you give a pattern index which does not exist your pattern will not change.
+        /// @note patterns default to PATTERN_0
+        ///
+        inline fapi2::ReturnCode change_random_24b_seeds( const uint64_t i_random24_seed )
+        {
+            FAPI_INF("change MCBIST 24b random data seeds index %d", i_random24_seed );
+
+            // TK Want a new RC for random 24
+            // Sanity check the pattern since they're just numbers.
+            FAPI_ASSERT( i_random24_seed <= mcbist::NO_RANDOM24_SEEDS,
+                         fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_random24_seed),
+                         "Attempting to change to a 24b random data seed which does not exist %d", i_random24_seed );
+
+            iv_random24_data_seed = i_random24_seed;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Store off the random 24b data seed mapping index. We'll use this to write the 24b random data seed mappings when we load the program
+        /// @param[in] i_index an index such as mss::mcbist::RANDOM24_SEEDS_0
+        /// @return fapi2::ReturnCode checks for bad pattern index
+        /// @warning if you give a pattern index which does not exist your pattern will not change.
+        /// @note patterns default to PATTERN_0
+        ///
+        inline fapi2::ReturnCode change_random_24b_maps( const uint64_t i_random24_map )
+        {
+            FAPI_INF("change MCBIST 24b random data seed mappings index %d", i_random24_map );
+
+            // TK Want a new RC for random 24
+            // Sanity check the pattern since they're just numbers.
+            FAPI_ASSERT( i_random24_map <= mcbist::NO_RANDOM24_SEED_MAP,
+                         fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_random24_map),
+                         "Attempting to change to a random seed map which does not exist %d", i_random24_map );
+
+            iv_random24_seed_map = i_random24_map;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief checks if two programs are equal
         /// @param[in] i_rhs program to compare
         /// @return bool true if equal
@@ -1814,6 +2097,13 @@ class program
             l_equal &= iv_async == i_rhs.iv_async;
             l_equal &= iv_pattern == i_rhs.iv_pattern;
             l_equal &= iv_thresholds == i_rhs.iv_thresholds;
+            l_equal &= iv_data_rotate_cnfg == i_rhs.iv_data_rotate_cnfg;
+            l_equal &= iv_data_rotate_seed == i_rhs.iv_data_rotate_seed;
+            l_equal &= iv_random24_data_seed == i_rhs.iv_random24_data_seed;
+            l_equal &= iv_random24_seed_map == i_rhs.iv_random24_seed_map;
+            l_equal &= iv_data_rotate_cnfg == i_rhs.iv_data_rotate_cnfg;
+            l_equal &= iv_data_rotate_seed == i_rhs.iv_data_rotate_seed;
+            l_equal &= iv_compare_mask == i_rhs.iv_compare_mask;
 
             //returns result
             return  l_equal;
@@ -1851,6 +2141,10 @@ class program
         fapi2::buffer<uint64_t>     iv_addr_map2;
         fapi2::buffer<uint64_t>     iv_addr_map3;
 
+        // Data Rotate Seed and Config Registers
+        fapi2::buffer<uint64_t>     iv_data_rotate_cnfg;
+        fapi2::buffer<uint64_t>     iv_data_rotate_seed;
+
         // Config register
         fapi2::buffer<uint64_t>     iv_config;
 
@@ -1862,6 +2156,15 @@ class program
 
         // The pattern for the pattern generator
         uint64_t                    iv_pattern;
+
+        // The pattern for the random 24b seeds
+        uint64_t                    iv_random24_data_seed;
+
+        // The pattern for the random 24b data seed mapping
+        uint64_t                    iv_random24_seed_map;
+
+        // The pattern for the pattern generator
+        fapi2::buffer<uint64_t>     iv_compare_mask;
 
         // The error stop conditions, thresholds for the program
         stop_conditions             iv_thresholds;
@@ -2196,7 +2499,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Load MCBIST pattern given a pattern
 /// @tparam T, the fapi2::TargetType - derived
@@ -2283,6 +2585,198 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 {
     return load_pattern(i_target, i_program.iv_pattern);
 }
+
+///
+/// @brief Load MCBIST maint pattern given a pattern
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert );
+
+
+///
+/// @brief Load MCBIST maint pattern given an index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_index the pattern index
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, uint64_t i_pattern )
+{
+    if (NO_PATTERN != i_pattern)
+    {
+        bool l_invert = false;
+
+        // Sanity check the pattern since they're just numbers.
+        // Belt-and-suspenders FAPI_ASSERT as the sim-only uses this API directly.
+        FAPI_ASSERT( i_pattern <= mcbist::LAST_PATTERN,
+                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_pattern),
+                     "Attempting to load a pattern which does not exist %d", i_pattern );
+
+        // The indexes are split in to even and odd where the odd indexes don't really exist.
+        // They're just indicating that we want to grab the even index and invert it. So calculate
+        // the proper vector index and acknowledge the inversion if necessary.
+        if ((i_pattern % 2) != 0)
+        {
+            l_invert = true;
+            i_pattern -= 1;
+        }
+
+        return load_maint_pattern(i_target, patterns[i_pattern / 2], l_invert);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST Maint mode pattern given an index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    return load_maint_pattern(i_target, i_program.iv_pattern);
+}
+
+
+///
+/// @brief Load MCBIST 24b random data seeds given a pattern index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_random24_data_seed mcbist::random24_data_seed
+/// @param[in] i_random24_map mcbist::random24_seed_map
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
+                                        const random24_data_seed& i_random24_data_seed,
+                                        const random24_seed_map& i_random24_map,
+                                        const bool i_invert );
+
+///
+/// @brief Load MCBIST 24b Random data seeds given a pattern index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_data_seed the 24b random data seed index
+/// @param[in] i_seed_map the 24b random data map index
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, uint64_t i_data_seed,
+        uint64_t i_seed_map )
+{
+    if ((NO_RANDOM24_SEEDS != i_data_seed) && (NO_RANDOM24_SEED_MAP != i_seed_map))
+    {
+        bool l_invert = false;
+
+        // TK Want a new RC for random 24
+        // Sanity check the pattern since they're just numbers.
+        // Belt-and-suspenders FAPI_ASSERT as the sim-only uses this API directly.
+        FAPI_ASSERT( i_data_seed <= mcbist::LAST_RANDOM24_SEEDS,
+                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(i_data_seed),
+                     "Attempting to load a 24b random data seed set which does not exist %d", i_data_seed );
+
+        // The indexes are split in to even and odd where the odd indexes don't really exist.
+        // They're just indicating that we want to grab the even index and invert it. So calculate
+        // the proper vector index and acknowledge the inversion if necessary.
+        if ((i_data_seed % 2) != 0)
+        {
+            l_invert = true;
+            i_data_seed -= 1;
+        }
+
+        return load_random24b_seeds(i_target, random24_data_seeds[i_data_seed / 2], random24_seed_maps[i_seed_map], l_invert);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST 24b Random data seeds given a program conatining a pattern index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    return load_random24b_seeds(i_target, i_program.iv_random24_data_seed, i_program.iv_random24_seed_map);
+}
+
+///
+/// @brief Load MCBIST data patterns and configuration
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    uint64_t l_data_rotate_cnfg_addr = TT::DATA_ROTATE_CNFG_REG;
+    uint64_t l_data_rotate_seed_addr = TT::DATA_ROTATE_SEED_REG;
+
+    // First load the data pattern registers
+    FAPI_INF("Loading the data pattern seeds!");
+    FAPI_TRY( mss::mcbist::load_pattern(i_target, i_program.iv_pattern) );
+
+    // Load the 24b random data pattern seeds registers
+    FAPI_INF("Loading the 24b Random data pattern seeds!");
+    FAPI_TRY( mss::mcbist::load_random24b_seeds(i_target, i_program.iv_random24_data_seed,
+              i_program.iv_random24_seed_map) );
+
+    // Load the maint data pattern into the Maint entry in the RMW buffer
+    // TK Might want to only load the RMW buffer if maint commands are present in the program
+    // The load takes 33 Putscoms to load 16 64B registers, might slow down mcbist programs that
+    // don't need the RMW buffer maint entry loaded
+    FAPI_INF("Loading the maint data pattern into the RMW buffer!");
+    FAPI_TRY( mss::mcbist::load_maint_pattern(i_target, i_program.iv_pattern) );
+
+    FAPI_INF("Loading the data rotate config and seeds!");
+    FAPI_TRY( mss::putScom(i_target, l_data_rotate_cnfg_addr, i_program.iv_data_rotate_cnfg) );
+    FAPI_TRY( mss::putScom(i_target, l_data_rotate_seed_addr, i_program.iv_data_rotate_seed) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Load MCBIST data compare mask registers
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<T>& i_target,
+        const mcbist::program<T>& i_program );
 
 ///
 /// @brief Load MCBIST Thre load_addr_gen
