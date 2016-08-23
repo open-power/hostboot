@@ -333,31 +333,26 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target )
 
 //------------------------------------------------------------------------------
 
-uint8_t getChipLevel( TARGETING::TargetHandle_t i_target )
+TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt )
 {
-    uint8_t o_chipLvl = 0;
+    PRDF_ASSERT( NULL != i_trgt );
 
-    do
-    {
-        if ( NULL == i_target ) break;
+    TargetHandle_t parent = getParentChip( i_trgt );
+    PRDF_ASSERT( NULL != parent );
 
-        TargetHandle_t l_parentTarget = getParentChip( i_target );
-        if ( NULL == l_parentTarget ) break;
+    return parent->getAttr<ATTR_MODEL>();
+}
 
-        if ( !l_parentTarget->tryGetAttr<ATTR_EC>(o_chipLvl) )
-        {
-            PRDF_ERR( "[getChipLevel] Failed to get ATTR_EC" );
-            o_chipLvl = 0; // Just in case
-        }
+//------------------------------------------------------------------------------
 
-    } while (0);
+uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( NULL != i_trgt );
 
-    if ( 0 == o_chipLvl )
-    {
-        PRDF_ERR( "[getChipLevel] Failed: i_target=0x%08x", getHuid(i_target) );
-    }
+    TargetHandle_t parent = getParentChip( i_trgt );
+    PRDF_ASSERT( NULL != parent );
 
-    return o_chipLvl;
+    return parent->getAttr<ATTR_EC>();
 }
 
 //------------------------------------------------------------------------------
@@ -1093,27 +1088,6 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
     #undef PRDF_FUNC
 
     return o_pos;
-}
-
-//------------------------------------------------------------------------------
-
-TARGETING::MODEL getProcModel( TARGETING::TargetHandle_t i_proc )
-{
-    #define PRDF_FUNC "[PlatServices::getProcModel] "
-
-    MODEL l_model = MODEL_NA;
-    if( TYPE_PROC == getTargetType( i_proc ) )
-    {
-        l_model = i_proc->getAttr<ATTR_MODEL>();
-    }
-    else
-    {
-        PRDF_ERR( PRDF_FUNC "Invalid Target Huid = 0x%08x", getHuid( i_proc ) );
-    }
-
-    return l_model;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
