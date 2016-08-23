@@ -273,7 +273,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
             break;
         }
-        TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo succeeded");
+        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo succeeded for sec = %s",
+                  l_info.name);
 
         // it's a coding error if l_info.vaddr is not in secure space
         assert(l_info.vaddr >= SBASE_VADDR);

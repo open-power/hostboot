@@ -458,7 +458,8 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     isSecure = (secId == PNOR::HB_EXT_CODE) ||
                                (secId == PNOR::HB_DATA) ||
                                (secId == PNOR::SBE_IPL) ||
-                               (secId == PNOR::CENTAUR_SBE);
+                               (secId == PNOR::CENTAUR_SBE) ||
+                               (secId == PNOR::PAYLOAD);
                     #endif
                     if (o_TOC[secId].version == FFS_VERS_SHA512 || isSecure)
                     {

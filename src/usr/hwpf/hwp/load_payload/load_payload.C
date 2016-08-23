@@ -112,7 +112,7 @@ void*   call_host_load_payload( void *io_pArgs )
 
         // Get Payload base/entry from attributes
         uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
-        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,INFO_MRK
                    "call_load_payload: Payload Base: 0x%08x, Base:0x%08x",
                    payloadBase, (payloadBase * MEGABYTE) );
 
@@ -145,11 +145,23 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               ENTER_MRK"load_pnor_section()");
 
+    errlHndl_t err = NULL;
+
+    #ifdef CONFIG_SECUREBOOT
+    // Securely load section
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"load_pnor_section: secure section load of secId=0x%X",
+              i_section);
+    err = PNOR::loadSecureSection(i_section);
+    if (err)
+    {
+        return err;
+    }
+    // Do not need to unload since we have plenty of memory at this point.
+    #endif
+
     // Get the section info from PNOR.
     PNOR::SectionInfo_t pnorSectionInfo;
-    errlHndl_t err = PNOR::getSectionInfo( i_section,
-                                           pnorSectionInfo);
-
+    err = PNOR::getSectionInfo( i_section, pnorSectionInfo);
     if( err != NULL )
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -157,11 +169,17 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
                  i_section);
         return err;
     }
+    uint64_t l_vaddr = pnorSectionInfo.vaddr;
+
+    // @TODO RTC:156118 remove workaround with getSectionInfo cleanup.
+    #ifdef CONFIG_SECUREBOOT
+    pnorSectionInfo.vaddr += PAGE_SIZE;
+    #endif
 
     // XZ repository: http://git.tukaani.org/xz.git
     // Header specifics can be found in xz/doc/xz-file-format.txt
     const uint8_t HEADER_MAGIC[]= { 0xFD, '7', 'z', 'X', 'Z', 0x00 };
-    uint8_t* l_pnor_header = reinterpret_cast<uint8_t *>(pnorSectionInfo.vaddr);
+    uint8_t* l_pnor_header = reinterpret_cast<uint8_t *>(l_vaddr);
 
     bool l_pnor_is_XZ_compressed = (0 == memcmp(l_pnor_header,
                                     HEADER_MAGIC, sizeof(HEADER_MAGIC)));
@@ -227,7 +245,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             for ( uint32_t i = 0; i < originalPayloadSize; i += BLOCK_SIZE )
             {
                 memcpy( reinterpret_cast<void*>( loadAddr + i ),
-                        reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
+                        reinterpret_cast<void*>( l_vaddr + i ),
                         std::min( originalPayloadSize - i, BLOCK_SIZE ) );
  #ifdef CONFIG_CONSOLE
                 for ( int new_progress = (i * progressSteps) /
@@ -264,7 +282,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         static const uint64_t compressed_SIZE = originalPayloadSize;
         static const uint64_t decompressed_SIZE = uncompressedPayloadSize;
 
-        b.in = reinterpret_cast<uint8_t *>( pnorSectionInfo.vaddr);
+        b.in = reinterpret_cast<uint8_t *>( l_vaddr);
         b.in_pos = 0;
         b.in_size = compressed_SIZE;
         b.out = reinterpret_cast<uint8_t *>(loadAddr);

@@ -62,6 +62,14 @@ use constant VFS_MODULE_TABLE_ENTRY_SIZE => 112;
 # VFS Module table max size
 use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
                                           * VFS_MODULE_TABLE_ENTRY_SIZE;
+# Flag parameter string passed into signing tools
+# Note spaces before/after are critical.
+use constant LOCAL_SIGNING_FLAG => " -flag ";
+use constant OP_SIGNING_FLAG => " -flags ";
+# Security bits HW flag strings
+use constant HB_FW_FLAG => "0x80000000";
+use constant OPAL_FLAG => "0x40000000";
+use constant PHYP_FLAG => "0x20000000";
 
 ################################################################################
 # I/O parsing
@@ -138,13 +146,13 @@ if($SIGNING_TOOL_EDITION eq COMMUNITY)
 
 # Secureboot command strings
 # Requires naming convention of hw/sw keys in DEV_KEY_DIR
-my $SIGN_PREFIX_PARAMS = "-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb "
-    . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
-    . "-skp ${DEV_KEY_DIR}/sw_key_a";
+
 my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
 # Secureboot header file
 my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
-my $SECUREBOOT_HDR = "$bin_dir/$randPrefix.secureboot.hdr.bin";
+my $HB_FW_SECUREBOOT_HDR = "$bin_dir/$randPrefix.hb.fw.secureboot.hdr.bin";
+my $OPAL_SECUREBOOT_HDR = "$bin_dir/$randPrefix.opal.secureboot.hdr.bin";
+my $PHYP_SECUREBOOT_HDR = "$bin_dir/$randPrefix.phyp.secureboot.hdr.bin";
 
 my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
     . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
@@ -165,8 +173,15 @@ if ($secureboot)
     if(!$openSigningTool)
     {
         # Key prefix used for all partitions (N/A for open edition)
-        run_command("$SIGNING_DIR/prefix -good -of $SECUREBOOT_HDR "
-            . "$SIGN_PREFIX_PARAMS");
+        my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
+                    . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
+                    . "-skp ${DEV_KEY_DIR}/sw_key_a";
+        run_command("$SIGNING_DIR/prefix -good -of $HB_FW_SECUREBOOT_HDR".
+                    LOCAL_SIGNING_FLAG.HB_FW_FLAG." $SIGN_PREFIX_PARAMS");
+        run_command("$SIGNING_DIR/prefix -good -of $OPAL_SECUREBOOT_HDR ".
+                    LOCAL_SIGNING_FLAG.OPAL_FLAG." $SIGN_PREFIX_PARAMS");
+        run_command("$SIGNING_DIR/prefix -good -of $PHYP_SECUREBOOT_HDR ".
+                    LOCAL_SIGNING_FLAG.PHYP_FLAG." $SIGN_PREFIX_PARAMS");
         if ($build_all)
         {
             gen_test_containers();
@@ -200,8 +215,13 @@ foreach my $binFilesCSV (@systemBinFiles)
     # Make sure provided files will fit in their sections
     checkSpaceConstraints(\%pnorLayout, \%binFiles, $testRun);
 }
-system("rm -f $SECUREBOOT_HDR");
-die "Could not delete $SECUREBOOT_HDR" if $?;
+
+system("rm -f $HB_FW_SECUREBOOT_HDR");
+die "Could not delete $HB_FW_SECUREBOOT_HDR" if $?;
+system("rm -f $OPAL_SECUREBOOT_HDR");
+die "Could not delete $OPAL_SECUREBOOT_HDR" if $?;
+system("rm -f $PHYP_SECUREBOOT_HDR");
+die "Could not delete $PHYP_SECUREBOOT_HDR" if $?;
 
 ################################################################################
 # manipulateImages - Perform any ECC/padding/sha/signing manipulations
@@ -256,11 +276,20 @@ sub manipulateImages
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
         my $isNormalSecure =    ($eyeCatch eq "SBE")
-                             || ($eyeCatch eq "SBEC");
+                             || ($eyeCatch eq "SBEC")
+                             || ($eyeCatch eq "PAYLOAD");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
                               || ($eyeCatch eq "HBI")
                               || ($eyeCatch eq "HBD");
+
+        my $openSigningFlags = OP_SIGNING_FLAG.HB_FW_FLAG;
+        my $secureboot_hdr =  $HB_FW_SECUREBOOT_HDR;
+        if ($eyeCatch eq "PAYLOAD")
+        {
+            $secureboot_hdr = $OPAL_SECUREBOOT_HDR;
+            $openSigningFlags = OP_SIGNING_FLAG.OPAL_FLAG;
+        }
 
         # Handle partitions that have an input binary.
         if (-e $bin_file)
@@ -318,7 +347,7 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             run_command("$OPEN_SIGN_REQUEST "
-                                . "-flags 0x80000000 "
+                                . "$openSigningFlags "
                                 . "-protectedPayload $tempImages{PAYLOAD_TEXT} "
                                 . "-out $tempImages{PROTECTED_PAYLOAD}");
                         }
@@ -326,7 +355,7 @@ sub manipulateImages
                         {
                             # @TODO RTC:155374 Remove when official signing
                             # supported
-                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
+                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
                         }
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
@@ -337,7 +366,7 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             run_command("$OPEN_SIGN_REQUEST "
-                                . "-flags 0x80000000  "
+                                . "$openSigningFlags  "
                                 . "-protectedPayload $bin_file.protected "
                                 . "-out $tempImages{PROTECTED_PAYLOAD}");
                         }
@@ -345,7 +374,7 @@ sub manipulateImages
                         {
                             # @TODO RTC:155374 Remove when official signing
                             # supported
-                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
+                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
                         }
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
@@ -357,7 +386,7 @@ sub manipulateImages
                             my $codeStartOffset = ($eyeCatch eq "HBB") ?
                                 "-code-start-offset 0x00000180" : "";
                             run_command("$OPEN_SIGN_REQUEST "
-                                . "-flags 0x80000000 $codeStartOffset "
+                                . "$openSigningFlags $codeStartOffset "
                                 . "-protectedPayload $bin_file "
                                 . "-out $tempImages{HDR_PHASE}");
                         }
@@ -365,7 +394,7 @@ sub manipulateImages
                         {
                             # @TODO RTC:155374 Remove when official signing
                             # supported
-                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                         }
                     }
 
@@ -402,14 +431,14 @@ sub manipulateImages
                 if($openSigningTool)
                 {
                     run_command("$OPEN_SIGN_REQUEST "
-                        . "-flags 0x80000000 "
+                        . "$openSigningFlags "
                         . "-protectedPayload $bin_file "
                         . "-out $tempImages{HDR_PHASE}");
                 }
                 else
                 {
                     # @TODO RTC:155374 Remove when official signing supported
-                    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                    run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                 }
             }
             else
@@ -486,6 +515,17 @@ sub manipulateImages
             else
             {
                 run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+            }
+
+            # Add secure container header
+            if ($secureboot && $isNormalSecure)
+            {
+                # Remove PAGE_SIZE bytes from generated dummy content of file
+                # to make room for the secure header
+                my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
+                run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
+                # @TODO RTC:155374 Remove when official signing supported
+                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
             }
         }
 
@@ -644,14 +684,14 @@ sub gen_test_containers
     # name = secureboot_signed_container (no prefix in hb cacheadd)
     my $test_container = "$bin_dir/secureboot_signed_container";
     run_command("dd if=/dev/zero count=1 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
-    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $HB_FW_SECUREBOOT_HDR -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
 
     # Create a signed test container with a hash page table
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
     run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
     $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
-    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $HB_FW_SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");
 
     # Clean up temp images

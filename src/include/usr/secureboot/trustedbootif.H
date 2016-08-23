@@ -163,7 +163,7 @@ namespace TRUSTEDBOOT
      */
     errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
                                      const void* i_vaddr,
-                                     PNOR::SectionId i_sec);
+                                     const PNOR::SectionId i_sec);
 
     /**
      *  @brief Extends the Hostboot base image to the TPM

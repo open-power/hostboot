@@ -523,7 +523,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         if (o_info.id == HB_EXT_CODE ||
             o_info.id == HB_DATA ||
             o_info.id == SBE_IPL ||
-            o_info.id == CENTAUR_SBE)
+            o_info.id == CENTAUR_SBE ||
+            o_info.id == PAYLOAD)
         {
             // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
             // address into a secure pnor address, since pnor, temp, and spnor
@@ -1405,7 +1406,8 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
             bool isSecure = (id == HB_EXT_CODE ||
                              id == HB_DATA ||
                              id == SBE_IPL ||
-                             id == CENTAUR_SBE);
+                             id == CENTAUR_SBE ||
+                             id == PAYLOAD);
             extra = (isSecure) ? PAGE_SIZE : 0;
 #endif
             if( (i_vaddr >= iv_TOC[id].virtAddr)

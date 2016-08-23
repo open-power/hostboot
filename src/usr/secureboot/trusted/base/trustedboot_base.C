@@ -209,11 +209,20 @@ errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
               l_secName);
     do
     {
+        TPM_Pcr l_pnorHashPcr = PCR_0;
+        // PAYLOAD is the only section that needs its hash extended to PCR_4
+        if (i_sec == PNOR::PAYLOAD)
+        {
+            l_pnorHashPcr = PCR_4;
+        }
+        // Extend swKeyHash to the next PCR after the hash extension PCR.
+        TPM_Pcr l_swKeyHashPcr = (TPM_Pcr)(l_pnorHashPcr + 1);
+
         size_t l_protectedSize = i_conHdr.payloadTextSize();
         if (SECUREBOOT::enabled())
         {
             // If secureboot is enabled, use protected hash in header
-            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0,
+            l_errhdl = TRUSTEDBOOT::pcrExtend(l_pnorHashPcr,
                   reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
                   sizeof(SHA512_t),
                   l_secName);
@@ -222,8 +231,8 @@ errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
                 break;
             }
 
-            // Extend sw public key hash to pcr1
-            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
+            // Extend sw public key hash
+            l_errhdl = TRUSTEDBOOT::pcrExtend(l_swKeyHashPcr,
                         reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
                         sizeof(SHA512_t),
                         l_swKeyMsg);
@@ -237,7 +246,7 @@ errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
             // If secureboot is not enabled, measure protected section
             SHA512_t l_hash = {0};
             SECUREBOOT::hashBlob(i_vaddr, l_protectedSize, l_hash);
-            l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
+            l_errhdl = TRUSTEDBOOT::pcrExtend(l_pnorHashPcr, l_hash,
                                               sizeof(SHA512_t),
                                               l_secName);
             if (l_errhdl)
