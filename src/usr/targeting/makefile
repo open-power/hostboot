@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -50,7 +50,7 @@ HOSTBOOT_SPECIFIC_OBJS += ${ATTR_RP_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${DEBUG_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += namedtarget.o
-
+HOSTBOOT_SPECIFIC_OBJS += errludattribute.o
 
 #debug :
 #	@echo COMMON_TARGETING_REL_PATH = ${COMMON_TARGETING_REL_PATH}
@@ -69,4 +69,6 @@ SUBDIRS += attroverride.d
 
 include ${ROOTPATH}/config.mk
 
+# To find errludtarget.[CH], etc.  They are generated
+# by src/usr/targeting/common/xmltohb/xmltohb.pl
 vpath %.C ${GENDIR}

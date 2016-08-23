@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += targplatutil.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_targeting.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrPlatOverride_rt.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS += errludattribute.o
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 OBJS += ${COMMON_TARGETING_OBJS}
@@ -44,4 +45,7 @@ OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
 
 include $(ROOTPATH)/config.mk
+
+# To find errludtarget.[CH], etc.  They are generated
+# by src/usr/targeting/common/xmltohb/xmltohb.pl
 vpath %.C ${GENDIR}
