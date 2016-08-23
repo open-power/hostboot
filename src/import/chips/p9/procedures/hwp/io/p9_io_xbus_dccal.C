@@ -55,32 +55,43 @@
 #include <p9_io_xbus_dccal.H>
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
+#include <p9_io_common.H>
 
 //-----------------------------------------------------------------------------
 // Function Declarations
 //-----------------------------------------------------------------------------
 
+
+/**
+ * @brief Tx Z Impedance Calibration State Machine
+ * @param[in] i_tgt FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode tx_zcal_run_bus( const XBUS_TGT i_tgt );
+
 /**
  * @brief Tx Z Impedance Calibration
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
- * @param[in] i_flags  Dccal Attribute Flags
+ * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group );
+fapi2::ReturnCode tx_zcal_set_grp( const XBUS_TGT i_tgt, const uint8_t i_grp );
 
 /**
- * @brief Rx Dc Calibration
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @brief Rx Dc Calibration Poll
+ * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode rx_dccal(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group );
+fapi2::ReturnCode rx_dccal_poll_grp( const XBUS_TGT i_tgt, const uint8_t i_grp );
 
+/**
+ * @brief Rx Dc Calibration Start
+ * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_grp  Clock Group
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode rx_dccal_start_grp( const XBUS_TGT i_tgt, const uint8_t i_grp );
 
 //-----------------------------------------------------------------------------
 //  Function Definitions
@@ -89,45 +100,48 @@ fapi2::ReturnCode rx_dccal(
 /**
  * @brief A I/O EDI+ Procedure that runs Rx Dccal and Tx Z Impedance calibration
  * on every instance of the XBUS on a per group level.
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_mode Selects which operation to perform
+ * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @retval ReturnCode
  */
 fapi2::ReturnCode p9_io_xbus_dccal(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group )
+    const XbusDccalMode i_mode,
+    const XBUS_TGT      i_tgt,
+    const uint8_t       i_grp )
 {
     FAPI_IMP( "p9_io_xbus_dccal: I/O EDI+ Xbus Entering" );
-    uint8_t l_dccal_flags = 0x0;
-    char l_target_string[fapi2::MAX_ECMD_STRING_LEN];
-    fapi2::toString( i_target, l_target_string, fapi2::MAX_ECMD_STRING_LEN );
 
-    // Check if Tx Impedance Calibration or Rx Dc Calibration has been run.
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_XBUS_DCCAL_FLAGS, i_target, l_dccal_flags ) );
+    char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString( i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN );
+    FAPI_DBG( "I/O EDI+ Xbus Dccal %s:g%d", l_tgtStr, i_grp );
 
-    FAPI_DBG( "I/O EDI+ Xbus Dccal %s:g%d Flags Tx(%d) Rx(%d)",
-              l_target_string, i_group,
-              ( l_dccal_flags & fapi2::ENUM_ATTR_IO_XBUS_DCCAL_FLAGS_TX ) ? 1 : 0,
-              ( l_dccal_flags & fapi2::ENUM_ATTR_IO_XBUS_DCCAL_FLAGS_RX ) ? 1 : 0 );
+    switch( i_mode )
+    {
+        case XbusDccalMode::Noop: // Runs nothing, can be used for dry runs
+            FAPI_IMP( "I/O EDI+ Xbus Dccal Noop" );
+            break;
 
-    ///////////////////////////////////////////////////////////////////////////
-    /// Tx Impedance Calibraiton (Zcal)
-    ///////////////////////////////////////////////////////////////////////////
-    FAPI_TRY( tx_zcal( i_target, i_group ),
-              "p9_io_xbus_dccal: I/O Edi+ Xbus Tx Z Calibration Run Failed" );
+        case XbusDccalMode::TxZcalRunBus: // Runs Tx Zcal on a per bus basis
+            FAPI_TRY( tx_zcal_run_bus( i_tgt ), "I/O Edi+ Xbus Tx Z-Cal Run Bus Failed" );
+            break;
 
-    l_dccal_flags |= fapi2::ENUM_ATTR_IO_XBUS_DCCAL_FLAGS_TX;
-    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_XBUS_DCCAL_FLAGS, i_target, l_dccal_flags ) );
+        case XbusDccalMode::TxZcalSetGrp: // Sets Tx Zcal Group Settings based on the bus results
+            FAPI_TRY( tx_zcal_set_grp( i_tgt, i_grp ), "I/O Edi+ Xbus Tx Z-Cal Set Grp Failed" );
+            break;
 
-    ///////////////////////////////////////////////////////////////////////////
-    /// Rx DC Calibraiton
-    ///////////////////////////////////////////////////////////////////////////
-    FAPI_TRY( rx_dccal( i_target, i_group ),
-              "p9_io_xbus_dccal: I/O Edi+ Xbus Rx DC Calibration Run Failed" );
+        case XbusDccalMode::RxDccalStartGrp: // Starts Rx Dccal on a per group basis
+            FAPI_TRY( rx_dccal_start_grp( i_tgt, i_grp ), "I/O Edi+ Xbus Rx DC Cal Start Failed" );
+            break;
 
-    l_dccal_flags |= fapi2::ENUM_ATTR_IO_XBUS_DCCAL_FLAGS_RX;
-    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_XBUS_DCCAL_FLAGS, i_target, l_dccal_flags ) );
+        case XbusDccalMode::RxDccalCheckGrp: // Checks/polls Rx Dccal on a per group basis
+            FAPI_TRY( rx_dccal_poll_grp( i_tgt, i_grp ), "I/O Edi+ Xbus Rx DC Cal Poll Failed" );
+            break;
 
+        default:
+            FAPI_ERR( "I/O EDI+ Xbus Dccal No Valid Mode" );
+            break;
+    }
 
 fapi_try_exit:
     FAPI_IMP( "p9_io_xbus_dccal: I/O EDI+ Xbus Exiting" );
@@ -217,41 +231,42 @@ fapi2::ReturnCode tx_zcal_verify_results(
 
 /**
  * @brief Tx Z Impedance Calibration State Machine
- * @param[in] i_target FAPI2 Target
- * @param[in] io_pval  Tx Zcal P-value
- * @param[in] io_nval  Tx Zcal N-value
+ * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_run_sm(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    uint32_t&                                        io_pval,
-    uint32_t&                                        io_nval )
+fapi2::ReturnCode tx_zcal_run_bus( const XBUS_TGT i_tgt )
 {
     const uint64_t DLY_20MS         = 20000000;
     const uint64_t DLY_10US         = 10000;
     const uint64_t DLY_10MIL_CYCLES = 10000000;
     const uint64_t DLY_1MIL_CYCLES  = 1000000;
     const uint32_t TIMEOUT          = 200;
-    const uint8_t GROUP_00          = 0;
-    const uint8_t LANE_00           = 0;
+    const uint8_t GRP0              = 0;
+    const uint8_t LN0               = 0;
     uint32_t l_count                = 0;
     uint64_t l_data                 = 0;
+    uint8_t       l_is_sim = 0;
 
     FAPI_IMP( "tx_zcal_run_sm: I/O EDI+ Xbus Entering" );
 
+    ///////////////////////////////////////////////////////////////////////////
+    /// Simulation Speed Up
+    ///////////////////////////////////////////////////////////////////////////
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim) );
 
-#if 0 ////////////////////////////////////
-    // To speed up simulation, xbus_unit model + pie driver
-    //   without these settings: 50 million cycles
-    //   with these settings: 13 million cycles
-    io::set( EDIP_TX_ZCAL_SM_MIN_VAL, 50, l_data );
-    io::set( EDIP_TX_ZCAL_SM_MAX_VAL, 52, l_data );
-    FAPI_TRY( io::write( EDIP_TX_IMPCAL_SWO2_PB, i_target, GROUP_00, LANE_00, l_data ) );
-#endif ///////////////////////////////////
+    if( l_is_sim )
+    {
+        // To speed up simulation, xbus_unit model + pie driver
+        //   without these settings: 50 million cycles
+        //   with these settings: 13 million cycles
+        io::set( EDIP_TX_ZCAL_SM_MIN_VAL, 50, l_data );
+        io::set( EDIP_TX_ZCAL_SM_MAX_VAL, 52, l_data );
+        FAPI_TRY( io::write( EDIP_TX_IMPCAL_SWO2_PB, i_tgt, GRP0, LN0, l_data ) );
+    }
 
     // Request to start Tx Impedance Calibration
     // The Done bit is read only pulse, must use pie driver or system model in sim
-    FAPI_TRY( io::rmw( EDIP_TX_ZCAL_REQ, i_target, GROUP_00, LANE_00, 1 ),
+    FAPI_TRY( io::rmw( EDIP_TX_ZCAL_REQ, i_tgt, GRP0, LN0, 1 ),
               "tx_zcal_run_sm: RMW Tx Zcal Req Failed");
 
     // Delay before we start polling.  20ms was use from past p8 learning
@@ -259,7 +274,7 @@ fapi2::ReturnCode tx_zcal_run_sm(
               "tx_zcal_run_sm: Fapi Delay Failed." );
 
     // Poll Until Tx Impedance Calibration is done or errors out
-    FAPI_TRY( io::read( EDIP_TX_IMPCAL_PB, i_target, GROUP_00, LANE_00, l_data ),
+    FAPI_TRY( io::read( EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data ),
               "tx_zcal_run_sm: Reading Tx Impcal Pb Failed" );
 
     while( ( ++l_count < TIMEOUT ) &&
@@ -271,40 +286,23 @@ fapi2::ReturnCode tx_zcal_run_sm(
         FAPI_TRY( fapi2::delay( DLY_10US, DLY_1MIL_CYCLES ),
                   "tx_zcal_run_sm: Fapi Delay Failed." );
 
-        FAPI_TRY( io::read( EDIP_TX_IMPCAL_PB, i_target, GROUP_00, LANE_00, l_data ),
+        FAPI_TRY( io::read( EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data ),
                   "tx_zcal_run_sm: Reading Tx Impcal Pb Failed" );
     }
 
-    if( io::get( EDIP_TX_ZCAL_ERROR, l_data ) == 1 )
+
+    if( io::get( EDIP_TX_ZCAL_DONE, l_data ) == 1 )
+    {
+        FAPI_DBG( "tx_zcal_run_sm: I/O EDI+ Xbus Tx Zcal Poll Completed(%d/%d).", l_count, TIMEOUT );
+    }
+    else if( io::get( EDIP_TX_ZCAL_ERROR, l_data ) == 1 )
     {
         FAPI_ERR( "tx_zcal_run_sm: WARNING: Tx Z Calibration Error" );
-        FAPI_DBG( "tx_zcal_run_sm: Using Default Segments." );
-    }
-    else if( io::get( EDIP_TX_ZCAL_DONE, l_data ) == 0 )
-    {
-        FAPI_ERR( "tx_zcal_run_sm: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
-        FAPI_DBG( "tx_zcal_run_sm: Using Default Segments." );
     }
     else
     {
-        FAPI_DBG( "tx_zcal_run_sm: Tx Impedance Calibration Successful." );
-        FAPI_DBG( "tx_zcal_run_sm: Using zCal Results." );
-
-        FAPI_TRY( io::read( EDIP_TX_ZCAL_P, i_target, GROUP_00, LANE_00, l_data ),
-                  "tx_zcal_run_sm: tx_impcal_pval_pb read fail" );
-
-        // We need to convert the 8R value to a 4R equivalent
-        io_pval = io::get( EDIP_TX_ZCAL_P, l_data ) / 2;
-
-        FAPI_TRY( io::read( EDIP_TX_ZCAL_N, i_target, GROUP_00, LANE_00, l_data ),
-                  "tx_zcal_run_sm: tx_impcal_nval_pb read fail" );
-
-        // We need to convert the 8R value to a 4R equivalent
-        io_nval = io::get( EDIP_TX_ZCAL_N, l_data ) / 2;
+        FAPI_ERR( "tx_zcal_run_sm: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count );
     }
-
-    FAPI_TRY( tx_zcal_verify_results( io_pval, io_nval ),
-              "tx_zcal_run_sm: Tx Z Cal Get Results Failed" );
 
 fapi_try_exit:
     FAPI_IMP( "tx_zcal_run_sm: I/O EDI+ Xbus Exiting" );
@@ -314,20 +312,20 @@ fapi_try_exit:
 /**
  * @brief Tx Z Impedance Calibration Apply Segments.  The results of the Tx Impedance
  *   calibrationMargining and FFE Precursor
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @param[in] i_pval   Tx Zcal P-value
  * @param[in] i_nval   Tx Zcal N-value
  * @retval ReturnCode
  */
 fapi2::ReturnCode tx_zcal_apply(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group,
-    const uint32_t&                                  i_pval,
-    const uint32_t&                                  i_nval )
+    const XBUS_TGT i_tgt,
+    const uint8_t  i_grp,
+    const uint32_t i_pval,
+    const uint32_t i_nval )
 {
     FAPI_IMP( "tx_zcal_apply: I/O EDI+ Xbus Entering" );
-    const uint8_t LANE_00          = 0;
+    const uint8_t LN0              = 0;
     const uint8_t PRE_WIDTH        = 5;
     const uint8_t MAIN_WIDTH       = 13;
     //             4R Total        = ( 1R * 4 ) + (2R * 2 );
@@ -360,10 +358,10 @@ fapi2::ReturnCode tx_zcal_apply(
     //   0.00% =   0(0x00) / 128
 
     // During normal operation we will not use margining :: min(0, 0%) max(0.5, 50%)
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_XBUS_TX_MARGIN_RATIO, i_target, l_margin_ratio ) );
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_XBUS_TX_MARGIN_RATIO, i_tgt, l_margin_ratio ) );
 
     //   -4.8% FFE Precursor Tap Weight :: min(0.0, 0%) max(0.115, 11.5%)
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_XBUS_TX_FFE_PRECURSOR, i_target, l_ffe_pre_coef ) );
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_XBUS_TX_FFE_PRECURSOR, i_tgt, l_ffe_pre_coef ) );
 
     ///////////////////////////////////////////////////////////////////////////
     // Set P val enables
@@ -533,40 +531,40 @@ fapi2::ReturnCode tx_zcal_apply(
     //   the entire register.  To convert the 4R values to needed register values,
     //   we will  add the appropriate amount and shift to convert to 1R or
     //   1R + a 2R.
-    FAPI_TRY( io::rmw( EDIP_TX_PSEG_PRE_EN, i_target, i_group, LANE_00,  convert_4r_with_2r( p_en_pre, PRE_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_PSEG_PRE_EN, i_tgt, i_grp, LN0,  convert_4r_with_2r( p_en_pre, PRE_WIDTH ) ),
               "tx_zcal_apply: Pseg Pre Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_PSEG_PRE_SEL, i_target, i_group, LANE_00, convert_4r_with_2r( p_sel_pre, PRE_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_PSEG_PRE_SEL, i_tgt, i_grp, LN0, convert_4r_with_2r( p_sel_pre, PRE_WIDTH ) ),
               "tx_zcal_apply: Pseg Pre Select RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_NSEG_PRE_EN, i_target, i_group, LANE_00, convert_4r_with_2r( n_en_pre, PRE_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_NSEG_PRE_EN, i_tgt, i_grp, LN0, convert_4r_with_2r( n_en_pre, PRE_WIDTH ) ),
               "tx_zcal_apply: Nseg Pre Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_NSEG_PRE_SEL, i_target, i_group, LANE_00, convert_4r_with_2r( n_sel_pre, PRE_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_NSEG_PRE_SEL, i_tgt, i_grp, LN0, convert_4r_with_2r( n_sel_pre, PRE_WIDTH ) ),
               "tx_zcal_apply: Nseg Pre Select RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MARGINPD_EN, i_target, i_group, LANE_00, convert_4r( p_en_margin_pd ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MARGINPD_EN, i_tgt, i_grp, LN0, convert_4r( p_en_margin_pd ) ),
               "tx_zcal_apply: Pseg Margin Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MARGINPU_EN, i_target, i_group, LANE_00, convert_4r( p_en_margin_pu ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MARGINPU_EN, i_tgt, i_grp, LN0, convert_4r( p_en_margin_pu ) ),
               "tx_zcal_apply: Pseg Margin Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MARGINPD_EN, i_target, i_group, LANE_00, convert_4r( n_en_margin_pd ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MARGINPD_EN, i_tgt, i_grp, LN0, convert_4r( n_en_margin_pd ) ),
               "tx_zcal_apply: Nseg Margin Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MARGINPU_EN, i_target, i_group, LANE_00, convert_4r( n_en_margin_pu ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MARGINPU_EN, i_tgt, i_grp, LN0, convert_4r( n_en_margin_pu ) ),
               "tx_zcal_apply: Nseg Margin Enable RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_MARGINPD_SEL, i_target, i_group, LANE_00, convert_4r( sel_margin_pd ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_MARGINPD_SEL, i_tgt, i_grp, LN0, convert_4r( sel_margin_pd ) ),
               "tx_zcal_apply: Margin PD Select RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_MARGINPU_SEL, i_target, i_group, LANE_00, convert_4r( sel_margin_pu ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_MARGINPU_SEL, i_tgt, i_grp, LN0, convert_4r( sel_margin_pu ) ),
               "tx_zcal_apply: Margin PU Select RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MAIN_EN, i_target, i_group, LANE_00, convert_4r_with_2r( p_en_main, MAIN_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_PSEG_MAIN_EN, i_tgt, i_grp, LN0, convert_4r_with_2r( p_en_main, MAIN_WIDTH ) ),
               "tx_zcal_apply: Pseg Main RMW Fail" );
 
-    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MAIN_EN, i_target, i_group, LANE_00, convert_4r_with_2r( n_en_main, MAIN_WIDTH ) ),
+    FAPI_TRY( io::rmw( EDIP_TX_NSEG_MAIN_EN, i_tgt, i_grp, LN0, convert_4r_with_2r( n_en_main, MAIN_WIDTH ) ),
               "tx_zcal_apply: Nseg Main RMW Fail" );
 
 fapi_try_exit:
@@ -576,94 +574,68 @@ fapi_try_exit:
 
 /**
  * @brief Tx Z Impedance Calibration
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
- * @param[in] i_flags  Dccal Attribute Flags
+ * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group )
+fapi2::ReturnCode tx_zcal_set_grp( const XBUS_TGT i_tgt, const uint8_t i_grp )
 {
-    FAPI_IMP( "tx_zcal: I/O EDI+ Xbus Entering" );
-    uint32_t l_pval = 25 * 4; // Nominal 25 Segments 1R * 4 = 4R
-    uint32_t l_nval = 25 * 4; // Nominal 25 Segments 1R * 4 = 4R
+    FAPI_IMP( "tx_zcal_set_grp: I/O EDI+ Xbus Entering" );
 
-    FAPI_TRY( tx_zcal_run_sm( i_target, l_pval, l_nval ), "Tx Zcal Run SM Failed" );
+    const uint8_t  GRP0             = 0;
+    const uint8_t  LN0              = 0;
+    const uint32_t DEFAULT_SEGMENTS = 25 * 4; // Nominal 25 Segments 1R * 4 = 4R
+    uint32_t       l_pval           = DEFAULT_SEGMENTS;
+    uint32_t       l_nval           = DEFAULT_SEGMENTS;
+    uint64_t       l_data           = 0;
+
+
+    FAPI_TRY( io::read( EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data ),
+              "tx_zcal_run_sm: Reading Tx Impcal Pb Failed" );
+
+    if( io::get( EDIP_TX_ZCAL_DONE, l_data ) == 1 )
+    {
+        FAPI_DBG( "Using zCal Results." );
+
+        FAPI_TRY( io::read( EDIP_TX_ZCAL_P, i_tgt, GRP0, LN0, l_data ),
+                  "tx_impcal_pval_pb read fail" );
+
+        // We need to convert the 8R value to a 4R equivalent
+        l_pval = io::get( EDIP_TX_ZCAL_P, l_data ) / 2;
+
+        FAPI_TRY( io::read( EDIP_TX_ZCAL_N, i_tgt, GRP0, LN0, l_data ),
+                  "tx_impcal_nval_pb read fail" );
+
+        // We need to convert the 8R value to a 4R equivalent
+        l_nval = io::get( EDIP_TX_ZCAL_N, l_data ) / 2;
+
+
+        FAPI_TRY( tx_zcal_verify_results( l_pval, l_nval ), "Tx Z Cal Verify Results Failed" );
+    }
+    else
+    {
+        FAPI_ERR( "WARNING: Using Default Tx Zcal Segments." );
+    }
 
     // Convert the results of the zCal to actual segments.
-    FAPI_TRY( tx_zcal_apply( i_target, i_group, l_pval, l_nval ),
-              "Tx Zcal Apply Segments Failed" );
+    FAPI_TRY( tx_zcal_apply( i_tgt, i_grp, l_pval, l_nval ), "Tx Zcal Apply Segments Failed" );
 
 fapi_try_exit:
-    FAPI_IMP( "tx_zcal: I/O EDI+ Xbus Exiting" );
-    return fapi2::current_err;
-}
-
-
-/**
- * @brief Rx Dc Calibration Poll
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
- * @retval ReturnCode
- */
-fapi2::ReturnCode rx_dccal_poll(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group )
-{
-    FAPI_IMP( "rx_dc_cal_poll: I/O EDI+ Xbus Entering" );
-    const uint8_t  TIMEOUT           = 200;
-    const uint64_t DLY_100MS         = 100000000;
-    const uint64_t DLY_100MIL_CYCLES = 100000000;
-    const uint64_t DLY_10MS          = 10000000;
-    const uint64_t DLY_50MIL_CYCLES  = 50000000;
-    const uint8_t  LANE_00           = 0;
-    uint8_t        l_poll_count      = 0;
-    uint64_t       l_data            = 0;
-
-    // In the pervasive unit model, this takes 750,000,000 sim cycles to finish
-    //   on a group.  This equates to 30 loops with 25,000,000 delay each.
-
-    // Delay before we start polling.  100ms was use from past p8 learning
-    FAPI_TRY( fapi2::delay( DLY_100MS, DLY_100MIL_CYCLES ),
-              "rx_dc_cal_poll: Fapi Delay Failed." );
-
-    do
-    {
-        FAPI_DBG( "rx_dc_cal_poll: I/O EDI+ Xbus Rx Dccal Polling Count(%d/%d).",
-                  l_poll_count, TIMEOUT );
-
-        FAPI_TRY( fapi2::delay( DLY_10MS, DLY_50MIL_CYCLES ),
-                  "rx_dc_cal_poll: Fapi Delay Failed." );
-
-        FAPI_TRY( io::read( EDIP_RX_DC_CALIBRATE_DONE, i_target, i_group, LANE_00, l_data ),
-                  "rx_dc_cal_poll: Read Dccal Done Failed" );
-    }
-    while( ( ++l_poll_count < TIMEOUT ) && !io::get( EDIP_RX_DC_CALIBRATE_DONE, l_data ) );
-
-    FAPI_ASSERT( ( io::get( EDIP_RX_DC_CALIBRATE_DONE, l_data ) == 1 ),
-                 fapi2::IO_XBUS_RX_DCCAL_TIMEOUT().set_TARGET( i_target ).set_GROUP( i_group ),
-                 "rx_dc_cal_poll: Rx Dccal Timeout: Loops(%d) delay(%d ns, %d cycles)",
-                 l_poll_count, DLY_10MS, DLY_50MIL_CYCLES );
-
-    FAPI_DBG( "rx_dc_cal_poll: I/O EDI+ Xbus Rx Dccal Successful." );
-
-fapi_try_exit:
-    FAPI_IMP( "rx_dc_cal_poll: I/O EDI+ Xbus Exiting" );
+    FAPI_IMP( "tx_zcal_set_grp: I/O EDI+ Xbus Exiting" );
     return fapi2::current_err;
 }
 
 /**
  * @brief Rx Dc Calibration Set Lanes Invalid
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_tgt    FAPI2 Target
+ * @param[in] i_grp    Clock Group
  * @param[in] i_data   Data to Set Lanes Invalid
  * @retval ReturnCode
  */
 fapi2::ReturnCode set_lanes_invalid(
-    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
-    const uint8_t&                                i_group,
-    const uint8_t&                                i_data )
+    const XBUS_TGT i_tgt,
+    const uint8_t  i_grp,
+    const uint8_t  i_data )
 {
     const uint8_t XBUS_LANES = 17;
 
@@ -671,7 +643,7 @@ fapi2::ReturnCode set_lanes_invalid(
 
     for( uint8_t lane = 0; lane < XBUS_LANES; ++lane )
     {
-        FAPI_TRY( io::rmw( EDIP_RX_LANE_INVALID, i_target, i_group, lane, i_data ),
+        FAPI_TRY( io::rmw( EDIP_RX_LANE_INVALID, i_tgt, i_grp, lane, i_data ),
                   "set_lanes_invalid: RMW Invalid Lane Failed" );
     }
 
@@ -682,30 +654,28 @@ fapi_try_exit:
 
 /**
  * @brief Start Cleanup Pll
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode start_cleanup_pll(
-    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
-    const uint8_t&                                i_group )
+fapi2::ReturnCode start_cleanup_pll( const XBUS_TGT i_tgt, const uint8_t i_grp )
 {
     FAPI_IMP( "start_cleanup_pll: I/O EDI+ Xbus Entering" );
-    const uint8_t LANE_00 = 0;
+    const uint8_t LN0 = 0;
     uint64_t reg_data = 0;
 
-    FAPI_TRY( io::read( EDIP_RX_CTL_CNTL4_E_PG, i_target, i_group, LANE_00, reg_data ),
+    FAPI_TRY( io::read( EDIP_RX_CTL_CNTL4_E_PG, i_tgt, i_grp, LN0, reg_data ),
               "read edip_rx_ctl_cntl4_e_pg failed" );
 
     io::set( EDIP_RX_WT_PLL_REFCLKSEL, 0x1, reg_data );
     io::set( EDIP_RX_PLL_REFCLKSEL_SCOM_EN, 0x1, reg_data );
 
-    FAPI_TRY( io::write( EDIP_RX_CTL_CNTL4_E_PG, i_target, i_group, LANE_00, reg_data ),
+    FAPI_TRY( io::write( EDIP_RX_CTL_CNTL4_E_PG, i_tgt, i_grp, LN0, reg_data ),
               "write edip_rx_ctl_cntl4_e_pg failed" );
 
     FAPI_TRY( fapi2::delay( 150000, 0 ), " Fapi Delay Failed." );
 
-    FAPI_TRY( io::rmw( EDIP_RX_WT_CU_PLL_PGOOD, i_target, i_group, LANE_00, 0x1 ),
+    FAPI_TRY( io::rmw( EDIP_RX_WT_CU_PLL_PGOOD, i_tgt, i_grp, LN0, 0x1 ),
               "rmw edip_rx_wt_cu_pll_pgood failed" );
 
     FAPI_TRY( fapi2::delay( 5000, 0 ), " Fapi Delay Failed." );
@@ -713,11 +683,11 @@ fapi2::ReturnCode start_cleanup_pll(
 
 // The PLL Lock bit is not getting updated.  According to AET it is locked.
 #if 0
-    FAPI_TRY( io::read( EDIP_RX_WT_CU_BYP_PLL_LOCK, i_target, i_group, LANE_00, reg_data ),
+    FAPI_TRY( io::read( EDIP_RX_WT_CU_BYP_PLL_LOCK, i_tgt, i_group, LANE_00, reg_data ),
               "read edip_rx_wt_cu_byp_pll_lock failed" );
 
     FAPI_ASSERT( ( io::get( EDIP_RX_WT_CU_BYP_PLL_LOCK, reg_data ) == 1 ),
-                 fapi2::IO_XBUS_RX_CLEANUP_PLL_NOT_LOCKED().set_TARGET( i_target ).set_GROUP( i_group ),
+                 fapi2::IO_XBUS_RX_CLEANUP_PLL_NOT_LOCKED().set_TARGET( i_tgt ).set_GROUP( i_group ),
                  "start_cleanup_pll: Cleanup Pll Not Locking" );
 #endif
 
@@ -729,26 +699,24 @@ fapi_try_exit:
 
 /**
  * @brief Stop Cleanup Pll
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode stop_cleanup_pll(
-    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
-    const uint8_t&                                i_group )
+fapi2::ReturnCode stop_cleanup_pll( const XBUS_TGT i_tgt, const uint8_t i_grp )
 {
     FAPI_IMP( "stop_cleanup_pll: I/O EDI+ Xbus Entering" );
-    const uint8_t LANE_00 = 0;
+    const uint8_t LN0 = 0;
     uint64_t reg_data = 0;
 
-    FAPI_TRY( io::read( EDIP_RX_CTL_CNTL4_E_PG, i_target, i_group, LANE_00, reg_data ),
+    FAPI_TRY( io::read( EDIP_RX_CTL_CNTL4_E_PG, i_tgt, i_grp, LN0, reg_data ),
               "read edip_rx_ctl_cntl4_e_pg failed" );
 
     io::set( EDIP_RX_WT_PLL_REFCLKSEL,      0, reg_data );
     io::set( EDIP_RX_PLL_REFCLKSEL_SCOM_EN, 0, reg_data );
     io::set( EDIP_RX_WT_CU_PLL_PGOOD,       0, reg_data );
 
-    FAPI_TRY( io::write( EDIP_RX_CTL_CNTL4_E_PG, i_target, i_group, LANE_00, reg_data ),
+    FAPI_TRY( io::write( EDIP_RX_CTL_CNTL4_E_PG, i_tgt, i_grp, LN0, reg_data ),
               "write edip_rx_ctl_cntl4_e_pg failed" );
 
     FAPI_TRY( fapi2::delay( 110500, 0 ), " Fapi Delay Failed." );
@@ -760,16 +728,19 @@ fapi_try_exit:
 
 /**
  * @brief Rx Dc Calibration
- * @param[in] i_target FAPI2 Target
- * @param[in] i_group  Clock Group
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp  Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode rx_dccal (
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t&                                   i_group )
+fapi2::ReturnCode rx_dccal_start_grp( const XBUS_TGT i_tgt, const uint8_t i_grp )
 {
-    FAPI_IMP( "rx_dc_cal: I/O EDI+ Xbus Entering" );
-    const uint8_t LANE_00 = 0;
+    FAPI_IMP( "rx_dccal_start_grp: I/O EDI+ Xbus Entering" );
+    const uint8_t LN0 = 0;
+
+    ///////////////////////////////////////////////////////////////////////////
+    /// Simulation Speed Up
+    ///////////////////////////////////////////////////////////////////////////
+    FAPI_TRY( p9_io_xbus_shorten_timers( i_tgt, i_grp ), "Shorten Timers Failed." );
 
     ////////////////////////////////////////////////////////////////////////////
     /// Start Rx Dccal
@@ -778,51 +749,100 @@ fapi2::ReturnCode rx_dccal (
     // Must set lane invalid bit to 0 to run rx dccal, this enables us to run
     //   dccal on the specified lane.  These bits are normally set by wiretest
     //   although we are not running that now.
-    FAPI_TRY( set_lanes_invalid( i_target, i_group, 0 ),
-              "rx_dc_cal: Error Setting Lane Invalid to 0" );
+    FAPI_TRY( set_lanes_invalid( i_tgt, i_grp, 0 ),
+              "Error Setting Lane Invalid to 0" );
 
     // We must start the cleanup pll to have a clock that clocks the
     //  dccal logic.  This function locks the rx cleanup pll to the internal
     //  grid clock reference.
-    FAPI_TRY( start_cleanup_pll( i_target, i_group ), "rx_dc_cal: Starting Cleanup Pll" );
+    FAPI_TRY( start_cleanup_pll( i_tgt, i_grp ), "rx_dc_cal: Starting Cleanup Pll" );
 
     // Clear the rx dccal done bit in case rx dccal was previously run.
-    FAPI_TRY( io::rmw( EDIP_RX_DC_CALIBRATE_DONE, i_target, i_group, LANE_00, 0),
-              "rx_dc_cal: RMW Dccal Done Failed" );
+    FAPI_TRY( io::rmw( EDIP_RX_DC_CALIBRATE_DONE, i_tgt, i_grp, LN0, 0),
+              "RMW Dccal Done Failed" );
 
     // Start DC Calibrate, this iniates the rx dccal state machine
-    FAPI_TRY( io::rmw( EDIP_RX_START_DC_CALIBRATE, i_target, i_group, LANE_00, 1 ),
-              "rx_dc_cal: RMW Start Dccal Failed" );
+    FAPI_TRY( io::rmw( EDIP_RX_START_DC_CALIBRATE, i_tgt, i_grp, LN0, 1 ),
+              "RMW Start Dccal Failed" );
+
+    FAPI_DBG( "I/O EDI+ Xbus Rx Dccal Complete on Group(%d)", i_grp );
+
+
+fapi_try_exit:
+    FAPI_IMP( "rx_dccal_start_grp: I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+
+
+
+
+/**
+ * @brief Rx Dc Calibration
+ * @param[in] i_tgt FAPI2 Target
+ * @param[in] i_grp Clock Group
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode rx_dccal_poll_grp( const XBUS_TGT i_tgt, const uint8_t  i_grp )
+{
+    FAPI_IMP( "rx_dccal_poll_grp: I/O EDI+ Xbus Entering" );
+    const uint8_t  TIMEOUT           = 200;
+    const uint64_t DLY_100MS         = 100000000;
+    const uint64_t DLY_10MS          = 10000000;
+    const uint64_t DLY_1MIL_CYCLES   = 1000000;
+    const uint8_t  LN0               = 0;
+    uint8_t        l_poll_count      = 0;
+    uint64_t       l_data            = 0;
 
     ////////////////////////////////////////////////////////////////////////////
     /// Poll Rx Dccal
     ////////////////////////////////////////////////////////////////////////////
+    // In the pervasive unit model, this takes 750,000,000 sim cycles to finish
+    //   on a group.  This equates to 30 loops with 25,000,000 delay each.
 
-    // Poll to see if rx dccal is done on the specified target / group.
-    FAPI_TRY( rx_dccal_poll( i_target, i_group ), "rx_dc_cal: Poll Rx DcCal Failed" );
+    // Delay before we start polling.  100ms was use from past p8 learning
+    FAPI_TRY( fapi2::delay( DLY_100MS, DLY_1MIL_CYCLES ),
+              "rx_dc_cal_poll: Fapi Delay Failed." );
+
+    do
+    {
+        FAPI_DBG( "I/O EDI+ Xbus Rx Dccal Polling Count(%d/%d).", l_poll_count, TIMEOUT );
+
+        FAPI_TRY( fapi2::delay( DLY_10MS, DLY_1MIL_CYCLES ), "Fapi Delay Failed." );
+
+        FAPI_TRY( io::read( EDIP_RX_DC_CALIBRATE_DONE, i_tgt, i_grp, LN0, l_data ),
+                  "Read Dccal Done Failed" );
+    }
+    while( ( ++l_poll_count < TIMEOUT ) && !io::get( EDIP_RX_DC_CALIBRATE_DONE, l_data ) );
+
+    FAPI_ASSERT( ( io::get( EDIP_RX_DC_CALIBRATE_DONE, l_data ) == 1 ),
+                 fapi2::IO_XBUS_RX_DCCAL_TIMEOUT().set_TARGET( i_tgt ).set_GROUP( i_grp ),
+                 "Rx Dccal Timeout: Loops(%d) delay(%d ns, %d cycles)",
+                 l_poll_count, DLY_10MS, DLY_1MIL_CYCLES );
+
+    FAPI_DBG( "I/O EDI+ Xbus Rx Dccal Successful." );
 
     ////////////////////////////////////////////////////////////////////////////
     /// Cleanup Rx Dccal
     ////////////////////////////////////////////////////////////////////////////
 
     // Stop DC Calibrate
-    FAPI_TRY( io::rmw( EDIP_RX_START_DC_CALIBRATE, i_target, i_group, LANE_00, 0 ),
-              "rx_dc_cal: Stopping Dccal Failed" );
+    FAPI_TRY( io::rmw( EDIP_RX_START_DC_CALIBRATE, i_tgt, i_grp, LN0, 0 ),
+              "Stopping Dccal Failed" );
 
     // We must stop the cleanup pll to cleanup after ourselves.  Wiretest will
     //  turn this back on.  This function will turn off the cleanup pll and
     //   switch it back to bus clock reference.
-    FAPI_TRY( stop_cleanup_pll( i_target, i_group ), "rx_dc_cal: Stopping Cleanup Pll" );
+    FAPI_TRY( stop_cleanup_pll( i_tgt, i_grp ), "rx_dc_cal: Stopping Cleanup Pll" );
 
     // Restore the invalid bits, Wiretest will modify these as training is run.
-    FAPI_TRY( set_lanes_invalid( i_target, i_group, 1 ),
-              "rx_dc_cal: Error Setting Lane Invalid to 1" );
+    FAPI_TRY( set_lanes_invalid( i_tgt, i_grp, 1 ), "Error Setting Lane Invalid to 1" );
 
-    FAPI_DBG( "rx_dc_cal: I/O EDI+ Xbus Rx Dccal Complete on Group(%d)", i_group );
+    FAPI_DBG( "I/O EDI+ Xbus Rx Dccal Complete on Group(%d)", i_grp );
 
 
 fapi_try_exit:
-    FAPI_IMP( "rx_dc_cal: I/O EDI+ Xbus Exiting" );
+    FAPI_IMP( "rx_dccal_poll_grp: I/O EDI+ Xbus Exiting" );
     return fapi2::current_err;
 }
 

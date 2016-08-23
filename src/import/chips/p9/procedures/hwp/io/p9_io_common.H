@@ -51,15 +51,22 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 
-/**
- * @brief Shorten timers if we are running in simulation
- *        a right aligned value.
- * @param[in] i_target     FAPI2 Target
- * @param[in] i_groups     Clock groups
- * @return Field Data
- */
-fapi2::ReturnCode p9_io_xbus_shorten_timers(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const std::vector < uint8_t >&                   i_groups );
+typedef fapi2::Target<fapi2::TARGET_TYPE_XBUS> XBUS_TGT;
+
+extern "C"
+{
+
+    /**
+     * @brief Shorten timers if we are running in simulation
+     *        a right aligned value.
+     * @param[in] i_tgt     FAPI2 Target
+     * @param[in] i_grp     Clock group
+     * @return Field Data
+     */
+    fapi2::ReturnCode p9_io_xbus_shorten_timers(
+        const XBUS_TGT i_tgt,
+        const uint8_t  i_grp );
+
+}
 
 #endif /* P9_IO_COMMON_H_ */

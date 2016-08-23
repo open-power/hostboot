@@ -53,16 +53,14 @@
 /**
  * @brief Shorten timers if we are running in simulation
  *        a right aligned value.
- * @param[in] i_target     FAPI2 Target
- * @param[in] i_groups     Clock groups
+ * @param[in] i_tgt   FAPI2 Target
+ * @param[in] i_grp   Clock group
  * @return Field Data
  */
-fapi2::ReturnCode p9_io_xbus_shorten_timers(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-    const std::vector < uint8_t >&                   i_groups )
+fapi2::ReturnCode p9_io_xbus_shorten_timers( const XBUS_TGT i_tgt, const uint8_t i_grp )
 {
     FAPI_IMP( "p9_io_xbus_shorten_timers: I/O EDI+ Xbus Entering" );
-    const uint8_t LANE_00  = 0;
+    const uint8_t LN0  = 0;
     uint64_t      reg_data = 0;
     uint8_t       l_is_sim = 0;
 
@@ -70,45 +68,42 @@ fapi2::ReturnCode p9_io_xbus_shorten_timers(
 
     if( l_is_sim )
     {
-        for( auto grp : i_groups )
-        {
-            FAPI_TRY( io::read( EDIP_RX_CTL_MODE7_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "read edip_rx_ctl_mode7_eo_pg failed" );
-            io::set( EDIP_RX_ABORT_CHECK_TIMEOUT_SEL, 0x0, reg_data );
-            io::set( EDIP_RX_POLLING_TIMEOUT_SEL, 0x0, reg_data );
-            FAPI_TRY( io::write( EDIP_RX_CTL_MODE7_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "write edip_rx_ctl_mode7_eo_pg failed" );
+        FAPI_TRY( io::read( EDIP_RX_CTL_MODE7_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "read edip_rx_ctl_mode7_eo_pg failed" );
+        io::set( EDIP_RX_ABORT_CHECK_TIMEOUT_SEL, 0x0, reg_data );
+        io::set( EDIP_RX_POLLING_TIMEOUT_SEL, 0x0, reg_data );
+        FAPI_TRY( io::write( EDIP_RX_CTL_MODE7_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "write edip_rx_ctl_mode7_eo_pg failed" );
 
-            FAPI_TRY( io::rmw( EDIP_RX_SERVO_CHG_CFG, i_target, grp, LANE_00, 0x0 ),
-                      "rmw edip_rx_rx_servo_chg_cfg failed" );
+        FAPI_TRY( io::rmw( EDIP_RX_SERVO_CHG_CFG, i_tgt, i_grp, LN0, 0x0 ),
+                  "rmw edip_rx_rx_servo_chg_cfg failed" );
 
 
-            FAPI_TRY( io::read( EDIP_RX_CTL_MODE14_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "read edip_rx_ctl_mode14_eo_pg failed" );
-            io::set( EDIP_RX_AMP_INIT_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_AMP_RECAL_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_PEAK_INIT_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_PEAK_RECAL_TIMEOUT, 0x0, reg_data );
-            FAPI_TRY( io::write( EDIP_RX_CTL_MODE14_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "write edip_rx_ctl_mode14_eo_pg failed" );
+        FAPI_TRY( io::read( EDIP_RX_CTL_MODE14_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "read edip_rx_ctl_mode14_eo_pg failed" );
+        io::set( EDIP_RX_AMP_INIT_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_AMP_RECAL_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_PEAK_INIT_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_PEAK_RECAL_TIMEOUT, 0x0, reg_data );
+        FAPI_TRY( io::write( EDIP_RX_CTL_MODE14_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "write edip_rx_ctl_mode14_eo_pg failed" );
 
-            FAPI_TRY( io::read( EDIP_RX_CTL_MODE15_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "read edip_rx_ctl_mode15_eo_pg failed" );
-            io::set( EDIP_RX_AMIN_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_CM_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_OFF_INIT_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_OFF_RECAL_TIMEOUT, 0x0, reg_data );
-            FAPI_TRY( io::write( EDIP_RX_CTL_MODE15_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "write edip_rx_ctl_mode15_eo_pg failed" );
+        FAPI_TRY( io::read( EDIP_RX_CTL_MODE15_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "read edip_rx_ctl_mode15_eo_pg failed" );
+        io::set( EDIP_RX_AMIN_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_CM_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_OFF_INIT_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_OFF_RECAL_TIMEOUT, 0x0, reg_data );
+        FAPI_TRY( io::write( EDIP_RX_CTL_MODE15_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "write edip_rx_ctl_mode15_eo_pg failed" );
 
-            FAPI_TRY( io::read( EDIP_RX_CTL_MODE16_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "read edip_rx_ctl_mode16_eo_pg failed" );
-            io::set( EDIP_RX_AMP_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_BER_TIMEOUT, 0x0, reg_data );
-            io::set( EDIP_RX_USERDEF_TIMEOUT, 0x0, reg_data );
-            FAPI_TRY( io::write( EDIP_RX_CTL_MODE16_EO_PG, i_target, grp, LANE_00, reg_data ),
-                      "write edip_rx_ctl_mode16_eo_pg failed" );
-        }
+        FAPI_TRY( io::read( EDIP_RX_CTL_MODE16_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "read edip_rx_ctl_mode16_eo_pg failed" );
+        io::set( EDIP_RX_AMP_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_BER_TIMEOUT, 0x0, reg_data );
+        io::set( EDIP_RX_USERDEF_TIMEOUT, 0x0, reg_data );
+        FAPI_TRY( io::write( EDIP_RX_CTL_MODE16_EO_PG, i_tgt, i_grp, LN0, reg_data ),
+                  "write edip_rx_ctl_mode16_eo_pg failed" );
     }
 
 fapi_try_exit:

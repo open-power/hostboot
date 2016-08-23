@@ -42,9 +42,19 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 
+typedef fapi2::Target<fapi2::TARGET_TYPE_XBUS> XBUS_TGT;
 
-typedef fapi2::ReturnCode (*p9_io_xbus_dccal_FP_t)
-( const fapi2::Target < fapi2::TARGET_TYPE_XBUS>&, const uint8_t& );
+
+enum XbusDccalMode : uint8_t
+{
+    Noop            = 0x00, // Runs nothing, can be used for dry runs
+    TxZcalRunBus    = 0x01, // Runs Tx Zcal on a per bus basis
+    TxZcalSetGrp    = 0x02, // Sets Tx Zcal Group Settings based on the bus results
+    RxDccalStartGrp = 0x03, // Starts Rx Dccal on a per group basis
+    RxDccalCheckGrp = 0x04  // Checks/polls Rx Dccal on a per group basis
+};
+
+typedef fapi2::ReturnCode (*p9_io_xbus_dccal_FP_t)( const XbusDccalMode, const XBUS_TGT, const uint8_t );
 
 extern "C"
 {
@@ -52,12 +62,15 @@ extern "C"
     /**
      * @brief A I/O EDI+ Procedure that runs Rx Dccal and Tx Z Impedance calibration
      * on every group of the EDI+ XBUS.
-     * @param[in] i_target FAPI2 Target
+     * @param[in] i_mode  XbusDccalMode -- selects what operation to perform
+     * @param[in] i_tgt   FAPI2 Target
+     * @param[in] i_grp   Clock Group
      * @retval ReturnCode
      */
     fapi2::ReturnCode p9_io_xbus_dccal(
-        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-        const uint8_t&                                   i_group );
+        const XbusDccalMode i_mode,
+        const XBUS_TGT      i_tgt ,
+        const uint8_t       i_grp );
 
 } // extern "C"
 

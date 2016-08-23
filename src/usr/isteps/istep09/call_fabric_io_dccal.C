@@ -70,7 +70,7 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
-using   namespace   HWAS;
+
 //
 //  Wrapper function to call fabric_io_dccal
 //
@@ -115,85 +115,350 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
             break;
         }
 
+        //This HWP is broken into substeps, we want to deconfigure
+        //bad targets if one of the substeps fails so check this error
+        // between each substep.
+        bool l_subStepError = false;
+
         for (const auto & l_PbusConnection: l_PbusConnections)
         {
-            const TARGETING::Target* l_thisPbusTarget = l_PbusConnection.first;
-            const TARGETING::Target* l_connectedPbusTarget =
-                                                    l_PbusConnection.second;
+            bool l_firstTargetValid = true;
+            bool l_secondTargetValid = true;
+
+            //Set up fapi2 targets for each end of the connections
+            const TARGETING::Target* l_firstPbusTarget = l_PbusConnection.first;
+            const TARGETING::Target* l_secondPbusTarget = l_PbusConnection.second;
 
             const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
-                l_thisPbusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_thisPbusTarget)));
-
+                l_firstPbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_firstPbusTarget)));
             const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
-                l_connectedPbusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_connectedPbusTarget)));
+                l_secondPbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_secondPbusTarget)));
 
             // group is either 0 or 1
-            uint8_t l_group = 0;
-            for (l_group = 0; l_group < 2; l_group++)
+            std::vector<uint8_t> l_groups = {0,1};
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Running p9_io_xbus_dccal HWP  on "
+                        "this %cbus target %.8X on all groups",
+                        (ii ? 'X' : 'O'),
+                        TARGETING::get_huid(l_firstPbusTarget) );
+
+            FAPI_INVOKE_HWP( l_errl,
+                           p9_io_xbus_dccal,
+                           XbusDccalMode::TxZcalRunBus,
+                           l_firstPbusFapi2Target,
+                           l_groups[0] );
+
+            if ( l_errl )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "Running p9_io_xbus_dccal HWP on "
-                         "this %cbus target %.8X, group %d",
-                         (ii ? 'X' : 'O'),
-                         TARGETING::get_huid(l_thisPbusTarget), l_group );
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_firstPbusFapi2Target).addToLog(l_errl);
 
-                FAPI_INVOKE_HWP( l_errl, p9_io_xbus_dccal,
-                                 l_thisPbusFapi2Target, l_group );
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "%s : %cbus connection p9_io_xbus_dccal "
-                    "with group %d. Target 0x%.8X",
-                    (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'O'),
-                    l_group, TARGETING::get_huid(l_thisPbusTarget) );
-                if ( l_errl )
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+                l_errl = NULL;
+
+                //Note that the first target is invalid
+                l_firstTargetValid = false;
+                //Note that this substep had an error
+                l_subStepError = true;
+
+            }
+
+            if(l_firstTargetValid)
+            {
+                for(auto l_group : l_groups)
                 {
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_thisPbusTarget).addToLog(l_errl);
+                    FAPI_INVOKE_HWP( l_errl,
+                                p9_io_xbus_dccal,
+                                XbusDccalMode::TxZcalSetGrp,
+                                     l_firstPbusFapi2Target,
+                                l_group );
 
-                    // Create IStep error log and cross ref error that occurred
-                    l_StepError.addErrorDetails( l_errl );
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_firstPbusFapi2Target).addToLog(l_errl);
 
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                    // We want to continue the training despite the error, so
-                    // no break
-                    l_errl = NULL;
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        l_errl = NULL;
+                        //Note that this target is invalid
+                        l_firstTargetValid = false;
+                        //Note that this substep had an error
+                        l_subStepError = true;
+                        //if any of the groups have an error just break out
+                        break;
+                    }
                 }
+            }
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running p9_io_xbus_dccal HWP on "
-                    "connected %cbus target %.8X, group %d",
+           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+           "Running p9_io_xbus_dccal HWP on "
+           "this %cbus target %.8X on all groups",
+           (ii ? 'X' : 'O'),
+           TARGETING::get_huid(l_secondPbusTarget) );
+
+           FAPI_INVOKE_HWP( l_errl,
+                            p9_io_xbus_dccal,
+                            XbusDccalMode::TxZcalRunBus,
+                            l_secondPbusFapi2Target,
+                            l_groups[0] );
+
+            if ( l_errl )
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_secondPbusFapi2Target).addToLog(l_errl);
+
+                // Create IStep error log and cross ref error that occurred
+                l_StepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+                l_errl = NULL;
+                // Note that the second target is invalid
+                l_secondTargetValid = false;
+                // Note that an error was detected during this substep
+                l_subStepError = true;
+
+            }
+
+            if(l_secondTargetValid)
+            {
+                for(auto l_group : l_groups)
+                {
+                    FAPI_INVOKE_HWP( l_errl,
+                                    p9_io_xbus_dccal,
+                                    XbusDccalMode::TxZcalSetGrp,
+                                    l_secondPbusFapi2Target,
+                                    l_group );
+
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_secondPbusFapi2Target).addToLog(l_errl);
+
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+
+                        //set l_errl to null for future use
+                        l_errl = NULL;
+
+                        //one of the channels is bad on this target, its not valid
+                        l_secondTargetValid = false;
+
+                        //if any errors were found on this substep, we will skip the remainder
+                        l_subStepError = true;
+
+                        //if any of the groups have an error just break out
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(l_subStepError)
+        {
+            //Try the next connection set
+            continue;
+        }
+
+        for (const auto & l_PbusConnection: l_PbusConnections)
+        {
+            //Initially assume both targets are valid
+            uint8_t l_firstTargetValid = true;
+            uint8_t l_secondTargetValid = true;
+
+            //Set up fapi2 targets for each end of the connections
+            const TARGETING::Target* l_firstPbusTarget = l_PbusConnection.first;
+            const TARGETING::Target* l_secondPbusTarget = l_PbusConnection.second;
+
+            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
+                l_firstPbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_firstPbusTarget)));
+            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
+                l_secondPbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_secondPbusTarget)));
+
+            // group is either 0 or 1
+            std::vector<uint8_t> l_groups = {0,1};
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p9_io_xbus_dccal HWP with mode = %.8X on "
+                    "this %cbus target %.8X on all groups",
                     (ii ? 'X' : 'O'),
-                    TARGETING::get_huid(l_connectedPbusTarget), l_group );
+                    XbusDccalMode::RxDccalStartGrp,
+                    TARGETING::get_huid(l_firstPbusTarget) );
 
-                // call the HWP with each bus connection
-                FAPI_INVOKE_HWP( l_errl, p9_io_xbus_dccal,
-                                 l_connectedPbusFapi2Target, l_group);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Running p9_io_xbus_dccal HWP with mode = %.8X on "
+                        "this %cbus target %.8X on all groups",
+                        (ii ? 'X' : 'O'),
+                        XbusDccalMode::RxDccalStartGrp,
+                        TARGETING::get_huid(l_secondPbusTarget) );
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "%s : %cbus connection p9_io_xbus_dccal "
-                    "with group %d. Target 0x%.8X",
-                    (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'O'),
-                    l_group, TARGETING::get_huid(l_connectedPbusTarget) );
-                if ( l_errl )
+            for(auto l_group : l_groups)
+            {
+                if(l_firstTargetValid)
                 {
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_connectedPbusTarget).
-                        addToLog(l_errl);
+                    FAPI_INVOKE_HWP( l_errl,
+                                    p9_io_xbus_dccal,
+                                    XbusDccalMode::RxDccalStartGrp,
+                                    l_firstPbusFapi2Target,
+                                    l_group );
 
-                    // Create IStep error log and cross ref error that occurred
-                    l_StepError.addErrorDetails( l_errl );
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_firstPbusTarget).addToLog(l_errl);
 
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                    // We want to continue the training despite the error, so
-                    // no break
-                    l_errl = NULL;
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        l_errl = NULL;
+
+                        //Note the error on this substep
+                        l_subStepError = true;
+                        //Note that first target is invalid for next group
+                        l_firstTargetValid = false;
+                    }
                 }
-            } // end of groups
-        } // end of connection TYPE combinations
+
+                if(l_secondTargetValid)
+                {
+                    FAPI_INVOKE_HWP( l_errl,
+                                    p9_io_xbus_dccal,
+                                    XbusDccalMode::RxDccalStartGrp,
+                                    l_secondPbusFapi2Target,
+                                    l_group );
+
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_secondPbusTarget).addToLog(l_errl);
+
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        l_errl = NULL;
+
+                        //Note the error on this substep
+                        l_subStepError = true;
+                        //Note that second target is invalid for next group
+                        l_secondTargetValid = false;
+                    }
+                }
+            }
+        }
+
+        if(l_subStepError)
+        {
+            //Try the next connection set
+            continue;
+        }
+
+        for (const auto & l_PbusConnection: l_PbusConnections)
+        {
+            //Initially assume both targets are valid
+            uint8_t l_firstTargetValid = true;
+            uint8_t l_secondTargetValid = true;
+
+            //Set up fapi2 targets for each end of the connections
+            const TARGETING::Target* l_firstPbusTarget = l_PbusConnection.first;
+            const TARGETING::Target* l_secondPbusTarget = l_PbusConnection.second;
+
+            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
+            l_firstPbusFapi2Target(
+            (const_cast<TARGETING::Target*>(l_firstPbusTarget)));
+            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
+            l_secondPbusFapi2Target(
+            (const_cast<TARGETING::Target*>(l_secondPbusTarget)));
+
+            // group is either 0 or 1
+            std::vector<uint8_t> l_groups = {0,1};
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Running p9_io_xbus_dccal HWP with mode = %.8X on "
+                        "this %cbus target %.8X on all groups",
+                        (ii ? 'X' : 'O'),
+                        XbusDccalMode::RxDccalCheckGrp,
+                        TARGETING::get_huid(l_firstPbusFapi2Target) );
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Running p9_io_xbus_dccal HWP with mode = %.8X on "
+                        "this %cbus target %.8X on all groups",
+                        (ii ? 'X' : 'O'),
+                        XbusDccalMode::RxDccalCheckGrp,
+                        TARGETING::get_huid(l_secondPbusFapi2Target) );
+
+            for(auto l_group : l_groups)
+            {
+                if(l_firstTargetValid)
+                {
+                    FAPI_INVOKE_HWP( l_errl,
+                                    p9_io_xbus_dccal,
+                                    XbusDccalMode::RxDccalCheckGrp,
+                                    l_firstPbusFapi2Target,
+                                    l_group );
+
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_firstPbusFapi2Target).addToLog(l_errl);
+
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        // We want to continue the training despite the error, so
+                        // no break
+                        l_errl = NULL;
+                        //Note that first target is invalid for next group
+                        l_firstTargetValid = false;
+                    }
+                }
+
+                if(l_secondTargetValid)
+                {
+                    FAPI_INVOKE_HWP( l_errl,
+                                    p9_io_xbus_dccal,
+                                    XbusDccalMode::RxDccalCheckGrp,
+                                    l_secondPbusFapi2Target,
+                                    l_group );
+
+                    if ( l_errl )
+                    {
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_secondPbusFapi2Target).addToLog(l_errl);
+
+                        // Create IStep error log and cross ref error that occurred
+                        l_StepError.addErrorDetails( l_errl );
+
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                        // We want to continue the training despite the error, so
+                        // no break
+                        l_errl = NULL;
+                        //Note that second target is invalid for next group
+                        l_secondTargetValid = false;
+                    }
+                }
+            }
+        }
     } // end of connection set loop
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
