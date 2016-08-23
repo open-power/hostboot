@@ -81,6 +81,64 @@ const std::vector< pattern > patterns =
         {0x1234567887654321, 0x8765432112345678},
         {0x1234567887654321, 0x8765432112345678},
     },
+
+    // Pattern index 10 (Pattern 11 is this inverted), MPR pattern
+    {   {0x0000000000000000, 0xFFFFFFFFFFFFFFFF},
+        {0x0000000000000000, 0xFFFFFFFFFFFFFFFF},
+        {0x0000000000000000, 0xFFFFFFFFFFFFFFFF},
+        {0x0000000000000000, 0xFFFFFFFFFFFFFFFF},
+    },
+};
+
+// TK Want a new RC for random 24
+/// Vector of 24b random data seeds
+const std::vector< random24_data_seed > random24_data_seeds =
+{
+    // 24 Bit Pattern index 0 (Pattern 1 is this inverted)
+    {   {0x010203},
+        {0x040506},
+        {0x070809},
+    },
+
+    // 24 Bit Pattern index 2 (Pattern 3 is this inverted)
+    {   {0x112233},
+        {0x445566},
+        {0x778899},
+    },
+
+};
+
+/// Vector of 24b random data seed mappings
+//  Not sure how many mapping we will want, for now it should be sufficient to
+//  have all bytes point to a different LFSR or all bytes point to the same LFSR
+const std::vector< random24_seed_map > random24_seed_maps =
+{
+    // 8 Bit Pattern index 0
+    // This selection maps every data byte to a different random LFSR
+    {   {0x0},
+        {0x1},
+        {0x2},
+        {0x3},
+        {0x4},
+        {0x5},
+        {0x6},
+        {0x7},
+        {0x8},
+    },
+
+    // 8 Bit Pattern index 1
+    // This selection maps every data byte to random LFSR 0
+    {   {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+        {0x0},
+    },
+
 };
 
 }

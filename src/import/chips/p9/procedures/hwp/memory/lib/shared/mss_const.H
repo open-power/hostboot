@@ -74,6 +74,10 @@ enum sizes
 
     // Largest size a VPD keyword can be
     VPD_KEYWORD_MAX = 255,
+
+    // Number of double words in...
+    NUM_DW_IN_128B = 16,
+    NUM_DW_IN_64B = 8,
 };
 
 enum times
@@ -167,9 +171,86 @@ enum port_select
     PORT_NONE        = 0b0000,
 };
 
+enum dimm_select
+{
+    // Dimm selects for MCBIST and CCS
+    // Select for 1 dimm
+    DIMM0            = 0b10,
+    DIMM1            = 0b01,
+    // Selects for 2 dimm combinations
+    DIMM01           = DIMM0 | DIMM1,
+    // Maybe a better name for disabling all
+    DIMM_NONE        = 0b00,
+};
+
 
 namespace mcbist
 {
+
+enum broadcast_timebase
+{
+    // Number of 1024 2:1 cycle timebases to wait starting MCBIST
+    // for SRQs to get synced for broadcast mode
+    TB_COUNT_2     = 0b0000001,
+    TB_COUNT_4     = 0b0000011,
+    TB_COUNT_8     = 0b0000111,
+    TB_COUNT_16    = 0b0001111,
+    TB_COUNT_32    = 0b0011111,
+    TB_COUNT_64    = 0b0111111,
+    TB_COUNT_128   = 0b1111111,
+};
+
+enum rmw_address
+{
+    // 32B block addresses into the maint portion of the rmw buffer
+    DW0            = 0b111110000,
+    DW1            = 0b111110001,
+    DW2            = 0b111110010,
+    DW3            = 0b111110011,
+    DW4            = 0b111110100,
+    DW5            = 0b111110101,
+    DW6            = 0b111110110,
+    DW7            = 0b111110111,
+    DW8            = 0b111111000,
+    DW9            = 0b111111001,
+    DWA            = 0b111111010,
+    DWB            = 0b111111011,
+    DWC            = 0b111111100,
+    DWD            = 0b111111101,
+    DWE            = 0b111111110,
+    DWF            = 0b111111111,
+};
+
+enum data_rotate_mode
+{
+    // MCBIST data rotate modes refer to register MCBDRCR bits 0:3
+    ROTATE_0_BITS  = 0b0000,
+    ROTATE_1_BITS  = 0b0001,
+    ROTATE_2_BITS  = 0b0010,
+    ROTATE_3_BITS  = 0b0011,
+    ROTATE_4_BITS  = 0b0100,
+    ROTATE_5_BITS  = 0b0101,
+    ROTATE_6_BITS  = 0b0110,
+    ROTATE_7_BITS  = 0b0111,
+    ROTATE_8_BITS  = 0b1000,
+    ROTATE_9_BITS  = 0b1001,
+    ROTATE_10_BITS = 0b1010,
+    ROTATE_11_BITS = 0b1011,
+    ROTATE_12_BITS = 0b1100,
+    ROTATE_13_BITS = 0b1101,
+    ROTATE_14_BITS = 0b1110,
+    ROTATE_15_BITS = 0b1111,
+};
+
+enum data_seed_mode
+{
+    // MCBIST data seed modes refer to register MCBDRCR bits 21:22
+    ALL_UNIQUE        = 0b00,
+    REPEAT_SEED_0     = 0b01,
+    REPEAT_SEED_1     = 0b10,
+    REPEAT_SEED_2     = 0b11,
+};
+
 enum data_mode
 {
     // MCBIST test data modes
