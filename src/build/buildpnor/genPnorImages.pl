@@ -187,13 +187,20 @@ sub manipulateImages
         my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch.bin":
                                         "$bin_dir/$system_target.$eyeCatch.bin";
 
-        # FSP workaround to keep original bin names
-        my $fsp_file = (-e $bin_file)? $bin_file : "";
-        my $fsp_prefix = "";
+        # Get size of parition without ecc
+        if ($sectionHash{$layoutKey}{ecc} eq "yes")
+        {
+            $size = page_aligned_size_wo_ecc($size);
+        }
 
-        # Header Phase - only necessary if bin file exists
+        # Handle partitions that have an input binary.
         if (-e $bin_file)
         {
+            # FSP workaround to keep original bin names
+            my $fsp_file = $bin_file;
+            my $fsp_prefix = "";
+
+            # Header Phase
             if( ($sectionHash{$layoutKey}{sha512Version} eq "yes") )
             {
                 $fsp_prefix.=".header";
@@ -274,11 +281,8 @@ sub manipulateImages
             {
                 run_command("cp $bin_file $tempImages{HDR_PHASE}");
             }
-        }
 
-        # Prefix phase
-        if (-e $bin_file)
-        {
+            # Prefix phase
             # Add SBE header to HBB
             if($eyeCatch eq "HBB")
             {
@@ -290,21 +294,52 @@ sub manipulateImages
             {
                 run_command("mv $tempImages{HDR_PHASE} $tempImages{PREFIX_PHASE}");
             }
-        }
 
-        # Padding Phase
-        if ($sectionHash{$layoutKey}{ecc} eq "yes")
-        {
-            $size = page_aligned_size_wo_ecc($size);
-        }
+            # Padding Phase
+            if ($eyeCatch eq "HBI" && $testRun)
+            {
+                # If "--test" flag set do not pad as the test HBI images is
+                # possibly larger than parition size and does not need to be
+                # fully padded. Size adjustments made in checkSpaceConstraints
+                run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+            }
+            else
+            {
+                run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+            }
 
-        if ($eyeCatch eq "HBI" && $testRun)
-        {
-            # If "--test" flag set do not pad as the test HBI images is
-            # possibly larger than parition size and does not need to be
-            # fully padded. Size adjustments made in checkSpaceConstraints
-            run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+            # Create .header.bin file for FSP
+            if ($build_all)
+            {
+                $fsp_file =~ s/.bin/$fsp_prefix.bin/;
+                run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+            }
+
+            # Leave hacks in here for future testing purposes
+            # Hack HBI page to fail verification, Ensure location is past hash page table
+            #if ($eyeCatch eq "HBI")
+            #{
+                # Corrupt a single byte of the HBI partition at a address after
+                # the hash page table. Use dd with seek to maniuplate a bin file
+                # in-place at a specific location.
+                # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00013000))");
+            #}
+
+            # Hack HBD page to fail verification
+            #if ($eyeCatch eq "HBD")
+            #{
+                # Corrupt a single byte of HBD's RO section
+                # Use dd with seek to maniuplate a bin file in-place at a specific location.
+                #run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00004000))");
+
+                # Corrupt a single byte of HBD's RW section
+                # Use dd with seek to maniuplate a bin file in-place at a specific location.
+                # Enusre seek address is after RO section on.
+                # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00044000))");
+            #}
         }
+        # Handle partitions that have no input binary. Simply zero or random
+        # fill the partition.
         elsif (!-e $bin_file)
         {
             # Test partitions have random data
@@ -317,24 +352,6 @@ sub manipulateImages
             {
                 run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
             }
-        }
-        else
-        {
-            run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
-        }
-
-        # Create .header.bin file for FSP
-        if ($build_all && $fsp_file ne "")
-        {
-            $fsp_file =~ s/.bin/$fsp_prefix.bin/;
-            run_command("cp $tempImages{PAD_PHASE} $fsp_file");
-        }
-
-        # Hack HBI page to fail verification, Ensure location is past hash page table
-        if ($eyeCatch eq "HBI")
-        {
-            # Leave in here for now
-            # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00013000))");
         }
 
         # ECC Phase
