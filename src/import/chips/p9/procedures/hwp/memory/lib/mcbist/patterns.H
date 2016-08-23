@@ -58,16 +58,45 @@ constexpr uint64_t PATTERN_5 = 5;
 constexpr uint64_t PATTERN_6 = 6;
 constexpr uint64_t PATTERN_7 = 7;
 constexpr uint64_t PATTERN_8 = 8;
+constexpr uint64_t PATTERN_9 = 9;
+constexpr uint64_t PATTERN_10 = 10;
 constexpr uint64_t PATTERN_RANDOM = PATTERN_8;
-constexpr uint64_t LAST_PATTERN = PATTERN_8;
+constexpr uint64_t LAST_PATTERN = PATTERN_10;
 
 // Don't mess with the patterns
 constexpr uint64_t NO_PATTERN = LAST_PATTERN + 1;
+
+//Pattern references for the 24b random data pattern seeds
+constexpr uint64_t MAX_NUM_RANDOM24_SEEDS = 3;
+constexpr uint64_t RANDOM24_SEEDS_0 = 0;
+constexpr uint64_t RANDOM24_SEEDS_1 = 1;
+constexpr uint64_t RANDOM24_SEEDS_2 = 2;
+constexpr uint64_t RANDOM24_SEEDS_3 = 3;
+constexpr uint64_t LAST_RANDOM24_SEEDS = RANDOM24_SEEDS_3;
+constexpr uint64_t NO_RANDOM24_SEEDS = LAST_RANDOM24_SEEDS + 1;
+
+//Pattern references for the 24b random data pattern seeds
+constexpr uint64_t MAX_NUM_RANDOM24_MAPS = 9;
+constexpr uint64_t RANDOM24_SEED_MAP_0 = 0;
+constexpr uint64_t RANDOM24_SEED_MAP_1 = 1;
+constexpr uint64_t LAST_RANDOM24_SEED_MAP = RANDOM24_SEED_MAP_1;
+constexpr uint64_t NO_RANDOM24_SEED_MAP = LAST_RANDOM24_SEED_MAP + 1;
+constexpr uint64_t RANDOM24_SEED_MAP_FIELD_LEN = 4;
+
 
 /// Vector of cache lines, seaprated in to two 64B chunks
 typedef std::pair<uint64_t, uint64_t> cache_line;
 typedef std::vector< cache_line > pattern;
 extern const std::vector< pattern > patterns;
+
+// Vector of 24b random data seeds
+typedef std::vector< uint64_t > random24_data_seed;
+extern const std::vector< random24_data_seed > random24_data_seeds;
+
+// Vector of 24b random data seed maps
+typedef std::vector< uint64_t > random24_seed_map;
+extern const std::vector< random24_seed_map > random24_seed_maps;
+
 
 }
 
