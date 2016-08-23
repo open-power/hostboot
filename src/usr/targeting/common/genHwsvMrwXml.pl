@@ -2649,6 +2649,7 @@ sub generate_sys
         <default>
             <field><id>traceContinuous</id><value>0</value></field>
             <field><id>traceScanDebug</id><value>0</value></field>
+            <field><id>traceFapiDebug</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
