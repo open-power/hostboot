@@ -54,6 +54,12 @@ namespace SECUREBOOT
     const uint64_t
           PROC_SECURITY_SWITCH_PROTECT_I2C_SEEPROM_MASK = 0x0100000000000000ull;
 
+    // L3 Purge register
+    const uint64_t EX_L3_PURGE_REGISTER = 0x1001080Eull;
+
+    // L2 Purge register
+    const uint64_t EX_L2_PURGE_REGISTER = 0x1001280Full;
+
     // Core protect register
     const uint64_t CORE_PROTECT_REG_0x10013C03 = 0x10013C03ull;
 
