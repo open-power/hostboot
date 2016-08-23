@@ -47,6 +47,7 @@
 trace_desc_t* g_fapiTd;
 trace_desc_t* g_fapiImpTd;
 trace_desc_t* g_fapiScanTd;
+trace_desc_t* g_fapiDbgTd;
 trace_desc_t* g_fapiMfgTd;
 
 
@@ -56,6 +57,7 @@ trace_desc_t* g_fapiMfgTd;
 TRAC_INIT(&g_fapiTd, FAPI_TRACE_NAME, 2*KILOBYTE);
 TRAC_INIT(&g_fapiImpTd, FAPI_IMP_TRACE_NAME, 2*KILOBYTE);
 TRAC_INIT(&g_fapiScanTd, FAPI_SCAN_TRACE_NAME, 4*KILOBYTE);
+TRAC_INIT(&g_fapiDbgTd, FAPI_DBG_TRACE_NAME, 4*KILOBYTE);
 TRAC_INIT(&g_fapiMfgTd, FAPI_MFG_TRACE_NAME, 4*KILOBYTE);
 namespace fapi2
 {
@@ -894,6 +896,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
         l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
         l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
         l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
+        l_pError->collectTrace(FAPI_DBG_TRACE_NAME, 256 );
     }
 
     FAPI_DBG("Exiting rcToErrl");

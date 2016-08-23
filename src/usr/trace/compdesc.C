@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,19 @@ namespace TRACE
                     sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
 
                 if (hbSettings.traceScanDebug)
+                {
+                    l_rc->iv_debugEnabled = true;
+                }
+            }
+            else if(0 == memcmp(l_compName, "FAPI_DBG", 9))
+            {
+                TARGETING::Target* sys = NULL;
+                TARGETING::targetService().getTopLevelTarget(sys);
+
+                TARGETING::HbSettings hbSettings =
+                    sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
+
+                if (hbSettings.traceFapiDebug)
                 {
                     l_rc->iv_debugEnabled = true;
                 }
