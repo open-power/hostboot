@@ -46,28 +46,26 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_io_xbus_linktrain_FP_t)(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
-    const uint8_t&,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
-    const uint8_t& );
+typedef fapi2::Target<fapi2::TARGET_TYPE_XBUS> XBUS_TGT;
+
+typedef fapi2::ReturnCode (*p9_io_xbus_linktrain_FP_t)
+( const XBUS_TGT, const XBUS_TGT, const uint8_t );
 
 extern "C"
 {
 
     /**
-     * @brief A HWP that runs on every instance of the XBUS(EDI+)
-     * @param[in] i_mtarget Reference to the Master Target
-     * @param[in] i_mgroup  Master Target Clock Group
-     * @param[in] i_starget Reference to the Slave Target
-     * @param[in] i_sgroup  Slave Target Clock Group
+     * @brief A HWP that runs once on every link of the XBUS(EDI+).
+     *   The HWP will train both ends of the link.
+     * @param[in] i_target  Reference to the Target
+     * @param[in] i_ctarget Reference to the Connected Target
+     * @param[in] i_group   Clock Group
      * @retval    ReturnCode
      */
     fapi2::ReturnCode p9_io_xbus_linktrain(
-        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
-        const uint8_t&                                   i_mgroup,
-        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
-        const uint8_t&                                   i_sgroup );
+        const XBUS_TGT      i_target,
+        const XBUS_TGT      i_ctarget,
+        const uint8_t       i_group );
 
 } // extern "C"
 
