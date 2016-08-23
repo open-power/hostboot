@@ -660,7 +660,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         // Check Processor type
         bool isNaples = false;
         TargetHandleList list = getFunctionalTargetList( TYPE_PROC );
-        if ((list.size() > 0) && (MODEL_NAPLES == getProcModel(list[0])))
+        if ((list.size() > 0) && (MODEL_NAPLES == getChipModel(list[0])))
             isNaples = true;
 
         // Get the ultimate buffer size.
