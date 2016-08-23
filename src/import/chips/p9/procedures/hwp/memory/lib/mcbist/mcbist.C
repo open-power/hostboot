@@ -56,6 +56,207 @@ namespace mcbist
 {
 
 ///
+/// @brief Load MCBIST maint pattern given a pattern
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_pattern an mcbist::patterns
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode load_maint_pattern( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target, const pattern& i_pattern,
+                                      const bool i_invert )
+{
+    // Init the fapi2 return code
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Array access control
+    fapi2::buffer<uint64_t> l_aacr;
+    // Array access data
+    fapi2::buffer<uint64_t> l_aadr;
+
+    // first we must setup the access control register
+    // Setup the array address
+    // enable the auto increment bit
+    // set ecc mode bit on
+    l_aacr
+    .writeBit<MCA_WREITE_AACR_BUFFER>(mss::states::OFF)
+    .insertFromRight<MCA_WREITE_AACR_ADDRESS, MCA_WREITE_AACR_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0)
+    .writeBit<MCA_WREITE_AACR_AUTOINC>(mss::states::ON)
+    .writeBit<MCA_WREITE_AACR_ECCGEN>(mss::states::ON);
+
+    // This loop will be run twice to write the pattern twice.  Once per 64B write.
+    // When MCBIST maint mode is in 64B mode it will only use the first 64B when in 128B mode
+    // MCBIST maint will use all 128B (it will perform two consecutive writes)
+    const auto l_ports =  mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    // Init the port map
+
+    for (const auto& p : l_ports)
+    {
+        l_aacr.insertFromRight<MCA_WREITE_AACR_ADDRESS, MCA_WREITE_AACR_ADDRESS_LEN>(mss::mcbist::rmw_address::DW0);
+
+        for (auto l_num_reads = 0; l_num_reads < 2; ++l_num_reads)
+        {
+            FAPI_INF("Setting the array access control register.");
+            FAPI_TRY( mss::putScom(p, MCA_WREITE_AACR, l_aacr) );
+
+            for (const auto& l_cache_line : i_pattern)
+            {
+                fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
+                fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
+                FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx", l_value_first, l_value_second);
+                FAPI_TRY( mss::putScom(p, MCA_AADR, l_value_first) );
+
+                // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+                // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
+                // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
+                FAPI_TRY( mss::putScom(p, MCA_AAER, 0) );
+
+                // No need to increment the address because the logic does it automatically when MCA_WREITE_AACR_AUTOINC is set
+                FAPI_TRY( mss::putScom(p, MCA_AADR, l_value_second) );
+
+                // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+                // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
+                // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
+                FAPI_TRY( mss::putScom(p, MCA_AAER, 0) );
+            }
+
+            l_aacr.insertFromRight<MCA_WREITE_AACR_ADDRESS, MCA_WREITE_AACR_ADDRESS_LEN>(mss::mcbist::rmw_address::DW8);
+        }
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Load MCBIST data compare mask registers
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+        const mcbist::program<TARGET_TYPE_MCBIST>& i_program )
+{
+    typedef mcbistTraits<TARGET_TYPE_MCBIST> TT;
+
+    // Init the fapi2 return code
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Load the MCBCM Data compare masks
+
+    const auto l_ports =  mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    FAPI_INF("Loading the MCBIST data compare mask registers!");
+
+    for (const auto& p : l_ports)
+    {
+        FAPI_TRY( mss::putScom(p, TT::COMPARE_MASK, i_program.iv_compare_mask) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Load MCBIST 24b random data seeds given a pattern index
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_random24_data_seed mcbist::random24_data_seed
+/// @param[in] i_random24_map mcbist::random24_seed_map
+/// @param[in] i_invert whether to invert the pattern or not
+/// @note this overload disappears when we have real patterns.
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                        const random24_data_seed& i_random24_data_seed,
+                                        const random24_seed_map& i_random24_map,
+                                        const bool i_invert )
+{
+    // Init the fapi2 return code
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    const uint64_t l_random_addr0 = MCBIST_MCBRDS0Q;
+    const uint64_t l_random_addr1 = MCBIST_MCBRDS1Q;
+    uint64_t l_index = 0;
+    uint64_t l_map_index = 0;
+    uint64_t l_map_offset = 0;
+
+    fapi2::buffer<uint64_t> l_mcbrsd0q;
+    fapi2::buffer<uint64_t> l_mcbrsd1q;
+
+
+    // We are going to loop through the random seeds and load them into the random seed registers
+    // Because the 24b random data seeds share the same registers as the 24b random data byte LFSR maps
+    // we will load those as well
+
+    for (const auto& l_seed : i_random24_data_seed)
+    {
+        FAPI_INF("Loading 24b random seed index %ld ", l_index);
+        fapi2::buffer<uint64_t> l_value  = i_invert ? ~l_seed : l_seed;
+
+        // Print an informational message to indicate if a random seed is 0
+        // TK Do we want an error here? 0 may be used on purpose to hold a byte at all 0 on purpose
+        if ( l_value == 0 )
+        {
+            FAPI_INF("Warning: Random 24b data seed is set to 0 for seed index %d", l_index);
+        }
+
+        // If we are processing the first 24b random data seed we will add it to the fapi buffer
+        // we won't load it yet because the second 24b seed will be loaded into the same register
+        if ( l_index == 0 )
+        {
+            l_mcbrsd0q.insertFromRight<MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0, MCBIST_MCBRDS0Q_DGEN_RNDD_SEED0_LEN>(l_value);
+        }
+        // The second 24b random data seed is loaded into the same register as the first seed
+        // therefore we will add the second seed tothe fapi buffer and then issue the putscom
+        else if (l_index == 1 )
+        {
+            l_mcbrsd0q.insertFromRight<MCBIST_MCBRDS0Q_DGEN_RNDD_SEED1, MCBIST_MCBRDS0Q_DGEN_RNDD_SEED1_LEN>(l_value);
+            FAPI_INF("Loading 24b random seeds 0 and 1 0x%016lx ", l_mcbrsd0q);
+            FAPI_TRY( mss::putScom(i_target, l_random_addr0, l_mcbrsd0q) );
+        }
+        // The third 24b random data seed occupies the same register as the random data byte maps.  Therefore we first
+        // add the third random 24b data seed to the register and then loop through all of the byte mappings a total of
+        // 9.  ach of the byte mappings associates a byte of the random data to a byte in the 24b random data LFSRs
+        // Each byte map is offset by 4 bits in the register.
+        else
+        {
+            l_mcbrsd1q.insertFromRight<MCBIST_MCBRDS1Q_DGEN_RNDD_SEED2, MCBIST_MCBRDS1Q_DGEN_RNDD_SEED2_LEN>(l_value);
+
+            for (const auto& l_map : i_random24_map)
+            {
+                l_map_offset = MCBIST_MCBRDS1Q_DGEN_RNDD_DATA_MAPPING + (l_map_index * RANDOM24_SEED_MAP_FIELD_LEN);
+                l_mcbrsd1q.insertFromRight(l_map, l_map_offset, RANDOM24_SEED_MAP_FIELD_LEN);
+                FAPI_INF("Loading 24b random seed map index %ld ", l_map_index);
+                FAPI_ASSERT( l_map_index < mss::mcbist::MAX_NUM_RANDOM24_MAPS,
+                             fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(l_map_index),
+                             "Attempting to load a 24b random data seed map which does not exist %d", l_map_index );
+                ++l_map_index;
+            }
+
+            FAPI_TRY( mss::putScom(i_target, l_random_addr1, l_mcbrsd1q) );
+        }
+
+        FAPI_ASSERT( l_index < MAX_NUM_RANDOM24_SEEDS,
+                     fapi2::MSS_MEMDIAGS_INVALID_PATTERN_INDEX().set_INDEX(l_index),
+                     "Attempting to load a 24b random data seed which does not exist %d", l_index );
+        ++l_index;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Load a set of MCBIST subtests in to the MCBIST registers
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T - derived
@@ -251,7 +452,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     FAPI_TRY( load_control( i_target, i_program) );
 
     // Load the patterns and any associated bits for random, etc
-    FAPI_TRY( load_pattern( i_target, i_program) );
+    FAPI_TRY( load_data_config( i_target, i_program) );
 
     // Load the thresholds
     FAPI_TRY( load_thresholds( i_target, i_program) );
