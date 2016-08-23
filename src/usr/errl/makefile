@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,6 @@ SUBDIRS += runtime.d
 
 include ${ROOTPATH}/config.mk
 
-# to find errludattribute.[CH] and errludtarget.[CH] - they are generated
+# to find errludtarget.[CH] - they are generated
 #  by src/usr/targeting/common/xmltohb/xmltohb.pl
 vpath %.C ${GENDIR}

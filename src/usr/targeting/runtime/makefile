@@ -38,10 +38,14 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += targplatutil.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_targeting.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrPlatOverride_rt.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS += errludattribute.o
 
 OBJS += ${COMMON_TARGETING_OBJS}
 OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
 
 include $(ROOTPATH)/config.mk
+
+# To find errludattribute.[CH], etc.  They are generated
+# by src/usr/targeting/common/xmltohb/xmltohb.pl
 vpath %.C ${GENDIR}
