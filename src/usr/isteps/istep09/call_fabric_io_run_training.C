@@ -210,44 +210,37 @@ uint8_t run_linktraining(
     uint8_t o_failures = 0;
     errlHndl_t l_errl = NULL;
 
-    // clock group is either 0 or 1
-    // need to train both groups and allow for them to differ
-    uint8_t l_this_group = 0;
-    uint8_t l_connected_group = 0;
-    uint8_t l_group_loop = 0;
-    for (l_group_loop = 0; l_group_loop < 4; l_group_loop++)
+    // group is either 0 or 1
+    std::vector<uint8_t> l_groups = {0,1};
+
+    for (auto l_group : l_groups)
     {
-        l_this_group = l_group_loop / 2;      // 0, 0, 1, 1
-        l_connected_group = l_group_loop % 2; // 0, 1, 1, 0
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "Running p9_io_xbus_linktrain HWP on "
-                 "master target %.8X group %d and "
-                 "slave target %.8X group %d.",
+                 "master target %.8X and "
+                 "slave target %.8X on group %d.",
                  TARGETING::get_huid(i_master_target),
-                 l_this_group,
                  TARGETING::get_huid(i_slave_target),
-                 l_connected_group );
+                 l_group );
 
         FAPI_INVOKE_HWP(l_errl,
                         p9_io_xbus_linktrain,
                         i_master_target,
-                        l_this_group,
                         i_slave_target,
-                        l_connected_group);
+                        l_group);
 
         if (l_errl)
         {
             o_failures++;
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "Failure #%d) ERROR 0x%.8X : p9_io_xbus_linktrain "
-                 "HWP on master target %.8X group %d and "
-                 "slave target %.8X group %d.",
+                 "HWP on master target %.8X and "
+                 "slave target %.8X on group %d.",
                  o_failures, l_errl->reasonCode(),
                  TARGETING::get_huid(i_master_target),
-                 l_this_group,
                  TARGETING::get_huid(i_slave_target),
-                 l_connected_group );
+                 l_group );
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(i_master_target).addToLog( l_errl );

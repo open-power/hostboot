@@ -53,13 +53,16 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
 
 # fabric_io_dccal
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_dccal.mk
+#p9_io_xbus_dccal.mk has includes we dont need so manually add the .o
+OBJS+= p9_io_xbus_dccal.o
+include ${PROCEDURES_PATH}/hwp/io/p9_io_common.mk
 
 # fabric_pre_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pre_trainadv.mk
 
 # fabric_io_run_training
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_linktrain.mk
+#p9_io_xbus_linktrain.mk has includes we dont need so manually add the .o
+OBJS+= p9_io_xbus_linktrain.o
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_clear_firs.mk
 
 # fabric_post_trainadv
