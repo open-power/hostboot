@@ -1,8 +1,3 @@
-config SKIP_RESTRICT_EC_UNITS
-    default n
-    help
-        Skip restricting the number of ec/cores based on PR keyword
-
 config NO_GARD_SUPPORT
     default n
     help
