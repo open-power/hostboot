@@ -125,12 +125,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -150,12 +150,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -175,12 +175,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -200,12 +200,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -225,11 +225,11 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -250,12 +250,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -275,12 +275,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -300,12 +300,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -325,12 +325,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -350,12 +350,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -375,12 +375,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -400,12 +400,12 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_DIMM</targetType>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -428,6 +428,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
     <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
