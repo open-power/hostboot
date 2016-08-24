@@ -177,7 +177,9 @@ switchToHBB:
         ;// Update HRMOR
     mtspr HRMOR, r3
 
-        ;// Execute isync
+        ;// Clear out SLBs, ERATs, etc.
+    isync
+    slbia
     isync
 
         ;// Enter Hostboot Base (HBB).
