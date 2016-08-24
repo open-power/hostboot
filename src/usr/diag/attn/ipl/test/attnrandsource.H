@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,8 +85,16 @@ class RandSource
 
         /**
          * @brief run Execute the testcase.
+         *
+         * @param[in] i_attnType - Optional parameter
+         *                         If you pass this in, then only that
+         *                          attention type will be generated.
+         *                         Else a random attn type from the valid
+         *                          values will get used.
          */
-        void run();
+        void run( PRDF::ATTENTION_VALUE_TYPE i_attnType =
+                                         PRDF::END_ATTENTION_TYPE
+                );
 
         /**
          * @brief dtor

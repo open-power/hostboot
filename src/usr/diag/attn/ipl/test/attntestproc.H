@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntestproc.H $              */
+/* $Source: src/usr/diag/attn/ipl/test/attntestproc.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <cxxtest/TestSuite.H>
 #include <sys/time.h>
 #include "../../common/attntrace.H"
+#include <targeting/common/targetservice.H>
 
 using namespace ATTN;
 using namespace PRDF;
@@ -56,7 +57,6 @@ using namespace std;
 class AttnProcTest: public CxxTest::TestSuite
 {
     public:
-
         /**
          * @brief testQuery Unit test for the
          *        query method.
@@ -64,6 +64,7 @@ class AttnProcTest: public CxxTest::TestSuite
         void testQuery(void)
         {
             ATTN_SLOW(ENTER_MRK "AttnProcTest::testQuery");
+#if 0  // asdf bjs @TODO: RTC:151004
 
             static const uint64_t iterations = 100;
             static const uint64_t targetPoolSize = 8;
@@ -144,6 +145,7 @@ class AttnProcTest: public CxxTest::TestSuite
                     break;
                 }
             }
+#endif
 
             ATTN_SLOW(EXIT_MRK "AttnProcTest::testQuery");
         }
@@ -155,7 +157,7 @@ class AttnProcTest: public CxxTest::TestSuite
         void testFakeAttentions()
         {
             ATTN_SLOW(ENTER_MRK "AttnProcTest::testFakeAttentions");
-
+#if 0 // asdf bjs @TODO: RTC:151004
             static const uint64_t targetPoolSize = 8;
             static const uint64_t iterations = 5;
             static const uint64_t maxAttnsPerIteration = 5;
@@ -269,8 +271,219 @@ class AttnProcTest: public CxxTest::TestSuite
 
                 v.dump();
             }
+#endif
 
             ATTN_SLOW(EXIT_MRK "AttnProcTest::testFakeAttentions");
         }
+
+
+        // Want to verify the HW workaround on NIMBUS
+        // for clearing F001A reg on RECOV errors.
+        void testRecovAttnWorkaround()
+        {
+            static const uint64_t targetPoolSize = 1;
+            static const uint64_t iterations = 1;
+            static const uint64_t maxAttnsPerIteration = 1;
+            uint64_t l_intrAddrReg  = 0x00000000000F001Aull;
+            uint64_t l_intrAddrData = 0xE000000000000000ull;
+            uint64_t l_intrDataRead = l_intrAddrData;
+
+
+
+            ATTN_SLOW("AttnProcTest::testRecovAttnWorkaround");
+
+            errlHndl_t err = 0;
+
+            // Verify RECOV error goes thru the workaround
+            ATTN_SLOW("AttnProcTest::RECOV TEST");
+
+            FakeSystem system;
+
+            FakeGfir recGfir(RECOVERABLE);
+            recGfir.install(system);
+
+            Validator v;
+            v.install(system);
+            system.installScomImpl();
+
+            FakeProcTargetService targetSvc(targetPoolSize);
+            TargetHandleList procs;
+            targetSvc.getAllChips(procs, TYPE_PROC);
+
+            RandSource source(
+                    iterations,
+                    maxAttnsPerIteration,
+                    system,
+                    &procs[0],
+                    &procs[0] + procs.size());
+
+            targetSvc.installTargetService();
+
+            FakePrd prd(system);
+            prd.installPrd();
+
+            getProcOps().enable();
+
+            ATTN_SLOW("AttnProcTest::testRecovAttnWorkaround ready to go");
+
+            do
+            {
+                // ---------------------------------------
+                // Alter the combined global interrupt reg
+                // so we can verify it later
+                err = putScom( procs[0],
+                               l_intrAddrReg,
+                               l_intrAddrData
+                             );
+
+                if (NULL != err)
+                {
+                    TS_FAIL("Error1 setting Reg %016llx Data:%016llx",
+                            l_intrAddrReg, l_intrAddrData );
+                    break;
+                }
+                // ---------------------------------------
+
+                source.run(RECOVERABLE);
+
+                err = checkForIplAttentions();
+
+                if(err)
+                {
+                    TS_FAIL("unexpected error checking for ipl attentions.");
+                    break;
+                }
+
+                uint64_t count = system.count();
+                if(count)
+                {
+                    TS_FAIL("%d unexpected attentions present after check for "
+                            "ipl attentions.", count);
+
+                    system.dump();
+                    break;
+                }
+
+                // ---------------------------------------
+                // The combined global interrupt reg should get
+                // reset (at least on certain level of hardware)
+                err = getScom( procs[0],
+                               l_intrAddrReg,
+                               l_intrDataRead
+                             );
+
+                if (NULL != err)
+                {
+                    TS_FAIL("Error1 getting Reg %016llx Data:%016llx",
+                            l_intrAddrReg, l_intrAddrData );
+                    break;
+                }
+
+                // Verify REG is MODIFIED this time
+                if (0 != l_intrDataRead)
+                {
+                    TS_FAIL("Int Reg1 Not cleared: Orig:%016llx  Read:%016llx",
+                            l_intrAddrData, l_intrDataRead );
+                    break;
+                }
+                // ---------------------------------------
+
+
+            } while(0);
+
+
+            // Verify HOST_ATTN skips the workaround
+            FakeSystem systemHA;
+
+            FakeGfir haGfir(HOST_ATTN);
+            haGfir.install(systemHA);
+
+            Validator vHA;
+            vHA.install(systemHA);
+            systemHA.installScomImpl();
+
+            RandSource sourceHA(
+                    iterations,
+                    maxAttnsPerIteration,
+                    systemHA,
+                    &procs[0],
+                    &procs[0] + procs.size());
+
+            FakePrd prdHA(systemHA);
+            prdHA.installPrd();
+
+            getProcOps().enable();
+
+            ATTN_SLOW("AttnProcTest::testRecovAttnWorkaround2  ready to go");
+
+            do
+            {
+                // ---------------------------------------
+                // Alter the combined global interrupt reg
+                // so we can verify it later
+                err = putScom( procs[0],
+                               l_intrAddrReg,
+                               l_intrAddrData
+                             );
+
+                if (NULL != err)
+                {
+                    TS_FAIL("Error2 setting Reg %016llx Data:%016llx",
+                            l_intrAddrReg, l_intrAddrData );
+                    break;
+                }
+                // ---------------------------------------
+
+                sourceHA.run(HOST_ATTN);
+
+                err = checkForIplAttentions();
+
+                if(err)
+                {
+                    TS_FAIL("unexpected error checking for ipl attentions2.");
+                    break;
+                }
+
+                uint64_t count = systemHA.count();
+                if(count)
+                {
+                    TS_FAIL("%d unexpected attentions present after check for "
+                            "ipl attentions2.", count);
+
+                    systemHA.dump();
+                    break;
+                }
+
+                // ---------------------------------------
+                // The combined global interrupt reg should not
+                // change
+                err = getScom( procs[0],
+                               l_intrAddrReg,
+                               l_intrDataRead
+                             );
+
+                if (NULL != err)
+                {
+                    TS_FAIL("Error2 getting Reg %016llx Data:%016llx",
+                            l_intrAddrReg, l_intrAddrData );
+                    break;
+                }
+
+                // Verify REG is MODIFIED this time
+                if (l_intrAddrData != l_intrDataRead)
+                {
+                    TS_FAIL("Int Reg2 altered rig:%016llx  Read:%016llx",
+                            l_intrAddrData, l_intrDataRead );
+                    break;
+                }
+                // ---------------------------------------
+
+            } while(0);
+
+
+            ATTN_SLOW("AttnProcTest::testRecovAttnWorkaround  ending");
+
+        }  // end testRecovAttnWorkaround
+
 };
 #endif

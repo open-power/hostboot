@@ -85,7 +85,7 @@ void* RandSource::main(void * i_source)
     return NULL;
 }
 
-void RandSource::run()
+void RandSource::run(PRDF::ATTENTION_VALUE_TYPE  i_attnType)
 {
     mutex_lock(&iv_mutex);
 
@@ -108,9 +108,18 @@ void RandSource::run()
             // select a random target
 
             // generate a random attention
-
             d.targetHndl = *(iv_first + randint(0, distance(iv_first, iv_last) -1));
-            d.attnType = getRandomAttentionType();
+
+            // Input value determines if we use random type
+            // or what was passed in
+            if (PRDF::END_ATTENTION_TYPE == i_attnType)
+            {
+                d.attnType = getRandomAttentionType();
+            }
+            else
+            {
+                d.attnType = i_attnType;
+            }
 
             l.push_back(d);
             ATTN_TRACE("RandSource:run, Type:%d, Count:%d Iterations:%d",
