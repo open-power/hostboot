@@ -231,7 +231,7 @@ fapi2::ReturnCode p9_pm_ocb_init(
     // -------------------------------------------------------------------------
     else if (i_mode == p9pm::PM_RESET)
     {
-        FAPI_INF(" *** Resetting OCB Indirect Channels 0-3");
+        FAPI_DBG(" *** Resetting OCB Indirect Channels");
         FAPI_TRY(pm_ocb_reset(i_target), "ERROR: OCB Reset failed.");
     }
     // -------------------------------------------------------------------------
@@ -491,6 +491,8 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     for (auto chan : v_reset_chan)
     {
+        FAPI_INF(" Reset OCB channel : %d", chan);
+
         fapi2::buffer<uint64_t> l_data64;
         // Clear out OCB Channel BAR registers
         FAPI_TRY(fapi2::putScom(i_target, OCBARn[chan], 0),
@@ -521,6 +523,8 @@ fapi2::ReturnCode pm_ocb_reset(
     // -------------------------------------------------------------------------
     for (auto chan : v_reset_chan)
     {
+        FAPI_INF(" Reset OCB channel : %d", chan);
+
         fapi2::buffer<uint64_t> l_data64;
         // Clear out Pull Base
         FAPI_TRY(fapi2::putScom(i_target, OCBSLBRn[chan], 0),
