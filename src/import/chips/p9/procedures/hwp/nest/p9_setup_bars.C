@@ -156,8 +156,7 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     p9_setup_bars_addr_range l_nm_range[2];
     p9_setup_bars_addr_range l_m_range;
     bool l_enable_mcd = false;
-    fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING_Type l_mirror_ctl;
-
+    fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_mirror_ctl;
     // determine range of NM memory which MCD needs to cover on this chip
     {
         fapi2::ATTR_PROC_MEM_BASES_ACK_Type l_nm_bases;
@@ -223,10 +222,10 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
 
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING, i_target_sys, l_mirror_ctl),
-             "Error from FAPI_ATTR_GET (ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_HW_MIRRORING_ENABLE, i_target_sys, l_mirror_ctl),
+             "Error from FAPI_ATTR_GET (ATTR_MRW_HW_MIRRORING_ENABLE)");
 
-    if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING_FALSE)
+    if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
         // determine range of M memory which MCD needs to cover on this chip
     {
 
