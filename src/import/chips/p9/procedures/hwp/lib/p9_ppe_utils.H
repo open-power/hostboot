@@ -33,7 +33,7 @@
 /// *HWP Team            : PM
 /// *HWP Level           : 2
 /// *HWP Consumed by     : CMEs, GPEs, SBE, Cronus
-
+#include <map>
 #ifndef __P9_PPE_UTILS_H__
 #define __P9_PPE_UTILS_H__
 typedef struct
@@ -50,16 +50,32 @@ typedef struct
 
 typedef struct
 {
-    uint16_t     number;
-    std::string  name;
-} PPEReg_num_name_t;
+    uint16_t    number;
+    uint64_t    value;
+} SCOMRegValue_t;
 
 
 typedef struct
 {
-    PPEReg_t    reg;
-    uint64_t    value;
-} SCOMRegValue_t;
+    SCOMRegValue_t    reg;
+    std::string  name;
+} SCOMReg_t;
+/**
+ * @brief enumerates opcodes for few instructions.
+ */
+enum
+{
+    OPCODE_31         = 31,
+    MTSPR_CONST1      = 467,
+    MTSPR_BASE_OPCODE = (OPCODE_31 << (31 - 5)) | (MTSPR_CONST1 << (31 - 30)),
+    MFSPR_CONST1      = 339,
+    MFSPR_BASE_OPCODE = (OPCODE_31 << (31 - 5)) | (MFSPR_CONST1 << (31 - 30)),
+    MFMSRD_CONST1     = 83,
+    MFCR_CONST1       = 19,
+    ANDIS_CONST       = 29,
+    ORIS_CONST        = 25,
+};
+
 
 /**
  * @brief Offsets from base address for XIRs.
@@ -73,7 +89,8 @@ const static uint64_t PPE_XIDBGPRO = 0x5; //XSR_IAR
 
 enum PPE_DUMP_MODE
 {
-    XIRS           = 0x0,
+    NONE           = 0x0,
+    XIRS           = 0x4,
     SNAPSHOT       = 0x1,
     HALT           = 0x2,
     FORCE_HALT     = 0x3
@@ -83,6 +100,8 @@ enum VERBOSE_MODE
     NOVERBOSE        = 0x0,
     VERBOSE          = 0x1,
     VERBOSEP         = 0x2,
+    VERBOSE1         = 0x3,
+
 };
 
 enum INT_VEC_OFFSET
@@ -159,6 +178,56 @@ enum PPE_GPRS
     R29 = 29,
     R30 = 30,
     R31 = 31,
+};
+// Vector defining all spr acceess egisters
+const std::map<uint16_t, std::string> v_ppe_sprs_num_name =
+{
+    { MSR,   "MSR"    },
+    { CR,    "CR"     },
+    { CTR,   "CTR"    },
+    { LR,    "LR"     },
+    { ISR,   "ISR"    },
+    { SRR0,  "SRR0"   },
+    { SRR1,  "SRR1"   },
+    { TCR,   "TCR"    },
+    { TSR,   "TSR"    },
+    { DACR,  "DACR"   },
+    { DBCR,  "DBCR"   },
+    { DEC,   "DEC"    },
+    { IVPR,  "IVPR"   },
+    { PIR,   "PIR"    },
+    { PVR,   "PVR"    },
+    { XER,   "XER"    }
+};
+
+// Vector defining the GPRs
+const std::map<uint16_t, std::string> v_ppe_gprs_num_name =
+{
+    { R0,    "R0"     },
+    { R1,    "R1"     },
+    { R2,    "R2"     },
+    { R3,    "R3"     },
+    { R4,    "R4"     },
+    { R5,    "R5"     },
+    { R6,    "R6"     },
+    { R7,    "R7"     },
+    { R8,    "R8"     },
+    { R9,    "R9"     },
+    { R10,   "R10"    },
+    { R13,   "R13"    },
+    { R28,   "R28"    },
+    { R29,   "R29"    },
+    { R30,   "R30"    },
+    { R31,   "R31"    }
+};
+// Vector defining the other xsr regs
+const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
+{
+    { XSR,   "XSR"    },
+    { IAR,   "IAR"    },
+    { IR,    "IR"     },
+    { EDR,   "EDR"    },
+    { SPRG0, "SPRG0"  }
 };
 
 
