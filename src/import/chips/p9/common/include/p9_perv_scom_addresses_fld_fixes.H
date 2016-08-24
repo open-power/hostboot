@@ -56,6 +56,18 @@ static const uint64_t SH_FLD_C4_VDN_GPOOD = 32002;
 static const uint64_t SH_FLD_C4_FSI_IN_ENA = 32003;
 static const uint64_t SH_FLD_C4_CHIP_MASTER = 32004;
 static const uint64_t SH_FLD_C4_SMD = 32005;
+static const uint64_t SH_FLD_CLOCK_REGION_ALL_UNITS = 32006;
+static const uint64_t SH_FLD_CLOCK_REGION_ALL_UNITS_LEN = 32007;
+static const uint64_t SH_FLD_SEL_THOLD_ALL = 32008;
+static const uint64_t SH_FLD_SEL_THOLD_ALL_LEN = 32009;
+static const uint64_t SH_FLD_ALL_UNITS = 32010;
+static const uint64_t SH_FLD_ALL_UNITS_LEN = 32011;
+static const uint64_t SH_FLD_TC_ALL_REGIONS_FENCE = 32012;
+static const uint64_t SH_FLD_TC_ALL_REGIONS_FENCE_LEN = 32013;
+static const uint64_t SH_FLD_SCAN_REGION_ALL_UNITS = 32014;
+static const uint64_t SH_FLD_SCAN_REGION_ALL_UNITS_LEN = 32015;
+static const uint64_t SH_FLD_SCAN_ALL_TYPES = 32016;
+static const uint64_t SH_FLD_SCAN_ALL_TYPES_LEN = 32017;
 
 REG64_FLD( PERV_CBS_ENVSTAT_C4_TEST_ENABLE                        , 0   , SH_UNT_PERV_CBS_ENVSTAT     ,
            SH_ACS_SCOM     ,
@@ -75,5 +87,47 @@ REG64_FLD( PERV_CBS_ENVSTAT_C4_CHIP_MASTER                        , 4   , SH_UNT
 REG64_FLD( PERV_CBS_ENVSTAT_C4_SMD                                , 5   , SH_UNT_PERV_CBS_ENVSTAT     ,
            SH_ACS_SCOM     ,
            SH_FLD_C4_SMD );
+
+REG64_FLD( PERV_1_CLK_REGION_CLOCK_REGION_ALL_UNITS           , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_REGION_ALL_UNITS );
+REG64_FLD( PERV_1_CLK_REGION_CLOCK_REGION_ALL_UNITS_LEN       , 11  , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_REGION_ALL_UNITS_LEN );
+REG64_FLD( PERV_1_CLK_REGION_SEL_THOLD_ALL                    , 48  , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SEL_THOLD_ALL );
+REG64_FLD( PERV_1_CLK_REGION_SEL_THOLD_ALL_LEN                , 3   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SEL_THOLD_ALL_LEN );
+REG64_FLD( PERV_1_CLK_REGION_CLOCK_REGION_PERV                , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_PERV );
+
+REG64_FLD( PERV_1_BIST_TC_BIST_START_TEST_DC                      , 0   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_TC_START_TEST_DC );
+REG64_FLD( PERV_1_BIST_BIST_ALL_UNITS                             , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_ALL_UNITS );
+REG64_FLD( PERV_1_BIST_BIST_ALL_UNITS_LEN                         , 11   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_ALL_UNITS_LEN );
+
+REG64_FLD( PERV_1_OPCG_GO                                         , 1   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_GO );
+REG64_FLD( PERV_1_OPCG_STARTS_BIST                                , 14  , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_STARTS_BIST );
+
+REG64_FLD( PERV_1_CPLT_CTRL1_TC_ALL_REGIONS_FENCE                 , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_ALL_REGIONS_FENCE );
+REG64_FLD( PERV_1_CPLT_CTRL1_TC_ALL_REGIONS_FENCE_LEN             , 11   , SH_UNT_PERV_1   , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_ALL_REGIONS_FENCE_LEN );
+
+REG64_FLD( PERV_1_SCAN_REGION_TYPE_SCAN_REGION_ALL_UNITS          , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_REGION_ALL_UNITS );
+REG64_FLD( PERV_1_SCAN_REGION_TYPE_SCAN_REGION_ALL_UNITS_LEN      , 11   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_REGION_ALL_UNITS_LEN );
+REG64_FLD( PERV_1_SCAN_REGION_TYPE_SCAN_ALL_TYPES                 , 48   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_ALL_TYPES );
+REG64_FLD( PERV_1_SCAN_REGION_TYPE_SCAN_ALL_TYPES_LEN             , 12   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_ALL_TYPES_LEN );
+
+REG64_FLD( PERV_1_OPCG_REG0_OPCG_STARTS_BIST                       , 14  , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_STARTS_BIST );
+REG64_FLD( PERV_1_OPCG_REG0_OPCG_GO                                , 1   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
+           SH_FLD_GO         );
 
 #endif
