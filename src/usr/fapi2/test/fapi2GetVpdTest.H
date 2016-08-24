@@ -52,6 +52,10 @@ void testGetVPD(void)
     testDecode_MT();
 
     testGetVPD_Override();
+
+    testGetVPD_DQ();
+
+    testGetVPD_CK();
 }
 
 }; // GetVPDTest class

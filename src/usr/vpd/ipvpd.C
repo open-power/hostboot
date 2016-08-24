@@ -149,6 +149,10 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
             break;
         }
 
+        TRACSCOMP( g_trac_vpd,
+                   INFO_MRK"IpVpdFacade::read: Record offset for %s is 0x%.4x",
+                   recordName, recordOffset );
+
         if(IPVPD::FULL_RECORD == i_args.keyword)
         {
             // full record
