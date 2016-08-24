@@ -74,7 +74,7 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        FAPI_DBG("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
+        FAPI_INF("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
         FAPI_TRY( mss::getScom(p, MCA_MBA_CAL0Q, l_data) );
         i_state == HIGH ? l_data.setBit<MCA_MBA_CAL0Q_RESET_RECOVER>() : l_data.clearBit<MCA_MBA_CAL0Q_RESET_RECOVER>();
@@ -153,24 +153,24 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     // de-assert RESETN, etc
 
     fapi2::buffer<uint64_t> l_data;
+    uint8_t is_sim = 0;
 
-    FAPI_DBG("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
+    FAPI_INF("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+    // On cycle sim for some reason clearing force_mclk_low makes the DIMM interface go tri-state.
+    // On real hardware this should release the memory clocks
+    if (is_sim && (i_state == mss::LOW))
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Might as well do this for all the ports while we're here.
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
         FAPI_TRY( mss::getScom(p, MCA_MBA_FARB5Q, l_data) );
-
-        // TK: use writeBit?
-        if (i_state == mss::HIGH)
-        {
-            l_data.setBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>();
-        }
-        else
-        {
-            l_data.clearBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>();
-        }
-
+        l_data.writeBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>(i_state);
         FAPI_TRY(mss::putScom( p, MCA_MBA_FARB5Q, l_data));
     }
 
@@ -238,7 +238,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
-    FAPI_DBG("Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.");
+    FAPI_INF("Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.");
     FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, 0) );
 
 fapi_try_exit:
@@ -568,7 +568,7 @@ fapi2::ReturnCode set_pc_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_CMD_SIG_REDUCTION>();
     l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP>();
 
-    FAPI_DBG("phy pc_config0 0x%0llx", l_data);
+    FAPI_INF("phy pc_config0 0x%0llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
 
 fapi_try_exit:
@@ -631,7 +631,7 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     // and '1' for 'extended 3ds.' We need to check an attribute here when we get to 3ds BRS
     l_data.clearBit<MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW>();
 
-    FAPI_DBG("phy pc_config1 0x%0llx", l_data);
+    FAPI_INF("phy pc_config1 0x%0llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
 
 fapi_try_exit:
@@ -814,7 +814,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
             // TK: Other 2D config information
         }
 
-        FAPI_DBG("wr_vref_config: 0x%016lu", l_vref_config);
+        FAPI_INF("wr_vref_config: 0x%016lu", l_vref_config);
         FAPI_TRY( mss::scom_blastah(i_target, l_vref_regs, l_vref_config) );
     }
 
@@ -861,7 +861,7 @@ fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 
     // ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
 
-    FAPI_DBG("seq_config0 0x%llx", l_data);
+    FAPI_INF("seq_config0 0x%llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_CONFIG0_P0, l_data) );
 
 fapi_try_exit:
@@ -898,7 +898,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0_LEN>(l_odt_rd[0][0]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1,
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1_LEN>(l_odt_rd[0][1]);
-        FAPI_DBG("odt_rd_config0: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_rd_config0: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0, l_data) );
     }
 
@@ -912,7 +912,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2_LEN>(l_odt_rd[0][2]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3,
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3_LEN>(l_odt_rd[0][3]);
-        FAPI_DBG("odt_rd_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_rd_config1: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
     }
 
@@ -926,7 +926,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4_LEN>(l_odt_rd[1][0]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5,
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5_LEN>(l_odt_rd[1][1]);
-        FAPI_DBG("odt_rd_config2: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_rd_config2: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0, l_data) );
     }
 
@@ -940,7 +940,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6_LEN>(l_odt_rd[1][2]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7,
                                MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7_LEN>(l_odt_rd[1][3]);
-        FAPI_DBG("odt_rd_config3: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_rd_config3: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0, l_data) );
     }
 
@@ -957,7 +957,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0_LEN>(l_odt_wr[0][0]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1,
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1_LEN>(l_odt_wr[0][1]);
-        FAPI_DBG("odt_wr_config0: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_wr_config0: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0, l_data) );
     }
 
@@ -971,7 +971,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2_LEN>(l_odt_wr[0][2]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3,
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3_LEN>(l_odt_wr[0][3]);
-        FAPI_DBG("odt_wr_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_wr_config1: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0, l_data) );
     }
 
@@ -985,7 +985,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4_LEN>(l_odt_wr[1][0]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5,
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5_LEN>(l_odt_wr[1][1]);
-        FAPI_DBG("odt_wr_config2: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_wr_config2: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0, l_data) );
     }
 
@@ -999,7 +999,7 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6_LEN>(l_odt_wr[1][2]);
         l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7,
                                MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7_LEN>(l_odt_wr[1][3]);
-        FAPI_DBG("odt_wr_config3: 0x%016llx", uint64_t(l_data));
+        FAPI_INF("odt_wr_config3: 0x%016llx", uint64_t(l_data));
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0, l_data) );
     }
 
@@ -1022,7 +1022,7 @@ fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_M
     l_data.insertFromRight<MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0,
                            MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0_LEN>(MPR_PATTERN);
 
-    FAPI_DBG("seq_rd_wr 0x%llx", l_data);
+    FAPI_INF("seq_rd_wr 0x%llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA0_P0, l_data) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA1_P0, l_data) );
 
