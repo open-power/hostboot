@@ -55,7 +55,6 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_ddr_phy_reset(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
     {
-        FAPI_INF("********* %s start *********", __func__);
 
         // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
         // attributes for the PHY, etc.
@@ -153,24 +152,15 @@ extern "C"
         // Done bang-bang-lock
         //
 
-        //FIXME:    Need to code..      FAPI_TRY(mss_slew_cal(i_target),
-        //      "mss_slew_cal Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
-        // slew cal successful
-//    FAPI_TRY( mss::slew_cal(i_target), "slew_cal for %s failed", mss::c_str(i_target));
-
-#ifdef LEAVES_OUTPUT_TO_DIMM_TRISTATE
         // Per J. Bialas, force_mclk_low can be dasserted.
         FAPI_TRY(mss::change_force_mclk_low(i_target, mss::LOW),
                  "force_mclk_low (set low) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
-#endif
 
         // If mss_unmask_ddrphy_errors gets it's own bad rc,
         // it will commit the passed in rc (if non-zero), and return it's own bad rc.
         // Else if mss_unmask_ddrphy_errors runs clean,
         // it will just return the passed in rc.
-        //FIXME:    Need to code..   FAPI_TRY(mss_unmask_ddrphy_errors(i_target, rc));
-
-        FAPI_INF("********* %s complete *********", __func__);
+        // TODO RTC:159727  Need to code..   FAPI_TRY(mss_unmask_ddrphy_errors(i_target, rc));
 
     fapi_try_exit:
         return fapi2::current_err;
