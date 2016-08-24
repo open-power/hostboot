@@ -738,10 +738,13 @@ errlHndl_t PnorRP::findTOC()
 errlHndl_t PnorRP::readTOC()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
-    errlHndl_t l_errhdl = NULL;
-    errlHndl_t l_secondary_errhdl = NULL;
+    errlHndl_t l_errhdl = nullptr;
+    errlHndl_t l_primary_errhdl = nullptr;
+    errlHndl_t l_secondary_errhdl = nullptr;
+
     uint8_t* toc0Buffer = new uint8_t[PAGESIZE];
     uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
+    PNOR::SectionData_t l_secondary_TOC[PNOR::NUM_SECTIONS+1];
     uint64_t fatal_error = 0;
     do {
         //Initialize toc bufferes to invalid value
@@ -749,7 +752,7 @@ errlHndl_t PnorRP::readTOC()
         //then parseTOC will see invalid data
         memset(toc0Buffer, 0xFF, PAGESIZE);
         memset(toc1Buffer, 0xFF, PAGESIZE);
-
+        //If the first toc is at a valid offset try to read and parse it
         if (iv_TocOffset[WORKING].first != INVALID_OFFSET)
         {
             l_errhdl = readFromDevice(iv_TocOffset[WORKING].first, 0, false,
@@ -759,8 +762,12 @@ errlHndl_t PnorRP::readTOC()
                 TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC0");
                 break;
             }
-        }
+            l_primary_errhdl = PNOR::parseTOC(toc0Buffer, iv_TOC);
 
+            //For now assume TOC_0 worked and we are using it
+            iv_TOC_used = TOC_0;
+        }
+        //If the second toc is at a valid offset try to read and parse it
         if (iv_TocOffset[WORKING].second != INVALID_OFFSET)
         {
             l_errhdl = readFromDevice(iv_TocOffset[WORKING].second, 0, false,
@@ -770,45 +777,40 @@ errlHndl_t PnorRP::readTOC()
                 TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC1");
                 break;
             }
+
+            l_secondary_errhdl = PNOR::parseTOC(toc1Buffer, l_secondary_TOC);
         }
 
-        //In order to track errors we will always parse both TOCs
-        l_errhdl = PNOR::parseTOC(toc0Buffer, iv_TOC);
-        PNOR::SectionData_t l_secondary_TOC[PNOR::NUM_SECTIONS+1];
-        l_secondary_errhdl = PNOR::parseTOC(toc1Buffer, l_secondary_TOC);
-
-        //If there is no error in the primary TOC
-        if(!l_errhdl)
+        //if at least one of them is good, only report errors as informational
+        if((l_primary_errhdl != nullptr) && (l_secondary_errhdl == nullptr))
         {
-            //Then we use the primary TOC
-            iv_TOC_used = TOC_0;
-            //If we found an error in the secondary TOC
-            if(l_secondary_errhdl)
-            {
+            //Found an error in primary TOC, report it
+
                 //@TODO RTC:144079 Try to fix PNOR for detected TOC failures
-                //Set the error severity to INFORMATIONAL and commit it
-                l_secondary_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                errlCommit(l_secondary_errhdl, PNOR_COMP_ID);
-            }
+                //Set the error severity to INFORMATIONAL
+                l_primary_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                //commit error logs for corrupted TOC
+                errlCommit(l_primary_errhdl, PNOR_COMP_ID);
+
+                //use the secondary TOC if first is bad
+                iv_TOC_used = TOC_1;
+                memcpy(iv_TOC, l_secondary_TOC, (sizeof(l_secondary_TOC)));
         }
-        //Otherwise if the secondary TOC has no error
-        else if(!l_secondary_errhdl)
+        //If we found an error in the secondary TOC
+        else if((l_secondary_errhdl != nullptr) && (l_primary_errhdl == nullptr))
         {
-            //then we will use the secondary TOC instead
-            iv_TOC_used = TOC_1;
-            memcpy(iv_TOC, l_secondary_TOC, (sizeof(l_secondary_TOC)));
-            //Set the error severity to INFORMATIONAL for the primaryTOC error
-            // and commit it
-            //@TODO RTC:144079: Try to fix PNOR for detected TOC failures
-            l_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(l_errhdl, PNOR_COMP_ID);
+            //@TODO RTC:144079 Try to fix PNOR for detected TOC failures
+            //Set the error severity to INFORMATIONAL
+            l_secondary_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            //commit error logs for corrupted TOC
+            errlCommit(l_secondary_errhdl, PNOR_COMP_ID);
         }
-        //In the case that both TOCs, have errors shut down the system
-        else
+        //In the case that both TOCs failing, have errors shut down the system
+        else if(l_primary_errhdl != nullptr && l_secondary_errhdl != nullptr)
         {
             //commit both error logs for each corrupted TOC
-            l_errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            errlCommit(l_errhdl, PNOR_COMP_ID);
+            l_primary_errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            errlCommit(l_primary_errhdl, PNOR_COMP_ID);
             l_secondary_errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             errlCommit(l_secondary_errhdl, PNOR_COMP_ID);
             TRACFCOMP(g_trac_pnor, "readTOC: parseTOC failed");
@@ -816,20 +818,23 @@ errlHndl_t PnorRP::readTOC()
             INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_INVALID);
         }
 
+        //Set the virtual addresses for the different sections of pnor
+        //so the resource provider has it ready for later use
         l_errhdl = setVirtAddrs();
+
         if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, "readTOC: Failed to set vaddr in TOC");
+            TRACFCOMP(g_trac_pnor, "readTOC: Failed to set virtual addresses in TOC");
             INITSERVICE::doShutdown(PNOR::RC_PNOR_SET_VADDR_FAILED);
         }
     } while (0);
 
-    if(toc0Buffer != NULL)
+    if(toc0Buffer != nullptr)
     {
         delete[] toc0Buffer;
     }
 
-    if(toc1Buffer != NULL)
+    if(toc1Buffer != nullptr)
     {
         delete[] toc1Buffer;
     }
