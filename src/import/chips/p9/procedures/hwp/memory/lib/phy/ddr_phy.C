@@ -396,6 +396,19 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
+    // Check the PC error status. If it's !0, we'll log an informational message
+    // which records the states of the individual PHY block error registers (this is
+    // in the collect register section in the XML)
+    FAPI_TRY( pc::read_error_status0(i_target, l_err_data) );
+
+    if (l_err_data != 0)
+    {
+        FAPI_ERR("seeing %s pc error_status0 0x%016lx", mss::c_str(i_target), l_err_data);
+        fapi2::MSS_DRAMINIT_PC_ERROR_INFO()
+        .set_PC_ERROR0(l_err_data)
+        .set_TARGET_IN_ERROR(i_target).execute(fapi2::FAPI2_ERRL_SEV_RECOVERED, true);
+    }
+
     FAPI_TRY( pc::read_init_cal_error(i_target, l_err_data) );
 
     l_err_data.extractToRight<TT::INIT_CAL_ERROR_WR_LEVEL, TT::CAL_ERROR_FIELD_LEN>(l_errors);
@@ -405,7 +418,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     if ((l_rank_pairs == 0) || (l_errors == 0))
     {
         FAPI_INF("Initial cal - no errors reported");
-        return fapi2::current_err;
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Get the DIMM which failed. We should only have one rank pair as we calibrate the
