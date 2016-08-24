@@ -45,151 +45,41 @@
 #include <p9_hcd_common.H>
 #include <map>
 
-/**
- * @brief enumerates opcodes for few instructions.
- */
-enum
-{
-    OPCODE_31         = 31,
-    MTSPR_CONST1      = 467,
-    MTSPR_BASE_OPCODE = (OPCODE_31 << (31 - 5)) | (MTSPR_CONST1 << (31 - 30)),
-    MFSPR_CONST1      = 339,
-    MFSPR_BASE_OPCODE = (OPCODE_31 << (31 - 5)) | (MFSPR_CONST1 << (31 - 30)),
-    MFMSRD_CONST1     = 83,
-    MFCR_CONST1       = 19,
-    ANDIS_CONST       = 29,
-    ORIS_CONST        = 25,
-};
 
 
-// Vector defining the special acceess egisters
-std::vector<uint16_t> v_ppe_special_regs =
-{
-    { MSR   },
-    { CR    },
-};
-// Vector defining the other xsr regs
-std::vector<uint16_t> v_ppe_xsr_regs =
-{
-    { XSR    },
-    { IAR    },
-    { IR     },
-    { EDR    },
-    { SPRG0  },
 
 
-};
+//// Vector defining the special acceess egisters
+//const std::map<uint16_t, std::string> v_ppe_special_num_name =
+//{
+//    { MSR,   "MSR"    },
+//    { CR,    "CR"     }
+//};
+//// Vector defining the major SPRs
+//// Note: SPRG0 is not include as it is saved and restored as the means for
+//// accessing the other SPRS
+//const std::map<uint16_t, std::string> v_ppe_major_num_name =
+//{
+//    { CTR,   "CTR"    },
+//    { LR,    "LR"     },
+//    { ISR,   "ISR"    },
+//    { SRR0,  "SRR0"   },
+//    { SRR1,  "SRR1"   },
+//    { TCR,   "TCR"    },
+//    { TSR,   "TSR"    }
+//};
+//// Vector defining the minor SPRs
+//const std::map<uint16_t, std::string> v_ppe_minor_num_name =
+//{
+//    { DACR,  "DACR"   },
+//    { DBCR,  "DBCR"   },
+//    { DEC,   "DEC"    },
+//    { IVPR,  "IVPR"   },
+//    { PIR,   "PIR"    },
+//    { PVR,   "PVR"    },
+//    { XER,   "XER"    }
+//};
 
-// Vector defining the major SPRs
-// Note: SPRG0 is not include as it is saved and restored as the means for
-// accessing the other SPRS
-std::vector<uint16_t> v_ppe_major_sprs =
-{
-    { CTR    },
-    { LR     },
-    { ISR    },
-    { SRR0   },
-    { SRR1   },
-    { TCR    },
-    { TSR    },
-};
-
-// Vector defining the minor SPRs
-std::vector<uint16_t> v_ppe_minor_sprs =
-{
-    { DACR  },
-    { DBCR  },
-    { DEC   },
-    { IVPR  },
-    { PIR   },
-    { PVR   },
-    { XER   },
-};
-
-// Vector defining the GPRs
-std::vector<uint16_t> v_ppe_gprs =
-{
-    { R0 },
-    { R1 },
-    { R2 },
-    { R3 },
-    { R4 },
-    { R5 },
-    { R6 },
-    { R7 },
-    { R8 },
-    { R9 },
-    { R10},
-    { R13},
-    { R28},
-    { R29},
-    { R30},
-    { R31},
-};
-
-
-// Vector defining the special acceess egisters
-const std::map<uint16_t, std::string> v_ppe_special_num_name =
-{
-    { MSR,   "MSR"    },
-    { CR,    "CR"     }
-};
-// Vector defining the other xsr regs
-const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
-{
-    { XSR,   "XSR"    },
-    { IAR,   "IAR"    },
-    { IR,    "IR"     },
-    { EDR,   "EDR"    },
-    { SPRG0, "SPRG0"  }
-};
-
-// Vector defining the major SPRs
-// Note: SPRG0 is not include as it is saved and restored as the means for
-// accessing the other SPRS
-const std::map<uint16_t, std::string> v_ppe_major_num_name =
-{
-    { CTR,   "CTR"    },
-    { LR,    "LR"     },
-    { ISR,   "ISR"    },
-    { SRR0,  "SRR0"   },
-    { SRR1,  "SRR1"   },
-    { TCR,   "TCR"    },
-    { TSR,   "TSR"    }
-};
-
-// Vector defining the minor SPRs
-const std::map<uint16_t, std::string> v_ppe_minor_num_name =
-{
-    { DACR,  "DACR"   },
-    { DBCR,  "DBCR"   },
-    { DEC,   "DEC"    },
-    { IVPR,  "IVPR"   },
-    { PIR,   "PIR"    },
-    { PVR,   "PVR"    },
-    { XER,   "XER"    }
-};
-
-// Vector defining the GPRs
-const std::map<uint16_t, std::string> v_ppe_gprs_num_name =
-{
-    { R0,    "R0"     },
-    { R1,    "R1"     },
-    { R2,    "R2"     },
-    { R3,    "R3"     },
-    { R4,    "R4"     },
-    { R5,    "R5"     },
-    { R6,    "R6"     },
-    { R7,    "R7"     },
-    { R8,    "R8"     },
-    { R9,    "R9"     },
-    { R10,   "R10"    },
-    { R13,   "R13"    },
-    { R28,   "R28"    },
-    { R29,   "R29"    },
-    { R30,   "R30"    },
-    { R31,   "R31"    }
-};
 
 
 //-----------------------------------------------------------------------------
@@ -834,5 +724,38 @@ fapi2::ReturnCode ppe_write_iar(
     FAPI_DBG("IAR: 0x%16llX",  temp_data64  );
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIDBGPRO, temp_data64));
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief single step the engine
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note   output is l_scom_regs.] which has reg name added along with value and number
+ *         this will be used for printing in the wrapper
+ */
+fapi2::ReturnCode scom_regs_populate_name(
+    std::vector<SCOMRegValue_t> l_ppe_regs_value,
+    const std::map<uint16_t, std::string> l_ppe_regs_num_name,
+    std::vector<SCOMReg_t>& l_scom_regs)
+
+{
+    SCOMReg_t l_reg;
+    FAPI_INF("   populating reg names");
+
+    if (!l_ppe_regs_value.empty())
+    {
+        for (auto it : l_ppe_regs_value)
+        {
+            auto search = l_ppe_regs_num_name.find(it.number);
+            l_reg.name  = search->second;
+            l_reg.reg = it;
+            l_scom_regs.push_back(l_reg);
+        }
+    }
+
+
     return fapi2::current_err;
 }
