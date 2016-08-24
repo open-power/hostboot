@@ -295,68 +295,8 @@ errlHndl_t platReadPartialGood(const TargetHandle_t &i_target,
 errlHndl_t platReadPR(const TargetHandle_t &i_target,
         void *o_prData)
 {
-    HWAS_DBG( "i_target %.8X",
-            i_target->getAttr<ATTR_HUID>());
-
-    // call deviceRead() to find the PR record
-    uint8_t prData[VPD_VINI_PR_DATA_LENGTH];
-    size_t prSize = sizeof(prData);
-
-    errlHndl_t errl = deviceRead(i_target, prData, prSize,
-            DEVICE_MVPD_ADDRESS(MVPD::VINI, MVPD::PR));
-
-    if (unlikely(errl != NULL))
-    {   // errl was set - this is an error condition.
-        HWAS_ERR( "i_target %.8X - failed PR read",
-            i_target->getAttr<ATTR_HUID>());
-    }
-    else
-    {
-#if 0
-// Unit test. set P8_MURANO.config to have 4 procs, and this code will
-//  alter the VPD so that some of the procs and chiplets should get marked
-//  as NOT functional.
-        {
-            if (i_target->getAttr<ATTR_HUID>() == 0x50000)
-            {   // 1st proc - let it go thru ok.
-                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
-                prData[7] = 1; // 2 procs
-                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
-                //prData[7] = 3; // 4 cores
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50001)
-            {   // 2nd proc -
-                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*2 = 6 cores
-                prData[7] = 1; // 2 procs
-                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
-                //prData[7] = 3; // 4 cores
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50002)
-            {   // 3rd proc -
-                prData[2] = 3 << VPD_VINI_PR_B2_SHIFT; // 3*1 = 3 cores
-                prData[7] = 0; // 1 procs
-                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
-                //prData[7] = 3; // 4 cores
-            }
-            else
-            if (i_target->getAttr<ATTR_HUID>() == 0x50003)
-            {   // 4th proc -
-                prData[2] = 4 << VPD_VINI_PR_B2_SHIFT; // 4*1 = 4 cores
-                prData[7] = 0; // 1 procs
-                //prData[2] = 1 << VPD_VINI_PR_B2_SHIFT; // 1*4 = 4 cores
-                //prData[7] = 3; // 4 cores
-            }
-        }
-#endif
-
-        HWAS_DBG_BIN("PR record", prData, VPD_VINI_PR_DATA_LENGTH);
-        // copy the data back into the caller's buffer
-        memcpy(o_prData, prData, VPD_VINI_PR_DATA_LENGTH);
-    }
-
-    return errl;
+    HWAS_ERR( "platReadPR is deprecated!!!" );
+    return NULL;
 } // platReadPR
 
 //******************************************************************************

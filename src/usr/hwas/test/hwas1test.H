@@ -1263,11 +1263,12 @@ public:
         using namespace HWAS;
         using namespace TARGETING;
 
+#if 0 //Cannot actually run this because it might change state
         errlHndl_t errl = NULL;
 
-        // list of procs and data that we'll need to look at the PR keyword
+        // list of procs and data
         procRestrict_t l_procEntry;
-        std::vector <procRestrict_t> l_procPRList;
+        std::vector <procRestrict_t> l_procRestrictList;
 
         // Get list of present targets with type PROC
         TargetHandleList pCheckPres;
@@ -1280,46 +1281,43 @@ public:
         {
             TargetHandle_t pTarget = *pTarget_it;
 
-            // read the PR keywords that we need, so that if
-            //  we have errors, we can handle them as approprite.
-            uint8_t prData[VPD_VINI_PR_DATA_LENGTH/sizeof(uint8_t)];
-            bzero(prData, sizeof(prData));
-            errl = platReadPR(pTarget, prData);
-            if (errl != NULL)
-            {   // read of PR keyword failed
-                TS_FAIL("testHWASrestrictECunits>"
-                        "pTarget %.8X - read PR failed - bad",
-                        pTarget->getAttr<ATTR_HUID>());
-            }
-            else
-            {
-                // save info so that we can
-                //  process the PR keyword after this loop
-                l_procEntry.target = pTarget;
-                l_procEntry.group = pTarget->getAttr<ATTR_FRU_ID>();
-                l_procEntry.procs = (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
-                l_procEntry.maxECs = l_procEntry.procs *
-                    (prData[2] & VPD_VINI_PR_B2_MASK) >> VPD_VINI_PR_B2_SHIFT;
-                l_procPRList.push_back(l_procEntry);
+            // create data for each proc
+            l_procEntry.target = pTarget;
+            l_procEntry.group = 0;
+            l_procEntry.procs = 1;
+            l_procEntry.maxECs = UINT32_MAX;
 
-                if (l_procEntry.maxECs == 0)
-                {
-                    // this is PROBABLY bad PR, so YELL...
-                    TS_FAIL("testHWASrestrictECunits>"
-                            "pTarget %.8X - PR VPD says 0 CORES",
-                            pTarget->getAttr<ATTR_HUID>());
-                }
-            }
+            l_procPRList.push_back(l_procEntry);
         } // for pTarget_it
 
         // Call restrictECunits
-        errl = restrictECunits(l_procPRList, false, 0);
+        errl = restrictECunits(l_procRestrictList, false, 0);
         if (errl != NULL)
         {   // restrict EC units failed
             TS_FAIL("testHWASrestrictECunits> - restrict EC units failed");
         }
+#endif
+
+        // Instead verify that we ended up with exactly the right number
+        //  enabled cores that we expect for our NIMBUS standalone config
+        TargetHandleList l_funcProcs;
+        getAllChips( l_funcProcs, TYPE_PROC, true );
+        for( const auto& l_proc : l_funcProcs )
+        {
+            TargetHandleList l_funcCores;
+            getChildChiplets( l_funcCores, l_proc, TYPE_CORE, true );
+
+            // Currently we have 4 ECs configured in the PG record
+            const size_t l_numCores = 4;
+            if( l_funcCores.size() != l_numCores )
+            {
+                TS_FAIL("testHWASrestrictECunits> Expected %d cores, but saw %d",
+                        l_numCores, l_funcCores.size() );
+            }
+        }
 
         TS_TRACE( "testHWASrestrictECunits exit" );
+
     }
 
     /**

@@ -239,6 +239,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
 
 
 /**
+ * @deprecated
  * @brief platform specific code to determine the PR vector of the input
  *  target. The platform specific code is responsible for returning the
  *  vector. The caller is responsible for allocating and de-allocating the
@@ -256,23 +257,7 @@ errlHndl_t platReadPR(const TARGETING::TargetHandle_t &i_target,
                                 void *o_prData);
 
 // constants the platReadPR will use for looking at the VPD data
-const uint32_t VPD_VINI_PR_DATA_LENGTH      = 8;
-
-// Byte 2 Number of processors per module chip
-const uint32_t VPD_VINI_PR_B2_MASK          = 0xF0; // bits 0-3
-const uint32_t VPD_VINI_PR_B2_SHIFT         = 4;
-// Byte 7 Max VPD copies (aka replication factor)
-// Bits 2:7
-//   Number of chips using this VPD minus 1, i.e., Used to
-//   calculate the maximum number of duplicate copies of the B9
-//   keyword allowed. Multiply PR byte 2 (number of processor
-//   per module) times this value [(PR byte 7) + 1] to get the max
-//   number of copies of any given B9 keyword data in the SPIRA
-//   PACA structure.
-//   If the number of functional processors is different on chips
-//   within the same module. It will be firmwares responsibility
-//   average them out as specified in byte 2 above.
-const uint32_t VPD_VINI_PR_B7_MASK          = 0x3F; // bits 2-7
+const uint32_t VPD_VINI_PR_DATA_LENGTH      = 8; //@deprecrated
 
 /**
  * @brief platform specific code to read the Field Core Override

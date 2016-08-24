@@ -223,9 +223,10 @@ errlHndl_t discoverTargets()
         //  read the partialGood vector to determine if any are not functional
         //  and read and store values from the PR keyword
 
-        // list of procs and data that we'll need to look at the PR keyword
+        // list of procs and data that we'll need to look at when potentially
+        //  reducing the list of valid ECs later
         procRestrict_t l_procEntry;
-        std::vector <procRestrict_t> l_procPRList;
+        std::vector <procRestrict_t> l_procRestrictList;
 
         // sort the list by ATTR_HUID to ensure that we
         //  start at the same place each time
@@ -294,52 +295,19 @@ errlHndl_t discoverTargets()
                     }
                     else
                     {
-                      // look at the 'nest' logic to override the functionality
-                      //  of this proc
-                      chipFunctional = isChipFunctional(pTarget, pgData);
+                        // look at the 'nest' logic to override the
+                        //  functionality of this proc
+                        chipFunctional = isChipFunctional(pTarget, pgData);
 
-                      if (chipFunctional)
-                      {
-                        // read the PR keywords that we need, so that if
-                        //  we have errors, we can handle them as approprite.
-                        uint8_t prData[VPD_VINI_PR_DATA_LENGTH/sizeof(uint8_t)];
-                        bzero(prData, sizeof(prData));
-                        errl = platReadPR(pTarget, prData);
-                        if (errl != NULL)
-                        {   // read of PR keyword failed
-                            HWAS_INF("pTarget %.8X - read PR failed - bad",
-                                pTarget->getAttr<ATTR_HUID>());
-                            chipFunctional = false;
-                            errlEid = errl->eid();
-
-                            // commit the error but keep going
-                            errlCommit(errl, HWAS_COMP_ID);
-                            // errl is now NULL
-                        }
-                        else
-                        {
-                            // save info so that we can
-                            //  process the PR keyword after this loop
-                            HWAS_INF("pTarget %.8X - pushing to procPRlist; FRU_ID %d",
-                                pTarget->getAttr<ATTR_HUID>(),
-                                pTarget->getAttr<ATTR_FRU_ID>());
-                            l_procEntry.target = pTarget;
-                            l_procEntry.group = pTarget->getAttr<ATTR_FRU_ID>();
-                            l_procEntry.procs =
-                                        (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
-                            l_procEntry.maxECs = l_procEntry.procs *
-                                        (prData[2] & VPD_VINI_PR_B2_MASK)
-                                            >> VPD_VINI_PR_B2_SHIFT;
-                            l_procPRList.push_back(l_procEntry);
-
-                            if (l_procEntry.maxECs == 0)
-                            {
-                                // this is PROBABLY bad PR, so YELL...
-                                HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
-                                    pTarget->getAttr<ATTR_HUID>());
-                            }
-                        }
-                      }
+                        // Fill in a dummy restrict list
+                        l_procEntry.target = pTarget;
+                        // every proc is uniquely counted
+                        l_procEntry.group = pTarget->getAttr<ATTR_HUID>();
+                        // just 1 proc per group
+                        l_procEntry.procs = 1;
+                        // indicates we should use all available ECs
+                        l_procEntry.maxECs = UINT32_MAX;
+                        l_procRestrictList.push_back(l_procEntry);
                     }
                 } // TYPE_PROC
             } // CLASS_CHIP
@@ -424,20 +392,17 @@ errlHndl_t discoverTargets()
         //calculate the system EFFECTIVE_EC
         calculateEffectiveEC();
 
-        // PR keyword processing - potentially reduce the number of ec/core
-        //  units that are functional based on what's in the PR keyword.
-        //  call to restrict EC units, marking bad units as present=false;
+        // Potentially reduce the number of ec/core units that are present
+        //  based on fused mode
+        //  marking bad units as present=false;
         //  deconfigReason = 0 because present is false so this is not a
-        //  deconfigured event.
-#ifndef CONFIG_SKIP_RESTRICT_EC_UNITS
-        errl = restrictECunits(l_procPRList, false, 0);
-
+        //   deconfigured event.
+        errl = restrictECunits(l_procRestrictList, false, 0);
         if (errl)
         {
             HWAS_ERR("discoverTargets: restrictECunits failed");
             break;
         }
-#endif
 
         // call invokePresentByAssoc() to obtain functional MCSs, MEMBUFs, and
         // DIMMs for non-direct memory or MCSs, MCAs, and DIMMs for direct
@@ -918,7 +883,7 @@ errlHndl_t restrictECunits(
         // this procs number, used to determine groupings
         uint32_t thisGroup = i_procList[procIdx].group;
 
-        HWAS_INF("procRestrictList[%d] - maxECs %d, procs %d, group %d",
+        HWAS_INF("procRestrictList[%d] - maxECs 0x%X, procs %d, group %d",
                 procIdx, maxECs, procs, thisGroup);
 
         // exs, ecs, and iters for each proc in this vpd set
@@ -1014,15 +979,22 @@ errlHndl_t restrictECunits(
             ++procIdx;
         } // for i < procs
 
+        // adjust maxECs based on fused mode
+        if( is_fused_mode() )
+        {
+            // only allow complete pairs
+            maxECs = std::min( currentPairedECs*2, maxECs );
+        }
+
         if ((currentPairedECs + currentSingleECs) <= maxECs)
         {
             // we don't need to restrict - we're done with this group.
-            HWAS_DBG("currentECs %d <= maxECs %d -- done",
+            HWAS_INF("currentECs 0x%X <= maxECs 0x%X -- done",
                     (currentPairedECs + currentSingleECs), maxECs);
             continue;
         }
 
-        HWAS_DBG("currentECs %d > maxECs %d -- restricting!",
+        HWAS_DBG("currentECs 0x%X > maxECs 0x%X -- restricting!",
                 (currentPairedECs + currentSingleECs), maxECs);
 
         // now need to find EC units that stay functional, going
@@ -1039,7 +1011,7 @@ errlHndl_t restrictECunits(
             ((maxECs > currentPairedECs) && !is_fused_mode())
             ? (maxECs - currentPairedECs) : 0;
         uint32_t goodECs = 0;
-        HWAS_DBG("procs %d maxECs %d", procs, maxECs);
+        HWAS_DBG("procs 0x%X maxECs 0x%X", procs, maxECs);
 
         // Each pECList has ECs for a given EX and proc.  Check each EC list to
         //  determine if it has an EC pair or a single EC and if the remaining
