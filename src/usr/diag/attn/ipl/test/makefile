@@ -45,6 +45,6 @@ MODULE = testattn
 
 # asdf bjs @TODO: RTC:151004
 #TESTS = *.H
-TESTS = attntestipl.H
+TESTS = attntestipl.H attntestproc.H
 
 include ${ROOTPATH}/config.mk
