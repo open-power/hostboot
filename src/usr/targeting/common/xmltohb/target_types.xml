@@ -1786,6 +1786,10 @@
     <attribute><id>VPD_OVERRIDE_MT_ENABLE</id></attribute>
     <attribute><id>VPD_OVERRIDE_MR</id></attribute>
     <attribute><id>VPD_OVERRIDE_MR_ENABLE</id></attribute>
+    <attribute><id>VPD_OVERRIDE_DQ</id></attribute>
+    <attribute><id>VPD_OVERRIDE_DQ_ENABLE</id></attribute>
+    <attribute><id>VPD_OVERRIDE_CK</id></attribute>
+    <attribute><id>VPD_OVERRIDE_CK_ENABLE</id></attribute>
     <attribute><id>MSS_VPD_MT_0_VERSION_LAYOUT</id></attribute>
     <attribute><id>MSS_VPD_MT_1_VERSION_DATA</id></attribute>
     <attribute><id>MSS_VPD_MT_2_SIGNATURE_HASH</id></attribute>

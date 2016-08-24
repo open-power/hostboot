@@ -66,6 +66,10 @@ dvpdTestData dvpdData[] =
 {
     { DVPD::MEMD, DVPD::MR },
     { DVPD::MEMD, DVPD::MT },
+    { DVPD::MEMD, DVPD::Q0 },
+    { DVPD::MEMD, DVPD::Q1 },
+    { DVPD::MEMD, DVPD::Q8 },
+    { DVPD::MEMD, DVPD::CK },
 };
 
 TARGETING::Target* getFunctionalMcsTarget()

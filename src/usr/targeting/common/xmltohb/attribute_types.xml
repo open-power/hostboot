@@ -10806,6 +10806,82 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>VPD_OVERRIDE_DQ_ENABLE</id>
+    <description>
+        Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_DQ.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_DQ_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_DQ</id>
+    <description>
+    Byte-for-byte override for the bucket of DQ data that would
+    normally come from VPD.  If ATTR_VPD_OVERRIDE_DQ_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getVPD() instead of the actual VPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>160</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_DQ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_CK_ENABLE</id>
+    <description>
+        Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_CK.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_CK_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VPD_OVERRIDE_CK</id>
+    <description>
+    Byte-for-byte override for the bucket of CK data that would
+    normally come from VPD.  If ATTR_VPD_OVERRIDE_CK_ENABLE!=0 then
+    the value of this attribute will be returned to callers of
+    fapi2::getVPD() instead of the actual VPD contents.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VPD_OVERRIDE_CK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <!--TOOD RTC: 151938 Make sure that these are set up by parseMRW script-->
 <attribute>
     <id>MEMVPD_FREQS_MHZ</id>
