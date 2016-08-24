@@ -882,11 +882,13 @@ sub writeScom
 
 # @sub getHRMOR
 #
-# Returns the HRMOR (0 for VPO).
+# Returns the HRMOR (read from model for VPO).
 #
 sub getHRMOR
 {
-    return 0;
+    my $hrmor = `getspy pu.c ECP.LS.HRMOR -c14 -debug3.1 -quiet | grep 0x`;
+    chomp $hrmor;
+    return hex( $hrmor );
 }
 
 
