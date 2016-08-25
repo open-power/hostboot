@@ -38,7 +38,7 @@
 
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/conversions.H>
+#include <lib/eff_config/timing.H>
 #include <lib/utils/poll.H>
 
 namespace mss
