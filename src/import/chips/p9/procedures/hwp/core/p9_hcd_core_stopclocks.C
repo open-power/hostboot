@@ -42,6 +42,7 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_hcd_common.H>
+#include <p9_common_clk_ctrl_state.H>
 #include "p9_hcd_core_stopclocks.H"
 
 //------------------------------------------------------------------------------
@@ -50,8 +51,12 @@
 
 enum P9_HCD_CORE_STOPCLOCKS_CONSTANTS
 {
-    CORE_CLK_SYNC_TIMEOUT_IN_MS       = 1,
-    CORE_CLK_STOP_TIMEOUT_IN_MS       = 1
+    CORE_PCB_MUX_POLLING_HW_NS_DELAY      = 10000,
+    CORE_PCB_MUX_POLLING_SIM_CYCLE_DELAY  = 320000,
+    CORE_CLK_SYNC_POLLING_HW_NS_DELAY     = 10000,
+    CORE_CLK_SYNC_POLLING_SIM_CYCLE_DELAY = 320000,
+    CORE_CLK_STOP_POLLING_HW_NS_DELAY     = 10000,
+    CORE_CLK_STOP_POLLING_SIM_CYCLE_DELAY = 320000
 };
 
 //------------------------------------------------------------------------------
@@ -63,9 +68,11 @@ p9_hcd_core_stopclocks(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target)
 {
     FAPI_INF(">>p9_hcd_core_stopclocks");
+    fapi2::ReturnCode                              l_rc;
     fapi2::buffer<uint64_t>                        l_ccsr;
     fapi2::buffer<uint64_t>                        l_data64;
-    uint32_t                                       l_timeout;
+    fapi2::buffer<uint64_t>                        l_temp64;
+    uint32_t                                       l_loops1ms;
     uint8_t                                        l_attr_chip_unit_pos;
     uint8_t                                        l_attr_vdm_enable;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
@@ -83,12 +90,59 @@ p9_hcd_core_stopclocks(
     // Prepare to stop core clocks
     // ----------------------------
 
-    FAPI_DBG("Assert Core-L2/CC Quiesces via CME_SCOM_SICR[6,8]/[7,9]");
-    FAPI_TRY(putScom(l_quad,
-                     (l_attr_chip_unit_pos < 2) ?
-                     EX_0_CME_SCOM_SICR_OR : EX_1_CME_SCOM_SICR_OR,
-                     (BIT64(6 + (l_attr_chip_unit_pos % 2)) |
-                      BIT64(8 + (l_attr_chip_unit_pos % 2)))));
+    FAPI_DBG("Check PM_RESET_STATE_INDICATOR via GPMMR[15]");
+    FAPI_TRY(getScom(i_target, C_PPM_GPMMR_SCOM, l_data64));
+
+    if (!l_data64.getBit<15>())
+    {
+        FAPI_DBG("Gracefully turn off power management, continue anyways if fail");
+        /// @todo suspend_pm()
+    }
+
+    FAPI_DBG("Check core clock controller status");
+    l_rc = p9_common_clk_ctrl_state<fapi2::TARGET_TYPE_CORE>(i_target);
+
+    if (l_rc)
+    {
+        FAPI_INF("Clock controller of this core chiplet is inaccessible, return");
+        goto fapi_try_exit;
+    }
+
+    FAPI_DBG("Check cache clock controller status");
+    l_rc = p9_common_clk_ctrl_state<fapi2::TARGET_TYPE_EQ>(l_quad);
+
+    if (l_rc)
+    {
+        FAPI_INF("WARNING: core is enabled while cache is not, continue anyways");
+    }
+    else
+    {
+
+        FAPI_DBG("Check PERV clock status for access to CME via CLOCK_STAT[4]");
+        FAPI_TRY(getScom(l_quad, EQ_CLOCK_STAT_SL, l_data64));
+
+        FAPI_DBG("Check PERV fence status for access to CME via CPLT_CTRL1[4]");
+        FAPI_TRY(getScom(l_quad, EQ_CPLT_CTRL1, l_temp64));
+
+        if (l_data64.getBit<4>() == 0 && l_temp64.getBit<4>() == 0)
+        {
+            //halt cme(poll for halted, if timeout, print warnning keep going).
+
+            FAPI_DBG("Assert Core-L2/CC Quiesces via CME_SCOM_SICR[6,8]/[7,9]");
+            FAPI_TRY(putScom(l_quad,
+                             (l_attr_chip_unit_pos < 2) ?
+                             EX_0_CME_SCOM_SICR_OR : EX_1_CME_SCOM_SICR_OR,
+                             (BIT64(6 + (l_attr_chip_unit_pos % 2)) |
+                              BIT64(8 + (l_attr_chip_unit_pos % 2)))));
+        }
+    }
+
+    FAPI_DBG("Assert pm_mux_disable to get PCB Mux from CME via SLAVE_CONFIG[7]");
+    FAPI_TRY(getScom(i_target, C_SLAVE_CONFIG_REG, l_data64));
+    FAPI_TRY(putScom(i_target, C_SLAVE_CONFIG_REG, DATA_SET(7)));
+
+    FAPI_DBG("Override possible PPM write protection to CME via CPPM_CPMMR[1]");
+    FAPI_TRY(putScom(i_target, C_CPPM_CPMMR_OR, MASK_SET(1)));
 
     FAPI_DBG("Assert chiplet fence via NET_CTRL0[18]");
     FAPI_TRY(putScom(i_target, C_NET_CTRL0_WOR, MASK_SET(18)));
@@ -107,28 +161,26 @@ p9_hcd_core_stopclocks(
     FAPI_TRY(putScom(i_target, C_CLK_REGION, l_data64));
 
     FAPI_DBG("Poll for core clocks stopped via CPLT_STAT0[8]");
-    l_timeout = (p9hcd::CYCLES_PER_MS / p9hcd::INSTS_PER_POLL_LOOP) *
-                CORE_CLK_STOP_TIMEOUT_IN_MS;
+    l_loops1ms = 1E6 / CORE_CLK_STOP_POLLING_HW_NS_DELAY;
 
     do
     {
+        fapi2::delay(CORE_CLK_STOP_POLLING_HW_NS_DELAY,
+                     CORE_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
+
         FAPI_TRY(getScom(i_target, C_CPLT_STAT0, l_data64));
     }
-    while((l_data64.getBit<8>() != 1) && ((--l_timeout) != 0));
+    while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::PMPROC_CORECLKSTOP_TIMEOUT()
-                .set_CORE_TARGET(i_target)
-                .set_CORECPLTSTAT(l_data64),
+    FAPI_ASSERT((l_loops1ms != 0),
+                fapi2::PMPROC_CORECLKSTOP_TIMEOUT().set_CORECPLTSTAT(l_data64),
                 "Core Clock Stop Timeout");
 
     FAPI_DBG("Check core clocks stopped via CLOCK_STAT_SL[4-13]");
     FAPI_TRY(getScom(i_target, C_CLOCK_STAT_SL, l_data64));
 
     FAPI_ASSERT((((~l_data64) & p9hcd::CLK_REGION_ALL_BUT_PLL) == 0),
-                fapi2::PMPROC_CORECLKSTOP_FAILED()
-                .set_CORE_TARGET(i_target)
-                .set_CORECLKSTAT(l_data64),
+                fapi2::PMPROC_CORECLKSTOP_FAILED().set_CORECLKSTAT(l_data64),
                 "Core Clock Stop Failed");
     FAPI_DBG("Core clocks stopped now");
 
@@ -140,16 +192,18 @@ p9_hcd_core_stopclocks(
     FAPI_TRY(putScom(i_target, C_CPPM_CACCR_CLEAR, MASK_SET(15)));
 
     FAPI_DBG("Poll for core clock sync done to drop via CPPM_CACSR[13]");
-    l_timeout = (p9hcd::CYCLES_PER_MS / p9hcd::INSTS_PER_POLL_LOOP) *
-                CORE_CLK_STOP_TIMEOUT_IN_MS;
+    l_loops1ms = 1E6 / CORE_CLK_SYNC_POLLING_HW_NS_DELAY;
 
     do
     {
+        fapi2::delay(CORE_CLK_SYNC_POLLING_HW_NS_DELAY,
+                     CORE_CLK_SYNC_POLLING_SIM_CYCLE_DELAY);
+
         FAPI_TRY(getScom(i_target, C_CPPM_CACSR, l_data64));
     }
-    while((l_data64.getBit<13>() == 1) && ((--l_timeout) != 0));
+    while((l_data64.getBit<13>() == 1) && ((--l_loops1ms) != 0));
 
-    FAPI_ASSERT((l_timeout != 0),
+    FAPI_ASSERT((l_loops1ms != 0),
                 fapi2::PMPROC_CORECLKSYNCDROP_TIMEOUT().set_COREPPMCACSR(l_data64),
                 "Core Clock Sync Drop Timeout");
     FAPI_DBG("Core clock sync done dropped");
@@ -186,7 +240,18 @@ p9_hcd_core_stopclocks(
     // -------------------------------
 
     FAPI_DBG("Set core as stopped in STOP history register");
-    FAPI_TRY(putScom(i_target, C_PPM_SSHSRC, (BIT64(0) | BIT64(13))));
+    FAPI_TRY(putScom(i_target, C_PPM_SSHSRC, BIT64(0)));
+
+    // -------------------------------
+    // Clean up
+    // -------------------------------
+
+    FAPI_DBG("Return possible PPM write protection to CME via CPPM_CPMMR[1]");
+    FAPI_TRY(putScom(i_target, C_CPPM_CPMMR_CLEAR, MASK_SET(1)));
+
+    FAPI_DBG("Drop pm_mux_disable to release PCB Mux via SLAVE_CONFIG[7]");
+    FAPI_TRY(getScom(i_target, C_SLAVE_CONFIG_REG, l_data64));
+    FAPI_TRY(putScom(i_target, C_SLAVE_CONFIG_REG, DATA_UNSET(7)));
 
 fapi_try_exit:
 
