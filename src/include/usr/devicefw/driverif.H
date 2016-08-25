@@ -266,7 +266,7 @@ namespace DeviceFW
                              TargType i_targetType,
                              deviceOp_t i_regRoute)
     {
-        return InvalidParameterType(); // Cause a compile fail if not one of
+        InvalidParameterType(); // Cause a compile fail if not one of
                                        // the explicit template specializations.
     }
 
