@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -427,9 +427,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                i_record.rec_num,
                i_record.offset );
 
-    // mimic the behavior of hostboot when mbox is not available.
-    TRACFCOMP( g_trac_vpd, ERR_MRK
+    if(!INITSERVICE::spBaseServicesEnabled())
+    {
+        TRACFCOMP( g_trac_vpd, ERR_MRK
                "No SP Base Services available at runtime.");
+        return err;
+    }
 
     /*@
      * @errortype

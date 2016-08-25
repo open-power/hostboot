@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -537,7 +537,7 @@ class MVPDTest: public CxxTest::TestSuite
 
                 // first figure out how big the keyword is
                 cmds++;
-                size_t theSize = 0;                
+                size_t theSize = 0;
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
@@ -599,7 +599,7 @@ class MVPDTest: public CxxTest::TestSuite
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
-                } 
+                }
 
                 // verify the data got written
                 cmds++;
@@ -653,17 +653,19 @@ class MVPDTest: public CxxTest::TestSuite
 #else
                 if(!err)
                 {
-                    fails++;
-                    TRACFCOMP( g_trac_vpd, ERR_MRK
-                               "testMvpdWrite() at runtime did not fail");
-                    TS_FAIL( "testMvpdWrite() - VPD write did not fail at runtime");
+                    // Removed this error from rt_vpd.C
+                    // So it will not fail here anymore
+                    //fails++;
+                    //TRACFCOMP( g_trac_vpd, ERR_MRK
+                    //           "testMvpdWrite() at runtime did not fail");
+                    //TS_FAIL( "testMvpdWrite() - VPD write did not fail at runtime");
                 }
                 else
                 {
                     delete err;
                 }
 #endif
-                
+
             } while( 0 );
 
             if( NULL != testData )
