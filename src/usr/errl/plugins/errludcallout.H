@@ -284,6 +284,7 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
                     case_PROCEDURE(EPUB_PRC_TOD_CLOCK_ERR)
                     case_PROCEDURE(EPUB_PRC_COOLING_SYSTEM_ERR)
                     case_PROCEDURE(EPUB_PRC_FW_VERIFICATION_ERR)
+                    case_PROCEDURE(EPUB_PRC_GPU_ISOLATION_PROCEDURE)
                     default:
                         i_parser.PrintNumber( "Procedure", "UNKNOWN: 0x%X",
                                         ntohl(pData->procedure) );

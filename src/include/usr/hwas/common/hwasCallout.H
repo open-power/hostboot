@@ -92,6 +92,7 @@ enum epubProcedureID
     EPUB_PRC_TOD_CLOCK_ERR          = 0x56,
     EPUB_PRC_COOLING_SYSTEM_ERR     = 0x5C,
     EPUB_PRC_FW_VERIFICATION_ERR    = 0x5D,
+    EPUB_PRC_GPU_ISOLATION_PROCEDURE= 0x5E,
 };
 
 // from srci/fsp/srci.H
