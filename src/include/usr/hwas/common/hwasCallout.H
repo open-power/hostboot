@@ -114,7 +114,8 @@ enum busTypeEnum
     A_BUS_TYPE      = 3,
     X_BUS_TYPE      = 4,
     I2C_BUS_TYPE    = 5,
-    PSI_BUS_TYPE    = 6
+    PSI_BUS_TYPE    = 6,
+    O_BUS_TYPE      = 7
 };
 
 enum clockTypeEnum

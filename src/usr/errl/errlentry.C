@@ -113,6 +113,18 @@ static const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_MBA              , EPUB_MEMORY_CONTROLLER    },
     { TARGETING::TYPE_XBUS             , EPUB_PROCESSOR_BUS_CTL    },
     { TARGETING::TYPE_ABUS             , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_EQ               , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_MCA              , EPUB_MEMORY_CONTROLLER    },
+    { TARGETING::TYPE_MCBIST           , EPUB_MEMORY_CONTROLLER    },
+    { TARGETING::TYPE_MI               , EPUB_MEMORY_CONTROLLER    },
+    { TARGETING::TYPE_DMI              , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_OBUS             , EPUB_PROCESSOR_BUS_CTL    },
+    { TARGETING::TYPE_NX               , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_CAPP             , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_NV               , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_PHB              , EPUB_IO_PHB               },
+    { TARGETING::TYPE_PEC              , EPUB_IO_PHB               },
+    { TARGETING::TYPE_CORE             , EPUB_PROCESSOR_UNIT       },
 };
 
 struct epubBusTypeToSub_t
@@ -129,6 +141,7 @@ static const epubBusTypeToSub_t BUS_TO_SUBSYS_TABLE[] =
     { HWAS::X_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
     { HWAS::I2C_BUS_TYPE               , EPUB_CEC_HDW_I2C_DEVS     },
     { HWAS::PSI_BUS_TYPE               , EPUB_CEC_HDW_SP_PHYP_INTF },
+    { HWAS::O_BUS_TYPE                 , EPUB_PROCESSOR_BUS_CTL    },
 };
 
 struct epubClockTypeToSub_t
