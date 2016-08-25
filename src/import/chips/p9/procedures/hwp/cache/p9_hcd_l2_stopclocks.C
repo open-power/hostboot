@@ -42,6 +42,7 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_hcd_common.H>
+#include <p9_common_clk_ctrl_state.H>
 #include "p9_hcd_l2_stopclocks.H"
 
 //------------------------------------------------------------------------------
@@ -50,8 +51,10 @@
 
 enum P9_HCD_L2_STOPCLOCKS_CONSTANTS
 {
-    L2_CLK_SYNC_TIMEOUT_IN_MS = 1,
-    L2_CLK_STOP_TIMEOUT_IN_MS = 1
+    CACHE_L2_CLK_SYNC_POLLING_HW_NS_DELAY     = 10000,
+    CACHE_L2_CLK_SYNC_POLLING_SIM_CYCLE_DELAY = 320000,
+    CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY     = 10000,
+    CACHE_L2_CLK_STOP_POLLING_SIM_CYCLE_DELAY = 320000
 };
 
 //------------------------------------------------------------------------------
@@ -64,8 +67,10 @@ p9_hcd_l2_stopclocks(
     const p9hcd::P9_HCD_EX_CTRL_CONSTANTS       i_select_ex)
 {
     FAPI_INF(">>p9_hcd_l2_stopclocks: ex[%d]",  i_select_ex);
+    fapi2::ReturnCode                           l_rc;
     fapi2::buffer<uint64_t>                     l_data64;
-    uint32_t                                    l_timeout;
+    fapi2::buffer<uint64_t>                     l_temp64;
+    uint32_t                                    l_loops1ms;
     uint64_t                                    l_region_clock = 0;
     uint64_t                                    l_l2sync_clock = 0;
     uint64_t                                    l_l2mask_pscom = 0;
@@ -75,7 +80,7 @@ p9_hcd_l2_stopclocks(
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
                            l_attr_chip_unit_pos));
-//    l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+//  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
     l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
     if (i_select_ex & p9hcd::EVEN_EX)
@@ -96,8 +101,35 @@ p9_hcd_l2_stopclocks(
     // Prepare to stop L2 clocks
     // -------------------------
 
-    FAPI_DBG("Assert L2 pscom masks via RING_FENCE_MASK_LATCH_REG[2/3,10/11]");
-    FAPI_TRY(putScom(i_target, EQ_RING_FENCE_MASK_LATCH_REG, l_l2mask_pscom));
+    FAPI_DBG("Check PM_RESET_STATE_INDICATOR via GPMMR[15]");
+    FAPI_TRY(getScom(i_target, EQ_PPM_GPMMR_SCOM, l_data64));
+
+    if (!l_data64.getBit<15>())
+    {
+        FAPI_DBG("Gracefully turn off power management, if fail, continue anyways");
+        /// @todo suspend_pm()
+    }
+
+    FAPI_DBG("Check cache clock controller status");
+    l_rc = p9_common_clk_ctrl_state<fapi2::TARGET_TYPE_EQ>(i_target);
+
+    if (l_rc)
+    {
+        FAPI_INF("Clock controller of this cache chiplet is inaccessible, return");
+        goto fapi_try_exit;
+    }
+
+    FAPI_DBG("Check PERV clock status for access to CME via CLOCK_STAT[4]");
+    FAPI_TRY(getScom(i_target, EQ_CLOCK_STAT_SL, l_data64));
+
+    FAPI_DBG("Check PERV fence status for access to CME via CPLT_CTRL1[4]");
+    FAPI_TRY(getScom(i_target, EQ_CPLT_CTRL1, l_temp64));
+
+    if (l_data64.getBit<4>() == 0 && l_temp64.getBit<4>() == 0)
+    {
+        FAPI_DBG("Assert L2 pscom masks via RING_FENCE_MASK_LATCH_REG[2/3,10/11]");
+        FAPI_TRY(putScom(i_target, EQ_RING_FENCE_MASK_LATCH_REG, l_l2mask_pscom));
+    }
 
     // -------------------------------
     // Stop L2 clocks
@@ -113,28 +145,26 @@ p9_hcd_l2_stopclocks(
     FAPI_TRY(putScom(i_target, EQ_CLK_REGION, l_data64));
 
     FAPI_DBG("Poll for L2 clocks stopped via CPLT_STAT0[8]");
-    l_timeout = (p9hcd::CYCLES_PER_MS / p9hcd::INSTS_PER_POLL_LOOP) *
-                L2_CLK_STOP_TIMEOUT_IN_MS;
+    l_loops1ms = 1E6 / CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY;
 
     do
     {
+        fapi2::delay(CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY,
+                     CACHE_L2_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
+
         FAPI_TRY(getScom(i_target, EQ_CPLT_STAT0, l_data64));
     }
-    while((l_data64.getBit<8>() != 1) && ((--l_timeout) != 0));
+    while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
 
-    FAPI_ASSERT((l_timeout != 0),
-                fapi2::PMPROC_L2CLKSTOP_TIMEOUT()
-                .set_EQ_TARGET(i_target)
-                .set_EQCPLTSTAT(l_data64),
+    FAPI_ASSERT((l_loops1ms != 0),
+                fapi2::PMPROC_L2CLKSTOP_TIMEOUT().set_EQCPLTSTAT(l_data64),
                 "L2 Clock Stop Timeout");
 
     FAPI_DBG("Check L2 clocks stopped");
     FAPI_TRY(getScom(i_target, EQ_CLOCK_STAT_SL, l_data64));
 
     FAPI_ASSERT((((~l_data64) & l_region_clock) == 0),
-                fapi2::PMPROC_L2CLKSTOP_FAILED()
-                .set_EQ_TARGET(i_target)
-                .set_EQCLKSTAT(l_data64),
+                fapi2::PMPROC_L2CLKSTOP_FAILED().set_EQCLKSTAT(l_data64),
                 "L2 Clock Stop Failed");
     FAPI_DBG("L2 clocks stopped now");
 
@@ -146,16 +176,18 @@ p9_hcd_l2_stopclocks(
     FAPI_TRY(putScom(i_target, EQ_QPPM_EXCGCR_CLEAR, l_l2sync_clock));
 
     FAPI_DBG("Poll for L2 clock sync dones to drop via QPPM_QACSR[36,37]");
-    l_timeout = (p9hcd::CYCLES_PER_MS / p9hcd::INSTS_PER_POLL_LOOP) *
-                L2_CLK_SYNC_TIMEOUT_IN_MS;
+    l_loops1ms = 1E6 / CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY;
 
     do
     {
+        fapi2::delay(CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY,
+                     CACHE_L2_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
+
         FAPI_TRY(getScom(i_target, EQ_QPPM_QACSR, l_data64));
     }
-    while(((l_data64 & l_l2sync_clock)) && ((--l_timeout) != 0));
+    while(((l_data64 & l_l2sync_clock)) && ((--l_loops1ms) != 0));
 
-    FAPI_ASSERT((l_timeout != 0),
+    FAPI_ASSERT((l_loops1ms != 0),
                 fapi2::PMPROC_CACHECLKSYNCDROP_TIMEOUT().set_EQPPMQACSR(l_data64),
                 "L2 Clock Sync Drop Timeout");
     FAPI_DBG("L2 clock sync dones dropped");
@@ -167,7 +199,6 @@ p9_hcd_l2_stopclocks(
     FAPI_DBG("Assert regional fences via CPLT_CTRL1[8/9]");
     FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, l_region_clock));
 
-
     // -------------------------------
     // Update QSSR
     // -------------------------------
@@ -175,7 +206,6 @@ p9_hcd_l2_stopclocks(
     FAPI_DBG("Set EX as stopped in QSSR");
     FAPI_TRY(putScom(l_chip, PU_OCB_OCI_QSSR_OR,
                      ((uint64_t)i_select_ex << SHIFT64((l_attr_chip_unit_pos << 1) + 1))));
-
 
 fapi_try_exit:
 

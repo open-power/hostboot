@@ -26,6 +26,14 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PMPROC_COREPCBMUX_TIMEOUT</rc>
+    <description>
+        polling for pcb mux grant timed out.
+    </description>
+    <ffdc>CMESISR</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_PMPROC_CORECLKSYNCDROP_TIMEOUT</rc>
     <description>
         core clock sync done drop timed out.
@@ -38,30 +46,7 @@
     <description>
         core clock stop failed.
     </description>
-    <ffdc>CORE_TARGET</ffdc>
     <ffdc>CORECLKSTAT</ffdc>
-    <callout>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-    <gard>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -69,30 +54,7 @@
     <description>
         core clock stop timed out.
     </description>
-    <ffdc>CORE_TARGET</ffdc>
     <ffdc>CORECPLTSTAT</ffdc>
-    <callout>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-    <gard>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_CORE</childType>
-        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
