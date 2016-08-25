@@ -434,15 +434,15 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         iv_bs = &iv_iBS;
     }
 
-    AttnTypeRegister( SCAN_COMM_REGISTER_CLASS & i_check,
-                      SCAN_COMM_REGISTER_CLASS & i_recov,
-                      SCAN_COMM_REGISTER_CLASS & i_special,
-                      SCAN_COMM_REGISTER_CLASS & i_proccs ) :
+    AttnTypeRegister( SCAN_COMM_REGISTER_CLASS *i_check,
+                      SCAN_COMM_REGISTER_CLASS *i_recov,
+                      SCAN_COMM_REGISTER_CLASS *i_special,
+                      SCAN_COMM_REGISTER_CLASS *i_proccs ) :
         SCAN_COMM_REGISTER_CLASS( ),
-        iv_check(  NULL == &i_check   ? &cv_null : &i_check),
-        iv_recov(  NULL == &i_recov   ? &cv_null : &i_recov),
-        iv_special(NULL == &i_special ? &cv_null : &i_special),
-        iv_proccs( NULL == &i_proccs  ? &cv_null : &i_proccs),
+        iv_check(  NULL == i_check   ? &cv_null : i_check),
+        iv_recov(  NULL == i_recov   ? &cv_null : i_recov),
+        iv_special(NULL == i_special ? &cv_null : i_special),
+        iv_proccs( NULL == i_proccs  ? &cv_null : i_proccs),
         iv_iBS(0)         // will fully initialize this inside ctor.
     {
         uint32_t l_length = 1024;
