@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,7 +273,7 @@ namespace DeviceFW
                              TargType i_targetType,
                              deviceOp_t i_regRoute)
     {
-        return InvalidParameterType(); // Cause a compile fail if not one of
+        InvalidParameterType(); // Cause a compile fail if not one of
                                        // the explicit template specializations.
     }
 
