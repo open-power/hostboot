@@ -145,6 +145,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
 /// @brief Calculates refresh interval time
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_temp_refresh_range temperature refresh range
@@ -155,6 +156,7 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
                               int64_t& o_timing );
 
+///
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
 /// @param[in] i_mode fine refresh rate mode
 /// @param[in] i_density SDRAM density
@@ -164,6 +166,205 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
 fapi2::ReturnCode calc_trfc_dlr( const uint8_t i_refresh_mode,
                                  const uint8_t i_density,
                                  uint64_t& o_trfc_in_ps );
+
+///
+/// @brief DLL locking time
+/// @tparam T the fapi2::TargetType of i_target
+/// @tparam OT the type of the output location
+/// @param[in] i_target a target for attributes
+/// @param[out] o_value reference to space into which to store the output
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+template< fapi2::TargetType T, typename OT = uint64_t >
+inline fapi2::ReturnCode tdllk( const fapi2::Target<T>& i_target, OT& o_value )
+{
+    uint64_t l_freq = 0;
+
+    // Calculate tDLLK from our MT/s. Magic numbers (in clocks) from the DDR4 spec
+    FAPI_TRY( mss::freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
+    o_value = (l_freq < fapi2::ENUM_ATTR_MSS_FREQ_MT2133) ? 597 : 768;
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Mode Register Set Command Cycle Time
+/// @return constexpr value of 8 clocks
+///
+constexpr uint64_t tmrd()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 8;
+}
+
+///
+/// @brief Control word to control word delay
+/// @return constexpr value of 16 clocks
+///
+constexpr uint64_t tmrd_l()
+{
+    // Per DDR4RCD02 Spec Rev 0.85
+    return 16;
+}
+
+///
+/// @brief Stabilization time
+/// @return constexpr value of 5 us
+///
+constexpr uint64_t tstab()
+{
+    // Per DDR4RCD02 Spec Rev 0.85 CK_t stable
+    return 5;
+}
+
+///
+/// @brief Power-up and RESET calibration time
+/// @return constexpr value of 1024 clocks
+///
+constexpr uint64_t tzqinit()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 1024;
+}
+
+///
+/// @brief Normal operation Full calibration time
+/// @return constexpr value of 512 clocks
+///
+constexpr uint64_t tzqoper()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 512;
+}
+
+///
+/// @brief Normal operation Short calibration time
+/// @return constexpr value of 128 clocks
+///
+constexpr uint64_t tzqcs()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 128;
+}
+
+///
+/// @brief DQS_t/DQS_n delay after write leveling mode is programmed
+/// @return constexpr value of 25 clocks
+///
+constexpr uint64_t twldqsen()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 25;
+}
+
+///
+/// @brief First DQS_t/DQS_n rising edge after write leveling mode is programmed
+/// @return constexpr value of 40 clocks
+///
+constexpr uint64_t twlmrd()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 40;
+}
+
+///
+/// @brief Calculate TWLO_TWLOE
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get DIMM clocks
+/// @return uint64_t, TWLO_TWLOE in cycles
+///
+template< fapi2::TargetType T >
+inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
+{
+    return 12 + mss::ns_to_cycles(i_target, tWLO - tWLOE);
+}
+
+///
+/// @brief Mode Register Set command update delay
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get clocks
+/// @return max(24nCK,15ns) in clocks
+///
+template< fapi2::TargetType T >
+inline uint64_t tmod( const fapi2::Target<T>& i_target )
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return mss::max_ck_ns( i_target, 24, 15 );
+}
+
+///
+/// @brief Refresh cycle time
+/// @param[in] i_target the DIMM target used to get clocks (needed to know the stack type)
+/// @param[out] o_trfc the trfc *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode trfc( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint16_t& o_trfc )
+{
+    // Pull down the 3DS attribute. If we have a stack we need to use
+    // tRFC_DLR if not we pull down TRFC and use that.
+    uint8_t l_stack = 0;
+
+    FAPI_TRY( mss::eff_prim_stack_type(i_target, l_stack) );
+
+    if (l_stack == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
+    {
+        uint8_t l_value = 0;
+        FAPI_TRY( mss::eff_dram_trfc_dlr(i_target, l_value) );
+        o_trfc = l_value;
+    }
+    else
+    {
+        FAPI_TRY( mss::eff_dram_trfc(i_target, o_trfc) );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Direct ODT turn on Latency
+/// @param[in] i_target the DIMM target used to get attributes
+/// @param[out] o_dodt *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode dodt_on( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_dodt )
+{
+    // CWL + AL + PL - 2.0 per DDR4 Full spec update(79-4B)
+
+    uint8_t l_ca_parity_latency = 0;
+    uint8_t l_al = 0;
+    uint8_t l_cwl = 0;
+
+    FAPI_TRY( mss::eff_ca_parity_latency(i_target, l_ca_parity_latency) );
+    FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
+    FAPI_TRY( mss::eff_dram_cwl(i_target, l_cwl) );
+
+    o_dodt = l_cwl + l_al + l_ca_parity_latency - 2;
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Direct ODT turn off Latency
+/// @param[in] i_target the DIMM target used to get attributes
+/// @param[out] o_dodt *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode dodt_off( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_dodt )
+{
+    // Same for all frequencies of DDR4; DDR4 Full spec update(79-4B)
+    return dodt_on(i_target, o_dodt);
+}
+
+// TK RODTon - The use would be for the ODT in the PHY, but the max RODT is equal to or less than
+// the max DODTon/off so it would really never be used anyway there anyway. We can implement it if
+// we find another need for it.
 
 } // mss
 #endif

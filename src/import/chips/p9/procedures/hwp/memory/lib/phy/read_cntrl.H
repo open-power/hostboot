@@ -390,12 +390,10 @@ template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode reset_config3( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
-    uint8_t is_sim = 0;
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
 
-    // 51:54, 0b1010, (def_is_sim); # COARSE_CAL_STEP_SIZE» # old=4=5/128 (5/18)
-    // 51:54, 0b0000, any; # COARSE_CAL_STEP_SIZE = 1/128
-    l_data.insertFromRight<TT::COARSE_CAL_STEP_SIZE, TT::COARSE_CAL_STEP_SIZE_LEN>(is_sim ? 0b1010 : 0b0000);
+    // Per S. Wyatt 8/16: COARSE_CAL_STEP_SIZE='1010'b [Centaur sim value] is reserved.
+    // Change to COARSE_CAL_STEP_SIZE='0100'
+    l_data.insertFromRight<TT::COARSE_CAL_STEP_SIZE, TT::COARSE_CAL_STEP_SIZE_LEN>(0b0100);
 
     FAPI_TRY( write_config3(i_target, l_data) );
 

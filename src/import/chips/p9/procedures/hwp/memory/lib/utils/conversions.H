@@ -186,6 +186,12 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
+    // No time if MT/s is 0 (well, infinite really but shut up)
+    if (l_freq == 0)
+    {
+        return 0;
+    }
+
     // Hoping the compiler figures out how to do these together.
     FAPI_TRY( freq_to_ps(l_freq, l_divisor) );
     l_quotient = i_ps / ((l_divisor == 0) ? 1 : l_divisor);
@@ -312,18 +318,6 @@ inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_
 }
 
 ///
-/// @brief Calculate TWLO_TWLOE - this needs to go in to eff_config and be an attribute
-/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
-/// @param[in] i_target the target used to get DIMM clocks
-/// @return uint64_t, TWLO_TWLOE in cycles
-///
-template< fapi2::TargetType T >
-inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
-{
-    return 12 + mss::ns_to_cycles(i_target, tWLO - tWLOE);
-}
-
-///
 /// @brief Convert nanoseconds to picoseconds
 /// @tparam T input and output type
 /// @param[in] i_time_in_ns time in nanoseconds
@@ -350,6 +344,19 @@ inline T ps_to_ns(const T i_time_in_ps)
 
     // Round up if remainder isn't even
     return l_time_in_ns + ( remainder == 0 ? 0 : 1 );
+}
+
+///
+/// @brief Return the maximum of two values *in clocks*, the first in clocks the second in ns
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_clocks a value in clocks
+/// @param[in] i_time a value in nanoseconds
+/// @return max( iclocks nCK, i_time ) in clocks
+///
+template< fapi2::TargetType T >
+inline uint64_t max_ck_ns(const fapi2::Target<T>& i_target, const uint64_t i_clocks, const uint64_t i_time)
+{
+    return std::max( i_clocks, ns_to_cycles(i_target, i_time) );
 }
 
 

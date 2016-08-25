@@ -59,28 +59,29 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 {
     FAPI_INF("rcd_load_ddr4 %s", mss::c_str(i_target));
 
-    // Per DDR4RCD02 table 104 - timing requirements
-    static const uint64_t tMRD = 8;
-    static const uint64_t tMRD_L = 16;
-
-    // Per DDR4RCD02, tSTAB is 5us. We want this in cycles for the CCS.
-    const uint64_t tSTAB = mss::us_to_cycles(i_target, 5);
+    // Per DDR4RCD02, tSTAB is us. We want this in cycles for the CCS.
+    const uint64_t tSTAB = mss::us_to_cycles(i_target, mss::tstab());
 
     static std::vector< rcd_data > l_rcd_4bit_data =
     {
-        {  0, eff_dimm_ddr4_rc00, tMRD  }, {  1, eff_dimm_ddr4_rc01, tMRD  }, {  2, eff_dimm_ddr4_rc02, tSTAB },
-        {  3, eff_dimm_ddr4_rc03, tMRD_L}, {  4, eff_dimm_ddr4_rc04, tMRD_L}, {  5, eff_dimm_ddr4_rc05, tMRD_L},
-        {  6, eff_dimm_ddr4_rc06_07, tMRD  }, {  8, eff_dimm_ddr4_rc08, tMRD  }, {  9, eff_dimm_ddr4_rc09, tMRD  },
-        { 10, eff_dimm_ddr4_rc10, tSTAB }, { 11, eff_dimm_ddr4_rc11, tMRD  }, { 12, eff_dimm_ddr4_rc12, tMRD  },
-        { 13, eff_dimm_ddr4_rc13, tMRD  }, { 14, eff_dimm_ddr4_rc14, tMRD  }, { 15, eff_dimm_ddr4_rc15, tMRD  },
+        {  0, eff_dimm_ddr4_rc00, mss::tmrd()    }, {  1, eff_dimm_ddr4_rc01, mss::tmrd()   },
+        {  2, eff_dimm_ddr4_rc02, tSTAB          }, {  3, eff_dimm_ddr4_rc03, mss::tmrd_l() },
+        {  4, eff_dimm_ddr4_rc04, mss::tmrd_l()  }, {  5, eff_dimm_ddr4_rc05, mss::tmrd_l() },
+        {  6, eff_dimm_ddr4_rc06_07, mss::tmrd() }, {  8, eff_dimm_ddr4_rc08, mss::tmrd()   },
+        {  9, eff_dimm_ddr4_rc09, mss::tmrd()    }, { 10, eff_dimm_ddr4_rc10, tSTAB         },
+        { 11, eff_dimm_ddr4_rc11, mss::tmrd()    }, { 12, eff_dimm_ddr4_rc12, mss::tmrd()   },
+        { 13, eff_dimm_ddr4_rc13, mss::tmrd()    }, { 14, eff_dimm_ddr4_rc14, mss::tmrd()   },
+        { 15, eff_dimm_ddr4_rc15, mss::tmrd()    },
     };
 
     static std::vector< rcd_data > l_rcd_8bit_data =
     {
-        {  1, eff_dimm_ddr4_rc_1x, tMRD  }, {  2, eff_dimm_ddr4_rc_2x, tMRD  }, {  3, eff_dimm_ddr4_rc_3x, tSTAB },
-        {  4, eff_dimm_ddr4_rc_4x, tMRD  }, {  5, eff_dimm_ddr4_rc_5x, tMRD  }, {  6, eff_dimm_ddr4_rc_6x, tMRD  },
-        {  7, eff_dimm_ddr4_rc_7x, tMRD  }, {  8, eff_dimm_ddr4_rc_8x, tMRD  }, {  9, eff_dimm_ddr4_rc_9x, tMRD  },
-        { 10, eff_dimm_ddr4_rc_ax, tMRD  }, { 11, eff_dimm_ddr4_rc_bx, tMRD_L}
+        {  1, eff_dimm_ddr4_rc_1x, mss::tmrd()  }, {  2, eff_dimm_ddr4_rc_2x, mss::tmrd()  },
+        {  3, eff_dimm_ddr4_rc_3x, tSTAB        }, {  4, eff_dimm_ddr4_rc_4x, mss::tmrd()  },
+        {  5, eff_dimm_ddr4_rc_5x, mss::tmrd()  }, {  6, eff_dimm_ddr4_rc_6x, mss::tmrd()  },
+        {  7, eff_dimm_ddr4_rc_7x, mss::tmrd()  }, {  8, eff_dimm_ddr4_rc_8x, mss::tmrd()  },
+        {  9, eff_dimm_ddr4_rc_9x, mss::tmrd()  }, { 10, eff_dimm_ddr4_rc_ax, mss::tmrd()  },
+        { 11, eff_dimm_ddr4_rc_bx, mss::tmrd_l() }
     };
 
     fapi2::buffer<uint8_t> l_value;

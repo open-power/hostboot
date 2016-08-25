@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <lib/utils/scom.H>
-#include <lib/utils/conversions.H>
+#include <lib/eff_config/timing.H>
 
 namespace mss
 {
