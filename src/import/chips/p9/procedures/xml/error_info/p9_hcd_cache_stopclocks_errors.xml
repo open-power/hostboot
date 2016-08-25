@@ -38,30 +38,7 @@
     <description>
         cache clock stop failed.
     </description>
-    <ffdc>EQ_TARGET</ffdc>
     <ffdc>EQCLKSTAT</ffdc>
-    <callout>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-    <gard>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -69,30 +46,7 @@
     <description>
         cache clock stop timed out.
     </description>
-    <ffdc>EQ_TARGET</ffdc>
     <ffdc>EQCPLTSTAT</ffdc>
-    <callout>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </deconfigure>
-    <gard>
-      <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EQ</childType>
-        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
-      </childTargets>
-    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
