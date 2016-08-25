@@ -50,7 +50,7 @@ fapi::ReturnCode getMBvpdMemoryDataVersion(
     fapi::ReturnCode l_fapirc;
     DimmType l_dimmType = ISDIMM;
     fapi::MBvpdRecord  l_record  = fapi::MBVPD_RECORD_SPDX;
-    uint32_t l_vpdMemoryDataVersion = VM_KEYWORD_DEFAULT_VALUE;   
+    MBvpdVMKeyword l_vpdMemoryDataVersion;
     uint32_t l_bufSize = sizeof(l_vpdMemoryDataVersion);
 
     FAPI_DBG("getMBvpdMemoryDataVersion: entry ");
@@ -140,8 +140,8 @@ fapi::ReturnCode getMBvpdMemoryDataVersion(
         }
                     
         // Check if the format byte in the value returned is in between valid range
-        if (( ((MBvpdVMKeyword *)(&l_vpdMemoryDataVersion))->iv_version >  VM_SUPPORTED_HIGH_VER )||
-            ( ((MBvpdVMKeyword *)(&l_vpdMemoryDataVersion))->iv_version == VM_NOT_SUPPORTED ))
+        if ((l_vpdMemoryDataVersion.iv_version >  VM_SUPPORTED_HIGH_VER )||
+            (l_vpdMemoryDataVersion.iv_version == VM_NOT_SUPPORTED ))
         {
             FAPI_ERR("getMBvpdMemoryDataVersion:"
                      " keyword data returned is invalid : %d ",
