@@ -41,7 +41,7 @@ CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
 	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
 ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
-	    -fuse-cxa-atexit
+	    -fuse-cxa-atexit -std=gnu++11
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )
