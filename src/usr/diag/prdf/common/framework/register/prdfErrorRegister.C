@@ -120,8 +120,6 @@ ErrorRegister::ErrorRegister( SCAN_COMM_REGISTER_CLASS & r, ResolutionMap & rm,
     ErrorRegisterType(), scr(r), scr_rc(SUCCESS), rMap(rm),
     xNoErrorOnZeroScr(false), xScrId(scrId)
 {
-    PRDF_ASSERT( &r  != NULL );
-    PRDF_ASSERT( &rm != NULL );
 }
 
 /*---------------------------------------------------------------------*/

@@ -160,7 +160,7 @@ SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetAttnTypeRegister(
                                         SCAN_COMM_REGISTER_CLASS * i_proccs,
                                         SCAN_COMM_REGISTER_CLASS * i_hostattn )
 {
-  AttnTypeRegister r(*i_check, *i_recov, *i_special, *i_proccs, *i_hostattn);
+  AttnTypeRegister r(i_check, i_recov, i_special, i_proccs, i_hostattn);
   return iv_attnRegFw.get(r);
 }
 
