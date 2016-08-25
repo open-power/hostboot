@@ -37,6 +37,7 @@
 
 #include <mss.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/eff_config/timing.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_DIMM;
@@ -60,31 +61,26 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_INF("ddr4::mrs_load %s", mss::c_str(i_target));
 
-    // Per DDR4 Full spec update (79-4A) - timing requirements
-    constexpr uint64_t tMRD = 8;
-    constexpr uint64_t tZQinit = 1024;
-    uint64_t l_freq = 0;
-    uint64_t tDLLK = 0;
     fapi2::buffer<uint16_t> l_cal_steps;
+    uint64_t tDLLK = 0;
 
     static std::vector< mrs_data<TARGET_TYPE_MCBIST> > l_mrs_data =
     {
         // JEDEC ordering of MRS per DDR4 power on sequence
-        {  3, mrs03, mrs03_decode, tMRD  },
-        {  6, mrs06, mrs06_decode, tMRD  },
-        {  5, mrs05, mrs05_decode, tMRD  },
-        {  4, mrs04, mrs04_decode, tMRD  },
-        {  2, mrs02, mrs02_decode, tMRD  },
-        {  1, mrs01, mrs01_decode, tMRD  },
-        {  0, mrs00, mrs00_decode, tMRD  },
+        {  3, mrs03, mrs03_decode, mss::tmrd()  },
+        {  6, mrs06, mrs06_decode, mss::tmrd()  },
+        {  5, mrs05, mrs05_decode, mss::tmrd()  },
+        {  4, mrs04, mrs04_decode, mss::tmrd()  },
+        {  2, mrs02, mrs02_decode, mss::tmrd()  },
+        {  1, mrs01, mrs01_decode, mss::tmrd()  },
+
+        // We need to wait either tmod or tmrd before zqcl.
+        {  0, mrs00, mrs00_decode, std::max(mss::tmrd(), mss::tmod(i_target))  },
     };
 
     std::vector< uint64_t > l_ranks;
     FAPI_TRY( mss::ranks(i_target, l_ranks) );
-
-    // Calculate tDLLK from our frequency. Magic numbers (in clocks) from the DDR4 spec
-    FAPI_TRY( mss::freq(mss::find_target<TARGET_TYPE_MCBIST>(i_target), l_freq) );
-    tDLLK = (l_freq < fapi2::ENUM_ATTR_MSS_FREQ_MT2133) ? 597 : 768;
+    FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
     // Load MRS
     for (const auto& d : l_mrs_data)
@@ -141,9 +137,9 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
             l_inst_b_side = mss::address_invert(l_inst_a_side);
 
             l_inst_a_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + tZQinit);
+                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + mss::tzqinit());
             l_inst_b_side.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + tZQinit);
+                                               MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + mss::tzqinit());
 
             // There's nothing to decode here.
             FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d a-side",
