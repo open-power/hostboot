@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -259,6 +259,10 @@ enum epubSubSystem_t
     EPUB_MEMORY_DIMM                = 0x23,
     EPUB_MEMORY_FRU                 = 0x24, //@PUB_IGNORE
     EPUB_EXTERNAL_CACHE             = 0x25, //@PUB_IGNORE
+
+    // I/O subsystem: hub and bridge
+    EPUB_IO_SUBSYS                  = 0x30,
+    EPUB_IO_PHB                     = 0x38,
 
     // CEC Hardware
     EPUB_CEC_HDW_SUBSYS             = 0x50,

@@ -554,6 +554,11 @@ void processEIBusCallouts(const ErrorInfo & i_errInfo,
         {
             l_busType = HWAS::X_BUS_TYPE;
         }
+        else if ((l_type1 == TARGETING::TYPE_OBUS) &&
+                 (l_type2 == TARGETING::TYPE_OBUS))
+        {
+            l_busType = HWAS::O_BUS_TYPE;
+        }
         else
         {
             FAPI_ERR("processEIBusCallouts: Bus between target types not known (0x%08x:0x%08x)",

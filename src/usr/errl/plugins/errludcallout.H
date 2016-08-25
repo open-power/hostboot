@@ -197,6 +197,7 @@ case HWAS::_type: i_parser.PrintString( "Bus Type", #_type); break;
                     case_BUS_TYPE(X_BUS_TYPE)
                     case_BUS_TYPE(I2C_BUS_TYPE)
                     case_BUS_TYPE(PSI_BUS_TYPE)
+                    case_BUS_TYPE(O_BUS_TYPE)
                     default:
                         i_parser.PrintNumber( "Bus Type", "UNKNOWN: 0x%X",
                                         ntohl(pData->busType) );
