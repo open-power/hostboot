@@ -188,15 +188,14 @@ fapi_try_exit:
 fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         const states i_state )
 {
+    // From the DDR PHY workbook
+    constexpr uint64_t CONTINUOUS_UPDATE = 0x8004;
+    constexpr uint64_t SIM_OVERRIDE = 0x8080;
+    constexpr uint64_t PHASE_CNTL_EN = 0x8020;
+
     uint8_t is_sim = 0;
 
-    // Per Bialas, we don't want to do true alignment in the cycle sim as we have
-    // a chance of being off one-tick (which is detrimental.) Per his recomendations,
-    // we write 0's to the control registers and then configure them with 0x8080. We'll
-    // over write l_update's values with a getScom to the correct h/w initiialized values
-    // if we're not in sim
-
-    fapi2::buffer<uint64_t> l_update( i_state == mss::ON ? 0x0 : 0x8080 );
+    fapi2::buffer<uint64_t> l_update( i_state == mss::ON ? CONTINUOUS_UPDATE : PHASE_CNTL_EN );
     const auto l_mca = find_targets<TARGET_TYPE_MCA>(i_target);
 
     std::vector<uint64_t> addrs(
@@ -212,14 +211,16 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
-    if (! is_sim)
+    if (is_sim)
     {
-        // All the MCA (and both registers) will be in the same state, so we can get the first and use it to create the
-        // values for the others.
-        FAPI_TRY( mss::getScom(l_mca[0], MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0, l_update) );
-        l_update.setBit<MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_ADR0_PHASE_EN>();
-        l_update.writeBit<MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0_ADR0_CONTINUOUS_UPDATE>(i_state);
+        // Per Bialas, we don't want to do true alignment in the cycle sim as we have
+        // a chance of being off one-tick (which is detrimental.) Per his recomendations,
+        // we write 0's to the control registers and then configure them with 0x8080.
+        l_update = (i_state == mss::ON) ? 0x0 : SIM_OVERRIDE;
     }
+
+    // All the MCA (and both registers) will be in the same state, so we can get the first and use it to create the
+    // values for the others.
 
     FAPI_INF("Write 0x%lx into the ADR SysClk Phase Rotator Control Regs", l_update);
 
@@ -734,6 +735,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 {
     fapi2::buffer<uint64_t> l_cal_config;
     fapi2::buffer<uint64_t> l_vref_config;
+    uint8_t is_sim = 0;
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
     // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
@@ -746,6 +748,8 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_INF("Both 1D and 2D write centering were defined - only performing 2D");
         i_cal_steps_enabled.clearBit<WRITE_CTR>();
     }
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
     // Sadly, the bits in the register don't align directly with the bits in the attribute.
     // So, arrange the bits accordingly and write the config register.
@@ -766,6 +770,12 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
             i_cal_steps_enabled.getBit<COARSE_WR>());
         l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>(
             i_cal_steps_enabled.getBit<COARSE_RD>());
+
+        // Always turn on initial pattern write in h/w, never for sim (makes the DIMM behavioral lose it's mind)
+        if (!is_sim)
+        {
+            l_cal_config.setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>();
+        }
     }
 
     // Blast the VREF config with the proper setting for these cal bits.
