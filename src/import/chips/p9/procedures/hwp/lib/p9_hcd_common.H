@@ -43,8 +43,8 @@
 // Create a multi-bit mask of \a n bits starting at bit \a b
 #define BITS64(b, n) ((0xffffffffffffffffull << (64 - (n))) >> (b))
 #define BITS32(b, n) ((0xffffffff            << (32 - (n))) >> (b))
-#define BITS16(b, n) ((0xffff                << (16 - (n))) >> (b))
-#define BITS8(b, n)  ((0xff                  << (8  - (n))) >> (b))
+#define BITS16(b, n) (((0xffff                << (16 - (n))) & 0xffff) >> (b))
+#define BITS8(b, n)  (((0xff                  << (8  - (n))) & 0xff) >> (b))
 
 // Create a single bit mask at bit \a b
 #define BIT64(b) BITS64((b), 1)
