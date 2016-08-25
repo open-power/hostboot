@@ -1303,6 +1303,96 @@ public:
         TS_TRACE( "testHWASrestrictECunits exit" );
     }
 
+    /**
+     * @brief   test pervStates
+     */
+    void testHWASpervStates()
+    {
+        using namespace HWAS;
+        using namespace TARGETING;
+
+        // find top level target
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+
+        PredicateCTM predChip(CLASS_CHIP);
+        PredicateCTM predPerv(CLASS_UNIT, TYPE_PERV);
+        PredicatePostfixExpr checkExpr;
+        checkExpr.push(&predChip).Or().push(&predPerv).Or();
+
+        TargetHandleList pPervList;
+        // get list of all PERV targets
+        targetService().getAssociated( pPervList, pSys,
+                TargetService::CHILD,
+                TargetService::ALL,
+                &predPerv );
+        // sort the list by ATTR_HUID to ensure that we
+        //  start at the same place each time
+        std::sort(pPervList.begin(), pPervList.end(),
+                compareTargetHuid);
+        do
+        {
+            if (pPervList.empty())
+            {
+                TS_FAIL("testHWASpervStates: empty pPervList");
+                break;
+            }
+            // Iterate through all PERV chiplets
+            for (TargetHandleList::const_iterator
+                 l_pervIter = pPervList.begin();
+                 l_pervIter != pPervList.end();
+                 ++l_pervIter)
+            {
+                Target * l_target = *l_pervIter;
+
+                // The chip unit number of the perv target
+                // is the index into the PG data
+                ATTR_CHIP_UNIT_type chip_unit =
+                  l_target->getAttr<ATTR_CHIP_UNIT>();
+
+                // get the HW State of the target
+                HwasState hwasState = l_target->getAttr<ATTR_HWAS_STATE>();
+
+                // get parent target and the HW state
+                const Target * l_ptarget;
+                l_ptarget = getParentChip(l_target);
+                HwasState phwasState = l_ptarget->getAttr<ATTR_HWAS_STATE>();
+
+                if (phwasState.present == true)
+                {
+                    if (hwasState.present == false)
+                    {
+                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: %.8X - is NOT Present",
+                             chip_unit,
+                            l_target->getAttr<ATTR_HUID>());
+                        break;
+                    }
+                    HWAS_DBG("PERV[%d]: HUID: %.8X - %spresent, %sfunctional",
+                        chip_unit,
+                        l_target->getAttr<ATTR_HUID>(),
+                        hwasState.present ? "" : "NOT ",
+                        hwasState.functional ? "" : "NOT ");
+                }
+                else
+                {
+                    if (hwasState.present == true)
+                    {
+                        TS_FAIL("testHWASpervStates: PERV[%d] HUID: %.8X - is Present and Parent is NOT",
+                             chip_unit,
+                            l_target->getAttr<ATTR_HUID>());
+                        break;
+                    }
+                    HWAS_DBG("PERV[%d]: HUID: %.8X - %spresent, %sfunctional",
+                        chip_unit,
+                        l_target->getAttr<ATTR_HUID>(),
+                        hwasState.present ? "" : "NOT ",
+                        hwasState.functional ? "" : "NOT ");
+                }
+            }
+        } while(0);
+
+        TS_TRACE( "testHWASpervStates exit" );
+    }
 };
 
 #endif //
