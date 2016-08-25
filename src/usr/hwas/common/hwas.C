@@ -405,13 +405,27 @@ errlHndl_t discoverTargets()
                     descFunctional = isDescFunctional(pDesc, pgData);
                 }
 
-                // for sub-parts, if it's not functional, it's not present.
-                enableHwasState(pDesc, descFunctional, descFunctional,
+                if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
+                {
+                    // for sub-parts of PERV, it's always present.
+                    enableHwasState(pDesc, chipFunctional, descFunctional,
                                 errlEid);
-                HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
-                    pDesc->getAttr<ATTR_HUID>(),
-                    descFunctional ? "" : "NOT ",
-                    descFunctional ? "" : "NOT ");
+                    HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
+                        pDesc->getAttr<ATTR_HUID>(),
+                        "",
+                        descFunctional ? "" : "NOT ");
+                }
+                else
+                {
+                    // for other sub-parts, if it's not functional,
+                    // it's not present.
+                    enableHwasState(pDesc, descFunctional, descFunctional,
+                                errlEid);
+                    HWAS_DBG("pDesc %.8X - marked %spresent, %sfunctional",
+                        pDesc->getAttr<ATTR_HUID>(),
+                        descFunctional ? "" : "NOT ",
+                        descFunctional ? "" : "NOT ");
+                }
             }
 
             // set HWAS state to show CHIP is present, functional per above
