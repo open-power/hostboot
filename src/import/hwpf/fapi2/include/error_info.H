@@ -683,4 +683,11 @@ struct ErrorInfoEntry
 };
 #endif //  !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)
 }
+
+#if !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)
+    //explicitly declare for space as these templates are used everywhere
+    extern template class std::shared_ptr<fapi2::ErrorInfo>;
+    extern template class std::shared_ptr<fapi2::ErrorInfoFfdc>;
+#endif
+
 #endif // FAPI2_ERRORINFO_H_
