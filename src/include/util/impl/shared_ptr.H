@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <utility>
 #include <stdint.h>
+#include <builtins.h>
 
 namespace std
 {
@@ -88,35 +89,12 @@ namespace std
                 return (pointer != r.pointer);
             }
 
-            shared_ptr& operator=(const shared_ptr& r)
-            {
-                _cleanup();
-                _copy(r);
-
-                return *this;
-            }
-            template<typename U> shared_ptr& operator=(const shared_ptr<U>& r)
-            {
-                _cleanup();
-                _copy(r);
-
-                return *this;
-            }
-
-            shared_ptr& operator=(shared_ptr&& r)
-            {
-                _cleanup();
-                _swap(std::move(r));
-
-                return *this;
-            }
-            template<typename U> shared_ptr& operator=(shared_ptr<U>&& r)
-            {
-                _cleanup();
-                _swap(std::move(r));
-
-                return *this;
-            }
+            shared_ptr& operator=(const shared_ptr& r) NEVER_INLINE;
+            template<typename U> shared_ptr& operator=
+              (const shared_ptr<U>& r) NEVER_INLINE;
+            shared_ptr& operator=(shared_ptr&& r) NEVER_INLINE;
+            template<typename U> shared_ptr& operator=
+              (shared_ptr<U>&& r) NEVER_INLINE;
 
             void reset() { _cleanup(); }
             template<typename U> void reset(U* ptr) { _cleanup(); _setup(ptr); }
@@ -174,28 +152,9 @@ namespace std
                 }
             }
 
-            void _cleanup()
-            {
-                if (!count) return;
-
-                if (count->decrement())
-                {
-                    delete count;
-                    delete owner;
-                }
-
-                count = nullptr;
-                owner = nullptr;
-                pointer = nullptr;
-            }
-
-            template<typename U> void _copy(const shared_ptr<U>& r)
-            {
-                if (r.count) r.count->increment();
-                count = r.count;
-                owner = static_cast<T*>(r.owner);
-                pointer = static_cast<T*>(r.pointer);
-            }
+            void _cleanup() NEVER_INLINE;
+            template<typename U> void _copy
+              (const shared_ptr<U>& r) NEVER_INLINE;
 
             template<typename U> void _swap(shared_ptr<U>&& r)
             {
@@ -207,6 +166,69 @@ namespace std
                 r.pointer = nullptr;
             }
     };
+
+    template <typename T>
+      shared_ptr<T>& shared_ptr<T>::operator=(const shared_ptr<T>& r)
+    {
+        _cleanup();
+        _copy(r);
+
+        return *this;
+    }
+
+    template <typename T>
+    template<typename U> shared_ptr<T>& shared_ptr<T>::operator=
+      (const shared_ptr<U>& r)
+    {
+        _cleanup();
+        _copy(r);
+
+        return *this;
+    }
+
+    template <typename T>
+    shared_ptr<T>& shared_ptr<T>::operator=(shared_ptr<T>&& r)
+    {
+        _cleanup();
+        _swap(std::move(r));
+
+        return *this;
+    }
+
+    template <typename T>
+    template<typename U> shared_ptr<T>& shared_ptr<T>::operator=
+      (shared_ptr<U>&& r)
+    {
+        _cleanup();
+        _swap(std::move(r));
+
+        return *this;
+    }
+
+    template <typename T>
+      void shared_ptr<T>::_cleanup()
+    {
+        if (!count) return;
+
+        if (count->decrement())
+            {
+            delete count;
+            delete owner;
+            }
+
+        count = nullptr;
+        owner = nullptr;
+        pointer = nullptr;
+    }
+    template <typename T>
+      template<typename U> void shared_ptr<T>::_copy(const shared_ptr<U>& r)
+    {
+        if (r.count) r.count->increment();
+        count = r.count;
+        owner = static_cast<T*>(r.owner);
+        pointer = static_cast<T*>(r.pointer);
+    }
+
 
     template <typename T, typename... Args>
     shared_ptr<T> make_shared( Args&&... args)
