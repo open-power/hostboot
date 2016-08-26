@@ -30,10 +30,10 @@
 /// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
 ///
 
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
 #include <p9_mss_utils_to_throttle.H>
@@ -57,39 +57,54 @@ extern "C"
 
 ///
 /// @brief Sets number commands allowed within a given data bus utilization.
-/// @param[in] i_target the controller target
+/// @param[in] i_targets vector of MCS on the same VDDR domain
 /// @return FAPI2_RC_SUCCESS iff ok
+/// @note throttle_per_slot will be equalized so all throttles coming out will be equal to worst case
 ///
-    fapi2::ReturnCode p9_mss_utils_to_throttle( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
+    fapi2::ReturnCode p9_mss_utils_to_throttle( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
-        uint32_t l_databus_util = 0;
-        std::vector<uint32_t> l_throttled_cmds(mss::PORTS_PER_MCS, 0);
-
-        uint32_t l_dram_clocks = 0;
-        FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
-
-        FAPI_TRY( mss::mrw_max_dram_databus_util(l_databus_util) );
-
-        for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
+        for( const auto& l_mcs : i_targets )
         {
-            const auto l_port_num = mss::index( l_mca );
+            //TODO RTC 160048 Complete implementing (calculating power and per slot throttles) - JLH
+            uint32_t l_databus_util [mss::PORTS_PER_MCS];
+            uint32_t l_throttled_cmds_port[mss::PORTS_PER_MCS];
+            uint32_t l_throttled_cmds_slot[mss::PORTS_PER_MCS];
+            uint32_t l_max_power[mss::PORTS_PER_MCS];
 
-            FAPI_INF( "MRW dram clock window: %d, databus utilization: %d",
-                      l_dram_clocks,
-                      l_databus_util );
+            uint32_t l_dram_clocks = 0;
+            FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
 
-            // Calculate programmable N address operations within M dram clock window
-            l_throttled_cmds[l_port_num] = mss::throttled_cmds( l_databus_util, l_dram_clocks );
+            FAPI_TRY( mss::databus_util(l_mcs, l_databus_util) );
 
-            FAPI_INF( "Calculated N commands per port [%d] = %d",
-                      l_port_num,
-                      l_throttled_cmds[l_port_num]);
+            for( const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
+            {
+                const auto l_port_num = mss::index( l_mca );
 
-        }// end for
+                FAPI_INF( "MRW dram clock window: %d, databus utilization: %d",
+                          l_dram_clocks,
+                          l_databus_util );
 
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_OCC_THROTTLED_N_CMDS,
-                                i_target,
-                                UINT32_VECTOR_TO_1D_ARRAY(l_throttled_cmds, mss::PORTS_PER_MCS)) );
+                // Calculate programmable N address operations within M dram clock window
+                l_throttled_cmds_port[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
+                l_throttled_cmds_slot[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
+                //TK - actually implement function - JLH
+                //Quick hard code for API purposes
+                l_max_power[l_port_num] = 2088;
+                FAPI_INF( "Calculated N commands per port [%d] = %d",
+                          l_port_num,
+                          l_throttled_cmds_port[l_port_num]);
+            }// end for
+
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_PORT_MAXPOWER,
+                                    l_mcs,
+                                    l_max_power) );
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+                                    l_mcs,
+                                    l_throttled_cmds_slot) );
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT,
+                                    l_mcs,
+                                    l_throttled_cmds_port) );
+        }
 
     fapi_try_exit:
         return fapi2::current_err;
