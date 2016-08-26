@@ -33,6 +33,10 @@
 #include <error_info.H>
 #include <buffer.H>
 
+//explicitly declare for space as these templates are used everywhere
+template class std::shared_ptr<fapi2::ErrorInfo>;
+template class std::shared_ptr<fapi2::ErrorInfoFfdc>;
+
 namespace fapi2
 {
 ///

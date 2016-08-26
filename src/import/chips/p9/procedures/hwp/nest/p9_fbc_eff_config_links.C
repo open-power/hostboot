@@ -164,7 +164,7 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_endp(
     FAPI_DBG("Start");
 
     // A/X link ID for local end
-    uint8_t l_loc_link_id;
+    uint8_t l_loc_link_id = 0;
     // remote end target
     fapi2::Target<T> l_rem_target;
 

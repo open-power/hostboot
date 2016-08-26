@@ -120,7 +120,7 @@ class ffdc_t
         }
 
     private:
-        struct ffdc_struct iv_value;
+        struct ffdc_struct iv_value = {}; //init to zero
 };
 
 ///
