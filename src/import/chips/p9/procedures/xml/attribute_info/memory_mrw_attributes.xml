@@ -88,7 +88,6 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
   </attribute>
@@ -103,7 +102,6 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
   </attribute>
