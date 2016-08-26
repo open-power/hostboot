@@ -93,6 +93,9 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<TARGET_TYPE_MC
     // DIMM speed is equal until we deduce otherwise
     o_is_speed_equal = speed_equality::EQUAL_DIMM_SPEEDS;
 
+    // Make sure to stick the first one we found in the freq map.
+    o_freq_map.emplace( std::make_pair(*l_found_comp, l_comparator) );
+
     // Loop through all MCSBISTs and store dimm speeds
     // Starting from known 1st known good freq (non-zero) value
     // I found above to avoid double looping target vector
@@ -118,6 +121,13 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<TARGET_TYPE_MC
 
             o_freq_map.emplace( std::make_pair(*l_iter, l_dimm_speed) );
         }
+    }
+
+    // Idiot check - most certainly a programming error
+    if (o_freq_map.size() == 0 )
+    {
+        FAPI_ERR("freq system freq map is empty? found mcbist: %s", mss::c_str(*l_found_comp));
+        fapi2::Assert(false);
     }
 
 fapi_try_exit:
