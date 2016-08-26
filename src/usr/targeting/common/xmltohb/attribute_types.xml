@@ -10338,7 +10338,7 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
 </attribute>
 
 <attribute>
-    <id>C1_IS_SCANABLE</id>
+    <id>C1_HAS_POWER</id>
     <description>
         Indicates core 1 has power and has valid latch state that could be scanned
     </description>
@@ -10350,13 +10350,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C1_IS_SCANABLE</id>
+        <id>ATTR_C1_HAS_POWER</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>C0_IS_SCANABLE</id>
+    <id>C0_HAS_POWER</id>
     <description>
         Indicates core 0 has power and has valid latch state that could be scanned
     </description>
@@ -10368,13 +10368,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C0_IS_SCANABLE</id>
+        <id>ATTR_C0_HAS_POWER</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>L3_IS_SCANABLE</id>
+    <id>L3_HAS_POWER</id>
     <description>
         Indicates L3 has power and has valid latch state that could be scanned
     </description>
@@ -10386,13 +10386,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_L3_IS_SCANABLE</id>
+        <id>ATTR_L3_HAS_POWER</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>L2_IS_SCANABLE</id>
+    <id>L2_HAS_POWER</id>
     <description>
         Indicates L2 has power and has valid latch state that could be scanned
     </description>
@@ -10404,13 +10404,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_L2_IS_SCANABLE</id>
+        <id>ATTR_L2_HAS_POWER</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>C1_PC_IS_SCOMABLE</id>
+    <id>C1_PC_HAS_CLOCKS</id>
     <description>
         Indicates the core pervasive unit in core 1 has clocks running and scommable
     </description>
@@ -10422,13 +10422,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C1_PC_IS_SCOMABLE</id>
+        <id>ATTR_C1_PC_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>C0_PC_IS_SCOMABLE</id>
+    <id>C0_PC_HAS_CLOCKS</id>
     <description>
         Indicates the core pervasive unit in core 0 has clocks running and scommable
     </description>
@@ -10440,13 +10440,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C0_PC_IS_SCOMABLE</id>
+        <id>ATTR_C0_PC_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>C1_EXEC_IS_SCOMABLE</id>
+    <id>C1_EXEC_HAS_CLOCKS</id>
     <description>
         Indicates the execution units in core 1 have clocks running and scommable
     </description>
@@ -10458,13 +10458,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C1_EXEC_IS_SCOMABLE</id>
+        <id>ATTR_C1_EXEC_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>C0_EXEC_IS_SCOMABLE</id>
+    <id>C0_EXEC_HAS_CLOCKS</id>
     <description>
         Indicates the execution units in core 0 have clocks running and scommable
     </description>
@@ -10476,13 +10476,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_C0_EXEC_IS_SCOMABLE</id>
+        <id>ATTR_C0_EXEC_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>L3_IS_SCOMABLE</id>
+    <id>L3_HAS_CLOCKS</id>
     <description>
         Indicates the L3 region has clocks running and scommable
     </description>
@@ -10494,13 +10494,13 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_L3_IS_SCOMABLE</id>
+        <id>ATTR_L3_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>L2_IS_SCOMABLE</id>
+    <id>L2_HAS_CLOCKS</id>
     <description>
         Indicates the L2 region has clocks running and scommable
     </description>
@@ -10512,7 +10512,7 @@ the tmgt code has been updated to have the correct type for MSS_MEM_WATT_TARGET-
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_L2_IS_SCOMABLE</id>
+        <id>ATTR_L2_HAS_CLOCKS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
