@@ -191,6 +191,27 @@
          <id>ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE</id>
          <default>0x0000000000000000</default>
      </attribute>
+     <attribute>
+       <id>ATTR_PM_SAFE_VOLTAGE_MV</id>
+     </attribute>
+     <attribute>
+          <id>ATTR_IVRM_STRENGTH_LOOKUP</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_IVRM_VIN_MULTIPLIER</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_IVRM_VIN_MAX_MV</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_IVRM_STEP_DELAY_NS</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
+      </attribute>
+      <attribute>
+          <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
+      </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
