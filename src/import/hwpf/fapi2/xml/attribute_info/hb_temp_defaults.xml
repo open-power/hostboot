@@ -376,9 +376,6 @@
       <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
     </attribute>
     <attribute>
-      <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
-    </attribute>
-    <attribute>
       <id>ATTR_MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id>
     </attribute>
     <attribute>
@@ -417,7 +414,17 @@
     <attribute>
       <id>ATTR_MSS_VPD_MT_DIMM_RCD_IBT_ODT</id>
     </attribute>
-<!-- =====================================================================
+    <attribute>
+      <id>ATTR_MSS_TOTAL_PWR_SLOPE</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_TOTAL_PWR_INTERCEPT</id>
+    </attribute>
+    <attribute>
+      <id>ATTR_MSS_PORT_MAXPOWER</id>
+    </attribute>
+    
+    <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
 
