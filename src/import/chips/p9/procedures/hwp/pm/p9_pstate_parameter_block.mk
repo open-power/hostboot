@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/lib/wrapper/p9_pstate_parameter_block_wrap.mk $
+# $Source: src/import/chips/p9/procedures/hwp/pm/p9_pstate_parameter_block.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-WRAPPER=p9_pstate_parameter_block_wrap
-$(WRAPPER)_USELIBS += p9_pstate_parameter_block
-$(call BUILD_WRAPPER)
+PROCEDURE=p9_pstate_parameter_block
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
+#OBJS+=p9_pstates.o
+#p9_pstate_parameter_block_PATH+=$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib
+$(call BUILD_PROCEDURE)

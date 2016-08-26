@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/lib/p9_pstate_parameter_block.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_pstate_parameter_block.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,16 +90,18 @@ typedef struct
 
     uint32_t reference_frequency_khz;
     uint32_t frequency_step_khz;   // This is the reference frequency / DPPL_DIVIDER
-    uint32_t vdd_load_line_uohm;
-    uint32_t vcs_load_line_uohm;
-    uint32_t vdn_load_line_uohm;
-    uint32_t vdd_distribution_uohm;
-    uint32_t vcs_distribution_uohm;
-    uint32_t vdn_distribution_uohm;
+    // Load line parameters, This is also called Rloadline
+    uint32_t vdd_r_loadline_uohm;
+    uint32_t vcs_r_loadline_uohm;
+    uint32_t vdn_r_loadline_uohm;
+    // Distribution loss parameters, This is also called Rpath
+    uint32_t vdd_r_distloss_uohm;
+    uint32_t vcs_r_distloss_uohm;
+    uint32_t vdn_r_distloss_uohm;
     uint32_t vdd_voffset_uv;
     uint32_t vcs_voffset_uv;
     uint32_t vdn_voffset_uv;
-} OperatingPointParameters;
+} SystemParameters;
 
 
 /// A chip characterization
@@ -110,7 +112,7 @@ typedef struct
     VpdOperatingPoint* vpd;
     VpdOperatingPoint* vpd_unbiased;
     OperatingPoint* ops;
-    OperatingPointParameters* parameters;
+    SystemParameters* parameters;
     uint32_t points;
     uint32_t max_cores;                     // Needed for WOF
 
@@ -197,6 +199,7 @@ typedef struct
     uint32_t attr_dpll_bias;
     uint32_t attr_undervolting;
     uint32_t attr_pm_safe_frequency_mhz;
+    uint32_t attr_pm_safe_voltage_mv;
 
 //  uint32_t attr_freq_core_floor;
     uint32_t attr_freq_core_floor_mhz;
@@ -212,6 +215,12 @@ typedef struct
     uint8_t  attr_system_wof_enabled;
     uint8_t  attr_system_ivrms_enabled;
     uint32_t attr_tdp_rdp_current_factor;
+
+    uint8_t attr_resclk_enable;
+    uint8_t attr_dpll_dynamic_fmax_enable;
+    uint8_t attr_dpll_dynamic_fmin_enable;
+    uint8_t attr_dpll_droop_protect_enable;
+
 
 } AttributeList;
 
@@ -276,18 +285,16 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 
 /// ---------------------------------------------------------------------------
 /// @brief Check and process #V bias attributes for external and internal
-/// @param[inout]    io_attr_mvpd_data          => 5x5 array to hold the #V data
+/// @param[inout]    io_attr_mvpd_data       => 5x5 array to hold the #V data
 /// @param[in]    *  i_attr                  => pointer to attribute list structure
-/// @param[inout] *  io_volt_int_vdd_bias    => pointer to internal vdd bias
-/// @param[inout] *  io_volt_int_vcs_bias    => pointer to internal vcs bias
+/// @param[out]   *  o_vpdbias               => Voltage/Frequency bias values
 /// @return   FAPI2::SUCCESS
 /// ---------------------------------------------------------------------------
 
 fapi2::ReturnCode
 proc_get_extint_bias ( uint32_t io_attr_mvpd_data[PV_D][PV_W],
                        const AttributeList* i_attr,
-                       double* io_volt_int_vdd_bias,
-                       double* io_volt_int_vcs_bias);
+                       VpdBias o_vpdbias[VPD_PV_POINTS] );
 
 /// -------------------------------------------------------------------
 /// @brief Boost max frequency in pstate table based on boost attribute
@@ -365,6 +372,28 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
 fapi2::ReturnCode
 proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      VDMParmBlock* o_vdmpb);
+
+/// ----------------------------------------------------------------
+/// @brief Get resonant clocking parameters from attributes
+/// @param[in]    i_target          => Chip Target
+/// @param[out]   o_resclk_setup    => Resonant clocking setup
+/// @return   FAPI2::SUCCESS
+/// ----------------------------------------------------------------
+
+fapi2::ReturnCode
+proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                       ResonantClockingSetup* o_resclk_setup);
+
+/// ----------------------------------------------------------------
+/// @brief Get IVRM parameters from attributes
+/// @param[in]    i_target          => Chip Target
+/// @param[out]   o_ivrmpb          => IVRM parameter block
+/// @return   FAPI2::SUCCESS
+/// ----------------------------------------------------------------
+
+fapi2::ReturnCode
+proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                      IvrmParmBlock* o_ivrmpb);
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support

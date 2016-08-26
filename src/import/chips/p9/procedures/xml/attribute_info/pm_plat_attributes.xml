@@ -1302,6 +1302,63 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+      <id>ATTR_IVRM_STRENGTH_LOOKUP</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+
+          Producer: MRWB.
+      </description>
+      <valueType>uint8</valueType>
+      <array>64</array>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_IVRM_VIN_MULTIPLIER</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+
+          Producer: MRWB.
+      </description>
+      <valueType>uint8</valueType>
+      <array>64</array>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_IVRM_VIN_MAX_MV</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+
+          Producer: MRWB.
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_IVRM_STEP_DELAY_NS</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+
+          Producer: MRWB.
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+
+          Producer: MRWB.
+      </description>
+      <valueType>uint16</valueType>
+      <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_TDP_RDP_CURRENT_FACTOR</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description> TODO RTC 157943 -- Placeholder description
@@ -1309,6 +1366,24 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+      Controls the enablement of resonant clocking in the system.
+
+      Producer:  Machine Readable Workbook
+
+      Consumers:
+        p9_pstate_parameter_block to set flag for CME QuadManager Hcode
+            reaction
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0x00, ON = 0x01</enum>
+      <initToZero/>
+      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1325,7 +1400,7 @@
 
     Platform default:   0
     </description>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->

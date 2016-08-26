@@ -33,6 +33,22 @@
 // *HWP Consumed by     : PGPE, OCC
 
 
+// @todo RTC 162565 - Temporary definition,
+// Pick up p9_pm_utils code for revlev when code is merged
+#ifdef _BIG_ENDIAN
+
+    #define revle16(x) x
+    #define revle32(x) x
+    #define revle64(x) x
+
+#else
+
+    uint16_t revle16(uint16_t i_x);
+    uint32_t revle32(uint32_t i_x);
+    uint64_t revle64(uint64_t i_x);
+
+#endif
+
 #ifndef __P9_PSTATES_H__
 #define __P9_PSTATES_H__
 
@@ -646,7 +662,7 @@ typedef struct iVRMInfo
     uint8_t strength_lookup[IVRM_ARRAY_SIZE];   // Each entry is a six bit value, right justified
 
     /// Scaling factor for the Vin_Adder calculation.
-    uint8_t vin_multipler[IVRM_ARRAY_SIZE];     // Each entry is from 0 to 255.
+    uint8_t vin_multiplier[IVRM_ARRAY_SIZE];     // Each entry is from 0 to 255.
 
     /// Vin_Max used in Vin_Adder calculation (in millivolts)
     uint16_t    vin_max_mv;
@@ -738,6 +754,10 @@ typedef struct
 /// instances of this structure are 1KB-aligned.
 typedef struct
 {
+
+
+    /// Magic Number
+    uint64_t magic;     // the last byte of this number the structure's version.
 
     /// Pstate options
     ///
