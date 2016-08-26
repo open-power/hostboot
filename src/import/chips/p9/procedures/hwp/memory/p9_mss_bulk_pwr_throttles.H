@@ -27,7 +27,7 @@
 /// @file p9_mss_bulk_pwr_throttles.H
 /// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
@@ -37,17 +37,33 @@
 #define __P9_MSS_BULK_PWR_THROTTLES__
 
 #include <fapi2.H>
-
-typedef fapi2::ReturnCode (*p9_mss_bulk_pwr_throttles_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+#include <vector>
+typedef fapi2::ReturnCode (*p9_mss_bulk_pwr_throttles_FP_t) (const
+        std::vector< fapi2::Target< fapi2::TARGET_TYPE_MCS>>&);
 
 extern "C"
 {
+
+    enum throttle_type : size_t
+    {
+        POWER = 0,
+        THERMAL = 1,
+    };
+
 ///
-/// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
-/// @param[in] i_target controller target
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @brief Set ATTR_MSS_PORT_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT
+/// @param[in] i_targets vector of MCS's on the same VDDR domain
+/// @param[in] thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note Called in p9_mss_bulk_pwr_throttles
+/// @note determines the throttle levels based off of the port's power curve,
+/// sets the slot throttles to the same
+/// @note Enums are POWER for power egulator throttles and THERMAL for thermal throttles
+/// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
 ///
-    fapi2::ReturnCode p9_mss_bulk_pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
+
+    fapi2::ReturnCode p9_mss_bulk_pwr_throttles (const std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>>& i_targets,
+            throttle_type t );
 }
 
 #endif
