@@ -217,7 +217,7 @@ fapi2::ReturnCode pm_init(
     FAPI_DBG("Executing p9_pm_occ_control to start OCC PPC405");
     FAPI_EXEC_HWP(l_rc, p9_pm_occ_control, i_target,
                   p9occ_ctrl::PPC405_START,// Operation on PPC405
-                  p9occ_ctrl::PPC405_BOOT_NULL // PPC405 boot location
+                  p9occ_ctrl::PPC405_BOOT_MEM // PPC405 boot location
                  );
     FAPI_TRY(l_rc, "ERROR: Failed to initialize OCC PPC405");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
