@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,7 @@
 #include    <targeting/namedtarget.H>
 
 #include <pnor/pnorif.H>
+#include <config.h>
 
 //  fapi support
 #include    <fapi.H>
@@ -80,7 +81,6 @@
 #include    "p8_slw_build/sbe_xip_image.h"
 #include    <runtime/runtime.H>
 #include    "p8_slw_build/p8_image_help_base.H"
-
 
 namespace   BUILD_WINKLE_IMAGES
 {
@@ -403,6 +403,9 @@ void*    call_host_build_winkle( void    *io_pArgs )
     uint32_t    l_poreSize      =   0;
     void        *l_pRealMemBase = NULL;
     void* l_pVirtMemBase        = NULL;
+    #ifdef CONFIG_SECUREBOOT
+    bool l_secureSectionLoaded = false;
+    #endif
 
     ISTEP_ERROR::IStepError     l_StepError;
 
@@ -454,6 +457,14 @@ void*    call_host_build_winkle( void    *io_pArgs )
 
         //  Continue, build SLW images
 
+        #ifdef CONFIG_SECUREBOOT
+        l_errl = loadSecureSection(PNOR::WINK);
+        if(l_errl)
+        {
+            break;
+        }
+        l_secureSectionLoaded = true;
+        #endif
 
         //Load the reference image from PNOR
         l_errl  =   loadPoreImage(  l_pPoreImage,
@@ -608,6 +619,18 @@ void*    call_host_build_winkle( void    *io_pArgs )
         // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
+
+    #ifdef CONFIG_SECUREBOOT
+    if (l_secureSectionLoaded)
+    {
+        l_errl = unloadSecureSection(PNOR::WINK);
+        if(l_errl)
+        {
+            l_StepError.addErrorDetails( l_errl );
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+    }
+    #endif
 
     // delete working buffers
     if( l_rs4_tmp ) { free(l_rs4_tmp); }
