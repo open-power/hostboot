@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,6 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 MODULE = testtargeting_rt
 TESTS = *.H
 

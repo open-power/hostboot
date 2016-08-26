@@ -45,9 +45,6 @@
 #include    <targeting/common/util.H>
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
 #include    <isteps/hwpf_reasoncodes.H>
 
 #include    <vfs/vfs.H>

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -24,8 +24,6 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = htmgt
-
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/occ
 
 # objects common to hostboot and hbrt
 include htmgt_common.mk

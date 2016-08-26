@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 MODULE = istepdisp
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/establish_system_smp
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 
 # Next includes required for attribute override support

@@ -552,7 +552,7 @@ namespace KernelMisc
             // Increment the start address by a page size to make a gap
             // in memory that Hostboot will later populate with
             // the OCC Bootloader image.
-            // see src/usr/hwpf/hwp/occ/occ.C::loadnStartAllOccs()
+            // see src/usr/occ/occ.C::loadnStartAllOccs()
             startAddr += PAGESIZE;
             size_t pages = (reinterpret_cast<uint64_t>(endAddr) -
                             reinterpret_cast<uint64_t>(startAddr)) / PAGESIZE;

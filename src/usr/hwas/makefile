@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -26,18 +26,10 @@ ROOTPATH = ../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas/common
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/proc_hwreconfig/proc_enable_reconfig
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
-
-## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 
 VPATH += ${ROOTPATH}/src/usr/hwas/plat
 VPATH += ${ROOTPATH}/src/usr/hwas/common

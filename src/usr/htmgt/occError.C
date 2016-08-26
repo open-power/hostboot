@@ -30,7 +30,7 @@
 #include "htmgt_occcmd.H"
 
 #include <ecmdDataBufferBase.H>
-#include <hwpf/hwp/occ/occAccess.H>
+#include <occ/occAccess.H>
 #include <console/consoleif.H>
 #include <targeting/targplatutil.H>
 

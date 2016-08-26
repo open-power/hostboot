@@ -30,8 +30,6 @@
  */
 
 ///
-/// @file src/include/usr/hwpf/plat/plat_hwp_invoker.H
-///
 /// @brief Defines the HostBoot FAPI2 HWP invoker macro and a function to
 /// convert a fapi2::ReturnCode to an error log
 ///

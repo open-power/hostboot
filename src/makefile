@@ -243,8 +243,6 @@ TESTCASE_MODULES += testfapi2
 #might need to enable isteps that turn mailboxes on
 #TESTCASE_MODULES += testmbox
 
-#TESTCASE_MODULES += testhwpf
-
 TESTCASE_MODULES += testrtloader
 
 RUNTIME_OBJECTS += rt_start.o
