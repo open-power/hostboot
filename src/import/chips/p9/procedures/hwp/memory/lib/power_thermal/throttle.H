@@ -33,8 +33,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef _MSS_THROTTLE_
-#define _MSS_THROTTLE_
+#ifndef _MSS_POWER_THROTTLE_
+#define _MSS_POWER_THROTTLE_
 
 
 namespace mss
@@ -65,6 +65,29 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 
     return l_quotient + (l_remainder == 0  ? 0 : 1);
 }
+
+///
+/// @brief Set ATTR_MSS_CHANNEL_PAIR_MAXPOWER and  ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+/// @param[in] Vector of MCS 's on the same VDDR domain
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note Called in p9_mss_bulk_pwr_throttles
+/// @note determines the throttle levels based off of the port's power curve,
+/// sets the slot throttles to the same
+///
+fapi2::ReturnCode bulk_power_regulator_throttles (const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>&
+        i_targets);
+
+///
+/// @brief Set ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+/// @param[in] Vector of MCS 's on the same VDDR domain
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @note Called in p9_mss_bulk_pwr_throttles
+/// @note Sets the throttle levels based off of the dimm's thermal limits
+/// @note both DIMM's on a port are set to the same throttle level
+///
+fapi2::ReturnCode bulk_thermal_throttles (const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>& i_targets);
+
+
 
 }// mss
 
