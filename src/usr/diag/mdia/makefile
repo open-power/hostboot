@@ -30,8 +30,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 ##########################################################
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 ##########################################################
 # Following is needed to include memdiags.H

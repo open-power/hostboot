@@ -1,9 +1,0 @@
-config SET_NOMINAL_PSTATE
-    default n
-    depends on !HTMGT
-    help
-        Set the PState to Nominal just before starting the payload.
-config START_OCC_DURING_BOOT
-    default n
-    help
-        Activates all the OCCs during IPL

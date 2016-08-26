@@ -23,8 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file src/include/usr/hwpf/plat/plat_attribute_service.H
-///
 /// @brief Defines the specialized platform attribute access functions
 ///
 /// Note that platform code must provide the code.

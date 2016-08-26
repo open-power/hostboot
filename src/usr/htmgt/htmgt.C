@@ -42,7 +42,7 @@
 #include <targeting/common/targetservice.H>
 
 // HBOCC support
-#include <hwpf/hwp/occ/occ_common.H>
+#include <occ/occ_common.H>
 
 #include <sys/time.h>
 #include <targeting/common/attributeTank.H>

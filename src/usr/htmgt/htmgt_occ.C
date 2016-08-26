@@ -38,9 +38,9 @@
 #include <console/consoleif.H>
 #include <sys/time.h>
 #include <ecmdDataBufferBase.H>
-#include <hwpf/hwp/occ/occAccess.H>
-#include <hwpf/hwp/occ/occ.H>
-#include <hwpf/hwp/occ/occ_common.H>
+#include <occ/occAccess.H>
+#include <occ/occ.H>
+#include <occ/occ_common.H>
 #include <errl/errludlogregister.H>
 
 namespace HTMGT

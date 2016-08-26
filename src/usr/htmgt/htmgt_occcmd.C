@@ -36,7 +36,7 @@
 #include <targeting/common/targetservice.H>
 
 #include <ecmdDataBufferBase.H>
-#include <hwpf/hwp/occ/occAccess.H>
+#include <occ/occAccess.H>
 
 #include <sys/time.h>
 #include <trace/interface.H>

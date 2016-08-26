@@ -40,7 +40,7 @@
 #include <arch/ppc.H> //for MAGIC
 #include <attributeenums.H>
 #include <errl/errlmanager.H>
-#include <hwpf/plat/fapiPlatHwpInvoker.H>
+//#include <hwpf/plat/fapiPlatHwpInvoker.H>
 #include "../common/hsvc_attribute_structs.H"
 
 extern trace_desc_t* g_trac_runtime;

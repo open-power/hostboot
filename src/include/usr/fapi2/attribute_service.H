@@ -23,8 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file src/include/usr/hwpf/plat/attribute_service.H
-///
 /// @brief Defines the PLAT attribute access macros and the functions that
 ///        access attributes for FAPI2
 ///

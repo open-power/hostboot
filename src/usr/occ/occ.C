@@ -26,8 +26,8 @@
 #include    <stdint.h>
 #include    <config.h>
 
-#include    <hwpf/hwp/occ/occ.H>
-#include    <hwpf/hwp/occ/occ_common.H>
+#include    <occ/occ.H>
+#include    <occ/occ_common.H>
 
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
@@ -46,9 +46,6 @@
 #include    <targeting/common/util.H>
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
 #include    <isteps/hwpf_reasoncodes.H>
 
 #include    <vfs/vfs.H>

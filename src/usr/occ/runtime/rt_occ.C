@@ -25,7 +25,7 @@
 #include <runtime/interface.h>
 #include <kernel/console.H>
 
-#include <hwpf/hwp/occ/occ_common.H>
+#include <occ/occ_common.H>
 
 #include <vmmconst.h>
 #include <sys/misc.h>
@@ -44,16 +44,8 @@
 #include    <runtime/rt_targeting.H>
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
 #include    <isteps/hwpf_reasoncodes.H>
 
-// Procedures
-#include <p8_occ_control.H>
-#include <p8_pba_bar_config.H>
-#include <p8_pm_init.H>
-#include <p8_pm_prep_for_reset.H>
 
 using namespace TARGETING;
 // Trace
