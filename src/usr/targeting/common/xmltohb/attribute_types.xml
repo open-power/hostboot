@@ -19735,10 +19735,10 @@ Measured in GB</description>
       Platform default:   0
     </description>
     <simpleType>
-        <uint8_t>
+        <uint16_t>
 <!-- TODO RTC:161900 Temporary default -->
             <default>0x32</default>
-        </uint8_t>
+        </uint16_t>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_STEP_DELAY</id>
