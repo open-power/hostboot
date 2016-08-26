@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9McbistDomain.H $       */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfP9McbistDomain.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,39 +23,54 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9McbistDomain_H
-#define __prdfP9McbistDomain_H
+/**
+ * @file prdfP9McbistDomain.C
+ * @brief chip Plug-in code for mcbist domain
+ */
 
-#include <prdfRuleChipDomain.H>
+#include <prdfP9McbistDomain.H>
+
+// Framework includes
+#include <prdfExtensibleChip.H>
+#include <prdfPlatServices.H>
+#include <prdfTrace.H>
+#include <prdfMemBgScrub.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
 
-class McbistDomain : public RuleChipDomain
+using namespace PlatServices;
+
+int32_t McbistDomain::startScrub()
 {
-  public:
+    #define PRDF_FUNC "[McbistDomain::startScrub] "
 
-    /**
-     * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
-     */
-    McbistDomain( DOMAIN_ID i_did, uint32_t i_size = MCBIST_DOMAIN_SIZE ) :
-                  RuleChipDomain( i_did, i_size )
-    {}
+    PRDF_ENTER( PRDF_FUNC );
 
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the processor chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
+    int32_t o_rc = SUCCESS;
 
-};
+    // Iterate all MCBISTs in the domain.
+    for ( uint32_t i = 0; i < GetSize(); ++i )
+    {
+        RuleChip * mcbistChip = LookUp(i);
+
+        // Start background scrub
+        int32_t l_rc = PRDF::startInitialBgScrub<TYPE_MCBIST>(mcbistChip);
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: "
+                    "MCBIST=0x%08x", mcbistChip->GetId() );
+            o_rc = FAIL; continue; // Keep going.
+        }
+    }
+
+    PRDF_EXIT( PRDF_FUNC "prdf: McbistDomain::startScrub exit" );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 } // end namespace PRDF
-
-#endif /* __prdfP9McbistDomain_H */

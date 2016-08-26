@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfMbaDomain.C $              */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfMemScrubUtils.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,50 +23,44 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfMbaDomain.H>
+/** @file  prdfMemScrubUtils.H
+ *  @brief Define the functionality necessary to start initial background scrub
+ */
 
-// Framework includes
-#include <prdfExtensibleChip.H>
-#include <prdfPlatServices.H>
-#include <prdfTrace.H>
-#include <prdfMemBgScrub.H>
+#ifndef __prdfMemScrubUtils_H
+#define __prdfMemScrubUtils_H
 
-using namespace TARGETING;
+#include <iipconst.h>
+#include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 
 namespace PRDF
 {
 
-using namespace PlatServices;
+/**
+ * @brief Clears the cmd complete attention from the inputted chip
+ * @param chip The chip, either mba or mcbist
+ * @return SUCCESS if the cmd complete attention is cleared, else Non-SUCCESS
+ */
+template<TARGETING::TYPE T>
+int32_t clearCmdCompleteAttn (ExtensibleChip* chip);
 
-int32_t MbaDomain::startScrub()
-{
-    #define PRDF_FUNC "[MbaDomain::startScrub] "
+/**
+ * @brief Clears the ecc counters from the inputted chip
+ * @param chip The chip, either mba or mcbist
+ * @return SUCCESS if the ecc counters are cleared, else Non-SUCCESS
+ */
+template<TARGETING::TYPE T>
+int32_t clearEccCounters (ExtensibleChip* chip);
 
-    int32_t o_rc = SUCCESS;
+/**
+ * @brief Clears the ecc firs from the inputted chip
+ * @param chip The chip, either mba or mcbist
+ * @return SUCCESS if the ecc firs are cleared, else Non-SUCCESS
+ */
+template<TARGETING::TYPE T>
+int32_t clearEccFirs (ExtensibleChip* chip);
 
-    do
-    {
-        // Iterate all MBAs in the domain.
-        for ( uint32_t i = 0; i < GetSize(); ++i )
-        {
-            RuleChip * mbaChip = LookUp(i);
+} //end namespace PRDF
 
-            // Start background scrub
-            int32_t l_rc = PRDF::startInitialBgScrub<TYPE_MBA>(mbaChip);
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: MBA=0x%08x",
-                          mbaChip->GetId() );
-                o_rc = FAIL; continue; // Keep going.
-            }
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-} // end namespace PRDF
-
+#endif // __prdfMemScrubUtils_H

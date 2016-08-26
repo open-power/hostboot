@@ -47,6 +47,7 @@ prd_incpath += ${PRD_SRC_PATH}/framework
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/occ_firdata
 prd_incpath += ${PRD_SRC_PATH}/plat
+prd_incpath += ${PRD_SRC_PATH}/plat/mem
 
 # External header paths
 prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
@@ -55,8 +56,10 @@ prd_incpath += ${ROOTPATH}/src/include/usr/fapi2
 prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
 prd_incpath += ${ROOTPATH}/src/include/usr/util
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
-prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 

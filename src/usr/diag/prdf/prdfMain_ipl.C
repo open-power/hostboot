@@ -38,6 +38,8 @@
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 //#include <prdfMbaDomain.H> TODO RTC 136128
+#include <prdfP9McbistDomain.H>
+#include <iipSystem.h>
 
 // Custom compile configs
 #include <config.h>
@@ -124,12 +126,11 @@ errlHndl_t startScrub()
     #define PRDF_FUNC "[PRDF::startScrub] "
     PRDF_ENTER( PRDF_FUNC );
 
-    errlHndl_t o_errl = NULL;
+    errlHndl_t o_errl = nullptr;
 
     int32_t l_rc = SUCCESS;
     HUID nodeId = INVALID_HUID;
 
-/* TODO RTC 136126
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
@@ -140,7 +141,7 @@ errlHndl_t startScrub()
         // to remove any non-functional MBAs from PRD system model.
         o_errl = noLock_refresh();
         // This shouldn't return any error but if it does, break out
-        if(NULL != o_errl)
+        if( nullptr != o_errl )
         {
             PRDF_ERR( PRDF_FUNC "noLock_refresh() failed" );
             break;
@@ -157,19 +158,38 @@ errlHndl_t startScrub()
 
         PRDF_ENTER( PRDF_FUNC "HUID=0x%08x", nodeId );
 
-        // Start scrubbing on all MBAs.
-        MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
-        if ( NULL == domain )
+        //master proc is CUMULUS, use MBA
+        if ( MODEL_CUMULUS == getChipModel( getMasterProc() ) )
         {
-            PRDF_ERR( PRDF_FUNC "MBA_DOMAIN not found. nodeId=0x%08x", nodeId );
-            l_rc = FAIL; break;
+            //TODO RTC 155857
+            // Start scrubbing on all MBAs.
+            //MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
+            //if ( nullptr == domain )
+            //{
+            //    PRDF_ERR( PRDF_FUNC "MBA_DOMAIN not found. nodeId=0x%08x",
+            //              nodeId );
+            //    l_rc = FAIL; break;
+            //}
+            //l_rc = domain->startScrub();
         }
-        l_rc = domain->startScrub();
+        //else use MCBIST
+        else
+        {
+            //Start scrubbing on all MCBISTs
+            McbistDomain * domain =
+                (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
+            if ( nullptr == domain )
+            {
+                PRDF_ERR( PRDF_FUNC "MCBIST_DOMAIN not found. nodeId=0x%08x",
+                        nodeId );
+                l_rc = FAIL; break;
+            }
+            l_rc = domain->startScrub();
+        }
 
         PRDF_EXIT( PRDF_FUNC "HUID=0x%08x", nodeId );
 
     } while (0);
-*/
 
     if (( SUCCESS != l_rc ) && (NULL == o_errl))
     {
