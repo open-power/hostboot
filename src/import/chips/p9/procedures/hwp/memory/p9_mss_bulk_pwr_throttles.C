@@ -27,31 +27,57 @@
 /// @file p9_mss_bulk_pwr_throttles.C
 /// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
+#include <algorithm>
 
+#include <mss.H>
 #include <fapi2.H>
 #include <p9_mss_bulk_pwr_throttles.H>
+#include <lib/utils/find.H>
+#include <lib/power_thermal/throttle.H>
 
 using fapi2::TARGET_TYPE_MCS;
-
+using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_DIMM;
 extern "C"
 {
 
-///
-/// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
-/// @param[in] i_target the controller target
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-    fapi2::ReturnCode p9_mss_bulk_pwr_throttles( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
+    ///
+    /// @brief Set ATTR_MSS_PORT_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT
+    /// @param[in] i_targets vector of MCS's on the same VDDR domain
+    /// @param[in] thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
+    /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+    /// @note Called in p9_mss_bulk_pwr_throttles
+    /// @note determines the throttle levels based off of the port's power curve,
+    /// sets the slot throttles to the same
+    /// @note Enums are POWER for power egulator throttles and THERMAL for thermal throttles
+    /// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
+    ///
+
+    fapi2::ReturnCode p9_mss_bulk_pwr_throttles( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets,
+            throttle_type t)
     {
         FAPI_INF("Start bulk_pwr_throttles");
+
+        FAPI_TRY ( mss::bulk_thermal_throttles (i_targets) );
+
+        //Check for THERMAL
+        if (t == THERMAL)
+        {
+            FAPI_TRY ( mss::bulk_thermal_throttles (i_targets) );
+        }
+        //else do POWER
+        else
+        {
+            FAPI_TRY ( mss::bulk_power_regulator_throttles (i_targets) );
+        }
+
         FAPI_INF("End bulk_pwr_throttles");
-
-        return fapi2::FAPI2_RC_SUCCESS;
+    fapi_try_exit:
+        return fapi2::current_err;
     }
-
-}// extern C
+} //extern C
