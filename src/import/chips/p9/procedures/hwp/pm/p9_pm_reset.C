@@ -84,16 +84,14 @@ enum PPM_MASK
 /// @brief Sets or clears special wake-up on all configured EX on a target
 ///
 /// @param[in] i_target Chip target
-/// @param[in] i_action enable/disable specialwakeup
-/// @param[in] i_entity Entities for special wakeup
+/// @param[in] i_enable true = enable. false = disable.
 ///
 /// @return FAPI2_RC_SUCCESS If the special wake-up is successful,
 ///         else error code.
 ///
 fapi2::ReturnCode special_wakeup_all(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const p9specialWakeup::PROC_SPCWKUP_OPS i_action,
-    const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity);
+    bool i_enable);
 
 ///
 /// @brief Clear the Deep Exit Masks
@@ -142,8 +140,7 @@ fapi2::ReturnCode p9_pm_reset(
     //  ************************************************************************
     FAPI_DBG("Enable special wakeup for all functional  EX targets.");
     FAPI_TRY(special_wakeup_all(i_target,
-                                p9specialWakeup::SPCWKUP_ENABLE,//Enable splwkup
-                                p9specialWakeup::SPW_ALL),//Apply to all
+                                true),//Enable splwkup
              "ERROR: Failed to remove EX chiplets from special wakeup");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
 
@@ -240,8 +237,7 @@ fapi_try_exit:
 
 fapi2::ReturnCode special_wakeup_all(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const p9specialWakeup::PROC_SPCWKUP_OPS i_action,
-    const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity)
+    const bool i_enable)
 {
     FAPI_INF("special_wakeup_all Enter");
 
@@ -254,12 +250,7 @@ fapi2::ReturnCode special_wakeup_all(
     {
         FAPI_DBG("Running special wakeup on ex chiplet 0x%08X ", l_ex_chplt);
 
-        FAPI_EXEC_HWP(l_rc, p9_cpu_special_wakeup,
-                      l_ex_chplt, // EX chiplet
-                      i_action, // Enable/Disable action
-                      i_entity // Anitites to apply action on
-                     );
-        FAPI_TRY(l_rc, "ERROR: Failed to enable/disable special wakeup");
+        FAPI_TRY( fapi2::specialWakeup( l_ex_chplt, i_enable ) );
     }
 
 fapi_try_exit:
