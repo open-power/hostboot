@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -428,7 +428,7 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     // do basic attribute value checking and generate error if needed
     // --------------------------------------------------------------
 
-// @todo RTC 157943 - ssrivath Biasing checks either not required or need to be different in P9
+// @todo RTC 161279 - ssrivath Biasing checks either not required or need to be different in P9
 #if 0
 
     // ----------------------------------------------------
@@ -547,6 +547,7 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             // clear out buffer to known value before calling fapiGetMvpdField
             memset(l_buffer, 0, 512);
 
+            //@todo RTC 162565 - Change code to use POUNDV accessor function
             // Get Chiplet MVPD data and put in chiplet_mvpd_data using accessor function
             FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
                                   fapi2::MVPD_KEYWORD_PDV,
@@ -571,6 +572,7 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             // fill chiplet_mvpd_data 2d array with data iN buffer (skip first byte - bucket id)
 #define UINT16_GET(__uint8_ptr)   ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
 
+            //@todo RTC 162565 - Change code to use POUNDV accessor function
             // use copy of allocated buffer pointer to increment through buffer
             l_buffer_inc = l_buffer;
 
@@ -796,7 +798,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_on[i] = revle16(l_iddq_data);
             FAPI_INF(" IVDDQ with all good cores ON, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -805,7 +807,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_cores_off[i] = revle16(l_iddq_data);
             FAPI_INF("IVDDQ with all cores and caches OFF, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -814,7 +816,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_off[i] = revle16(l_iddq_data);
             FAPI_INF("IVDDQ with all good cores OFF and caches ON, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -825,7 +827,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             for (j = 0; j < IDDQ_MEASUREMENTS; j++)
             {
                 l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-                io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] = revle16(l_iddq_data);
+                io_iddqt->ivdd_quad_good_cores_on[i][j] = revle16(l_iddq_data);
                 FAPI_INF(" IVDDQ will all good cores ON , Quad %d, Measurement %d = %u", i, j, l_iddq_data);
                 l_buffer_iq_inc += sizeof(iddq_entry_t);
             }
@@ -934,16 +936,16 @@ proc_get_extint_bias( uint32_t io_attr_mvpd_data[PV_D][PV_W],
     voltage_ext_vdd_bias_nominal = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_nominal);
     voltage_ext_vdd_bias_powersave = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_powersave);
 
-    // @todo RTC 157943 - Where should we apply int_vdd bias ?, Read in attributes for all VPD points. REVIEW with Greg
+    // @todo RTC 161279 - Where should we apply int_vdd bias ?, Read in attributes for all VPD points. REVIEW with Greg
     //voltage_int_vdd_bias_ultraturbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_ultraturbo);
     //voltage_int_vdd_bias_turbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_turbo);
     //voltage_int_vdd_bias_nominal = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_nominal);
     //voltage_int_vdd_bias_powersave = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_powersave);
 
-    // @todo RTC 157943 - Should VCS bias be applied to all operating points ? Currently applied to all. REVIEW with Greg
+    // @todo RTC 161279 - Should VCS bias be applied to all operating points ? Currently applied to all. REVIEW with Greg
     voltage_ext_vcs_bias = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vcs_bias);
 
-    // @todo RTC 157943 - VDN bias corresponds to Power Bus operating point ? Currently applied to power bus point. REVIEW with Greg
+    // @todo RTC 161279 - VDN bias corresponds to Power Bus operating point ? Currently applied to power bus point. REVIEW with Greg
     voltage_ext_vdn_bias = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdn_bias);
 
 
