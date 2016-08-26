@@ -62,11 +62,6 @@
 #include <p9_pm_pfet_init.H>
 
 
-// @todo RTC 147679 This will be uncommented upon the formal availability
-// This is needed to initialize the special wakeup tracking attributes
-// in stop_corecache_setup section
-//#include "p9_cpu_special_wakeup.H"
-
 // ----------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------
@@ -333,35 +328,6 @@ fapi2::ReturnCode stop_corecache_setup(
     auto l_cache_functional_vector =
         i_target.getChildren<fapi2::TARGET_TYPE_EQ>
         (fapi2::TARGET_STATE_FUNCTIONAL);
-#if 0
-
-    for (auto l_chplt_trgt : l_core_functional_vector)
-    {
-        // @todo RTC 147679 Enable when special wake-up is available
-        // --------------------------------------
-        // Initialize the special wake-up tracking attributes
-        FAPI_INF("\tInitialize the special wake-up tracking  attributes for the cores");
-        FAPI_EXEC_HWP(rc,  p9_cpu_special_wakeup,
-                      l_chplt_trgt,
-                      SPCWKUP_INIT,
-                      SPW_ALL);
-    } // core chiplet loop
-
-    // Process all cache chiplets
-    for (auto l_chplt_trgt : l_cache_functional_vector)
-    {
-        // @todo RTC 147679 Enable when special wake-up is available
-        // --------------------------------------
-        // Initialize the special wake-up tracking attributes
-        FAPI_INF("\tInitialize the special wake-up tracking  attributes for the caches");
-        FAPI_EXEC_HWP(rc,  p9_cpu_special_wakeup,
-                      l_chplt_trgt,
-                      SPCWKUP_INIT,
-                      SPW_ALL);
-
-    } // cache chiplet loop
-
-#endif
 
     return fapi2::current_err;
 }
