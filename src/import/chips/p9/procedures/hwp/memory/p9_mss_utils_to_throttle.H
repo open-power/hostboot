@@ -30,28 +30,30 @@
 /// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
 ///
 
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_UTILS_TO_THROTTLE__
 #define __P9_MSS_UTILS_TO_THROTTLE__
 
 #include <fapi2.H>
+#include <vector>
 
-typedef fapi2::ReturnCode (*p9_mss_utils_to_throttle_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mss_utils_to_throttle_FP_t) (const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >&);
 
 extern "C"
 {
 
 ///
 /// @brief Set the N throttle attributes for a given dram data bus utilization.
-/// @param[in] i_target the controller target
+/// @param[in] i_targets vector of MCS on the same VDDR domain
 /// @return FAPI2_RC_SUCCESS iff ok
-///
-    fapi2::ReturnCode p9_mss_utils_to_throttle( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
+/// @note throttle_per_slot will be equalized so all throttles coming out will be equal to worst case
+    fapi2::ReturnCode p9_mss_utils_to_throttle( const std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets );
 }
 
 #endif
