@@ -82,6 +82,7 @@ namespace RTPM
                          uint32_t i_mode )
     {
         // LOAD == i_mode
+        // - Call pm_reset first
         // - HBRT loads OCC lid, writes OCC config data, builds Pstate
         //   Parameter Blocks, and loads Hcode reference image lid
         // RELOAD == i_mode
@@ -118,6 +119,15 @@ namespace RTPM
                            "load_pm_complex: "
                            "proc Target HUID=0x%08X",
                             get_huid(proc_target));
+            }
+
+            err = HBPM::resetPMComplex(proc_target);
+            if( err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"load_pm_complex: "
+                           "reset PM complex failed!" );
+                break;
             }
 
             void* occVirt = HBPM::convertHomerPhysToVirt(proc_target,
