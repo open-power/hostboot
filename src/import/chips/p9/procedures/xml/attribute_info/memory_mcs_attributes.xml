@@ -23,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
-
+    <!-- MCS attribute array indexes are always [port][dimm] -->
     <attribute>
         <id>ATTR_MSS_VOLT_VDDR</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
@@ -1228,18 +1228,49 @@
         <id>ATTR_MSS_MEM_WATT_TARGET</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-          Total memory power limit in cW for the dimms on the memory channel pair.
-          Used to compute the throttles on the channel and/or dimms.
-          creator: unknown.
-          consumer: mss_eff_config.
+          Total memory power used to throttle for each dimm
+          Used to compute the throttles on the channel and/or dimms for OCC
+          OCC sets after IPL
+          creator: mss_eff_config
+          consumer: mss_bulk_pwr_throttle, mss_utils_to_throttle
           firmware notes: none.
+        </description>
+        <initToZero></initToZero>
+        <mssUnit>cW</mssUnit>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>mem_watt_target</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_TOTAL_PWR_SLOPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            VDDR+VPP Power slope value for dimm
+            creator: mss_eff_config
+            consumer: mss_bulk_pwr_throttles
         </description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <array>2</array>
+        <array> 2 2</array>
+        <mssAccessorName>total_pwr_slope</mssAccessorName>
+    </attribute>
 
-        <mssAccessorName>mem_watt_target</mssAccessorName>
+    <attribute>
+        <id>ATTR_MSS_TOTAL_PWR_INTERCEPT</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            VDDR+VPP Power intercept value for dimm
+            creator: mss_eff_config
+            consumer: mss_bulk_pwr_throttles
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array> 2 2</array>
+        <mssAccessorName>total_pwr_intercept</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1342,14 +1373,29 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
+        <id>ATTR_MSS_DATABUS_UTIL</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Databus utilization limit used to calculate memory throttles and power limit
+            creator: OCC
+            consumer: mss_utils_to_throttle
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>databus_util</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_PORT_MAXPOWER</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Power output from thermal procedures</description>
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>channel_pair_maxpower</mssAccessorName>
+        <mssAccessorName>port_maxpower</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2118,20 +2164,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>vmem_regulator_max_dimm_count</mssAccessorName>
-    </attribute>
-
-    <attribute>
-      <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
-      <targetType>TARGET_TYPE_MCS</targetType>
-      <!-- TK Do we need an attr per port & dimm ? P8 only had an attr per port AAM -->
-      <description>
-        cfg_nm_n_per_port throttle N value that was calculated from MSS_DATABUS_UTIL
-      </description>
-      <initToZero></initToZero>
-      <valueType>uint32</valueType>
-      <writeable/>
-      <array>2</array>
-      <mssAccessorName>occ_throttled_n_cmds</mssAccessorName>
     </attribute>
 
     <attribute>
