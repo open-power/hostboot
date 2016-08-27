@@ -34,6 +34,8 @@ use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                  getSwSignatures getBinDataFromFile);
 use Getopt::Long qw(:config pass_through);
 
+use constant COMMUNITY => "community";
+
 ################################################################################
 # Be explicit with POSIX
 # Everything is exported by default (with a handful of exceptions). This is an
@@ -126,13 +128,29 @@ sub partitionDepSort
 # Signing and Dev key directory location set via env vars
 my $SIGNING_DIR = $ENV{'SIGNING_DIR'};
 my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
+
+my $openSigningTool = 0;
+my $SIGNING_TOOL_EDITION = $ENV{'SIGNING_TOOL_EDITION'};
+if($SIGNING_TOOL_EDITION eq COMMUNITY)
+{
+    $openSigningTool = 1;
+}
+
 # Secureboot command strings
 # Requires naming convention of hw/sw keys in DEV_KEY_DIR
-my $SIGN_PREFIX_PARAMS = "-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a";
+my $SIGN_PREFIX_PARAMS = "-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb "
+    . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
+    . "-skp ${DEV_KEY_DIR}/sw_key_a";
 my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
 # Secureboot header file
 my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
 my $SECUREBOOT_HDR = "$bin_dir/$randPrefix.secureboot.hdr.bin";
+
+my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
+    . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
+    . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
+    . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
+    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key ";
 
 if ($secureboot)
 {
@@ -144,11 +162,15 @@ if ($secureboot)
     die "hw_key_c DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_c*"));
     die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
 
-    # Key prefix used for all partitions
-    run_command("$SIGNING_DIR/prefix -good -of $SECUREBOOT_HDR $SIGN_PREFIX_PARAMS");
-    if ($build_all)
+    if(!$openSigningTool)
     {
-        gen_test_containers();
+        # Key prefix used for all partitions (N/A for open edition)
+        run_command("$SIGNING_DIR/prefix -good -of $SECUREBOOT_HDR "
+            . "$SIGN_PREFIX_PARAMS");
+        if ($build_all)
+        {
+            gen_test_containers();
+        }
     }
 }
 
@@ -194,27 +216,31 @@ sub manipulateImages
 
     # Prefix for temporary files for parallel builds
     my $parallelPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
-    my %tempImages = (
-        HDR_PHASE => "$bin_dir/$parallelPrefix.temp.hdr.bin",
-        PREFIX_PHASE => "$bin_dir/$parallelPrefix.temp.hdr.prefix.bin",
-        TEMP_SHA_IMG => "$bin_dir/$parallelPrefix.temp.sha.bin",
-        PAD_PHASE => "$bin_dir/$parallelPrefix.temp.pad.bin",
-        ECC_PHASE => "$bin_dir/$parallelPrefix.temp.bin.ecc",
-        VFS_MODULE_TABLE => => "$bin_dir/$parallelPrefix.vfs_module_table.bin",
-        TEMP_BIN => "$bin_dir/$parallelPrefix.temp.bin",
-        PAYLOAD_TEXT => "$bin_dir/$parallelPrefix.payload_text.bin",
-        PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.protected_payload.bin",
-        HBB_SW_SIG_FILE =>  "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
-    );
 
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
     my %hashPageTablePartitions = (HBI => 1);
 
+    my %preReqImages = (
+        HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
+    );
+
     foreach my $key (sort partitionDepSort  keys %{$i_binFilesRef})
     {
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
+        my %tempImages = (
+            HDR_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.bin",
+            PREFIX_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.prefix.bin",
+            TEMP_SHA_IMG => "$bin_dir/$parallelPrefix.$eyeCatch.temp.sha.bin",
+            PAD_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.pad.bin",
+            ECC_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.bin.ecc",
+            VFS_MODULE_TABLE => => "$bin_dir/$parallelPrefix.$eyeCatch.vfs_module_table.bin",
+            TEMP_BIN => "$bin_dir/$parallelPrefix.$eyeCatch.temp.bin",
+            PAYLOAD_TEXT => "$bin_dir/$parallelPrefix.$eyeCatch.payload_text.bin",
+            PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.$eyeCatch.protected_payload.bin"
+        );
+
         my $size = $sectionHash{$layoutKey}{physicalRegionSize};
         my $bin_file = $$i_binFilesRef{$eyeCatch};
         # Check if bin file is system specific and prefix target to the front
@@ -227,6 +253,15 @@ sub manipulateImages
             $size = page_aligned_size_wo_ecc($size);
         }
 
+        # Sections that have secureboot support. Secureboot still must be
+        # enabled for secureboot actions on these partitions to occur.
+        my $isNormalSecure =    ($eyeCatch eq "SBE")
+                             || ($eyeCatch eq "SBEC");
+
+        my $isSpecialSecure =    ($eyeCatch eq "HBB")
+                              || ($eyeCatch eq "HBI")
+                              || ($eyeCatch eq "HBD");
+
         # Handle partitions that have an input binary.
         if (-e $bin_file)
         {
@@ -235,7 +270,8 @@ sub manipulateImages
             my $fsp_prefix = "";
 
             # Header Phase
-            if( ($sectionHash{$layoutKey}{sha512Version} eq "yes") )
+            if(   ($sectionHash{$layoutKey}{sha512Version} eq "yes")
+               || ($secureboot && $isSpecialSecure) )
             {
                 $fsp_prefix.=".header";
                 # Add secure container header
@@ -248,7 +284,7 @@ sub manipulateImages
                         {
                             # Pass HBB sw signatures as the salt entry.
                             $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,
-                                                                    getBinDataFromFile($tempImages{HBB_SW_SIG_FILE}));
+                                                                    getBinDataFromFile($preReqImages{HBB_SW_SIG_FILE}));
                         }
                         else
                         {
@@ -278,18 +314,59 @@ sub manipulateImages
                         {
                             run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
                         }
-                        run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
+
+                        if($openSigningTool)
+                        {
+                            run_command("$OPEN_SIGN_REQUEST "
+                                . "-flags 0x80000000 "
+                                . "-protectedPayload $tempImages{PAYLOAD_TEXT} "
+                                . "-out $tempImages{PROTECTED_PAYLOAD}");
+                        }
+                        else
+                        {
+                            # @TODO RTC:155374 Remove when official signing
+                            # supported
+                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
+                        }
+
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
                     }
                     # Handle read-only protected payload
                     elsif ($eyeCatch eq "HBD")
                     {
-                        run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
+                        if($openSigningTool)
+                        {
+                            run_command("$OPEN_SIGN_REQUEST "
+                                . "-flags 0x80000000  "
+                                . "-protectedPayload $bin_file.protected "
+                                . "-out $tempImages{PROTECTED_PAYLOAD}");
+                        }
+                        else
+                        {
+                            # @TODO RTC:155374 Remove when official signing
+                            # supported
+                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
+                        }
+
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
                     }
                     else
                     {
-                        run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                        if($openSigningTool)
+                        {
+                            my $codeStartOffset = ($eyeCatch eq "HBB") ?
+                                "-code-start-offset 0x00000180" : "";
+                            run_command("$OPEN_SIGN_REQUEST "
+                                . "-flags 0x80000000 $codeStartOffset "
+                                . "-protectedPayload $bin_file "
+                                . "-out $tempImages{HDR_PHASE}");
+                        }
+                        else
+                        {
+                            # @TODO RTC:155374 Remove when official signing
+                            # supported
+                            run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                        }
                     }
 
                     # Customize secureboot prefix header with container size,
@@ -300,12 +377,13 @@ sub manipulateImages
                     {
                         run_command("echo \"000000000007EF8000000000080000000000000008280000\" | xxd -r -ps -seek 6 - $tempImages{HDR_PHASE}");
                         # Save off HBB sw signatures for use by HBI
-                        open (HBB_SW_SIG_FILE, ">", $tempImages{HBB_SW_SIG_FILE}) or die "Error opening file $tempImages{HBB_SW_SIG_FILE}: $!\n";
+                        open (HBB_SW_SIG_FILE, ">",
+                        $preReqImages{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages{HBB_SW_SIG_FILE}: $!\n";
                         binmode HBB_SW_SIG_FILE;
                         print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
-                        die "Error reading of $tempImages{HBB_SW_SIG_FILE} failed" if $!;
+                        die "Error reading of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                         close HBB_SW_SIG_FILE;
-                        die "Error closing of $tempImages{HBB_SW_SIG_FILE} failed" if $!;
+                        die "Error closing of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                     }
                 }
                 # Add simiple version header
@@ -317,19 +395,21 @@ sub manipulateImages
                     run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
                 }
             }
-            elsif( ($sectionHash{$layoutKey}{sha512perEC} eq "yes") )
+            elsif($secureboot
+                  &&  (   ($sectionHash{$layoutKey}{sha512perEC} eq "yes")
+                       || ($isNormalSecure)))
             {
-                # sha512perEC partitions
-                if ($secureboot)
+                if($openSigningTool)
                 {
-                    # Add secure container header
-                    # @TODO RTC:155374 Remove when official signing supported
-                    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                    run_command("$OPEN_SIGN_REQUEST "
+                        . "-flags 0x80000000 "
+                        . "-protectedPayload $bin_file "
+                        . "-out $tempImages{HDR_PHASE}");
                 }
                 else
                 {
-                    # Don't add any header if not in secureboot mode
-                    run_command("cp $bin_file $tempImages{HDR_PHASE}");
+                    # @TODO RTC:155374 Remove when official signing supported
+                    run_command("$SIGNING_DIR/build -good -if $SECUREBOOT_HDR -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                 }
             }
             else
@@ -366,7 +446,7 @@ sub manipulateImages
             # Create .header.bin file for FSP
             if ($build_all)
             {
-                $fsp_file =~ s/.bin/$fsp_prefix.bin/;
+                $fsp_file =~ s/\.bin/$fsp_prefix.bin/;
                 run_command("cp $tempImages{PAD_PHASE} $fsp_file");
             }
 
@@ -427,13 +507,20 @@ sub manipulateImages
 
         # Move content to final bin filename
         run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
+
+        # Clean up temp images
+        foreach my $image (keys %tempImages)
+        {
+            system("rm -f $tempImages{$image}");
+            die "Failed deleting $tempImages{$image}" if ($?);
+        }
     }
 
-    # Clean up temp images
-    foreach my $image (keys %tempImages)
+    # Clean up prerequisite images
+    foreach my $image (keys %preReqImages)
     {
-        system("rm -f $tempImages{$image}");
-        die "Failed deleting $tempImages{$image}" if ($?);
+        system("rm -f $preReqImages{$image}");
+        die "Failed deleting $preReqImages{$image}" if ($?);
     }
 
     return 0;
