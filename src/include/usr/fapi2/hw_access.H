@@ -243,6 +243,7 @@ inline ReturnCode putRing(const Target<K>& i_target,
                           const RingID i_ringID,
                           const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
 {
+    FAPI_DBG("Entering putRing with RingID ...");
     return platPutRing(i_target, i_ringID, i_ringMode);
 }
 

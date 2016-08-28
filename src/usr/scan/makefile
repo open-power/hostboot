@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +24,10 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = scan
+
+EXTRAINCDIR +=${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR +=${ROOTPATH}/src/import/hwpf/fapi2/include
+
 
 OBJS += scandd.o
 

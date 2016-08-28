@@ -37,8 +37,8 @@
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include "sbe_psudd.H"
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
+#include <sbeio/sbe_psudd.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -90,7 +90,12 @@ errlHndl_t performPsuChipOp(psuCommand     * i_pPsuRequest,
         errl = writeRequest(l_target,
                             i_pPsuRequest,
                             i_reqMsgs);
-        if (errl) break;  // return with error
+        if (errl)//error has been generated
+        {
+            SBE_TRACF(ERR_MRK"performPsuChipOp::"
+                    " writeRequest returned an error");
+            break;
+        }
 
         // read PSU response and check results
         errl = readResponse(l_target,
@@ -98,8 +103,11 @@ errlHndl_t performPsuChipOp(psuCommand     * i_pPsuRequest,
                              o_pPsuResponse,
                              i_timeout,
                              i_rspMsgs);
-        if (errl) break;  // return with error
-
+        if (errl){
+            SBE_TRACF(ERR_MRK"performPsuChipOp::"
+                    " readResponse returned an error");
+            break;  // return with error
+        }
     }
     while (0);
 
@@ -274,7 +282,8 @@ errlHndl_t readResponse(TARGETING::Target  * i_target,
             (SBE_SEC_OPERATION_SUCCESSFUL != o_pPsuResponse->secondaryStatus) ||
             (i_pPsuRequest->seqID != o_pPsuResponse->seqID) )
         {
-            SBE_TRACF(ERR_MRK "readResponse: failing response status "
+
+            SBE_TRACF(ERR_MRK "sbe_psudd.C :: readResponse: failing response status "
                       " cmd=0x%08x prim=0x%08x secondary=0x%08x",
                       " expected seqID=%d actual seqID=%d",
                       i_pPsuRequest[1],

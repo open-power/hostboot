@@ -159,6 +159,25 @@ void test_fapi2HwAccess()
                           // a false negative on the next case (future?)
         }
 
+
+// this test should only be run before HOSTBOOT runtime
+// otherwise it will trigger false positive test result
+
+#ifndef __HOSTBOOT_RUNTIME
+
+        //this test should not be run at runtime
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_platPutRingWRingID_pass);
+        if(l_errl)
+        {
+            TS_FAIL("Error from p9_platPutRingWRingID_pass !!");
+            numFails++;
+            errlCommit(l_errl,FAPI2_COMP_ID);
+            delete l_errl; // delete unexpected error log so we dont get
+                           // a false negative on the next case
+        }
+#endif
+
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_fail, fapi2_procTarget);
         if(l_errl != NULL)
@@ -170,7 +189,6 @@ void test_fapi2HwAccess()
             TS_FAIL("No error from p9_ringtest_getring_fail !!");
             numFails++;
         }
-
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_opmodetest_getsetopmode);
@@ -255,7 +273,6 @@ void test_fapi2HwAccess()
     }while(0);
 
     FAPI_INF("fapi2HwAccessTest Test Complete. %d/%d fails",  numFails , numTests);
-
 }
 
 };

@@ -31,12 +31,15 @@
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
-#include "sbe_psudd.H"
+#include <sbeio/sbe_psudd.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"coreStateControl: " printf_string,##args)
+
+#define SBE_TRACF(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"coreStateControl: " printf_string,##args)
 
 namespace SBEIO
 {
@@ -59,11 +62,11 @@ errlHndl_t startDeadmanLoop(const uint64_t i_waitTime )
     psuCommand   l_psuCommand(
          SBE_DMCONTROL_START | SBE_DMCONTROL_RESPONSE_REQUIRED, //control flags
          SBE_PSU_CLASS_CORE_STATE,                              //command class
-         SBE_CMD_CONTROL_DEADMAN_LOOP);                         //comand
+         SBE_CMD_CONTROL_DEADMAN_LOOP);                         //command
     psuResponse  l_psuResponse;
 
     // set up PSU command message
-    l_psuCommand.cdl_waitTime = i_waitTime;
+    l_psuCommand.cd1_ControlDeadmanLoop_WaitTime = i_waitTime;
 
     errl = performPsuChipOp(&l_psuCommand,
                             &l_psuResponse,

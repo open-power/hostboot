@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_psudd.H $                                   */
+/* $Source: src/include/usr/sbeio/sbe_psudd.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 #ifndef __SBE_PSUDD_H
 #define __SBE_PSUDD_H
 
@@ -48,23 +47,39 @@ namespace SBEIO
     /**
      * @brief enums for SBE command class
      */
+
+    // BYTE 6 options
     enum psuCommandClass
     {
         SBE_PSU_CLASS_UNKNOWN      = 0,
         SBE_PSU_CLASS_CORE_STATE   = 0xD1,
+        SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3
     };
 
     /**
      * @brief enums for SBE core state control commands
      */
+
+    // BYTE 7 options
     enum psuCoreStateControlCommands
     {
         SBE_CMD_CONTROL_DEADMAN_LOOP   = 0x01,
+
+    };
+
+    /**
+     * @brief enums for SBEPutRing From Image message commands
+     */
+      // BYTE 7 options
+    enum putRingCommandFromImageCommands
+    {
+        SBE_CMD_CONTROL_PUTRING        = 0x01
     };
 
     /**
      * @brief enums for SBE core state control commands
      */
+    //BYTE 2  & 3, Control Flags
     enum psuDeadManControlFlags
     {
         SBE_DMCONTROL_START              = 0x01,
@@ -144,31 +159,61 @@ namespace SBEIO
         } PACKED;
         struct //controlDeadmanLoop
         {
-            uint16_t cdl_reserved;
-            uint16_t cdl_controlFlags;
-            uint16_t cdl_seqID;
-            uint8_t  cdl_commandClass;
-            uint8_t  cdl_command;
-            uint64_t cdl_waitTime ;
-            uint64_t cdl_mbxReg2reserved;
-            uint64_t cdl_mbxReg3reserved;
+            uint16_t cd1_ControlDeadmanLoop_Reserved;
+            uint16_t cd1_ControlDeadmanLoop_ControlFlags;
+            uint16_t cd1_ControlDeadmanLoop_SeqID;
+            uint8_t  cd1_ControlDeadmanLoop_CommandClass;
+            uint8_t  cd1_ControlDeadmanLoop_Command;
+            uint64_t cd1_ControlDeadmanLoop_WaitTime ;
+            uint64_t cd1_ControlDeadmanLoop_MbxReg2reserved;
+            uint64_t cd1_ControlDeadmanLoop_MbxReg3reserved;
         } PACKED;
-        psuCommand(uint16_t i_controlFlags,
-                   uint8_t  i_commandClass,
-                   uint8_t  i_command) :
+
+        struct //for 'Put Ring from Image' message
+        {
+            uint16_t cd3_PutRing_Reserved;      //Mbx Reg 0
+            uint16_t cd3_PutRing_ControlFlags;  //Mbx Reg 0
+            uint16_t cd3_PutRing_SeqID;         //Mbx Reg 0
+            uint8_t  cd3_PutRing_CommandClass;    //Mbx Reg 0
+            uint8_t  cd3_PutRing_Command;         //Mbx Reg 0
+            uint16_t cd3_PutRing_TargetType;  //Mbx Reg 1
+            uint8_t  cd3_PutRing_Reserved1;   //Mbx Reg 1
+            uint8_t  cd3_PutRing_ChipletID;   //Mbx Reg 1
+            uint16_t cd3_PutRing_RingID;      //Mbx Reg 1
+            uint16_t cd3_PutRing_RingMode;    //Mbx Reg 1
+            uint64_t cd3_PutRing_ReservedMbxReg2; //Mbx Reg 2
+            uint64_t cd3_PutRing_ReservedMbxReg3; //Mbx Reg 3
+        }PACKED;
+
+        psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
+                   uint8_t  i_commandClass, //Mbx Reg 0 input
+                   uint8_t  i_command) :    //Mbx Reg 0 input
+
+                   //setting BYTE 0 & 1     Mbx Reg 0
                    reserved (0),
+                   //setting BYTE 2 & 3     Mbx Reg 0
                    controlFlags(i_controlFlags),
+                   //setting BYTE 4 & 5     Mbx Reg 0
                    seqID(0),
+                   //setting BYTE 6         Mbx Reg 0
                    commandClass(i_commandClass),
+                   //setting BYTE 7         Mbx Reg 0
                    command(i_command),
+                   //setting BYTE 8- Byte 11 - Mbx Reg 1
                    dataWord2(0),
+                   //setting BYTE 12- Byte 15 - Mbx Reg 1
                    dataWord3(0),
+                   //setting BYTE 16- Byte 19 - Mbx Reg 2
                    dataWord4(0),
+                   //setting BYTE 20- Byte 23 - Mbx Reg 2
                    dataWord5(0),
+                   //setting BYTE 24- Byte 27 - Mbx Reg 3
                    dataWord6(0),
+                   //setting BYTE 28- Byte 31 - Mbx Reg 3
                    dataWord7(0)
         {
         }
+
     };
 
     /**
@@ -234,6 +279,7 @@ namespace SBEIO
             respWord5 (0)
         {
         }
+
     };
 
     /**
@@ -282,6 +328,7 @@ namespace SBEIO
         SBE_SEC_EXCESS_DATA_PASSED                = 0x0F,
         SBE_SEC_SBE_BUSY_TO_HANDLE_COMMAND        = 0x10,
     };
+
 
     /**
      * @Brief perform SBE PSU chip-op
@@ -408,6 +455,18 @@ namespace SBEIO
         HOST_RESPONSE_WAITING       = 0x8000000000000000,
         HOST_CLEAR_RESPONSE_WAITING = 0x7FFFFFFFFFFFFFFF,
     };
+
+
+    enum SBE_TARGET_TYPES {
+
+         SBE_TARGET_TYPE_PROC     = 0x00,
+         SBE_TARGET_TYPE_EX       = 0x01,
+         SBE_TARGET_TYPE_PERV     = 0x02,
+         SBE_TARGET_TYPE_MCS      = 0x03,
+         SBE_TARGET_TYPE_TOTAL          ,
+         SBE_TARGET_TYPE_UNKNOWN  = 0xFF
+     };
+
 
 }
 

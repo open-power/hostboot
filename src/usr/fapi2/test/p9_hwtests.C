@@ -298,10 +298,32 @@ fapi2::ReturnCode p9_ringtest_modring_pass(
  fapi_try_exit:
 
     FAPI_INF("Exiting p9_ringtest_modring_pass...");
-
     return fapi2::current_err;
 
 }
+
+fapi2::ReturnCode p9_platPutRingWRingID_pass()
+{
+    //every test is displayed this way via FAPI_INF
+    FAPI_INF("Entering p9_platPutRingWRingID_pass ...");
+    // get the master proc
+    TARGETING::Target * l_procTest;
+    TARGETING::targetService().masterProcChipTargetHandle( l_procTest);
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+    l_fapi2CpuTarget((l_procTest));
+
+    fapi2::ReturnCode l_status =
+            fapi2::putRing(l_fapi2CpuTarget, ob0_fure,
+                    fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND);
+
+    if(l_status!= fapi2::FAPI2_RC_SUCCESS)
+    {
+        TS_FAIL("p9_platPutRingWRingID_pass>> proc test - failed");
+    }
+
+    return l_status;
+}
+
 
 fapi2::ReturnCode p9_opmodetest_getsetopmode()
 {
