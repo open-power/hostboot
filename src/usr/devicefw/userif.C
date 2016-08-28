@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,8 +28,10 @@
 
 #include <devicefw/userif.H>
 #include <util/singleton.H>
+#include <trace/interface.H>
 
 #include "associator.H"
+
 
 namespace DeviceFW
 {
@@ -48,9 +52,16 @@ namespace DeviceFW
         return errl;
     }
 
+    /*
+     *  Function: deviceWrite
+     *
+     *  Responsible for routing generic driver requests
+     *  to appropriate devices
+     *
+     */
     errlHndl_t deviceWrite(TARGETING::Target* i_target, 
-                           void* i_buffer, size_t& io_buflen,
-                           AccessType i_accessType, ...)
+            void* i_buffer, size_t& io_buflen,
+            AccessType i_accessType, ...)
     {
         va_list args;
         errlHndl_t errl;
@@ -60,7 +71,6 @@ namespace DeviceFW
         errl = Singleton<Associator>::instance().performOp(
                 WRITE, i_target, i_buffer, io_buflen,
                 i_accessType, args);
-
         va_end(args);
         return errl;
     }

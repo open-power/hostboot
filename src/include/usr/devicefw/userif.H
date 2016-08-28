@@ -46,6 +46,7 @@ namespace DeviceFW
     /** @enum AccessType
      *  @brief Access types for accessing a hardware device.
      */
+
     enum AccessType
     {
         SCOM = 0,
@@ -266,11 +267,28 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_ringlen )),\
             static_cast<uint64_t>(( i_flag ))
 
+      /**
+        * Construct the device addressing parameters for the SCAN device ops.
+        * @param[in] i_ringID   - ring ID
+        * @param[in] i_ringMode - Ring Mode
+        *
+        * @param[in] i_flag    - flags
+        * PUT_RING_FROM_IMAGE_COMMAND - is for Put Ring from Image command
+        */
+
+       #define PUT_RING_FROM_IMAGE_COMMAND (0xFFFFFFFFFFFFFFFF)
+       #define DEVICE_SCAN_SBE_ADDRESS( i_ringID, i_ringMode, i_flag )\
+           DeviceFW::SCAN, static_cast<uint64_t>(( i_ringID )),\
+               static_cast<uint64_t>(( i_ringMode )),\
+               static_cast<uint64_t>(( i_flag )),\
+               static_cast<uint64_t>(PUT_RING_FROM_IMAGE_COMMAND)
+
     /**
      * Construct the device addressing parameters for the LPC device ops.
      * @param[in] i_trans_type - LPC transaction type.
      * @param[in] i_address - LPC address to operate on.
      *     Flag options are located in: src/include/usr/lpc/lpcif.H
+     *
      */
     #define DEVICE_LPC_ADDRESS( i_trans_type, i_address )\
         DeviceFW::LPC, static_cast<uint64_t>(( i_trans_type )),\

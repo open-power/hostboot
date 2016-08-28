@@ -167,7 +167,9 @@ namespace DeviceFW
 
         if( NULL == i_target )
         {
-	    TRACFCOMP(g_traceBuffer, "A device driver operation was attempted on a NULL target : i_opType=%d, i_accessType=%d", i_opType, i_accessType );
+            TRACFCOMP(g_traceBuffer, "associator.C: A device driver operation was"
+                " attempted on a NULL target : i_opType=%d, i_accessType=%d",
+                i_opType, i_accessType );
             /*@
              *  @errortype
              *  @moduleid       DEVFW_MOD_ASSOCIATOR
@@ -205,7 +207,10 @@ namespace DeviceFW
         // Call function if one was found, create error otherwise.
         if (NULL == l_devRoute)
         {
-	    TRACFCOMP(g_traceBuffer, "A device driver operation was attempted for which no driver has been registered : i_opType=%d, i_accessType=%d, l_devType=%d", i_opType, i_accessType, l_devType );
+            TRACFCOMP(g_traceBuffer, "associator.C: A device driver operation"
+                    " was attempted for which no driver has been registered : "
+                    "i_opType=%d, i_accessType=%d, l_devType=%d",
+                    i_opType, i_accessType, l_devType );
             /*@
              *  @errortype
              *  @moduleid       DEVFW_MOD_ASSOCIATOR
@@ -223,12 +228,13 @@ namespace DeviceFW
                                    TO_UINT64(l_devType)
                                   );
         }
-        else
+        else //This section is where the intended function is called
         {
             l_errl = (*l_devRoute)(i_opType, i_target,
                                    io_buffer, io_buflen,
                                    i_accessType, i_addr);
         }
+
 
         return l_errl;
     }

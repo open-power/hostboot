@@ -43,6 +43,7 @@
 
 #include <scan/scanif.H>
 #include <hw_access_def.H>
+#include <arch/ppc.H>
 
 
 namespace fapi2
@@ -911,17 +912,61 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
     return l_rc;
 }
 
-
+/// @brief passing a 'Put Ring from Image' message to SBE with RingID
 ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
-                       const RingID i_ringID,
-                       const RingMode i_ringMode)
+        const RingID i_ringID,
+        const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
 {
-    FAPI_DBG(ENTER_MRK "platPutRing with RingID");
-    ReturnCode l_rc;
+    FAPI_DBG("Entering: platPutRing() with RingID");
+    ReturnCode l_rc  = FAPI2_RC_SUCCESS;
+    errlHndl_t l_err = NULL;
 
-    // TODO-RTC:132654:Use SBE to drive scans
+    // Note: Trace is placed here in plat code because PPE doesn't support
+    //       trace in common fapi2_hw_access.H
+    bool l_traceit = platIsScanTraceEnabled();
 
-    FAPI_DBG(EXIT_MRK "platPutRing with RingID");
+    //convert const ringID to ringID
+    RingID l_ringID = reinterpret_cast<RingID>(i_ringID);
+
+    // Extract the component pointer
+    TARGETING::Target* l_target =
+            reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    // Grab the name of the target
+    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+    fapi2::toString(i_target, l_targName, sizeof(l_targName));
+
+    uint64_t l_flag = platGetDDScanMode(i_ringMode);
+    size_t l_size   = (size_t) 0;
+
+    FAPI_DBG("platPutRing  l_target : %.16llX i_targetType %.16llX",
+            l_target,
+            l_target->getAttr<TARGETING::ATTR_TYPE>());
+
+    FAPI_DBG("platPutRing  l_RingID :"
+            " %.16llX i_ringMode %.16llX l_flag %.16llX",
+            static_cast<uint64_t>(l_ringID), i_ringMode, l_flag );
+
+    l_err = deviceWrite(l_target,
+            nullptr,
+            l_size,
+            DEVICE_SCAN_SBE_ADDRESS(l_ringID,i_ringMode,l_flag));
+
+    if(l_err)
+    {
+        FAPI_ERR("platPutRing: deviceWrite returns error!");
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+    }
+
+    if (l_traceit)
+    {
+         FAPI_SCAN("TRACE : PUTRING w RingID     :  %s : %.16llX",
+                l_targName,
+                static_cast<uint64_t>(l_ringID));
+    }
+
+    FAPI_DBG(EXIT_MRK "platPutRing() with RingID");
     return l_rc;
 }
 
