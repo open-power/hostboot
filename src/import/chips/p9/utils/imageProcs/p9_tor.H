@@ -75,6 +75,7 @@ typedef struct
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
 #define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
 #define IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION    14  // Ring container is already available in ring section
+#define IMGBUILD_TGR_BUFFER_TOO_SMALL                 15
 
 
 extern const char* ringVariantName[];
@@ -331,7 +332,7 @@ int tor_access_ring( void*           i_ringSection, // Ring address Ptr any of .
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
-                          uint64_t        i_magic,          // Image Magic Number
+                          uint64_t       i_magic,          // Image Magic Number
                           uint16_t       i_ddLevel,
                           RingID         i_ringId,
                           PpeType_t      i_PpeType,
