@@ -455,22 +455,25 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                             break;
 
                         default:
-                            FAPI_TRY( mss::check::spd::invalid_factory_sel(i_target,
-                                      l_dimm_type,
-                                      l_encoding_rev,
-                                      l_additions_rev,
-                                      "Additions Level Unsupported!") );
+                            // For additions level retrieved from SPD higher than highest decoded revision level,
+                            // we default to be highest decoded additions level because they are backward compatable.
+                            // This will need to be updated for every new additions level that is decoded.
+                            l_module_decoder = std::make_shared<rdimm_decoder_v1_1>(i_target, i_spd_data);
+                            o_fact_obj = std::make_shared<decoder_v1_1>( i_target, i_spd_data, l_module_decoder, l_raw_card );
                             break;
+
                     }//end additions
 
                     break;
 
                 default:
+                    // For encodings level retrieved from SPD higher than highest decoded revision level,
+                    // we error out because encoding level changes are NOT backward comptable.
                     FAPI_TRY( mss::check::spd::invalid_factory_sel(i_target,
                               l_dimm_type,
                               l_encoding_rev,
                               l_additions_rev,
-                              "Encoding Level Unsupported!") );
+                              "Encoding Level unsupported!") );
                     break;
             }// end encodings
 
@@ -481,12 +484,12 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                       l_dimm_type,
                       l_encoding_rev,
                       l_additions_rev,
-                      "DIMM Type Unsupported!") );
+                      "DIMM Type unsupported!") );
             break;
 
     } // end dimm type
 
-    FAPI_INF("%s: Decoder created SPD revision %d.%d",
+    FAPI_INF("%s: Decoder created for SPD revision %d.%d",
              c_str(i_target),
              l_encoding_rev,
              l_additions_rev);
