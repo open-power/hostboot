@@ -58,6 +58,38 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                     ERRORLOG::errlSeverity_t i_sev =
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
+
+///
+/// @brief Enable/Disable special wakeup on processor chip core(s)
+///
+/// Special Wakeup Enable must be done when a HWP is doing an operation that
+/// requires core(s) to be awake (e.g. modifying the Hcode image). For
+/// each Special Wakeup Enable call, there must be a subsequent Special Wakeup
+/// Disable call.
+///
+/// @param[in] i_target
+///              TARGET_TYPE_PROC_CHIP: Enables/Disables Special Wakeup on all
+///                cores (EX,EQ chiplets) of the specified chip target.
+///              TARGET_TYPE_CORE: Enables/Disables Special Wakeup on the
+///                specified core target (EX,EQ chiplets)
+///              TARGET_TYPE_EX: Enables/Disables Special Wakeup on the
+///                specified EX target.
+///              TARGET_TYPE_EQ: Enables/Disables Special Wakeup on the
+///                specified EQ target.
+///
+/// @param[in] i_enable true = enable. false = disable.
+///
+/// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform specified error.
+///
+///
+template<TargetType T>
+inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
+{
+    //@TODO-RTC:150505-Implement real support
+    return FAPI2_RC_SUCCESS;
+}
+
 } // End namespace fapi2
+
 
 #endif // PLAT_UTILS_H_
