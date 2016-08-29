@@ -299,11 +299,21 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
 
                         if (chiplet_offset)
                         {
-                            if (io_ringBlockSize < ringSize)
+                            if (io_ringBlockSize == 0)
                             {
-                                MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                                if(i_dbgl > 0)
+                                {
+                                    MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                                }
+
                                 io_ringBlockSize =  ringSize;
                                 return 0;
+                            }
+
+                            if (io_ringBlockSize < ringSize)
+                            {
+                                MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                                return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                             }
 
                             if(i_dbgl > 1)
@@ -418,11 +428,21 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
 
                                     if (chiplet_offset)
                                     {
-                                        if (io_ringBlockSize < ringSize)
+                                        if (io_ringBlockSize == 0)
                                         {
-                                            MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                                            if(i_dbgl > 0)
+                                            {
+                                                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                                            }
+
                                             io_ringBlockSize =  ringSize;
                                             return 0;
+                                        }
+
+                                        if (io_ringBlockSize < ringSize)
+                                        {
+                                            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                                         }
 
                                         if(i_dbgl > 0)
@@ -506,7 +526,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
 
     }
 
-    return IMGBUILD_TGR_RING_NOT_FOUND;
+    return IMGBUILD_TGR_INVALID_RING_ID;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -587,11 +607,21 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
 
                     if (chiplet_offset)
                     {
-                        if (io_ringBlockSize < ringSize)
+                        if (io_ringBlockSize == 0)
                         {
-                            MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                            if(i_dbgl > 0)
+                            {
+                                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                            }
+
                             io_ringBlockSize =  ringSize;
                             return 0;
+                        }
+
+                        if (io_ringBlockSize < ringSize)
+                        {
+                            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                         }
 
                         if(i_dbgl > 0)
@@ -708,11 +738,21 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
 
                                 if (chiplet_offset)
                                 {
-                                    if (io_ringBlockSize < ringSize)
+                                    if (io_ringBlockSize == 0)
                                     {
-                                        MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                                        if(i_dbgl > 0)
+                                        {
+                                            MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                                        }
+
                                         io_ringBlockSize =  ringSize;
                                         return 0;
+                                    }
+
+                                    if (io_ringBlockSize < ringSize)
+                                    {
+                                        MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                                        return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                                     }
 
                                     if(i_dbgl > 0)
@@ -790,7 +830,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
         }
     }
 
-    return IMGBUILD_TGR_RING_NOT_FOUND;
+    return IMGBUILD_TGR_INVALID_RING_ID;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -876,11 +916,21 @@ int get_ring_from_cme_image ( void*
 
                     if (chiplet_offset)
                     {
-                        if (io_ringBlockSize < ringSize)
+                        if (io_ringBlockSize == 0)
                         {
-                            MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                            if(i_dbgl > 0)
+                            {
+                                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                            }
+
                             io_ringBlockSize =  ringSize;
                             return 0;
+                        }
+
+                        if (io_ringBlockSize < ringSize)
+                        {
+                            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                         }
 
                         if(i_dbgl > 0)
@@ -999,11 +1049,21 @@ int get_ring_from_cme_image ( void*
 
                                     if (chiplet_offset)
                                     {
-                                        if (io_ringBlockSize < ringSize)
+                                        if (io_ringBlockSize == 0)
                                         {
-                                            MY_INF("\tio_ringBlockSize is less than required size ...\n");
+                                            if(i_dbgl > 0)
+                                            {
+                                                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+                                            }
+
                                             io_ringBlockSize =  ringSize;
                                             return 0;
+                                        }
+
+                                        if (io_ringBlockSize < ringSize)
+                                        {
+                                            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+                                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                                         }
 
                                         if(i_dbgl > 0)
@@ -1084,7 +1144,7 @@ int get_ring_from_cme_image ( void*
         }
     }
 
-    return IMGBUILD_TGR_RING_NOT_FOUND;
+    return IMGBUILD_TGR_INVALID_RING_ID;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1221,12 +1281,21 @@ int tor_access_ring(  void*
 
     if(i_RingBlockType == GET_DD_LEVEL_RINGS)  // DD_LEVEL_COPY
     {
+        if (io_ringBlockSize == 0)
+        {
+            if(i_dbgl > 0)
+            {
+                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+            }
+
+            io_ringBlockSize =  temp1;
+            return 0;
+        }
 
         if (io_ringBlockSize < temp1)
         {
-            MY_INF("\tio_ringBlockSize is less than required size ...\n");
-            io_ringBlockSize =  temp1;
-            return 0;
+            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
         }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
@@ -1291,11 +1360,21 @@ int tor_access_ring(  void*
             l_ppe_size = htobe32(l_ppe_size);
         }
 
-        if (io_ringBlockSize < l_ppe_size)
+        if (io_ringBlockSize == 0)
         {
-            MY_INF("\tio_ringBlockSize is less than required size ....\n");
+            if(i_dbgl > 0)
+            {
+                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+            }
+
             io_ringBlockSize =  l_ppe_size;
             return 0;
+        }
+
+        if (io_ringBlockSize < l_ppe_size)
+        {
+            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
         }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
@@ -1738,13 +1817,22 @@ int tor_access_ring(  void*
             }
         }
 
-        if (io_ringBlockSize < l_cplt_size)
+        if (io_ringBlockSize == 0)
         {
-            MY_INF("\tio_ringBlockSize is less than required size ...\n");
+            if(i_dbgl > 0)
+            {
+                MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
+            }
+
             io_ringBlockSize =  l_cplt_size;
             return 0;
         }
 
+        if (io_ringBlockSize < l_cplt_size)
+        {
+            MY_ERR("\tio_ringBlockSize is less than required size.\n");
+            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+        }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
                 (uint8_t*)i_ringSection + l_cplt_offset + temp1,
@@ -1754,7 +1842,9 @@ int tor_access_ring(  void*
     }
     else
     {
-        if(i_PpeType == SBE)
+        if(i_PpeType == SBE &&
+           ( i_magic == P9_XIP_MAGIC_HW ||
+             i_magic == P9_XIP_MAGIC_SEEPROM))
         {
             rc = get_ring_from_sbe_image ( i_ringSection,
                                            i_magic,
@@ -1771,21 +1861,44 @@ int tor_access_ring(  void*
 
             if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
             {
-                MY_INF("\t After SBE single ring call, %s ring container is not found \n",
-                       RING_PROPERTIES[i_ringId].iv_name);
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SBE single ring call, %s ring container is not found \n",
+                           RING_PROPERTIES[i_ringId].iv_name);
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_INVALID_INSTANCEID)
             {
-                MY_INF("\t After SBE single ring call, Instance %d is invalid \n",
-                       io_instanceId );
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SBE single ring call, Instance %d is invalid \n",
+                           io_instanceId );
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                MY_INF("\t After SBE single ring call, Ring container is available in the image \n");
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SBE single ring call, Ring container is available in the image \n");
+                }
+
                 return rc;
             }
+            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            {
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SBE single ring call, There is no TOR slot for %s %d\n",
+                           RING_PROPERTIES[i_ringId].iv_name, i_ringId);
+                }
+
+                return rc;
+            }
+
 
             if(i_dbgl > 1)
             {
@@ -1793,7 +1906,9 @@ int tor_access_ring(  void*
                        io_ringBlockSize );
             }
         }
-        else if (i_PpeType == CME)
+        else if (i_PpeType == CME &&
+                 ( i_magic == P9_XIP_MAGIC_HW ||
+                   i_magic == P9_XIP_MAGIC_CME))
         {
             rc =  get_ring_from_cme_image ( i_ringSection,
                                             i_magic,
@@ -1810,19 +1925,41 @@ int tor_access_ring(  void*
 
             if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
             {
-                MY_INF("\t After CME single ring call, %s ring container is not found \n",
-                       RING_PROPERTIES[i_ringId].iv_name);
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After CME single ring call, %s ring container is not found \n",
+                           RING_PROPERTIES[i_ringId].iv_name);
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_INVALID_INSTANCEID)
             {
-                MY_INF("\t After CME single ring call, Instance %d is invalid \n",
-                       io_instanceId );
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After CME single ring call, Instance %d is invalid \n",
+                           io_instanceId );
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                MY_INF("\t After CME single ring call, Ring container is available in the image \n");
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After CME single ring call, Ring container is available in the image \n");
+                }
+
+                return rc;
+            }
+            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            {
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After CME single ring call, There is no TOR slot for %s %d\n",
+                           RING_PROPERTIES[i_ringId].iv_name, i_ringId);
+                }
+
                 return rc;
             }
 
@@ -1832,7 +1969,9 @@ int tor_access_ring(  void*
                        io_ringBlockSize );
             }
         }
-        else if (i_PpeType == SGPE)
+        else if (i_PpeType == SGPE &&
+                 ( i_magic == P9_XIP_MAGIC_HW ||
+                   i_magic == P9_XIP_MAGIC_SGPE))
         {
             rc =  get_ring_from_sgpe_image ( i_ringSection,
                                              i_magic,
@@ -1849,19 +1988,41 @@ int tor_access_ring(  void*
 
             if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
             {
-                MY_INF("\t After SGPE single ring call, %s ring container is not found \n",
-                       RING_PROPERTIES[i_ringId].iv_name);
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SGPE single ring call, %s ring container is not found \n",
+                           RING_PROPERTIES[i_ringId].iv_name);
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_INVALID_INSTANCEID)
             {
-                MY_INF("\t After SGPE single ring call, Instance %d is invalid \n",
-                       io_instanceId );
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SGPE single ring call, Instance %d is invalid \n",
+                           io_instanceId );
+                }
+
                 return rc;
             }
             else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                MY_INF("\t After SGPE single ring call, Ring container is available in the image \n");
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SGPE single ring call, Ring container is available in the image \n");
+                }
+
+                return rc;
+            }
+            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            {
+                if(i_dbgl > 0)
+                {
+                    MY_INF("\t After SGPE single ring call, There is no TOR slot for %s %d\n",
+                           RING_PROPERTIES[i_ringId].iv_name, i_ringId);
+                }
+
                 return rc;
             }
 
