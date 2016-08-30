@@ -446,9 +446,14 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         {
 
             // No match, do nothing. Next chipletId.
-            FAPI_INF("_fetch_and_insert_vpd_rings():"
-                     "(ringId,chipletId)=(0x%X,0x%X) not found.",
-                     i_ring.ringId, l_chipletId);
+            //@TODO: Uncomment the following after PowerOn. Also, need to come
+            //       to agreement whether this should be fatal error or not.
+            //       For now, for PO, it's considered benign and noise and is
+            //       being commented out... most of it at least.
+            //FAPI_INF("_fetch_and_insert_vpd_rings(): "
+            //         "(ringId,chipletId)=(0x%X,0x%X) not found.",
+            //         i_ring.ringId, l_chipletId);
+
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
         }
@@ -866,9 +871,13 @@ fapi2::ReturnCode p9_xip_customize (
                               "  Min req'd boot cores: %d",
                               io_bootCoreMask, l_actualEcCount, MIN_REQD_ECS );
 
-                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
 
                 }
+
+                fapi2::current_err = l_fapiRc;
+                goto fapi_try_exit;
+
             }
 
             // More size code sanity checks of section and image sizes.
