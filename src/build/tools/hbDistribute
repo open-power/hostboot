@@ -26,6 +26,7 @@
 TARGET_DIR="invalid directory"
 TARGET="fsp_TARGET"
 TEST_TEST=0
+CORRUPT_PARAMS=""
 
 print_usage()
 {
@@ -50,40 +51,55 @@ print_usage()
 }
 
 # Parse arguments
-for ARG in $*
+while [[ $# -gt 0 ]]
 do
-    case $ARG in
+    case $1 in
         "--help")
             print_usage
-            exit
+            exit -1
         ;;
 
         "--test")
             TARGET_TEST=1
+            shift
         ;;
 
         "--vpo")
             TARGET="vpo_TARGET"
+            shift
         ;;
 
         "--simics" | "--fsp")
             TARGET="fsp_TARGET"
+            shift
         ;;
 
         "--openpower")
             TARGET="openpower_TARGET"
+            shift
         ;;
 
         "--release")
             TARGET="ALL"
+            shift
         ;;
 
         "--debug")
             DEBUG="-d"
+            shift
         ;;
 
         "--hb-standalone")
             HB_STANDALONE=1
+            shift
+        ;;
+
+        "--corrupt")
+            # Format is "--corrupt <partition[=pro|unpro]>"
+            CORRUPT_PARAMS="$CORRUPT_PARAMS $1"
+            shift
+            CORRUPT_PARAMS="$CORRUPT_PARAMS $1"
+            shift
         ;;
 
         "--key-transition")
@@ -91,12 +107,13 @@ do
         ;;
 
         --*)
-            echo "ERROR: Unknown option: $ARG"
-            exit
+            echo "ERROR: Unknown option: $1"
+            exit -1
         ;;
 
         *)
-            TARGET_DIR=$ARG
+            TARGET_DIR=$1
+            shift
         ;;
 
     esac
@@ -107,7 +124,7 @@ if [ "${TARGET_DIR}" == "invalid directory" ]; then
     if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
         echo "ERROR: No path specified and \$SANDBOXBASE undefined."
         print_usage
-        exit
+        exit -1
     else
         TARGET_DIR=${SANDBOXROOT}/${SANDBOXNAME}/src/hbfw
     fi
@@ -120,7 +137,7 @@ else
     REPO_ROOT=`git rev-parse --show-toplevel`
     if [ -z $REPO_ROOT ]; then
         echo "ERROR: Not in a git repo."
-        exit
+        exit -1
     fi
 fi
 
@@ -141,11 +158,22 @@ else
     exit -1
 fi
 
+# Clean up preivous rand files. Should only be needed if a previous call failed.
+# Done before dist.targets.mk because there are parallel operations that occur.
+# So if we delete in genPnorImages.pl we would wipe out stuff currently being
+# used elsewhere and cause a file not found error.
+# Note: Prefix is set by genPnorImages.pl
+rm -f ${SANDBOXROOT}/${SANDBOXNAME}/obj/ppc/hbfw/img/rand-*
+
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
 export TARGET_TEST
 export TARGET_DIR
 export HB_STANDALONE
 export KEY_TRANSITION
+export CORRUPT_PARAMS
+if [ -n "$CORRUPT_PARAMS" ]; then
+    echo "Corruption options = $CORRUPT_PARAMS"
+fi
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET

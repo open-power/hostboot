@@ -170,10 +170,12 @@ errlHndl_t VfsRp::_init()
         iv_hashPageTableOffset = iv_pnor_vaddr;
 
         // calculate the hash page table size
-        TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT payload_text_size = 0x%X",
+        TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT total payload_text_size = 0x%X",
                     l_pnor_info.secureProtectedPayloadSize);
         iv_hashPageTableSize = l_pnor_info.secureProtectedPayloadSize
                                                        - VFS_MODULE_TABLE_SIZE;
+        TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT hash page table size = 0x%X",
+                    iv_hashPageTableSize);
         // skip the hash page table
         iv_pnor_vaddr += iv_hashPageTableSize;
         #endif
@@ -393,7 +395,7 @@ uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
     TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Current Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
              i_vaddr,
              getHashPageTableIndex(i_vaddr,i_baseOffset),
-             i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+             i_vaddr+PAGE_SIZE+iv_payloadTextSize);
     PAGE_TABLE_ENTRY_t* l_pageTableEntry = getHashPageTableEntry(i_vaddr,
                                                         i_baseOffset,
                                                         i_hashPageTableOffset);
@@ -403,7 +405,7 @@ uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
     TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Prev Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
              l_prevPage,
              getHashPageTableIndex(l_prevPage,i_baseOffset),
-             i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+             i_vaddr+PAGE_SIZE+iv_payloadTextSize);
     PAGE_TABLE_ENTRY_t* l_prevPageTableEntry = getHashPageTableEntry(
                                                         l_prevPage,
                                                         i_baseOffset,
@@ -424,7 +426,7 @@ uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
     {
         TRACFCOMP(g_trac_vfs, "ERROR:>VfsRp::verify_page secureboot verify fail on vaddr 0x%llX, offset into HBI 0x%llX",
                               i_vaddr,
-                              i_vaddr+PAGE_SIZE+iv_hashPageTableSize);
+                              i_vaddr+PAGE_SIZE+iv_payloadTextSize);
         printk("Secureboot Verification Failure in HBI\n");
         rc = EACCES;
     }

@@ -68,6 +68,7 @@ use constant VFS_MODULE_TABLE_ENTRY_SIZE => 112;
 # VFS Module table max size
 use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
                                           * VFS_MODULE_TABLE_ENTRY_SIZE;
+
 # Flag parameter string passed into signing tools
 # Note spaces before/after are critical.
 use constant LOCAL_SIGNING_FLAG => " -flag ";
@@ -77,6 +78,13 @@ use constant HB_FW_FLAG => 0x80000000;
 use constant OPAL_FLAG => 0x40000000;
 use constant PHYP_FLAG => 0x20000000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
+
+# Corrupt parameter strings
+use constant CORRUPT_PROTECTED => "pro";
+use constant CORRUPT_UNPROTECTED => "unpro";
+use constant MAX_PAGES_TO_CORRUPT => 10;
+# rand file prefix string. Note hbDistribute cleans up files with this prefix
+use constant RAND_PREFIX => "rand-";
 
 ################################################################################
 # I/O parsing
@@ -91,6 +99,7 @@ my $build_all = 0;
 my $install_all = 0;
 my $key_transition = 0;
 my $help = 0;
+my %partitionsToCorrupt = ();
 
 GetOptions("binDir:s" => \$bin_dir,
            "secureboot" => \$secureboot,
@@ -100,6 +109,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "build-all" => \$build_all,
            "install-all" => \$install_all,
            "key-transition" => \$key_transition,
+           "corrupt:s" => \%partitionsToCorrupt,
            "help" => \$help);
 
 # If in test mode, set key transition
@@ -156,11 +166,10 @@ if($SIGNING_TOOL_EDITION eq COMMUNITY)
     $openSigningTool = 1;
 }
 
+
 # Secureboot command strings
 # Requires naming convention of hw/sw keys in DEV_KEY_DIR
-
 my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
-
 
 # Key prefix used for current key siging of partitions (N/A for open edition)
 my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
@@ -214,6 +223,28 @@ if ($secureboot)
     die "hw_key_b DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_b*"));
     die "hw_key_c DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_c*"));
     die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
+
+    # Ensure all values of partitionsToCorrupt hash are valid.
+    # Allow some flexibiliy for the user and do a regex, case insensitive check
+    # to properly clean up the corrupt partition hash.
+    foreach my $key (keys %partitionsToCorrupt)
+    {
+        my $value = $partitionsToCorrupt{$key};
+        # ${\(CONST)} is the syntax to allow mixing other regex options like '^'
+        # and '/i' with a perl constant
+        if ($value eq "" || $value =~ m/^${\(CORRUPT_PROTECTED)}/i)
+        {
+            $partitionsToCorrupt{$key} = CORRUPT_PROTECTED
+        }
+        elsif ($value =~ m/^${\(CORRUPT_UNPROTECTED)}/i)
+        {
+            $partitionsToCorrupt{$key} = CORRUPT_UNPROTECTED;
+        }
+        else
+        {
+            die "Error> Unsupported option for --corrupt, value \"$key=$value\"";
+        }
+    }
 
     if(!$openSigningTool)
     {
@@ -281,7 +312,7 @@ sub manipulateImages
     trace(1, "manipulateImages");
 
     # Prefix for temporary files for parallel builds
-    my $parallelPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
+    my $parallelPrefix = RAND_PREFIX.POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
 
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
@@ -319,7 +350,7 @@ sub manipulateImages
         my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch.bin":
                                         "$bin_dir/$system_target.$eyeCatch.bin";
 
-        # Get size of parition without ecc
+        # Get size of partition without ecc
         if ($sectionHash{$layoutKey}{ecc} eq "yes")
         {
             $size = page_aligned_size_wo_ecc($size);
@@ -343,6 +374,11 @@ sub manipulateImages
             $secureboot_hdr = $sb_hdrs{OPAL}{file};
             $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{OPAL}{flag};
         }
+
+        # Used for corrupting partitions. By default all protected offsets start
+        # immediately after the container header which is size = PAGE_SIZE.
+        # *Note: this is before ECC.
+        my $protectedOffset = PAGE_SIZE;
 
         # Handle partitions that have an input binary.
         if (-e $bin_file)
@@ -378,6 +414,10 @@ sub manipulateImages
                     if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
                     {
                         trace(1,"Adding hash page table for $eyeCatch");
+                        my $hashPageTableSize = -s $tempImages{hashPageTable};
+                        die "hashPageTable size undefined" unless(defined $hashPageTableSize);
+                        # Move protected offset after hash page table.
+                        $protectedOffset += $hashPageTableSize;
                         if ($eyeCatch eq "HBI")
                         {
                             # Add the VFS module table to the payload text section.
@@ -386,9 +426,11 @@ sub manipulateImages
                             run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} skip=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
                             run_command("cp $tempImages{TEMP_BIN} $bin_file");
                             # Pad after hash page table to have the VFS module table end at a 4K boundary
-                            my $hashPageTableSize = -s $tempImages{hashPageTable};
                             my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
                             run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
+
+                            # Move protected offset after padding of hash page table.
+                            $protectedOffset += $padSize;
 
                             # Payload text section
                             run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
@@ -469,7 +511,7 @@ sub manipulateImages
                         $preReqImages{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages{HBB_SW_SIG_FILE}: $!\n";
                         binmode HBB_SW_SIG_FILE;
                         print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
-                        die "Error reading of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
+                        die "Error writing to $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                         close HBB_SW_SIG_FILE;
                         die "Error closing of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                     }
@@ -525,7 +567,7 @@ sub manipulateImages
             if ($eyeCatch eq "HBI" && $testRun)
             {
                 # If "--test" flag set do not pad as the test HBI images is
-                # possibly larger than parition size and does not need to be
+                # possibly larger than partition size and does not need to be
                 # fully padded. Size adjustments made in checkSpaceConstraints
                 run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
             }
@@ -541,28 +583,17 @@ sub manipulateImages
                 run_command("cp $tempImages{PAD_PHASE} $fsp_file");
             }
 
-            # Leave hacks in here for future testing purposes
-            # Hack HBI page to fail verification, Ensure location is past hash page table
-            #if ($eyeCatch eq "HBI")
-            #{
-                # Corrupt a single byte of the HBI partition at a address after
-                # the hash page table. Use dd with seek to maniuplate a bin file
-                # in-place at a specific location.
-                # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00013000))");
-            #}
-
-            # Hack HBD page to fail verification
-            #if ($eyeCatch eq "HBD")
-            #{
-                # Corrupt a single byte of HBD's RO section
-                # Use dd with seek to maniuplate a bin file in-place at a specific location.
-                #run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00004000))");
-
-                # Corrupt a single byte of HBD's RW section
-                # Use dd with seek to maniuplate a bin file in-place at a specific location.
-                # Enusre seek address is after RO section on.
-                # run_command("printf \'\\xa1\' | dd conv=notrunc of=$tempImages{PAD_PHASE} bs=1 seek=\$((0x00044000))");
-            #}
+            # Corrupt section if user specified to do so, before ECC injection.
+            if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
+            {
+                # If no protected file ($tempImages{PAYLOAD_TEXT}) exists
+                # for this partition, then that means there is no unprotected
+                # section. A protected file is only created when there's a need
+                # to split up the partition for signing purposes.
+                corrupt_partition($eyeCatch, $protectedOffset,
+                                  $tempImages{PAYLOAD_TEXT},
+                                  $tempImages{PAD_PHASE});
+            }
         }
         # Handle partitions that have no input binary. Simply zero or random
         # fill the partition.
@@ -634,6 +665,74 @@ sub manipulateImages
     }
 
     return 0;
+}
+
+################################################################################
+# corrupt_partition : Corrupts a single byte of a section's bin file.
+#                     The input $protected_file is used to determine the
+#                     unprotected offset. Some partitions have no unprotected
+#                     section, so the file DNE.
+#                     *Note: this should be run before ECC is injected.
+################################################################################
+sub corrupt_partition
+{
+    my ($eyeCatch, $protected_offset, $protected_file, $bin_file) = @_;
+
+    die "Error> Missing bin file to corrupt $bin_file" if (!-f $bin_file);
+
+    my $section = $partitionsToCorrupt{$eyeCatch};
+    my $offset = 0;
+    my $bin_file_size = -s $bin_file;
+    die "size of $bin_file undef" unless(defined $bin_file_size);
+
+    if ($section eq CORRUPT_PROTECTED)
+    {
+        $offset = $protected_offset;
+    }
+    elsif ($section eq CORRUPT_UNPROTECTED)
+    {
+        # If no protected_file file exists for this partition, then that means
+        # there is no unprotected section. A protected_file is only created
+        # when there's a need to split up the partition for signing purposes.
+        # *Note: Must add PAGE_SIZE to protected size as it does not include
+        #        the secure container header.
+        $offset = (-f $protected_file) ? (-s $protected_file)+PAGE_SIZE : 0;
+        die "offset undef" unless(defined $offset);
+        if ($offset == 0)
+        {
+            die "Error> Section $eyeCatch does not have an unprotected section to corrupt";
+        }
+        elsif ($offset <= $protected_offset)
+        {
+            die "Error> Unprotected offset($offset) <= Protected offset($protected_offset)";
+        }
+    }
+    else
+    {
+        die "Error> Unsupported --corrupt value \"$section\"";
+    }
+
+    # Error checking
+    die "Error> corrupt offset not set" if ($offset == 0);
+    die "Error> Offset=$offset is past the size of the bin file to corrupt size=$bin_file_size" if ($offset >= $bin_file_size);
+
+    # Corrupt partition
+    my $num_pages_to_corrupt = 1;
+    # If corrupting the unprotected HBI section, corrupt multiple pages in
+    # attempt to corrupt a page that is actually used to result in a VFS
+    # verify page failure.
+    if (($eyeCatch eq "HBI") && ($section eq CORRUPT_UNPROTECTED))
+    {
+        $num_pages_to_corrupt = MAX_PAGES_TO_CORRUPT;
+    }
+    for (my $i = 0; $i < $num_pages_to_corrupt; $i++)
+    {
+        my $page_offset = $i*PAGE_SIZE;
+        my $hex_offset = sprintf("0x%X", $offset + $page_offset);
+        trace(1,"Corrupting $eyeCatch $section section offset=$hex_offset");
+        # dd used with seek to manipulate a bin file in-place at a specific location.
+        run_command("printf \'\\xaf\' | dd conv=notrunc of=$bin_file bs=1 seek=\$(($hex_offset))");
+    }
 }
 
 ################################################################################
@@ -850,7 +949,7 @@ print <<"ENDUSAGE";
     $programName --pnorlayout <layout xml file>
              --systemBinFiles HBI=hostboot_extended.bin,HBEL=HBEL.bin,GUARD=EMPTY
              --systemBinFiles MURANO:HBD=simics_MURANO_targeting.bin
-             --build-all --test --binDir <path> --secureboot
+             --build-all --test --binDir <path> --secureboot --corrupt HBI
 
   Parms:
     -h|--help           Print this help text
@@ -858,14 +957,22 @@ print <<"ENDUSAGE";
     --build-all         Indicates script should operate as if in ODE build_all
                         This is used to handle things that should happen once in
                         build_all phase and avoid parallel call issues.
-    --systemBinFiles [SYSTEM:]<NAME=FILE,NAME=FILE> CSV of bin files to format. Multiple '--systemBinFiles' allowed
-                                    Optional prefix 'SYSTEM:' used to specify with system bin files are being built.
-                                    For sections <NAME> that simply require zero-filling, you can pass in EMPTY or
-                                        any non-existing file. If a file DNE, the script will handle accordingly.
-                                    Example: HBI=hostboot_extended.bin,GUARD=EMPTY
-                                             MURANO:HBD=simics_MURANO_targeting.bin
-    --test                  Output test-only sections.
-    --secureboot            Indicates a secureboot build.
+    --systemBinFiles    [SYSTEM:]<NAME=FILE,NAME=FILE> CSV of bin files to format. Multiple '--systemBinFiles' allowed
+                            Optional prefix 'SYSTEM:' used to specify with system bin files are being built.
+                            For sections <NAME> that simply require zero-filling, you can pass in EMPTY or
+                                any non-existing file. If a file DNE, the script will handle accordingly.
+                            Example: HBI=hostboot_extended.bin,GUARD=EMPTY
+                                     MURANO:HBD=simics_MURANO_targeting.bin
+    --test              Output test-only sections.
+    --secureboot        Indicates a secureboot build.
+    --corrupt           <Partition name>[= pro|unpro] (Note: requires '--secureboot')
+                        Partition 'eyeCatch' name to corrupt a byte of.
+                        Optional '= pro|unpro' to indicate which section of the secure container to corrupt.
+                            Default (empty string '') is protected section.
+                            [Note: Some sections only have a protected section so not relevant for all.]
+                        Multiple '--corrupt' options are allowed, but note the system will checkstop on the
+                            first bad partition so multiple may not be that useful.
+                        Example: --corrupt HBI --corrupt HBD=unpro
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This

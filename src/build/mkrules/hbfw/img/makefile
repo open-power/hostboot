@@ -52,18 +52,15 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 # changes expected in the future which will require using OBJ version.
 #################################################
 BASE_IMAGE = hostboot.bin
+BASE_ECC_IMAGE = hostboot.bin.ecc
+BASE_FINAL_IMAGE = HBB.bin
 EXT_IMAGE =  hostboot_extended.bin
 EXT_FINAL_IMAGE = HBI.bin
-BASE_FINAL_IMAGE = HBB.bin
 HBRT_IMAGE = hostboot_runtime.bin
 HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
 HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
 HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
 BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
-BASE_W_HEADER_IMAGE = hostboot.header.bin
-BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
-BASE_ECC_IMAGE = hostboot.bin.ecc
-BASE_SHA_IMAGE = hostboot.sha.bin
 TEMP_IMAGE = hostboot.temp.bin
 # Zero filled sections final bin names
 TEST_IMAGE = TEST.bin
@@ -79,10 +76,9 @@ SBKT_IMAGE = SBKT.bin
 ZERO_FILL_IMAGES = ${TEST_IMAGE} ${TESTRO_IMAGE} ${HBEL_IMAGE} ${GUARD_IMAGE} \
                    ${GLOBAL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} ${CVPD_IMAGE} \
                    ${PAYLOAD_IMAGE} ${SBKT_IMAGE}
-ALL_HB_IMAGES = ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} ${BASE_ECC_IMAGE}\
-                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE} ${HBRT_SHA_IMAGE} \
-                ${HBRT_HEADER_IMAGE} ${HBRT_ECC_HEADER_IMAGE} \
-                ${EXT_FINAL_IMAGE} ${BASE_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
+ALL_HB_IMAGES = ${BASE_IMAGES} ${HBRT_SHA_IMAGE} ${HBRT_HEADER_IMAGE} \
+                ${HBRT_ECC_HEADER_IMAGE} ${EXT_FINAL_IMAGE} \
+                ${BASE_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
 
 # Script to manipulate bin files to prepare for buildpnor (install_all phase)
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
@@ -116,7 +112,8 @@ gen_default_images: cp_hbfiles
 	# HBI + HBB partitions and ZERO_FILL_IMAGES
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
 		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition}
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition} \
+		${CORRUPT_PARAMS}
 	rm ${TEMP_IMAGE}
 
 clobber_gen_default_images:
@@ -251,11 +248,12 @@ gen_system_specific_images: build_sbe_partitions
 	ecc --inject ${TEMP_IMG} --output ${VENICE_LOCAL_SLW_IMG_ECC} --p8;
 	# Eventually use genPnorImages for every system specific image
 	${GEN_PNOR_IMAGE_SCRIPT} ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
-		--pnorLayout ${DEFAULT_PNOR_LAYOUT} \
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
 		--systemBinFiles ${GEN_MURANO_BIN_FILES} \
 		--systemBinFiles ${GEN_NAPLES_BIN_FILES} \
 		--systemBinFiles ${GEN_VENICE_BIN_FILES} \
 		--systemBinFile  SBEC=${${SBEC_IMG}:P}
+
 	rm ${TEMP_IMG}
 
 MURANO_SECT = HBD=${MURANO_TARG_FINAL_IMG},SBE=${MURANO_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${MURANO_LOCAL_SLW_IMG_ECC}
