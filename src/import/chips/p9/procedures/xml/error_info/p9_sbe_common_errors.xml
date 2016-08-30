@@ -28,6 +28,18 @@
 <hwpErrors>
    <!-- ******************************************************************** -->
     <registerFfdc>
+       <id>CBS_STATUS_REGISTERS</id>
+       <cfamRegister>PERV_CBS_CS_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_TR_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_EL_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_ENVSTAT_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_TR_HIST_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_EL_HIST_FSI</cfamRegister>
+       <cfamRegister>PERV_SB_CS_FSI</cfamRegister>
+       <cfamRegister>PERV_SB_MSG_FSI</cfamRegister>
+       <cfamRegister>PERV_CBS_STAT_FSI</cfamRegister>
+    </registerFfdc>
+    <registerFfdc>
        <id>ROOT_CTRL_REGISTERS_CFAM</id>
        <cfamRegister>PERV_ROOT_CTRL0_FSI</cfamRegister>
        <cfamRegister>PERV_ROOT_CTRL1_FSI</cfamRegister>
