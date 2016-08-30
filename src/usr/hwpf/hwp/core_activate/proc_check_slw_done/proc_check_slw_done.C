@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_check_slw_done.C,v 1.10 2015/09/17 16:10:02 cmolsen Exp $
+// $Id: proc_check_slw_done.C,v 1.11 2016/08/29 03:17:46 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_check_slw_done.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -288,6 +288,7 @@ proc_check_slw_done(const fapi::Target& i_ex_target)
         {
             const uint64_t& EX = l_ex_number;
             const fapi::Target& CHIP_IN_ERROR = l_parentTarget;
+            const fapi::Target& EX_IN_ERROR = i_ex_target;
 
             // XML will dump the SLW registers
 
