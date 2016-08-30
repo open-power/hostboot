@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,8 @@ enum MFG_THRES_SYNC_MSG_TYPE
     #define EPUB_PRC_MEMORY_UE      HWAS::EPUB_PRC_MEMORY_UE
     #define EPUB_PRC_TOD_CLOCK_ERR  HWAS::EPUB_PRC_TOD_CLOCK_ERR
     #define EPUB_PRC_COOLING_SYSTEM_ERR  HWAS::EPUB_PRC_COOLING_SYSTEM_ERR
+    #define EPUB_PRC_GPU_ISOLATION_PROCEDURE \
+                                    HWAS::EPUB_PRC_GPU_ISOLATION_PROCEDURE
 
     // FIXME: remove these mapping once the enums are made common
     #define SRCI_PRIORITY_HIGH  HWAS::SRCI_PRIORITY_HIGH
@@ -83,16 +85,17 @@ enum MFG_THRES_SYNC_MSG_TYPE
         #ifdef __PRD_RULE_COMPILE
         //FIXME RTC 137911: these enum values have to match with
         //what are defined in include/usr/hwas/common/hwasCallout.H
-        EPUB_PRC_SP_CODE        = 0x04,
-        EPUB_PRC_PHYP_CODE      = 0x05,
-        EPUB_PRC_ALL_PROCS      = 0x08,
-        EPUB_PRC_LVL_SUPP       = 0x10,
-        EPUB_PRC_PROC_AB_BUS    = 0x30,
-        EPUB_PRC_PROC_XYZ_BUS   = 0x31,
-        EPUB_PRC_MEMBUS_ERROR   = 0x34,
-        EPUB_PRC_MEMORY_UE      = 0x4F,
-        EPUB_PRC_TOD_CLOCK_ERR  = 0x56,
-        EPUB_PRC_COOLING_SYSTEM_ERR  = 0x5C,
+        EPUB_PRC_SP_CODE                 = 0x04,
+        EPUB_PRC_PHYP_CODE               = 0x05,
+        EPUB_PRC_ALL_PROCS               = 0x08,
+        EPUB_PRC_LVL_SUPP                = 0x10,
+        EPUB_PRC_PROC_AB_BUS             = 0x30,
+        EPUB_PRC_PROC_XYZ_BUS            = 0x31,
+        EPUB_PRC_MEMBUS_ERROR            = 0x34,
+        EPUB_PRC_MEMORY_UE               = 0x4F,
+        EPUB_PRC_TOD_CLOCK_ERR           = 0x56,
+        EPUB_PRC_COOLING_SYSTEM_ERR      = 0x5C,
+        EPUB_PRC_GPU_ISOLATION_PROCEDURE = 0x5E,
 
         SRCI_PRIORITY_LOW   = 1,
         SRCI_PRIORITY_MEDC  = 2,

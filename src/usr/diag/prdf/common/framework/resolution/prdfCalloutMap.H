@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,7 @@ PRDF_SYM_CALLOUT_ALIAS( PassiveFabric_OffNode_ENUM, EPUB_PRC_PROC_AB_BUS       )
 PRDF_SYM_CALLOUT_ALIAS( ErrorCausedByMemUE_ENUM,    EPUB_PRC_MEMORY_UE         )
 PRDF_SYM_CALLOUT_ALIAS( TODProcInterface_Enum,      EPUB_PRC_TOD_CLOCK_ERR     )
 PRDF_SYM_CALLOUT_ALIAS( CoolingSystemError_ENUM,    EPUB_PRC_COOLING_SYSTEM_ERR)
+PRDF_SYM_CALLOUT_ALIAS( GPUIsolation_ENUM,    EPUB_PRC_GPU_ISOLATION_PROCEDURE )
 
 PRDF_SYM_CALLOUT_MAP_END
 

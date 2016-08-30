@@ -158,17 +158,17 @@ group gIoNvFir_0 filter singlebit
     /** IONVFIR_0[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_0, bit(0)) ? SelfMedThr32PerDay;
+    (IoNvFir_0, bit(0)) ? GPUIsolation;
 
     /** IONVFIR_0[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_0, bit(1)) ? SelfMedThr32PerDay;
+    (IoNvFir_0, bit(1)) ? GPUIsolation;
 
     /** IONVFIR_0[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoNvFir_0, bit(2)) ? SelfMedThr32PerDay;
+    (IoNvFir_0, bit(2)) ? GPUIsolation;
 
     /** IONVFIR_0[3:12]
      *  RESERVED
@@ -219,17 +219,17 @@ group gIoNvFir_1 filter singlebit
     /** IONVFIR_1[0]
      *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_1, bit(0)) ? SelfMedThr32PerDay;
+    (IoNvFir_1, bit(0)) ? GPUIsolation;
 
     /** IONVFIR_1[1]
      *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_1, bit(1)) ? SelfMedThr32PerDay;
+    (IoNvFir_1, bit(1)) ? GPUIsolation;
 
     /** IONVFIR_1[2]
      *  FIR_GCR_HANG_ERROR
      */
-    (IoNvFir_1, bit(2)) ? SelfMedThr32PerDay;
+    (IoNvFir_1, bit(2)) ? GPUIsolation;
 
     /** IONVFIR_1[3:12]
      *  RESERVED
@@ -581,3 +581,12 @@ actionclass calloutSelfMedTh32NoGard
     calloutSelfMedNoGard;
     threshold32pday;
 };
+
+/** Callout GPU isolation procedure MED, self med, no garding. */
+actionclass GPUIsolation
+{
+    callout(procedure(GPUIsolation_ENUM), MRU_MED);
+    calloutSelfMedNoGard;
+    threshold32pday;
+};
+
