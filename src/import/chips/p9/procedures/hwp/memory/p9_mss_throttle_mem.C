@@ -27,15 +27,15 @@
 /// @file p9_mss_throttle_mem.C
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HB
+// *HWP Level: 2
+// *HWP Consumed by: Cronus
 
 #include <fapi2.H>
-#include <p9_mss_thermal_throttle_mem.H>
-
+#include <p9_mss_throttle_mem.H>
+#include <mss.H>
 using fapi2::TARGET_TYPE_MCS;
 
 extern "C"
@@ -45,12 +45,37 @@ extern "C"
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
 /// @param[in] i_target the controller target
 /// @return FAPI2_RC_SUCCESS iff ok
+/// @note overwriting the safemem_throttle values
 ///
     fapi2::ReturnCode p9_mss_throttle_mem( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
         FAPI_INF("Start throttle mem");
-        FAPI_INF("End throttle mem");
 
+        for (const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA> (i_target))
+        {
+            uint32_t l_runtime_port = 0;
+            uint32_t l_runtime_slot = 0;
+            uint32_t l_throttle_denominator = 0;
+
+            FAPI_TRY( mss::mem_m_dram_clocks( l_mca, l_throttle_denominator) );
+            FAPI_TRY( mss::runtime_mem_throttled_n_commands_per_port(l_mca, l_runtime_port));
+            FAPI_TRY( mss::runtime_mem_throttled_n_commands_per_slot(l_mca, l_runtime_slot));
+
+            fapi2::buffer<uint64_t> l_data;
+            FAPI_TRY(mss::getScom(l_mca, MCA_MBA_FARB3Q, l_data));
+
+            l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_runtime_slot);
+            l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_runtime_port);
+
+            FAPI_TRY( mss::putScom(l_mca, MCA_MBA_FARB3Q, l_data) );
+
+        }
+
+        FAPI_INF("End throttle mem");
         return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        FAPI_ERR("Couldn't finish mss_throttle_mem");
+        return fapi2::current_err;
     }
-}
+} // extern "C"
