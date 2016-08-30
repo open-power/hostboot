@@ -54,8 +54,8 @@
       <priority>HIGH</priority>
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
+<!--    <ffdc>RING_ID</ffdc> -->
+<!--    <ffdc>CHIPLET_ID</ffdc> -->
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
