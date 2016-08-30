@@ -75,7 +75,7 @@ extern "C"
 ///                                             In:  MAX_SEEPROM_IMAGE_SIZE
 ///                                             Out: Unchanged
 ///                                         RT_{CME,SGPE}:
-///                                             In:  MAX_RT_IMAGE_SIZE
+///                                             In:  MAX_SEEPROM_IMAGE_SIZE
 ///                                             Out: Final size
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
 /// @param[in] i_modeBuild               => ={IPL, REBUILD}
