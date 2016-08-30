@@ -1075,7 +1075,7 @@ int get_ring_from_cme_image ( void*
                                 ring_offset = htobe32(ring_offset);
                                 var = ring_offset + i_ddLevel + temp;
                                 temp1 = var / sizeof(uint16_t) + local;
-                                chiplet_offset  = *((uint16_t*)i_ringSection + temp1);
+                                chiplet_offset = *((uint16_t*)i_ringSection + temp1);
                                 chiplet_offset = htobe16(chiplet_offset);
 
                                 if (i_RingBlockType == GET_SINGLE_RING)
@@ -1225,6 +1225,8 @@ int tor_access_ring(  void*
 
     uint32_t ddLevelOffset = 0;
     uint32_t ddLevelCount = 0;
+    uint32_t ddLevel = 0;
+    uint32_t ddBlockSize = 0;
     uint32_t temp = 0, temp1 = 0, local = 0;
 
     if(i_dbgl > 1)
@@ -1247,24 +1249,23 @@ int tor_access_ring(  void*
         {
             local = 2;
             ddLevelOffset  =  *((uint32_t*)i_ringSection + local);
-            temp = htobe32(ddLevelOffset) >> 24 & 0x000000FF;
+            ddLevel = htobe32(ddLevelOffset) >> 24 & 0x000000FF;
             ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
 
             if(i_dbgl > 1)
             {
                 MY_INF( "TOR_ACCESS_RING(4): DD level offset %d DD %d level Copy  \n",
-                        ddLevelOffset, temp );
+                        ddLevelOffset, ddLevel );
             }
 
-            if ( temp == i_ddLevel)
+            if ( ddLevel == i_ddLevel)
             {
                 ddLevelOffset  =  *((uint32_t*)i_ringSection + local);
-                ddLevelOffset = ddLevelOffset & 0xFFFFFF00;
-                ddLevelOffset = htobe32(ddLevelOffset);
+                ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
                 ddLevelOffset = ddLevelOffset + sizeof(TorNumDdLevels_t);
                 local = local + 1;
-                temp1 = *((uint32_t*)i_ringSection + local);
-                temp1 = htobe32(temp1);
+                ddBlockSize = *((uint32_t*)i_ringSection + local);
+                ddBlockSize = htobe32(ddBlockSize);
                 dd_check = 1;
                 break;
             }
@@ -1288,7 +1289,7 @@ int tor_access_ring(  void*
         else
         {
             ddLevelOffset = 0;
-            temp1 = 0;
+            ddBlockSize = 0;
         }
     }
     else if( i_magic ==  P9_XIP_MAGIC_CME)
@@ -1303,7 +1304,7 @@ int tor_access_ring(  void*
         else
         {
             ddLevelOffset = 0;
-            temp1 = 0;
+            ddBlockSize = 0;
         }
     }
     else if( i_magic ==  P9_XIP_MAGIC_SGPE)
@@ -1318,7 +1319,7 @@ int tor_access_ring(  void*
         else
         {
             ddLevelOffset = 0;
-            temp1 = 0;
+            ddBlockSize = 0;
         }
     }
     else
@@ -1336,26 +1337,26 @@ int tor_access_ring(  void*
                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
             }
 
-            io_ringBlockSize =  temp1;
+            io_ringBlockSize =  ddBlockSize;
             return 0;
         }
 
-        if (io_ringBlockSize < temp1)
+        if (io_ringBlockSize < ddBlockSize)
         {
             MY_ERR("\tio_ringBlockSize is less than required size.\n");
             return IMGBUILD_TGR_BUFFER_TOO_SMALL;
         }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
-                (uint8_t*)i_ringSection + ddLevelOffset, (size_t)temp1);
+                (uint8_t*)i_ringSection + ddLevelOffset, (size_t)ddBlockSize);
 
         if(i_dbgl > 1)
         {
-            MY_INF( "TOR_ACCESS_RING(5): DD level offset %d DD %d size 0x%08x %d \n",
-                    ddLevelOffset, temp, temp1, temp1);
+            MY_INF( "TOR_ACCESS_RING(5): DD offset = %d  DD level = %d  DD block size = %d \n",
+                    ddLevelOffset, ddLevel, ddBlockSize);
         }
 
-        io_ringBlockSize =  temp1;
+        io_ringBlockSize =  ddBlockSize;
         return IMGBUILD_TGR_RING_BLOCKS_FOUND;
 
     }
@@ -1366,7 +1367,7 @@ int tor_access_ring(  void*
 
         if(i_PpeType == SBE)
         {
-            int temp = ddLevelOffset >> 2;
+            temp = ddLevelOffset >> 2;
 
             if(i_dbgl > 1)
             {
@@ -1380,7 +1381,7 @@ int tor_access_ring(  void*
         }
         else if (i_PpeType == CME)
         {
-            int temp = (ddLevelOffset >> 2) + 2;
+            temp = (ddLevelOffset >> 2) + 2;
 
             if(i_dbgl > 1)
             {
@@ -1395,7 +1396,7 @@ int tor_access_ring(  void*
         else if (i_PpeType == SGPE)
         {
 
-            int temp = (ddLevelOffset >> 2) + sizeof(uint32_t);
+            temp = (ddLevelOffset >> 2) + sizeof(uint32_t);
 
             if(i_dbgl > 1)
             {

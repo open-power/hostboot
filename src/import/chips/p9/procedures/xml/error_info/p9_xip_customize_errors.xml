@@ -46,10 +46,12 @@
       <priority>HIGH</priority>
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>INPUT_IMAGE_SIZE</ffdc>
     <ffdc>IMAGE_BUF_SIZE</ffdc>
     <ffdc>RING_SECTION_BUF_SIZE</ffdc>
     <ffdc>RING_BUF_SIZE1</ffdc>
     <ffdc>RING_BUF_SIZE2</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -184,6 +186,9 @@
       <priority>HIGH</priority>
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CURRENT_RING_SECTION_SIZE</ffdc>
+    <ffdc>SIZE_OF_THIS_RING</ffdc>
+    <ffdc>MAX_RING_SECTION_SIZE</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
@@ -255,6 +260,18 @@
     <ffdc>IMAGE_SIZE</ffdc>
     <ffdc>MAX_IMAGE_SIZE</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED</rc>
+    <description>tor_get_block_of_rings() failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOR_RC</ffdc>
+    <ffdc>SYSPHASE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
