@@ -29,12 +29,12 @@
 
 using namespace fapi2;
 
-constexpr auto literal_0x04000C0000000000 = 0x04000C0000000000;
+constexpr auto literal_0x04047C0000000000 = 0x04047C0000000000;
 constexpr auto literal_0x0000000000000000 = 0x0000000000000000;
-constexpr auto literal_0x009F780000000000 = 0x009F780000000000;
-constexpr auto literal_0x0000FAF8000F = 0x0000FAF8000F;
+constexpr auto literal_0x409B000000000000 = 0x409B000000000000;
+constexpr auto literal_0x0000FAF800FF = 0x0000FAF800FF;
 constexpr auto literal_0x000000000000 = 0x000000000000;
-constexpr auto literal_0x9000FAFC00FC = 0x9000FAFC00FC;
+constexpr auto literal_0x910000040B00 = 0x910000040B00;
 constexpr auto literal_0b11111 = 0b11111;
 constexpr auto literal_0x0258 = 0x0258;
 
@@ -56,7 +56,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x04000C0000000000, 0, 22, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x04047C0000000000, 0, 22, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c03ull, l_scom_buffer);
@@ -98,7 +98,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x009F780000000000, 0, 22, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x409B000000000000, 0, 22, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c07ull, l_scom_buffer);
@@ -181,7 +181,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0000FAF8000F, 0, 48, 16 );
+                l_scom_buffer.insert<uint64_t> (literal_0x0000FAF800FF, 0, 48, 16 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c43ull, l_scom_buffer);
@@ -225,7 +225,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x9000FAFC00FC, 0, 48, 16 );
+                l_scom_buffer.insert<uint64_t> (literal_0x910000040B00, 0, 48, 16 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5012c47ull, l_scom_buffer);
