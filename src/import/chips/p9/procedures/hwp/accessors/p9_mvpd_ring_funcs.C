@@ -280,13 +280,20 @@ extern "C"
         // do the get or set specific operations
         if (i_mvpdRingFuncOp == MVPD_RING_GET ) // do the get operation
         {
-            // ensure ring was found. Must be there for "get"
-            FAPI_ASSERT(l_ringLen != 0,
-                        fapi2::MVPD_RING_NOT_FOUND().
-                        set_CHIP_TARGET(i_fapiTarget).
-                        set_RING_ID(i_ringId).
-                        set_CHIPLET_ID(i_chipletId),
-                        "mvpdRingFunc: mvpdRingFuncFind did not find ring");
+            // Ensure ring was found. Must be there for "get"
+            //@TODO: Uncomment the following after PowerOn. Also, need to come
+            //       to agreement whether this should be fatal error or not.
+            //       For now, for PO, it's considered benign and noise and is
+            //       being commented out... most of it at least.
+            FAPI_ASSERT( l_ringLen != 0,
+                         fapi2::MVPD_RING_NOT_FOUND().
+                         set_CHIP_TARGET(i_fapiTarget) );
+            //FAPI_ASSERT(l_ringLen != 0,
+            //            fapi2::MVPD_RING_NOT_FOUND().
+            //            set_CHIP_TARGET(i_fapiTarget).
+            //            set_RING_ID(i_ringId).
+            //            set_CHIPLET_ID(i_chipletId),
+            //            "mvpdRingFunc: mvpdRingFuncFind did not find ring");
 
             // copy ring back to caller's buffer
             FAPI_TRY(mvpdRingFuncGet(l_pRing,
