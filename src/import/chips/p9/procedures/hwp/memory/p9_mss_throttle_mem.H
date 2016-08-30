@@ -22,17 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 ///
 /// @file p9_mss_throttle_mem.H
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HB
-
+// *HWP Level: 2
+// *HWP Consumed by: Cronus
+//
 #ifndef __P9_MSS_THROTTLE_MEM__
 #define __P9_MSS_THROTTLE_MEM__
 
@@ -42,12 +41,14 @@ typedef fapi2::ReturnCode (*p9_mss_throttle_mem_FP_t) (const fapi2::Target<fapi2
 
 extern "C"
 {
-///
-/// @brief Write the runtime memory throttle settings from attributes to scom registers
-/// @param[in] i_target the controller target
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Write the runtime memory throttle settings from attributes to scom registers
+    /// @param[in] i_target the controller target
+    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @note overwriting the safemem_throttle values
+    ///
     fapi2::ReturnCode p9_mss_throttle_mem( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
+
 }
 
 #endif
