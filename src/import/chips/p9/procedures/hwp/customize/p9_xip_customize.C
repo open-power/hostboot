@@ -161,8 +161,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     for (auto l_chipletId = i_ring.instanceIdMin; l_chipletId <= l_instanceIdMax; l_chipletId++)
     {
 
-        FAPI_INF("_fetch_and_insert_vpd_rings: "
-                 "(ringId,chipletId) = (0x%02X,0x%02x)",
+        FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02X,0x%02x)",
                  i_ring.ringId, l_chipletId);
 
         auto l_vpdRingSize = i_vpdRingSize;
@@ -179,7 +178,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 break;
 
             default:
-                FAPI_ASSERT( 0,
+                FAPI_ASSERT( false,
                              fapi2::XIPC_INVALID_VPD_KEYWORD().
                              set_CHIP_TARGET(i_proc_target).
                              set_VPD_KEYWORD(i_ring.vpdKeyword),
@@ -201,9 +200,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
         bSkipRing = 0;
 
-        if (i_ring.vpdRingClass == VPD_RING_CLASS_EQ_INS)
+        if ( i_ring.vpdRingClass == VPD_RING_CLASS_EQ_INS &&
+             (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
         {
-            // Fetch Quad (EQ) instance ring
+            // Fetch EQ instance ring
+            // - Fetch for SBE and SGPE only.
 
             if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
                  io_bootCoreMask )
@@ -222,9 +223,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             }
 
         }
-        else if (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS)
+        else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS &&
+                  (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
         {
-            // Fetch CME (EX) instance ring
+            // Fetch EX instance ring
+            // - Fetch for SBE and SGPE only.
 
             if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
                  io_bootCoreMask )
@@ -243,9 +246,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             }
 
         }
-        else if (i_ring.vpdRingClass == VPD_RING_CLASS_EC_INS)
+        else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EC_INS &&
+                  (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_CME) )
         {
-            // Fetch Core (EC) instance ring
+            // Fetch EC instance ring
+            // - Fetch for SBE and CME only.
 
             if ( ((0x00000001 << (NUM_OF_CORES - 1)) >> (l_chipletId - i_ring.instanceIdMin)) & io_bootCoreMask )
             {
@@ -263,9 +268,15 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             }
 
         }
-        else
+        else if ( i_sysPhase == SYSPHASE_HB_SBE ||
+                  (i_sysPhase == SYSPHASE_RT_CME  && i_ring.vpdRingClass == VPD_RING_CLASS_EC) ||
+                  (i_sysPhase == SYSPHASE_RT_SGPE && (i_ring.vpdRingClass == VPD_RING_CLASS_EX ||
+                          i_ring.vpdRingClass == VPD_RING_CLASS_EQ)) )
         {
             // Fetch common ring
+            // - Fetch all VPD rings for SBE.
+            // - Fetch only EC VPD rings for CME.
+            // - Fetch only EX+EQ VPD rings for SGPE.
 
             l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
                                     l_mvpdKeyword,
@@ -274,7 +285,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                     i_ring.ringId,
                                     (uint8_t*)i_vpdRing,
                                     l_vpdRingSize );
-
+        }
+        else
+        {
+            bSkipRing = 1;
         }
 
 
@@ -374,9 +388,12 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                     //       we would manually have to scale back on the requested
                     //       cores in the initialled supplied io_bootCoreMask arg to
                     //       xip_customize.
-                    FAPI_ASSERT( 0,
+                    FAPI_ASSERT( false,
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW().
                                  set_CHIP_TARGET(i_proc_target).
+                                 set_CURRENT_RING_SECTION_SIZE(io_ringSectionSize).
+                                 set_SIZE_OF_THIS_RING(l_sizeOfThisRing).
+                                 set_MAX_RING_SECTION_SIZE(i_maxRingSectionSize).
                                  set_RING_ID(i_ring.ringId).
                                  set_CHIPLET_ID(l_chipletId).
                                  set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
@@ -412,7 +429,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             }
                             else
                             {
-                                FAPI_ASSERT( 0,
+                                FAPI_ASSERT( false,
                                              fapi2::XIPC_TOR_APPEND_RING_FAILED().
                                              set_CHIP_TARGET(i_proc_target).
                                              set_TOR_RC(l_rc),
@@ -424,12 +441,77 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                         break;
 
                     case SYSPHASE_RT_CME:
+                        for (iRingsPerChipletId = 0; iRingsPerChipletId < l_ringsPerChipletId; iRingsPerChipletId++)
+                        {
+                            l_rc = tor_append_ring(
+                                       i_ringSection,
+                                       io_ringSectionSize, // In: Exact size. Out: Updated size.
+                                       i_ringBuf2,
+                                       i_ringBufSize2,  // Max size.
+                                       (RingID)i_ring.ringId,
+                                       P9_TOR::CME,     // We're working on the SBE image
+                                       P9_TOR::ALLRING, // No-care
+                                       BASE,            // All VPD rings are Base ringVariant
+                                       l_chipletId,     // Chiplet instance ID
+                                       i_vpdRing );     // The VPD RS4 ring container
+
+                            if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
+                            {
+                                FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
+                                         i_ring.ringId, l_chipletId);
+                            }
+                            else
+                            {
+                                FAPI_ASSERT( false,
+                                             fapi2::XIPC_TOR_APPEND_RING_FAILED().
+                                             set_CHIP_TARGET(i_proc_target).
+                                             set_TOR_RC(l_rc),
+                                             "tor_append_ring() failed w/l_rc=%d",
+                                             l_rc );
+                            }
+
+                            FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
+                        }
+
+                        break;
+
                     case SYSPHASE_RT_SGPE:
-                        //call insert_ring function
+                        for (iRingsPerChipletId = 0; iRingsPerChipletId < l_ringsPerChipletId; iRingsPerChipletId++)
+                        {
+                            l_rc = tor_append_ring(
+                                       i_ringSection,
+                                       io_ringSectionSize, // In: Exact size. Out: Updated size.
+                                       i_ringBuf2,
+                                       i_ringBufSize2,  // Max size.
+                                       (RingID)i_ring.ringId,
+                                       P9_TOR::SGPE,    // We're working on the SGPE image
+                                       P9_TOR::ALLRING, // No-care
+                                       BASE,            // All VPD rings are Base ringVariant
+                                       l_chipletId,     // Chiplet instance ID
+                                       i_vpdRing );     // The VPD RS4 ring container
+
+                            if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
+                            {
+                                FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
+                                         i_ring.ringId, l_chipletId);
+                            }
+                            else
+                            {
+                                FAPI_ASSERT( false,
+                                             fapi2::XIPC_TOR_APPEND_RING_FAILED().
+                                             set_CHIP_TARGET(i_proc_target).
+                                             set_TOR_RC(l_rc),
+                                             "tor_append_ring() failed w/l_rc=%d",
+                                             l_rc );
+                            }
+
+                            FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
+                        }
+
                         break;
 
                     default:
-                        FAPI_ASSERT( 0,
+                        FAPI_ASSERT( false,
                                      fapi2::XIPC_INVALID_SYSPHASE_PARM().
                                      set_CHIP_TARGET(i_proc_target).
                                      set_SYSPHASE(i_sysPhase).
@@ -448,9 +530,9 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             // No match, do nothing. Next chipletId.
             //@TODO: Uncomment the following after PowerOn. Also, need to come
             //       to agreement whether this should be fatal error or not.
-            //       For now, for PO, it's considered benign and noise and is
-            //       being commented out... most of it at least.
-            //FAPI_INF("_fetch_and_insert_vpd_rings(): "
+            //       For now, for PO, it's considered benigh and noise and is
+            //       being commented out.
+            //FAPI_INF("_fetch_and_insert_vpd_rings():"
             //         "(ringId,chipletId)=(0x%X,0x%X) not found.",
             //         i_ring.ringId, l_chipletId);
 
@@ -466,24 +548,24 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             // getMvpdRing failed due to insufficient ring buffer space.
             // Assumption here is that getMvpdRing returns required buffer size
             //   in l_vpdRingSize (and which it does!).
-            FAPI_ASSERT(!l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
-                        fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
-                        set_CHIP_TARGET(i_proc_target).
-                        set_RING_ID(i_ring.ringId).
-                        set_CHIPLET_ID(l_chipletId).
-                        set_RING_BUFFER_SIZE(i_vpdRingSize).
-                        set_MVPD_RING_SIZE(l_vpdRingSize),
-                        "_fetch_and_insert_vpd_rings(): VPD ring size (=0x%X) exceeds"
-                        " allowed ring buffer size (=0x%X)",
-                        l_vpdRingSize, i_vpdRingSize );
+            FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
+                         fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_RING_ID(i_ring.ringId).
+                         set_CHIPLET_ID(l_chipletId).
+                         set_RING_BUFFER_SIZE(i_vpdRingSize).
+                         set_MVPD_RING_SIZE(l_vpdRingSize),
+                         "_fetch_and_insert_vpd_rings(): VPD ring size (=0x%X) exceeds"
+                         " allowed ring buffer size (=0x%X)",
+                         l_vpdRingSize, i_vpdRingSize );
 
             // getMvpdRing failed due to invalid record data magic word.
-            FAPI_ASSERT(!l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
-                        fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
-                        set_CHIP_TARGET(i_proc_target).
-                        set_RING_ID(i_ring.ringId).
-                        set_CHIPLET_ID(l_chipletId),
-                        "_fetch_and_insert_vpd_rings(): MVPD has invalid record data" );
+            FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
+                         fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_RING_ID(i_ring.ringId).
+                         set_CHIPLET_ID(l_chipletId),
+                         "_fetch_and_insert_vpd_rings(): MVPD has invalid record data" );
 
             // getMvpdRing failed for some other reason aside from above handled cases.
             if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
@@ -555,6 +637,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 l_ring_id_list[iRing].vpdRingClass != VPD_RING_CLASS_EX_INS &&
                 l_ring_id_list[iRing].vpdRingClass != VPD_RING_CLASS_EC_INS)
             {
+
                 FAPI_TRY( _fetch_and_insert_vpd_rings( i_proc_target,
                                                        i_ringSection,
                                                        io_ringSectionSize,
@@ -569,6 +652,9 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                           "fetch_and_insert_vpd_rings(): Failed to execute "
                           "_fetch_and_insert_vpd_rings() w/rc:0x%.8x",
                           (uint64_t)fapi2::current_err );
+
+                FAPI_DBG("(CMN) io_ringSectionSize = %d", io_ringSectionSize);
+
             }
 
         } //Loop on ringId
@@ -614,6 +700,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                           "_fetch_and_insert_vpd_rings() w/rc:0x%.8x",
                           (uint64_t)fapi2::current_err );
 
+                FAPI_DBG("(INS) io_ringSectionSize = %d", io_ringSectionSize);
+
             } // if (Quad instance ring)
 
         } // Loop on ringId
@@ -646,21 +734,27 @@ fapi2::ReturnCode p9_xip_customize (
     fapi2::ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
     int                 l_rc = 0; // Non-fapi RC
 
-    P9XipSection    l_xipRingSection;
+    P9XipSection    l_xipRingsSection;
     uint32_t        l_initialImageSize;
     uint32_t        l_imageSizeWithoutRings;
     uint32_t        l_maxImageSize, l_imageSize;
     uint32_t        l_maxRingSectionSize;
     uint32_t        l_sectionOffset = 1;
+    uint16_t        l_ddLevel;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
+    void*           l_hwRingsSection;
 
 
-    FAPI_DBG ("Entering p9_xip_customize...");
+    FAPI_DBG ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
 
-    //-----------------------------------------
-    // Check input buffer parameters
+    io_bootCoreMask = l_requestedBootCoreMask;
+
+    //-------------------------------------------
+    // Check some input buffer parameters:
     // - sysPhase, modeBuild are checked later
-    //-----------------------------------------
+    // - log the initial image size
+    // - more buffer size checks in big switch()
+    //-------------------------------------------
 
     FAPI_ASSERT( io_image != NULL &&
                  io_ringSectionBuf != NULL &&
@@ -682,29 +776,6 @@ fapi2::ReturnCode p9_xip_customize (
                  (uintptr_t)io_ringBuf1,
                  (uintptr_t)io_ringBuf2 );
 
-
-    FAPI_ASSERT( io_imageSize >= MAX_SEEPROM_IMAGE_SIZE &&
-                 io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE &&
-                 i_ringBufSize1 == MAX_RING_BUF_SIZE &&
-                 i_ringBufSize2 == MAX_RING_BUF_SIZE,
-                 fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
-                 set_CHIP_TARGET(i_proc_target).
-                 set_IMAGE_BUF_SIZE(io_imageSize).
-                 set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
-                 set_RING_BUF_SIZE1(i_ringBufSize1).
-                 set_RING_BUF_SIZE2(i_ringBufSize2),
-                 "One or more invalid input buffer sizes:\n"
-                 "  io_imageSize=0x%016llx\n"
-                 "  io_ringSectionBufSize=0x%016llx\n"
-                 "  i_ringBufSize1=0x%016llx\n"
-                 "  i_ringBufSize2=0x%016llx\n",
-                 (uintptr_t)io_imageSize,
-                 (uintptr_t)io_ringSectionBufSize,
-                 (uintptr_t)i_ringBufSize1,
-                 (uintptr_t)i_ringBufSize2 );
-
-
-    // Make a note of the initial image size
     l_rc = p9_xip_image_size(io_image, &l_initialImageSize);
 
     FAPI_ASSERT( l_rc == 0,
@@ -715,7 +786,32 @@ fapi2::ReturnCode p9_xip_customize (
                  "p9_xip_image_size() failed (1) w/rc=0x%08X",
                  (uint32_t)l_rc );
 
-    FAPI_DBG("Image size before VPD update (incl .rings): %d", l_initialImageSize);
+    FAPI_ASSERT( io_imageSize >= l_initialImageSize &&
+                 io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE &&
+                 i_ringBufSize1 == MAX_RING_BUF_SIZE &&
+                 i_ringBufSize2 == MAX_RING_BUF_SIZE,
+                 fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                 set_CHIP_TARGET(i_proc_target).
+                 set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                 set_IMAGE_BUF_SIZE(io_imageSize).
+                 set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                 set_RING_BUF_SIZE1(i_ringBufSize1).
+                 set_RING_BUF_SIZE2(i_ringBufSize2).
+                 set_OCCURRENCE(1),
+                 "One or more invalid input buffer sizes:\n"
+                 "  l_initialImageSize=0x%016llx\n"
+                 "  io_imageSize=0x%016llx\n"
+                 "  io_ringSectionBufSize=0x%016llx\n"
+                 "  i_ringBufSize1=0x%016llx\n"
+                 "  i_ringBufSize2=0x%016llx\n",
+                 (uintptr_t)l_initialImageSize,
+                 (uintptr_t)io_imageSize,
+                 (uintptr_t)io_ringSectionBufSize,
+                 (uintptr_t)i_ringBufSize1,
+                 (uintptr_t)i_ringBufSize2 );
+
+
+    FAPI_DBG("Input image size: %d", l_initialImageSize);
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -748,7 +844,27 @@ fapi2::ReturnCode p9_xip_customize (
 
         case SYSPHASE_HB_SBE:
 
-            l_maxImageSize = min(MAX_SEEPROM_IMAGE_SIZE, io_imageSize);
+            FAPI_DBG("Image size before any updates: %d", l_initialImageSize);
+
+            FAPI_ASSERT( io_imageSize >= MAX_SEEPROM_IMAGE_SIZE &&
+                         io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE,
+                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                         set_IMAGE_BUF_SIZE(io_imageSize).
+                         set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                         set_RING_BUF_SIZE1(i_ringBufSize1).
+                         set_RING_BUF_SIZE2(i_ringBufSize2).
+                         set_OCCURRENCE(2),
+                         "One or more invalid input buffer sizes for SBE:\n"
+                         "  MAX_SEEPROM_IMAGE_SIZE=0x%016llx\n"
+                         "  io_imageSize=0x%016llx\n"
+                         "  io_ringSectionBufSize=0x%016llx\n",
+                         (uintptr_t)MAX_SEEPROM_IMAGE_SIZE,
+                         (uintptr_t)io_imageSize,
+                         (uintptr_t)io_ringSectionBufSize );
+
+            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
 
             // Copy, save and delete the .rings section, wherever it is (even if
             //   not the last section), and re-arrange other sections located above
@@ -778,32 +894,33 @@ fapi2::ReturnCode p9_xip_customize (
             FAPI_DBG("Size of image before VPD update (excl .rings): %d", l_imageSizeWithoutRings);
 
             // Get the size of our .rings section.
-            l_rc = p9_xip_get_section(io_ringSectionBuf, P9_XIP_SECTION_SBE_RINGS, &l_xipRingSection);
+            l_rc = p9_xip_get_section(io_ringSectionBuf, P9_XIP_SECTION_SBE_RINGS, &l_xipRingsSection);
 
             FAPI_ASSERT( l_rc == 0,
                          fapi2::XIPC_XIP_API_MISC_ERROR().
                          set_CHIP_TARGET(i_proc_target).
                          set_XIP_RC(l_rc).
                          set_OCCURRENCE(4),
-                         "p9_xip_get_section() failed getting .rings section w/rc=0x%08X",
+                         "p9_xip_get_section() failed (4) getting .rings section w/rc=0x%08X",
                          (uint32_t)l_rc );
 
-            io_ringSectionBufSize = l_xipRingSection.iv_size;
+            io_ringSectionBufSize = l_xipRingsSection.iv_size;
 
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
+
+            l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
+
+            FAPI_DBG("Max allowable size of .rings section: %d", l_maxRingSectionSize);
 
             // Move .rings to the top of ringSectionBuf (which currently holds a copy of the
             //   io_image but which can now be destroyed.)
             memcpy( io_ringSectionBuf,
-                    (void*)(((uint8_t*)io_ringSectionBuf) + l_xipRingSection.iv_offset),
+                    (void*)(((uint8_t*)io_ringSectionBuf) + l_xipRingsSection.iv_offset),
                     io_ringSectionBufSize );
-
 
             //----------------------------------------
             // Append VPD Rings to the .rings section
             //----------------------------------------
-
-            l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
 
             l_fapiRc = fetch_and_insert_vpd_rings( i_proc_target,
                                                    io_ringSectionBuf,
@@ -903,9 +1020,6 @@ fapi2::ReturnCode p9_xip_customize (
             // Append the updated .rings section to the Seeprom image
             //--------------------------------------------------------
 
-            p9_xip_image_size(io_image, &l_imageSize);
-            FAPI_DBG( "Seeprom image size before append: %d",
-                      l_imageSize );
             l_rc = p9_xip_append( io_image,
                                   P9_XIP_SECTION_SBE_RINGS,
                                   io_ringSectionBuf,
@@ -933,8 +1047,7 @@ fapi2::ReturnCode p9_xip_customize (
                          "p9_xip_image_size() failed (6) w/rc=0x%08X",
                          (uint32_t)l_rc );
 
-            FAPI_DBG( "Seeprom image size after VPD updates: %d",
-                      l_imageSize );
+            FAPI_DBG( "Seeprom image size after VPD updates: %d", l_imageSize );
 
             FAPI_ASSERT( l_imageSize <= l_maxImageSize,
                          fapi2::XIPC_IMAGE_TOO_LARGE().
@@ -949,11 +1062,131 @@ fapi2::ReturnCode p9_xip_customize (
 
         case SYSPHASE_RT_CME:
         case SYSPHASE_RT_SGPE:
-            l_maxImageSize = min(MAX_RT_IMAGE_SIZE, io_imageSize);
+
+            FAPI_ASSERT( io_imageSize == l_initialImageSize &&
+                         io_ringSectionBufSize == MAX_SEEPROM_IMAGE_SIZE,
+                         fapi2::XIPC_INVALID_INPUT_BUFFER_SIZE_PARM().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_INPUT_IMAGE_SIZE(l_initialImageSize).
+                         set_IMAGE_BUF_SIZE(io_imageSize).
+                         set_RING_SECTION_BUF_SIZE(io_ringSectionBufSize).
+                         set_RING_BUF_SIZE1(i_ringBufSize1).
+                         set_RING_BUF_SIZE2(i_ringBufSize2).
+                         set_OCCURRENCE(3),
+                         "One or more invalid input buffer sizes for CME or SGPE:\n"
+                         "  l_initialImageSize=0x%016llx\n"
+                         "  io_imageSize=0x%016llx\n"
+                         "  io_ringSectionBufSize=0x%016llx\n",
+                         (uintptr_t)l_initialImageSize,
+                         (uintptr_t)io_imageSize,
+                         (uintptr_t)io_ringSectionBufSize );
+
+            l_maxRingSectionSize = io_ringSectionBufSize;
+
+            // Calculate pointer to HW image's .rings section
+            l_rc = p9_xip_get_section(io_image, P9_XIP_SECTION_HW_RINGS, &l_xipRingsSection);
+
+            FAPI_ASSERT( l_rc == 0,
+                         fapi2::XIPC_XIP_API_MISC_ERROR().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_XIP_RC(l_rc).
+                         set_OCCURRENCE(7),
+                         "p9_xip_get_section() failed (7) getting .rings section w/rc=0x%08X",
+                         (uint32_t)l_rc );
+
+            l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
+
+            // Extract the DD level
+            //@FIXME: CMO: Use attribute service for this. For now, hardcode.
+            l_ddLevel = 0x10;
+
+            //------------------------------------------------------------
+            // Get the CME or SGPE block of rings from .rings in HW image
+            //------------------------------------------------------------
+            if ( i_sysPhase == SYSPHASE_RT_CME )
+            {
+                FAPI_DBG("Getting the CME block of rings from HW image");
+
+                l_rc = tor_get_block_of_rings( l_hwRingsSection,
+                                               l_ddLevel,
+                                               P9_TOR::CME,
+                                               P9_TOR::ALLRING,
+                                               BASE,
+                                               0,
+                                               &io_ringSectionBuf,
+                                               io_ringSectionBufSize );
+            }
+            else
+            {
+                FAPI_DBG("Getting the SGPE block of rings from HW image");
+
+                l_rc = tor_get_block_of_rings( l_hwRingsSection,
+                                               l_ddLevel,
+                                               P9_TOR::SGPE,
+                                               P9_TOR::ALLRING,
+                                               BASE,
+                                               0,
+                                               &io_ringSectionBuf,
+                                               io_ringSectionBufSize );
+            }
+
+            FAPI_ASSERT( l_rc == 0,
+                         fapi2::XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_TOR_RC(l_rc).
+                         set_SYSPHASE(i_sysPhase),
+                         "tor_get_block_of_rings() failed w/rc=0x%08X",
+                         (uint32_t)l_rc );
+
+            FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
+
+            //----------------------------------------
+            // Append VPD Rings to the .rings section
+            //----------------------------------------
+
+            l_fapiRc = fetch_and_insert_vpd_rings( i_proc_target,
+                                                   io_ringSectionBuf,
+                                                   io_ringSectionBufSize, // Running section size
+                                                   l_maxRingSectionSize,  // Max section size
+                                                   i_sysPhase,
+                                                   io_ringBuf1,
+                                                   i_ringBufSize1,
+                                                   io_ringBuf2,
+                                                   i_ringBufSize2,
+                                                   io_bootCoreMask );
+
+            FAPI_DBG("Size of .rings section after VPD update: %d", io_ringSectionBufSize );
+
+            FAPI_DBG("bootCoreMask: Requested=0x%08X Final=0x%08X",
+                     l_requestedBootCoreMask, io_bootCoreMask);
+
+            if (l_fapiRc)
+            {
+
+                FAPI_ASSERT( !l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW),
+                             fapi2::XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
+                             set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
+                             "Ran out of space appending VPD rings to the .rings section" );
+
+                fapi2::current_err = l_fapiRc;
+                goto fapi_try_exit;
+
+            }
+
+            // More size code sanity checks of section and image sizes.
+            FAPI_ASSERT( io_ringSectionBufSize <= l_maxRingSectionSize,
+                         fapi2::XIPC_SECTION_SIZING().
+                         set_CHIP_TARGET(i_proc_target).
+                         set_RING_SECTION_SIZE(io_ringSectionBufSize).
+                         set_MAX_RING_SECTION_SIZE(l_maxRingSectionSize),
+                         "Code bug: ringSectionBufSize>maxRingSectionSize" );
+
             break;
 
         default:
-            FAPI_ASSERT( 0,
+            FAPI_ASSERT( false,
                          fapi2::XIPC_INVALID_SYSPHASE_PARM().
                          set_CHIP_TARGET(i_proc_target).
                          set_SYSPHASE(i_sysPhase).
@@ -1015,7 +1248,7 @@ fapi2::ReturnCode p9_xip_customize (
                      fapi2::XIPC_XIP_API_MISC_ERROR().
                      set_CHIP_TARGET(i_proc_target).
                      set_XIP_RC(l_rc).
-                     set_OCCURRENCE(7),
+                     set_OCCURRENCE(8),
                      "p9_xip_image_size() failed (7) w/rc=0x%08X",
                      (uint32_t)l_rc );
 
@@ -1043,14 +1276,16 @@ fapi2::ReturnCode p9_xip_customize (
 
 
     ///////////////////////////////////////////////////////////////////////////
-    // Return the updated image or section size
+    // Done
     ///////////////////////////////////////////////////////////////////////////
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
         io_imageSize = l_imageSize;
-        FAPI_DBG("Final customized image size: %d", io_imageSize);
+        FAPI_DBG("Final customized Seeprom image size: %d", io_imageSize);
     }
+
+    FAPI_DBG("Final customized .rings section size: %d", io_ringSectionBufSize);
 
 
 fapi_try_exit:
