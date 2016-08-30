@@ -3267,15 +3267,9 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
             // give us MCA with 0 DIMM, so we'll just use a 0-filled VPD for those MCA.
             memset(l_mt_blob, 0, mss::VPD_KEYWORD_MAX);
 
-            const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
-
-            // If we don't have any DIMM, then just move about our business.
-            if (l_dimms.size() == 0)
-            {
-                continue;
-            }
-
-            for (const auto& d : l_dimms)
+            // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
+            // This will fill the VPD attributes with 0's which is perfectly ok.
+            for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
             {
                 uint8_t l_num_master_ranks = 0;
                 FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_num_master_ranks) );
