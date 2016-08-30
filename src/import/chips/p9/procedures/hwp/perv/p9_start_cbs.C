@@ -88,8 +88,10 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>();  //l_read_vdn_pgood_status = PERV_CBS_ENVSTAT.PERV_CBS_ENVSTAT_C4_VDN_GPOOD
 
     FAPI_ASSERT(l_read_vdn_pgood_status,
-                fapi2::VDN_PGOOD_NOT_SET(),
-                "ERROR:VDN PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
+                fapi2::VDN_PGOOD_NOT_SET()
+                .set_MASTER_CHIP(i_target_chip)
+                .set_CBS_ENVSTAT_READ(l_data32),
+                "ERROR:VDN_PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
 
     FAPI_DBG("Resetting CFAM Boot Sequencer (CBS) to flush value");
     //Setting CBS_CS register value
@@ -130,8 +132,14 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_DBG("Loop Count :%d", l_timeout);
 
     FAPI_ASSERT(l_timeout > 0,
-                fapi2::CBS_CS_INTERNAL_STATE(),
-                "ERROR: CBS_CS_INTERNAL_STATE_VECTOR HAS NOT REACHED IDLE STATE VALUE 0x002 ");
+                fapi2::CBS_NOT_IN_IDLE_STATE()
+                .set_MASTER_CHIP_TARGET(i_target_chip)
+                .set_MASTER_CHIP(i_target_chip)
+                .set_CBS_CS_READ(l_data32_cbs_cs)
+                .set_CBS_CS_IDLE_VALUE(CBS_IDLE_VALUE)
+                .set_LOOP_COUNT(l_timeout)
+                .set_HW_DELAY(P9_CBS_IDLE_HW_NS_DELAY),
+                "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
     FAPI_DBG("check for VDD status");
     //Getting FSI2PIB_STATUS register value
@@ -141,7 +149,9 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     l_fsi2pib_status = l_data32.getBit<PERV_FSI2PIB_STATUS_VDD_NEST_OBSERVE>();
 
     FAPI_ASSERT(l_fsi2pib_status,
-                fapi2::VDD_NEST_OBSERVE(),
+                fapi2::VDD_NEST_OBSERVE_NOT_SET()
+                .set_MASTER_CHIP(i_target_chip)
+                .set_FSI2PIB_STATUS_READ(l_data32),
                 "ERROR:VDD OFF, FSI2PIB  BIT 16 NOT SET");
 
     FAPI_INF("p9_start_cbs: Exiting ...");

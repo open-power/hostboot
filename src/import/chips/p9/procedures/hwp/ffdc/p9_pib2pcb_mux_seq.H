@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/ffdc/ffdc_includes.H $     */
+/* $Source: src/import/chips/p9/procedures/hwp/ffdc/p9_pib2pcb_mux_seq.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,14 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __FFDC_INCLUDES_H
-#define __FFDC_INCLUDES_H
-
-/// @file ffdc_includes.H
+//------------------------------------------------------------------------------
+/// @file  p9_pib2pcb_mux_seq.H
 ///
-/// @brief main file used to export all include files for FFDC procedures
-///
+/// @brief Pib2pcb mux sequence
+//------------------------------------------------------------------------------
+// *HWP HW Owner        : Anusha Reddy Rangareddygari <anusrang@in.ibm.com>
+// *HWP HW Backup Owner :  <>
+// *HWP FW Owner        :  <>
+// *HWP Team            : Perv
+// *HWP Level           : 2
+// *HWP Consumed by     : SE:HB
+//------------------------------------------------------------------------------
 
-#include <p9_collect_some_ffdc.H>
-#include <p9_pib2pcb_mux_seq.H>
+
+#ifndef _P9_PIB2PCB_MUX_SEQ_H_
+#define _P9_PIB2PCB_MUX_SEQ_H_
+
+#include <return_code.H>
+#include <error_info_defs.H>
+
+typedef fapi2::ReturnCode (*p9_pib2pcb_mux_seq_FP_t)(const fapi2::ffdc_t&, fapi2::ReturnCode&);
+
+/// @brief switching tp pib2pcb mux
+///
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+extern "C"
+{
+    fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
+                                         fapi2::ReturnCode&);
+}
+
 #endif
