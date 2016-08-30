@@ -31,5 +31,5 @@
 ///
 
 #include <p9_collect_some_ffdc.H>
-
+#include <p9_pib2pcb_mux_seq.H>
 #endif
