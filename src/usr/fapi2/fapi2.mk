@@ -68,6 +68,7 @@ OBJS += error_info.o
 OBJS += ffdc.o
 OBJS += fapi2_utils.o
 OBJS += p9_collect_some_ffdc.o
+OBJS += p9_pib2pcb_mux_seq.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
