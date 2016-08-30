@@ -628,7 +628,8 @@ bool PNOR::isSecureSection(const uint32_t i_section)
            i_section == PAYLOAD ||
            i_section == SBKT ||
            i_section == OCC ||
-           i_section == WINK;
+           i_section == WINK ||
+           i_section == HB_RUNTIME;
 #else
     return false;
 #endif

@@ -57,11 +57,12 @@ BASE_FINAL_IMAGE = HBB.bin
 EXT_IMAGE =  hostboot_extended.bin
 EXT_FINAL_IMAGE = HBI.bin
 HBRT_IMAGE = hostboot_runtime.bin
-HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
-HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
-HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
+HBRT_FINAL_IMAGE = HBRT.bin
 BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
-TEMP_IMAGE = hostboot.temp.bin
+BASE_W_HEADER_IMAGE = hostboot.header.bin
+BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
+BASE_ECC_IMAGE = hostboot.bin.ecc
+BASE_SHA_IMAGE = hostboot.sha.bin
 # Zero filled sections final bin names
 TEST_IMAGE = TEST.bin
 TESTRO_IMAGE = TESTRO.bin
@@ -76,9 +77,9 @@ SBKT_IMAGE = SBKT.bin
 ZERO_FILL_IMAGES = ${TEST_IMAGE} ${TESTRO_IMAGE} ${HBEL_IMAGE} ${GUARD_IMAGE} \
                    ${GLOBAL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} ${CVPD_IMAGE} \
                    ${PAYLOAD_IMAGE} ${SBKT_IMAGE}
-ALL_HB_IMAGES = ${BASE_IMAGES} ${HBRT_SHA_IMAGE} ${HBRT_HEADER_IMAGE} \
-                ${HBRT_ECC_HEADER_IMAGE} ${EXT_FINAL_IMAGE} \
-                ${BASE_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
+ALL_HB_IMAGES = ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} ${BASE_ECC_IMAGE}\
+                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE} ${HBRT_FINAL_IMAGE} \
+                ${EXT_FINAL_IMAGE} ${BASE_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
 
 # Script to manipulate bin files to prepare for buildpnor (install_all phase)
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
@@ -87,7 +88,7 @@ GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 # them, rather than use an input.
 # Note: HBI depends on HBB for sw signatures. Ensure that both are passed into
 #       the same --systemBinFiles parameter for genPnorImages
-GEN_DEFAULT_BIN_FILES = HBB=${BASE_IMAGE},HBI=${EXT_IMAGE},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,SBKT=EMPTY
+GEN_DEFAULT_BIN_FILES = HBB=${BASE_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,SBKT=EMPTY
 DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
 
 ################################################################################
@@ -100,21 +101,11 @@ cp_hbfiles: .SPECTARG
 gen_default_images: cp_hbfiles
 	currentsb -chain
 	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
-	# Add version header w/ HBRT sha hash
-	echo -en VERSION\\0 > ${HBRT_SHA_IMAGE}
-	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
-	dd if=${HBRT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
-	cat ${HBRT_IMAGE} >> ${TEMP_IMAGE}
-	# HBRT partition
-	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=3072K conv=sync
-	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
 	# Eventually use genPnorImages for every default image
 	# HBI + HBB partitions and ZERO_FILL_IMAGES
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
 		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition} \
-		${CORRUPT_PARAMS}
-	rm ${TEMP_IMAGE}
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition}
 
 clobber_gen_default_images:
 	rm -f ${ALL_HB_IMAGES} \
@@ -196,7 +187,7 @@ GEN_FAKE_HEADER_SCRIPT = ${genfakeheader.pl:P}
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
 ZERO_FILL_SECTIONS = TEST=${TEST_IMAGE},TESTRO=${TESTRO_IMAGE},HBEL=${HBEL_IMAGE},GUARD=${GUARD_IMAGE},GLOBAL=${GLOBAL_IMAGE},PAYLOAD=${PAYLOAD_IMAGE},CVPD=${CVPD_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE},SBKT=${SBKT_IMAGE}
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_FINAL_IMAGE},HBI=${EXT_FINAL_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},${ZERO_FILL_SECTIONS}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_FINAL_IMAGE},HBI=${EXT_FINAL_IMAGE},HBRT=${HBRT_FINAL_IMAGE},${ZERO_FILL_SECTIONS}
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}

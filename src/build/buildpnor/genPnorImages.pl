@@ -362,7 +362,8 @@ sub manipulateImages
                              || ($eyeCatch eq "SBEC")
                              || ($eyeCatch eq "PAYLOAD")
                              || ($eyeCatch eq "SBKT")
-                             || ($eyeCatch eq "OCC");
+                             || ($eyeCatch eq "OCC")
+                             || ($eyeCatch eq "HBRT");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
                               || ($eyeCatch eq "HBI")

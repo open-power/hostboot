@@ -277,8 +277,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
             break;
         }
-        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo succeeded for sec = %s",
-                  l_info.name);
+        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo"
+                " succeeded for sec = %s", l_info.name);
 
         l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
         l_info.size += PAGESIZE; // add a page to size to account for the header
@@ -678,6 +678,8 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     msg->type = PNOR::MSG_LOAD_SECTION;
     msg->data[0] = static_cast<uint64_t>(i_section);
     int rc = msg_sendrecv(spnorQ, msg);
+
+    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i",i_section);
 
     // TODO RTC 156118 - Need to be able to receive an error from the
     // message handler. Also, message handler should police whether the request

@@ -58,7 +58,7 @@
 #include <vpd/mvpdenums.H>
 #include <vpd/cvpdenums.H>
 #include <vpd/spdenums.H>
-
+#include <config.h>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -1481,9 +1481,20 @@ void add_reserved_mem(devTree * i_dt,
 void load_hbrt_image(uint64_t& io_address)
 {
     errlHndl_t l_errl = NULL;
+    #ifdef CONFIG_SECUREBOOT
+    bool l_secureSectionLoaded = false;
+    #endif
 
     do
     {
+        #ifdef CONFIG_SECUREBOOT
+        l_errl = loadSecureSection(PNOR::HB_RUNTIME);
+        if(l_errl)
+        {
+            break;
+        }
+        l_secureSectionLoaded = true;
+        #endif
 
         PNOR::SectionInfo_t l_pnorInfo;
         l_errl = getSectionInfo( PNOR::HB_RUNTIME , l_pnorInfo);
@@ -1525,6 +1536,17 @@ void load_hbrt_image(uint64_t& io_address)
         io_address = 0;
         errlCommit(l_errl, DEVTREE_COMP_ID);
     }
+
+    #ifdef CONFIG_SECUREBOOT
+    if (l_secureSectionLoaded)
+    {
+        l_errl = unloadSecureSection(PNOR::HB_RUNTIME);
+        if(l_errl)
+        {
+            errlCommit(l_errl, DEVTREE_COMP_ID);
+        }
+    }
+    #endif
 }
 
 void load_tpmlog(devTree * i_dt, uint64_t& io_address)
