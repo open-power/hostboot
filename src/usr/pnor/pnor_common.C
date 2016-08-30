@@ -626,7 +626,8 @@ bool PNOR::isSecureSection(const uint32_t i_section)
            i_section == SBE_IPL ||
            i_section == CENTAUR_SBE ||
            i_section == PAYLOAD ||
-           i_section == SBKT;
+           i_section == SBKT ||
+           i_section == OCC;
 #else
     return false;
 #endif
