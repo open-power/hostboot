@@ -115,6 +115,30 @@ fapi2::ReturnCode decoder::generate_encoding()
 fapi_try_exit:
     return fapi2::current_err;
 }
+///
+///@brief a compare functor for the decoder::find_attr functions below
+///@note AND's the input hash with the generated hash from the DIMM to see if they match
+///@note Using an AND instead of == because not all DIMM configs have power slopes, so defaults are needed
+///
+struct is_match
+{
+    ///
+    ///@brief functor constructor
+    ///@param[in] i_gen_key the class object's constructed hash for the installed dimm, to be compared with the attr array
+    ///
+    is_match(const fapi2::buffer<uint32_t> i_gen_key) : iv_gen_key(i_gen_key) {}
+    const fapi2::buffer<uint32_t> iv_gen_key;
+
+    ///
+    ///@brief Boolean compare used for find_if function
+    ///
+    bool operator()(const fapi2::buffer<uint64_t> i_hash)
+    {
+        uint32_t l_temp = 0;
+        i_hash.extractToRight<ENCODING_START, ENCODING_LENGTH>(l_temp);
+        return ((l_temp & iv_gen_key) == iv_gen_key);
+    }
+};
 
 ///
 /// @brief Finds a value for the power curve slope attributes by matching the generated hashes
@@ -124,27 +148,18 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>>& i_slope)
 {
-
-    // Comparator lambda expression
-    const auto compare = [this](const fapi2::buffer<uint64_t>& i_hash)
-    {
-        uint32_t l_temp = 0;
-        i_hash.extractToRight<ENCODING_START, ENCODING_LENGTH>(l_temp);
-        return ((l_temp & iv_gen_key) == iv_gen_key);
-    };
-
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_slope.begin(),
                                     i_slope.end(),
-                                    compare);
+                                    is_match(iv_gen_key));
 
-    //Should have matched with the all default ATTR at least
+    //Should have matched with the default ATTR value at least
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_slope.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_DIMM_TARGET(iv_kind.iv_target),
-                "Couldn't find %s value for generated key:%016lx, for target %s. "
+                "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
                 "ATTR_MSS_MRW_POWER_CURVE_SLOPE",
@@ -159,8 +174,8 @@ fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    (*l_value_iterator).extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_slope);
-    (*l_value_iterator).extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_slope);
+    l_value_iterator->extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_slope);
+    l_value_iterator->extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_slope);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -174,18 +189,10 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint64_t>>& i_intercept)
 {
-    // Comparator lambda expression
-    const auto compare = [this](const fapi2::buffer<uint64_t>& i_hash)
-    {
-        uint32_t l_temp = 0;
-        i_hash.extractToRight<ENCODING_START, ENCODING_LENGTH>(l_temp);
-        return ((l_temp & iv_gen_key) == iv_gen_key);
-    };
-
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_intercept.begin(),
                                     i_intercept.end(),
-                                    compare);
+                                    is_match(iv_gen_key));
 
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
@@ -193,7 +200,7 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint6
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_DIMM_TARGET(iv_kind.iv_target),
-                "Couldn't find %s value for generated key:%016lx, for target %s. "
+                "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
                 "ATTR_MSS_MRW_POWER_CURVE_INTERCEPT",
@@ -208,8 +215,8 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint6
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    (*l_value_iterator).extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_intercept);
-    (*l_value_iterator).extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_intercept);
+    l_value_iterator->extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_intercept);
+    l_value_iterator->extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_intercept);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -223,18 +230,10 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::buffer<uint64_t>>& i_thermal_limits)
 {
-    // Comparator lambda expression
-    const auto compare = [this](const fapi2::buffer<uint64_t>& i_hash)
-    {
-        uint32_t l_temp = 0;
-        i_hash.extractToRight<ENCODING_START, ENCODING_LENGTH>(l_temp);
-        return ((l_temp & iv_gen_key) == iv_gen_key);
-    };
-
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_thermal_limits.begin(),
                                     i_thermal_limits.end(),
-                                    compare);
+                                    is_match(iv_gen_key));
 
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
@@ -242,7 +241,7 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
                 .set_GENERATED_KEY(iv_gen_key)
                 .set_DIMM_TARGET(iv_kind.iv_target),
-                "Couldn't find %s value for generated key:%016lx, for target %s. "
+                "Couldn't find %s value for generated key:%8lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
                 "ATTR_MSS_MRW_THERMAL_POWER_LIMIT",
@@ -257,7 +256,7 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    (*l_value_iterator).extractToRight<THERMAL_POWER_START, THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
+    l_value_iterator->extractToRight<THERMAL_POWER_START, THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
 
 fapi_try_exit:
     return fapi2::current_err;
