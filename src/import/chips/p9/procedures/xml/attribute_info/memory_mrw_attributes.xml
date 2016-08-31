@@ -102,6 +102,7 @@
     <platInit/>
     <initToZero/>
     <array>100</array>
+    <default>0xffffe00002CC03AE</default>
     <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
   </attribute>
 
@@ -132,6 +133,7 @@
     <platInit/>
     <initToZero/>
     <array>100</array>
+    <default>0xffffe00003FD0546</default>
     <mssAccessorName>mrw_pwr_slope</mssAccessorName>
   </attribute>
 
@@ -246,7 +248,7 @@
     <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        Memory power control settings programmed during IPL 
+        Memory power control settings programmed during IPL
         Used by OCC when exiting idle power-save mode
     </description>
     <valueType>uint8</valueType>

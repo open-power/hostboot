@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -40,14 +40,15 @@
 #include <lib/power_thermal/throttle.H>
 #include <lib/power_thermal/decoder.H>
 #include <lib/dimm/kind.H>
+#include <lib/utils/count_dimm.H>
 #include <mss.H>
 extern "C"
 {
-///
-/// @brief Perform thermal calculations as part of the effective configuration
-/// @param[in] i_targets an array of MCS targets all on the same VDDR domain
-/// @return FAPI2_RC_SUCCESS iff ok
-///
+    ///
+    /// @brief Perform thermal calculations as part of the effective configuration
+    /// @param[in] i_targets an array of MCS targets all on the same VDDR domain
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
     fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets )
     {
 
@@ -61,17 +62,18 @@ extern "C"
 
         //Gotta convert into fapi2::buffers. Not very elegant
         //Do it here or in the encode and decode functions
-        std::vector< uint64_t > l_tslope (mss::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_tintercept (mss::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_tthermal_power_limit (mss::SIZE_OF_THERMAL_ATTR, 0);
+        //Not that pretty :(
+        std::vector< uint64_t > l_tslope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_tintercept (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_tthermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR, 0);
 
-        std::vector< fapi2::buffer< uint64_t > > l_slope (mss::SIZE_OF_POWER_CURVES_ATTRS);
-        std::vector< fapi2::buffer< uint64_t > > l_intercept  (mss::SIZE_OF_POWER_CURVES_ATTRS);
-        std::vector< fapi2::buffer< uint64_t > > l_thermal_power_limit (mss::SIZE_OF_THERMAL_ATTR);
+        std::vector<fapi2::buffer< uint64_t>> l_slope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS);
+        std::vector<fapi2::buffer< uint64_t>> l_intercept  (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS);
+        std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR);
 
-        FAPI_TRY ( mss::mrw_pwr_slope (l_tslope.data() ));
-        FAPI_TRY ( mss::mrw_pwr_intercept (l_tintercept.data()) );
-        FAPI_TRY ( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
+        FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data() ));
+        FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()) );
+        FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
 
         for (size_t i = 0; i < l_slope.size(); ++i)
         {
@@ -79,9 +81,22 @@ extern "C"
             l_intercept[i] = fapi2::buffer<uint64_t>(l_tintercept[i]);
         }
 
-        for ( const auto& l_mcs : i_targets )
+        for (size_t i = 0; i < l_thermal_power_limit.size(); ++i)
         {
-            FAPI_TRY (mss::power_thermal::get_power_attrs(l_mcs,
+            l_thermal_power_limit[i] = fapi2::buffer<uint64_t> (l_tthermal_power_limit[i]);
+        }
+
+        //Restore runtime_throttles from safemode setting
+        //Decode and set power curve attributes at the same time
+        for (const auto& l_mcs : i_targets )
+        {
+            //Not doing any work if there are no dimms installed
+            if (mss::count_dimm(l_mcs) == 0)
+            {
+                continue;
+            }
+
+            FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
                       l_intercept,
                       l_thermal_power_limit,
@@ -90,13 +105,11 @@ extern "C"
                       l_total_slope,
                       l_total_int,
                       l_thermal_power));
-
+            //Sets throttles to max_databus_util value
+            FAPI_INF("Restoring throttles");
             FAPI_TRY( mss::power_thermal::restore_runtime_throttles(l_mcs));
 
-            //Set the power attribute (TOTAL_PWR) to just VDDR for IPL, restoreto vddr+vpp  later for OCC
-            //Set here because bulk_pwr_throttles takes input as attributes, and I can't change which attribute it takes
-            //So we have to use TOTAL_PWR_SLOPE
-            //Setting here and not in set_power_attrs because get_power_attrs decodes the attributes and stores them
+            //Set the power attribute (TOTAL_PWR) to just VDDR for the POWER bulk_pwr_throttles, restore to vddr+vpp  later for OCC
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_TOTAL_PWR_SLOPE,
                                     l_mcs,
                                     l_vddr_slope));
@@ -104,15 +117,27 @@ extern "C"
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_TOTAL_PWR_INTERCEPT,
                                     l_mcs,
                                     l_vddr_int));
+
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_DIMM_THERMAL_LIMIT,
+                                    l_mcs,
+                                    l_thermal_power));
         }
 
+        FAPI_INF("Starting bulk_pwr");
         //get the thermal limits, done per dimm and set to worst case for the slot and port throttles
-        FAPI_TRY (p9_mss_bulk_pwr_throttles(i_targets, THERMAL));
+        //Bulk_pwr sets the general, all purpose ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, _PER_PORT, and MAXPOWER ATTRs
+        FAPI_TRY( p9_mss_bulk_pwr_throttles(i_targets, POWER));
 
-        //Set VDDR+VPP
+        //Set runtime throttles to worst case between ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT
+        //and ATTR_MSS_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
+        FAPI_INF("Starting update");
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
+        FAPI_INF("finished update");
+
+        //Set VDDR+VPP power curve values
         for ( const auto& l_mcs : i_targets )
         {
-            FAPI_TRY (mss::power_thermal::get_power_attrs(l_mcs,
+            FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
                       l_intercept,
                       l_thermal_power_limit,
@@ -122,9 +147,10 @@ extern "C"
                       l_total_int,
                       l_thermal_power));
 
-            FAPI_TRY( mss::power_thermal::restore_runtime_throttles(l_mcs));
+            FAPI_INF( "VDDR+VPP power curve slope is %d, int is %d, thermal_power is %d", l_total_slope[0][0], l_total_int[0][0],
+                      l_thermal_power[0][0]);
 
-            //Set the power attribute (TOTAL_PWR) to just VDDR for IPL, restoreto vddr+vpp  later for OCC
+            //Set the power attribute (TOTAL_PWR) to vpp+vdd power slope
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_TOTAL_PWR_SLOPE,
                                     l_mcs,
                                     l_total_slope));
@@ -134,8 +160,13 @@ extern "C"
                                     l_total_int));
         }
 
+        //Run thermal throttles with the VDDR+VPP power curves
+        FAPI_TRY( p9_mss_bulk_pwr_throttles(i_targets, THERMAL));
+        //Update everything to worst case
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets));
 
-        FAPI_INF("End effective config thermal");
+        //Done
+        FAPI_INF( "End effective config thermal");
 
     fapi_try_exit:
         return fapi2::FAPI2_RC_SUCCESS;

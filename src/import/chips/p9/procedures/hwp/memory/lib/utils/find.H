@@ -127,7 +127,6 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target
     return i_target.getParent<fapi2::TARGET_TYPE_MCBIST>();
 }
 
-
 ///
 /// @brief find all the dimm connected to an MCS
 /// @param[in] i_target a fapi2::Target MCS
@@ -452,8 +451,6 @@ fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_ve
     return fapi2::FAPI2_RC_SUCCESS;
 
 }// find_value_from_key
-
-
 
 ///
 /// @brief find a key value from a C-style array of STL pairs

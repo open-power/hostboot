@@ -1182,7 +1182,7 @@
           of M DRAM clocks setting for cfg_nm_n_per_port.
         </description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
@@ -1209,7 +1209,7 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>This is the throttle numerator setting for cfg_nm_n_per_slot</description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
@@ -1346,6 +1346,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_DIMM_THERMAL_LIMIT</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DIMM Max Power based on a thermal limit
+            Decoded from ATTR_MSS_MRW_THERMAL_POWER_LIMIT
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssUnit>cW</mssUnit>
+        <array> 2 2</array>
+        <mssAccessorName>dimm_thermal_limit</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -1353,7 +1368,7 @@
           M DRAM clocks setting for cfg_nm_n_per_port.
         </description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
@@ -1375,7 +1390,7 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime throttle numerator setting for cfg_nm_n_per_slot</description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>

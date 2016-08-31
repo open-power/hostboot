@@ -184,7 +184,7 @@ fapi_try_exit:
 }// dimm_type
 
 ///
-/// @brief Determines & sets effective config for dram_mfg_id type from SPD
+/// @brief Determines & sets effective config for eff_dram_mfg_id type from SPD
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///

@@ -161,7 +161,7 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_CALC_PORT_POWER_CURVE_DIVIDE_BY_ZERO</rc>
+    <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
     <description>
       Denominator equals 0
     </description>

@@ -53,8 +53,8 @@ extern "C"
 
         for (const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA> (i_target))
         {
-            uint32_t l_runtime_port = 0;
-            uint32_t l_runtime_slot = 0;
+            uint16_t l_runtime_port = 0;
+            uint16_t l_runtime_slot = 0;
             uint32_t l_throttle_denominator = 0;
 
             FAPI_TRY( mss::mem_m_dram_clocks( l_mca, l_throttle_denominator) );

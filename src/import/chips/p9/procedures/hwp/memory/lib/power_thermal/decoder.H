@@ -41,17 +41,17 @@
 #include <lib/utils/count_dimm.H>
 namespace mss
 {
+
+namespace power_thermal
+{
+
 enum size_of_attrs : size_t
 {
     SIZE_OF_POWER_CURVES_ATTRS = 100,
     SIZE_OF_THERMAL_ATTR = 10,
 };
 
-
-namespace power_thermal
-{
 //Currently needs to be in sorted order for lookup to work
-
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
 {
     {4, 0b0000},
@@ -162,8 +162,8 @@ enum ATTR_DECODE_INFO
 ///
 class decoder
 {
-    private:
     public:
+
         //IVs for all of the attributes per MCS
         const mss::dimm::kind iv_kind;
 
@@ -252,7 +252,6 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
                                    uint16_t o_total_slope      [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint16_t o_total_int        [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint32_t o_thermal_power    [PORTS_PER_MCS][MAX_DIMM_PER_PORT]);
-
 ///
 /// @brief Encode the attribute into a bit encoding
 /// @tparam[in] S *ATTR*_SIZE enum used for fapi2::buffer position
