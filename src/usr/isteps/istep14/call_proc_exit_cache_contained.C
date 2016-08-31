@@ -39,7 +39,7 @@
 
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
-
+#include    <p9_misc_scom_addresses.H>
 #include    <p9_exit_cache_contained.H>
 
 
@@ -52,12 +52,17 @@
 #include <kernel/console.H>                  // printk status
 #include <devicefw/userif.H>
 #include <config.h>
+#include <util/misc.H>
 // @TODO RTC:134082 remove above block
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+
+
+//Simics only register to trigger exit of cache containment
+#define EXIT_CACHE_CONTAINED_SCOM_ADDR 0x0000000005000003
 
 namespace ISTEP_14
 {
@@ -239,71 +244,36 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
 
 
-        // no errors so extend VMM.
+        // no errors so extend Virtual Memory Map
         if(!l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS : call_proc_exit_cache_contained on all procs" );
 
-            // @TODO RTC:134082 remove below block
-#ifndef CONFIG_P9_VPO_COMPILE
-            // Add P9 - Fake trigger for memory expansion
+            size_t scom_size = sizeof(uint64_t);
             TARGETING::Target* l_masterProc = NULL;
             TARGETING::targetService()
-              .masterProcChipTargetHandle( l_masterProc );
+            .masterProcChipTargetHandle( l_masterProc );
 
-            uint64_t l_top_addr = get_top_mem_addr();
-            uint64_t l_bottom_addr = get_bottom_mem_addr();
-            uint64_t l_mem_size = l_top_addr - l_bottom_addr;
-
-            // aggregate scom data to write
-            uint64_t l_data[] = {l_bottom_addr,  // Memory Base Address
-                                 l_mem_size,     // Memory Size in bytes
-                                 1};             // Memory Valid
-            uint64_t l_addr = 0x05000000;
-            size_t scom_size = sizeof(uint64_t);
-
-            for(uint8_t i = 0;
-                i < sizeof(l_data) / sizeof(uint64_t);
-                i++)
+            if(Util::isSimicsRunning())
             {
+                uint64_t l_memory_valid = 1;
+                // exit cache contained mode
                 l_errl = deviceWrite( l_masterProc,
-                                      &(l_data[i]),
-                                      scom_size,
-                                      DEVICE_SCOM_ADDRESS(l_addr+i) );
-                if( l_errl ) { break; }
+                                &l_memory_valid,  //Memory is valid
+                                scom_size, //Size of Scom
+                                DEVICE_SCOM_ADDRESS(EXIT_CACHE_CONTAINED_SCOM_ADDR));
+
+                if ( l_errl )
+                {
+                    // Create IStep error log and cross reference to error that
+                    // occurred
+                    l_stepError.addErrorDetails( l_errl );
+
+                    // Commit Error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                }
             }
-
-            if ( l_errl )
-            {
-                // Create IStep error log and cross reference to error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-
-            printk("Fake Memory now set up.\n");
-
-            // exit cache contained mode
-            l_errl = deviceWrite( l_masterProc,
-                                  &(l_data[2]),
-                                  scom_size,
-                                  DEVICE_SCOM_ADDRESS(l_addr+3) );
-
-            if ( l_errl )
-            {
-                // Create IStep error log and cross reference to error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-
-            printk("Cache contained mode has been exited.\n");
-            // End of Add P9 - Fake trigger for memory expansion
 
             //Set PSI and FSP BARs, activate the PSI link BAR
             //TODO RTC 150260 Re-evaluate if this should be deleted or enabled
@@ -314,7 +284,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 //            l_errl = deviceWrite( l_masterProc,
 //                                  &psi,
 //                                  scom_size,
-//                                  DEVICE_SCOM_ADDRESS(0x0501290a) );
+//                                  DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_BAR_REG) );
             if ( l_errl )
             {
                 // Create IStep error log and cross reference to error that
@@ -328,7 +298,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             l_errl = deviceWrite( l_masterProc,
                                   &fsp,
                                   scom_size,
-                                  DEVICE_SCOM_ADDRESS(0x0501290b) );
+                                  DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_FSP_BAR_REG) );
             if ( l_errl )
             {
                 // Create IStep error log and cross reference to error that
@@ -338,59 +308,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 // Commit Error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
-
-            //Need to default TOD registers to reasonable value
-            // aggregate scom data to write
-            uint64_t l_tod_data[] = {
-                0x40000, 0x4083000000000000,0x4083000000000000,
-                0x40001, 0x0008008011000000,0x8000000000000000,
-                0x40002, 0x8000000000000000,0x0008008000000000,
-                0x40003, 0x0008008000000000,0x8000000011000000,
-                0x40004, 0x8000000000000000,0x00C3000000000000,
-                0x40005, 0x0800c30000000000,0x00C3000000000000,
-                0x40007, 0x6900000000000000,0x0B60000000000000,
-                0x40008, 0x06661D0C00000000,0x06C06CCC00000000,
-                0x40010, 0x003F000000000000,0x003F000000000000,
-                0x40013, 0x8000000000000000,0x0000000000000000,
-            };
-
-            // Per Dean, this workaround should be run against all
-            // processor chips.
-            TARGETING::TargetHandleList l_cpuTargetList;
-            getAllChips(l_cpuTargetList, TYPE_PROC);
-
-            uint32_t l_proc_num = 0;
-            for (const auto & l_cpu_target: l_cpuTargetList)
-            {
-                assert((l_proc_num < 2),
-                       "TOD hack does not support more then 2 procs");
-
-                for(uint8_t i = 0;
-                    i < (sizeof(l_tod_data) / sizeof(uint64_t));
-                    i+=3)
-                {
-                    l_errl = deviceWrite( l_cpu_target,
-                                          &(l_tod_data[i+1+l_proc_num]),
-                                          scom_size,
-                                          DEVICE_SCOM_ADDRESS(l_tod_data[i]) );
-                    if( l_errl ) { break; }
-                }
-
-                if ( l_errl )
-                {
-                    // Create IStep error log and cross reference to error that
-                    // occurred
-                    l_stepError.addErrorDetails( l_errl );
-
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                }
-                l_proc_num++;
-            }
-
-            printk("Fake TOD Initialized\n");
-#endif
-            // @TODO RTC:134082 remove above block
 
             // Call the function to extend VMM to 32MEG
             int rc = mm_extend();
