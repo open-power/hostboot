@@ -1569,21 +1569,25 @@ sub config_resolve_level_dep
         # Check for OPEN parent
         my $commit_info = gerrit_query_commit($patch);
         my $parent_commit = $commit_info->{currentPatchSet}->{parents}[0];
-        my $parent_info = gerrit_query_commit($parent_commit);
-        if ($parent_info->{status} eq "NEW")
+        # Check if parent already merged into base branch
+        if (!commit_local($base, $parent_commit))
         {
-            my $parent_id = $parent_info->{id};
-            # Add dependency if dependency is not already in base release
-            if(!git_log_changeId($base, $parent_id))
+            my $parent_info = gerrit_query_commit($parent_commit);
+            if ($parent_info->{status} eq "NEW")
             {
-                print "Adding forced dependency $patch:$parent_id\n" if $debug;
-                config_add_dep($level, $patch, $parent_id);
-            }
+                my $parent_id = $parent_info->{id};
+                # Add dependency if dependency is not already in base release
+                if(!git_log_changeId($base, $parent_id))
+                {
+                    print "Adding forced dependency $patch:$parent_id\n" if $debug;
+                    config_add_dep($level, $patch, $parent_id);
+                }
 
-            # Add dependent patch if not already added to level
-            if (!exists($level_patches{$parent_id}) )
-            {
-                push @patches, $parent_id;
+                # Add dependent patch if not already added to level
+                if (!exists($level_patches{$parent_id}) )
+                {
+                    push @patches, $parent_id;
+                }
             }
         }
 
@@ -1855,14 +1859,15 @@ sub gerrit_query_commit
 #
 # Determines if a patch identifier is a Gerrit patch or not.
 #
-# @param[in] patch - The patch to make determination about.
+# @param[in] i_patch - The patch to make determination about.
 #
 # @retval true - Patch is a Gerrit patch ID.
 # @retval false - Patch does not appear to be a Gerrit patch ID.
 sub gerrit_is_patch
 {
-    my $patch = shift;
-    return 1 if ($patch =~ m/I[0-9a-f]+/);
+    my $i_patch = shift;
+    chomp($i_patch);
+    return 1 if ($i_patch =~ m/I[0-9a-f]+/);
     return 0;
 }
 
@@ -2588,4 +2593,55 @@ sub run_system_command
     print $output if $debug;
 
     return $output;
+}
+
+# sub commit_local
+#
+# Checks if commit is in local tree
+#
+# @param[in] i_commit - The commit to examine.
+#
+# @return bool - true if in local tree
+#
+sub commit_local
+{
+    my ($i_base, $i_commit) = @_;
+    chomp($i_base);
+    chomp($i_commit);
+
+    die "Based is not of type commit (SHA hash)" if (!is_commit($i_base));
+
+    # Git log will fail if not valid change-id or commit. Note order is check
+    # for change-id first as it will also match the regex for is_commit
+    if (gerrit_is_patch($i_commit))
+    {
+        `git log $i_base | grep "Change-Id: $i_commit"`;
+        ($?) ? return 0 : return 1;
+    }
+    elsif(is_commit($i_commit))
+    {
+        # Note '^commit' used to avoid finding the commit in the commit message
+        # somewhere
+        `git log $i_base | grep "^commit $i_commit"`;
+        ($?) ? return 0 : return 1;
+    }
+    else
+    {
+        die "Commit is not of type commit or change-id";
+    }
+}
+
+# sub is_commit
+#
+# Determines if a patch identifier is a git commit id or not.
+#
+# @param[in] i_ref - The reference to make determination about.
+#
+# @return bool - Ref is in the style of a git commit
+sub is_commit
+{
+    my $i_ref = shift;
+    chomp($i_ref);
+
+    ($i_ref =~ m/[0-9a-f]{7,40}/) ? return 1 : return 0;
 }
