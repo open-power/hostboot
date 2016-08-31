@@ -392,7 +392,7 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
     fapi::Target l_mbTarget;
     fapi::MBvpdKeyword l_keyword = fapi::MBVPD_KEYWORD_VM;  // try VM first
     fapi::MBvpdRecord  l_record  = fapi::MBVPD_RECORD_SPDX; // default to SPDX
-    MBvpdVMKeyword l_vmVersionBuf={};
+    MBvpdVMKeyword l_vmVersionBuf;
     uint32_t l_version = 0;
     uint32_t l_vmBufSize = sizeof(MBvpdVMKeyword); // VM keyword is of 4 bytes.
     uint16_t l_versionBuf = 0;
