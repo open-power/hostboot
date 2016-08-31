@@ -78,5 +78,6 @@ VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
+VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/lrdimm/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
