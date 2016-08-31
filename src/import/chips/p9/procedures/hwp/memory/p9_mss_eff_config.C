@@ -196,18 +196,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_WATT_TARGET, i_target,
                                  l_mem_watt_target ) );
     }
-    //Values taken from Mike Pardeik. Calculated to reach 90% util, will be removed once eff_config_thermal is implemented
-    {
-        uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target,
-                                 l_throttled_n_commands ) );
-    }
-
-    {
-        uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target,
-                                 l_throttled_n_commands ) );
-    }
 
     {
         uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
