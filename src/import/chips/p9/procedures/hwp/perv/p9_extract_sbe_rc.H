@@ -27,12 +27,12 @@
 ///
 /// @brief Check for errors on the PNOR , SEEPROM
 //------------------------------------------------------------------------------
-// *HWP HW Owner        : Anusha Reddy Rangareddygari <anusrang@in.ibm.com>
+// *HWP HW Owner        : Soma BhanuTej <soma.bhanu@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 1
-// *HWP Consumed by     : HB
+// *HWP Level           : 2
+// *HWP Consumed by     : FSP:HB
 //------------------------------------------------------------------------------
 
 
@@ -51,7 +51,7 @@ typedef fapi2::ReturnCode (*p9_extract_sbe_rc_FP_t)(const fapi2::Target<fapi2::T
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
-    fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chiplet);
+    fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 }
 
 #endif

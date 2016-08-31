@@ -24,3 +24,4 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_extract_sbe_rc
 $(call BUILD_PROCEDURE)
+

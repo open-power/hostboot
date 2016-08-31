@@ -1,0 +1,102 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_extract_sbe_rc_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_extract_sbe_rc_errors.xml. -->
+<!-- Halt codes for p9_extract_sbe_rc -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <!-- Halt codes -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT</rc>
+    <description>Program interrupt promoted</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
+    <description>Address scope out of range</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH</rc>
+    <description>SEEPROM magic number didn't match</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL</rc>
+    <description>Branch to SEEPROM didn't happen</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT</rc>
+    <description>Halted in OTPROM, but not at an expected halt location</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_PIB</rc>
+    <description>Uncorrectable error occurred while PIB memory read</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_SOFT_ECC_ERROR_PIB</rc>
+    <description>WARN:Corrected error in PIB mem read from PIB side</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_FACES</rc>
+    <description>Uncorrectable error occurred while fast acess interface read</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_SOFT_ECC_ERROR_FACES</rc>
+    <description>WARN:Corrected error in fast acess read operation</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_HALT_PIBMEM</rc>
+    <description>Halted in PIBMEM address location</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR</rc>
+    <description>I2C bit rate divisor is less than min speed value</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_SEEPROM</rc>
+    <description>There are 2 bit flips in read data which cannot be corrected</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SEEPROM</rc>
+    <description>WARN:One bit flip was there in data and been corrected</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_HALT_SEEPROM</rc>
+    <description>Halted in SEEPROM address location</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
