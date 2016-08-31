@@ -41,15 +41,6 @@
 namespace fapi2
 {
 
-// $TEMP - funciton temp function to pass compiling
-template<TargetType T>
-Target<T>* getTarget(TargetType type, uint8_t instance)
-{
-    static_cast<void>(type);
-    static_cast<void>(instance);
-    return new Target<T>(0);
-}
-
 ///
 /// @brief Type to hold the ffdc data to be sent to hostboot
 ///
@@ -258,7 +249,6 @@ enum CollectTrace
     MBOX             = 4,
 };
 }
-#endif
 
 // NOTE - this assumes no buffer_t or variable_buffers are passed
 //        data is converted to a uint64_t when placed into the sbe ffdc
@@ -272,11 +262,13 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc )
 
     if(temp.size() == EI_FFDC_SIZE_TARGET)
     {
+#ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
         uint64_t targetData = i_sbeFfdc.data;
         fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 32);
         uint8_t instance = static_cast<uint8_t>(targetData & 0xFFFFFFFF);
         // call hostboot to get the fapi2 target reference
         temp.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, instance));
+#endif
     }
     else
     {
@@ -287,6 +279,7 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc )
 
     return temp;
 }
+#endif
 ///
 /// @brief Get FFDC Size
 ///
