@@ -15080,50 +15080,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PROC_VRM_VOFFSET_VDD</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PROC_VRM_VOFFSET_VCS</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>CPM_TURBO_BOOST_PERCENT</id>
     <description>
      Percent of Boost Above Turbo for CPMs - (binary in 0.1 percent steps)
@@ -15148,6 +15104,44 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--TODO RTC:160430 Remove these attributes when hwsv updates their xml-->
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDD</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VCS</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 <attribute>
     <id>PROC_R_LOADLINE_VDD</id>
     <description>
@@ -15165,10 +15159,6 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -15187,10 +15177,6 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -15209,10 +15195,6 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -15231,11 +15213,9 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
+
+<!--TODO RTC:160430 END -->
 
 <attribute>
     <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
@@ -19751,221 +19731,6 @@ DEPRECATED!!!!
         <value>0x01</value>
     </enumerator>
 </enumerationType>
-
-<!--<attribute>
-    <id>PROC_R_LOADLINE_VDD</id>
-    <description>
-      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-
-      Consumer: p9_hcd_image_build_pstate ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-
-      Producer: Machine Readable Workbook (per the power subsystem design)
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
-
-<!--<attribute>
-    <id>PROC_R_DISTLOSS_VDD</id>
-    <description>
-      Impedance (binary in microOhms) of the VDD distribution loss sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Producer: Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
-
-<!--<attribute>
-    <id>PROC_VRM_VOFFSET_VDD</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
-
-      Producer: Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
-
-<attribute>
-    <id>PROC_R_LOADLINE_VDN</id>
-    <description>
-      Impedance (binary microOhms) of the load line from a processor VDN VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
-
-      Producer: Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE_VDN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_R_DISTLOSS_VDN</id>
-    <description>
-      Impedance (binary in microOhms) of the VDN distribution loss sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS_VDN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_VRM_VOFFSET_VDN</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VDN VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET_VDN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<!--<attribute>
-    <id>PROC_R_LOADLINE_VCS</id>
-    <description>
-      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
-
-      Producer: Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_LOADLINE_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
-
-<!--<attribute>
-    <id>PROC_R_DISTLOSS_VCS</id>
-    <description>
-      Impedance (binary in microOhms) of the VCS distribution loss sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p9_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_R_DISTLOSS_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
-
-<!--<attribute>
-    <id>PROC_VRM_VOFFSET_VCS</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>-->
 
 <attribute>
     <id>FREQ_EXT_BIAS_ULTRATURBO</id>
@@ -30515,5 +30280,1377 @@ DEPRECATED!!!!
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>L2_HASCLOCKS</id>
+    <description>
+        Indicates the L2 region has clocks running and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_HASCLOCKS</id>
+    <description>
+        Indicates the L3 region has clocks running and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_EXEC_HASCLOCKS</id>
+    <description>
+        Indicates the execution units in core 0 have clocks running
+       and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_EXEC_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_EXEC_HASCLOCKS</id>
+    <description>
+        Indicates the execution units in core 1 have clocks running
+       and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_EXEC_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_PC_HASCLOCKS</id>
+    <description>
+        Indicates the core pervasive unit in core 0 has clocks
+       running and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_PC_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_PC_HASCLOCKS</id>
+    <description>
+        Indicates the core pervasive unit in core 1 has clocks
+       running and scommable
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_PC_HASCLOCKS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L2_HASPOWER</id>
+    <description>
+        Indicates L2 has power and has valid latch state that could
+       be scanned
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L2_HASPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>L3_HASPOWER</id>
+    <description>
+        Indicates L3 has power and has valid latch state that could
+       be scanned
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_L3_HASPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C0_HASPOWER</id>
+    <description>
+        Indicates core 0 has power and has valid latch state that
+       could be scanned
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C0_HASPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>C1_HASPOWER</id>
+    <description>
+        Indicates core 1 has power and has valid latch state that
+       could be scanned
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_C1_HASPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TARGET_HAS_POWER</id>
+    <description>
+        Functional Target has power
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TARGET_HAS_POWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TARGET_HAS_CLOCK</id>
+    <description>
+        Functional Target has clock
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TARGET_HAS_CLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TARGET_IS_SCOMMABLE</id>
+    <description>
+        Functional Target is scommable
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TARGET_IS_SCOMMABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VDD_UOHM</id>
+    <description>
+
+      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDD_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDD_UOHM</id>
+    <description>
+
+      Impedance (binary in microOhms) of the VDD distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDD_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDD_UV</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution
+      to the processor module.  This value is applied to each processor instance.
+
+      Note:  no loadline may be present in the system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDD_UV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VDN_UOHM</id>
+    <description>
+
+      Impedance (binary microOhms) of the load line from a processor VDN VRM to
+      the Processor Module pins.  This value is applied to each processor
+      instance.
+
+      Note:  no loadline may be present in the system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDN_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDN_UOHM</id>
+    <description>
+
+      Impedance (binary in microOhms) of the VDN distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDN_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDN_UV</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to apply to the VDN VRM distribution
+      to the processor module.  This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDN_UV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VCS_UOHM</id>
+    <description>
+
+      Impedance (binary microOhms) of the load line from a processor VCS VRM to
+      the Processor Module pins.  This value is applied to each processor
+      instance.
+
+      Note:  no loadline may be present in the system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VCS_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VCS_UOHM</id>
+    <description>
+
+      Impedance (binary in microOhms) of the VCS distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per
+      system)
+
+      Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VCS_UOHM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VCS_UV</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution
+      to the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per
+      system)
+
+      Consumer: FSP
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VCS_UV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_BIAS_ULTRATURBO</id>
+    <description>
+
+     UltraTurbo Frequency Bias - % of bias (signed twos complement in 0.5
+     percent steps) used in calculating the frequency associated with a Pstate
+     - both Global and Local.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_BIAS_ULTRATURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_BIAS_TURBO</id>
+    <description>
+
+     Turbo Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate - both
+     Global and Local.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_BIAS_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_BIAS_NOMINAL</id>
+    <description>
+
+     Nominal Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate - both
+     Global and Local.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_BIAS_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FREQ_BIAS_POWERSAVE</id>
+    <description>
+
+     PowerSave Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate - both
+     Global and Local.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_BIAS_POWERSAVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_ULTRATURBO</id>
+    <description>
+
+     UltraTurbo VDD Voltage Bias - % of bias (signed twos complement in 0.5
+     percent steps) that is applied to the UltraTurbo VPD point used in
+     calculating the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_ULTRATURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_TURBO</id>
+    <description>
+
+     Turbo VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_NOMINAL</id>
+    <description>
+
+     Nominal VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDD_BIAS_POWERSAVE</id>
+    <description>
+
+     PowerSave VDD Voltage Bias - % of bias (signed twos complement in 0.5
+     percent steps) that is applied to the UltraTurbo VPD point used in
+     calculating the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDD_BIAS_POWERSAVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VCS_BIAS</id>
+    <description>
+
+     VCS Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the VCS value stored in the UltraTurbo VPD
+     point for setting the VCS rail.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VCS_BIAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_EXT_VDN_BIAS</id>
+    <description>
+
+     VDN Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the VDN value stored in the VPD for setting the
+     VDN rail.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_EXT_VDN_BIAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_ULTRATURBO</id>
+    <description>
+
+     TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS
+     WELL AS THE IVRM VOLTAGE CALCULATION PROCESS
+     UltraTurbo Internal VDD Voltage Bias - % of bias (signed twos complement in
+     0.5 percent steps) that is applied to the voltage computed (Vout) as part
+     of the Local Pstate.  Note: the Vin Effective that models the Vin to the
+     PFETs (i.e  accounting for system parameter losses) may include biassing
+     based on ATTR_VOLTAGE_VDD_BIAS_ULTRATURBO.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_ULTRATURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_TURBO</id>
+    <description>
+
+     TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS
+     WELL AS THE IVRM VOLTAGE CALCULATION PROCESS
+     TURBO Internal VDD Voltage Bias - % of bias (signed twos complement in 0.5
+     percent steps) that is applied to the voltage computed (Vout) as part of
+     the Local Pstate.  Note: the Vin Effective that models the Vin to the PFETs
+     (i.e  accounting for system parameter losses) may include biassing based on
+     ATTR_VOLTAGE_VDD_BIAS_TURBO.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_NOMINAL</id>
+    <description>
+
+     TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS
+     WELL AS THE IVRM VOLTAGE CALCULATION PROCESS
+     Nominal Internal VDD Voltage Bias - % of bias (signed twos complement in
+     0.5 percent steps) that is applied to the voltage computed (Vout) as part
+     of the Local Pstate.  Note: the Vin Effective that models the Vin to the
+     PFETs (i.e  accounting for system parameter losses) may include biassing
+     based on ATTR_VOLTAGE_VDD_BIAS_NOMINAL.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS_POWERSAVE</id>
+    <description>
+
+     TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS
+     WELL AS THE IVRM VOLTAGE CALCULATION PROCESS
+     PowerSave Internal VDD Voltage Bias - % of bias (signed twos complement in
+     0.5 percent steps) that is applied to the voltage computed (Vout) as part of
+     the Local Pstate.  Note: the Vin Effective that models the Vin to the PFETs
+     (i.e  accounting for system parameter losses) may include biassing based on
+     ATTR_VOLTAGE_VDD_BIAS_POWERSAVE.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumer: p9_pstate_parameter_block
+
+     Platform default:  0
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS_POWERSAVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_DROOP_SMALL_OVERRIDE</id>
+    <description>
+
+          Voltage Droop Monitor (VDM) Small Threshold Select Value per VPD point
+          The enum indicates a negative value below the VDM setting that will
+          trigger a small droop event.
+
+          Array of 5 entries:
+            0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+          If index 4 is non-zero, the other entries are considered valid.
+
+          Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_DROOP_SMALL_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_DROOP_LARGE_OVERRIDE</id>
+    <description>
+
+      Voltage Droop Monitor (VDM) Large Threshold Select Value per VPD point
+      The enum indicates a negative value below the VDM setting that will
+      trigger a large droop event.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: Firmware override
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_DROOP_LARGE_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_DROOP_EXTREME_OVERRIDE</id>
+    <description>
+
+      Voltage Droop Monitor (VDM) Extreme Threshold Select Value per VPD point.
+      The enum indicates a negative value below the VDM setting that will
+      trigger an extreme droop event.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_DROOP_EXTREME_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_OVERVOLT_OVERRIDE</id>
+    <description>
+
+      Voltage Droop Monitor (VDM) OverVoltage Threshold Select Value per VPD
+      point. The enum indicates a positive value above the VDM setting that will
+      indicate an overvolt droop condition.
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_OVERVOLT_OVERRIDE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_FMAX_OVERRIDE_KHZ</id>
+    <description>
+
+
+          Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_FMAX_OVERRIDE_KHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_FMIN_OVERRIDE_KHZ</id>
+    <description>
+
+
+
+          Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_FMIN_OVERRIDE_KHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_VID_COMPARE_OVERRIDE_MV</id>
+    <description>
+
+      Voltage Droop Monitor (VDM) Voltage Compare Voltage to expect when no
+      droop is present (binary in mV)
+
+      Array of 5 entries:
+        0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
+
+      If index 4 is non-zero, the other entries are considered valid.
+
+      Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>5</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_VID_COMPARE_OVERRIDE_MV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_DEADZONE_MV</id>
+    <description>
+
+          Indicates the size of the deadzone where the iVRM cannot regulate
+          (binary in millivolts)
+
+          Producer: MRWB.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_DEADZONE_MV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TDP_RDP_CURRENT_FACTOR</id>
+    <description>
+         TODO RTC 157943 -- Placeholder description
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TDP_RDP_CURRENT_FACTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_FREQ_REGIONS</id>
+    <description>
+
+    Frequency discontinuity region points that defines the lower edge of a
+    Resonant Region and where F[i] LT F[i+1] and 0 LE i LE 7.
+    This yields:
+       ATTR_RESCLK_FREQ_REGIONS[0] LE Region 0 LT ATTR_RESCLK_FREQ_REGIONS[1]
+       ATTR_RESCLK_FREQ_REGIONS[1] LE Region 1 LT ATTR_RESCLK_FREQ_REGIONS[2]
+       ATTR_RESCLK_FREQ_REGIONS[2] LE Region 2 LT ATTR_RESCLK_FREQ_REGIONS[3]
+       etc.
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_FREQ_REGIONS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_FREQ_REGION_INDEX</id>
+    <description>
+
+    Defines the index into ATTR_RESCLK_VALUE[] to use for the frequency region.
+
+    The frequency associated with the region is defined by
+    ATTR_RESCLK_FREQ_REGIONS[i] and ATTR_RESCLK_FREQ_REGIONS[i+1] for
+    0 LE i LE 7.
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_VALUE</id>
+    <description>
+
+    Array of Clock strength values that will we written in QACCR by CME Hcode
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>64</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_L3_VALUE</id>
+    <description>
+
+    Array of L3 Clock strength values to be used going between "High and Normal
+    Voltage" and "Low Voltage" mode.   Low Voltage mode is define by
+    ATTR_RESCLK_L3_VOLTAGE_THRESHOLD_MV.
+
+    Entry 0 = "High and Normal Voltage" setting
+    Entry 3 = "High and Normal Voltage" setting
+
+    Entry 1 = transitional setting defined by the clock team
+    Entry 2 = transitional setting defined by the clock team
+
+    Contents of each entry will be written directly into L3 control bits in the
+    QACCR(16:23) a RMW operations.  If the circuits demand a grey code whereby
+    only 1 bit of this field can change at a time, the entries must be deal with
+    such encoding.  The Hcode that these values does not perform that function;
+    it merely steps from 0->3 when going below the voltage defined by
+    ATTR_RESCLK_L3_VOLTAGE_THRESHOLD_MV and then steps 3->0 when going at or
+    above the voltage defined by ATTR_RESCLK_L3_VOLTAGE_THRESHOLD_MV.
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_L3_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>
+    <description>
+
+    Voltage value (in millivolts) whereby voltage below this value will have
+    the L3 clock strength moved to "Low" mode while values at or above this
+    value will have the L3 clock strength moved to "High" mode.  The L3 clock
+    strength values put in the hardware for this mode transtion are defined by
+    ATTR_RESCLK_L3_VALUE.
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_SAFE_FREQUENCY_MHZ</id>
+    <description>
+
+    Frequency (in MHz) to move to if the Power Management function fails.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_OCC_THROTTLED_N_CMDS</id>
+    <description>
+
+        cfg_nm_n_per_port throttle N value that was calculated from MSS_DATABUS_UTIL
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_OCC_THROTTLED_N_CMDS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_OFFSET_WLO</id>
+    <description>
+
+      Write Latency Offset in number of Clocks
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_OFFSET_WLO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_OFFSET_GPO</id>
+    <description>
+
+      Global Offset in number of Clocks. Delta from the value calculated or taken from VPD.
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_OFFSET_GPO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_OFFSET_RLO</id>
+    <description>
+
+      Read Latency Offset in number of Clocks. Delta from the value calculated or taken from VPD.
+
+    </description>
+    <simpleType>
+        <int8_t></int8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_OFFSET_RLO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_TSYS_ADR</id>
+    <description>
+
+      Phase rotator value for the memory sub-system clock in ticks.
+      Ticks are 1/128 of one cycle of clock.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_TSYS_ADR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_TSYS_DATA</id>
+    <description>
+
+      Phase rotator value for the memory sub-system data in ticks.
+      Ticks are 1/128 of one cycle of clock.
+
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_TSYS_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_PWR_SLOPE</id>
+    <description>
+
+            VDDR+VPP Power slope value for dimm
+            creator: mss_eff_config
+            consumer: mss_bulk_pwr_throttles
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_PWR_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_PWR_INTERCEPT</id>
+    <description>
+
+            VDDR+VPP Power intercept value for dimm
+            creator: mss_eff_config
+            consumer: mss_bulk_pwr_throttles
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_PWR_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_PORT_MAXPOWER</id>
+    <description>
+        Channel Pair Max Power output from thermal procedures
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_PORT_MAXPOWER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>

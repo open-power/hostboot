@@ -5145,27 +5145,27 @@
     </attribute>
     <!-- End PM_ attributes -->
     <attribute>
-        <id>PROC_R_DISTLOSS_VCS</id>
+        <id>PROC_R_DISTLOSS_VCS_UOHM</id>
         <default>0x578</default>
     </attribute>
     <attribute>
-        <id>PROC_R_LOADLINE_VCS</id>
+        <id>PROC_R_LOADLINE_VCS_UOHM</id>
         <default>0x23A</default>
     </attribute>
     <attribute>
-        <id>PROC_R_DISTLOSS_VDD</id>
+        <id>PROC_R_DISTLOSS_VDD_UOHM</id>
         <default>0x96</default>
     </attribute>
     <attribute>
-        <id>PROC_R_LOADLINE_VDD</id>
+        <id>PROC_R_LOADLINE_VDD_UOHM</id>
         <default>0x23A</default>
     </attribute>
     <attribute>
-        <id>PROC_VRM_VOFFSET_VCS</id>
+        <id>PROC_VRM_VOFFSET_VCS_UV</id>
         <default>0x0</default>
     </attribute>
     <attribute>
-        <id>PROC_VRM_VOFFSET_VDD</id>
+        <id>PROC_VRM_VOFFSET_VDD_UV</id>
         <default>0x0</default>
     </attribute>
 

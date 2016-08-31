@@ -274,12 +274,15 @@
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>HOT_PLUG_POWER_CONTROLLER_INFO</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
-    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
-    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
-    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VDD_UOHM</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDD_UOHM</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDD_UV</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VDN_UOHM</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDN_UOHM</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDN_UV</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VCS_UOHM</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VCS_UOHM</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VCS_UV</id></attribute>
     <attribute><id>ICACHE_LINE_SIZE</id></attribute>
     <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
     <attribute><id>ICACHE_SIZE</id></attribute>
@@ -824,6 +827,20 @@
     <attribute><id>PROC_FSP_MMIO_MASK_SIZE</id></attribute>
 <!-- p9_setup_bars - End -->
 
+    <attribute><id>VDM_DROOP_SMALL_OVERRIDE</id></attribute>
+    <attribute><id>VDM_DROOP_LARGE_OVERRIDE</id></attribute>
+    <attribute><id>VDM_DROOP_EXTREME_OVERRIDE</id></attribute>
+    <attribute><id>VDM_OVERVOLT_OVERRIDE</id></attribute>
+    <attribute><id>VDM_FMAX_OVERRIDE_KHZ</id></attribute>
+    <attribute><id>VDM_FMIN_OVERRIDE_KHZ</id></attribute>
+    <attribute><id>VDM_VID_COMPARE_OVERRIDE_MV</id></attribute>
+    <attribute><id>IVRM_DEADZONE_MV</id></attribute>
+    <attribute><id>PM_SAFE_FREQUENCY_MHZ</id></attribute>
+    <attribute><id>MSS_MRW_OFFSET_WLO</id></attribute>
+    <attribute><id>MSS_MRW_OFFSET_GPO</id></attribute>
+    <attribute><id>MSS_MRW_OFFSET_RLO</id></attribute>
+    <attribute><id>MSS_MRW_TSYS_DATA</id></attribute>
+    <attribute><id>MSS_MRW_TSYS_ADR</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1155,9 +1172,28 @@
 
     <attribute><id>PROC_NX_RNG_FAILED_INT_ENABLE</id></attribute>
     <attribute><id>PROC_NX_RNG_FAILED_INT_ADDR</id></attribute>
-
     <attribute><id>NEST_MEM_X_O_PCI_BYPASS</id></attribute>
     <attribute><id>DPLL_BYPASS</id></attribute>
+    <attribute><id>FREQ_BIAS_ULTRATURBO</id></attribute>
+    <attribute><id>FREQ_BIAS_TURBO</id></attribute>
+    <attribute><id>FREQ_BIAS_NOMINAL</id></attribute>
+    <attribute><id>FREQ_BIAS_POWERSAVE</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_ULTRATURBO</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_TURBO</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_NOMINAL</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDD_BIAS_POWERSAVE</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VCS_BIAS</id></attribute>
+    <attribute><id>VOLTAGE_EXT_VDN_BIAS</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_ULTRATURBO</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_TURBO</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_NOMINAL</id></attribute>
+    <attribute><id>VOLTAGE_INT_VDD_BIAS_POWERSAVE</id></attribute>
+    <attribute><id>TDP_RDP_CURRENT_FACTOR</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_FREQ_REGIONS</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_FREQ_REGION_INDEX</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_VALUE</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_L3_VALUE</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id></attribute>
 
     <!-- Process Voltage Rail Ids -->
     <attribute><id>NEST_VDD_ID</id></attribute>
@@ -1261,6 +1297,16 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
     <attribute><id>CME_LOCAL_FIRMASK</id></attribute>
+    <attribute><id>L2_HASCLOCKS</id></attribute>
+    <attribute><id>L3_HASCLOCKS</id></attribute>
+    <attribute><id>C0_EXEC_HASCLOCKS</id></attribute>
+    <attribute><id>C1_EXEC_HASCLOCKS</id></attribute>
+    <attribute><id>C0_PC_HASCLOCKS</id></attribute>
+    <attribute><id>C1_PC_HASCLOCKS</id></attribute>
+    <attribute><id>L2_HASPOWER</id></attribute>
+    <attribute><id>L3_HASPOWER</id></attribute>
+    <attribute><id>C0_HASPOWER</id></attribute>
+    <attribute><id>C1_HASPOWER</id></attribute>
 </targetType>
 
 <!-- CORE: Use same CORE target for both Nimbus and Cumulus
@@ -1374,6 +1420,9 @@
     <attribute><id>MSS_MEM_WATT_TARGET</id></attribute>
     <attribute><id>MSS_MASTER_PWR_SLOPE</id></attribute>
     <attribute><id>MSS_SUPPLIER_PWR_SLOPE</id></attribute>
+    <attribute><id>MSS_TOTAL_PWR_SLOPE</id></attribute>
+    <attribute><id>MSS_TOTAL_PWR_INTERCEPT</id></attribute>
+    <attribute><id>MSS_PORT_MAXPOWER</id></attribute>
     <attribute><id>MSS_SUPPLIER_PWR_INTERCEPT</id></attribute>
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
     <attribute><id>MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id></attribute>
@@ -1701,6 +1750,7 @@
     <attribute><id>MSS_VPD_MR_DPHY_GPO</id></attribute>
     <attribute><id>MSS_VPD_MR_DPHY_RLO</id></attribute>
     <attribute><id>MSS_VPD_MR_DPHY_WLO</id></attribute>
+    <attribute><id>MSS_OCC_THROTTLED_N_CMDS</id></attribute>
 </targetType>
 
 <targetType>
@@ -2068,6 +2118,9 @@
     <attribute><id>PG</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PG</id><default>5</default></attribute>
+    <attribute><id>TARGET_HAS_POWER</id></attribute>
+    <attribute><id>TARGET_HAS_CLOCK</id></attribute>
+    <attribute><id>TARGET_IS_SCOMMABLE</id></attribute>
 </targetType>
 
 <targetType>
