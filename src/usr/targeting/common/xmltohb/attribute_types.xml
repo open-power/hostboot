@@ -9118,8 +9118,8 @@ firmware notes: Used as override attribute for pstate procedure
     Initialized and used by HWPs.
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint16_t>
+        </uint16_t>
         <array>2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -9159,8 +9159,8 @@ firmware notes: Used as override attribute for pstate procedure
       This is the throttle numerator setting for cfg_nm_n_per_slot
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint16_t>
+        </uint16_t>
         <array>2</array><!-- [drop][port] -->
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -9168,6 +9168,26 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_DIMM_THERMAL_LIMIT</id>
+    <description>
+        DIMM Max Power based on a thermal limit
+        Decoded from ATTR_MSS_MRW_THERMAL_POWER_LIMIT
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_DIMM_THERMAL_LIMIT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -9632,8 +9652,8 @@ firmware notes: Used as override attribute for pstate procedure
     Initialized and used by HWPs.
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint16_t>
+        </uint16_t>
         <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -9670,8 +9690,8 @@ firmware notes: Used as override attribute for pstate procedure
       Runtime throttle numerator setting for cfg_nm_n_per_slot
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+        <uint16_t>
+        </uint16_t>
         <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
