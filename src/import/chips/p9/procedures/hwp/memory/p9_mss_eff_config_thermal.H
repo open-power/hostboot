@@ -27,10 +27,10 @@
 /// @file p9_mss_eff_config_thermal.H
 /// @brief Perform thermal calculations as part of the effective configuration
 ///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_EFF_CONFIG_THERMAL__
@@ -39,7 +39,8 @@
 #include <fapi2.H>
 #include <vector>
 
-typedef fapi2::ReturnCode (*p9_mss_eff_config_thermal_FP_t) (const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>&);
+typedef fapi2::ReturnCode (*p9_mss_eff_config_thermal_FP_t) (const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >&);
 
 extern "C"
 {
@@ -50,7 +51,6 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets );
-
 }
 
 #endif
