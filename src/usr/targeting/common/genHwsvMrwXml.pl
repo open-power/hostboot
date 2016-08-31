@@ -223,7 +223,7 @@ my $mruAttr = parse_xml_file($mru_ids_file);
 #------------------------------------------------------------------------------
 my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
 my $sysPolicy = parse_xml_file($system_policy_file,
-    forcearray=>['proc_r_loadline_vdd','proc_r_distloss_vdd',
+        forcearray=>['proc_r_loadline_vdd','proc_r_distloss_vdd',
         'proc_vrm_voffset_vdd','proc_r_loadline_vcs','proc_r_distloss_vcs',
         'proc_vrm_voffset_vcs']);
 
@@ -3843,10 +3843,22 @@ sub generate_proc
         {
             $val = $procLoadline{$attr}{sys};
         }
-        print "    <attribute>\n";
-        print "        <id>$attr</id>\n";
-        print "        <default>$val</default>\n";
-        print "    </attribute>\n";
+        #if it has VRM_OFFSET in the attr name then add _UV suffix to ID
+        if(index($attr, "VRM_VOFFSET" ) != -1)
+        {
+            print "    <attribute>\n";
+            print "        <id>".$attr."_UV</id>\n";
+            print "        <default>$val</default>\n";
+            print "    </attribute>\n";
+        }
+        #otherwise add UOHM suffix to ID
+        else
+        {
+            print "    <attribute>\n";
+            print "        <id>".$attr."_UOHM</id>\n";
+            print "        <default>$val</default>\n";
+            print "    </attribute>\n";
+        }
     }
 
     print "</targetInstance>\n";
