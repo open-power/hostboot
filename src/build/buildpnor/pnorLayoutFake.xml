@@ -25,6 +25,7 @@
 <!--
 Layout Description
 <metadata> Element -> Contains high-level information about the PNOR layout.
+    <chipSize>     -> Size of the chip that the pnor image will reside on
     <imageSize>    -> Size of PNOR image in bytes.
     <blockSize>    -> size of erase blocks in bytes.
     <tocSize>      -> size of each partition table
@@ -66,6 +67,7 @@ Layout Description
         <!-- NOTE: buildpnor expects power of 2 size, go to 8M for 6M image -->
         <!-- @FIXME RTC 132396                                              -->
         <imageSize>0x800000</imageSize>
+        <chipSize>0x800000</chipSize>
         <blockSize>0x1000</blockSize>
         <tocSize>0x1000</tocSize>
         <sideAOffset>0x0</sideAOffset>
