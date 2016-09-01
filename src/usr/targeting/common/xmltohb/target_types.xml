@@ -1005,6 +1005,8 @@
     <attribute><id>CHIP_SELECTION</id></attribute>
     <attribute><id>SCRATCH6_VALID</id></attribute>
     <attribute><id>SCRATCH7_VALID</id></attribute>
+    <attribute><id>OCC_LFIR</id></attribute>
+    <attribute><id>PBA_LFIR</id></attribute>
     <!-- proc_fbc_eff_config_links -->
     <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
     <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
