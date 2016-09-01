@@ -44,6 +44,7 @@
 #include <targeting/common/predicates/predicates.H>
 #include <devicefw/driverif.H>
 #include <fsi/fsiif.H>
+#include <secureboot/service.H>
 #include <i2c/i2creasoncodes.H>
 #include <i2c/i2cif.H>
 #include <attributetraits.H>
@@ -3172,6 +3173,34 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 {
                     continue;
                 }
+
+                // Do not do FSI I2C resets on engine 0 of slave processors
+                // if security is asserted via jumper to that processor.
+                // NOTE: getJumperState() returns state of master processor's
+                //       jumper (true==secure).  Since all secure jumpers
+                //       are required to have the same configuration in a
+                //       system, the master processor jumper bit is used as a
+                //       proxy for all slave processors.
+                // NOTE: Master Proc never uses FSI
+                if ( (i_processOperation & I2C_OP_RESET) &&
+                     (engine == 0) &&
+                     (io_args.switches.useFsiI2C == 1) &&
+                     (tgt->getAttr<TARGETING::ATTR_TYPE>() ==
+                           TARGETING::TYPE_PROC ) &&
+                     (SECUREBOOT::getJumperState())
+                   )
+                {
+                    TRACUCOMP( g_trac_i2c,INFO_MRK
+                               "i2cProcessActiveMasters: skipping tgt=0x%X "
+                               "due to ResetOp(%d), useFsiI2C(%d), engine (%d),"
+                               " TYPE(%d) --AND-- getJumperState(%d)",
+                               TARGETING::get_huid(tgt), i_processOperation,
+                               io_args.switches.useFsiI2C, engine,
+                               tgt->getAttr<TARGETING::ATTR_TYPE>(),
+                               SECUREBOOT::getJumperState());
+                    continue;
+                }
+
 
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
