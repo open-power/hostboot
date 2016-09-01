@@ -159,6 +159,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <endian.h>
 #include "p9_scan_compression.H"
 
 // Diagnostic aids for debugging
