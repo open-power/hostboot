@@ -72,7 +72,7 @@ Layout Description
         <tocSize>0x8000</tocSize>
         <!--TODO: RTC 123734 - remove side offsets once hwsv implements new
         layout-->
-        <sideAOffset>0x3FF0000</sideAOffset>
+        <sideAOffset>0x3FF7000</sideAOffset>
         <sideBOffset>0x0</sideBOffset>
         <arrangement>A-D-B</arrangement>
         <side>
