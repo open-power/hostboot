@@ -229,7 +229,7 @@ fapi_try_exit:
     // Channel 1 returned to Linear Stream, Circular upon exit
     FAPI_EXEC_HWP(l_rc, p9_pm_ocb_indir_setup_circular, i_target,
                   p9ocb::OCB_CHAN1,
-                  p9ocb::OCB_TYPE_NULL,
+                  p9ocb::OCB_TYPE_CIRC,
                   0,   // Bar
                   0,   // Length
                   p9ocb::OCB_Q_OUFLOW_NULL,
