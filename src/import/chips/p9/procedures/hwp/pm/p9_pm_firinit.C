@@ -134,7 +134,7 @@ fapi2::ReturnCode p9_pm_firinit(
     }
     else if (i_mode == p9pm::PM_RESET)
     {
-        if (l_pm_firinit_flag != 1)
+        if (l_pm_firinit_flag != 2)
         {
             l_pm_firinit_flag = 2;
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
