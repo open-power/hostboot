@@ -235,8 +235,7 @@ TESTCASE_MODULES += testfapi2
 #@TODO RTC: 123019 (p9 work in progress)
 #TESTCASE_MODULES += testi2c
 
-#@TODO RTC: 138226 (p9 work in progress)
-#TESTCASE_MODULES += testsbe
+TESTCASE_MODULES += testsbe
 
 
 #*******************************************************
