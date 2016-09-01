@@ -468,7 +468,7 @@ group gNpuFir filter singlebit
     /** NPUFIR[38]
      *  PowerBus Data Hang Fatal Error
      */
-    (NpuFir, bit(38)) ? defaultMaskedError;
+    (NpuFir, bit(38)) ? thresholdAndMask_self;
 
     /** NPUFIR[39]
      *  PowerBus Command Hang Fatal Error
