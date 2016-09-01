@@ -49,7 +49,6 @@ extern trace_desc_t* g_trac_sbe;
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-const char SBE_BUILD_WINK_NAME[30] = "libbuild_winkle_images.so";
 const char SBE_LIBRARY_NAME[16]    = "libsbe.so";
 
 
@@ -136,21 +135,6 @@ errlHndl_t loadSbeModule(bool& o_loaded)
         }
     }
 
-    // This module is needed for certain HW procedure (like p8_xip_customize())
-    if(!VFS::module_is_loaded(SBE_BUILD_WINK_NAME))
-    {
-        err = VFS::module_load(SBE_BUILD_WINK_NAME);
-        if(err)
-        {
-            // Don't use g_trac_sbe - libsbe might not be loaded
-            TS_FAIL("loadSbeModule() - %s load failed", SBE_BUILD_WINK_NAME);
-        }
-        else
-        {
-            o_loaded = true;
-        }
-    }
-
     return err;
 }
 
@@ -165,13 +149,6 @@ errlHndl_t unloadSbeModule()
         TS_FAIL("unloadSbeModule() - %s unload failed", SBE_LIBRARY_NAME );
 
         // No break or return - still try and unload other module
-    }
-
-    err = VFS::module_unload(SBE_BUILD_WINK_NAME);
-    if(err)
-    {
-        // Don't use g_trac_sbe - libsbe might be unloaded
-        TS_FAIL("unloadSbeModule() - %s unload failed", SBE_BUILD_WINK_NAME);
     }
 
     return err;
@@ -244,6 +221,315 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
 
     /**
+     * @brief This function will test the calculation of ECC sizes
+     */
+    void  testSetECCSize( void )
+    {
+
+        uint64_t fails = 0x0;
+        uint64_t total = 0x0;
+
+        do{
+
+            TRACFCOMP( g_trac_sbe,
+                       ENTER_MRK"testSetECCSize()" );
+
+            struct
+            {
+                uint8_t  optionalParms;
+                size_t   inSize;
+                uint64_t inOffset;
+                uint64_t inBoundary;
+                size_t   outEccSize;
+            } testData[] =
+            {
+                {0, 0x0000E380, 0x00000000, 0x00010000, 0x0000FFF0},
+                {0, 0x0000E388, 0x00000000, 0x00010000, 0x0000FFF9},
+                {0, 0x0000E390, 0x00000000, 0x00010000, 0x00010009},
+                {0, 0x0001C710, 0x00000000, 0x00010000, 0x0001FFF9},
+                {0, 0x0001C718, 0x00000000, 0x00010000, 0x00020009},
+                {1, 0x00014710, 0x00009000, 0x00010000, 0x00016FF9},
+                {1, 0x00014718, 0x00009000, 0x00010000, 0x00017009},
+                {2, 0x0001C718, 0x00000000, 0x00020000, 0x0001FFFB},
+                {2, 0x0001C720, 0x00000000, 0x00020000, 0x00020009},
+                {2, 0x00018718, 0x00004800, 0x00020000, 0x0001B7FB},
+                {2, 0x00018720, 0x00004800, 0x00020000, 0x0001B809},
+            };
+            const uint32_t NUM_TESTS = sizeof(testData)/sizeof(testData[0]);
+
+            size_t retEccSize = 0;
+
+            for(uint32_t i=0; i < NUM_TESTS; i++)
+            {
+                switch(testData[i].optionalParms)
+                {
+                    case 1:
+                        retEccSize = setECCSize(testData[i].inSize,
+                                                testData[i].inOffset);
+                    break;
+
+                    case 2:
+                        retEccSize = setECCSize(testData[i].inSize,
+                                                testData[i].inOffset,
+                                                testData[i].inBoundary);
+                    break;
+
+                    default:
+                        retEccSize = setECCSize(testData[i].inSize);
+                    break;
+                }
+                total++;
+                if(retEccSize != testData[i].outEccSize)
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"testSetECCSize() - i=%d, "
+                               "retEccSize=0x%.8X, expEccSize=0x%.8X",
+                               i, retEccSize, testData[i].outEccSize);
+                    TS_FAIL("testSetECCSize() - Return size did not match "
+                            "expected size.");
+                }
+            }
+
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe,
+                   EXIT_MRK"testSetECCSize - %d/%d fails",
+                   fails, total );
+    }
+
+
+    /**
+     * @brief This function will test the injection and the removal of
+     *         ECC from what is stored in a buffer
+     */
+    void  testInjectRemoveECC( void )
+    {
+
+        uint64_t fails = 0x0;
+        uint64_t total = 0x0;
+        int memcmpRtn;
+        PNOR::ECC::eccStatus rtnEccStatus;
+
+        const uint64_t boundary = 0x800;
+        size_t noEccBufferSz = 0x2000;
+        uint8_t noEccBuffer1[noEccBufferSz];
+        uint8_t noEccBuffer2[noEccBufferSz];
+        size_t eccBuffer1Sz = setECCSize(noEccBufferSz, 0, boundary);
+        size_t ecc2Sz1 = setECCSize(0x400, 0, boundary);
+        size_t ecc2Sz2 = setECCSize(0x400, ecc2Sz1, boundary);
+        size_t ecc2Sz3 = setECCSize(0x1800, ecc2Sz1 + ecc2Sz2, boundary);
+        size_t eccBuffer2Sz = ecc2Sz1 + ecc2Sz2 + ecc2Sz3;
+        uint8_t eccBuffer1[eccBuffer1Sz];
+        uint8_t eccBuffer2[eccBuffer2Sz];
+
+        // Fill the noEccBuffer1 buffer with test data
+        for(uint16_t i = 0;
+            i < noEccBufferSz;
+            i+=2)
+        {
+            uint16_t* pNoEccBuffer1 = (uint16_t*)(&noEccBuffer1[i]);
+            *pNoEccBuffer1 = i / 2;
+        }
+
+        do{
+
+            TRACFCOMP( g_trac_sbe,
+                       ENTER_MRK"testInjectRemoveECC()" );
+
+            // Verify expected sizes
+            total++;
+            if (eccBuffer1Sz != eccBuffer2Sz)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - "
+                           "expected ECC buffer sizes are not equal, "
+                           "eccBuffer1Sz=0x%.8X, eccBuffer2Sz=0x%.8X",
+                           eccBuffer1Sz, eccBuffer2Sz);
+                TS_FAIL("testInjectRemoveECC() - Expected ECC buffer "
+                        "sizes are not equal.");
+            }
+
+            // Inject ECC on noEccBuffer1 in one call
+            injectECC(noEccBuffer1,
+                      noEccBufferSz,
+                      0,
+                      boundary,
+                      eccBuffer1);
+            for(uint16_t i = 1;
+                i <= noEccBufferSz / boundary;
+                i++)
+            {
+                // Test each boundary
+                total++;
+                for(uint16_t j = (boundary % 9);
+                    j > 0;
+                    j--)
+                {
+                    // Check each pad byte
+                    uint16_t index = (boundary * i) - j;
+                    if (eccBuffer1[index] != '\0')
+                    {
+                        fails++;
+                        TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - "
+                               "inject ECC, failed check of boundary padding "
+                               "eccBuffer1[0x%.8X]=0x%.2X",
+                               index, eccBuffer1[index]);
+                        TS_FAIL("testInjectRemoveECC() - Inject ECC, failed "
+                                "check of boundary padding.");
+                        break; // Only fail once per boundary
+                    }
+                }
+            }
+
+            // Inject ECC on noEccBuffer1 in multiple calls
+            total++;
+            injectECC(&noEccBuffer1[0],
+                      0x400,
+                      0,
+                      boundary,
+                      &eccBuffer2[0]);
+
+            injectECC(&noEccBuffer1[0x400],
+                      0x400,
+                      ecc2Sz1,
+                      boundary,
+                      &eccBuffer2[ecc2Sz1]);
+
+            injectECC(&noEccBuffer1[0x800],
+                      0x1800,
+                      ecc2Sz1 + ecc2Sz2,
+                      boundary,
+                      &eccBuffer2[ecc2Sz1 + ecc2Sz2]);
+
+            for(uint16_t i = 0;
+                i < eccBuffer1Sz;
+                i++)
+            {
+                if (eccBuffer1[i] != eccBuffer2[i])
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - inject "
+                               "ECC, eccBuffer1[0x%.8X]=0x%.2X does not match "
+                               "eccBuffer2[0x%.8X]=0x%.2X with cmpSz=0x%.8X",
+                               i, eccBuffer1[i], i, eccBuffer2[i],
+                               eccBuffer1Sz);
+                    TS_FAIL("testInjectRemoveECC() - Inject ECC, buffers with ECC "
+                            "do not match each other.");
+                    break;
+                }
+            }
+
+            // Remove ECC in one call
+            total++;
+            rtnEccStatus = removeECC(eccBuffer1,
+                                     noEccBuffer2,
+                                     noEccBufferSz,
+                                     0,
+                                     boundary);
+
+            if (rtnEccStatus == PNOR::ECC::UNCORRECTABLE)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (one call) rtnEccStatus=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (one call) "
+                        "returned uncorrectable status.");
+                break;
+            }
+
+            memcmpRtn = memcmp(noEccBuffer1,
+                               noEccBuffer2,
+                               noEccBufferSz);
+            if (memcmpRtn != 0)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (one call) memcmpRtn=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (one call) buffer "
+                        "does not match original buffer.");
+            }
+
+            // Remove ECC in multiple calls
+            total++;
+            rtnEccStatus = removeECC(&eccBuffer1[0],
+                                     &noEccBuffer2[0],
+                                     0x600,
+                                     0,
+                                     boundary);
+            size_t removeSz1 = setECCSize(0x600, 0, boundary);
+
+            if (rtnEccStatus == PNOR::ECC::UNCORRECTABLE)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (call 1 of multiple calls) rtnEccStatus=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (call 1 of "
+                        "multiple calls) returned uncorrectable status.");
+                break;
+            }
+
+            total++;
+            rtnEccStatus = removeECC(&eccBuffer1[removeSz1],
+                                     &noEccBuffer2[0x600],
+                                     0x600,
+                                     removeSz1,
+                                     boundary);
+            size_t removeSz2 = setECCSize(0x600, removeSz1, boundary);
+
+            if (rtnEccStatus == PNOR::ECC::UNCORRECTABLE)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (call 2 of multiple calls) rtnEccStatus=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (call 2 of "
+                        "multiple calls) returned uncorrectable status.");
+                break;
+            }
+
+            total++;
+            rtnEccStatus = removeECC(&eccBuffer1[removeSz1 + removeSz2],
+                                     &noEccBuffer2[0xC00],
+                                     0x1400,
+                                     removeSz1 + removeSz2,
+                                     boundary);
+
+            if (rtnEccStatus == PNOR::ECC::UNCORRECTABLE)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (call 3 of multiple calls) rtnEccStatus=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (call 3 of "
+                        "multiple calls) returned uncorrectable status.");
+                break;
+            }
+
+            int memcmpRtn = memcmp(noEccBuffer1,
+                                   noEccBuffer2,
+                                   noEccBufferSz);
+            if (memcmpRtn != 0)
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testInjectRemoveECC() - remove "
+                           "ECC (multiple calls) memcmpRtn=0x%.8X",
+                           rtnEccStatus);
+                TS_FAIL("testInjectRemoveECC() - Remove ECC (multiple calls) "
+                        "buffer does not match original buffer.");
+            }
+
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe,
+                   EXIT_MRK"testInjectRemoveECC - %d/%d fails",
+                   fails, total );
+    }
+
+
+    /**
      * @brief This function will test SBE Update's ability
      *        to find SBE images in PNOR
      */
@@ -306,34 +592,36 @@ class SBEUpdateTest: public CxxTest::TestSuite
             theTarget = getFunctionalTarget(TARGETING::TYPE_MEMBUF);
             if(theTarget == NULL)
             {
-                total++;
-                fails++;
-                TS_FAIL("testReadSbeFromPnor() - No Functional MemBuf Targets found!");
-                break;
+                TS_TRACE("testReadSbeFromPnor() - No Functional MemBuf Targets "
+                         "found!");
             }
-
-            total++;
-            err = findSBEInPnor(theTarget,
-                                sbeImgPtr,
-                                sbeImgSize,
-                                &version);
-
-            if(err || (sbeImgPtr == NULL) || (sbeImgSize == 0) )
+            else
             {
-                fails++;
-                TRACFCOMP( g_trac_sbe, ERR_MRK"testFindSbeInPnor() - failure "
-                           "finding MemBuf SBE image for uid=0x%X, ec=0x%.2X, "
-                           "sbeImgPtr=%p, sbeImgSize=0x%x",
-                           TARGETING::get_huid(theTarget),
-                           theTarget->getAttr<TARGETING::ATTR_EC>(),
-                           sbeImgPtr, sbeImgSize );
-                TS_FAIL("testFindSbeInPnor() -failure finding SBE image!");
-                errlCommit( err,
-                            SBE_COMP_ID );
+                total++;
+                err = findSBEInPnor(theTarget,
+                                    sbeImgPtr,
+                                    sbeImgSize,
+                                    &version);
 
+                if(err || (sbeImgPtr == NULL) || (sbeImgSize == 0) )
+                {
+                    fails++;
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"testFindSbeInPnor() - "
+                               "failure finding MemBuf SBE image for uid=0x%X, "
+                               "ec=0x%.2X, sbeImgPtr=%p, sbeImgSize=0x%x",
+                               TARGETING::get_huid(theTarget),
+                               theTarget->getAttr<TARGETING::ATTR_EC>(),
+                               sbeImgPtr, sbeImgSize );
+                    TS_FAIL("testFindSbeInPnor() -failure finding SBE image!");
+                    errlCommit( err,
+                                SBE_COMP_ID );
+
+                }
+                TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Version",
+                         &version, sizeof(version));
+                TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Image",
+                         sbeImgPtr, 0x80);
             }
-            TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Version", &version, sizeof(version));
-            TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Image", sbeImgPtr, 0x80);
 
 
             /****************************************************/
@@ -381,6 +669,53 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
             TRACFCOMP( g_trac_sbe,
                        EXIT_MRK"testFindSbeInPnor - %d/%d fails",
+                       fails, total );
+
+        }while(0);
+
+    }
+
+
+    /**
+     * @brief This function will test SBE Update's ability
+     *        to find HBBL images in PNOR
+     */
+
+    void testFindHBBLInPnor ( void )
+    {
+        errlHndl_t err = NULL;
+        uint64_t fails = 0x0;
+        uint64_t total = 0x0;
+
+        void* hbblImgPtr = NULL;
+        size_t hbblImgSize = 0;
+
+        do{
+
+            TRACFCOMP( g_trac_sbe,
+                       ENTER_MRK"testFindHBBLInPnor()" );
+
+            total++;
+            err = findHBBLInPnor(hbblImgPtr,
+                                 hbblImgSize);
+
+            if(err || (hbblImgPtr == NULL) || (hbblImgSize == 0) )
+            {
+                fails++;
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testFindHBBLInPnor() - "
+                           "failure finding HBBL image, hbblImgPtr=%p, "
+                           "hbblImgSize=0x%x",
+                           hbblImgPtr, hbblImgSize );
+                TS_FAIL("testFindHBBLInPnor() -failure finding HBBL image!");
+                errlCommit( err,
+                            SBE_COMP_ID );
+
+            }
+            TRACDBIN(g_trac_sbe, "testFindHBBLInPnor()-Proc PNOR Image",
+                     hbblImgPtr, 0x80);
+
+            TRACFCOMP( g_trac_sbe,
+                       EXIT_MRK"testFindHBBLInPnor - %d/%d fails",
                        fails, total );
 
         }while(0);
