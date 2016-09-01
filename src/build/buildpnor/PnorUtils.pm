@@ -26,10 +26,11 @@
 
 package PnorUtils;
 
+use File::Basename;
 use Exporter 'import';
 @EXPORT_OK = qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                 loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
-                getSwSignatures getBinDataFromFile);
+                getSwSignatures getBinDataFromFile checkFile);
 use strict;
 
 my $TRAC_ERR = 0;
@@ -476,6 +477,29 @@ sub getBinDataFromFile
     die "Error closing $i_file failed" if $!;
 
     return $data;
+}
+
+# sub checkFile
+#
+# Check if file exists and is of type XML
+#
+# @param [in] i_layoutFile - PNOR layout file
+# @return - N/A Die on failure
+#
+sub checkFile
+{
+    my $i_layoutFile = shift;
+
+    my($filename, $dirs, $suffix) = fileparse($i_layoutFile,".xml");
+
+    unless(-e $i_layoutFile)
+    {
+        die "File not found: $i_layoutFile";
+    }
+    if ($suffix ne ".xml")
+    {
+        die "File not type XML: $i_layoutFile";
+    }
 }
 
 1;
