@@ -54,277 +54,7 @@ namespace mss
 namespace spd
 {
 
-enum byte_extract : uint8_t
-{
-    // Byte 0
-    BYTES_USED_START = 4,
-    BYTES_USED_LEN = 4,
-
-    BYTES_TOTAL_START = 1,
-    BYTES_TOTAL_LEN = 3,
-
-    // Byte 1
-    ENCODING_LEVEL_START = 0,
-    ENCODING_LEVEL_LEN = 4,
-
-    ADDITIONS_LEVEL_START = 4,
-    ADDITIONS_LEVEL_LEN = 4,
-
-    // Byte 2 - Entire byte used
-
-    // Byte 3
-    BASE_MODULE_START = 4,
-    BASE_MODULE_LEN = 4,
-
-    HYBRID_MEDIA_START = 1,
-    HYBRID_MEDIA_LEN = 3,
-
-    HYBRID_START = 0,
-    HYBRID_LEN = 1,
-
-    // Byte 4
-    SDRAM_CAPACITY_START = 4,
-    SDRAM_CAPACITY_LEN = 4,
-
-    SDRAM_BANKS_START = 2,
-    SDRAM_BANKS_LEN = 2,
-
-    BANK_GROUP_START = 0,
-    BANK_GROUP_LEN = 2,
-
-    // Byte 5
-    COL_ADDRESS_START = 5,
-    COL_ADDRESS_LEN = 3,
-
-    ROW_ADDRESS_START = 2,
-    ROW_ADDRESS_LEN = 3,
-
-    ADDRESS_RESERVED_START = 0,
-    ADDRESS_RESERVED_LEN = 2,
-
-    // Byte 6
-    PRIM_SIGNAL_LOAD_START = 6,
-    PRIM_SIGNAL_LOAD_LEN = 2,
-
-    PACKAGE_RESERVE_START = 4,
-    PACKAGE_RESERVE_LEN = 2,
-
-    PRIM_DIE_COUNT_START = 1,
-    PRIM_DIE_COUNT_LEN = 3,
-
-    PRIM_PACKAGE_TYPE_START = 0,
-    PRIM_PACKAGE_TYPE_LEN = 1,
-
-    // Byte 7
-    MAC_START = 4,
-    MAC_LEN = 4,
-
-    TMAW_START = 2,
-    TMAW_LEN = 2,
-
-    OPT_FEAT_RESERVED_START = 0,
-    OPT_FEAT_RESERVED_LEN = 2,
-
-    // Byte 8 reserved
-
-    // Byte 9
-    PPR_RESERVED_START = 3,
-    PPR_RESERVED_LEN = 5,
-
-    SOFT_PPR_START = 2,
-    SOFT_PPR_LEN = 1,
-
-    PPR_START = 0,
-    PPR_LEN = 2,
-
-    // Byte 10
-    SEC_SIGNAL_LOAD_START = 5,
-    SEC_SIGNAL_LOAD_LEN = 2,
-
-    DENSITY_RATIO_START = 4,
-    DENSITY_RATIO_LEN = 2,
-
-    SEC_DIE_COUNT_START = 1,
-    SEC_DIE_COUNT_LEN = 3,
-
-    SEC_PACKAGE_TYPE_START = 0,
-    SEC_PACKAGE_TYPE_LEN = 1,
-
-    // Byte 11
-    OPERABLE_START = 7,
-    OPERABLE_LEN = 1,
-
-    ENDURANT_START = 6,
-    ENDURANT_LEN = 1,
-
-    NOM_VOLT_START = 0,
-    NOM_VOLT_LEN = 6,
-
-    // Byte 12
-    SDRAM_WIDTH_START = 5,
-    SDRAM_WIDTH_LEN = 3,
-
-    PACKAGE_RANKS_START = 2,
-    PACKAGE_RANKS_LEN = 3,
-
-    RANK_MIX_START = 1,
-    RANK_MIX_LEN = 1,
-
-    MODULE_ORG_RESERVED_START = 0,
-    MODULE_ORG_RESERVED_LEN = 1,
-
-    // Byte 13
-    BUS_WIDTH_START = 5,
-    BUS_WIDTH_LEN = 3,
-
-    BUS_EXT_WIDTH_START = 3,
-    BUS_EXT_WIDTH_LEN = 2,
-
-    BUS_WIDTH_RESERVED_START = 0,
-    BUS_WIDTH_RESERVED_LEN = 3,
-
-    // Byte 14
-    THERM_SENSOR_RESERV_START = 1,
-    THERM_SENSOR_RESERV_LEN = 7,
-
-    THERM_SENSOR_START = 0,
-    THERM_SENSOR_LEN = 1,
-
-    // Byte 15
-    EXT_MOD_TYPE_START = 5,
-    EXT_MOD_TYPE_LEN = 3,
-
-    EXT_MOD_TYPE_RESERV_START = 0,
-    EXT_MOD_TYPE_RESERV_LEN = 4,
-
-    // Byte 16 - reserved
-
-    // Byte 17
-    FINE_TIMEBASE_START = 6,
-    FINE_TIMEBASE_LEN = 2,
-
-    MED_TIMEBASE_START = 4,
-    MED_TIMEBASE_LEN = 2,
-
-    TIMEBASE_RESERV_START = 0,
-    TIMEBASE_RESERV_LEN = 4,
-
-    // Byte 18 -  Entire byte used
-    // Byte 19 -  Entire byte used
-
-    // Byte 20-23
-    CAS_BYTE_1_START = 56,
-    CAS_BYTE_1_LEN = 8,
-    CAS_BYTE_2_START = 48,
-    CAS_BYTE_2_LEN = 8,
-    CAS_BYTE_3_START = 40,
-    CAS_BYTE_3_LEN = 8,
-    CAS_BYTE_4_START = 32,
-    CAS_BYTE_4_LEN = 8,
-
-    // Byte 24 -  Entire byte used
-    // Byte 25 -  Entire byte used
-    // Byte 26 -  Entire byte used
-
-    // Byte 27
-    TRASMIN_MSN_START = 4, // MSN = most significant nibble
-    TRASMIN_MSN_LEN = 4,
-
-    TRCMIN_MSN_START = 0, // MSN = most significant nibble
-    TRCMIN_MSN_LEN = 4,
-
-    // Byte 28
-    TRASMIN_LSB_START = 0, // LSB = least significant byte
-    TRASMIN_LSB_LEN = 8,
-
-    // Byte 29
-    TRCMIN_LSB_START = 0, // LSB = least significant byte
-    TRCMIN_LSB_LEN = 8,
-
-    // Byte 30
-    TRFC1MIN_LSB_START = 0,
-    TRFC1MIN_LSB_LEN = 8,
-
-    // Byte 31
-    TRFC1MIN_MSB_START = 0,
-    TRFC1MIN_MSB_LEN = 8,
-
-    // Byte 32
-    TRFC2MIN_LSB_START = 0,
-    TRFC2MIN_LSB_LEN = 8,
-
-    // Byte 33
-    TRFC2MIN_MSB_START = 0,
-    TRFC2MIN_MSB_LEN = 8,
-
-    // Byte 34 & Byte 35
-    TRFC4MIN_LSB_START = 0,
-    TRFC4MIN_LSB_LEN = 8,
-
-    TRFC4MIN_MSB_START = 0,
-    TRFC4MIN_MSB_LEN = 8,
-
-    // Byte 36
-    TFAWMIN_MSN_START = 4,
-    TFAWMIN_MSN_LEN = 4,
-
-    // Byte 37
-    TFAWMIN_LSB_START = 0,
-    TFAWMIN_LSB_LEN = 8,
-
-    // Byte 38 - Entire byte used
-    // Byte 39 - Entire byte used
-    // Byte 40 - Entire byte used
-
-    // Byte 41
-    TWRMIN_MSN_START = 4, // MSN = most significant nibble
-    TWRMIN_MSN_LEN = 4,
-
-    // Byte 42
-    TWRMIN_LSB_START = 0, // LSB = least significant nibble
-    TWRMIN_LSB_LEN = 8,
-
-    // Byte 43
-    TWTRMIN_L_MSN_START = 0, // MSN = most significant nibble
-    TWTRMIN_L_MSN_LEN = 4,
-
-    TWTRMIN_S_MSN_START = 4, // MSN = most significant nibble
-    TWTRMIN_S_MSN_LEN = 4,
-
-    // Byte 44
-    TWTRMIN_S_LSB_START = 0, // LSB = least significant byte
-    TWTRMIN_S_LSB_LEN = 8,
-
-    // Byte 45
-    TWTRMIN_L_LSB_START = 0,
-    TWTRMIN_L_LSB_LEN = 8,
-
-    // Bytes 46 - 59 - reserved
-
-    // Bytes 60 - 77 - Connector to SDRAM Bit Mapping ??
-
-    // Bytes 78 - 116 - reserved
-
-    // Bytes 117 - 125 : Entire byte used
-
-    // Byte 126
-    CRC_MSB_START = 0,
-    CRC_MSB_LEN = 8,
-
-    // Byte 127
-    CRC_LSB_START = 0,
-    CRC_LSB_LEN = 8,
-
-    // Bytes 128 ~ 191 Module-Specific Section ??
-
-    // Bytes 192 ~ 255 Hybrid Memory Architecture Specific Parameters ??
-
-    // Bytes 256 ~ 319 Extended Function Parameter Block ??
-
-    // Bytes 320 ~ 383 Module Supplier’s Data ??
-};
-
-enum sdram_package_type : size_t
+enum sdram_package_type : uint8_t
 {
     // Signal loading
     MONOLITHIC = 0,
@@ -343,6 +73,20 @@ enum nominal_voltage : uint8_t
 
     NOT_ENDURANT = 0,
     ENDURANT = 1
+};
+
+enum factory_byte_extract
+{
+    // Byte 1
+    ENCODING_LEVEL_START = 0,
+    ENCODING_LEVEL_LEN = 4,
+
+    ADDITIONS_LEVEL_START = 4,
+    ADDITIONS_LEVEL_LEN = 4,
+
+    // Byte 3
+    BASE_MODULE_START = 4,
+    BASE_MODULE_LEN = 4,
 };
 
 ///
@@ -377,6 +121,260 @@ inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 ///
 class decoder
 {
+    protected:
+        enum
+        {
+            // Byte 0
+            BYTES_USED_START = 4,
+            BYTES_USED_LEN = 4,
+
+            BYTES_TOTAL_START = 1,
+            BYTES_TOTAL_LEN = 3,
+
+            // Byte 1 - see factory byte enum
+            // Byte 2 - Entire byte used
+
+            // Byte 3
+            HYBRID_MEDIA_START = 1,
+            HYBRID_MEDIA_LEN = 3,
+
+            HYBRID_START = 0,
+            HYBRID_LEN = 1,
+
+            // Byte 4
+            SDRAM_CAPACITY_START = 4,
+            SDRAM_CAPACITY_LEN = 4,
+
+            SDRAM_BANKS_START = 2,
+            SDRAM_BANKS_LEN = 2,
+
+            BANK_GROUP_START = 0,
+            BANK_GROUP_LEN = 2,
+
+            // Byte 5
+            COL_ADDRESS_START = 5,
+            COL_ADDRESS_LEN = 3,
+
+            ROW_ADDRESS_START = 2,
+            ROW_ADDRESS_LEN = 3,
+
+            ADDRESS_RESERVED_START = 0,
+            ADDRESS_RESERVED_LEN = 2,
+
+            // Byte 6
+            PRIM_SIGNAL_LOAD_START = 6,
+            PRIM_SIGNAL_LOAD_LEN = 2,
+
+            PACKAGE_RESERVE_START = 4,
+            PACKAGE_RESERVE_LEN = 2,
+
+            PRIM_DIE_COUNT_START = 1,
+            PRIM_DIE_COUNT_LEN = 3,
+
+            PRIM_PACKAGE_TYPE_START = 0,
+            PRIM_PACKAGE_TYPE_LEN = 1,
+
+            // Byte 7
+            MAC_START = 4,
+            MAC_LEN = 4,
+
+            TMAW_START = 2,
+            TMAW_LEN = 2,
+
+            OPT_FEAT_RESERVED_START = 0,
+            OPT_FEAT_RESERVED_LEN = 2,
+
+            // Byte 8 reserved
+
+            // Byte 9
+            PPR_RESERVED_START = 3,
+            PPR_RESERVED_LEN = 5,
+
+            SOFT_PPR_START = 2,
+            SOFT_PPR_LEN = 1,
+
+            PPR_START = 0,
+            PPR_LEN = 2,
+
+            // Byte 10
+            SEC_SIGNAL_LOAD_START = 5,
+            SEC_SIGNAL_LOAD_LEN = 2,
+
+            DENSITY_RATIO_START = 4,
+            DENSITY_RATIO_LEN = 2,
+
+            SEC_DIE_COUNT_START = 1,
+            SEC_DIE_COUNT_LEN = 3,
+
+            SEC_PACKAGE_TYPE_START = 0,
+            SEC_PACKAGE_TYPE_LEN = 1,
+
+            // Byte 11
+            OPERABLE_START = 7,
+            OPERABLE_LEN = 1,
+
+            ENDURANT_START = 6,
+            ENDURANT_LEN = 1,
+
+            NOM_VOLT_START = 0,
+            NOM_VOLT_LEN = 6,
+
+            // Byte 12
+            SDRAM_WIDTH_START = 5,
+            SDRAM_WIDTH_LEN = 3,
+
+            PACKAGE_RANKS_START = 2,
+            PACKAGE_RANKS_LEN = 3,
+
+            RANK_MIX_START = 1,
+            RANK_MIX_LEN = 1,
+
+            MODULE_ORG_RESERVED_START = 0,
+            MODULE_ORG_RESERVED_LEN = 1,
+
+            // Byte 13
+            BUS_WIDTH_START = 5,
+            BUS_WIDTH_LEN = 3,
+
+            BUS_EXT_WIDTH_START = 3,
+            BUS_EXT_WIDTH_LEN = 2,
+
+            BUS_WIDTH_RESERVED_START = 0,
+            BUS_WIDTH_RESERVED_LEN = 3,
+
+            // Byte 14
+            THERM_SENSOR_RESERV_START = 1,
+            THERM_SENSOR_RESERV_LEN = 7,
+
+            THERM_SENSOR_START = 0,
+            THERM_SENSOR_LEN = 1,
+
+            // Byte 15
+            EXT_MOD_TYPE_START = 5,
+            EXT_MOD_TYPE_LEN = 3,
+
+            EXT_MOD_TYPE_RESERV_START = 0,
+            EXT_MOD_TYPE_RESERV_LEN = 4,
+
+            // Byte 16 - reserved
+
+            // Byte 17
+            FINE_TIMEBASE_START = 6,
+            FINE_TIMEBASE_LEN = 2,
+
+            MED_TIMEBASE_START = 4,
+            MED_TIMEBASE_LEN = 2,
+
+            TIMEBASE_RESERV_START = 0,
+            TIMEBASE_RESERV_LEN = 4,
+
+            // Byte 18 -  Entire byte used
+            // Byte 19 -  Entire byte used
+
+            // Byte 20-23
+            CAS_BYTE_1_START = 56,
+            CAS_BYTE_1_LEN = 8,
+            CAS_BYTE_2_START = 48,
+            CAS_BYTE_2_LEN = 8,
+            CAS_BYTE_3_START = 40,
+            CAS_BYTE_3_LEN = 8,
+            CAS_BYTE_4_START = 32,
+            CAS_BYTE_4_LEN = 8,
+
+            // Byte 24 -  Entire byte used
+            // Byte 25 -  Entire byte used
+            // Byte 26 -  Entire byte used
+
+            // Byte 27
+            TRASMIN_MSN_START = 4, // MSN = most significant nibble
+            TRASMIN_MSN_LEN = 4,
+
+            TRCMIN_MSN_START = 0, // MSN = most significant nibble
+            TRCMIN_MSN_LEN = 4,
+
+            // Byte 28
+            TRASMIN_LSB_START = 0, // LSB = least significant byte
+            TRASMIN_LSB_LEN = 8,
+
+            // Byte 29
+            TRCMIN_LSB_START = 0, // LSB = least significant byte
+            TRCMIN_LSB_LEN = 8,
+
+            // Byte 30
+            TRFC1MIN_LSB_START = 0,
+            TRFC1MIN_LSB_LEN = 8,
+
+            // Byte 31
+            TRFC1MIN_MSB_START = 0,
+            TRFC1MIN_MSB_LEN = 8,
+
+            // Byte 32
+            TRFC2MIN_LSB_START = 0,
+            TRFC2MIN_LSB_LEN = 8,
+
+            // Byte 33
+            TRFC2MIN_MSB_START = 0,
+            TRFC2MIN_MSB_LEN = 8,
+
+            // Byte 34 & Byte 35
+            TRFC4MIN_LSB_START = 0,
+            TRFC4MIN_LSB_LEN = 8,
+
+            TRFC4MIN_MSB_START = 0,
+            TRFC4MIN_MSB_LEN = 8,
+
+            // Byte 36
+            TFAWMIN_MSN_START = 4,
+            TFAWMIN_MSN_LEN = 4,
+
+            // Byte 37
+            TFAWMIN_LSB_START = 0,
+            TFAWMIN_LSB_LEN = 8,
+
+            // Byte 38 - Entire byte used
+            // Byte 39 - Entire byte used
+            // Byte 40 - Entire byte used
+
+            // Byte 41
+            TWRMIN_MSN_START = 4, // MSN = most significant nibble
+            TWRMIN_MSN_LEN = 4,
+
+            // Byte 42
+            TWRMIN_LSB_START = 0, // LSB = least significant nibble
+            TWRMIN_LSB_LEN = 8,
+
+            // Byte 43
+            TWTRMIN_L_MSN_START = 0, // MSN = most significant nibble
+            TWTRMIN_L_MSN_LEN = 4,
+
+            TWTRMIN_S_MSN_START = 4, // MSN = most significant nibble
+            TWTRMIN_S_MSN_LEN = 4,
+
+            // Byte 44
+            TWTRMIN_S_LSB_START = 0, // LSB = least significant byte
+            TWTRMIN_S_LSB_LEN = 8,
+
+            // Byte 45
+            TWTRMIN_L_LSB_START = 0,
+            TWTRMIN_L_LSB_LEN = 8,
+
+            // Bytes 46 - 59 - reserved
+
+            // Bytes 60 - 77 - Connector to SDRAM Bit Mapping ??
+
+            // Bytes 78 - 116 - reserved
+
+            // Bytes 117 - 125 : Entire byte used
+
+            // Byte 126
+            CRC_MSB_START = 0,
+            CRC_MSB_LEN = 8,
+
+            // Byte 127
+            CRC_LSB_START = 0,
+            CRC_LSB_LEN = 8,
+        };
+
     public:
         std::shared_ptr<dimm_module_decoder> iv_module_decoder;
         std::vector<uint8_t> iv_spd_data;
