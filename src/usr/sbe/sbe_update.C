@@ -127,7 +127,7 @@ namespace SBE
             if ( !INITSERVICE::spBaseServicesEnabled() &&
                  !Util::isSimicsRunning() )
             {
-                assert (false, "resolveProcessorSbeSeeproms() - "
+                assert (false, "updateProcessorSbeSeeproms() - "
                         "SBE_UPDATE_SEQUENTIAL mode, but FSP-services are not "
                         "enabled - Invalid Configuration");
             }

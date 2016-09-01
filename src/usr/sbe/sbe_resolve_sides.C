@@ -137,7 +137,7 @@ errlHndl_t resolveProcessorSbeSeeproms()
         {
             TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms() - "
                        "Do Nothing in SBE_UPDATE_INDEPENDENT mode in simics");
-             break;
+            break;
         }
 
         // Get Target Service, and the system target.
@@ -190,6 +190,21 @@ errlHndl_t resolveProcessorSbeSeeproms()
 
         for(uint32_t i=0; i<procList.size(); i++)
         {
+            /***********************************************************/
+            /*  Skip this on processors that are not connected to PNOR */
+            /***********************************************************/
+            // Check if processor is not a MASTER proc, and thus doesn't have a
+            // have a connection to PNOR so it doesn't need its HBB resolved
+            TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
+                       procList[i]->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
+
+            if ( type_enum == TARGETING::PROC_MASTER_TYPE_NOT_MASTER )
+            {
+                TRACFCOMP( g_trac_sbe, INFO_MRK"resolveProcessorSbeSeeproms> Skipping Processor 0x%X (PROC_MASTER_TYPE=%d)",
+                           TARGETING::get_huid(procList[i]), type_enum);
+                continue;
+            }
+
             /***********************************************/
             /*  Get Side This Processor did/will boot from */
             /***********************************************/
