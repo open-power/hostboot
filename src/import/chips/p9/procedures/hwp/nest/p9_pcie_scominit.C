@@ -173,12 +173,12 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION0_REG, l_buf));
 
         // Phase1 init step 6 (Set FIR action1)
-        l_buf = 0xFFFFFFFFF8000000;
+        l_buf = 0xE79E79E000000000ULL;
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION1_REG, l_buf));
 
         // Phase1 init step 7 (Set FIR mask)
-        l_buf = 0xFFFFFFFFF8000000;
+        l_buf = 0x1861861FF8000000ULL;
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, l_buf));
 

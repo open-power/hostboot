@@ -309,8 +309,8 @@ fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHI
         l_register_bar += l_register_bar_offsets[l_phb_id];
         FAPI_DBG("phb%i bar1 addr: %#lx", l_phb_id, l_register_bar());
         l_register_bar = l_register_bar << P9_PCIE_CONFIG_BAR_SHIFT;
-        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_MMIOBAR1_REG, l_register_bar),
-                 "Error from putScom (PHB_MMIOBAR1_REG)");
+        FAPI_TRY(fapi2::putScom(l_phb_chiplets, PHB_PHBBAR_REG, l_register_bar),
+                 "Error from putScom (PHB_PHBBAR_REG)");
 
         // step 23: NestBase+StackBase+0x14<software programmed>Set Base
         // addressress Enable Register (BARE)
