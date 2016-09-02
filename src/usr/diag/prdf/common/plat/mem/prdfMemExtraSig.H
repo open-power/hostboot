@@ -23,10 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfMemExtraSig.H
- *  @brief PRD signatures that are common between memory chips.
- */
-
 #ifndef __prdfMemExtraSig_H
 #define __prdfMemExtraSig_H
 

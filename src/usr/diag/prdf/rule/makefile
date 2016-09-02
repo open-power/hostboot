@@ -196,8 +196,14 @@ ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 # Build the *.prf, *.err.C, and *.reg.C files
 #------------------------------------------------------------------------------
 
-vpath %.rule ../common/plat/p9 ../common/plat/cen
-PRDRPP_SEARCHDIRS = -I../common/plat/p9 -I../common/plat/cen
+vpath %.rule \
+	  ../common/plat/p9 \
+	  ../common/plat/cen \
+	  ../common/plat/mem
+
+PRDRPP_SEARCHDIRS = -I../common/plat/p9 \
+				    -I../common/plat/cen \
+					-I../common/plat/mem
 
 ${OBJ_RULE_DIR}/%.prf \
 ${OBJ_RULE_DIR}/%.prf.err.C \
