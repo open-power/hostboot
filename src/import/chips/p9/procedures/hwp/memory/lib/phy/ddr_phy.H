@@ -149,25 +149,6 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     const uint64_t i_rank,
                                     const fapi2::buffer<uint16_t> i_cal_steps_enabled);
 
-
-///
-/// @brief Setup seq_config0
-/// @tparam T the target type of the MCA/MBA
-/// @param[in] i_target the target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode reset_seq_config0( const fapi2::Target<T>& i_target );
-
-///
-/// @brief Setup seq_config0
-/// @param[in] i_target the MCA target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
-
-
 ///
 /// @brief Setup odt_wr/rd_config
 /// @tparam T the target type of the MCA/MBA
@@ -184,23 +165,6 @@ fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
 ///
 template<>
 fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
-
-///
-/// @brief Setup seq_rd_wr_data
-/// @tparam T the target type of the MCA/MBA
-/// @param[in] i_target the target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target );
-
-///
-/// @brief Setup seq_rd_wr_data
-/// @param[in] i_target the MCA target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
 /// @brief Perform the DLL calibration
@@ -235,6 +199,15 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<T>& i_target );
 ///
 template<>
 fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Setup seq_rd_wr_data
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup seq_rd_wr_data
