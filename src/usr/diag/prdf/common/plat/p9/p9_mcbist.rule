@@ -202,11 +202,6 @@ group gMCBISTFIR filter singlebit
     (rMCBISTFIR, bit(11)) ? defaultMaskedError;
 
     /** MCBISTFIR[12]
-     *  WAT_DEBUG_ATTN
-     */
-    (rMCBISTFIR, bit(12)) ? defaultMaskedError;
-
-    /** MCBISTFIR[12]
      *  MCBIST program complete - WAT workaround
      */
     (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround;
