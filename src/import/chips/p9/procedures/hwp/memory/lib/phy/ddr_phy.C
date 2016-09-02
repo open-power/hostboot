@@ -45,6 +45,8 @@
 #include <lib/phy/apb.H>
 #include <lib/phy/adr32s.H>
 #include <lib/phy/adr.H>
+#include <lib/phy/seq.H>
+#include <lib/workarounds/dp16_workarounds.H>
 
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
@@ -616,6 +618,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Read Control reset
         FAPI_TRY( mss::rc::reset(p) );
 
+        // Reset the SEQ block
+        FAPI_TRY( mss::seq::reset(p) );
+
         // Reset the AC Boost controls from the values in VPD
         FAPI_TRY( mss::dp16::reset_ac_boost_cntl(p) );
 
@@ -629,8 +634,13 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::adr32s::reset_tsys_adr(p) );
         FAPI_TRY( mss::dp16::reset_tsys_data(p) );
 
-        //resets all of the IO impedances
+        // Resets all of the IO impedances
         FAPI_TRY( mss::reset_io_impedances(p) );
+
+        //
+        // Workarounds
+        //
+        FAPI_TRY( mss::workarounds::dp16::dqs_polarity(p) );
     }
 
 fapi_try_exit:
@@ -773,25 +783,6 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 }
 
 ///
-/// @brief Setup seq_config0
-/// @param[in] i_target the MCA target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    fapi2::buffer<uint64_t> l_data;
-
-    // ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
-
-    FAPI_INF("seq_config0 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_CONFIG0_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Setup odt_wr/rd_config
 /// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
@@ -931,29 +922,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setup seq_rd_wr_data
-/// @param[in] i_target the MCA target associated with this cal setup
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    // MPR_PATTERN_BIT of 0F0F0F0F pattern
-    static const uint64_t MPR_PATTERN = 0x5555;
-    fapi2::buffer<uint64_t> l_data;
-
-    l_data.insertFromRight<MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0,
-                           MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0_LEN>(MPR_PATTERN);
-
-    FAPI_INF("seq_rd_wr 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA0_P0, l_data) );
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA1_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Start the DLL calibration, monitor for fails.
 /// @param[in] i_target the target associated with this DLL cal
 /// @return FAPI2_RC_SUCCESS iff setup was successful
@@ -1061,6 +1029,10 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_M
     const auto& l_force_atest_reg = adr32sTraits<TARGET_TYPE_MCA>::OUTPUT_DRIVER_REG;
     const auto& l_data_dir_reg = dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1;
 
+    // Per PHY review 8/16, setup the DATA_BIT_DIR1 with advance_ping_pong and delay_ping_pong_half
+    mss::dp16::set_adv_pp(l_dp16_data, mss::HIGH);
+    mss::dp16::set_delay_pp_half(l_dp16_data, mss::HIGH);
+
     // 8. Set FLUSH=1 and INIT_IO=1 in the DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL and DDRPHY_DP16_DATA_BIT_DIR1 register
     {
         mss::adr32s::set_output_flush( l_adr_data, mss::HIGH );
@@ -1069,7 +1041,7 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_M
 
         mss::dp16::set_output_flush( l_dp16_data, mss::HIGH );
         mss::dp16::set_init_io( l_dp16_data, mss::HIGH);
-        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_adr_data) );
+        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_dp16_data) );
     }
 
     // 9. Wait at least 32 dphy_gckn clock cycles.
@@ -1084,7 +1056,7 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_M
 
         mss::dp16::set_output_flush( l_dp16_data, mss::LOW );
         mss::dp16::set_init_io( l_dp16_data, mss::LOW);
-        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_adr_data) );
+        FAPI_TRY( mss::scom_blastah(l_ports, l_data_dir_reg, l_dp16_data) );
     }
 
 fapi_try_exit:

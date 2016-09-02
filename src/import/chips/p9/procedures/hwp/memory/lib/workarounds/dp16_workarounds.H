@@ -22,3 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file workarounds/dp16.H
+/// @brief Workarounds for the DP16 logic blocks
+/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// this code in any way.
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_WORKAROUNDS_DP16_H_
+#define _MSS_WORKAROUNDS_DP16_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+namespace dp16
+{
+
+///
+/// @brief DQS polarity workaround
+/// For Monza DDR port 2, one pair of DQS P/N is swapped polarity.  Not in DDR port 6
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note This function is called during the phy scom init procedure, after the initfile is
+/// processed. It is specific to the Monza module, but can be called for all modules as it
+/// will enforce its requirements internally
+///
+fapi2::ReturnCode dqs_polarity( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+} // close namespace dp16
+} // close namespace workarounds
+} // close namespace mss
+
+#endif
+

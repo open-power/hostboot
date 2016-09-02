@@ -22,3 +22,158 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file seq.C
+/// @brief Subroutines for the PHY SEQ registers
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/phy/seq.H>
+#include <lib/utils/scom.H>
+#include <lib/utils/c_str.H>
+#include <lib/utils/bit_count.H>
+#include <lib/eff_config/timing.H>
+
+using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_DIMM;
+
+namespace mss
+{
+
+namespace seq
+{
+
+///
+/// @brief PHY SEQ register exponent helper
+/// PHY SEQ fields is used as exponent of 2, to calculate the number of MEMINTCLKO clock cycles.
+/// For example, if TMOD_CYCLES[0:3] = 5, the internal timers use the value 2^5 = 32 MEMINTCLKO
+/// clock cycles. The maximum value per nibble is ‘A’h. This helper takes a calculated value and returns
+/// the 'best' exponent.
+/// @param[in] i_value a value for which to make an exponent
+/// @return uint64_t right-aligned value to stick in the field
+///
+uint64_t exp_helper( const uint64_t i_value )
+{
+    // PHY exponents don't make much sense above this value so we short circuit if possible.
+    constexpr uint64_t MAX_EXP = 0xA;
+
+    if (i_value >= (1 << MAX_EXP))
+    {
+        return 0xA;
+    }
+
+    // If the user passes in 0, let it past.
+    if (i_value == 0)
+    {
+        return 0;
+    }
+
+    // Find the first bit set. The subtraction from 63 switches from a left-count to a right-count (e.g., 0 (left most
+    // bit) is really bit 63 if you start on the right.)
+    const uint64_t l_first_bit = 63 - first_bit_set(i_value);
+
+    // If the input is greater than 2^first bit, add one to the first_bit so 2^first_bit >= input
+    // (round up)
+    return l_first_bit + (uint64_t(1 << l_first_bit) < i_value ? 1 : 0);
+}
+
+
+///
+/// @brief reset SEQ_TIMING0
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_timing0( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    typedef seqTraits<TARGET_TYPE_MCA> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Table 5-324. SEQ Memory Timing Parameter 0 Register Bit Definition
+    // TMOD_CYCLES max(tMRD, tMOD)
+    // TRCD_CYCLES tRCD
+    // TRP_CYCLES  tRP
+    // TRFC_CYCLES tRFC
+
+    uint64_t l_tmod_cycles = 0;
+    uint8_t l_trcd = 0;
+    uint8_t l_trp = 0;
+    uint16_t l_trfc_max = 0;
+
+    l_tmod_cycles = exp_helper( std::max(mss::tmrd(), mss::tmod(i_target)) );
+    l_data.insertFromRight<TT::TMOD_CYCLES, TT::TMOD_CYCLES_LEN>(l_tmod_cycles);
+
+    FAPI_TRY( mss::eff_dram_trcd(i_target, l_trcd) );
+    l_data.insertFromRight<TT::TRCD_CYCLES, TT::TRCD_CYCLES_LEN>( exp_helper(l_trcd) );
+
+    FAPI_TRY( mss::eff_dram_trp(i_target, l_trp) );
+    l_data.insertFromRight<TT::TRP_CYCLES, TT::TRP_CYCLES_LEN>( exp_helper(l_trp) );
+
+    // It's not really clear what to put here. We can have DIMM with different tRFC as they
+    // don't have to be the same (3DS v. SPD for example.) So we'll take the maximum trfc we
+    // find on the DIMM connected to this port.
+    for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target))
+    {
+        uint16_t l_trfc = 0;
+        FAPI_TRY( mss::trfc(d, l_trfc) );
+        l_trfc_max = std::max(l_trfc_max, l_trfc);
+    }
+
+    l_data.insertFromRight<TT::TRFC_CYCLES, TT::TRFC_CYCLES_LEN>( exp_helper(l_trfc_max) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING0_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief reset SEQ_TIMING1
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_timing1( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    typedef seqTraits<TARGET_TYPE_MCA> TT;
+    fapi2::buffer<uint64_t> l_data;
+
+    // Table 5-325. SEQ Memory Timing Parameter 1 Register
+    // TZQINIT_CYCLES  max(tZQINIT,tZQOPER)
+    // TZQCS_CYCLES  tZQCS
+    // TWLDQSEN_CYCLES tWLDQSEN
+    // TWRMRD_CYCLES tWLMRD
+
+    uint64_t l_tzqint = std::max( mss::tzqinit(), mss::tzqoper() );
+    l_data.insertFromRight<TT::TZQINIT_CYCLES, TT::TZQINIT_CYCLES_LEN>( exp_helper(l_tzqint) );
+    l_data.insertFromRight<TT::TZQCS_CYCLES, TT::TZQCS_CYCLES_LEN>( exp_helper(mss::tzqcs()) );
+    l_data.insertFromRight<TT::TWLDQSEN_CYCLES, TT::TWLDQSEN_CYCLES_LEN>( exp_helper(mss::twldqsen()) );
+    l_data.insertFromRight<TT::TWRMRD_CYCLES, TT::TWRMRD_CYCLES_LEN>( exp_helper(mss::twlmrd()) );
+
+    return mss::putScom(i_target, TT::SEQ_TIMING1_REG, l_data);
+}
+
+
+///
+/// @brief reset SEQ_TIMING2
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_timing2( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // NO-OP right now.
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+
+} // close namespace seq
+} // close namespace mss
+

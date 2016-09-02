@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <lib/utils/find.H>
 #include <lib/utils/conversions.H>
+
 namespace mss
 {
 
@@ -168,7 +169,7 @@ fapi2::ReturnCode calc_trfc_dlr( const uint8_t i_refresh_mode,
                                  uint64_t& o_trfc_in_ps );
 
 ///
-/// @brief DLL locking time
+/// @brief DLL locking time *in clocks*
 /// @tparam T the fapi2::TargetType of i_target
 /// @tparam OT the type of the output location
 /// @param[in] i_target a target for attributes
