@@ -47,6 +47,7 @@
 namespace PRDF
 {
 
+class ExtensibleChip;
 //class CenRank; TODO: RTC 136126
 
 namespace PlatServices
@@ -195,6 +196,30 @@ TARGETING::TargetHandle_t getConnectedParent(TARGETING::TargetHandle_t i_target,
 TARGETING::TargetHandle_t getConnectedChild( TARGETING::TargetHandle_t i_target,
                                              TARGETING::TYPE i_connType,
                                              uint32_t i_position );
+
+/**
+ * @brief  ExtensibleChip wrapper for targeting version of getConnectedParent().
+ * @param  i_child      The child ExtensibleChip.
+ * @param  i_parentType The targeting type of the parent.
+ * @note   If the child is the same type as the parent type, the child is
+ *         returned.
+ * @return The connected parent, nullptr if not found.
+ */
+ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
+                                     TARGETING::TYPE i_parentType );
+
+/**
+ * @brief  ExtensibleChip wrapper for targeting version of getConnectedChild().
+ * @param  i_parent    The parent ExtensibleChip.
+ * @param  i_childType The targeting type of the child.
+ * @param  i_childPos  The position of the child relative to the parent.
+ * @note   If the parent is the same type as the child type, the parent is
+ *         returned.
+ * @return The connected child, nullptr if not found.
+ */
+ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
+                                    TARGETING::TYPE i_childType,
+                                    uint32_t i_childPos );
 
 /**
  * @brief   Returns the target of a PROC that is connected via the given
