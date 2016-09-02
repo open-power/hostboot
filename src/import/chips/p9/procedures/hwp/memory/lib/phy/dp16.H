@@ -158,6 +158,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
             FLUSH = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_FLUSH,
             INIT_IO = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_INIT_IO,
+            ADV_PP = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_ADVANCE_PING_PONG,
+            DELAY_PP_HALF = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_DELAY_PING_PONG_HALF,
 
             TSYS_DATA = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS,
             TSYS_DATA_LEN = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS_LEN,
@@ -546,7 +548,7 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<T>& i_target );
 /// @brief Set the DLL cal reset (begins DLL cal operations)
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to dp16Traits<T>
-/// @param[in] o_data the value of the register
+/// @param[out] o_data the value of the register
 /// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
 /// @note Default state is 'low' as writing a 0 forces the cal to begin.
 ///
@@ -606,9 +608,8 @@ fapi_try_exit:
 /// @brief Set the output flush
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to dp16Traits<T>
-/// @param[in] o_data the value of the register
+/// @param[out] o_data the value of the register
 /// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
-/// @note Default state is 'low' as writing a 0 forces the cal to begin.
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
 inline void set_output_flush( fapi2::buffer<uint64_t>& o_data, const states i_state )
@@ -621,15 +622,42 @@ inline void set_output_flush( fapi2::buffer<uint64_t>& o_data, const states i_st
 /// @brief Set the init io state
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to dp16Traits<T>
-/// @param[in] o_data the value of the register
+/// @param[out] o_data the value of the register
 /// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
-/// @note Default state is 'low' as writing a 0 forces the cal to begin.
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
 inline void set_init_io( fapi2::buffer<uint64_t>& o_data, const states i_state )
 {
     FAPI_INF("set_init_io %s", (i_state == mss::LOW ? "low" : "high"));
     o_data.writeBit<TT::INIT_IO>(i_state);
+}
+
+///
+/// @brief Set advance_ping_pong
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_adv_pp( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_adv_pp %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::ADV_PP>(i_state);
+}
+
+///
+/// @brief Set delay ping pong half
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[out] o_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_delay_pp_half( fapi2::buffer<uint64_t>& o_data, const states i_state )
+{
+    FAPI_INF("set_delay_pp_half %s", (i_state == mss::LOW ? "low" : "high"));
+    o_data.writeBit<TT::DELAY_PP_HALF>(i_state);
 }
 
 
