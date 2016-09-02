@@ -29,6 +29,8 @@
 
 using namespace fapi2;
 
+constexpr auto literal_0xFE00000000000000 = 0xFE00000000000000;
+constexpr auto literal_0x0000000000000000 = 0x0000000000000000;
 constexpr auto literal_0b00111001000000101111111111111 = 0b00111001000000101111111111111;
 constexpr auto literal_0b00000000000000000000000000000 = 0b00000000000000000000000000000;
 constexpr auto literal_0b11000110001010010000000000000 = 0b11000110001010010000000000000;
@@ -42,6 +44,69 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     do
     {
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            l_rc = fapi2::getScom( TGT0, 0x4011803ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x4011803ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0xFE00000000000000, 0, 7, 0 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x4011803ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x4011803ull)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x4011806ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x4011806ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0000000000000000, 0, 7, 0 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x4011806ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x4011806ull)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x4011807ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x4011807ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0000000000000000, 0, 7, 0 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x4011807ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x4011807ull)");
+                break;
+            }
+        }
         {
             l_rc = fapi2::getScom( TGT0, 0x5012903ull, l_scom_buffer );
 
