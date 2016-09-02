@@ -75,7 +75,7 @@
 static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR = PU_OCB_OCI_OCCFLG_SCOM1;
 static const uint64_t PU_OCB_OCI_OCCFLG_SET  = PU_OCB_OCI_OCCFLG_SCOM2;
 
-static const uint32_t SGPE_TIMEOUT_MS       = 500;      // Guess at this time
+static const uint32_t SGPE_TIMEOUT_MS       = 2500;     // Guess at this time
 static const uint32_t SGPE_TIMEOUT_MCYCLES  = 20;       // Guess at this time
 static const uint32_t SGPE_POLLTIME_MS      = 20;       // Guess at this time
 static const uint32_t SGPE_POLLTIME_MCYCLES = 2;        // Guess at this time
