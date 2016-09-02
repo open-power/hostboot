@@ -105,8 +105,6 @@ namespace ATTN_RT
         int rc = 0;
         errlHndl_t err = NULL;
         AttentionList attentions;
-        MemOps & memOps = getMemOps();
-
 
         do
         {
