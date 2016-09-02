@@ -34,10 +34,15 @@
 
 #include <prdfTargetServices.H>
 
+// Framework includes
+#include <iipSystem.h>
 #include <prdfAssert.h>
-#include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
+#include <prdfExtensibleChip.H>
+#include <prdfGlobal.H>
 #include <prdfTrace.H>
+
+// External includes
 #include <algorithm>
 //#include <fapi.H> TODO RTC 136126
 #include <targeting/common/targetservice.H>
@@ -829,6 +834,46 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
     return o_child;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+ExtensibleChip * getConnectedParent( ExtensibleChip * i_child,
+                                     TYPE i_parentType )
+{
+    PRDF_ASSERT( nullptr != i_child );
+
+    ExtensibleChip * o_parent = nullptr;
+
+    TargetHandle_t trgt = getConnectedParent( i_child->getTrgt(),
+                                              i_parentType );
+    if ( nullptr != trgt )
+    {
+        o_parent = (ExtensibleChip *)systemPtr->GetChip( trgt );
+    }
+
+    return o_parent;
+}
+
+//------------------------------------------------------------------------------
+
+ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
+                                    TARGETING::TYPE i_childType,
+                                    uint32_t i_childPos )
+{
+    PRDF_ASSERT( nullptr != i_parent );
+
+    ExtensibleChip * o_child = nullptr;
+
+    TargetHandle_t trgt = getConnectedChild( i_parent->getTrgt(),
+                                             i_childType,
+                                             i_childPos );
+    if ( nullptr != trgt )
+    {
+        o_child = (ExtensibleChip *)systemPtr->GetChip( trgt );
+    }
+
+    return o_child;
 }
 
 //------------------------------------------------------------------------------
