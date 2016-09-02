@@ -1,8 +1,9 @@
-#-- $Id: p8.npu.scom.initfile,v 1.8 2016/08/11 16:54:48 camille Exp $
+#-- $Id: p8.npu.scom.initfile,v 1.9 2016/08/31 14:54:06 camille Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
 #-- All Rights Reserved -- Property of IBM
+#-- ***  ***
 #--
 #-- TITLE       : p8.npu.scom.initfile
 #-- DESCRIPTION : Perform NPU configuration
@@ -35,7 +36,8 @@ scom 0x0000000008013D83 {
      bits,   	 scom_data        ;
 #  0:63,  	0xE0002C12000F5F3F      ; --hw341060
 #   0:63,  	0xE0002C92000F5F3F      ; --hw341036
-    0:63,  	0xE0000C92000F5F3F      ;
+#   0:63,  	0xE0000C92000F5F3F      ; -- BZ 144536 / NVIDIA bug 1796939    SW364851  crm
+    0:63,  	0xE0000C92010F5F3F      ;
     }
 
 # set the clock speed in the gp0 registers
@@ -127,7 +129,8 @@ scom 0x0000000008013D86 {
     bits, 	scom_data        		;
 #    0:63, 	0x1CBFC1FCB7F0A300      ;  --hw341060
 #    0:63, 	0x1CBFC17CB7F0A300      ;  --hw341036
-    0:63, 	0x1CBFE17CB7F0A300      ;
+#    0:63, 	0x1CBFE17CB7F0A300      ;  --BZ 144536 / NVIDIA bug 1796939    SW364851 crm     
+     0:63, 	0x1CBFE17CB5F0A300      ;
       }
 
 # spy name  ES.NPU.NP_AT.REG.FIR_ACTION1_REG
@@ -183,7 +186,8 @@ scom 0x0000000008013D9F {
      bits,   	 scom_data        ;
 #   0:63,  	0x1CBFC1FCB7F0A000      ;  --hw341060
 #   0:63,  	0x1CBFC17CB7F0A000      ;  --hw341036
-    0:63,  	0x1CBFE17CB7F0A000      ;
+#   0:63,  	0x1CBFE17CB7F0A000      ;  --BZ 144536 / NVIDIA bug 1796939    SW364851  crm
+    0:63,  	0x1CBFE17CB4F0A000      ;
     }
 
 # spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
@@ -355,4 +359,3 @@ scom 0x0000000008013C13 {
      bits,   	 scom_data        ;
     0:63,  	0x0800000043500000      ;
     }
-
