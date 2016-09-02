@@ -32,3 +32,206 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
+
+// std lib
+#include <vector>
+
+// fapi2
+#include <fapi2.H>
+
+// mss lib
+#include <lib/spd/lrdimm/lrdimm_decoder.H>
+#include <lib/spd/common/spd_decoder.H>
+#include <lib/utils/checker.H>
+#include <lib/utils/c_str.H>
+#include <lib/utils/find.H>
+
+using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_MCS;
+using fapi2::TARGET_TYPE_DIMM;
+
+namespace mss
+{
+namespace spd
+{
+namespace lrdimm
+{
+
+///
+/// @brief Decodes RCD output slew rate control
+/// @param[out] o_output encoded drive strength
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 138 (Bit 6)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.L-4 - 70
+///
+fapi2::ReturnCode decoder_v1_2::slew_rate_control(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< RCD_SLEW_CNTRL >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 0b1111;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              RCD_SLEW_CNTRL.iv_byte,
+              l_field_bits,
+              "Failed bound check for RCD output slew rate control") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. RCD output slew rate control: %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes VrefDQ range for DRAM interface range
+/// @param[out] o_output spd encoding
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 155 (Bits 3~0)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.L-4 - 76
+///
+fapi2::ReturnCode decoder_v1_2::dram_vref_dq_range(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< DRAM_VREF_DQ_RANGE >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 0b1111;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              DRAM_VREF_DQ_RANGE.iv_byte,
+              l_field_bits,
+              "Failed bound check for VrefDQ range for DRAM interface range ") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. VrefDQ range for DRAM interface range: %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes data buffer VrefDQ range for DRAM interface range
+/// @param[out] o_output spd encoding
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 155 (Bit 4)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.L-4 - 76
+///
+fapi2::ReturnCode decoder_v1_2::data_buffer_vref_dq_range(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_VREF_DQ >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 1;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              DATA_BUFFER_VREF_DQ.iv_byte,
+              l_field_bits,
+              "Failed bound check for data buffer VrefDQ range for DRAM interface range") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Data buffer VrefDQ range for DRAM interface range: %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes data buffer gain adjustment
+/// @param[out] o_output spd encoding
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 156 (Bit 0)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.L-4 - 77
+///
+fapi2::ReturnCode decoder_v1_2::data_buffer_gain_adjustment(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_GAIN_ADJUST >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 1;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              DATA_BUFFER_GAIN_ADJUST.iv_byte,
+              l_field_bits,
+              "Failed bound check for data buffer gain adjustment") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Data buffer gain adjustment: %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes data buffer Decision Feedback Equalization (DFE)
+/// @param[out] o_output spd encoding
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 156 (Bit 1)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 4
+/// @note Page 4.1.2.L-4 - 77
+///
+fapi2::ReturnCode decoder_v1_2::data_buffer_dfe(uint8_t& o_output)
+{
+    // Extracting desired bits
+    uint8_t l_field_bits = extract_spd_field< DATA_BUFFER_DFE >(iv_target, iv_spd_data);
+    FAPI_INF("Field Bits value: %d", l_field_bits);
+
+    // This checks my extracting params returns a value within bound
+    constexpr size_t MAX_VALID_VAL = 1;
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(iv_target,
+              l_field_bits <= MAX_VALID_VAL, // extract sanity check
+              DATA_BUFFER_DFE.iv_byte,
+              l_field_bits,
+              "Failed bound check for data buffer Decision Feedback Equalization (DFE)") );
+
+    // Update output only if check passes
+    o_output = l_field_bits;
+
+    FAPI_INF("%s. Data buffer Decision Feedback Equalization (DFE): %d",
+             mss::c_str(iv_target),
+             o_output);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+}// lrdimm
+}// spd
+}// mss

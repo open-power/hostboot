@@ -45,7 +45,9 @@
 #include <fapi2.H>
 
 // mss lib
+#include <lib/spd/common/dimm_module_decoder.H>
 #include <lib/spd/rdimm/rdimm_decoder.H>
+#include <lib/spd/lrdimm/lrdimm_decoder.H>
 #include <lib/spd/rdimm/raw_cards.H>
 #include <lib/utils/c_str.H>
 
@@ -94,6 +96,8 @@ enum factory_byte_extract
 /// @tparam I Byte index
 /// @tparam S Start bit
 /// @tparam L Bit length
+/// @param[in] i_target the dimm target
+/// @param[in] i_spd_data the SPD data
 /// @return extracted byte (right aligned)
 ///
 template<uint8_t I, uint8_t S, uint8_t L>
@@ -111,6 +115,56 @@ inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
     // Extracting desired bits
     uint8_t l_field_bits = 0;
     l_buffer.extractToRight<S, L>(l_field_bits);
+
+    return l_field_bits;
+}
+
+///
+/// @brief Helper function to extract byte information
+/// @tparam F the SPD field to extract
+/// @param[in] i_target the dimm target
+/// @param[in] i_spd_data the SPD data
+/// @return extracted byte (right aligned)
+///
+template< const field_t& F >
+inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const std::vector<uint8_t>& i_spd_data)
+{
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             F.iv_byte,
+             i_spd_data[F.iv_byte]);
+
+    fapi2::buffer<uint8_t> l_buffer(i_spd_data[F.iv_byte]);
+
+    // Extracting desired bits
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight<F.iv_start, F.iv_length>(l_field_bits);
+
+    return l_field_bits;
+}
+
+///
+/// @brief Helper function to extract byte information
+/// @param[in] i_target the dimm target
+/// @param[in] i_field the SPD field
+/// @param[in] i_spd_data the SPD data
+/// @return extracted byte (right aligned)
+///
+inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const field_t& i_field,
+                                 const std::vector<uint8_t>& i_spd_data)
+{
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             i_field.iv_byte,
+             i_spd_data[i_field.iv_byte]);
+
+    fapi2::buffer<uint8_t> l_buffer(i_spd_data[i_field.iv_byte]);
+
+    // Extracting desired bits
+    uint8_t l_field_bits = 0;
+    l_buffer.extractToRight( l_field_bits, i_field.iv_start, i_field.iv_length );
 
     return l_field_bits;
 }
@@ -1454,4 +1508,4 @@ class decoder_v1_1 : public decoder
 }// spd
 }// mss
 
-#endif //_MSS_SPD_DECODER_H_
+#endif //_MSSS_PD_DECODER_H_

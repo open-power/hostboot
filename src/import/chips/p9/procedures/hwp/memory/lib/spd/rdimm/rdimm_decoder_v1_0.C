@@ -380,7 +380,7 @@ fapi2::ReturnCode rdimm_decoder_v1_0::manufacturer_id_code(uint8_t& o_output)
 
     o_output = l_raw_byte;
 
-    FAPI_INF("%s. Register revision number: %d",
+    FAPI_INF("%s. Manufacturer ID code: %d",
              mss::c_str(iv_target),
              o_output);
 
