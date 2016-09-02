@@ -61,14 +61,8 @@ enum sizes
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
     T_PER_MT     = 1000000,          ///< Multiplier to go from MT/s to T/s
 
-    // All need to be attributes - BRS
-    // 48:51, 0b1100, (def_is_sim);       # BIG_STEP = 12 (changed from default for SIM)
-    // 48:51, 0b0000, any;       # BIG_STEP = 0  SWyatt
-    // #48:51, 0b0010, any;       # BIG_STEP = 2  (default)
-    // 52:54,  0b000,  any;       # SMALL_STEP = 0 (default)      SWyatt
-    //#52:54,  0b001,  any;       # SMALL_STEP = 1        (!! recommend setting to 0)
-    // 55:60,  0b101010, any;     # WR_PRE_DLY = 42
-    WR_LVL_BIG_STEP = 0b1100,
+    // All need to be attributes? - BRS
+    WR_LVL_BIG_STEP = 0b0111,
     WR_LVL_SMALL_STEP = 0b000,
     WR_LVL_PRE_DLY = 0b101010,
     WR_LVL_NUM_VALID_SAMPLES = 0x5,
