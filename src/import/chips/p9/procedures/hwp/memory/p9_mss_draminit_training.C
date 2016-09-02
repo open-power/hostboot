@@ -124,12 +124,7 @@ extern "C"
 
             // The following registers must be configured to the correct operating environment:
 
-            // Unclear, can probably be 0's for sim BRS
             // • Section 5.2.5.10 SEQ ODT Write Configuration {0-3} on page 422
-
-            FAPI_TRY( mss::reset_seq_config0(p) );
-            FAPI_TRY( mss::reset_seq_rd_wr_data(p) );
-
             FAPI_TRY( mss::reset_odt_config(p) );
 
             // These are reset in phy_scominit
