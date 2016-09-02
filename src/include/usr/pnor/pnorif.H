@@ -66,11 +66,12 @@ enum SectionId
     TEST,           /**< Scratch space for PNOR test cases */
     TESTRO,         /**< Scratch space for PNOR ReadOnly test cases */
     BMC_INV,        /**< BMC Inventory */
+    SBKT,           /**< SecureBoot Key Transition */
 
     NUM_SECTIONS,   /**< Number of defined sections */
 
     FIRST_SECTION = TOC,  /**< First section (for looping) */
-    LAST_SECTION = BMC_INV,  /**< Last section (for looping) */
+    LAST_SECTION = SBKT,  /**< Last section (for looping) */
     INVALID_SECTION = NUM_SECTIONS,  /**< Used for error cases, initialization */
 };
 

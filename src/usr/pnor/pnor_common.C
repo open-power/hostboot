@@ -74,6 +74,7 @@ const char* cv_EYECATCHER[] = {
     "TEST",      /**< PNOR::TEST           : Test space for PNOR*/
     "TESTRO",    /**< PNOR::TESTRO         : ReadOnly Test space for PNOR */
     "BMC_INV",   /**< PNOR::BMC_INV        : BMC Inventory */
+    "SBKT",      /**< PNOR::SBKT           : SecureBoot Key Transition */
     //Not currently used
 //    "XXX",    /**< NUM_SECTIONS       : Used as invalid entry */
 };

@@ -73,9 +73,10 @@ use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
 use constant LOCAL_SIGNING_FLAG => " -flag ";
 use constant OP_SIGNING_FLAG => " -flags ";
 # Security bits HW flag strings
-use constant HB_FW_FLAG => "0x80000000";
-use constant OPAL_FLAG => "0x40000000";
-use constant PHYP_FLAG => "0x20000000";
+use constant HB_FW_FLAG => 0x80000000;
+use constant OPAL_FLAG => 0x40000000;
+use constant PHYP_FLAG => 0x20000000;
+use constant KEY_TRANSITION_FLAG => 0x00000001;
 
 ################################################################################
 # I/O parsing
@@ -88,6 +89,7 @@ my $pnorLayoutFile = "";
 my $system_target = "";
 my $build_all = 0;
 my $install_all = 0;
+my $key_transition = 0;
 my $help = 0;
 
 GetOptions("binDir:s" => \$bin_dir,
@@ -97,7 +99,11 @@ GetOptions("binDir:s" => \$bin_dir,
            "systemBinFiles:s" => \@systemBinFiles,
            "build-all" => \$build_all,
            "install-all" => \$install_all,
+           "key-transition" => \$key_transition,
            "help" => \$help);
+
+# If in test mode, set key transition
+$key_transition = 1 if($testRun);
 
 if ($help)
 {
@@ -154,11 +160,44 @@ if($SIGNING_TOOL_EDITION eq COMMUNITY)
 # Requires naming convention of hw/sw keys in DEV_KEY_DIR
 
 my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
-# Secureboot header file
+
+
+# Key prefix used for current key siging of partitions (N/A for open edition)
+my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
+            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
+            . "-skp ${DEV_KEY_DIR}/sw_key_a";
+
+# Key prefix used for secureboot key transition partition.
+# Note: simply reordered the keys to create a psuedo production key.
+my $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
+            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
+            . "-skp ${DEV_KEY_DIR}/sw_key_a";
+
+# Secureboot headers
+# Contains the appropriate flags, prefix, and file names.
 my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
-my $HB_FW_SECUREBOOT_HDR = "$bin_dir/$randPrefix.hb.fw.secureboot.hdr.bin";
-my $OPAL_SECUREBOOT_HDR = "$bin_dir/$randPrefix.opal.secureboot.hdr.bin";
-my $PHYP_SECUREBOOT_HDR = "$bin_dir/$randPrefix.phyp.secureboot.hdr.bin";
+my %sb_hdrs = (
+    HB_FW => {
+        flags =>  sprintf("0x%08X",HB_FW_FLAG),
+        prefix => $SIGN_PREFIX_PARAMS,
+        file => "$bin_dir/$randPrefix.hb.fw.secureboot.hdr.bin"
+    },
+    OPAL => {
+        flags =>  sprintf("0x%08X",OPAL_FLAG),
+        prefix => $SIGN_PREFIX_PARAMS,
+        file => "$bin_dir/$randPrefix.opal.secureboot.hdr.bin"
+    },
+    PHYP => {
+        flags => sprintf("0x%08X", PHYP_FLAG),
+        prefix => $SIGN_PREFIX_PARAMS,
+        file => "$bin_dir/$randPrefix.phyp.secureboot.hdr.bin"
+    },
+    SBKT => {
+        flags => sprintf("0x%08X", HB_FW_FLAG | KEY_TRANSITION_FLAG),
+        prefix => $SIGN_SBKT_PREFIX_PARAMS,
+        file => "$bin_dir/$randPrefix.sbkt.secureboot.hdr.bin"
+    }
+);
 
 my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
     . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
@@ -178,16 +217,16 @@ if ($secureboot)
 
     if(!$openSigningTool)
     {
-        # Key prefix used for all partitions (N/A for open edition)
-        my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
-                    . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
-                    . "-skp ${DEV_KEY_DIR}/sw_key_a";
-        run_command("$SIGNING_DIR/prefix -good -of $HB_FW_SECUREBOOT_HDR".
-                    LOCAL_SIGNING_FLAG.HB_FW_FLAG." $SIGN_PREFIX_PARAMS");
-        run_command("$SIGNING_DIR/prefix -good -of $OPAL_SECUREBOOT_HDR ".
-                    LOCAL_SIGNING_FLAG.OPAL_FLAG." $SIGN_PREFIX_PARAMS");
-        run_command("$SIGNING_DIR/prefix -good -of $PHYP_SECUREBOOT_HDR ".
-                    LOCAL_SIGNING_FLAG.PHYP_FLAG." $SIGN_PREFIX_PARAMS");
+        # Generate each secureboot header file
+        foreach my $header (keys %sb_hdrs)
+        {
+            next if($header eq "SBKT" && !$key_transition);
+            run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
+                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
+                        " $sb_hdrs{$header}{prefix}");
+        }
+
+        # Generate test containers once and limit to build phase
         if ($build_all)
         {
             gen_test_containers();
@@ -222,12 +261,13 @@ foreach my $binFilesCSV (@systemBinFiles)
     checkSpaceConstraints(\%pnorLayout, \%binFiles, $testRun);
 }
 
-system("rm -f $HB_FW_SECUREBOOT_HDR");
-die "Could not delete $HB_FW_SECUREBOOT_HDR" if $?;
-system("rm -f $OPAL_SECUREBOOT_HDR");
-die "Could not delete $OPAL_SECUREBOOT_HDR" if $?;
-system("rm -f $PHYP_SECUREBOOT_HDR");
-die "Could not delete $PHYP_SECUREBOOT_HDR" if $?;
+
+# Clean up temp header files
+foreach my $header (keys %sb_hdrs)
+{
+    system("rm -f $sb_hdrs{$header}{file}");
+    die "Could not delete $sb_hdrs{$header}{file}" if $?;
+}
 
 ################################################################################
 # manipulateImages - Perform any ECC/padding/sha/signing manipulations
@@ -289,18 +329,19 @@ sub manipulateImages
         # enabled for secureboot actions on these partitions to occur.
         my $isNormalSecure =    ($eyeCatch eq "SBE")
                              || ($eyeCatch eq "SBEC")
-                             || ($eyeCatch eq "PAYLOAD");
+                             || ($eyeCatch eq "PAYLOAD")
+                             || ($eyeCatch eq "SBKT");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
                               || ($eyeCatch eq "HBI")
                               || ($eyeCatch eq "HBD");
 
-        my $openSigningFlags = OP_SIGNING_FLAG.HB_FW_FLAG;
-        my $secureboot_hdr =  $HB_FW_SECUREBOOT_HDR;
+        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{HB_FW}{flag};
+        my $secureboot_hdr =  $sb_hdrs{HB_FW}{file};
         if ($eyeCatch eq "PAYLOAD")
         {
-            $secureboot_hdr = $OPAL_SECUREBOOT_HDR;
-            $openSigningFlags = OP_SIGNING_FLAG.OPAL_FLAG;
+            $secureboot_hdr = $sb_hdrs{OPAL}{file};
+            $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{OPAL}{flag};
         }
 
         # Handle partitions that have an input binary.
@@ -465,24 +506,7 @@ sub manipulateImages
                 run_command("cp $bin_file $tempImages{HDR_PHASE}");
             }
 
-            if($callerHwHdrFields{configure})
-            {
-                # If not already explicitly set, compute total container size
-                if(!$callerHwHdrFields{totalContainerSize})
-                {
-                    $callerHwHdrFields{totalContainerSize}
-                        = -s $tempImages{HDR_PHASE};
-                    die  "Could not determine size of file "
-                        ."$tempImages{HDR_PHASE}; errno = $!" unless
-                            defined($callerHwHdrFields{totalContainerSize});
-                }
-                my $callerHwHdr = sprintf("%016llX%016llX%016llX",
-                    $callerHwHdrFields{totalContainerSize},
-                    $callerHwHdrFields{targetHrmor},
-                    $callerHwHdrFields{instructionStartStackPointer});
-                run_command( "echo \"$callerHwHdr\" | xxd -r -ps -seek 6 - "
-                            ."$tempImages{HDR_PHASE}");
-            }
+            setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
 
             # Prefix phase
             # Add SBE header to HBB
@@ -549,21 +573,29 @@ sub manipulateImages
             {
                 run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
             }
+            elsif ($eyeCatch eq "SBKT" && $secureboot && $key_transition)
+            {
+                $callerHwHdrFields{configure} = 1;
+                create_sb_key_transition_container($tempImages{PAD_PHASE});
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+            }
             # Other partitions fill with FF's if no empty bin file provided
             else
             {
                 run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
-            }
 
-            # Add secure container header
-            if ($secureboot && $isNormalSecure)
-            {
-                # Remove PAGE_SIZE bytes from generated dummy content of file
-                # to make room for the secure header
-                my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
-                run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
-                # @TODO RTC:155374 Remove when official signing supported
-                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                # Add secure container header
+                if ($secureboot && $isNormalSecure && $eyeCatch ne "SBKT")
+                {
+                    $callerHwHdrFields{configure} = 1;
+                    # Remove PAGE_SIZE bytes from generated dummy content of file
+                    # to make room for the secure header
+                    my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
+                    run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
+                    # @TODO RTC:155374 Remove when official signing supported
+                    run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                    setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+                }
             }
         }
 
@@ -713,23 +745,24 @@ sub genHashPageTable
 ################################################################################
 sub gen_test_containers
 {
+    my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
     my %tempImages = (
-        TEST_CONTAINER_DATA => "$bin_dir/test.cont.bin",
-        PROTECTED_PAYLOAD => "$bin_dir/test.protected_payload.bin"
+        TEST_CONTAINER_DATA => "$bin_dir/$randPrefix.test.cont.bin",
+        PROTECTED_PAYLOAD => "$bin_dir/$randPrefix.test.protected_payload.bin"
     );
 
     # Create a signed test container
     # name = secureboot_signed_container (no prefix in hb cacheadd)
     my $test_container = "$bin_dir/secureboot_signed_container";
     run_command("dd if=/dev/zero count=1 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
-    run_command("$SIGNING_DIR/build -good -if $HB_FW_SECUREBOOT_HDR -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
 
     # Create a signed test container with a hash page table
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
     run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
     $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
-    run_command("$SIGNING_DIR/build -good -if $HB_FW_SECUREBOOT_HDR -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");
 
     # Clean up temp images
@@ -737,6 +770,71 @@ sub gen_test_containers
     {
         system("rm -f $tempImages{$image}");
         die "Failed deleting $tempImages{$image}" if ($?);
+    }
+}
+
+################################################################################
+# create_sb_key_transition_container
+#       Generate sb key transition container used for transitioning from an
+#       imprint to production key.
+#       Format:
+#           SB_HDR_IMPRINT_KEY[SB_HDR_PRD_KEY[4K rand blob]]
+#       Steps:
+#           1. Generate 4K blob of random data
+#           2. Sign #1 with production keys
+#           3. Sign #2 with the imprint keys
+################################################################################
+sub create_sb_key_transition_container
+{
+    my ($o_file) = @_;
+
+    my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
+    my %tempImages = (
+        RAND_BLOB => "$bin_dir/$randPrefix.rand_blob.bin",
+        PRD_KEY_FILE => "$bin_dir/$randPrefix.sbkt_prod_key.bin"
+    );
+
+    # Gen 4K blob of random data
+    run_command("dd if=/dev/urandom of=$tempImages{RAND_BLOB} count=1 bs=4k");
+
+    # Create a signed container with new production keys
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
+
+    # Sign new production key container with imprint keys
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
+
+    # Clean up temp images
+    foreach my $image (keys %tempImages)
+    {
+        system("rm -f $tempImages{$image}");
+        die "Failed deleting $tempImages{$image}" if ($?);
+    }
+}
+
+################################################################################
+# setCallerHwHdrFields
+#       Sets the caller hardware header fields in the passed in file based on
+#       the input hash passed in.
+################################################################################
+sub setCallerHwHdrFields
+{
+    my ($i_callerHwHdrFields, $i_file) = @_;
+
+    if($i_callerHwHdrFields->{configure})
+    {
+        # If not already explicitly set, compute total container size
+        if(!$i_callerHwHdrFields->{totalContainerSize})
+        {
+            $i_callerHwHdrFields->{totalContainerSize}
+                = -s $i_file;
+            die  "Could not determine size of file $i_file; errno = $!" unless
+                    defined($i_callerHwHdrFields->{totalContainerSize});
+        }
+        my $callerHwHdr = sprintf("%016llX%016llX%016llX",
+            $i_callerHwHdrFields->{totalContainerSize},
+            $i_callerHwHdrFields->{targetHrmor},
+            $i_callerHwHdrFields->{instructionStartStackPointer});
+        run_command( "echo \"$callerHwHdr\" | xxd -r -ps -seek 6 - $i_file");
     }
 }
 
