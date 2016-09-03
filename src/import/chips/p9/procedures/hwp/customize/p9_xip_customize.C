@@ -50,30 +50,77 @@ fapi2::ReturnCode writeMboxRegs (
     FAPI_DBG ("writeMboxRegs Entering...");
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    MBOX_ATTR_WRITE (ATTR_I2C_BUS_DIV_REF,         i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_FUNCTIONAL_EQ_EC_VALID,  i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_EQ_GARD,                 i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_EC_GARD,                 i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_I2C_BUS_DIV_REF_VALID,   i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_IS_MPIPL,                FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_BOOT_FREQUENCY_VALID,    i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,         FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_BOOT_FREQ_MULT,          i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_HWP_CONTROL_FLAGS_VALID, i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_SYSTEM_IPL_PHASE,        FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,     FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,              FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,    FAPI_SYSTEM,     i_image);
-    MBOX_ATTR_WRITE (ATTR_CHIP_SELECTION_VALID,    i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_CHIP_SELECTION,          i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_NODE_POS,                i_proc_target,   i_image);
-    MBOX_ATTR_WRITE (ATTR_CHIP_POS,                i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_I2C_BUS_DIV_REF,          i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_EQ_GARD,                  i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_EC_GARD,                  i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_NEST_PLL_BUCKET,          FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_WRITE (ATTR_BOOT_FREQ_MULT,           i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_CLOCK_PLL_MUX,            i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_DPLL_BYPASS,              i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_SS_FILTER_BYPASS,         i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_CP_FILTER_BYPASS,         i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_IO_FILTER_BYPASS,         i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_NEST_MEM_X_O_PCI_BYPASS,  i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_SYSTEM_IPL_PHASE,         FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_WRITE (ATTR_SYS_FORCE_ALL_CORES,      FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_WRITE (ATTR_RISK_LEVEL,               FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_WRITE (ATTR_DISABLE_HBBL_VECTORS,     FAPI_SYSTEM,     i_image);
+    MBOX_ATTR_WRITE (ATTR_MC_SYNC_MODE,             i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_PROC_SBE_MASTER_CHIP,     i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_PROC_FABRIC_GROUP_ID,     i_proc_target,   i_image);
+    MBOX_ATTR_WRITE (ATTR_PROC_FABRIC_CHIP_ID,      i_proc_target,   i_image);
 
 fapi_try_exit:
-    FAPI_DBG ("writeMboxRegs Exiting...");
+    FAPI_DBG("writeMboxRegs Exiting...");
     return fapi2::current_err;
 }
 
+fapi2::ReturnCode writePG(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    void* i_image)
+{
+    FAPI_DBG ("writePG Entering...");
+    const uint8_t IMG_PG_ENTRIES = 64;
+
+    for (auto l_perv_tgt : i_proc_target.getChildren<fapi2::TARGET_TYPE_PERV>())
+    {
+        uint8_t l_unit_id = 0;
+        uint16_t l_pg_data = 0;
+        uint8_t l_pg_idx = 0;
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv_tgt, l_unit_id),
+                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)" );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv_tgt, l_pg_data),
+                  "Error from FAPI_ATTR_GET (ATTR_PG)" );
+
+        l_pg_idx = l_unit_id;
+
+        FAPI_ASSERT( l_pg_idx < IMG_PG_ENTRIES,
+                     fapi2::XIPC_BAD_PG_XLATE().
+                     set_CHIP_TARGET(i_proc_target).
+                     set_CHIP_UNIT_POS(l_unit_id).
+                     set_PG_INDEX(l_pg_idx),
+                     "Code bug: Invalid translation from PERV chip unit position to image PG index" );
+
+        // Update the image
+        FAPI_TRY( p9_xip_set_element(i_image, "ATTR_PG", l_pg_idx, l_pg_data),
+                  "Error from p9_xip_set_element (idx %d)", l_pg_idx );
+
+        FAPI_DBG("Write value of pg_data[%d] = %08X", l_pg_idx, l_pg_data);
+    }
+
+    for (auto l_pg_idx = 0; l_pg_idx < IMG_PG_ENTRIES; l_pg_idx++)
+    {
+        uint64_t l_val;
+        FAPI_TRY( p9_xip_get_element(i_image, "ATTR_PG", l_pg_idx, &l_val),
+                  "Error from p9_xip_get_element (idx %d)", l_pg_idx );
+        FAPI_DBG("Read value of pg_data[%d] = %08X", l_pg_idx, l_val);
+    }
+
+fapi_try_exit:
+    FAPI_DBG ("writePG Exiting...");
+    return fapi2::current_err;
+}
 
 
 //  Function: _fetch_and_insert_vpd_rings()
@@ -818,6 +865,9 @@ fapi2::ReturnCode p9_xip_customize (
         FAPI_TRY(writeMboxRegs(i_proc_target, io_image),
                  "p9_xip_customize: error writing mbox regs in SBE image rc=0x%.8x",
                  (uint64_t)fapi2::current_err);
+        FAPI_TRY(writePG(i_proc_target, io_image),
+                 "p9_xip_customize: error writing PG data in SBE image rc=0x%.8x",
+                 (uint64_t)fapi2::current_err);
     }
 
 
@@ -944,14 +994,16 @@ fapi2::ReturnCode p9_xip_customize (
                              " to the .rings section");
 
                     // Check the bootCoreMask to determine if enough cores have been configured.
-                    uint32_t MIN_REQD_ECS;
+                    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+                    uint8_t MIN_REQD_ECS = 0;
                     uint8_t  l_actualEcCount = 0;
-                    //@FIXME: CMO: Attribute support yet?
-                    //l_fapiRc2 = FAPI_ATTR_GET(ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, NULL, MINIMUM_VALID_ECS);
-                    // Temporary override until attrib support
-                    MIN_REQD_ECS = 3;
 
-                    //fapiLogError(lrc);
+                    FAPI_DBG("MIN_REQD_ECS = 0x%x", MIN_REQD_ECS);
+
+                    l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_SBE_IMAGE_MINIMUM_VALID_ECS, FAPI_SYSTEM, MIN_REQD_ECS);
+
+                    FAPI_DBG("MIN_REQD_ECS = 0x%x", MIN_REQD_ECS);
+
                     FAPI_ASSERT( l_fapiRc2.isRC(fapi2::FAPI2_RC_SUCCESS),
                                  fapi2::XIPC_IMAGE_WOULD_OVERFLOW_ADDL_INFO().
                                  set_CHIP_TARGET(i_proc_target).
