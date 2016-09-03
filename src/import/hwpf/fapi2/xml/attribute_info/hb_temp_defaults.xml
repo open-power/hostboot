@@ -74,6 +74,11 @@
      <attribute>
           <id>ATTR_EFF_DRAM_MFG_ID</id>
      </attribute>
+     <attribute>
+          <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
+          <default>3</default>
+     </attribute>
+
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

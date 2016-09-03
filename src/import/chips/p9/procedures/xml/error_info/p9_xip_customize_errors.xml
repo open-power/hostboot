@@ -25,6 +25,18 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_BAD_PG_XLATE</rc>
+    <description>Code bug: Invalid translation from PERV target chip unit position to image PG index</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIP_UNIT_POS</ffdc>
+    <ffdc>PG_INDEX</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_INVALID_INPUT_BUFFER_PARM</rc>
     <description>Caller bug: Caller supplied one or more invalid input buffer pointers</description>
     <callout>
