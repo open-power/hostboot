@@ -1950,6 +1950,51 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+// VPD Keyword Version Byte: map
+///
+/// @brief ATTR_MSS_VPD_CKE_MAP decode and set
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blob the VPD blob for this MCS
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  The Memory Clock Enable MAP is a bit map describing the Memory Clock Enable signal to its respective rank.
+/// There are 8 bits, but only 4 are currently used
+/// [DIMM0 CKE0][DIMM0 CKE1][N/A][N/A][DIMM1 CKE0][DIMM1 CKE1][N/A][N/A]
+/// E.g. 0x80 -> 0b10000000, which means DIMM0 CKE0 is mapped to that rank.
+///
+inline fapi2::ReturnCode vpd_cke_map(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
+{
+    uint8_t l_value[2][2][4];
+
+    memcpy(&l_value, i_blob + 0, 16);
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_CKE_MAP, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_CKE_MAP start: 0, len: 16");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+// VPD Keyword Version Byte: map
+///
+/// @brief ATTR_MSS_VPD_DQ_MAP decode and set
+/// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
+/// @param[in] i_blob the VPD blob for this MCS
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
+/// @note  [PORT][Dimm DQ PIN]  The map from the Dual Inline Memory Module (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
+///
+inline fapi2::ReturnCode vpd_dq_map(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, const uint8_t* i_blob)
+{
+    uint8_t l_value[2][72];
+
+    memcpy(&l_value, i_blob + 0, 144);
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_DQ_MAP, i_target, l_value),
+              "Unable to decode and set ATTR_MSS_VPD_DQ_MAP start: 0, len: 144");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }; // close decoder ns
 
 ///
@@ -1961,7 +2006,7 @@ fapi_try_exit:
 /// @note Decodes the blobs and sets all the attributes.
 ///
 inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                    const std::vector<uint8_t*>& i_mt_blob, const uint8_t* i_mr_blob)
+                                    const std::vector<uint8_t*>& i_mt_blob, const uint8_t* i_mr_blob, const uint8_t* i_cke_blob, const uint8_t* i_dq_blob)
 {
     FAPI_TRY (decoder::vpd_mt_0_version_layout(i_target, i_mt_blob) );
     FAPI_TRY (decoder::vpd_mt_1_version_data(i_target, i_mt_blob) );
@@ -2043,6 +2088,8 @@ inline fapi2::ReturnCode eff_decode(const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
     FAPI_TRY (decoder::vpd_mr_mc_2n_mode_autoset(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_tsys_adr(i_target, i_mr_blob) );
     FAPI_TRY (decoder::vpd_mr_tsys_data(i_target, i_mr_blob) );
+    FAPI_TRY (decoder::vpd_cke_map(i_target, i_cke_blob) );
+    FAPI_TRY (decoder::vpd_dq_map(i_target, i_dq_blob) );
 
 fapi_try_exit:
     return fapi2::current_err;
