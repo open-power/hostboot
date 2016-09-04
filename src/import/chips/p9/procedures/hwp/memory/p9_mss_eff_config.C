@@ -201,21 +201,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
         // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
         {
-            uint8_t l_vpd_rlo[mss::PORTS_PER_MCS] = {0x01, 0x01};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_VPD_RLO, i_target, l_vpd_rlo ) );
-        }
-
-        {
-            uint8_t l_vpd_wlo[mss::PORTS_PER_MCS] = {0x01, 0x01};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_VPD_WLO, i_target, l_vpd_wlo ) );
-        }
-
-        {
-            uint8_t l_vpd_glo[mss::PORTS_PER_MCS] = {0x05, 0x05};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_VPD_GPO, i_target, l_vpd_glo ) );
-        }
-
-        {
             uint32_t l_m_dram_clocks[mss::PORTS_PER_MCS] = {0x200, 0x200};
             FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS, i_target, l_m_dram_clocks ) );
         }

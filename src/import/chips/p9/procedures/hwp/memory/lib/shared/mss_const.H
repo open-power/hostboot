@@ -98,10 +98,6 @@ enum times
     DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
     DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
 
-    // From the DDR4spec 2400 speed - need to be changed to read attributes. BRS
-    tWLO = 10,
-    tWLOE = 2,
-
     SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
     BG_SCRUB_IN_HOURS       = 12,
 

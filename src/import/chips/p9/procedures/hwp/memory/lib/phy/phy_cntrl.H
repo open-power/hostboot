@@ -38,6 +38,10 @@
 
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+
+#include <lib/shared/mss_const.H>
+#include <lib/utils/scom.H>
 
 namespace mss
 {
@@ -75,6 +79,8 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
         static const uint64_t PC_INIT_CAL_ERROR_REG = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0;
         static const uint64_t PC_DLL_ZCAL_CAL_STATUS_REG = MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS_P0;
         static const uint64_t PC_RESETS_REG = MCA_DDRPHY_PC_RESETS_P0;
+        static const uint64_t PC_CONFIG0_REG = MCA_DDRPHY_PC_CONFIG0_P0;
+        static const uint64_t PC_CONFIG1_REG = MCA_DDRPHY_PC_CONFIG1_P0;
 
         enum
         {
@@ -108,6 +114,35 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             SYSCLK_RESET = MCA_DDRPHY_PC_RESETS_P0_SYSCLK_RESET,
             PVT_OVERRIDE = MCA_DDRPHY_PC_RESETS_P0_PVT_OVERRIDE,
             ENABLE_ZCAL = MCA_DDRPHY_PC_RESETS_P0_ENABLE_ZCAL,
+
+            WRITE_LATENCY_OFFSET = MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET,
+            WRITE_LATENCY_OFFSET_LEN = MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET_LEN,
+            READ_LATENCY_OFFSET = MCA_DDRPHY_PC_CONFIG1_P0_READ_LATENCY_OFFSET,
+            READ_LATENCY_OFFSET_LEN = MCA_DDRPHY_PC_CONFIG1_P0_READ_LATENCY_OFFSET_LEN,
+            MEMCTL_CIC_FAST = MCA_DDRPHY_PC_CONFIG1_P0_MEMCTL_CIC_FAST,
+            MEMCTL_CTRN_IGNORE = MCA_DDRPHY_PC_CONFIG1_P0_MEMCTL_CTRN_IGNORE,
+            DISABLE_MEMCTL_CAL = MCA_DDRPHY_PC_CONFIG1_P0_DISABLE_MEMCTL_CAL,
+            MEMORY_TYPE = MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE,
+            MEMORY_TYPE_LEN = MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE_LEN,
+            DDR4_LATENCY_SW = MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW,
+            RETRAIN_PERCAL_SW = MCA_DDRPHY_PC_CONFIG1_P0_RETRAIN_PERCAL_SW,
+
+
+            // PC Config0 Protocol has been re-purposed for PDA enable.
+            // repurposed to pda_enable_override, so zero per John Bialas 4/16 JJM
+            PDA_ENABLE = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL,
+            PDA_ENABLE_LEN = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN,
+
+            DATA_MUX4_1MODE = MCA_DDRPHY_PC_CONFIG0_P0_DATA_MUX4_1MODE,
+            DDR4_CMD_SIG_REDUCTION = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_CMD_SIG_REDUCTION,
+            SYSCLK_2X_MEMINTCLKO = MCA_DDRPHY_PC_CONFIG0_P0_SYSCLK_2X_MEMINTCLKO,
+            RANK_OVERRIDE = MCA_DDRPHY_PC_CONFIG0_P0_RANK_OVERRIDE,
+            RANK_OVERRIDE_VALUE = MCA_DDRPHY_PC_CONFIG0_P0_RANK_OVERRIDE_VALUE,
+            RANK_OVERRIDE_VALUE_LEN = MCA_DDRPHY_PC_CONFIG0_P0_RANK_OVERRIDE_VALUE_LEN,
+            LOW_LATENCY = MCA_DDRPHY_PC_CONFIG0_P0_LOW_LATENCY,
+            DDR4_IPW_LOOP_DIS = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_IPW_LOOP_DIS,
+            DDR4_VLEVEL_BANK_GROUP = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP,
+            VPROTH_PSEL_MODE = MCA_DDRPHY_PC_CONFIG0_P0_VPROTH_PSEL_MODE,
         };
 
 };
@@ -115,9 +150,104 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
 namespace pc
 {
 
+///
+/// @brief read PC_CONFIG1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG1_REG, o_data) );
+    FAPI_INF("pc_config1: 0x%016llx", o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC_CONFIG1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_config1( const fapi2::Target<T>& i_target,
+                                        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_INF("pc_config1: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG1_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset pc_config1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+fapi2::ReturnCode reset_config1( const fapi2::Target<T>& i_target );
+
+///
+/// @brief read PC_CONFIG0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG0_REG, o_data) );
+    FAPI_INF("pc_config0: 0x%016llx", o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC_CONFIG0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target,
+                                        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_INF("pc_config0: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG0_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset pc_config0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief read MCA_DDRPHY_PC_DLL_ZCAL_CAL_STATUS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -127,12 +257,15 @@ inline fapi2::ReturnCode read_dll_zcal_status( const fapi2::Target<T>& i_target,
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_DLL_ZCAL_CAL_STATUS_REG, o_data) );
     FAPI_INF("pc_dll_zcal_status: 0x%016llx", o_data);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief Get DP DLL Cal Status
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// Combine the processing of Good, Error and Error Fine into one functional interface
 /// @param[in] fapi2::buffer representing the status register to interrogate
 /// @return mss::states; YES == success, NO == fail, INVALID == still running
@@ -177,6 +310,8 @@ inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
 
 ///
 /// @brief Get ZCAL Cal Status
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] fapi2::buffer representing the status register to interrogate
 /// @return mss::states; YES == success, NO == fail
 ///
@@ -189,6 +324,8 @@ inline mss::states get_zcal_status( fapi2::buffer<uint64_t>& i_data )
 
 ///
 /// @brief read PC_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -198,12 +335,15 @@ inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, f
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data) );
     FAPI_INF("pc_error_status0: 0x%016llx", o_data);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief Write PC_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -214,12 +354,15 @@ inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
 {
     FAPI_INF("pc_error_status0: 0x%016llx", i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief reset pc_error_status0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
@@ -234,6 +377,8 @@ fapi_try_exit:
 
 ///
 /// @brief read PC_INIT_CAL_ERROR
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -243,6 +388,7 @@ inline fapi2::ReturnCode read_init_cal_error( const fapi2::Target<T>& i_target, 
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data) );
     FAPI_INF("pc_init_cal_error: 0x%016llx", o_data);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -259,12 +405,15 @@ inline fapi2::ReturnCode write_init_cal_error( const fapi2::Target<T>& i_target,
 {
     FAPI_INF("pc_init_cal_error: 0x%016llx", i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief reset pc_init_cal_error
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
@@ -279,12 +428,16 @@ fapi_try_exit:
 
 ///
 /// @brief reset rc
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target fapi2 target of the port
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
 {
+    // Note that PC_CONFIG0 is statically configured in the initfile - we don't need to reset it.
+    FAPI_TRY( reset_config1(i_target) );
     FAPI_TRY( reset_error_status0(i_target) );
     FAPI_TRY( reset_init_cal_error(i_target) );
 
@@ -294,6 +447,8 @@ fapi_try_exit:
 
 ///
 /// @brief read PC_RESETS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[in] i_target the fapi2 target of the port
 /// @param[out] o_data the value of the register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -303,6 +458,7 @@ inline fapi2::ReturnCode read_resets( const fapi2::Target<T>& i_target, fapi2::b
 {
     FAPI_TRY( mss::getScom(i_target, TT::PC_RESETS_REG, o_data) );
     FAPI_INF("pc_resets: 0x%016llx", o_data);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -318,12 +474,15 @@ inline fapi2::ReturnCode write_resets( const fapi2::Target<T>& i_target, const f
 {
     FAPI_INF("pc_resets: 0x%016llx", i_data);
     FAPI_TRY( mss::putScom(i_target, TT::PC_RESETS_REG, i_data) );
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief Set ENABLE_ZCAL in PC_RESETS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[out] o_data the value of the register
 /// @param[in] i_state mss::HIGH or mss::LOW
 ///

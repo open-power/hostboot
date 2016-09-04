@@ -65,6 +65,13 @@ const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::DUTY_CYCLE_DIS
     MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1
 };
 
+// Definition of the ADR32S write clock static offset registers
+const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::PR_STATIC_OFFSET_REG =
+{
+    MCA_DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S0,
+    MCA_DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S1,
+};
+
 namespace adr32s
 {
 

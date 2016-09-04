@@ -2184,34 +2184,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_VPD_RLO</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            This value comes from the VPD keyword MT byte 60 bits 4:7 for the Logical DIMM associated with port A.
-            Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <array>2</array>
-        <mssAccessorName>vpd_rlo</mssAccessorName>
-        <writeable/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_WLO</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            This value comes from the VPD keyword MT byte 60 bits 0:3 for the Logical DIMM associated with port A.
-            Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <array>2</array>
-        <mssAccessorName>vpd_wlo</mssAccessorName>
-        <writeable/>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DRAM_MODULE_BUS_WIDTH</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -2922,20 +2894,6 @@
         <array>2 2</array>
         <writeable/>
         <mssAccessorName>eff_dram_ron</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_GPO</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-          This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
-          associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <array>2</array>
-        <writeable/>
-        <mssAccessorName>vpd_gpo</mssAccessorName>
     </attribute>
 
     <attribute>

@@ -42,6 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <lib/utils/scom.H>
+#include <lib/utils/find.H>
 
 namespace mss
 {
@@ -148,6 +149,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DATA_BIT_DIR1;
+        static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
         static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
         static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
 
@@ -156,6 +158,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
             FLUSH = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_FLUSH,
             INIT_IO = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_INIT_IO,
+
+            TSYS_DATA = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS,
+            TSYS_DATA_LEN = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS_LEN,
 
             // Seriously PHY guys?
             AC_BOOST_WR_DOWN = MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0_01_S0ACENSLICENDRV_DC,
@@ -212,6 +217,75 @@ fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
 
 namespace dp16
 {
+
+///
+/// @brief Read TSYS_DATA
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_tsys_data( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::PR_STATIC_OFFSET_REG[I], o_data) );
+    FAPI_INF("tsys_data dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write TSYS_DATA
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_tsys_data( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("tsys_data dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PR_STATIC_OFFSET_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset tsys_data
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_tsys_data( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+    uint8_t l_tsys_data = 0;
+
+    FAPI_TRY( mss::vpd_mr_tsys_data(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_tsys_data) );
+    l_data.insertFromRight<TT::TSYS_DATA, TT::TSYS_DATA_LEN>(l_tsys_data);
+
+    for (const auto r : TT::PR_STATIC_OFFSET_REG)
+    {
+        // TODO RTC:160358 Suspect duplicated scoms in ddr initfile
+        FAPI_INF("reset tsys_data 0x%016lx: 0x%016lx", r, l_data);
+        FAPI_TRY( mss::putScom(i_target, r, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Read DLL_CNTL

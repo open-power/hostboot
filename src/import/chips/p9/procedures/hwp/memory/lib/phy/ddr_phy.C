@@ -550,93 +550,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setup the PC CONFIG0 register
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target the target (MCA or MBA?)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template<>
-fapi2::ReturnCode set_pc_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
-{
-    fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
-
-    // Note: This needs to get the DRAM gen from an attribute. - 0x1 is DDR4 Note for Nimbus PHY
-    // this is ignored and hard-wired to DDR4, per John Bialas 10/15 BRS
-    // repurposed to pda_enable_override, so zero per John Bialas 4/16 JJM
-    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL, MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN>(0x0);
-
-    l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_CMD_SIG_REDUCTION>();
-    l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP>();
-
-    FAPI_INF("phy pc_config0 0x%0llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Setup the PC CONFIG1 register
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target <the target (MCA or MBA?)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template<>
-fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
-{
-    // Static table of PHY config values for MEMORY_TYPE.
-    // [EMPTY, RDIMM, CDIMM, or LRDIMM][EMPTY, DDR3 or DDR4]
-    static const uint64_t memory_type[4][3] =
-    {
-        { 0, 0,     0     },  // Empty, never really used.
-        { 0, 0b001, 0b101 },  // RDIMM
-        { 0, 0b000, 0b000 },  // CDIMM
-        { 0, 0b011, 0b111 },  // LRDIMM
-    };
-
-    fapi2::buffer<uint64_t> l_data;
-
-    uint8_t l_rlo = 0;
-    uint8_t l_wlo = 0;
-    uint8_t l_dram_gen[MAX_DIMM_PER_PORT]    = {0};
-    uint8_t l_dimm_type[MAX_DIMM_PER_PORT]   = {0};
-    uint8_t l_type_index = 0;
-    uint8_t l_gen_index = 0;
-
-    FAPI_TRY( mss::vpd_rlo(i_target, l_rlo) );
-    FAPI_TRY( mss::vpd_wlo(i_target, l_wlo) );
-    FAPI_TRY( mss::eff_dram_gen(i_target, &(l_dram_gen[0])) );
-    FAPI_TRY( mss::eff_dimm_type(i_target, &(l_dimm_type[0])) );
-
-    // There's no way to configure the PHY for more than one value. However, we don't know if there's
-    // a DIMM in one slot, the other or double drop. So we do a little gyration here to make sure
-    // we have one of the two values (and assume effective config caught a bad config
-    l_type_index = l_dimm_type[0] | l_dimm_type[1];
-    l_gen_index = l_dram_gen[0] | l_dram_gen[1];
-
-    // FOR NIMBUS PHY (as the protocol choice above is) BRS
-    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
-
-    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE,
-                           MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE_LEN>(memory_type[l_type_index][l_gen_index]);
-    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG1_P0_READ_LATENCY_OFFSET,
-                           MCA_DDRPHY_PC_CONFIG1_P0_READ_LATENCY_OFFSET_LEN>(l_rlo);
-    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET,
-                           MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET_LEN>(l_wlo);
-
-    // Model 31 changed the MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW bit to '0' for DDR4
-    // and '1' for 'extended 3ds.' We need to check an attribute here when we get to 3ds BRS
-    l_data.clearBit<MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW>();
-
-    FAPI_INF("phy pc_config1 0x%0llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Sets up the IO impedances (ADR DRV's and DP DRV's/RCV's) - MCA specialization
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA/MCBIST or MBA?)
@@ -674,10 +587,6 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     {
         // The following registers must be configured to the correct operating environment:
 
-        // Undocumented, noted by Bialas
-        FAPI_TRY( mss::set_pc_config0(p) );
-        FAPI_TRY( mss::set_pc_config1(p) );
-
         // Section 5.2.1.3 PC Rank Pair 0 on page 177
         // Section 5.2.1.4 PC Rank Pair 1 on page 179
         FAPI_TRY( mss::set_rank_pairs(p) );
@@ -698,6 +607,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Reset Read VREF according to ATTR_MSS_VPD_MT_VREF_MC_RD value
         FAPI_TRY( mss::dp16::reset_rd_vref(p) );
 
+        // PHY Control reset
+        FAPI_TRY( mss::pc::reset(p) );
+
         // Write Control reset
         FAPI_TRY( mss::wc::reset(p) );
 
@@ -712,6 +624,10 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Shove the ADR delay values from VPD into the ADR delay registers
         FAPI_TRY( mss::adr::reset_delay(p) );
+
+        // Write tsys adr and tsys data
+        FAPI_TRY( mss::adr32s::reset_tsys_adr(p) );
+        FAPI_TRY( mss::dp16::reset_tsys_data(p) );
 
         //resets all of the IO impedances
         FAPI_TRY( mss::reset_io_impedances(p) );

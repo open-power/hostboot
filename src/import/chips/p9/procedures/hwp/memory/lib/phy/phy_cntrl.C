@@ -22,3 +22,111 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file phy_cntrl.C
+/// @brief Subroutines for the PHY PC registers
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+#include <lib/phy/phy_cntrl.H>
+#include <lib/utils/scom.H>
+#include <lib/utils/c_str.H>
+#include <lib/utils/index.H>
+
+#include <lib/mss_attribute_accessors.H>
+
+using fapi2::TARGET_TYPE_MCA;
+
+namespace mss
+{
+
+namespace pc
+{
+
+///
+/// @brief Reset the PC CONFIG0 register
+/// @param[in] i_target the target (MCA or MBA?)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode reset_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
+{
+    typedef pcTraits<TARGET_TYPE_MCA> TT;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    l_data.setBit<TT::DDR4_CMD_SIG_REDUCTION>();
+    l_data.setBit<TT::DDR4_VLEVEL_BANK_GROUP>();
+
+    FAPI_TRY( write_config0(i_target, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the PC CONFIG1 register
+/// @param[in] i_target <the target (MCA or MBA?)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
+{
+    typedef pcTraits<TARGET_TYPE_MCA> TT;
+
+    // Static table of PHY config values for MEMORY_TYPE.
+    // [EMPTY, RDIMM, CDIMM, or LRDIMM][EMPTY, DDR3 or DDR4]
+    constexpr uint64_t memory_type[4][3] =
+    {
+        { 0, 0,     0     },  // Empty, never really used.
+        { 0, 0b001, 0b101 },  // RDIMM
+        { 0, 0b000, 0b000 },  // CDIMM bits, UDIMM enum (placeholder, never used on Nimbus)
+        { 0, 0b011, 0b111 },  // LRDIMM
+    };
+
+    fapi2::buffer<uint64_t> l_data;
+
+    uint8_t l_rlo = 0;
+    uint8_t l_wlo = 0;
+    uint8_t l_dram_gen[MAX_DIMM_PER_PORT]    = {0};
+    uint8_t l_dimm_type[MAX_DIMM_PER_PORT]   = {0};
+    uint8_t l_type_index = 0;
+    uint8_t l_gen_index = 0;
+
+    FAPI_TRY( mss::vpd_mr_dphy_rlo(i_target, l_rlo) );
+    FAPI_TRY( mss::vpd_mr_dphy_wlo(i_target, l_wlo) );
+    FAPI_TRY( mss::eff_dram_gen(i_target, &(l_dram_gen[0])) );
+    FAPI_TRY( mss::eff_dimm_type(i_target, &(l_dimm_type[0])) );
+
+    // There's no way to configure the PHY for more than one value. However, we don't know if there's
+    // a DIMM in one slot, the other or double drop. So we do a little gyration here to make sure
+    // we have one of the two values (and assume effective config caught a bad config)
+    l_type_index = l_dimm_type[0] | l_dimm_type[1];
+    l_gen_index = l_dram_gen[0] | l_dram_gen[1];
+
+    // FOR NIMBUS PHY (as the protocol choice above is) BRS
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
+
+    l_data.insertFromRight<TT::MEMORY_TYPE, TT::MEMORY_TYPE_LEN>(memory_type[l_type_index][l_gen_index]);
+    l_data.insertFromRight<TT::READ_LATENCY_OFFSET, TT::READ_LATENCY_OFFSET_LEN>(l_rlo);
+    l_data.insertFromRight<TT::WRITE_LATENCY_OFFSET, TT::WRITE_LATENCY_OFFSET_LEN>(l_wlo);
+
+    // TODO RTC:160355 Need to check what mode to put this bit in if there are mixed 3DS/SDP DIMM
+    l_data.clearBit<TT::DDR4_LATENCY_SW>();
+
+    FAPI_TRY( write_config1(i_target, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+} // close namespace pc
+} // close namespace mss
+

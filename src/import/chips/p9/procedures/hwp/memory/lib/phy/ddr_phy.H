@@ -245,24 +245,6 @@ template<>
 fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
-/// @brief Setup the PC CONFIG0 register
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target the target (MCA or MBA?)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< fapi2::TargetType T>
-fapi2::ReturnCode set_pc_config0(const fapi2::Target<T>& i_target);
-
-///
-/// @brief Setup the PC CONFIG1 register
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target the target (MCA or MBA?)
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< fapi2::TargetType T>
-fapi2::ReturnCode set_pc_config1(const fapi2::Target<T>& i_target);
-
-///
 /// @brief Return the DIMM target for the primary rank in the specificed rank pair
 /// @tparam T fapi2::TargetType of the port target
 /// @param[in] i_target the target
