@@ -324,11 +324,9 @@ inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_gpo = 0;
 
-    FAPI_TRY( mss::vpd_gpo(i_target, l_gpo) );
+    FAPI_TRY( mss::vpd_mr_dphy_gpo(i_target, l_gpo) );
 
-    // 48:51, (ATTR_VPD_GPO[0]), any; # GLOBAL_PHY_OFFSET (GPO), based on attribute now
     l_data.insertFromRight<TT::GLOBAL_PHY_OFFSET, TT::GLOBAL_PHY_OFFSET_LEN>(l_gpo);
-
     l_data.setBit<TT::PERFORM_RDCLK_ALIGN>();
 
     FAPI_TRY( write_config0(i_target, l_data) );
