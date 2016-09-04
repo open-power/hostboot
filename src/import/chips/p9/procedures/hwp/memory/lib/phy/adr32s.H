@@ -39,9 +39,10 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
-
+#include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/scom.H>
+#include <lib/utils/find.H>
 
 namespace mss
 {
@@ -82,6 +83,7 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
         static const std::vector<uint64_t> DLL_CNFG_REG;
         static const std::vector<uint64_t> OUTPUT_DRIVER_REG;
         static const std::vector<uint64_t> DUTY_CYCLE_DISTORTION_REG;
+        static const std::vector<uint64_t> PR_STATIC_OFFSET_REG;
 
         // This fellow is needed for the reset_dcd template, so he's more like a real trait.
         // Default starting place for duty cycle distortion algorithm
@@ -113,6 +115,9 @@ class adr32sTraits<fapi2::TARGET_TYPE_MCA>
             DCD_CONTROL_DLL_CORRECT_EN = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_CORRECT_EN,
             DCD_CONTROL_DLL_ITER_A = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_ITER_A,
             DCD_CONTROL_DLL_COMPARE_OUT = MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0_ADR0_DLL_COMPARE_OUT,
+
+            TSYS_ADR = MCA_DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S0_ADR0_TSYS,
+            TSYS_ADR_LEN = MCA_DDRPHY_ADR_MCCLK_WRCLK_PR_STATIC_OFFSET_P0_ADR32S0_ADR0_TSYS_LEN,
         };
 
 };
@@ -341,7 +346,73 @@ fapi2::ReturnCode dcd_cal_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 ///
 fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
-} // close namespace adr
+///
+/// @brief Read tsys_adr
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode read_tsys_adr( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+    FAPI_TRY( mss::getScom(i_target, TT::PR_STATIC_OFFSET_REG[I], o_data) );
+    FAPI_INF("tsys_adr adrs32%d: 0x%016lx", I, o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write tsys_adr
+/// @tparam I ADR32S instance e.g., 0 or 1 for a 64 bit implementation of the PHY
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode write_tsys_adr( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::ADR32S_COUNT, "adr32s instance out of range");
+    FAPI_INF("tsys_adr adr32s%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PR_STATIC_OFFSET_REG[I], i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset tsys_adr
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to adr32sTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = adr32sTraits<T> >
+inline fapi2::ReturnCode reset_tsys_adr( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+    uint8_t l_tsys_adr = 0;
+
+    FAPI_TRY( mss::vpd_mr_tsys_adr(mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target), l_tsys_adr) );
+    l_data.insertFromRight<TT::TSYS_ADR, TT::TSYS_ADR_LEN>(l_tsys_adr);
+
+    for (const auto r : TT::PR_STATIC_OFFSET_REG)
+    {
+        // TODO RTC:160358 Suspect duplicated scoms in ddr initfile
+        FAPI_INF("reset tsys_adr 0x%016lx: 0x%016lx", r, l_data);
+        FAPI_TRY( mss::putScom(i_target, r, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+} // close namespace adr32s
 
 } // close namespace mss
 
