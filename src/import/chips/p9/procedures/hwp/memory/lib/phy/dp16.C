@@ -243,6 +243,17 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4 },
 };
 
+// Definition of the DP16 Phase Rotator Static Offset registers
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::PR_STATIC_OFFSET_REG
+{
+    MCA_DDRPHY_DP16_WRCLK_PR_P0_0,
+    MCA_DDRPHY_DP16_WRCLK_PR_P0_1,
+    MCA_DDRPHY_DP16_WRCLK_PR_P0_2,
+    MCA_DDRPHY_DP16_WRCLK_PR_P0_3,
+    MCA_DDRPHY_DP16_WRCLK_PR_P0_4,
+};
+
 ///
 /// @brief Given a RD_VREF value, create a PHY 'standard' bit field for that percentage.
 /// @tparam T fapi2 Target Type - derived
