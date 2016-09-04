@@ -173,10 +173,54 @@ fapi_try_exit:
 template< fapi2::TargetType R, fapi2::TargetType T, typename TT = posTraits<T> >
 inline typename TT::pos_type relative_pos(const fapi2::Target<T>& i_target);
 
+///
+/// @brief Return a MCA's relative position from an MCBIST
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
 template<>
-inline uint8_t relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
     return pos(i_target) % PORTS_PER_MCBIST;
+}
+
+///
+/// @brief Return a DIMM's relative position from an MCS
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    constexpr uint64_t MAX_DIMM_PER_MCS = PORTS_PER_MCS * MAX_DIMM_PER_PORT;
+    return pos(i_target) % MAX_DIMM_PER_MCS;
+}
+
+///
+/// @brief Return an MCS's relative position from a processor
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_MCS>::pos_type
+relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+{
+    constexpr uint64_t MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC;
+    return pos(i_target) % MCS_PER_PROC;
+}
+
+///
+/// @brief Return an MCA's relative position from an MCS
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_MCA>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    return pos(i_target) % PORTS_PER_MCS;
 }
 
 

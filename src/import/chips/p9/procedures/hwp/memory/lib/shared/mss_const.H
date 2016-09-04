@@ -45,6 +45,7 @@ enum sizes
 {
     PORTS_PER_MCS = 2,
     PORTS_PER_MCBIST = 4,
+    MCS_PER_MC = 2,
     MC_PER_MODULE = 2,
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,

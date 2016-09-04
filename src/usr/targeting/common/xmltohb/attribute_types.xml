@@ -31652,5 +31652,48 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>MSS_VPD_CKE_MAP</id>
+  <description>
+            The Memory Clock Enable MAP is a bit map describing the Memory Clock Enable signal to its respective rank.
+            There are 8 bits, but only 4 are currently used
+            [DIMM0 CKE0][DIMM0 CKE1][N/A][N/A][DIMM1 CKE0][DIMM1 CKE1][N/A][N/A]
+            E.g. 0x80 -> 0b10000000, which means DIMM0 CKE0 is mapped to that rank.
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+    <array>2,2,4</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_CKE_MAP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MSS_VPD_DQ_MAP</id>
+  <description>
+        [PORT][Dimm DQ PIN]  The map from the Dual
+        Inline Memory Module (DIMM) Data (DQ) Pin to
+        the Module Package Data (DQ) Pinout
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+    <array>2,72</array>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_VPD_DQ_MAP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>

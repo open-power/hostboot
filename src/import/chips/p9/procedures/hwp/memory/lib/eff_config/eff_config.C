@@ -3491,6 +3491,8 @@ fapi_try_exit:
 fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
 {
     uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {0};
+    uint8_t l_cke_blob[mss::VPD_KEYWORD_MAX] = {0};
+    uint8_t l_dq_blob[mss::VPD_KEYWORD_MAX] = {0};
     std::vector<uint8_t*> l_mt_blobs(PORTS_PER_MCS, nullptr);
 
     // For sanity. Not sure this will break us, but we're certainly making assumptions below.
@@ -3580,7 +3582,39 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
         }
     }
 
-    FAPI_TRY( mss::eff_decode(i_target, l_mt_blobs, l_mr_blob) );
+    // Get CKE data
+    {
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::CK);
+
+        // Check the max for giggles. Programming bug so we should assert.
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
+
+        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+        {
+            FAPI_ERR("VPD MR keyword is too big for our array");
+            fapi2::Assert(false);
+        }
+
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_cke_blob[0])) );
+    }
+
+    // Get DQ data
+    {
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::DQ);
+
+        // Check the max for giggles. Programming bug so we should assert.
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, nullptr) );
+
+        if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
+        {
+            FAPI_ERR("VPD MR keyword is too big for our array");
+            fapi2::Assert(false);
+        }
+
+        FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_dq_blob[0])) );
+    }
+
+    FAPI_TRY( mss::eff_decode(i_target, l_mt_blobs, l_mr_blob, l_cke_blob, l_dq_blob) );
 
 fapi_try_exit:
 
