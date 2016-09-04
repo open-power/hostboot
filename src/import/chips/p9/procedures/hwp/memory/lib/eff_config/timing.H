@@ -270,18 +270,6 @@ constexpr uint64_t twlmrd()
 }
 
 ///
-/// @brief Calculate TWLO_TWLOE
-/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
-/// @param[in] i_target the target used to get DIMM clocks
-/// @return uint64_t, TWLO_TWLOE in cycles
-///
-template< fapi2::TargetType T >
-inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
-{
-    return 12 + mss::ns_to_cycles(i_target, tWLO - tWLOE);
-}
-
-///
 /// @brief Mode Register Set command update delay
 /// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
 /// @param[in] i_target the target used to get clocks
@@ -292,6 +280,40 @@ inline uint64_t tmod( const fapi2::Target<T>& i_target )
 {
     // Per DDR4 Full spec update (79-4A) - timing requirements
     return mss::max_ck_ns( i_target, 24, 15 );
+}
+
+///
+/// @brief Calculate TWLO_TWLOE
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get DIMM clocks
+/// @return uint64_t, TWLO_TWLOE in cycles
+///
+template< fapi2::TargetType T >
+inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
+{
+    // From mthe PHY databook:
+    // 12 + std::max((twldqsen - tmod), (twlo - twlow))
+    //    + longest DQS delay in clocks (rounded up) + longest DQ delay in clocks (rounded up)
+    // Magic numbers taken from talking with Anuwat (twloe) and reviewing the Centaur code (ldq/ldqs)
+    constexpr uint64_t l_dq_ck = 1;
+    constexpr uint64_t l_dqs_ck = 1;
+    uint8_t l_wlo_ck = 0;
+    uint64_t l_wloe_ck = mss::ns_to_cycles(i_target, 2);
+    uint64_t l_twlo_twloe = 0;
+
+    FAPI_TRY( mss::vpd_mr_dphy_wlo(i_target, l_wlo_ck) );
+
+    // TODO RTC:160356 This changes if wlo is signed, which it's not but I wonder if it should
+    // be ... (the PHY register is.) It changes because we need to round up to 0 if needed.
+    l_twlo_twloe = 12 + std::max( (twldqsen() + tmod(i_target)), (l_wlo_ck + l_wloe_ck) ) + l_dq_ck + l_dqs_ck;
+    FAPI_INF("twlo_twloe %d for %s", l_twlo_twloe, mss::c_str(i_target));
+    return l_twlo_twloe;
+
+fapi_try_exit:
+    // We're in deep horseradish if we can't get wlo
+    FAPI_ERR("failed to calculate twlo_twloe for %s", mss::c_str(i_target));
+    fapi2::Assert(false);
+    return 0;
 }
 
 ///
