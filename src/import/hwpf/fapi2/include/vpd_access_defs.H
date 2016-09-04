@@ -42,6 +42,8 @@ enum MemVpdData
     MR, //! Memory phase rotator
     MT, //! Memory Termination
     MP, //! Memory Power related info
+    DQ, //! DQ/DQS pin assignments
+    CK, //! CKE pin assignments
 };
 
 typedef MemVpdData MemVpdData_t;
