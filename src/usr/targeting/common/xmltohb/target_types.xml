@@ -1751,6 +1751,8 @@
     <attribute><id>MSS_VPD_MR_DPHY_RLO</id></attribute>
     <attribute><id>MSS_VPD_MR_DPHY_WLO</id></attribute>
     <attribute><id>MSS_OCC_THROTTLED_N_CMDS</id></attribute>
+    <attribute><id>MSS_VPD_CKE_MAP</id></attribute>
+    <attribute><id>MSS_VPD_DQ_MAP</id></attribute>
 </targetType>
 
 <targetType>
