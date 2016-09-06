@@ -6166,25 +6166,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_SWAP</id>
-  <description>PCIE IOP swap configuration
-      DEPRECATED!!!!
-      creator: platform
-      consumer: proc_pcie_scominit
-      firmware notes:
-        Encoded PCIE IOP swap configuration
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint8_t></uint8_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-  <writeable/>
-</attribute>
-
-<attribute>
   <id>PROC_PCIE_PHB_ACTIVE</id>
   <description>PCIE PHB valid mask
       creator: platform
@@ -6201,261 +6182,6 @@ firmware notes: Used as override attribute for pstate procedure
       <id>ATTR_PROC_PCIE_PHB_ACTIVE</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
-  <description>
-      DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      firmware notes:
-        PCIe Gen3 PLL Control Register 0.
-        ATUNE/CPISEL.
-        Array index: IOP number(0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
-  <description>
-      DEPRECATED!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      firmware notes:
-        PCIe Gen2/Gen1 PLL Control Register 0.
-        ATUNE/CPISEL.
-        Array index: IOP number(0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
-  <description>
-      DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe PLL Global Control Register 0.
-        REFISRC/REFISINK.
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe PLL Global Control Register 1.
-    ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe PCS Control Register 0.
-        BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
-        STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe PCS Control Register 1.
-    RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
-        ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe TX FIFO Offset Register.
-    G3OFFSET/G2OFFSET/G1OFFSET.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe TX Receiver Detect Control Register.
-        VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe TX Bandwidth Loss Coefficient Register.
-        GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe RX VGA Control Register 2.
-        GAIN2/GAIN1.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_RX_PEAK</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe RX Receiver Peaking Value Register.
-    PEAK1/PEAK2/PEAK3.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_RX_SDL</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe RX Signal Detect Level Register.
-        SDLVL3/SDLVL2/SDLVL1.
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
-  <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe ZCAL Control Register.
-        CMPEVALDLY.
-        Array index: IOP number (0:2)
-  </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
 </attribute>
 
 <attribute>
@@ -15614,44 +15340,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN1</id>
-    <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe TX FFE (Gen1)
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-    </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN2</id>
-    <description>
-DEPRECATED!!!!
-      creator: platform (MRW)
-      consumer: proc_pcie_scominit
-      notes:
-        PCIe TX FFE (Gen2)
-        First array index: IOP number (0:2)
-        Second array index: Lane number (0:15)
-    </description>
-  <simpleType>
-      <uint32_t></uint32_t>
-      <array>3,16</array>
-  </simpleType>
-  <persistency>non-volatile</persistency>
-  <readable/>
-</attribute>
-
-<attribute>
     <id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
     <description>Machine Readable Workbook DIMM power curve percent uplift for this system</description>
     <simpleType>
@@ -22577,7 +22265,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_SWAP_P9</id>
+  <id>PROC_PCIE_IOP_SWAP</id>
   <description>PCIE IOP swap configuration
       creator: platform
       consumer: p9_pcie_scominit
@@ -22597,7 +22285,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0_P9</id>
+  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22617,7 +22305,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0_P9</id>
+  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22637,7 +22325,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0_P9</id>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22657,7 +22345,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1_P9</id>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22677,7 +22365,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL0_P9</id>
+  <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22698,7 +22386,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL1_P9</id>
+  <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22719,7 +22407,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET_P9</id>
+  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22741,7 +22429,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL_P9</id>
+  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22763,7 +22451,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_BWLOSS1_P9</id>
+  <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22785,7 +22473,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2_P9</id>
+  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22807,7 +22495,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_PEAK_P9</id>
+  <id>PROC_PCIE_IOP_RX_PEAK</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22829,7 +22517,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_SDL_P9</id>
+  <id>PROC_PCIE_IOP_RX_SDL</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22851,7 +22539,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_ZCAL_CONTROL_P9</id>
+  <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22871,7 +22559,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN1_P9</id>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN1</id>
     <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22892,7 +22580,7 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN2_P9</id>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN2</id>
     <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
