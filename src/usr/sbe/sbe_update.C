@@ -586,21 +586,6 @@ namespace SBE
                        TARGETING::get_huid(i_target),
                        pnorSectionId, pnorInfo.vaddr);
 
-// @TODO RTC:156118 - Once Secure PNOR load/getSectionInfo is operational
-// we won't need to move past the secure header (size is 1 page/4K)
-#ifdef CONFIG_SECUREBOOT
-// Move pnorInfo pointer past secure header
-uint64_t tmp_vaddr = pnorInfo.vaddr;
-pnorInfo.vaddr += PAGESIZE;
-
-//debug info
-uint32_t tmp0=0, tmp1=0;
-memcpy(&tmp0, (void*)tmp_vaddr, sizeof(tmp0));
-memcpy(&tmp1, (void*)pnorInfo.vaddr, sizeof(tmp1));
-
-TRACFCOMP( g_trac_sbe, INFO_MRK"findSBEInPnor: Temporary Secureboot workaround: pnorInfo.vaddr was 0x%.16llX (0x%X) and now 0x%.16llX (0x%X)", tmp_vaddr, tmp0, pnorInfo.vaddr, tmp1);
-#endif
-
             sbeToc = reinterpret_cast<sbeToc_t*>( pnorInfo.vaddr );
 
             if (sbeToc->eyeCatch != SBETOC_EYECATCH)

@@ -90,6 +90,11 @@ struct SectionInfo_t
     bool sha512perEC;   /**< Version Checking perEC */
     bool readOnly;      /**< Section is read only */
     bool reprovision;   /**< Erase this section during a reprovision */
+#ifdef CONFIG_SECUREBOOT
+    size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
+                                              that the secure container only
+                                              needs to be parsed once */
+#endif
 };
 
 /**
@@ -180,6 +185,15 @@ errlHndl_t loadSecureSection(SectionId i_section);
  */
 errlHndl_t unloadSecureSection(SectionId i_section);
 #endif // CONFIG_SECUREBOOT
+
+/**
+ *  @brief Determines whether the given section is secured by secure boot
+ *
+ *  @param[in] i_section PNOR section to test.
+ *
+ *  @return bool True if secure section, false otherwise.
+ */
+bool isSecureSection(const uint32_t i_section);
 
 /**
  * @brief  Write the data back from hostboot memory to PNOR of a given section

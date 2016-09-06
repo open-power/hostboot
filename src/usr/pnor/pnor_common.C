@@ -453,23 +453,14 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
 
                     // @TODO RTC:153773 move header handling to secure pnor rp
                     // Don't skip header if verification is needed.
-                    bool isSecure = false;
-                    #ifdef CONFIG_SECUREBOOT
-                    isSecure = (secId == PNOR::HB_EXT_CODE) ||
-                               (secId == PNOR::HB_DATA) ||
-                               (secId == PNOR::SBE_IPL) ||
-                               (secId == PNOR::CENTAUR_SBE) ||
-                               (secId == PNOR::PAYLOAD);
-                    #endif
+                    bool isSecure = PNOR::isSecureSection(secId);
                     if (o_TOC[secId].version == FFS_VERS_SHA512 || isSecure)
                     {
                         uint32_t l_addr = o_TOC[secId].flashAddr;
 
                         size_t l_headerSize = 0;
-                    #ifdef CONFIG_SECUREBOOT
-                        if(!isSecure)
+                        if(!isSecure) // if not a secure section skip header
                         {
-                    #endif
                             TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
                                                 " Flash Address for SHA Header");
 
@@ -483,9 +474,11 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                 o_TOC[secId].flashAddr += PAGESIZE;
                                 l_headerSize = PAGESIZE;
                             }
-                    #ifdef CONFIG_SECUREBOOT
+
+                            // now that we've skipped the header
+                            // adjust the size to reflect that
+                            o_TOC[secId].size -= PAGESIZE;
                         }
-                    #endif
 
                         bool extend = true;
                         // If secureboot is compiled out, then we extend HBB
@@ -510,8 +503,6 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                 break;
                             }
                         }
-
-                        o_TOC[secId].size -= PAGESIZE;
                     }
 
                     if((o_TOC[secId].flashAddr + o_TOC[secId].size) >
@@ -573,15 +564,9 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     else
                     {
                         // Need to set permissions to R/W
-
-                        // TODO RTC: 156118 Remove the HBI size workaround
-                        size_t extra = 0;
-#ifdef CONFIG_SECUREBOOT
-                        extra = isSecure ? PAGESIZE : 0;
-#endif
                         int rc = mm_set_permission(
                                             (void*)o_TOC[secId].virtAddr,
-                                            o_TOC[secId].size + extra,
+                                            o_TOC[secId].size,
                                             WRITABLE | WRITE_TRACKED);
                         if (rc)
                         {
@@ -695,4 +680,17 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
     } while(0);
 
     return l_errhdl;
+}
+
+bool PNOR::isSecureSection(const uint32_t i_section)
+{
+#ifdef CONFIG_SECUREBOOT
+    return i_section == HB_EXT_CODE ||
+           i_section == HB_DATA ||
+           i_section == SBE_IPL ||
+           i_section == CENTAUR_SBE ||
+           i_section == PAYLOAD;
+#else
+    return false;
+#endif
 }

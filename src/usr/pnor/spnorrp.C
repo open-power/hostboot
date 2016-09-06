@@ -276,6 +276,9 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections getSectionInfo succeeded for sec = %s",
                   l_info.name);
 
+        l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
+        l_info.size += PAGESIZE; // add a page to size to account for the header
+
         // it's a coding error if l_info.vaddr is not in secure space
         assert(l_info.vaddr >= SBASE_VADDR);
 
@@ -291,36 +294,13 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // calcluate unsecured address from temp address
         uint8_t* l_unsecuredAddr = l_tempAddr - VMM_VADDR_SPNOR_DELTA;
 
-        // get size of text section (secured portion)
-        // Note: the textSize we get back is untrusted until verification
-        // completes and should not be treated as correct until then.
-        SECUREBOOT::ContainerHeader l_conHdr(l_unsecuredAddr);
-
-        assert(  l_conHdr.totalContainerSize() >= PAGESIZE +
-               + l_conHdr.payloadTextSize(),
-               "For section %s, total container size (%d) was less than header "
-               "size (4096) + payload text size (%d)",
-               l_info.name,
-               l_conHdr.totalContainerSize(),
-               l_conHdr.payloadTextSize());
-
-        assert(l_info.size + PAGESIZE >= l_conHdr.totalContainerSize(),
-               "For section %s, logical section size (%d) was less than total "
-               "container size (%d)",
-               l_info.name,
-               l_info.size + PAGESIZE,
-               l_conHdr.totalContainerSize());
-
-        o_rec->textSize = l_conHdr.payloadTextSize();
-
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
                     "in temp space is 0x%.16llX, "
                     "section start address in unsecured space is 0x%.16llX, "
                     "l_info.size = 0x%.16llX, "
-                    "payload size = 0x%.16llX, "
-                    "Total container size = 0x%.16llX",
-                    l_tempAddr,l_unsecuredAddr, l_info.size, o_rec->textSize,
-                    l_conHdr.totalContainerSize());
+                    "payload size = 0x%.16llX, ",
+                    l_tempAddr, l_unsecuredAddr, l_info.size,
+                    l_info.secureProtectedPayloadSize);
 
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections unsecured mem now: ",
                              l_unsecuredAddr, 128);
@@ -328,8 +308,29 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections about to do memcpy");
 
         // copy from unsecured PNOR space to temp PNOR space
-        memcpy(l_tempAddr, l_unsecuredAddr, o_rec->textSize
+        memcpy(l_tempAddr, l_unsecuredAddr, l_info.secureProtectedPayloadSize
                                           + PAGESIZE); // plus header size
+
+        SECUREBOOT::ContainerHeader l_conHdr(l_tempAddr);
+        size_t l_totalContainerSize = l_conHdr.totalContainerSize();
+
+        TRACDCOMP(g_trac_pnor, "SPnorRP::verifySections "
+                "Total container size = 0x%.16llX", l_totalContainerSize);
+
+        assert(l_totalContainerSize >= PAGESIZE +
+               + l_info.secureProtectedPayloadSize,
+               "For section %s, total container size (%d) was less than header "
+               "size (4096) + payload text size (%d)",
+               l_info.name,
+               l_totalContainerSize,
+               l_info.secureProtectedPayloadSize);
+
+        assert(l_info.size >= l_totalContainerSize,
+               "For section %s, logical section size (%d) was less than total "
+               "container size (%d)",
+               l_info.name,
+               l_info.size,
+               l_totalContainerSize);
 
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections did memcpy");
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections temp mem now: ",
@@ -345,7 +346,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         if (SECUREBOOT::enabled())
         {
             l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr,
-                                                 l_conHdr.totalContainerSize());
+                                                         l_totalContainerSize);
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections - section "
@@ -366,6 +367,14 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
         // verification succeeded
 
+        // parse container header now that it is verified
+        // store the payload text size in the section load record
+        // Note: the text size we get back is now trusted
+        o_rec->textSize = l_conHdr.payloadTextSize();
+        l_totalContainerSize = l_conHdr.totalContainerSize();
+
+        assert(o_rec->textSize == l_info.secureProtectedPayloadSize);
+
         // pcr extension of PNOR hash
         l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
                                         (l_tempAddr + PAGESIZE),
@@ -376,14 +385,17 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
             break;
         }
 
+        // remove secure header page in temp space
+        mm_remove_pages(RELEASE, l_tempAddr, PAGESIZE);
+
         // keep track of info size in load record
-        o_rec->infoSize = l_conHdr.totalContainerSize() - PAGESIZE;
+        o_rec->infoSize = l_totalContainerSize - PAGESIZE;
 
         // skip the header to block secure header access
         uint8_t* l_securePayloadStart = o_rec->secAddr + PAGESIZE;
 
         // set permissions on the secured pages to writable
-        l_errhdl = setPermission(l_securePayloadStart - PAGESIZE,
+        l_errhdl = setPermission(o_rec->secAddr,
                                           o_rec->textSize + PAGESIZE, WRITABLE);
         // TODO RTC 156118 - change above two lines of code to below:
         //l_errhdl = setPermission(l_securePayloadStart, o_rec->textSize, WRITABLE);
@@ -396,7 +408,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
-        uint64_t unprotectedPayloadSize = l_conHdr.totalContainerSize()
+        uint64_t unprotectedPayloadSize = l_totalContainerSize
             - PAGESIZE - o_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {

@@ -166,19 +166,15 @@ errlHndl_t VfsRp::_init()
         iv_pnor_vaddr = l_pnor_info.vaddr;
 
         #ifdef CONFIG_SECUREBOOT
-        // @TODO RTC:156118 this will no longer be needed when getSectionInfo
-        SECUREBOOT::ContainerHeader l_conHdr(reinterpret_cast<void*>(iv_pnor_vaddr));
-
-        // @TODO RTC:156118 this should be adjusted in getSectionInfo by spnorrp
-        // For now, done with the container header so increment vaddr
-        iv_pnor_vaddr += PAGE_SIZE;
-
-        // @TODO RTC:156118 These variables will be set and obtained via
-        // getSectionInfo. l_conHdr will not exist after that story is complete.
+        // store the hash page table offset for reference
         iv_hashPageTableOffset = iv_pnor_vaddr;
+
+        // calculate the hash page table size
         TRACFCOMP(g_trac_vfs, "VfsRp::_init HB_EXT payload_text_size = 0x%X",
-                    l_conHdr.payloadTextSize());
-        iv_hashPageTableSize = l_conHdr.payloadTextSize()-VFS_MODULE_TABLE_SIZE;
+                    l_pnor_info.secureProtectedPayloadSize);
+        iv_hashPageTableSize = l_pnor_info.secureProtectedPayloadSize
+                                                       - VFS_MODULE_TABLE_SIZE;
+        // skip the hash page table
         iv_pnor_vaddr += iv_hashPageTableSize;
         #endif
 

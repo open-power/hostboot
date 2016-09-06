@@ -51,6 +51,8 @@
 #include <console/consoleif.H>
 
 #ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <secureboot/containerheader.H>
 #include <secureboot/settings.H>
 #include <secureboot/header.H>
 #include <secureboot/trustedbootif.H>
@@ -519,21 +521,42 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.name = cv_EYECATCHER[id];
 
 #ifdef CONFIG_SECUREBOOT
+        o_info.secureProtectedPayloadSize = 0; // for non secure sections
+                                               // the protected payload size
+                                               // defaults to zero
         // handle secure sections in SPnorRP's address space
-        if (o_info.id == HB_EXT_CODE ||
-            o_info.id == HB_DATA ||
-            o_info.id == SBE_IPL ||
-            o_info.id == CENTAUR_SBE ||
-            o_info.id == PAYLOAD)
+        if (PNOR::isSecureSection(o_info.id))
         {
+            uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
             // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
             // address into a secure pnor address, since pnor, temp, and spnor
             // spaces are equidistant.
             // See comments in SPnorRP::verifySections() method in spnorrp.C
             // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
             // for specifics.
-            o_info.vaddr = iv_TOC[id].virtAddr + VMM_VADDR_SPNOR_DELTA
-                                               + VMM_VADDR_SPNOR_DELTA;
+            o_info.vaddr = reinterpret_cast<uint64_t>(l_vaddr)
+                                                       + VMM_VADDR_SPNOR_DELTA
+                                                       + VMM_VADDR_SPNOR_DELTA;
+
+            // Get size of the secured payload for the secure section
+            // Note: the payloadSize we get back is untrusted because
+            // we are parsing the header in pnor (non secure space).
+            SECUREBOOT::ContainerHeader l_conHdr(l_vaddr);
+            size_t payloadTextSize = l_conHdr.payloadTextSize();
+
+            assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+
+            // skip secure header for secure sections at this point in time
+            o_info.vaddr += PAGESIZE;
+            // now that we've skipped the header we also need to adjust the
+            // size of the section to reflect that.
+            // Note: For unsecured sections, the header skip and size decrement
+            // was done previously in pnor_common.C
+            o_info.size -= PAGESIZE;
+
+            // cache the value in SectionInfo struct so that we can
+            // parse the container header less often
+            o_info.secureProtectedPayloadSize = payloadTextSize;
         }
         else
 #endif
@@ -1400,19 +1423,8 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
              id < PNOR::NUM_SECTIONS;
              id = (PNOR::SectionId) (id + 1) )
         {
-            // TODO RTC: 156118 Remove the HBI size workaround
-            size_t extra = 0;
-#ifdef CONFIG_SECUREBOOT
-            bool isSecure = (id == HB_EXT_CODE ||
-                             id == HB_DATA ||
-                             id == SBE_IPL ||
-                             id == CENTAUR_SBE ||
-                             id == PAYLOAD);
-            extra = (isSecure) ? PAGE_SIZE : 0;
-#endif
             if( (i_vaddr >= iv_TOC[id].virtAddr)
-                && (i_vaddr < (iv_TOC[id].virtAddr + iv_TOC[id].size
-                    + extra)) )
+                && (i_vaddr < (iv_TOC[id].virtAddr + iv_TOC[id].size)) )
             {
                 o_id = iv_TOC[id].id;
                 break;
