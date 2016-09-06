@@ -316,7 +316,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                 return IMGBUILD_TGR_BUFFER_TOO_SMALL;
                             }
 
-                            if(i_dbgl > 1)
+                            if(i_dbgl > 0)
                             {
                                 MY_INF("   ring container of %s is found in the SBE image container \n",
                                        o_ringName);
@@ -360,8 +360,12 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                         }
                         else
                         {
-                            MY_INF("   ring container of %s is not found in the SBE image container \n",
-                                   o_ringName);
+                            if(i_dbgl > 0)
+                            {
+                                MY_INF("   ring container of %s is not found in the SBE image container \n",
+                                       o_ringName);
+                            }
+
                             return IMGBUILD_TGR_RING_NOT_FOUND;
                         }
                     }
@@ -369,7 +373,11 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                     {
                         if(chiplet_offset)
                         {
-                            MY_INF("Ring container is already present in the ring section \n");
+                            if(i_dbgl > 0)
+                            {
+                                MY_INF("Ring container is already present in the ring section \n");
+                            }
+
                             return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                         }
 
@@ -486,8 +494,12 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                     }
                                     else
                                     {
-                                        MY_INF("   ring container of %s is not found in the SBE image container \n",
-                                               o_ringName);
+                                        if(i_dbgl > 0)
+                                        {
+                                            MY_INF("   ring container of %s is not found in the SBE image container \n",
+                                                   o_ringName);
+                                        }
+
                                         return IMGBUILD_TGR_RING_NOT_FOUND;
                                     }
                                 }
@@ -495,7 +507,11 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                 {
                                     if(chiplet_offset)
                                     {
-                                        MY_INF("Ring container is already present in the ring section \n");
+                                        if(i_dbgl > 0)
+                                        {
+                                            MY_INF("Ring container is already present in the ring section \n");
+                                        }
+
                                         return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
@@ -667,8 +683,12 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                     }
                     else
                     {
-                        MY_INF("   ring container of %s is  not found in the SGPE image container \n",
-                               o_ringName);
+                        if(i_dbgl > 0)
+                        {
+                            MY_INF("   ring container of %s is  not found in the SGPE image container \n",
+                                   o_ringName);
+                        }
+
                         return IMGBUILD_TGR_RING_NOT_FOUND;
                     }
                 }
@@ -676,7 +696,11 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                 {
                     if(chiplet_offset)
                     {
-                        MY_INF("Ring container is already present in the ring section \n");
+                        if(i_dbgl > 0)
+                        {
+                            MY_INF("Ring container is already present in the ring section \n");
+                        }
+
                         return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
@@ -796,8 +820,12 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                                 }
                                 else
                                 {
-                                    MY_INF("   ring container of %s is not found in the SGPE image container \n",
-                                           o_ringName);
+                                    if(i_dbgl > 0)
+                                    {
+                                        MY_INF("   ring container of %s is not found in the SGPE image container \n",
+                                               o_ringName);
+                                    }
+
                                     return IMGBUILD_TGR_RING_NOT_FOUND;
                                 }
                             }
@@ -805,7 +833,11 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                             {
                                 if(chiplet_offset)
                                 {
-                                    MY_INF("Ring container is already present in the ring section \n");
+                                    if(i_dbgl > 0)
+                                    {
+                                        MY_INF("Ring container is already present in the ring section \n");
+                                    }
+
                                     return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                                 }
 
@@ -976,8 +1008,12 @@ int get_ring_from_cme_image ( void*
                     }
                     else
                     {
-                        MY_INF("   ring container of %s is not found in the CME image container \n",
-                               o_ringName);
+                        if(i_dbgl > 0)
+                        {
+                            MY_INF("   ring container of %s is not found in the CME image container \n",
+                                   o_ringName);
+                        }
+
                         return IMGBUILD_TGR_RING_NOT_FOUND;
                     }
                 }
@@ -985,7 +1021,11 @@ int get_ring_from_cme_image ( void*
                 {
                     if(chiplet_offset)
                     {
-                        MY_INF("Ring container is already present in the ring section \n");
+                        if(i_dbgl > 0)
+                        {
+                            MY_INF("Ring container is already present in the ring section \n");
+                        }
+
                         return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
@@ -1109,8 +1149,12 @@ int get_ring_from_cme_image ( void*
                                     }
                                     else
                                     {
-                                        MY_INF("   ring container of %s is not found in the CME image container \n",
-                                               o_ringName);
+                                        if(i_dbgl > 0)
+                                        {
+                                            MY_INF("   ring container of %s is not found in the CME image container \n",
+                                                   o_ringName);
+                                        }
+
                                         return IMGBUILD_TGR_RING_NOT_FOUND;
                                     }
                                 }
@@ -1118,7 +1162,11 @@ int get_ring_from_cme_image ( void*
                                 {
                                     if(chiplet_offset)
                                     {
-                                        MY_INF("Ring container is already present in the ring section \n");
+                                        if(i_dbgl > 0)
+                                        {
+                                            MY_INF("Ring container is already present in the ring section \n");
+                                        }
+
                                         return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
