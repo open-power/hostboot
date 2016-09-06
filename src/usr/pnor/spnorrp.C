@@ -295,24 +295,32 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // Note: the textSize we get back is untrusted until verification
         // completes and should not be treated as correct until then.
         SECUREBOOT::ContainerHeader l_conHdr(l_unsecuredAddr);
+
+        assert(  l_conHdr.totalContainerSize() >= PAGESIZE +
+               + l_conHdr.payloadTextSize(),
+               "For section %s, total container size (%d) was less than header "
+               "size (4096) + payload text size (%d)",
+               l_info.name,
+               l_conHdr.totalContainerSize(),
+               l_conHdr.payloadTextSize());
+
+        assert(l_info.size + PAGESIZE >= l_conHdr.totalContainerSize(),
+               "For section %s, logical section size (%d) was less than total "
+               "container size (%d)",
+               l_info.name,
+               l_info.size + PAGESIZE,
+               l_conHdr.totalContainerSize());
+
         o_rec->textSize = l_conHdr.payloadTextSize();
-        // TODO RTC: 159911 Only check page boundary alignment when there are
-        // both protected and unprotected sections of the partition.
-        if ( (i_id == HB_EXT_CODE) || (i_id == HB_DATA) )
-        {
-            // Split the mod math out of the assert as the trace would not display
-            // otherwise.
-            bool l_onPageBoundary = !(o_rec->textSize % PAGESIZE);
-            assert( l_onPageBoundary, "payloadTextSize is not on a page boundary for %s",
-                    l_info.name);
-        }
 
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
-                    "in temp space is 0x%.16llX\n"
-                    "section start address in unsecured space is 0x%.16llX\n"
-                    "l_info.size = 0x%.16llX\n"
-                    "payload size = 0x%.16llX\n",
-                    l_tempAddr,l_unsecuredAddr, l_info.size, o_rec->textSize);
+                    "in temp space is 0x%.16llX, "
+                    "section start address in unsecured space is 0x%.16llX, "
+                    "l_info.size = 0x%.16llX, "
+                    "payload size = 0x%.16llX, "
+                    "Total container size = 0x%.16llX",
+                    l_tempAddr,l_unsecuredAddr, l_info.size, o_rec->textSize,
+                    l_conHdr.totalContainerSize());
 
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections unsecured mem now: ",
                              l_unsecuredAddr, 128);
@@ -336,8 +344,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // verify while in temp space
         if (SECUREBOOT::enabled())
         {
-            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, l_info.size
-                                                        + PAGESIZE); // header
+            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr,
+                                                 l_conHdr.totalContainerSize());
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections - section "
@@ -369,7 +377,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         }
 
         // keep track of info size in load record
-        o_rec->infoSize = l_info.size;
+        o_rec->infoSize = l_conHdr.totalContainerSize() - PAGESIZE;
 
         // skip the header to block secure header access
         uint8_t* l_securePayloadStart = o_rec->secAddr + PAGESIZE;
@@ -388,9 +396,23 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
-        uint64_t unprotectedPayloadSize = l_info.size - o_rec->textSize;
+        uint64_t unprotectedPayloadSize = l_conHdr.totalContainerSize()
+            - PAGESIZE - o_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
+            TRACFCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections "
+                "creating unprotected area (%d bytes) for section %s",
+                unprotectedPayloadSize,
+                l_info.name);
+
+            // Split the mod math out of the assert as the trace would not
+            // display otherwise.
+            bool l_onPageBoundary = !(o_rec->textSize % PAGESIZE);
+            assert( l_onPageBoundary, "For section %s, payloadTextSize does "
+                    "not fall on a page boundary and there is an unprotected "
+                    "payload",
+                    l_info.name);
+
             l_errhdl = setPermission(l_securePayloadStart + o_rec->textSize,
                                        unprotectedPayloadSize,
                                        WRITABLE | WRITE_TRACKED);
@@ -405,6 +427,12 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
             // shutdown.
             INITSERVICE::registerBlock(l_securePayloadStart + o_rec->textSize,
                                         unprotectedPayloadSize, SPNOR_PRIORITY);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections not "
+                "creating unprotected area for section %s",
+                l_info.name);
         }
         TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
                               "and register block complete");

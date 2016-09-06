@@ -36,6 +36,12 @@ use Getopt::Long qw(:config pass_through);
 
 use constant COMMUNITY => "community";
 
+# Hostboot base image constants for the hardware header portion of the
+# secureboot header
+use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
+use constant BASE_IMAGE_TARGET_HRMOR => 0x0000000008000000;
+use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
+
 ################################################################################
 # Be explicit with POSIX
 # Everything is exported by default (with a handful of exceptions). This is an
@@ -247,6 +253,12 @@ sub manipulateImages
 
     foreach my $key (sort partitionDepSort  keys %{$i_binFilesRef})
     {
+        my %callerHwHdrFields = (
+            configure => 0,
+            totalContainerSize => 0,
+            targetHrmor => 0,
+            instructionStartStackPointer => 0);
+
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
         my %tempImages = (
@@ -307,6 +319,7 @@ sub manipulateImages
                 # @TODO RTC:155374 Remove when official signing supported
                 if ($secureboot)
                 {
+                    $callerHwHdrFields{configure} = 1;
                     if (exists $hashPageTablePartitions{$eyeCatch})
                     {
                         if ($eyeCatch eq "HBI")
@@ -404,7 +417,12 @@ sub manipulateImages
                     # header.
                     if($eyeCatch eq "HBB")
                     {
-                        run_command("echo \"000000000007EF8000000000080000000000000008280000\" | xxd -r -ps -seek 6 - $tempImages{HDR_PHASE}");
+                        $callerHwHdrFields{totalContainerSize}
+                            = BASE_IMAGE_TOTAL_CONTAINER_SIZE;
+                        $callerHwHdrFields{targetHrmor}
+                            = BASE_IMAGE_TARGET_HRMOR;
+                        $callerHwHdrFields{instructionStartStackPointer}
+                            = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
                         # Save off HBB sw signatures for use by HBI
                         open (HBB_SW_SIG_FILE, ">",
                         $preReqImages{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages{HBB_SW_SIG_FILE}: $!\n";
@@ -428,6 +446,7 @@ sub manipulateImages
                   &&  (   ($sectionHash{$layoutKey}{sha512perEC} eq "yes")
                        || ($isNormalSecure)))
             {
+                $callerHwHdrFields{configure} = 1;
                 if($openSigningTool)
                 {
                     run_command("$OPEN_SIGN_REQUEST "
@@ -444,6 +463,25 @@ sub manipulateImages
             else
             {
                 run_command("cp $bin_file $tempImages{HDR_PHASE}");
+            }
+
+            if($callerHwHdrFields{configure})
+            {
+                # If not already explicitly set, compute total container size
+                if(!$callerHwHdrFields{totalContainerSize})
+                {
+                    $callerHwHdrFields{totalContainerSize}
+                        = -s $tempImages{HDR_PHASE};
+                    die  "Could not determine size of file "
+                        ."$tempImages{HDR_PHASE}; errno = $!" unless
+                            defined($callerHwHdrFields{totalContainerSize});
+                }
+                my $callerHwHdr = sprintf("%016llX%016llX%016llX",
+                    $callerHwHdrFields{totalContainerSize},
+                    $callerHwHdrFields{targetHrmor},
+                    $callerHwHdrFields{instructionStartStackPointer});
+                run_command( "echo \"$callerHwHdr\" | xxd -r -ps -seek 6 - "
+                            ."$tempImages{HDR_PHASE}");
             }
 
             # Prefix phase

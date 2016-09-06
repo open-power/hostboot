@@ -66,6 +66,13 @@ class ContainerHeader
         ~ContainerHeader(){};
 
         /**
+         * @brief Retrieves total container size (includes header, payload text,
+         *     and payload data sizes)
+         * @return size_t - Total container size in bytes
+         */
+        size_t totalContainerSize() const;
+
+        /**
          * @brief Retrieves payload text size
          * @return size_t - size of payload text size
          */
