@@ -284,10 +284,15 @@ extern "C"
             //@TODO: Uncomment the following after PowerOn. Also, need to come
             //       to agreement whether this should be fatal error or not.
             //       For now, for PO, it's considered benign and noise and is
-            //       being commented out... most of it at least.
-            FAPI_ASSERT( l_ringLen != 0,
-                         fapi2::MVPD_RING_NOT_FOUND().
-                         set_CHIP_TARGET(i_fapiTarget) );
+            //       being commented out and we just exit with manually setting
+            //       the RC ring not found but which doesn't activates the FFDC
+            //       capturing.
+            if (l_ringLen == 0)
+            {
+                fapi2::current_err = RC_MVPD_RING_NOT_FOUND;
+                goto fapi_try_exit;
+            }
+
             //FAPI_ASSERT(l_ringLen != 0,
             //            fapi2::MVPD_RING_NOT_FOUND().
             //            set_CHIP_TARGET(i_fapiTarget).
