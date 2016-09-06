@@ -642,5 +642,21 @@ namespace SBE
     errlHndl_t getHwKeysHashPtrFromSbeImage(const void*  i_imgPtr,
                                             void*& o_HwKeysHashPtr);
 
+    /**
+     * @brief Checks if a secure key transition is needed and if so verifies
+     *        the key transition container is valid and gets the new hw key hash
+     *
+     * @param[out]  o_transHwKeyHash   New hw key hash to transition to.
+     *                                 Should be empty on input
+     *                                 Will return empty if keys will not be
+     *                                     transitioned.
+     *                                 Otherwise 64 bytes of the key to
+     *                                     transition to
+     *
+     * @return errlHndl_t    Error log handle on failure. NULL on success
+     */
+    errlHndl_t secureKeyTransition(std::vector<uint8_t> &o_transHwKeyHash);
+
+
 } //end namespace SBE
 #endif

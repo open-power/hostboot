@@ -54,12 +54,21 @@ namespace IPMI
 
         MSG_STATE_GRACEFUL_SHUTDOWN,
 
-        // initate a reboot request
-        MSG_STATE_INITATE_POWER_CYCLE,
+        // initiate a reboot request
+        MSG_STATE_INITIATE_POWER_CYCLE,
 
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_STATE_INITATE_POWER_CYCLE,
+        MSG_LAST_TYPE = MSG_STATE_INITIATE_POWER_CYCLE,
     };
+
+    // Message types related to system shutdown/reboot
+    inline bool validShutdownRebootMsgType(msg_type i_msgType)
+    {
+        return i_msgType == MSG_STATE_SHUTDOWN
+               || i_msgType == MSG_STATE_SHUTDOWN_SEL
+               || i_msgType == MSG_STATE_GRACEFUL_SHUTDOWN
+               || i_msgType == MSG_STATE_INITIATE_POWER_CYCLE;
+    }
 
     // chassis power off request types
     enum power_request_type
@@ -349,10 +358,12 @@ namespace IPMI
     size_t max_buffer(void);
 
     /**
-     * Tells ipmirp to start a graceful reboot sequence
+     * Tells ipmirp to start a graceful shutdown/reboot sequence
      *
+     * @param[in] i_msgType  IPMI message type to send. Note must be a valid
+     *                       shutdown/reboot message type.
      */
-    void initiateReboot();
+    void initiateShutdownReboot(const IPMI::msg_type i_msgType);
 
 }; // end namespace IPMI
 

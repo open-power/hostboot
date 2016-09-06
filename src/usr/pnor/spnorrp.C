@@ -151,6 +151,7 @@ errlHndl_t SPnorRP::allocBlock(msg_q_t i_mq, void* i_va, uint64_t i_size) const
                            TO_UINT64(rc),
                            true); //Add HB SW Callout
         l_errhdl->collectTrace(PNOR_COMP_NAME);
+        l_errhdl->collectTrace(SECURE_COMP_NAME);
     }
     return l_errhdl;
 }
@@ -186,6 +187,7 @@ errlHndl_t SPnorRP::setPermission(void* i_va, uint64_t i_size,
                             TO_UINT64(rc),
                             true); // Add HB SW Callout
         l_errhdl->collectTrace(PNOR_COMP_NAME);
+        l_errhdl->collectTrace(SECURE_COMP_NAME);
     }
     return l_errhdl;
 }
@@ -259,7 +261,7 @@ void SPnorRP::initDaemon()
  */
 void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
 {
-    SectionInfo_t l_info = {PNOR::INVALID_SECTION};
+    SectionInfo_t l_info;
     errlHndl_t l_errhdl = NULL;
     bool failedVerify = false;
 
@@ -280,8 +282,8 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         l_info.size += PAGESIZE; // add a page to size to account for the header
 
         // it's a coding error if l_info.vaddr is not in secure space
-        assert(l_info.vaddr >= SBASE_VADDR, "For section %s, getSectionInfo"
-            " returned a non secure space address", l_info.name);
+        assert(l_info.vaddr >= SBASE_VADDR, "Virtual address for section %s is"
+            " not in secure space. Bad ptr=0x%X", l_info.name, l_info.vaddr);
 
         // Note: A pointer to virtual memory in one PNOR space can be converted
         // to a pointer to any of the other two PNOR spaces and visa versa.
@@ -346,11 +348,10 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
         // verify while in temp space
         if (SECUREBOOT::enabled())
         {
-            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr,
-                                                         l_totalContainerSize);
+            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr);
             if (l_errhdl)
             {
-                TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections - section "
+                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorrRP::verifySections - section "
                       "with id 0x%08X failed verifyContainer", i_id);
                 failedVerify = true;
                 break;
@@ -359,7 +360,7 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
             l_errhdl = miscSectionVerification(l_tempAddr, i_id);
             if (l_errhdl)
             {
-                TRACFCOMP(g_trac_pnor, "< SPnorrRP::verifySections  - section "
+                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorrRP::verifySections  - section "
                      " with id 0x%08X failed miscSectionVerification", i_id);
                 failedVerify = true;
                 break;
@@ -619,6 +620,7 @@ void SPnorRP::waitForMessage()
                                            reinterpret_cast<uint64_t>(eff_addr),
                                            true /*Add HB SW Callout*/);
                     l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    l_errhdl->collectTrace(SECURE_COMP_NAME);
                     status_rc = -EINVAL; /* Invalid argument */
             }
 
@@ -681,8 +683,9 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     //else remove the if clause below at some point
     if (rc != 0)
     {
-        /* @errorlog tag
-         * @errortype         ERRL_SEV_CRITICAL_SYS_TERM
+        /*
+         * @errortype
+         * @severity          ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid          MOD_PNORRP_LOADSECURESECTION
          * @reasoncode        RC_EXTERNAL_ERROR
          * @userdata1         returncode from msg_sendrecv()
@@ -737,6 +740,11 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
             // table by skipping past the container header.
             l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
             break;
+        case SBKT:
+            // Ensure the SBKT partition has a valid key transition container
+            // Add PAGESIZE to skip outer container
+            l_errl = keyTransitionCheck((i_vaddr + PAGESIZE));
+            break;
         default:
             break;
     }
@@ -779,31 +787,115 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
                 HASH_PAGE_TABLE_ENTRY_SIZE) != 0 )
     {
         TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck Hostboot Base and Extended image mismatch");
-        TRACFBIN(g_trac_pnor,"SPnorRP:::baseExtVersCheck Measured sw key hash",
+        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
                             l_hashSwSigs, HASH_PAGE_TABLE_ENTRY_SIZE);
         TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
                         l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
 
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+        /*@
+         * @errortype
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid        MOD_SPNORRP_BASE_EXT_VER_CHK
          * @reasoncode      RC_BASE_EXT_MISMATCH
          * @userdata1       0
          * @userdata2       0
          * @devdesc         Hostboot Base and Extend code do not match versions.
          * @custdesc        Firmware level mismatch.
-         *
          */
-        l_errl = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   //  severity
-             MOD_SPNORRP_BASE_EXT_VER_CHK,           //  moduleid
-             RC_BASE_EXT_MISMATCH,                    //  reason Code
-             0,
-             0
-            );
+        l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                          MOD_SPNORRP_BASE_EXT_VER_CHK,
+                                          RC_BASE_EXT_MISMATCH,
+                                          0,
+                                          0);
         l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(SECURE_COMP_NAME);
     }
+
+    return l_errl;
+}
+
+errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
+{
+    errlHndl_t l_errl = NULL;
+    assert(i_vaddr != NULL);
+
+    do {
+    // Check if the header flags have the key transition bit set
+    SECUREBOOT::ContainerHeader l_nestedConHdr(i_vaddr);
+    if (!l_nestedConHdr.sb_flags()->hw_key_transition)
+    {
+        TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - Key transition flag not set");
+        /*@
+         * @errortype
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MOD_SPNORRP_KEY_TRAN_CHK
+         * @reasoncode      RC_KEY_TRAN_FLAG_UNSET
+         * @userdata1       0
+         * @userdata2       0
+         * @devdesc         Key transition flag not set in nested SBKT container containing new hw keys
+         * @custdesc        Secureboot key transition failure
+         */
+         l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                           MOD_SPNORRP_KEY_TRAN_CHK,
+                                           RC_KEY_TRAN_FLAG_UNSET,
+                                           0,
+                                           0,
+                                           true /*Add HB Software Callout*/ );
+        l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        break;
+    }
+
+    // Validate nested container is properly signed using new hw keys
+    l_errl = SECUREBOOT::verifyContainer(const_cast<uint8_t*>(i_vaddr),
+                                         l_nestedConHdr.hwKeyHash());
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - failed verifyContainer");
+        break;
+    }
+    }while(0);
+
+    return l_errl;
+}
+
+bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
+{
+    return memcmp(&MAGIC_NUMBER, i_vaddr, sizeof(MAGIC_NUMBER)) == 0;
+}
+
+errlHndl_t PNOR::hasSecurebootMagicNumber(const SectionId i_section,
+                                          bool &o_valid)
+{
+    errlHndl_t l_errl = NULL;
+    SectionInfo_t l_info;
+
+    // Force to false
+    o_valid = false;
+
+    // This will not work for HBB
+    assert(i_section != HB_BASE_CODE, "hasSecurebootMagicNumber() does not work for HBB section");
+
+    bool isSecure = PNOR::isSecureSection(i_section);
+    do {
+        l_errl = getSectionInfo(i_section, l_info);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PNOR::hasSecurebootMagicNumber(): - getSectionInfo failed");
+            break;
+        }
+
+        // Use PNOR vaddr
+        if(isSecure)
+        {
+            // back up a page to expose the secure header
+            l_info.vaddr = l_info.vaddr - VMM_VADDR_SPNOR_DELTA
+                                        - VMM_VADDR_SPNOR_DELTA
+                                        - PAGESIZE;
+        }
+        o_valid = cmpSecurebootMagicNumber(reinterpret_cast<uint8_t*>
+                                           (l_info.vaddr));
+    }while(0);
 
     return l_errl;
 }

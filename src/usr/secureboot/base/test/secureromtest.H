@@ -64,7 +64,7 @@ void unloadSignedFile( void * & io_signedFile_pageAddr,
 
 // secureboot_signed_container was generated using this hw hash key. If another
 // key is in pibmem, this test will always fail.
-const uint64_t hw_hash_key[] =
+const uint64_t hw_key_hash[] =
 {
     0x40d487ff7380ed6a,
     0xd54775d5795fea0d,
@@ -149,7 +149,7 @@ class SecureROMTest : public CxxTest::TestSuite
         }
 
         // Set hw hash key
-        memcpy (& l_sRom.iv_hash_key, &hw_hash_key, sizeof(sha2_hash_t));
+        memcpy (& l_sRom.iv_key_hash, &hw_key_hash, sizeof(sha2_hash_t));
 
         /*******************************************************************/
         /* Call verify function                                            */
@@ -158,8 +158,7 @@ class SecureROMTest : public CxxTest::TestSuite
         // Warn about the exception being handled during verification
         printkd("test_verify(): expect to see 'mfsr r2 to CFAR handled': ");
 
-        l_errl = l_sRom.verifyContainer( signedFile_pageAddr,
-                                         signedFile_size     );
+        l_errl = l_sRom.verifyContainer( signedFile_pageAddr);
 
         if (l_errl)
         {

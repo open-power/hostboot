@@ -126,11 +126,13 @@ namespace SECUREBOOT
      * @brief Verify Signed Container
      *
      * @param[in] i_container  Void pointer to effective address of container
-     * @param[in] i_size       Size of container in bytes
+     * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
+     *                         [default = NULL, use current hw hash key]
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t verifyContainer(void * i_container, size_t i_size);
+    errlHndl_t verifyContainer(void * i_container,
+                               const sha2_hash_t* i_hwKeyHash = NULL);
 
     /**
      * @brief Hash Signed Blob
@@ -144,12 +146,12 @@ namespace SECUREBOOT
     errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
 
     /**
-     * @brief Retrieve the internal hardware hash key from secure ROM
+     * @brief Retrieve the internal hardware hw key hash from secure ROM
      *        object.
      * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
      *                     hash to.
      */
-     void getHwHashKeys(sha2_hash_t o_hash);
+     void getHwKeyHash(sha2_hash_t o_hash);
 
      /*
       * @brief Hash the concatenation of N Blobs

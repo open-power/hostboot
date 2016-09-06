@@ -53,6 +53,10 @@
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
 #include "sbe_resolve_sides.H"
+#include <ipmi/ipmiif.H>
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/containerheader.H>
+#endif
 
 //  fapi support
 #include    <fapi.H>
@@ -138,7 +142,6 @@ namespace SBE
             }
             // else - continue on
 #endif
-
 
             // Get Target Service, and the system target.
             TargetService& tS = targetService();
@@ -264,6 +267,24 @@ namespace SBE
                  err = NULL;
             }
 
+            // Check if a key transition is needed
+            std::vector<uint8_t> l_transHwKeyHash;
+            err = secureKeyTransition(l_transHwKeyHash);
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");
+                break;
+            }
+            // If vector has a size then there is a key to transition to.
+            if(!l_transHwKeyHash.empty())
+            {
+                assert(l_transHwKeyHash.size() == SBE::SBE_HW_KEY_HASH_SIZE, "Transition HW key hash is the wrong size");
+                memcpy(g_hw_keys_hash_transition_data, l_transHwKeyHash.begin(),
+                       SBE::SBE_HW_KEY_HASH_SIZE);
+                g_do_hw_keys_hash_transition = true;
+                TRACFBIN(g_trac_sbe, "updateProcessorSbeSeeproms(): Key transition new hw key hash",
+                     g_hw_keys_hash_transition_data, SBE::SBE_HW_KEY_HASH_SIZE);
+            }
 
             for(uint32_t i=0; i<procList.size(); i++)
             {
@@ -424,20 +445,33 @@ namespace SBE
                 }
 
 #ifdef CONFIG_BMC_IPMI
-                err = sbePreRebootIpmiCalls();
+                // When doing a HW key hash transition, shutdown only.
+                if (g_do_hw_keys_hash_transition)
+                {
+                    err = sbePreShutdownIpmiCalls(
+                                            IPMI::MSG_STATE_GRACEFUL_SHUTDOWN);
+                }
+                else
+                {
+                    err = sbePreShutdownIpmiCalls(
+                                         IPMI::MSG_STATE_INITIATE_POWER_CYCLE);
+                }
                 if (err)
                 {
-                    TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreRebootIpmiCalls "
+                    TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreShutdownIpmiCalls "
                                "failed");
                     break;
                 }
 #endif
 
 #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
-                              "Perform SBE Update\n");
+            if(!g_do_hw_keys_hash_transition)
+            {
+                CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
+                                  "Perform SBE Update\n");
 
-            CONSOLE::flush();
+                CONSOLE::flush();
+            }
 #endif
 
 #ifndef CONFIG_BMC_IPMI
@@ -3007,7 +3041,6 @@ namespace SBE
             ///////////////////////////////////////////////////////////////////
 
 #endif
-
             // Set actions
             io_sbeState.update_actions = static_cast<sbeUpdateActions_t>
                                                     (l_actions);
@@ -4704,6 +4737,12 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
             memcpy(seeprom_hw_keys_hash_ptr,
                    g_hw_keys_hash_transition_data,
                    SBE_HW_KEY_HASH_SIZE);
+
+        #ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(SBE_COMP_NAME, "Performing Secureboot Key Transition\n");
+            CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
+            CONSOLE::flush();
+        #endif
         }
 
         // Normal Preservation of HW Keys Hash
@@ -4856,5 +4895,74 @@ errlHndl_t getHwKeysHashPtrFromSbeImage(const void*   i_imgPtr,
     return err;
 }
 
+errlHndl_t secureKeyTransition(std::vector<uint8_t> &o_transHwKeyHash)
+{
+    errlHndl_t l_errl = NULL;
+    o_transHwKeyHash.clear();
+
+#ifdef CONFIG_SECUREBOOT
+    do {
+    bool l_loaded = false;
+    PNOR::SectionInfo_t l_secInfo;
+    bool l_hasMagicHeader = false;
+
+    // Do an existence check on the container to see if it's non-empty and has
+    // valid beginning bytes.
+    l_errl = hasSecurebootMagicNumber(PNOR::SBKT, l_hasMagicHeader);
+    // SBKT section is optional so just delete error and no-op
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - hasSecurebootMagicNumber() optional PNOR::SBKT DNE");
+        delete l_errl;
+        l_errl = NULL;
+        break;
+    }
+
+    // If key transition partition does not have a header, it is assumed
+    // we do not need to load or perform any operations.
+    if(l_hasMagicHeader)
+    {
+        // Verify and Load SBKT section and nested container.
+        l_errl = loadSecureSection(PNOR::SBKT);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from loadSecureSection(PNOR::SBKT)");
+            break;
+        }
+        l_loaded = true;
+
+        // Get SBKT PNOR section info from PNOR RP
+        l_errl = getSectionInfo(PNOR::SBKT, l_secInfo);
+        // SBKT section is optional, but we check ealier if it exists, so if
+        // this fails, something is really wrong and we have to prevent key
+        // transition.
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - getSectionInfo(PNOR::SBKT) passed prior to this, but now fails. Prevent key transition!");
+            break;
+        }
+
+        // Get new verified HW key hash
+        const void* l_pVaddr = reinterpret_cast<void*>(l_secInfo.vaddr);
+        SECUREBOOT::ContainerHeader l_nestedConHdr(l_pVaddr);
+        // Get pointer to first element of hwKeyHash from header.
+        const uint8_t* l_hwKeyHash = l_nestedConHdr.hwKeyHash()[0];
+        o_transHwKeyHash.insert(o_transHwKeyHash.end(), l_hwKeyHash,
+                                l_hwKeyHash + SHA512_DIGEST_LENGTH);
+    }
+    if(l_loaded)
+    {
+        l_errl = unloadSecureSection(PNOR::SBKT);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK,"secureKeyTransition() - Error from unloadSecureSection(PNOR::SBKT)");
+            break;
+        }
+    }
+    } while(0);
+#endif
+
+    return l_errl;
+}
 
 } //end SBE Namespace

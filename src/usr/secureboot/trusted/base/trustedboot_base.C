@@ -286,7 +286,7 @@ errlHndl_t extendBaseImage()
     const void* pHbbVa = NULL;
     if(!SECUREBOOT::enabled())
     {
-        PNOR::SectionInfo_t l_info = {PNOR::INVALID_SECTION};
+        PNOR::SectionInfo_t l_info;
         pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
         if(pError)
         {

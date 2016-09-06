@@ -47,6 +47,7 @@
 #include "../baseinitsvc/initservice.H"
 #include "splesscommon.H"
 #include "istep_mbox_msgs.H"
+#include <ipmi/ipmiif.H>
 
 namespace   INITSERVICE
 {
@@ -216,9 +217,11 @@ public:
     void stop();
 #ifdef CONFIG_BMC_IPMI
     /**
-     * @brief This function will trigger a reboot via ipmi commands
+     * @brief This function will trigger a shutdown/reboot via ipmi commands
+     * @param[in] i_msgType  IPMI message type to send. Note must be a valid
+     *                       shutdown/reboot message type.
      */
-    void requestReboot();
+    void requestShutdownOrReboot(const IPMI::msg_type i_msgType);
 #endif
 
 

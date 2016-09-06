@@ -43,6 +43,12 @@ void ContainerHeader::parse_header(const void* i_header)
     size_t l_size = offsetof(ROM_container_raw, prefix);
     safeMemCpyAndInc(&iv_headerInfo.hw_hdr, l_hdr, l_size);
 
+    // Early check if magic number is valid, as a quick check to try and prevent
+    // any storage exceptions while parsing header.
+    assert(iv_headerInfo.hw_hdr.magic_number == MAGIC_NUMBER,
+           "ContainerHeader: magic number = 0x%08X not valid",
+           iv_headerInfo.hw_hdr.magic_number);
+
     /*---- Parse ROM_prefix_header_raw ----*/
     l_size = offsetof(ROM_prefix_header_raw, ecid);
     safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr, l_hdr, l_size);
@@ -72,6 +78,12 @@ void ContainerHeader::parse_header(const void* i_header)
     /*---- Parse ROM_sw_sig_raw ----*/
     safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr, iv_totalSwKeysSize);
 
+    // Parse hw and sw flags
+    parseFlags();
+
+    // Generate hw hash key
+    genHwKeyHash();
+
     // After parsing check if header is valid, do some quick bound checks
     validate();
 
@@ -97,6 +109,7 @@ void ContainerHeader::print() const
     TRACFBIN(g_trac_secure,"hw_pkey_c", iv_headerInfo.hw_hdr.hw_pkey_c, 64);
 
     /*---- Print ROM_prefix_header_raw ----*/
+    TRACFCOMP(g_trac_secure,"hw_flags 0x%X", iv_headerInfo.hw_prefix_hdr.flags);
     TRACFCOMP(g_trac_secure,"sw_key_count 0x%X", iv_headerInfo.hw_prefix_hdr.sw_key_count);
     TRACFBIN(g_trac_secure,"sw public key hash", iv_headerInfo.hw_prefix_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
@@ -135,6 +148,11 @@ size_t ContainerHeader::totalContainerSize() const
     return iv_headerInfo.hw_hdr.container_size;
 }
 
+const ecc_key_t* ContainerHeader::hw_keys() const
+{
+    return &iv_headerInfo.hw_hdr.hw_pkey_a;
+}
+
 size_t ContainerHeader::payloadTextSize() const
 {
     return iv_headerInfo.sw_hdr.payload_size;
@@ -165,6 +183,16 @@ const ecc_key_t* ContainerHeader::sw_sigs() const
     return &iv_headerInfo.sw_sig.sw_sig_p;
 }
 
+const sb_flags_t* ContainerHeader::sb_flags() const
+{
+    return &iv_sbFlags;
+}
+
+const SHA512_t* ContainerHeader::hwKeyHash() const
+{
+    return &iv_hwKeyHash;
+}
+
 void ContainerHeader::validate()
 {
     iv_isValid = (iv_hdrBytesRead <= MAX_SECURE_HEADER_SIZE)
@@ -181,24 +209,40 @@ void ContainerHeader::validate()
 void ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
                                        const size_t i_size)
 {
-    assert(i_dest != NULL);
-    assert(io_hdr != NULL);
-    assert(iv_pHdrStart != NULL);
+    assert(i_dest != NULL, "ContainerHeader: dest ptr NULL");
+    assert(io_hdr != NULL, "ContainerHeader: current header location ptr NULL");
+    assert(iv_pHdrStart != NULL, "ContainerHeader: start of header ptr NULL");
 
     TRACDCOMP(g_trac_secure,"dest: 0x%X src: 0x%X size: 0x%X",i_dest, io_hdr, i_size);
 
     // Determine if the memcpy is within the bounds of the container header
     iv_hdrBytesRead = io_hdr - iv_pHdrStart;
-    assert( (iv_hdrBytesRead + i_size) <= MAX_SECURE_HEADER_SIZE);
+    assert( (iv_hdrBytesRead + i_size) <= MAX_SECURE_HEADER_SIZE,
+            "ContainerHeader: memcpy is out of bounds of max header size");
 
     memcpy(i_dest, io_hdr, i_size);
     io_hdr += i_size;
 }
 
-// @TODO RTC: 155374 remove, SecureROMTest will use iv_isValid.
 bool ContainerHeader::isValid() const
 {
     return iv_isValid;
+}
+
+void ContainerHeader::parseFlags()
+{
+    iv_sbFlags.hw_hb_fw = iv_headerInfo.hw_prefix_hdr.flags & HB_FW_FLAG;
+    iv_sbFlags.hw_opal = iv_headerInfo.hw_prefix_hdr.flags & OPAL_FLAG;
+    iv_sbFlags.hw_phyp = iv_headerInfo.hw_prefix_hdr.flags & PHYP_FLAG;
+    iv_sbFlags.hw_key_transition = iv_headerInfo.hw_prefix_hdr.flags
+                                   & KEY_TRANSITION_FLAG;
+}
+
+void ContainerHeader::genHwKeyHash()
+{
+    // Generate and store hw hash key
+    SECUREBOOT::hashBlob(&iv_headerInfo.hw_hdr.hw_pkey_a,
+                         totalHwKeysSize, iv_hwKeyHash);
 }
 
 }; //end of SECUREBOOT namespace

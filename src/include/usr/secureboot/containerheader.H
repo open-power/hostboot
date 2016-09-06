@@ -57,6 +57,7 @@ class ContainerHeader
             assert(i_header != NULL);
             iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
             memset(&iv_headerInfo, 0x00, sizeof(iv_headerInfo));
+            memset(iv_hwKeyHash, 0, sizeof(SHA512_t));
             parse_header(i_header);
         };
 
@@ -71,6 +72,17 @@ class ContainerHeader
          * @return size_t - Total container size in bytes
          */
         size_t totalContainerSize() const;
+
+        /**
+         * @brief Retrieves pointer to first hw key
+         * @return ecc_key_t* - ptr to first hw key
+         */
+        const ecc_key_t* hw_keys() const;
+
+        /**
+         * @brief Total size of all hw keys concatenated
+         */
+        static const size_t totalHwKeysSize = HW_KEY_COUNT*sizeof(ecc_key_t);
 
         /**
          * @brief Retrieves payload text size
@@ -108,7 +120,19 @@ class ContainerHeader
          */
         const ecc_key_t* sw_sigs() const;
 
-        // @TODO RTC: 155374 remove, SecureROMTest will use iv_isValid.
+        /**
+         * @brief Retrieves pointer to sb flag struct holding all hw and sw
+         *        flags set when parsing the header.
+         * @return sb_flags_t - hw and sw flag struct
+         */
+        const sb_flags_t* sb_flags() const;
+
+        /**
+         * @brief Retrieves hw public key hash
+         * @return SHA512_t* - ptr to hash of hw public keys
+         */
+        const SHA512_t* hwKeyHash() const;
+
         /**
          * @brief Returns if the parsed header is a valid secureboot one. This
          *        is a temporary, non-secure way of pragmatically determining
@@ -152,6 +176,26 @@ class ContainerHeader
 
         // Total size of all software keys concatenated
         size_t iv_totalSwKeysSize;
+
+        // Struct to hold all hw and sw flags set
+        sb_flags_t iv_sbFlags;
+
+        // HW keys' hash for current container.
+        SHA512_t iv_hwKeyHash;
+
+        /**
+         * @brief Determines what flags are set based on the hw and sw flag bit
+         *        fields in the container header.
+         *        Also sets iv_sbFlags private member
+         */
+        void parseFlags();
+
+        /**
+         * @brief Generate and store hw key hash. Concatenate all hw public keys
+         *        and then take sha512 hash.
+         *        Also sets iv_hwKeyHash private member
+         */
+        void genHwKeyHash();
 
         /**
          * @brief Weak check to determine if secureboot header looks right.

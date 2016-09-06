@@ -35,6 +35,7 @@
 #include <targeting/common/targetservice.H>
 #include <i2c/eepromif.H>
 #include "sbe_update.H"
+#include <ipmi/ipmiif.H>
 
 namespace SBE
 {
@@ -286,11 +287,22 @@ namespace SBE
 
 #ifdef CONFIG_BMC_IPMI
     /**
-     * @brief Performs any necessary IPMI calls before reboot the system
+     * @brief Performs any necessary IPMI calls before shutdown/reboot
+     *
+     * @param[in] i_msgType  IPMI message type to send. Note must be a valid
+     *                       shutdown/reboot message type.
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t sbePreRebootIpmiCalls( void );
+    errlHndl_t sbePreShutdownIpmiCalls(const IPMI::msg_type i_msgType);
+
+    /**
+     * @brief Increment Reboot Count sensor by 1. Due to SBE specific traces
+     *        and errl trace collection, keeping this specific to the SBE code.
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t sbeIncrementRebootCount();
 #endif
 
 } //end namespace SBE

@@ -52,11 +52,13 @@ class SecureROM
          *
          * @param[in] i_container  Void pointer to effective address
          *                          of container
-         * @param[in] i_size       Size of container
+         * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
+         *                         [default = NULL, use current hw hash key]
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t verifyContainer(void * i_container, size_t i_size);
+        errlHndl_t verifyContainer(void * i_container,
+                                   const sha2_hash_t* i_hwKeyHash = NULL);
 
         /**
          * @brief Hash Blob
@@ -77,7 +79,7 @@ class SecureROM
          * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
          *                     hash to.
          */
-        void getHwHashKeys(sha2_hash_t o_hash);
+        void getHwKeyHash(sha2_hash_t o_hash);
 
         /*
          * @brief Hash the concatenation of N Blobs
@@ -119,9 +121,9 @@ class SecureROM
         void * iv_device_ptr;
 
         /**
-         * Hash Key Retrieved From System
+         * HW key hash Retrieved From System
          */
-        sha2_hash_t iv_hash_key;
+        sha2_hash_t iv_key_hash;
 
         /********************************************
          * Private Functions
@@ -132,7 +134,7 @@ class SecureROM
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t getHwHashKeys();
+        errlHndl_t getHwKeyHash();
 
         /**
          * @brief Static instance function for testcase only

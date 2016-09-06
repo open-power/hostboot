@@ -105,6 +105,7 @@ namespace PNOR
         MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
         MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
         MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
+        MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
     };
 
     enum PNORReasonCode
@@ -164,6 +165,8 @@ namespace PNOR
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
         RC_GETSECTIONINFO_FAILED     = PNOR_COMP_ID | 0x2B,
         RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2C,
+        RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x2D,
+        RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x2E,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

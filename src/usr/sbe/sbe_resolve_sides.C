@@ -311,10 +311,10 @@ errlHndl_t resolveProcessorSbeSeeproms()
                        l_restartNeeded);
 
 #ifdef CONFIG_BMC_IPMI
-            err = sbePreRebootIpmiCalls();
+            err = sbePreShutdownIpmiCalls(IPMI::MSG_STATE_INITIATE_POWER_CYCLE);
             if (err)
             {
-                TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreRebootIpmiCalls failed");
+                TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreShutdownIpmiCalls failed");
                 break;
             }
 #endif
@@ -1570,71 +1570,76 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
 
 #ifdef CONFIG_BMC_IPMI
 /////////////////////////////////////////////////////////////////////
-errlHndl_t sbePreRebootIpmiCalls( void )
+errlHndl_t sbeIncrementRebootCount()
 {
     errlHndl_t err = NULL;
-    TRACFCOMP( g_trac_sbe, ENTER_MRK"sbePreRebootIpmiCalls");
+    uint16_t count = 0;
+    SENSOR::RebootCountSensor l_sensor;
 
-    do{
-        uint16_t count = 0;
-        SENSOR::RebootCountSensor l_sensor;
+    // Read reboot count sensor
+    err = l_sensor.getRebootCount(count);
+    if ( err )
+    {
+        TRACFCOMP( g_trac_sbe,
+                   ERR_MRK"sbeIncrementRebootCount: "
+                   "FAIL Reading Reboot Sensor Count. "
+                   "Committing Error Log rc=0x%.4X eid=0x%.8X "
+                   "plid=0x%.8X, but continuing shutdown",
+                   err->reasonCode(),
+                   err->eid(),
+                   err->plid());
+        err->collectTrace(SBE_COMP_NAME);
+        errlCommit( err, SBE_COMP_ID );
+    }
+    else
+    {
+        // Increment Reboot Count Sensor
+        count++;
+        TRACFCOMP( g_trac_sbe,
+                   INFO_MRK"sbeIncrementRebootCount: "
+                   "Writing Reboot Sensor Count=%d", count);
 
-        // Read reboot count sensor
-        err = l_sensor.getRebootCount(count);
+        err = l_sensor.setRebootCount( count );
         if ( err )
         {
             TRACFCOMP( g_trac_sbe,
-                       ERR_MRK"sbePreRebootIpmiCalls: "
-                       "FAIL Reading Reboot Sensor Count. "
+                       ERR_MRK"sbeIncrementRebootCount: "
+                       "FAIL Writing Reboot Sensor Count to %d. "
                        "Committing Error Log rc=0x%.4X eid=0x%.8X "
                        "plid=0x%.8X, but continuing shutdown",
+                       count,
                        err->reasonCode(),
                        err->eid(),
                        err->plid());
             err->collectTrace(SBE_COMP_NAME);
             errlCommit( err, SBE_COMP_ID );
-
-            // No Break - Still do reboot
         }
-        else
-        {
-            // Increment Reboot Count Sensor
-            count++;
-            TRACFCOMP( g_trac_sbe,
-                       INFO_MRK"sbePreRebootIpmiCalls: "
-                       "Writing Reboot Sensor Count=%d", count);
+    }
+    return err;
+}
 
-            err = l_sensor.setRebootCount( count );
-            if ( err )
-            {
-                TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"sbePreRebootIpmiCalls: "
-                           "FAIL Writing Reboot Sensor Count to %d. "
-                           "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                           "plid=0x%.8X, but continuing shutdown",
-                           count,
-                           err->reasonCode(),
-                           err->eid(),
-                           err->plid());
-                err->collectTrace(SBE_COMP_NAME);
-                errlCommit( err, SBE_COMP_ID );
+/////////////////////////////////////////////////////////////////////
+errlHndl_t sbePreShutdownIpmiCalls(const IPMI::msg_type i_msgType)
+{
+    errlHndl_t err = NULL;
+    TRACFCOMP( g_trac_sbe, ENTER_MRK"sbePreShutdownIpmiCalls");
 
-                // No Break - Still send chassis power cycle
-            }
-        }
+    assert(IPMI::validShutdownRebootMsgType(i_msgType), "sbePreShutdownIpmiCalls: Invalid msg_type 0x%8X",
+           i_msgType);
 
-        TRACFCOMP( g_trac_sbe,"sbePreRebootIpmiCalls: "
-                   "requesting chassis power cycle");
+    // Still send chassis shutdown message on fail
+    err = sbeIncrementRebootCount();
 
-        // tell the istepdispacher to stop
-        INITSERVICE::stopIpl();
+    TRACFCOMP( g_trac_sbe,"sbePreShutdownIpmiCalls: requesting chassis "
+               "shutdown type = 0x%8X", i_msgType);
 
-        // initate a graceful power cycle
-        INITSERVICE::requestReboot();
+    // tell the istepdispacher to stop
+    INITSERVICE::stopIpl();
 
-    }while(0);
+    // initiate a power cycle of type i_msgType
+    INITSERVICE::requestShutdownOrReboot(i_msgType);
 
-    TRACFCOMP( g_trac_sbe, EXIT_MRK"sbePreRebootIpmiCalls");
+    TRACFCOMP( g_trac_sbe, EXIT_MRK"sbePreShutdownIpmiCalls");
 
     return err;
 }

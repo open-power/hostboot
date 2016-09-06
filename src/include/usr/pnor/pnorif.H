@@ -81,6 +81,7 @@ enum SectionId
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
+    SectionInfo_t(): id(INVALID_SECTION) {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
     uint64_t vaddr;     /**< Virtual address of the start of the section */
@@ -185,6 +186,35 @@ errlHndl_t loadSecureSection(SectionId i_section);
  *  @retval !NULL Failed to unload PNOR section
  */
 errlHndl_t unloadSecureSection(SectionId i_section);
+
+/**
+  * @brief  Memcmp a vaddr to the known secureboot magic number
+  *
+  * @param[in]   i_vaddr: vaddr of secureboot header to check for magic number
+  *                       Note: must point to a buffer of size >= 4 bytes
+  *
+  * @return  bool - True if the magic number and starting bytes of the vaddr
+  *                 match. False otherwise.
+  */
+bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
+
+/**
+  * @brief  Returns true if a PNOR section has the secureboot container
+  *         header magic number at the beginning. This is mainly used to
+  *         ignore unwanted PNOR sections like secureboot key transition.
+  *         It indicates the section has valid content to be securely
+  *         loaded, otherwise the section content will not be loaded.
+  *         If a section does not have the header but needs to be loaded,
+  *         it will fail ROM verify later on anyhow.
+  *         Note: Does not work with HBB section and will assert if attempted
+  *
+  * @param[in]   i_section: PNOR section to check first bytes of.
+  * @param[out]  o_valid:  true if section has the correct magic number at
+  *                        the beginning
+  *
+  * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
+  */
+errlHndl_t hasSecurebootMagicNumber(SectionId i_section, bool &o_valid);
 #endif // CONFIG_SECUREBOOT
 
 /**

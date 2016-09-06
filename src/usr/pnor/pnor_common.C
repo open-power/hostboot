@@ -452,7 +452,6 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                                             ((o_TOC[secId].size * 8 ) / 9);
                     }
 
-                    // @TODO RTC:153773 move header handling to secure pnor rp
                     // Don't skip header if verification is needed.
                     bool isSecure = PNOR::isSecureSection(secId);
                     if (o_TOC[secId].version == FFS_VERS_SHA512 || isSecure)
@@ -690,7 +689,8 @@ bool PNOR::isSecureSection(const uint32_t i_section)
            i_section == HB_DATA ||
            i_section == SBE_IPL ||
            i_section == CENTAUR_SBE ||
-           i_section == PAYLOAD;
+           i_section == PAYLOAD ||
+           i_section == SBKT;
 #else
     return false;
 #endif

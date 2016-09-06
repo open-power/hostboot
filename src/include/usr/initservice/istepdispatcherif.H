@@ -25,6 +25,8 @@
 #ifndef __INITSERVICE_ISTEPDISPATCHERIF_H
 #define __INITSERVICE_ISTEPDISPATCHERIF_H
 
+#include <ipmi/ipmiif.H>
+
 namespace INITSERVICE
 {
 
@@ -79,11 +81,13 @@ void stopIpl( void );
 #ifdef CONFIG_BMC_IPMI
 /**
  * @brief This function is to be used by external code to
- *        initate a system reboot via IPMI commands
+ *        initiate a system shutdown/reboot via IPMI commands
  *
+ * @param[in] i_msgType  IPMI message type to send. Note must be a valid
+ *                       shutdown/reboot message type.
  * @return Nothing
  */
-void requestReboot( void );
+void requestShutdownOrReboot(const IPMI::msg_type i_msgType);
 #endif
 
 /**

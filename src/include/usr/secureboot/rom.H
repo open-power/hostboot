@@ -30,9 +30,38 @@ const uint32_t MAGIC_NUMBER = 0x17082011;
 const uint16_t ROM_VERSION = 1;
 const uint8_t ROM_HASH_ALG = 1;
 const uint8_t ROM_SIG_ALG = 1;
+const uint8_t HW_KEY_COUNT = 3;
 const uint8_t SW_KEY_COUNT_MIN = 1;
 const uint8_t SW_KEY_COUNT_MAX = 3;
 const size_t MAX_SECURE_HEADER_SIZE = 4096;
+
+// Security Flags
+
+// HW Security Flags
+enum HW_SB_FLAGS
+{
+    HB_FW_FLAG = 0x80000000,
+    OPAL_FLAG = 0x40000000,
+    PHYP_FLAG = 0x20000000,
+    KEY_TRANSITION_FLAG = 0x00000001
+};
+
+// SW Security Flags
+enum SW_SB_FLAGS
+{
+    // placeholder
+};
+
+// Structure to store all hw and sw flag values in a container header
+struct sb_flags_t
+{
+    sb_flags_t() : hw_hb_fw(false), hw_opal(false), hw_phyp(false),
+                   hw_key_transition(false) {}
+    bool hw_hb_fw;
+    bool hw_opal;
+    bool hw_phyp;
+    bool hw_key_transition;
+};
 
 /******************************************************************/
 /*  Start of Chip Logic Secure ROM include section  */

@@ -696,8 +696,8 @@ void IpmiRP::execute(void)
             }
             break;
 
-            // begin a graceful reboot initated by us
-        case IPMI::MSG_STATE_INITATE_POWER_CYCLE:
+            // begin a graceful reboot initiated by us
+        case IPMI::MSG_STATE_INITIATE_POWER_CYCLE:
             {
                 msg_free(msg);
 
@@ -1079,13 +1079,13 @@ namespace IPMI
     }
 
     ///
-    /// @brief  kick off a reboot
+    /// @brief  initiate a graceful shutdown/reboot
     ///
-    void initiateReboot()
+    void initiateShutdownReboot(const IPMI::msg_type i_msgType)
     {
         static msg_q_t mq = Singleton<IpmiRP>::instance().msgQueue();
         msg_t * msg = msg_allocate();
-        msg->type =  IPMI::MSG_STATE_INITATE_POWER_CYCLE;
+        msg->type =  i_msgType;
         msg_send(mq, msg);
     }
 

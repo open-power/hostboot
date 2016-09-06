@@ -65,13 +65,10 @@ errlHndl_t initializeSecureROM(void)
 /**
  * @brief Verify Signed Container
  */
-errlHndl_t verifyContainer(void * i_container, size_t i_size)
+errlHndl_t verifyContainer(void * i_container, const sha2_hash_t* i_hwKeyHash)
 {
-    TRACUCOMP(g_trac_secure, "verifyContainer(): i_container=%p, size=0x%x",
-              i_container, i_size);
-
     return Singleton<SecureROM>::instance().verifyContainer(i_container,
-                                                            i_size);
+                                                            i_hwKeyHash);
 }
 
 /**
@@ -95,9 +92,9 @@ errlHndl_t hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
 /*
  * @brief  Externally available hardware hash key function
  */
-void getHwHashKeys(sha2_hash_t o_hash)
+void getHwKeyHash(sha2_hash_t o_hash)
 {
-    return Singleton<SecureROM>::instance().getHwHashKeys(o_hash);
+    return Singleton<SecureROM>::instance().getHwKeyHash(o_hash);
 }
 
 }; //end SECUREBOOT namespace
@@ -261,13 +258,13 @@ errlHndl_t SecureROM::initialize()
         /*  Retrieve HW Hash Keys From The System                      */
         /***************************************************************/
 
-        // @todo RTC:RTC:34080 - Support for SecureROM::getHwHashKeys()
-        l_errl = SecureROM::getHwHashKeys();
+        // @todo RTC:RTC:34080 - Support for SecureROM::getHwKeyHash()
+        l_errl = SecureROM::getHwKeyHash();
 
         if (l_errl != NULL)
         {
             TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::initialize():"
-            " SecureROM::getHwHashKeys() returned an error");
+            " SecureROM::getHwKeyHash() returned an error");
 
             l_errl->collectTrace(SECURE_COMP_NAME,256);
             break;
@@ -303,10 +300,11 @@ errlHndl_t SecureROM::initialize()
 /**
  * @brief Verify Container against system hash keys
  */
-errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
+errlHndl_t SecureROM::verifyContainer(void * i_container,
+                                      const sha2_hash_t* i_hwKeyHash)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::verifyContainer(): "
-              "i_container=%p, size=0x%x", i_container, i_size);
+              "i_container=%p", i_container);
 
     errlHndl_t  l_errl = NULL;
     uint64_t    l_rc   = 0;
@@ -326,8 +324,17 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
         // struct elements my_ecid, entry_point and log
         memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
-        // Now set hw_key_hash, which is of type sha2_hash_t, to iv_hash_key
-        memcpy (&l_hw_parms.hw_key_hash, &iv_hash_key, sizeof(sha2_hash_t));
+        // Now set hw_key_hash, which is of type sha2_hash_t, to iv_key_hash
+        if (i_hwKeyHash == NULL)
+        {
+            // Use current hw hash key
+            memcpy (&l_hw_parms.hw_key_hash, &iv_key_hash, sizeof(sha2_hash_t));
+        }
+        else
+        {
+            // Use custom hw hash key
+            memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(sha2_hash_t));
+        }
 
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
@@ -366,6 +373,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 
             /*@
              * @errortype
+             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid     SECUREBOOT::MOD_SECURE_ROM_VERIFY
              * @reasoncode   SECUREBOOT::RC_ROM_VERIFY
              * @userdata1    l_rc
@@ -470,8 +478,8 @@ SecureROM::SecureROM()
 {
     TRACDCOMP(g_trac_secure, "SecureROM::SecureROM()>");
 
-    // Clear out iv_hash_keys, which is of type sha2_hash_t
-    memset(&iv_hash_key, 0, sizeof(sha2_hash_t) );
+    // Clear out iv_key_hash, which is of type sha2_hash_t
+    memset(&iv_key_hash, 0, sizeof(sha2_hash_t) );
 
 }
 
@@ -549,16 +557,16 @@ void SecureROM::_cleanup()
 /**
  * @brief Retrieves HW Keys from the system
  */
-errlHndl_t SecureROM::getHwHashKeys()
+errlHndl_t SecureROM::getHwKeyHash()
 {
 
     errlHndl_t l_errl = NULL;
 
-    TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::getHwHashKeys()");
+    TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::getHwKeyHash()");
 
     // The length of the hash is SHA512_DIGEST_LENGTH
     // The data will be read from PIBMEM using SCOM addresses via deviceRead
-    // iv_hash_key is where the data will be copied.
+    // iv_key_hash is where the data will be copied.
 
     // simplify notation below
     using namespace TARGETING; // for MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
@@ -580,7 +588,7 @@ errlHndl_t SecureROM::getHwHashKeys()
     // This is NOT a pointer as it represents a SCOM address and not RAM.
     uint32_t l_pibaddr = PIBMEM_HW_KEY_HASH;
 
-    // stop at the end of iv_hash_key, so get its end pointer
+    // stop at the end of iv_key_hash, so get its end pointer
     uint64_t* l_stop;
     l_stop = reinterpret_cast<uint64_t*>(&l_temp_hash[SHA512_DIGEST_LENGTH]);
 
@@ -612,14 +620,14 @@ errlHndl_t SecureROM::getHwHashKeys()
     // if there was an error indicate it as a trace message
     if (l_errl != NULL)
     {
-        TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::getHwHashKeys():"
+        TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::getHwKeyHash():"
         " Fail SCOM Read of hash key at PIBMEM address (0x%x)",
         PIBMEM + (l_hash - reinterpret_cast<uint64_t*>(l_temp_hash)));
     }
     else
     {
         // copy the successfully retreived hash key to the member variable
-        memcpy(iv_hash_key, l_temp_hash, sizeof(sha2_hash_t));
+        memcpy(iv_key_hash, l_temp_hash, sizeof(sha2_hash_t));
     }
 
     return l_errl;
@@ -628,9 +636,9 @@ errlHndl_t SecureROM::getHwHashKeys()
 /**
  * @brief  Retrieve the internal hardware hash key from secure ROM object.
  */
-void SecureROM::getHwHashKeys(sha2_hash_t o_hash)
+void SecureROM::getHwKeyHash(sha2_hash_t o_hash)
 {
-    memcpy(o_hash, iv_hash_key, sizeof(sha2_hash_t));
+    memcpy(o_hash, iv_key_hash, sizeof(sha2_hash_t));
 }
 
 /**

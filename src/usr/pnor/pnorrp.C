@@ -510,73 +510,103 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             id = PNOR::INVALID_SECTION;
             break;
         }
-    } while(0);
 
-    if (PNOR::INVALID_SECTION != id)
-    {
-        TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
+        if (PNOR::INVALID_SECTION != id)
+        {
+            TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
 
-        // copy my data into the external format
-        o_info.id = iv_TOC[id].id;
-        o_info.name = cv_EYECATCHER[id];
+            // copy my data into the external format
+            o_info.id = iv_TOC[id].id;
+            o_info.name = cv_EYECATCHER[id];
 
 #ifdef CONFIG_SECUREBOOT
-        o_info.secureProtectedPayloadSize = 0; // for non secure sections
-                                               // the protected payload size
-                                               // defaults to zero
-        // handle secure sections in SPnorRP's address space
-        if (PNOR::isSecureSection(o_info.id))
-        {
-            uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
-            // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
-            // address into a secure pnor address, since pnor, temp, and spnor
-            // spaces are equidistant.
-            // See comments in SPnorRP::verifySections() method in spnorrp.C
-            // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
-            // for specifics.
-            o_info.vaddr = reinterpret_cast<uint64_t>(l_vaddr)
-                                                       + VMM_VADDR_SPNOR_DELTA
-                                                       + VMM_VADDR_SPNOR_DELTA;
+            o_info.secureProtectedPayloadSize = 0; // for non secure sections
+                                                   // the protected payload size
+                                                   // defaults to zero
+            // handle secure sections in SPnorRP's address space
+            if (PNOR::isSecureSection(o_info.id))
+            {
+                uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
+                // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
+                // address into a secure pnor address, since pnor, temp, and spnor
+                // spaces are equidistant.
+                // See comments in SPnorRP::verifySections() method in spnorrp.C
+                // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
+                // for specifics.
+                o_info.vaddr = reinterpret_cast<uint64_t>(l_vaddr)
+                                                           + VMM_VADDR_SPNOR_DELTA
+                                                           + VMM_VADDR_SPNOR_DELTA;
 
-            // Get size of the secured payload for the secure section
-            // Note: the payloadSize we get back is untrusted because
-            // we are parsing the header in pnor (non secure space).
-            SECUREBOOT::ContainerHeader l_conHdr(l_vaddr);
-            size_t payloadTextSize = l_conHdr.payloadTextSize();
+                // Get size of the secured payload for the secure section
+                // Note: the payloadSize we get back is untrusted because
+                // we are parsing the header in pnor (non secure space).
+                size_t payloadTextSize = 0;
+                // Do an existence check on the container to see if it's non-empty
+                // and has valid beginning bytes. For optional Secure PNOR sections.
+                if (PNOR::cmpSecurebootMagicNumber(l_vaddr))
+                {
+                    SECUREBOOT::ContainerHeader l_conHdr(l_vaddr);
+                    payloadTextSize = l_conHdr.payloadTextSize();
+                    assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+                }
+                else
+                {
+                    uint32_t l_badMagicHeader = 0;
+                    memcpy(&l_badMagicHeader, l_vaddr, sizeof(MAGIC_NUMBER));
+                    TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: magic number not valid to parse container for section = %s magic number = 0x%X",
+                               o_info.name, l_badMagicHeader);
+                    /*@
+                     * @errortype
+                     * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
+                     * @reasoncode   PNOR::RC_BAD_SECURE_MAGIC_NUM
+                     * @userdata1    Requested Section
+                     * @userdata2    Bad magic number
+                     * @devdesc      PNOR section does not have the known secureboot magic number
+                     * @custdesc     Corrupted flash image or firmware error during system boot
+                     */
+                    l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                       PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                                       PNOR::RC_BAD_SECURE_MAGIC_NUM,
+                                                       TO_UINT64(i_section),
+                                                       TO_UINT64(l_badMagicHeader),
+                                                       true /*Add HB SW Callout*/);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    break;
+                }
 
-            assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+                // skip secure header for secure sections at this point in time
+                o_info.vaddr += PAGESIZE;
+                // now that we've skipped the header we also need to adjust the
+                // size of the section to reflect that.
+                // Note: For unsecured sections, the header skip and size decrement
+                // was done previously in pnor_common.C
+                o_info.size -= PAGESIZE;
 
-            // skip secure header for secure sections at this point in time
-            o_info.vaddr += PAGESIZE;
-            // now that we've skipped the header we also need to adjust the
-            // size of the section to reflect that.
-            // Note: For unsecured sections, the header skip and size decrement
-            // was done previously in pnor_common.C
-            o_info.size -= PAGESIZE;
-
-            // cache the value in SectionInfo struct so that we can
-            // parse the container header less often
-            o_info.secureProtectedPayloadSize = payloadTextSize;
-        }
-        else
+                // cache the value in SectionInfo struct so that we can
+                // parse the container header less often
+                o_info.secureProtectedPayloadSize = payloadTextSize;
+            }
+            else
 #endif
-        {
-            o_info.vaddr = iv_TOC[id].virtAddr;
-        }
+            {
+                o_info.vaddr = iv_TOC[id].virtAddr;
+            }
 
-        o_info.flashAddr = iv_TOC[id].flashAddr;
-        o_info.size = iv_TOC[id].size;
-        o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
-                                != 0) ? true : false;
-        o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)
-                                 != 0) ? true : false;
-        o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
-                               != 0) ? true : false;
-        o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
-                               != 0) ? true : false;
-        o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
-                               != 0) ? true : false;
-    }
+            o_info.flashAddr = iv_TOC[id].flashAddr;
+            o_info.size = iv_TOC[id].size;
+            o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
+                                    != 0) ? true : false;
+            o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)
+                                     != 0) ? true : false;
+            o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
+                                   != 0) ? true : false;
+            o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
+                                   != 0) ? true : false;
+            o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
+                                   != 0) ? true : false;
+        }
+    } while(0);
 
     return l_errhdl;
 }

@@ -594,7 +594,8 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
                             // Request BMC to do power cycle that sends shutdown
                             // and reset the host
-                            requestReboot();
+                            requestShutdownOrReboot(
+                                          IPMI::MSG_STATE_INITIATE_POWER_CYCLE);
 
                             #endif
                             #ifdef CONFIG_CONSOLE
@@ -1375,9 +1376,9 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 }
 
 #ifdef CONFIG_BMC_IPMI
-void IStepDispatcher::requestReboot()
+void IStepDispatcher::requestShutdownOrReboot(const IPMI::msg_type i_msgType)
 {
-    IPMI::initiateReboot();
+    IPMI::initiateShutdownReboot(i_msgType);
 }
 #endif
 // ----------------------------------------------------------------------------
@@ -2080,9 +2081,9 @@ void setNewGardRecord()
     return IStepDispatcher::getTheInstance().setNewGardRecord();
 }
 #ifdef CONFIG_BMC_IPMI
-void requestReboot()
+void requestShutdownOrReboot(const IPMI::msg_type i_msgType)
 {
-    IStepDispatcher::getTheInstance().requestReboot();
+    IStepDispatcher::getTheInstance().requestShutdownOrReboot(i_msgType);
 }
 #endif
 void stopIpl()
