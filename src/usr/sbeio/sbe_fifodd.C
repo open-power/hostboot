@@ -37,6 +37,7 @@
 #include <targeting/common/targetservice.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include "sbe_fifodd.H"
+#include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -93,6 +94,36 @@ errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
     while (0);
 
     mutex_unlock(&l_fifoOpMux);
+
+    //@todo-RTC:149454-Remove when we have our FFDC in place
+    //Temporarily crash with a known RC so that HWSV collects the SBE FFDC
+    if( errl && (SBE_COMP_ID == errl->moduleId()) )
+    {
+        SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
+
+        //commit the original error after pulling some data out
+        uint32_t orig_plid = errl->plid();
+        uint32_t orig_rc = errl->reasonCode();
+        uint32_t orig_mod = errl->moduleId();
+        ERRORLOG::errlCommit( errl, SBE_COMP_ID );
+        /*@
+         * @errortype
+         * @moduleid     SBEIO_FIFO
+         * @reasoncode   SBEIO_HWSV_COLLECT_SBE_RC
+         * @userdata1    PLID of original error log
+         * @userdata2[00:31]    Original RC
+         * @userdata2[32:63]    Original Module Id
+         *
+         * @devdesc      SBE error, force HWSV to collect FFDC
+         * @custdesc     Firmware error communicating with boot device
+         */
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             SBEIO_FIFO,
+                             SBEIO_HWSV_COLLECT_SBE_RC,
+                             orig_plid,
+                             TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
+        INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
+    }
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
