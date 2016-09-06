@@ -37,6 +37,21 @@
 <hwpErrors>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_DRAM_GEN</rc>
+    <description>
+      The DIMM called out has an inappropriate DRAM generation (e.g., not DDR4)
+    </description>
+    <ffdc>DRAM_GEN</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_TYPE_MIX</rc>
     <description>
       The DIMM called out differed in DIMM type than the majority on the port

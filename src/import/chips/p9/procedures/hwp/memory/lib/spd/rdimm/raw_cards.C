@@ -40,7 +40,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <raw_cards.H>
+#include <lib/spd/rdimm/raw_cards.H>
 
 namespace mss
 {
