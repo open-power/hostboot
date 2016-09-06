@@ -1236,7 +1236,7 @@
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>CPU</default></attribute>
     <attribute><id>QUAD_PPM_ERRMASK</id></attribute>
-    <!--@todo-RTC:155823 <attribute><id>SENSEADJ_STEP</id><default>CPU</default></attribute> -->
+    <attribute><id>SENSEADJ_STEP</id></attribute>
 </targetType>
 
 <!-- EX: Use same EX target for both Nimbus and Cumulus
