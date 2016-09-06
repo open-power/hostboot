@@ -115,7 +115,8 @@ fi
 
 echo "sbfw dir = ${SBFW_DIR}"
 # Verify SBFW directory or default to sandbox.
-if [ "${SBFW_DIR}" == "invalid directory" ]; then
+if [ "${SBFW_DIR}" == "invalid directory" -a \
+    "${TARGET}" != "openpower_TARGET" ]; then
     if [ -z "${SANDBOXROOT}" -o -z "${SANDBOXNAME}" ]; then
         echo "ERROR:SBFW - No path specified and \$SANDBOXBASE undefined."
         print_usage
