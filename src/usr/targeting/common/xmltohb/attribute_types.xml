@@ -16927,7 +16927,7 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
-<attribute>
+<attribute><!-- Deprecated : @todo-Remove with RTC:160417 -->
     <id>PROC_PCIE_LANE_EQUALIZATION</id>
     <description>PCIE Lane Equalization values for each PHB
         Creator: MRW
@@ -16956,7 +16956,7 @@ Measured in GB</description>
         <array>4,32</array>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <readable/>
+    <readable/>    
 </attribute>
 
 <attribute>
@@ -31541,6 +31541,60 @@ Measured in GB</description>
         <id>ATTR_REL_POS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id>
+    <description>PCIE Lane Equalization values for each PHB
+        Creator: MRW
+        Purpose: Holds settings which are loaded into the HW to optimize the
+            PCIE lane signal eye between the chips + PCIE Gen3 endpoints
+        Data Format: 16 entries of 16 bytes of EQ data per PHB.  Each PHB has an EQ
+            value for each of its 16 lanes.  Each value is a uint16 formatted as
+            follows:
+                Bit 0:3   - up_rx_hint (bit 0 reserved)
+                Bit 4:7   - up_tx_preset
+                Bit 8:11  - dn_rx_hint (bit 0 reserved)
+                Bit 12:15 - dn_tx_preset
+    </description>
+    <simpleType>
+        <uint16_t><default>
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777
+        </default></uint16_t>
+        <array>16</array><!-- Lane -->
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>
+    <description>PCIE Lane Equalization values for each PHB
+        Creator: MRW
+        Purpose: Holds settings which are loaded into the HW to optimize the
+            PCIE lane signal eye between the chips + PCIE Gen4 endpoints
+        Data Format: 16 entries of 16 bytes of EQ data per PHB.  Each PHB has an EQ
+            value for each of its 16 lanes.  Each value is a uint16 formatted as
+            follows:
+                Bit 0:3   - up_rx_hint (bit 0 reserved)
+                Bit 4:7   - up_tx_preset
+                Bit 8:11  - dn_rx_hint (bit 0 reserved)
+                Bit 12:15 - dn_tx_preset
+    </description>
+    <simpleType>
+        <uint16_t><default>
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777,
+            0x7777,0x7777,0x7777,0x7777
+        </default></uint16_t>
+        <array>16</array><!-- Lane -->
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>
