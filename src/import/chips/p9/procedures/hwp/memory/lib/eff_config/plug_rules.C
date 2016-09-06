@@ -137,13 +137,28 @@ fapi2::ReturnCode dimm_type_mixing(std::vector<dimm::kind>& io_kinds)
     for (const auto& k : io_kinds)
     {
         // Sets fapi2::current_err
-        MSS_ASSERT_NOEXIT( ((k.iv_dimm_type == l_winner.first) || (k.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_EMPTY)),
+        MSS_ASSERT_NOEXIT( ((k.iv_dimm_type == l_winner.first) ||
+                            (k.iv_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_EMPTY)),
                            fapi2::MSS_PLUG_RULES_INVALID_DIMM_TYPE_MIX()
                            .set_DIMM_TYPE(k.iv_dimm_type)
                            .set_MAJORITY_DIMM_TYPE(l_winner.first)
                            .set_DIMM_TARGET(k.iv_target),
                            "%s of type %d can not be plugged in with DIMM of type %d",
-                           mss::c_str(k.iv_target), k.iv_dimm_type, l_winner.first);
+                           mss::c_str(k.iv_target), k.iv_dimm_type, l_winner.first );
+
+        // This should never fail ... but Just In Case a little belt-and-suspenders never hurt.
+        // Later on down the line we make the assumption that effective config caught any mimatched
+        // DRAM generations - so we ought to at least do that ...
+        // TODO RTC:160395 This needs to change for controllers which support different generations, of which
+        // Nimbus does not.
+        MSS_ASSERT_NOEXIT( ((k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4) ||
+                            (k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)),
+                           fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
+                           .set_DRAM_GEN(k.iv_dimm_type)
+                           .set_DIMM_TARGET(k.iv_target),
+                           "%s is not DDR4 it is %d",
+                           mss::c_str(k.iv_target), k.iv_dram_generation );
+
     }
 
     return fapi2::current_err;
