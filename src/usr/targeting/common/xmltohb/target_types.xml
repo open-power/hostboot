@@ -1990,22 +1990,22 @@
     <attribute><id>PROC_PCIE_PCS_SYSTEM_CNTL</id></attribute>
     <attribute><id>PROC_PCIE_PCS_M_CNTL</id></attribute>
 
-    <attribute><id>PROC_PCIE_IOP_SWAP_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL0_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL1_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FIFO_OFFSET_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_RCVRDETCNTL_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_BWLOSS1_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_VGA_CONTROL2_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_PEAK_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_SDL_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1_P9</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_SWAP</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL0</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_BWLOSS1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_PEAK</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_SDL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
 </targetType>
