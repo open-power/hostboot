@@ -29,7 +29,10 @@
     <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-      Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+        Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+        Set to below optimum value/ rate. 
+        On a per port (MCA) basis
+        Consumer: thermal_init
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -41,9 +44,16 @@
   <attribute>
     <id>ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <description>
+        Machine Readable Workbook Thermal Memory Power Limit
+        Used to calculate throttles to be at or under the power limit
+        Per DIMM basis
+        Consumers: eff_config_thermal and bulk_pwr_throttles
+    </description>
     <valueType>uint32</valueType>
+    <mssUnits>cW</mssUnits>
     <platInit/>
+    <default>0x000006A4</default>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
@@ -55,9 +65,11 @@
     <description>
       Machine Readable Workbook DIMM power curve percent uplift
       for this system at max utilization.
-    </description>
+      Value should be 0 for ISDIMMs 
+   </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <default>0x0</default>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
@@ -69,9 +81,11 @@
     <description>
       Machine Readable Workbook DIMM power curve percent uplift
       for this system at idle utilization.
+      Value should be 0 for ISDIMMs
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <default>0x0</default>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
@@ -87,6 +101,7 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+    <default>0x00000200</default>
     <initToZero/>
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
@@ -98,9 +113,13 @@
     <description>
       Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
       Used to determine memory throttle values.
+      Max databus utilization on a per port basis
+      Default to 90%
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+    <mssUnits>c%</mssUnits>
+    <default>0x00002328</default>
     <initToZero/>
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
@@ -131,6 +150,7 @@
     <valueType>uint8</valueType>
     <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
     <platInit/>
+    <default>OFF</default>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_power_control_requested</mssAccessorName>
@@ -147,8 +167,42 @@
     <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
     <initToZero/>
+    <!-- Ineffective for Nimbus -->
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW
+        Used for Cumulus
+        Consumed in mss_eff_config_thermal
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>cW</mssUnits>
+    <initToZero/>
+    <!-- Ineffective for Nimbus -->
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr3</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook VMEM regulator power limit per DIMM assuming a full configuration. Units in cW
+        Consumed in mss_eff_config_thermal
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>cW</mssUnits>
+    <default>0x000006A4</default>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr4</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -157,6 +211,7 @@
     <description>
       Machine Readable Workbook value for the maximum possible number
       of dimms that can be installed under any of the VMEM regulators.
+      Consumed in eff_config_thermal to calculate mem_watt_target
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -231,7 +286,9 @@
     <description>
       Fine refresh mode.
       Sets DDR4 MRS3.
-      Should be defaulted to normal mode.
+      ZZ uses normal mode.
+      From JEDEC DDR4 Spec 1716.78C from 07-2016
+      Page 47 Table 4.9.1
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -255,12 +312,16 @@
       Temperature refresh range.
       Sets DDR4 MRS4.
       Should be defaulted to extended range.
+      NORMAL for running at 85 degrees C or less, EXTENDED for 95 or less degrees C
+      Used for calculating periodic refresh intervals
+      JEDEC DDR4 spec 1716.78C from 07-2016
+      page 46 4.8.1
     </description>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, EXTEND = 1</enum>
     <platInit/>
     <initToZero/>
-    <default>NORMAL</default>
+    <default>EXTEND</default>
     <!-- little comment to tell us we implemented - will remove before flight TODO RTC:159145 -->
     <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
   </attribute>
@@ -283,7 +344,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Value of on or off. Determines if prefetching enabled or not.</description>
     <valueType>uint8</valueType>
-    <enum>ON = 0, OFF = 1</enum>
+    <enum>ON = 1, OFF = 0</enum>
     <platInit/>
     <initToZero/>
     <default>ON</default>
