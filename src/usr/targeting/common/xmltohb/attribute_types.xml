@@ -13028,9 +13028,16 @@ Measured in GB</description>
 
 <attribute>
     <id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <description>
+    Machine Readable Workbook Thermal Memory Power Limit
+    Used to calculate throttles to be at or under the power limit
+    Per DIMM basis
+    Consumers: eff_config_thermal and bulk_pwr_throttles
+    </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+        <default>0x000006A4</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -15572,7 +15579,9 @@ DEPRECATED!!!!
     <id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
     <description>Machine Readable Workbook DIMM power curve percent uplift for this system</description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+        <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -15589,7 +15598,9 @@ DEPRECATED!!!!
             curve percent uplife idle for this system
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+        <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -15617,7 +15628,9 @@ DEPRECATED!!!!
     <id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
     <description>Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).  Used to determine memory throttle values.</description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+        <default>0x00002328</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -24991,6 +25004,9 @@ DEPRECATED!!!!
     <id>MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
     <description>
       Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+      Set to below optimum value/ rate.
+      On a per port (MCA) basis
+      Consumer: thermal_init
     </description>
     <simpleType>
       <uint32_t>
@@ -25030,6 +25046,7 @@ DEPRECATED!!!!
     </description>
     <simpleType>
       <uint32_t>
+      <default>0x00000200</default>
       </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -25171,9 +25188,15 @@ DEPRECATED!!!!
       Temp ref range.
       Should be defaulted to extended range.
       This is for DDR4 MRS4.
+      Should be defaulted to extended range.
+      NORMAL for running at 85 degrees C or less, EXTENDED for 95 or less degrees C
+      Used for calculating periodic refresh intervals
+      JEDEC DDR4 spec 1716.78C from 07-2016
+      page 46 4.8.1
     </description>
     <simpleType>
       <uint8_t>
+      <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -28118,9 +28141,11 @@ DEPRECATED!!!!
 
 <attribute>
     <id>MSS_MRW_PREFETCH_ENABLE</id>
-    <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
+    <description>0 = OFF 1 = ON Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
     <simpleType>
-      <uint8_t></uint8_t>
+      <uint8_t>
+      <default>1</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -31616,5 +31641,42 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+  <description>
+        Machine Readable Workbook VMEM regulator power limit per DIMM assuming a full configuration. Units in cW
+        Consumed in mss_eff_config_thermal
+  </description>
+  <simpleType>
+    <uint32_t>
+        <default>0x000006A4</default>
+    </uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
+  <description>
+        Machine Readable Workbook VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW
+        Used for Cumulus
+        Consumed in mss_eff_config_thermal
+  </description>
+  <simpleType>
+    <uint32_t>
+    </uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
