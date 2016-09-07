@@ -7347,30 +7347,6 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
-    <id>EFF_CUSTOM_DIMM</id>
-    <description>
-      DIMM is a custom DIMM. This is commonly known as a CDIMM,
-      but technically, we could support Custom DIMMs of different types than an UDIMM,
-      such as RDIMM and LRDIMM.
-      Created in mss_eff_cnfg
-      Use this attribute if you need to know if the Centaur is on the DIMM instead of on a planar.
-      NO = 0, YES = 1
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    <array>2,2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_CUSTOM_DIMM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>EFF_DRAM_WIDTH</id>
     <description>
       DRAM Device Width: X4, X8, X16, X32.
@@ -8589,31 +8565,6 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_EFF_DRAM_TXS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>EFF_DRAM_BL</id>
-    <description>
-      Burst Length.
-      Used in various locations and is computed in mss_eff_cnfg.
-      Each memory channel will have a value.
-      creator: mss_eff_cnfg
-      consumer: various
-      firmware notes: none
-      BL8 = 0, OTF = 1, BC4 = 2
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EFF_DRAM_BL</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

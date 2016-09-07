@@ -1298,7 +1298,6 @@
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>MSS_DIMM_MFG_ID_CODE</id></attribute>
     <attribute><id>EFF_NUM_RANKS_PER_DIMM</id></attribute>
-    <attribute><id>EFF_CUSTOM_DIMM</id></attribute>
     <attribute><id>EFF_DRAM_WIDTH</id></attribute>
     <attribute><id>EFF_DRAM_RANK_MIX</id></attribute>
     <attribute><id>EFF_DIMM_SPARE</id></attribute>
@@ -1306,7 +1305,6 @@
     <attribute><id>EFF_DRAM_WR_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DRAM_WRDDR4_VREF_SCHMOO</id></attribute>
     <attribute><id>EFF_DIMM_SIZE</id></attribute>
-    <attribute><id>EFF_DRAM_BL</id></attribute>
     <attribute><id>EFF_DRAM_CL</id></attribute>
     <attribute><id>EFF_DRAM_AL</id></attribute>
     <attribute><id>EFF_DRAM_CWL</id></attribute>
