@@ -31,6 +31,8 @@ chip p9_ex
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+.include "prdfP9ExExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
@@ -596,7 +598,7 @@ group gL3FIR filter singlebit
     /** L3FIR[4]
      *  
      */
-    (rL3FIR, bit(4)) ? defaultMaskedError;
+    (rL3FIR, bit(4)) ? l3_cache_ce;
 
     /** L3FIR[5]
      *  

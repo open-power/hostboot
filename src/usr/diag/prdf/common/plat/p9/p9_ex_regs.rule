@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_ex_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_ex_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,24 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-actionclass level2_M_self_L_dump_SH
-{
-    callout2ndLvlMed;
-    calloutSelfLow;
-    dumpSH;
-};
+###############################################################################
+# Additional registers for EX, not defined in XML
+###############################################################################
 
-actionclass self_M_level2_L_th_1
-{
-    calloutSelfMed;
-    callout2ndLvlLow;
-    threshold1;
-};
-
-actionclass l3_cache_ce
-{
-    calloutSelfHigh;
-    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_CACHE_CES) );
-    funccall("L3CE");
-};
+    register L3_PURGE_REG
+    {
+        name        "L3 PRD Purge Register";
+        scomaddr    0x1001180E;
+        capture     group never;
+    };
 
