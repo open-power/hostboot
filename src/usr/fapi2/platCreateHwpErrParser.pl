@@ -211,6 +211,30 @@ foreach my $argnum (1 .. $#ARGV)
     #--------------------------------------------------------------------------
     foreach my $err (@{$errors->{hwpError}})
     {
+
+        if ($err->{platScomFail})
+        {
+            my $ffdcName = $err->{rc} . "_address";
+            my $ffdcHash128Bit = md5_hex($ffdcName);
+            my $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
+
+            print TGFILE "    case 0x$ffdcHash32Bit:\n";
+            print TGFILE "      { uint64_t l_Address =\n";
+            print TGFILE "        be64toh(*(reinterpret_cast<uint64_t*>(l_pBuffer)));\n";
+            print TGFILE "        i_parser.PrintNumber(\"Failed SCOM address\",\"%#016lX\",l_Address);}\n";
+            print TGFILE "     break;\n";
+
+            $ffdcName = $err->{rc} . "_pcb_pib_rc";
+            $ffdcHash128Bit = md5_hex($ffdcName);
+            $ffdcHash32Bit = substr($ffdcHash128Bit, 0, 8);
+
+            print TGFILE "    case 0x$ffdcHash32Bit:\n";
+            print TGFILE "             {uint32_t l_PibRc = be32toh(*(reinterpret_cast<uint32_t *>(l_pBuffer)));\n";
+            print TGFILE "             i_parser.PrintNumber(\"PIB RC:\",\"%#08lX\",l_PibRc);}\n";
+            print TGFILE "        break;\n";
+
+
+        }
         foreach my $ffdc (@{$err->{ffdc}})
         {
             #------------------------------------------------------------------
