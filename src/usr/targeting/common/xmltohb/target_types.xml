@@ -840,6 +840,8 @@
     <attribute><id>MSS_MRW_TSYS_DATA</id></attribute>
     <attribute><id>MSS_MRW_TSYS_ADR</id></attribute>
     <attribute><id>FSP_BAR_SIZE</id></attribute>
+    <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id></attribute>
+    <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
