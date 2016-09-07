@@ -16455,15 +16455,15 @@ Measured in GB</description>
         <value>0</value>
     </enumerator>
     <enumerator>
-        <name>SLOWEXIT</name>
+        <name>POWER_DOWN</name>
         <value>1</value>
     </enumerator>
     <enumerator>
-        <name>FASTEXIT</name>
+        <name>STR</name>
         <value>2</value>
     </enumerator>
     <enumerator>
-        <name>FASTEXIT_AND_SLOWEXIT</name>
+        <name>PD_AND_STR</name>
         <value>3</value>
     </enumerator>
     <default>NONE</default>
@@ -16474,15 +16474,17 @@ Measured in GB</description>
     <description>
         Type of memory power control requested
 
+        Producer: MRW
+
         0x00 = NONE
-        0x01 = SLOWEXIT
-        0x02 = FASTEXIT
-        0x03 = FASTEXIT_AND_SLOWEXIT
+        0x01 = POWER_DOWN
+        0x02 = STR
+        0x03 = PD_AND_STR
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0x00</default>
-        </uint8_t>
+        <enumeration>
+            <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
+        </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
