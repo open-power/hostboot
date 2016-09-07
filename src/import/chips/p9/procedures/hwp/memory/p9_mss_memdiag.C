@@ -43,6 +43,7 @@
 #include <lib/mcbist/mcbist.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
+using fapi2::TARGET_TYPE_SYSTEM;
 
 extern "C"
 {
@@ -63,10 +64,16 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+        uint8_t is_sim = false;
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
+
+        // We start the sf_init (write 0's) and it'll tickle the MCBIST complete FIR. PRD will see that
+        // and start a background scrub.
         FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 
-        // TODO RTC:153951
-        // Remove the polling when the attention bits are hooked up
+        // If we're in the sim, we want to poll for the FIR bit. I don't think this ever really happens
+        // unless we're expressly testing this API.
+        if (is_sim)
         {
             // Poll for the fir bit. We expect this to be set ...
             fapi2::buffer<uint64_t> l_status;
