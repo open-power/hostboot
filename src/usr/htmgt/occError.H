@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,7 +142,9 @@ namespace HTMGT
         // Actions to process the errors
         uint8_t             actions;
         // Reserved
-        uint32_t            reserved;
+        uint16_t            reserved;
+        // Extended Reason Code
+        uint16_t            extendedRC;
         // Log Callout Number
         uint8_t             maxCallouts;
         // Callouts
