@@ -150,8 +150,8 @@ namespace HTMGT
                       l_usrDtls_ptr->userData1,
                       l_usrDtls_ptr->userData2,
                       l_usrDtls_ptr->userData3,
-                      ((l_usrDtls_ptr->modId & 0xFF00) << 16 ) |
-                      l_occElog->reserved, // extended reason code
+                      (l_usrDtls_ptr->modId << 16 ) |
+                      l_occElog->extendedRC, // extended reason code
                       severity);
 
             // Add callout information
