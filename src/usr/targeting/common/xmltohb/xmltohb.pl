@@ -873,10 +873,12 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
                             $fapiWriteable = 1;
                         }
 
-                        $typeSection .= "    static_assert(sizeof(TARGETING::ATTR_". $attribute->{id}."_type) ==
-                                        sizeof(fapi2::". $fapiAttr->{id}."_Type), \"Size of attribute ATTR_". $attribute->{id}."_type is not equal to the size of ".
-                                        $fapiAttr->{id}."_Type , types dont match \" );\n";
-
+                        if(!exists $attribute->{simpleType}->{enumeration})
+                        {
+                            $typeSection .= "    static_assert(sizeof(TARGETING::ATTR_". $attribute->{id}."_type) ==
+                                            sizeof(fapi2::". $fapiAttr->{id}."_Type), \"Size of attribute ATTR_". $attribute->{id}."_type is not equal to the size of ".
+                                            $fapiAttr->{id}."_Type , types dont match \" );\n";
+                        }
                         last;
                     }
                 }
