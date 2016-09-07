@@ -117,8 +117,9 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_data.insertFromRight<TT::READ_LATENCY_OFFSET, TT::READ_LATENCY_OFFSET_LEN>(l_rlo);
     l_data.insertFromRight<TT::WRITE_LATENCY_OFFSET, TT::WRITE_LATENCY_OFFSET_LEN>(l_wlo);
 
-    // TODO RTC:160355 Need to check what mode to put this bit in if there are mixed 3DS/SDP DIMM
-    l_data.clearBit<TT::DDR4_LATENCY_SW>();
+    // Always set this bit. It forces the PHY to use A12 when figuring out latency. This makes sense in
+    // all cases as A12 is 0 for non-3DS in MR0.
+    l_data.setBit<TT::DDR4_LATENCY_SW>();
 
     FAPI_TRY( write_config1(i_target, l_data) );
 
