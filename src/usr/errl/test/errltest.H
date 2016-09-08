@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -868,7 +868,74 @@ public:
         return l_dataMatching;
     }
 
+   /**
+     * @brief Test CORE callout
+     */
+    void testErrl7(void)
+    {
+        TS_TRACE( "test testErrl7");
+#if 1
+        // these tests deconfigure and gard targets. and even tho they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+#else
+        do
+        {
+            // find a core unit that we can play with
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+
+            TARGETING::PredicateCTM predCore(TARGETING::CLASS_UNIT,
+                                           TARGETING::TYPE_CORE);
+            TARGETING::PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            TARGETING::PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predCore).push(&predFunctional).And();
+
+            TARGETING::TargetHandleList l_coreList;
+            TARGETING::targetService().getAssociated( l_coreList, pSys,
+                TARGETING::TargetService::CHILD, TARGETING::TargetService::ALL,
+                &checkExpr );
+
+            if (l_coreList.empty())
+            {
+                TS_FAIL("test callout: empty l_coreList");
+                break;
+            }
+
+            TARGETING::TargetHandle_t l_target = *l_coreList.begin();
+
+            // Create an error log
+            errlHndl_t errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ERRORLOG::ERRL_TEST_MOD_ID,
+                                    ERRORLOG::ERRL_TEST_REASON_CODE);
+
+            // test the different callout types
+            TS_TRACE( "test callout l_core %p", l_target);
+            ERRORLOG::ErrlUserDetailsTarget(l_target).addToLog(errl);
+
+            errl->addHwCallout(l_target,
+                    HWAS::SRCI_PRIORITY_HIGH,
+                    HWAS::DECONFIG,
+                    HWAS::GARD_User_Manual);
+
+            errlCommit(errl, CXXTEST_COMP_ID);
+
+            TS_TRACE("testErrl7 done");
+        }
+        while(0);
+#endif
+    }
+
 };
 }
+
 #endif
 
