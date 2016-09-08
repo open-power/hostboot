@@ -38,8 +38,219 @@
 
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+#include <lib/utils/scom.H>
 
 namespace mss
+{
+
+enum
+{
+    PRIMARY = 0,
+    SECONDARY = 1,
+    TERTIARY = 2,
+    QUATERNARY = 3,
+    NO_RANK = 999,
+};
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with rank pairs
+/// @tparam T fapi2::TargetType representing the PHY
+/// @tparam RP the rank pair
+///
+template< fapi2::TargetType T, uint64_t RP >
+class rankPairTraits;
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with the Centaur PHY
+///
+template< uint64_t RP >
+class rankPairTraits< fapi2::TARGET_TYPE_MBA, RP >
+{
+};
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with the Nimbus PHY rank pair 0
+///
+// TODO RTC:160869 Clean up rank utility functions, edd enums where appropriate
+template<>
+class rankPairTraits< fapi2::TARGET_TYPE_MCA, 0 >
+{
+    public:
+        enum
+        {
+            NUM_RANK_PAIR_REGS = 2,
+            NUM_RANKS_IN_PAIR = 4,
+        };
+
+        // MCA rank config registers
+        static const std::vector< uint64_t > RANK_PAIR_REGS;
+
+        // Mapping for which fields below (primary, secondary, ...) go into which regs
+        static const std::vector< uint64_t > RANK_PAIR_FIELD_MAP;
+
+        // MCA rank and valid fields.
+        constexpr static const uint64_t RANK_PAIR_FIELDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_SEC,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_TER,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_QUA,
+        };
+        constexpr static const uint64_t RANK_PAIR_LENGTHS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_SEC_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_TER_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_QUA_LEN,
+        };
+        constexpr static const uint64_t RANK_PAIR_VALIDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI_V,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_SEC_V,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_TER_V,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_QUA_V,
+        };
+};
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with the Nimbus PHY rank pair 1
+///
+template<>
+class rankPairTraits< fapi2::TARGET_TYPE_MCA, 1 >
+{
+    public:
+        enum
+        {
+            NUM_RANK_PAIR_REGS = 2,
+            NUM_RANKS_IN_PAIR = 4,
+        };
+
+        // MCA rank config registers
+        static const std::vector< uint64_t > RANK_PAIR_REGS;
+
+        // Mapping for which fields below (primary, secondary, ...) go into which regs
+        static const std::vector< uint64_t > RANK_PAIR_FIELD_MAP;
+
+        // MCA rank and valid fields.
+        constexpr static const uint64_t RANK_PAIR_FIELDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_SEC,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_TER,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_QUA,
+        };
+        constexpr static const uint64_t RANK_PAIR_LENGTHS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_SEC_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_TER_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_QUA_LEN,
+        };
+        constexpr static const uint64_t RANK_PAIR_VALIDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI_V,
+            MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_SEC_V,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_TER_V,
+            MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_QUA_V,
+        };
+};
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with the Nimbus PHY rank pair 2
+///
+template<>
+class rankPairTraits< fapi2::TARGET_TYPE_MCA, 2 >
+{
+    public:
+        enum
+        {
+            NUM_RANK_PAIR_REGS = 2,
+            NUM_RANKS_IN_PAIR = 4,
+        };
+
+        // MCA rank config registers
+        static const std::vector< uint64_t > RANK_PAIR_REGS;
+
+        // Mapping for which fields below (primary, secondary, ...) go into which regs
+        static const std::vector< uint64_t > RANK_PAIR_FIELD_MAP;
+
+        // MCA rank and valid fields.
+        constexpr static const uint64_t RANK_PAIR_FIELDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_SEC,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_TER,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_QUA,
+        };
+        constexpr static const uint64_t RANK_PAIR_LENGTHS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_SEC_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_TER_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_QUA_LEN,
+        };
+        constexpr static const uint64_t RANK_PAIR_VALIDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI_V,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_SEC_V,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_TER_V,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_QUA_V,
+        };
+};
+
+///
+/// @class rankPairTraits
+/// @brief a collection of traits associated with the Nimbus PHY rank pair 3
+///
+template<>
+class rankPairTraits< fapi2::TARGET_TYPE_MCA, 3 >
+{
+    public:
+        enum
+        {
+            NUM_RANK_PAIR_REGS = 2,
+            NUM_RANKS_IN_PAIR = 4,
+        };
+
+        // MCA rank config registers
+        static const std::vector< uint64_t > RANK_PAIR_REGS;
+
+        // Mapping for which fields below (primary, secondary, ...) go into which regs
+        static const std::vector< uint64_t > RANK_PAIR_FIELD_MAP;
+
+        // MCA rank and valid fields.
+        constexpr static const uint64_t RANK_PAIR_FIELDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_SEC,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_TER,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_QUA,
+        };
+        constexpr static const uint64_t RANK_PAIR_LENGTHS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_SEC_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_TER_LEN,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_QUA_LEN,
+        };
+        constexpr static const uint64_t RANK_PAIR_VALIDS[] =
+        {
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI_V,
+            MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_SEC_V,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_TER_V,
+            MCA_DDRPHY_PC_RANK_PAIR3_P0_QUA_V,
+        };
+};
+
+// TODO RTC:160717 Tidy up function names in mss::rank namespace
+namespace rank
 {
 
 ///
@@ -119,5 +330,378 @@ fapi2::ReturnCode get_rank_pairs(const fapi2::Target<T>& i_target, std::vector<u
 template< fapi2::TargetType T>
 fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<T>& i_target, const uint64_t i_rank, uint64_t& o_pair);
 
+///
+/// @brief Read PC Rank Pair register
+/// @tparam RP rank pair index
+/// @tparam N register index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, uint64_t N, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode read_rank_pair_reg( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
+    FAPI_TRY( mss::getScom(i_target, TT::RANK_PAIR_REGS[N], o_data) );
+    FAPI_INF("read_rank_pair_reg: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
 }
+
+///
+/// @brief Write PC Rank Pair register
+/// @tparam RP rank pair register index
+/// @tparam N register index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_data the value to write to the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, uint64_t N, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode write_rank_pair_reg( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
+    FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], i_data) );
+    FAPI_INF("write_rank_pair_reg:: 0x%016lx", i_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set_rank_field
+/// @tparam RP rank pair (group) index
+/// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in, out] io_data the register value
+/// @param[in] i_value rank number
+/// @note When configured for a protocol that only supports a single rank system, the rankpair 0 primary
+///       rank must be set to 0
+///
+template< uint64_t RP, uint64_t R, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline void set_rank_field( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
+    io_data.insertFromRight<TT::RANK_PAIR_FIELDS[R], TT::RANK_PAIR_LENGTHS[R]>(i_value);
+    // also set valid field
+    io_data.writeBit<TT::RANK_PAIR_VALIDS[R]>(mss::YES);
+
+    FAPI_INF("set_rank_field: 0x%01lx", i_value);
+}
+
+///
+/// @brief set_rank_field
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in, out] io_data the register value
+/// @param[i] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
+/// @param[in] i_value rank number
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note When configured for a protocol that only supports a single rank system, the rankpair 0 primary
+///       rank must be set to 0
+///
+template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode set_rank_field( fapi2::buffer<uint64_t>& io_data,
+        const uint64_t i_rank,
+        const uint64_t i_value )
+{
+    switch (i_rank)
+    {
+        case(0):
+            set_rank_field<RP, 0>(io_data, i_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(1):
+            set_rank_field<RP, 1>(io_data, i_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(2):
+            set_rank_field<RP, 2>(io_data, i_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(3):
+            set_rank_field<RP, 3>(io_data, i_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
+/// @brief get_rank_field
+/// @tparam RP rank pair (group) index
+/// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_data the register value
+/// @param[out] o_value rank number
+///
+template< uint64_t RP, uint64_t R, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline void get_rank_field( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
+    i_data.extractToRight<TT::RANK_PAIR_FIELDS[R], TT::RANK_PAIR_LENGTHS[R]>(o_value);
+
+    FAPI_INF("get_rank_field: 0x%01lx", o_value);
+}
+
+///
+/// @brief get_rank_field
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_data the register value
+/// @param[i] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
+/// @param[out] o_value rank number
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode get_rank_field( fapi2::buffer<uint64_t>& i_data,
+        const uint64_t i_rank,
+        uint64_t& o_value )
+{
+    switch (i_rank)
+    {
+        case(0):
+            get_rank_field<RP, 0>(i_data, o_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(1):
+            get_rank_field<RP, 1>(i_data, o_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(2):
+            get_rank_field<RP, 2>(i_data, o_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(3):
+            get_rank_field<RP, 3>(i_data, o_value);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
+/// @brief set_pair_valid
+/// @tparam RP rank pair (group) index
+/// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in, out] io_data the register value
+/// @param[in] i_state mss::YES or mss::NO - desired state
+/// @note Indicates value in the RANK_PAIR field is valid
+///
+template< uint64_t RP, uint64_t R, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline void set_pair_valid( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
+    io_data.writeBit<TT::RANK_PAIR_VALIDS[R]>(i_state);
+
+    FAPI_INF("set_pair_valid: 0x%01lx", i_state);
+}
+
+///
+/// @brief set_pair_valid
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in, out] io_data the register value
+/// @param[in] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
+/// @param[in] i_state mss::YES or mss::NO - desired state
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note Indicates value in the RANK_PAIR field is valid
+///
+template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode set_pair_valid( fapi2::buffer<uint64_t>& io_data,
+        const uint64_t i_rank,
+        const mss::states i_state )
+{
+    switch (i_rank)
+    {
+        case(0):
+            set_pair_valid<RP, 0>(io_data, i_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(1):
+            set_pair_valid<RP, 1>(io_data, i_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(2):
+            set_pair_valid<RP, 2>(io_data, i_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(3):
+            set_pair_valid<RP, 3>(io_data, i_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
+/// @brief get_pair_valid
+/// @tparam RP rank pair (group) index
+/// @tparam R rank index in pair (PRIMARY, SECONDARY, etc)
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_data the register value
+/// @param[out] o_state mss::YES or mss::NO - representing the state of the field
+/// @note Indicates value in the RANK_PAIR field is valid
+///
+template< uint64_t RP, uint64_t R, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline void get_pair_valid( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
+    o_state = (i_data.getBit<TT::RANK_PAIR_VALIDS[R]>() == false) ? mss::NO : mss::YES;
+
+    FAPI_INF("get_pair_valid: 0x%01lx", o_state);
+}
+
+///
+/// @brief get_pair_valid
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_data the register value
+/// @param[in] i_rank rank index in pair (PRIMARY, SECONDARY, etc)
+/// @param[out] o_state mss::YES or mss::NO - representing the state of the field
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note Indicates value in the RANK_PAIR field is valid
+///
+template< uint64_t RP, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rankPairTraits<T, RP> >
+inline fapi2::ReturnCode get_pair_valid( fapi2::buffer<uint64_t>& i_data,
+        const uint64_t i_rank,
+        mss::states& o_state )
+{
+    switch (i_rank)
+    {
+        case(0):
+            get_pair_valid<RP, 0>(i_data, o_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(1):
+            get_pair_valid<RP, 1>(i_data, o_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(2):
+            get_pair_valid<RP, 2>(i_data, o_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        case(3):
+            get_pair_valid<RP, 3>(i_data, o_state);
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
+/// @brief set_ranks_in_pair
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_ranks vector of rank numbers (primary, secondary, tertiary, quaternary)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note All ranks will be marked as valid in the pair, unless specified as enum NO_RANK
+///
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
+                                     const std::vector<uint64_t> i_ranks )
+{
+    // make sure i_ranks has all four ranks
+    if (i_ranks.size() != TT::NUM_RANKS_IN_PAIR)
+    {
+        FAPI_ERR("rank vector incorrect size");
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    // Read the rank pair register(s)
+    std::vector<fapi2::buffer<uint64_t>> l_data;
+    uint64_t l_ordinal = 0;
+
+    FAPI_TRY( scom_suckah(i_target, TT::RANK_PAIR_REGS, l_data) );
+
+    // Modify
+    for (const auto l_rank : i_ranks)
+    {
+        if (l_rank == NO_RANK)
+        {
+            FAPI_TRY( set_pair_valid<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, mss::NO) );
+        }
+        else
+        {
+            FAPI_TRY( set_rank_field<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
+        }
+
+        ++l_ordinal;
+    }
+
+    // Write
+    FAPI_TRY( scom_blastah(i_target, TT::RANK_PAIR_REGS, l_data) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief get_ranks_in_pair
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[out] o_ranks vector of rank numbers (primary, secondary, tertiary, quaternary)
+/// @note Any ranks not marked as valid in the pair will be returned as enum NO_RANK
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
+                                     std::vector<uint64_t>& o_ranks )
+{
+    o_ranks.clear();
+
+    // Read the rank pair register(s)
+    std::vector<fapi2::buffer<uint64_t>> l_data;
+
+    FAPI_TRY( scom_suckah(i_target, TT::RANK_PAIR_REGS, l_data) );
+
+    // Get data
+    for (uint64_t l_ordinal = 0; l_ordinal < TT::NUM_RANKS_IN_PAIR; ++l_ordinal)
+    {
+        mss::states l_state = mss::NO;
+
+        FAPI_TRY( get_pair_valid<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_state) );
+
+        if (l_state == mss::NO)
+        {
+            o_ranks.push_back(NO_RANK);
+        }
+        else
+        {
+            uint64_t l_rank = 0;
+            FAPI_TRY( get_rank_field<RP>(l_data.at(TT::RANK_PAIR_FIELD_MAP[l_ordinal]), l_ordinal, l_rank) );
+            o_ranks.push_back(l_rank);
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace rank
+
+} // namespace mss
 #endif
