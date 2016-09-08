@@ -369,7 +369,7 @@ fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA
 
     // Now we need to figure out which DIMM this rank is on. It's either on DIMM0 or DIMM1, and DIMM0
     // has ranks 0-3 and DIMM1 has ranks 4-7. Return the DIMM associated.
-    l_rank_on_dimm = get_dimm_from_rank(l_rank);
+    l_rank_on_dimm = mss::rank::get_dimm_from_rank(l_rank);
 
     // Sanity check the DIMM list
     FAPI_INF("%s rank is on dimm: %d, number of dimms: %d", mss::c_str(i_target), l_rank_on_dimm, l_dimms.size());
@@ -591,7 +591,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
         // Section 5.2.1.3 PC Rank Pair 0 on page 177
         // Section 5.2.1.4 PC Rank Pair 1 on page 179
-        FAPI_TRY( mss::set_rank_pairs(p) );
+        FAPI_TRY( mss::rank::set_rank_pairs(p) );
 
         // Section 5.2.4.1 DP16 Data Bit Enable 0 on page 284
         // Section 5.2.4.2 DP16 Data Bit Enable 1 on page 285
@@ -600,7 +600,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::reset_data_bit_enable(p) );
         FAPI_TRY( mss::dp16::reset_bad_bits(p) );
 
-        FAPI_TRY( mss::get_rank_pairs(p, l_pairs) );
+        FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
         FAPI_TRY( mss::dp16::reset_write_clock_enable(p, l_pairs) );
