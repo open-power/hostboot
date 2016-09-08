@@ -59,6 +59,11 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
     ccs::program<TARGET_TYPE_MCBIST> l_program;
 
+    // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
+    // instructions in the CCS instruction vector
+    l_program.iv_poll.iv_initial_delay = 0;
+    l_program.iv_poll.iv_initial_sim_delay = 0;
+
     for (auto c : i_target.getChildren<TARGET_TYPE_MCS>())
     {
         for (auto p : c.getChildren<TARGET_TYPE_MCA>())
