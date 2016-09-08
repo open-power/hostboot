@@ -360,7 +360,9 @@ extern "C"
             if (((l_port == GPREG_PORT_ID) ||
                  ((l_port >= CME_PORT_ID) && (l_port <= CPM_PORT_ID)) ||
                  (l_port == PCBSLV_PORT_ID) ||
-                 (l_port == UNIT_PORT_ID && l_ring == EC_PSCM_RING_ID))) //Catches all PSCOM regs
+                 (l_port == UNIT_PORT_ID && l_ring == EC_PSCM_RING_ID) || //Catches all PSCOM regs
+                 (l_port == UNIT_PORT_ID && l_ring == EC_PERV_RING_ID
+                  && l_sat_id == PERV_DBG_SAT_ID))) // Each chiplet also has a DBG macro
             {
                 o_chipUnitRelated = true;
                 // PU_PERV_CHIPUNIT
