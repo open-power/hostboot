@@ -42,6 +42,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_revert_sbe_mcs_setup.H>
+#include <p9_perv_scom_addresses.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
@@ -51,6 +52,23 @@
 
 // MCS target type constants
 const uint8_t NUM_MCS_TARGETS = 4;
+
+const uint64_t MCS_CPLT_CTRL1_ARR[NUM_MCS_TARGETS] =
+{
+    PERV_N3_CPLT_CTRL1,
+    PERV_N3_CPLT_CTRL1,
+    PERV_N1_CPLT_CTRL1,
+    PERV_N1_CPLT_CTRL1
+};
+
+const uint64_t MCS_CPLT_CTRL1_BIT_ARR[NUM_MCS_TARGETS] =
+{
+    10,
+    10,
+    9,
+    9
+};
+
 const uint64_t MCS_MCFGP_ARR[NUM_MCS_TARGETS] =
 {
     MCS_0_MCFGP,
@@ -85,35 +103,42 @@ revert_mcs_hb_dcbz_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_t
                           const uint8_t i_mcs)
 {
     FAPI_DBG("Start");
+    fapi2::buffer<uint64_t> l_cplt_ctrl1;
     fapi2::buffer<uint64_t> l_mcfgp;
     fapi2::buffer<uint64_t> l_mcmode1;
     fapi2::buffer<uint64_t> l_mcfirmask;
 
-    // MCFGP -- mark BAR invalid & reset grouping configuration fields
-    FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
-             "Error from getScom (MCS%d_MCFGP)", i_mcs);
-    l_mcfgp.clearBit<MCS_MCFGP_VALID>();
-    l_mcfgp.clearBit<MCS_MCFGP_MC_CHANNELS_PER_GROUP,
-                     MCS_MCFGP_MC_CHANNELS_PER_GROUP_LEN>();
-    l_mcfgp.clearBit<MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION,
-                     MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION_LEN>();
-    l_mcfgp.clearBit<MCS_MCFGP_GROUP_SIZE, MCS_MCFGP_GROUP_SIZE_LEN>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
-             "Error from putScom (MCS%d_MCFGP)", i_mcs);
+    FAPI_TRY(fapi2::getScom(i_target, MCS_CPLT_CTRL1_ARR[i_mcs], l_cplt_ctrl1),
+             "Error from getscom (CPLT_CTRL1)");
 
-    // MCMODE1 -- enable speculation
-    FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
-             "Error from getScom (MCS%d_MCMODE1)", i_mcs);
-    l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
-    l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
-                       MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
-             "Error from putScom (MCS%d_MCMODE1)", i_mcs);
+    if (!l_cplt_ctrl1.getBit(MCS_CPLT_CTRL1_BIT_ARR[i_mcs]))
+    {
+        // MCFGP -- mark BAR invalid & reset grouping configuration fields
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
+                 "Error from getScom (MCS%d_MCFGP)", i_mcs);
+        l_mcfgp.clearBit<MCS_MCFGP_VALID>();
+        l_mcfgp.clearBit<MCS_MCFGP_MC_CHANNELS_PER_GROUP,
+                         MCS_MCFGP_MC_CHANNELS_PER_GROUP_LEN>();
+        l_mcfgp.clearBit<MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION,
+                         MCS_MCFGP_CHANNEL_0_GROUP_MEMBER_IDENTIFICATION_LEN>();
+        l_mcfgp.clearBit<MCS_MCFGP_GROUP_SIZE, MCS_MCFGP_GROUP_SIZE_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFGP_ARR[i_mcs], l_mcfgp),
+                 "Error from putScom (MCS%d_MCFGP)", i_mcs);
 
-    // MCFIRMASK -- mask all errors
-    l_mcfirmask.flush<1>();
-    FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
-             "Error from putScom (MCS%d_MCFIRMASK_OR)", i_mcs);
+        // MCMODE1 -- enable speculation
+        FAPI_TRY(fapi2::getScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
+                 "Error from getScom (MCS%d_MCMODE1)", i_mcs);
+        l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
+        l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
+                           MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCMODE1_ARR[i_mcs], l_mcmode1),
+                 "Error from putScom (MCS%d_MCMODE1)", i_mcs);
+
+        // MCFIRMASK -- mask all errors
+        l_mcfirmask.flush<1>();
+        FAPI_TRY(fapi2::putScom(i_target, MCS_MCFIRMASK_OR_ARR[i_mcs], l_mcfirmask),
+                 "Error from putScom (MCS%d_MCFIRMASK_OR)", i_mcs);
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
