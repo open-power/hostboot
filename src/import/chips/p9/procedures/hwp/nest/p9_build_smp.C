@@ -392,10 +392,16 @@ p9_build_smp_check_topology(p9_build_smp_system& i_smp)
     // 1) in a given group, all chips are connected to every other
     //    chip in the group, by an X bus
     // 2) each chip is connected to its partner chip (with same chip id)
-    //    in every other group, by an A bus
+    //    in every other group, by an A bus (or X bus if pump mode = chip_is_group)
 
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
     fapi2::buffer<uint8_t> l_group_ids_in_system;
     fapi2::buffer<uint8_t> l_chip_ids_in_groups;
+
+    // determine pump mode
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, FAPI_SYSTEM, l_pump_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE");
 
     // build set of all valid group IDs in system
     for (auto g_iter = i_smp.groups.begin();
@@ -457,8 +463,16 @@ p9_build_smp_check_topology(p9_build_smp_system& i_smp)
             {
                 if (l_x_en[l_link_id])
                 {
-                    FAPI_TRY(l_connected_chip_ids.setBit(l_x_rem_chip_id[l_link_id]),
-                             "Error from setBit (l_connected_chip_ids, X)");
+                    if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
+                    {
+                        FAPI_TRY(l_connected_chip_ids.setBit(l_x_rem_chip_id[l_link_id]),
+                                 "Error from setBit (l_connected_chip_ids, X)");
+                    }
+                    else
+                    {
+                        FAPI_TRY(l_connected_group_ids.setBit(l_x_rem_chip_id[l_link_id]),
+                                 "Error from setBit (l_connected_group_ids, X)");
+                    }
                 }
 
             }
