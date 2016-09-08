@@ -25,9 +25,6 @@
 #ifndef __PBA_FIRMWARE_REGISTERS_H__
 #define __PBA_FIRMWARE_REGISTERS_H__
 
-// $Id$
-// $Source$
-
 /// \file pba_firmware_registers.h
 /// \brief C register structs for the PBA unit
 
@@ -44,7 +41,7 @@
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
-#include "pba_firmware_constants.h"
+
 
 
 
@@ -336,7 +333,7 @@ typedef union pba_bcde_stat
 
 
 
-typedef union pba_bcde_pbadr
+typedef union pba_bcde_dr
 {
 
     uint64_t value;
@@ -368,7 +365,7 @@ typedef union pba_bcde_pbadr
         uint64_t reserved1 : 2;
 #endif // _BIG_ENDIAN
     } fields;
-} pba_bcde_pbadr_t;
+} pba_bcde_dr_t;
 
 
 
@@ -504,7 +501,7 @@ typedef union pba_bcue_stat
 
 
 
-typedef union pba_bcue_pbadr
+typedef union pba_bcue_dr
 {
 
     uint64_t value;
@@ -536,7 +533,7 @@ typedef union pba_bcue_pbadr
         uint64_t reserved1 : 2;
 #endif // _BIG_ENDIAN
     } fields;
-} pba_bcue_pbadr_t;
+} pba_bcue_dr_t;
 
 
 
