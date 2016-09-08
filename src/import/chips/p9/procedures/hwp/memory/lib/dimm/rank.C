@@ -44,6 +44,43 @@ using fapi2::FAPI2_RC_INVALID_PARAMETER;
 namespace mss
 {
 
+// Definition of the Nimbus PHY rank_pair0 config registers
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 0>::RANK_PAIR_REGS =
+{
+    MCA_DDRPHY_PC_RANK_PAIR0_P0,
+    MCA_DDRPHY_PC_RANK_PAIR2_P0,
+};
+
+// Definition of the Nimbus PHY rank_pair1 config registers
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 1>::RANK_PAIR_REGS =
+{
+    MCA_DDRPHY_PC_RANK_PAIR0_P0,
+    MCA_DDRPHY_PC_RANK_PAIR2_P0,
+};
+
+// Definition of the Nimbus PHY rank_pair2 config registers
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 2>::RANK_PAIR_REGS =
+{
+    MCA_DDRPHY_PC_RANK_PAIR1_P0,
+    MCA_DDRPHY_PC_RANK_PAIR3_P0,
+};
+
+// Definition of the Nimbus PHY rank_pair3 config registers
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 3>::RANK_PAIR_REGS =
+{
+    MCA_DDRPHY_PC_RANK_PAIR1_P0,
+    MCA_DDRPHY_PC_RANK_PAIR3_P0,
+};
+
+// Definition of mappings for which fields (primary, secondary, ...) go into which regs
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 0>::RANK_PAIR_FIELD_MAP = { 0, 0, 1, 1 };
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 1>::RANK_PAIR_FIELD_MAP = { 0, 0, 1, 1 };
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 2>::RANK_PAIR_FIELD_MAP = { 0, 0, 1, 1 };
+const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 3>::RANK_PAIR_FIELD_MAP = { 0, 0, 1, 1 };
+
+namespace rank
+{
+
 //
 // Static table of rank pair assignments. Some of thoem won't be valid depending on
 // the plug rules (which may be OpenPOWER, IBM, etc.) Some also won't make sense
@@ -290,8 +327,9 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     FAPI_DBG("setting rank pairs for %s. 0x%08llx, 0x%08llx csid: 0x%016llx",
              mss::c_str(i_target), l_rp_registers.first, l_rp_registers.second, l_csid_data);
 
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_rp_registers.first) );
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_rp_registers.second) );
+    // need an extra pair of parens to make FAPI_TRY parsing work correctly
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 0 >(i_target, l_rp_registers.first)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 1 >(i_target, l_rp_registers.second)) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
 
     // HACK HACK HACK: put this in the code properly!! BRS
@@ -419,4 +457,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-} // namespace
+} // namespace rank
+
+} // namespace mss

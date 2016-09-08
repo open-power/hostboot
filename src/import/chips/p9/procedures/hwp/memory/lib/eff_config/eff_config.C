@@ -2144,7 +2144,7 @@ fapi2::ReturnCode eff_config::vref_dq_train_value(const fapi2::Target<TARGET_TYP
 
     // Attribute to set num dimm ranks is a pre-requisite
     FAPI_TRY( eff_vref_dq_train_value(l_mcs, &l_attrs_vref_dq_train_val[0][0][0]) );
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
 
     for(const auto& l_rank : l_ranks)
     {
@@ -2176,7 +2176,7 @@ fapi2::ReturnCode eff_config::vref_dq_train_enable(const fapi2::Target<TARGET_TY
 
     // Attribute to set num dimm ranks is a pre-requisite
     FAPI_TRY( eff_vref_dq_train_enable(l_mcs, &l_attrs_vref_dq_train_enable[0][0][0]) );
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
 
     for(const auto& l_rank : l_ranks)
     {
@@ -2215,7 +2215,7 @@ fapi2::ReturnCode eff_config::vref_dq_train_range(const fapi2::Target<TARGET_TYP
 
     //gets the current value of train_range
     FAPI_TRY( eff_vref_dq_train_range(l_mcs, &l_attrs_vref_dq_train_range[0][0][0]) );
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
 
     for(const auto& l_rank : l_ranks)
     {

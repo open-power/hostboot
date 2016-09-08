@@ -79,7 +79,7 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     };
 
     std::vector< uint64_t > l_ranks;
-    FAPI_TRY( mss::ranks(i_target, l_ranks) );
+    FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
     FAPI_TRY( mss::tdllk(i_target, tDLLK) );
 
     // Load MRS

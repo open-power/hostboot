@@ -84,7 +84,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         // ranks. Therefore, we only need to clean up the primary ranks. And because there's 4 max, we can do it
         // all using the 4 address range registers of tne MCBIST (broadcast currently not considered.)
         // So we can write 0's to those to get their ECC fixed up.
-        FAPI_TRY( mss::primary_ranks(p, l_pr) );
+        FAPI_TRY( mss::rank::primary_ranks(p, l_pr) );
         fapi2::Assert( l_pr.size() <= mss::MAX_RANK_PER_DIMM );
 
         for (auto r = l_pr.begin(); r != l_pr.end(); ++l_rank_address_pair, ++r)
@@ -110,9 +110,9 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
                 l_fw_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
                 l_fw_subtest.change_addr_sel(l_rank_address_pair);
-                l_fw_subtest.enable_dimm(mss::get_dimm_from_rank(*r));
+                l_fw_subtest.enable_dimm(mss::rank::get_dimm_from_rank(*r));
                 l_program.iv_subtests.push_back(l_fw_subtest);
-                FAPI_DBG("adding superfast write for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::get_dimm_from_rank(*r));
+                FAPI_DBG("adding superfast write for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::rank::get_dimm_from_rank(*r));
             }
 
             // Read - we do a read here as verification can use this as a tool as we do the write and then the read.
@@ -125,9 +125,9 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
                 l_fr_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
                 l_fr_subtest.change_addr_sel(l_rank_address_pair);
-                l_fr_subtest.enable_dimm(mss::get_dimm_from_rank(*r));
+                l_fr_subtest.enable_dimm(mss::rank::get_dimm_from_rank(*r));
                 l_program.iv_subtests.push_back(l_fr_subtest);
-                FAPI_DBG("adding superfast read for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::get_dimm_from_rank(*r));
+                FAPI_DBG("adding superfast read for %s rank %d (dimm %d)", mss::c_str(p), *r, mss::rank::get_dimm_from_rank(*r));
             }
         }
 

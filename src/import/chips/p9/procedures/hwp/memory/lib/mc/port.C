@@ -163,7 +163,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         //
 
         // Setup PER_ZCAL_CONFIG based on the number of ranks on the DIMM in either slot.
-        FAPI_TRY( mss::ranks(i_target, l_ranks) );
+        FAPI_TRY( mss::rank::ranks(i_target, l_ranks) );
 
         for (auto r : l_ranks)
         {
@@ -209,7 +209,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<fapi2::TARGET_TYPE_MC
         // need to do it twice for the PHY? BRS
         fapi2::buffer<uint64_t> l_rank_config;
 
-        FAPI_TRY( mss::get_rank_pairs(i_target, l_pairs) );
+        FAPI_TRY( mss::rank::get_rank_pairs(i_target, l_pairs) );
 
         for (auto pair : l_pairs)
         {
