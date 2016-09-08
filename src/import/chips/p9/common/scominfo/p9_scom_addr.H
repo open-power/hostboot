@@ -338,6 +338,12 @@ extern "C"
         PPE_GPE3_RING_ID = 0x18,
     } p9_tp_ring_id_t;
 
+    /// Satellite ID for PERV
+    typedef enum
+    {
+        PERV_DBG_SAT_ID = 0xF,
+    } p9_perv_sat_id_t;
+
     /// Satellite ID for SBE
     typedef enum
     {
