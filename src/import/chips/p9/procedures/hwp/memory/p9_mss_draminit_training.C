@@ -133,7 +133,7 @@ extern "C"
             // • Section 5.2.6.3 WC Configuration 2 Register on page 438
 
             // Get our rank pairs.
-            FAPI_TRY( mss::get_rank_pairs(p, l_pairs) );
+            FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
             // Setup the config register
             //
