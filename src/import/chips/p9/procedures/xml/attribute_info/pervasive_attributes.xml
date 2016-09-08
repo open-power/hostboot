@@ -45,7 +45,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Clock Mux#0 settings</description>
   <valueType>uint8</valueType>
-  <platInit/> 
+  <platInit/>
 </attribute>
 
 <attribute>
@@ -186,7 +186,16 @@
 <attribute>
   <id>ATTR_BOOT_FREQ_MULT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>EQ boot frequency multiplier</description>
+  <description>EQ boot frequency multiplier
+
+  The equation for this setting is BOOT_FREQ(MHz)/(REFCLK/DPLL_DIVIDER) where
+  the DPLL DIVIDER is planned for being set to 8.  The value needs to be loaded
+  right justified.  The value's right most 11 bits (becoming 0:10) is written
+  as bits 17:27 of PPM DPLL freq ctrl register. Bits 0:7 become DPLL.MULT_INTG(0:7)
+  and bits 8:10 are DPLL.MULT_FRAC(0:2).
+
+  As an example: 3000MHz / (133MHz/8) = 3000 / 16.667 = ~180 => 0xB4
+  </description>
   <valueType>uint16</valueType>
   <persistRuntime/>
   <platInit/>
@@ -350,7 +359,7 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
   Created from running the mss_get_cen_ecid.C
-  Firmware shares some code with the processor, 
+  Firmware shares some code with the processor,
   so the attribute is named so they can point at a target and have common function.</description>
   <valueType>uint64</valueType>
   <writeable/>
@@ -564,7 +573,7 @@
   <valueType>uint8</valueType>
   <platInit/>
   <writeable/>
-</attribute> 
+</attribute>
 
 <attribute>
   <id>ATTR_SECURITY_MODE</id>
@@ -626,7 +635,7 @@
   <id>ATTR_SENSEADJ_STEP</id>
   <targetType>TARGET_TYPE_EQ</targetType>
   <description>IPL for skew adjust and duty cycle adjust</description>
-  <valueType>uint8</valueType> 
+  <valueType>uint8</valueType>
   <writeable/>
 </attribute>
 
