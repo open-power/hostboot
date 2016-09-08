@@ -275,6 +275,10 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     uint8_t l_a_rem_link_id[P9_FBC_UTILS_MAX_A_LINKS] = { 0 };
     uint8_t l_a_rem_fbc_group_id[P9_FBC_UTILS_MAX_A_LINKS] = { 0 };
 
+    // atttribute defining X link pump mode
+    fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
     // seed arrays with previously written attribute state
     if (i_op == SMP_ACTIVATE_PHASE2)
     {
@@ -301,6 +305,8 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
              "Error from p9_fbc_utils_get_chip_id_attr");
     FAPI_TRY(p9_fbc_utils_get_group_id_attr(i_target, l_loc_fbc_group_id),
              "Error from p9_fbc_utils_get_group_id_attr");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, FAPI_SYSTEM, l_pump_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE");
 
     if (i_process_electrical)
     {
@@ -317,7 +323,7 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
                          l_loc_fbc_group_id,
                          P9_FBC_XBUS_LINK_CTL_ARR,
                          P9_FBC_UTILS_MAX_X_LINKS,
-                         true,
+                         (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE),
                          l_x_en,
                          l_x_rem_link_id,
                          l_x_rem_fbc_chip_id),
@@ -334,7 +340,6 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
         // - if configured for X link use, fill in logical X link attributes
         // - if configured for A link use, fill in logical A link attributes
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_smp_optics_mode;
-        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, FAPI_SYSTEM, l_smp_optics_mode),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_SMP_OPTICS_MODE)");
 
@@ -350,7 +355,7 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
                              l_loc_fbc_group_id,
                              P9_FBC_XBUS_LINK_CTL_ARR,
                              P9_FBC_UTILS_MAX_X_LINKS,
-                             true,
+                             (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE),
                              l_x_en,
                              l_x_rem_link_id,
                              l_x_rem_fbc_chip_id),
