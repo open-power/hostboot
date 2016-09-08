@@ -31,7 +31,7 @@ using namespace fapi2;
 
 constexpr auto literal_1 = 1;
 constexpr auto literal_0 = 0;
-constexpr auto literal_0x0000000000028000 = 0x0000000000028000;
+constexpr auto literal_0x0000004000028000 = 0x0000004000028000;
 constexpr auto literal_0x00000000040101C3 = 0x00000000040101C3;
 constexpr auto literal_0x9554021F80100E0C = 0x9554021F80100E0C;
 constexpr auto literal_0b00 = 0b00;
@@ -122,7 +122,7 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0000000000028000, 0, 64, 0 );
+                l_scom_buffer.insert<uint64_t> (literal_0x0000004000028000, 0, 64, 0 );
             }
 
             l_rc = fapi2::putScom(TGT0, 0x5013033ull, l_scom_buffer);
