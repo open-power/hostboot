@@ -154,7 +154,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     // clear MVPD array
     memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
 
-    FAPI_TRY(proc_get_mvpd_data( i_target, &attr, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets),
+    FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets),
              "Get MVPD #V data failed");
 
     if (!present_chiplets)
@@ -1178,7 +1178,6 @@ return fapi2::current_err;
 
 fapi2::ReturnCode
 proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                   const AttributeList* i_attr,
                    uint32_t      o_attr_mvpd_data[PV_D][PV_W],
                    uint32_t*     o_valid_pdv_points,
                    uint8_t*      o_present_chiplets
@@ -1286,7 +1285,6 @@ do
         //                                bucket_id);
 
         FAPI_TRY(proc_chk_valid_poundv( i_target,
-                                        i_attr,
                                         chiplet_mvpd_data,
                                         o_valid_pdv_points,
                                         l_chipNum,
@@ -1823,7 +1821,6 @@ return l_rc;
 
 fapi2::ReturnCode
 proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                      const AttributeList* i_attr,
                       const uint32_t i_chiplet_mvpd_data[PV_D][PV_W],
                       uint32_t*      o_valid_pdv_points,
                       const uint8_t  i_chiplet_num,
@@ -1834,9 +1831,13 @@ const uint8_t pv_op_order[VPD_PV_POINTS] = VPD_PV_ORDER;
 const char*    pv_op_str[VPD_PV_POINTS] = VPD_PV_ORDER_STR;
 uint8_t       i = 0;
 bool          suspend_ut_check = false;
+uint8_t  l_attr_system_wof_enabled;
 
 do
 {
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_attr_system_wof_enabled));
 
     // check for non-zero freq, voltage, or current in valid operating points
     for (i = 0; i <= VPD_PV_POINTS - 1; i++)
@@ -1849,7 +1850,7 @@ do
                  i_chiplet_mvpd_data[pv_op_order[i]][3],
                  i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
-        if (i_attr->attr_system_wof_enabled && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+        if (l_attr_system_wof_enabled && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
         {
 
             if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
@@ -1871,7 +1872,7 @@ do
                 suspend_ut_check = true;
             }
         }
-        else if ((!i_attr->attr_system_wof_enabled) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+        else if ((!l_attr_system_wof_enabled) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
         {
             FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
             suspend_ut_check = true;
@@ -1935,7 +1936,7 @@ do
                  i_chiplet_mvpd_data[pv_op_order[i]][3], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
                  i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
-        if (i_attr->attr_system_wof_enabled && strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") && !suspend_ut_check )
+        if (l_attr_system_wof_enabled && strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") && !suspend_ut_check )
         {
             if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
                 i_chiplet_mvpd_data[pv_op_order[i - 1]][1] > i_chiplet_mvpd_data[pv_op_order[i]][1]  ||
@@ -1961,7 +1962,8 @@ do
 }
 while(0);
 
-return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+return fapi2::current_err;
 }
 
 #if 0

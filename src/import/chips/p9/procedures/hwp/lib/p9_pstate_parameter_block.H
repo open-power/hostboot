@@ -224,7 +224,6 @@ typedef struct
 /// ----------------------------------------------------------------
 /// @brief Get #V data and put into array
 /// @param[i] i_target            Chip Target
-/// @param[i] i_attr              Attribute list
 /// @param[o] o_attr_mvpd_data    5x5 array to hold the #V data
 /// @param[o] o_valid_pdv_points  No of Valid VPD points
 /// @param[o] o_present_chiplets  No of functional chiplets
@@ -232,14 +231,12 @@ typedef struct
 /// ----------------------------------------------------------------
 fapi2::ReturnCode
 proc_get_mvpd_data ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     const AttributeList* i_attr,
                      uint32_t o_attr_mvpd_data[PV_D][PV_W],
                      uint32_t* o_valid_pdv_points,
                      uint8_t* o_present_chiplets );
 
 /// -------------------------------------------------------------------
 /// @brief Perform data validity check on #V data
-/// @param[i] i_attr              Attribute list
 /// @param[i] i_chiplet_mvpd_data Pointer to array of #V data
 /// @param[o] o_valid_pdv_points  No of Valid VPD points
 /// @param[o] i_chiplet_num       Chiplet number
@@ -249,7 +246,6 @@ proc_get_mvpd_data ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
 fapi2::ReturnCode
 proc_chk_valid_poundv ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                        const AttributeList* i_attr,
                         const uint32_t i_chiplet_mvpd_data[PV_D][PV_W],
                         uint32_t* o_valid_pdv_points,
                         const uint8_t i_chiplet_num,

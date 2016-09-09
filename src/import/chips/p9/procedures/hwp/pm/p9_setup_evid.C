@@ -184,13 +184,19 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                   avsbus_attrs_t* attrs,
                   const VoltageConfigActions_t i_action)
 {
+    uint32_t attr_mvpd_data[PV_D][PV_W];
+    uint32_t valid_pdv_points;
+    uint8_t present_chiplets;
 
     attrs->vdd_bus_num = DEFAULT_VDD_BUS_NUMBER;
     attrs->vdd_rail_select = DEFAULT_VDD_RAILSELECT;
+    attrs->vdd_voltage_mv = DEFAULT_BOOT_VDD_VOLTAGE_MV;
     attrs->vdn_bus_num = DEFAULT_VDN_BUS_NUMBER;
     attrs->vdn_rail_select = DEFAULT_VDN_RAILSELECT;
+    attrs->vdn_voltage_mv = DEFAULT_BOOT_VDN_VOLTAGE_MV;
     attrs->vcs_bus_num = DEFAULT_VCS_BUS_NUMBER;
     attrs->vcs_rail_select = DEFAULT_VCS_RAILSELECT;
+    attrs->vcs_voltage_mv = DEFAULT_BOOT_VCS_VOLTAGE_MV;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDD_AVSBUS_BUSNUM, i_target,
                            attrs->vdd_bus_num));
@@ -216,67 +222,66 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     //inputed to the HWP tells us to
     if(i_action == COMPUTE_VOLTAGE_SETTINGS)
     {
-        // If attribute values are zero, use the default values (hardcoded)
-        // check VDD VID
-        if (attrs->vdd_voltage_mv == 0)
+        // query VPD if any of the voltage attributes are zero
+        if (!attrs->vdd_voltage_mv ||
+            !attrs->vcs_voltage_mv ||
+            !attrs->vdn_voltage_mv)
         {
-            // Default voltage if mailbox value is not set
+            // Get #V data from MVPD for VDD/VDN and VCS voltage values
+            FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_data, &valid_pdv_points, &present_chiplets));
 
-            // @todo L3 - Eventually, this should replaced with an error point
-            // to indicate that the mailbox -> attributes haven't been setup
+            // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
+            if (attrs->vdd_voltage_mv)
+            {
+                FAPI_INF("VDD boot voltage override set");
+            }
+            else
+            {
+                FAPI_INF("VDD boot voltage override not set, using VPD value");
+                attrs->vdd_voltage_mv = attr_mvpd_data[POWERSAVE][1];
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, attrs->vdd_voltage_mv),
+                         "Error from FAPI_ATTR_SET (ATTR_VDD_BOOT_VOLTAGE)");
+            }
 
-            attrs->vdd_voltage_mv  = DEFAULT_BOOT_VDD_VOLTAGE_MV;
-            FAPI_INF("VDD boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                     attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target,
-                                   attrs->vdd_voltage_mv));
+            // set VCS voltage to UltraTurbo Voltage from MVPD data (if no override)
+            if (attrs->vcs_voltage_mv)
+            {
+                FAPI_INF("VCS boot voltage override set");
+            }
+            else
+            {
+                FAPI_INF("VCS boot voltage override not set, using VPD value");
+                attrs->vcs_voltage_mv = attr_mvpd_data[ULTRA][1];
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target, attrs->vcs_voltage_mv),
+                         "Error from FAPI_ATTR_SET (ATTR_VCS_BOOT_VOLTAGE)");
+            }
+
+            // set VDN voltage to PowerSave Voltage from MVPD data (if no override)
+            if (attrs->vdn_voltage_mv)
+            {
+                FAPI_INF("VDN boot voltage override set");
+            }
+            else
+            {
+                FAPI_INF("VDN boot voltage override not set, using VPD value");
+                attrs->vdn_voltage_mv = attr_mvpd_data[POWERBUS][1];
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target, attrs->vdn_voltage_mv),
+                         "Error from FAPI_ATTR_SET (ATTR_VDN_BOOT_VOLTAGE)");
+            }
         }
         else
         {
-            FAPI_INF("VDD boot voltage = %d mV (%x)",
-                     attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
-        }
-
-        // check VCS VID
-        if (attrs->vcs_voltage_mv == 0)
-        {
-            // Default voltage if mailbox value is not set
-
-            // @todo L3 - Eventually, this should replaced with an error point
-            // to indicate that the mailbox -> attributes haven't been setup
-
-            attrs->vcs_voltage_mv  = DEFAULT_BOOT_VCS_VOLTAGE_MV;
-            FAPI_INF("VCS boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                     attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target,
-                                   attrs->vcs_voltage_mv));
-        }
-        else
-        {
-            FAPI_INF("VCS boot voltage = %d mV (%x)",
-                     attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
-        }
-
-        // check VDN VID
-        if (attrs->vdn_voltage_mv == 0)
-        {
-            // Default voltage if mailbox value is not set
-
-            // @todo -L3  Eventually, this should replaced with an error point
-            // to indicate that the mailbox -> attributes haven't been setup
-
-            attrs->vdn_voltage_mv  = DEFAULT_BOOT_VDN_VOLTAGE_MV;
-            FAPI_INF("VDN boot voltage not set in attributes. Setting to default of %d mV (%x)",
-                     attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target,
-                                   attrs->vdn_voltage_mv));
-        }
-        else
-        {
-            FAPI_INF("VDN boot voltage = %d mV (%x)",
-                     attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
+            FAPI_INF("Using override for all boot voltages (VDD/VCS/VDN)");
         }
     }
+
+    // trace values to be used
+    FAPI_INF("VDD boot voltage = %d mV (%x)",
+             attrs->vdd_voltage_mv, attrs->vdd_voltage_mv);
+    FAPI_INF("VCS boot voltage = %d mV (%x)",
+             attrs->vcs_voltage_mv, attrs->vcs_voltage_mv);
+    FAPI_INF("VDN boot voltage = %d mV (%x)",
+             attrs->vdn_voltage_mv, attrs->vdn_voltage_mv);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -289,10 +294,6 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 
     // AVSBus configuration variables
     avsbus_attrs_t attrs;
-    AttributeList mvpd_attrs;
-    uint32_t attr_mvpd_data[PV_D][PV_W];
-    uint32_t valid_pdv_points;
-    uint8_t present_chiplets;
 
     // Read attribute -
     FAPI_TRY(avsInitAttributes(i_target, &attrs, i_action));
@@ -308,30 +309,27 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                           attrs.vdn_bus_num, BRIDGE_NUMBER),
                  "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
 
-        // Get #V data from MVPD to program VDD/VDN and VCS voltage values
-        FAPI_TRY(proc_get_mvpd_data(i_target, &mvpd_attrs, attr_mvpd_data, &valid_pdv_points, &present_chiplets));
-
-        // Set Boot VDD Voltage - PowerSave Voltage from the MVPD data
+        // Set Boot VDD Voltage
         FAPI_TRY(avsVoltageWrite(i_target,
                                  attrs.vdd_bus_num,
                                  BRIDGE_NUMBER,
                                  attrs.vdd_rail_select,
-                                 attr_mvpd_data[POWERSAVE][1]),
+                                 attrs.vdd_voltage_mv),
                  "Setting VDD voltage via AVSBus %d, Bridge %d",
                  attrs.vdd_bus_num,
                  BRIDGE_NUMBER);
 
-        // Set Boot VDN Voltage - PowerBus Voltage from the MVPD data
+        // Set Boot VDN Voltage
         FAPI_TRY(avsVoltageWrite(i_target,
                                  attrs.vdn_bus_num,
                                  BRIDGE_NUMBER,
                                  attrs.vdn_rail_select,
-                                 attr_mvpd_data[POWERBUS][1]),
+                                 attrs.vdn_voltage_mv),
                  "Setting VDN voltage via AVSBus %d, Bridge %d",
                  attrs.vdn_bus_num,
                  BRIDGE_NUMBER);
 
-        // Set Boot VCS Voltage - UltraTurbo Voltage from the MVPD data
+        // Set Boot VCS Voltage
         if(attrs.vcs_bus_num == 0xFF)
         {
 
@@ -345,7 +343,7 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                      attrs.vcs_bus_num,
                                      BRIDGE_NUMBER,
                                      attrs.vcs_rail_select,
-                                     attr_mvpd_data[ULTRA][1]),
+                                     attrs.vcs_voltage_mv),
                      "Setting VCS voltage via AVSBus %d, Bridge %d",
                      attrs.vcs_bus_num,
                      BRIDGE_NUMBER);
