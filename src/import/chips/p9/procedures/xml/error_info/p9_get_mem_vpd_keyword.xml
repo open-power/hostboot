@@ -45,7 +45,7 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_TYPE</rc>
-    <description>Type not supported. Supported types are MR and MT</description>
+    <description>Type not supported. Supported types are MR, MT, DQ, and CK</description>
     <ffdc>TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
   </hwpError>
@@ -97,6 +97,16 @@
     <ffdc>VPDRANKMASK</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+      <rc>RC_GET_MEM_VPD_ENTRY_NOT_FOUND</rc>
+      <description>Entry outside of possible entries</description>
+      <ffdc>ENTRY</ffdc>
+      <ffdc>MAX_ENTRIES</ffdc>
+      <ffdc>VERSION</ffdc>
+      <ffdc>TARGET</ffdc>
+      <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
