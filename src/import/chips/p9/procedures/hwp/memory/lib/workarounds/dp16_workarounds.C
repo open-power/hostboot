@@ -91,6 +91,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief DP16 Read Diagnostic Configuration 5 work around
+/// Not in the Model 67 spydef, so we scom them. Should be removed when they are
+/// added to the spydef.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // Config provided by S. Wyatt 8/16
+    constexpr uint64_t rd_dia_config = 0x0010;
+
+    static const std::vector<uint64_t> l_addrs =
+    {
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_0,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_1,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_2,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_3,
+        MCA_DDRPHY_DP16_RD_DIA_CONFIG5_P0_4,
+    };
+
+    FAPI_TRY( mss::scom_blastah(i_target, l_addrs, rd_dia_config) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss
