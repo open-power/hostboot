@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_xbus_linktrain
 OBJS+=p9_io_common.o
+OBJS+=p9_io_xbus_clear_firs.o
 $(call BUILD_PROCEDURE)
