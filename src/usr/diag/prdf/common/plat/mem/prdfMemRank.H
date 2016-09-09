@@ -40,7 +40,11 @@ namespace PRDF
 //  Class MemRank
 //------------------------------------------------------------------------------
 
-/** @brief Container for a memory rank. */
+/** @brief Simple container for a memory rank.
+ *  @note  These ranks are relative to the MBA and MCA targets. Therefore, they
+ *         do not contain information like the port, which is needed for MCBIST
+ *         targets. So that information will need to be derived elsewhere.
+ */
 class MemRank
 {
   public: // enums, constants
@@ -57,9 +61,7 @@ class MemRank
   public: // functions
 
     /** @brief Default constructor */
-    MemRank() :
-        iv_mrnk(0), iv_srnk(0)
-    {}
+    MemRank() = default;
 
     /**
      * @brief Constructor from components.
@@ -102,8 +104,8 @@ class MemRank
 
   private: // data
 
-    uint8_t iv_mrnk; ///< Master rank (combined DIMM slct and rank slct)
-    uint8_t iv_srnk; ///< Slave rank
+    uint8_t iv_mrnk = 0; ///< Master rank (combined DIMM slct and rank slct)
+    uint8_t iv_srnk = 0; ///< Slave rank
 };
 
 } // end namespace PRDF
