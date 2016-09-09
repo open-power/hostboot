@@ -29,6 +29,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
 // targeting support
 #include <targeting/common/commontargeting.H>
@@ -37,9 +38,10 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-
 #include <p9_setup_evid.H>
 
+
+#include <hbToHwsvVoltageMsg.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -59,10 +61,10 @@ void* call_host_set_voltages(void *io_pArgs)
     errlHndl_t l_err = NULL;
     TargetHandleList l_procList;
     IStepError l_stepError;
-
+    bool l_noError = true;
     do
     {
-        // Get the systems procs
+        // Get the system's procs
         getAllChips( l_procList,
                      TYPE_PROC,
                      true ); // true: return functional procs
@@ -91,9 +93,33 @@ void* call_host_set_voltages(void *io_pArgs)
                 l_stepError.addErrorDetails( l_err );
 
                 errlCommit( l_err, HWPF_COMP_ID );
+                l_noError = false;
             }
-        } // Processor loop
+        } // Processor Loop
 
+        if( l_noError )
+        {
+#if 0 // TODO RTC: 160517 - Uncomment the call to send processor voltage data to HWSV
+            //If FSP is present, send voltage information to HWSV
+            if( INITSERVICE::spBaseServicesEnabled() )
+            {
+                l_err = platform_set_nest_voltages();
+
+                if( l_err )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Error in call_host_set_voltages::platform_set_nest_voltages()")
+
+                    // Create IStep error log and cross reference occurred error
+                    l_stepError.addErrorDetails( l_err );
+
+                    //Commit Error
+                    errlCommit( l_err, ISTEP_COMP_ID );
+
+                }
+            }
+#endif
+        }
     }while( 0 );
 
 

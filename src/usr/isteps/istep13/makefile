@@ -46,7 +46,6 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 
 
-
 # from src/usr/isteps/istep13
 OBJS += call_host_disable_memvolt.o
 OBJS += call_mem_pll_reset.o
@@ -61,7 +60,6 @@ OBJS += call_mss_draminit_training.o
 OBJS += call_mss_draminit_trainadv.o
 OBJS += call_mss_draminit_mc.o
 
-OBJS += $(if $(CONFIG_OPENPOWER_VDDR),openpower_vddr.o,hbVddrMsg.o)
 
 #HWP build tool
 include ${ROOTPATH}/procedure.rules.mk

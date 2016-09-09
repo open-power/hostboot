@@ -31,6 +31,7 @@
 #        --system=systemname
 #              Specify which system MRW XML to be generated
 #        --systemnodes=systemnodesinbrazos
+
 #              Specify number of nodes for brazos system, by default it is 4
 #        --mrwdir=pathname
 #              Specify the complete dir pathname of the MRW. Colon-delimited
@@ -940,6 +941,93 @@ foreach my $dmi (@{$dmibus->{'dmi-bus'}})
     #print STDOUT "dbus_centaur: n$node:cen$membuf swap:$swap\n";
     push @dbus_centaur, [ $node, $membuf, $swap, $tx_swap, $rx_swap ];
 }
+
+#------------------------------------------------------------------------------
+# Process the proc-vrds MRW file
+#------------------------------------------------------------------------------
+my $proc_vrds_file = open_mrw_file($mrwdir, "${sysname}-proc-vrds.xml");
+my $mrwProcVoltageDomains = parse_xml_file($proc_vrds_file,
+                                 forcearray=>['proc-vrd-connection']);
+our %vrdHash = ();
+my %procVrdUuidHash;
+my %procVrdIdHash;
+my %validProcVrdTypes
+    = ('VCS' => 1, 'VDN' => 1, 'VIO' => 1, 'VDDR' => 1, 'VDD' => 1);
+
+use constant VRD_PROC_I2C_DEVICE_PATH => 'vrdProcI2cDevicePath';
+use constant VRD_PROC_I2C_ADDRESS => 'vrdProcI2cAddress';
+use constant VRD_PROC_DOMAIN_TYPE => 'vrdProcDomainType';
+use constant VRD_PROC_DOMAIN_ID => 'vrdProcDomainId';
+use constant VRD_PROC_UUID => 'vrdProcUuid';
+
+foreach my $mrwProcVoltageDomain (
+    @{$mrwProcVoltageDomains->{'proc-vrd-connection'}})
+{
+
+    if( (!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'})
+      ||(!exists $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'})
+      ||(ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'}) eq "HASH")
+       || (ref($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'}) eq "HASH")
+       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'} eq "")
+       || ($mrwProcVoltageDomain->{'vrd'}->{'i2c-address'} eq ""))
+   {
+       next;
+   }
+
+    my $procVrdDev  = $mrwProcVoltageDomain->{'vrd'}->{'i2c-dev-path'};
+    my $procVrdAddr = $mrwProcVoltageDomain->{'vrd'}->{'i2c-address'};
+    my $procVrdType = uc $mrwProcVoltageDomain->{'vrd'}->{'type'};
+    my $procInstance =
+        "n"  . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'node'} .
+        ":p" . $mrwProcVoltageDomain->{'proc'}->{'target'}->{'position'};
+
+
+    if(!exists $validProcVrdTypes{$procVrdType})
+    {
+        print STDOUT "Illegal VRD type of $procVrdType used\n";
+        next;
+    }
+
+    if(!exists $procVrdIdHash{$procVrdType})
+    {
+        $procVrdIdHash{$procVrdType} = 1; # changed to 1 as 0 = invalid
+    }
+    my $uuid = -1;
+    foreach my $vrd (keys %vrdHash )
+    {
+        if(   ($vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} eq $procVrdDev )
+           && ($vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS}     eq $procVrdAddr)
+           && ($vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE}     eq $procVrdType) )
+        {
+            # print STDOUT "-> Duplicate VRD: $vrd  ($procInstance)\n";
+            # print STDOUT "-> Device path: $procVrdDev + Address: $procVrdAddr\n";
+            # print STDOUT "-> VR Domain Type: $procVrdType\n";
+            # print STDOUT "-> VR Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
+            $uuid =  $vrd;
+            last;
+        }
+    }
+
+    if($uuid == -1)
+    {
+        my $vrd = scalar keys %vrdHash;
+        $vrdHash{$vrd}{VRD_PROC_I2C_DEVICE_PATH} = $procVrdDev;
+        $vrdHash{$vrd}{VRD_PROC_I2C_ADDRESS} = $procVrdAddr;
+        $vrdHash{$vrd}{VRD_PROC_DOMAIN_TYPE} = $procVrdType;
+        $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID} =
+            $procVrdIdHash{$procVrdType}++;
+        $uuid = $vrd;
+        if(0)
+        {
+            print STDOUT "** New vrd: $vrd  ($procInstance)\n";
+            print STDOUT "Device path: $procVrdDev + Address: $procVrdAddr\n";
+            print STDOUT "VRD Domain Type: $procVrdType\n";
+            print STDOUT "VRD Domain ID: $vrdHash{$vrd}{VRD_PROC_DOMAIN_ID}\n";
+        }
+    }
+    $procVrdUuidHash{$procInstance}{$procVrdType}{VRD_PROC_UUID} = $uuid;
+}
+
 
 #------------------------------------------------------------------------------
 # Process the dimm-vrds MRW file
@@ -2541,6 +2629,60 @@ sub byNodePos($$)
     return $retVal;
 }
 
+sub addProcVrdIds
+{
+    my($node, $proc) = @_;
+    my %o_vrd_uuids;
+    my $procInstance = "n0:p$proc";
+    my %vrd_ids =
+    (
+        "VCS"  => -1,
+        "VDN"  => -1,
+        "VIO"  => -1,
+        "VDDR" => -1,
+        "VDD"  => -1,
+    );
+
+
+#    print "\n<!-- addProcVrdIds for proc $proc" .
+#        "--n".$node."p".$proc." -->\n";
+
+
+
+    foreach my $procVrdType ( keys %{$procVrdUuidHash{$procInstance}} )
+    {
+        my $key = $procVrdUuidHash{$procInstance}{$procVrdType}{VRD_PROC_UUID};
+        my $domain_id = $vrdHash{$key}{VRD_PROC_DOMAIN_ID};
+
+        if( ($vrd_ids{ $procVrdType } != $domain_id) &&
+            ($vrd_ids{ $procVrdType } == -1) )
+        {
+            print "\n"
+            . "    <attribute>\n"
+            . "        <id>NEST_$procVrdType" . "_ID</id>\n"
+            . "        <default>$domain_id</default>\n"
+            . "    </attribute>";
+            $vrd_ids{ $procVrdType } = $domain_id;
+            $o_vrd_uuids{ $procVrdType } = $key;
+        }
+        elsif (!exists($vrd_ids{$procVrdType}))
+        {
+            die "Unkown vrd type $procVrdType for proc $proc\n";
+        }
+        elsif ($vrd_ids{ $procVrdType } != $domain_id)
+        {
+            die "PROC $proc: $procVrdType"."_ID has a different DomainID then expected".
+            " (found " . $domain_id . ", expected ". $vrd_ids{ $procVrdType } . ")\n";
+        }
+    }
+    print "\n";
+    #   print "\n<!-- end addProcVrdIds for proc $proc" .
+    #       "--n".$node."p".$proc." -->\n";
+
+    return %o_vrd_uuids;
+}
+
+
 sub addVoltageDomainIDs
 {
   my ($node, $proc, $mcbist) = @_;
@@ -2559,16 +2701,16 @@ sub addVoltageDomainIDs
   );
 
   #print "\n<!-- addVoltageDomainIDs for mcbist $mcbist" .
-  #          "--  n".$node."p".$proc." -->\n";
+            "--  n".$node."p".$proc." -->\n";
   foreach my $dimm (@dimms)
   {
-    # print "\n<!-- DIMM $dimm -->";
+#     print "\n<!-- DIMM $dimm -->";
 
     foreach my $vrmType ( keys %{$dimmVrmUuidHash{$dimm}} )
     {
       my $key = $dimmVrmUuidHash{$dimm}{$vrmType}{VRM_UUID};
       my $domain_id = $vrmHash{$key}{VRM_DOMAIN_ID};
-      # print "\n<!-- Key $key: Domain $domain_id -->\n";
+      #      print "\n<!-- Key $key: Domain $domain_id -->\n";
       if ( ($vrm_ids{ $vrmType } != $domain_id) &&
            ($vrm_ids{ $vrmType } == -1) )
       {
@@ -3509,6 +3651,8 @@ sub generate_proc
     # add I2C_BUS_SPEED_ARRAY attribute
     addI2cBusSpeedArray($sys, $node, $proc, "pu");
 
+    #add Voltage Rail Domain IDs
+    my %proc_vrd_hash = addProcVrdIds($node, $proc);
 
     print "
     <!-- Nest Voltage Rails -->
@@ -3544,7 +3688,7 @@ sub generate_proc
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
             $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId,
             $sbefifoFspApath, $sbefifoFspAsize, $sbefifoFspBpath,
-            $sbefifoFspBsize, \%nestRails );
+            $sbefifoFspBsize, \%proc_vrd_hash, \%nestRails );
 
     # Data from PHYP Memory Map
     print "\n";

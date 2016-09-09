@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep13/hbVddrMsg.C $                          */
+/* $Source: src/usr/isteps/hbToHwsvVoltageMsg.C $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2016                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,13 +33,11 @@
 #include <trace/trace.H>
 #include <mbox/mbox_queues.H>
 #include <mbox/mboxif.H>
-
-#include "hbVddrMsg.H"
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
-#include "platform_vddr.H"
-#include <istepHelperFuncs.H>
 #include <targeting/common/target.H>
+#include "hbToHwsvVoltageMsg.H"
+#include "istepHelperFuncs.H"
 
 
 using namespace ERRORLOG;
@@ -48,25 +45,25 @@ using namespace ERRORLOG;
 using namespace TARGETING;
 
 // Trace definition
-trace_desc_t* g_trac_volt = NULL;
-TRAC_INIT(&g_trac_volt, "HB_VDDR", 1024);
+trace_desc_t* g_trac_volt = nullptr;
+TRAC_INIT(&g_trac_volt, "HB_VOLT", 1024);
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::HBVddrMsg()
+// HBToHwsvVoltageMsg::HBToHwsvVoltageMsg()
 ///////////////////////////////////////////////////////////////////////////////
-HBVddrMsg::HBVddrMsg()
+HBToHwsvVoltageMsg::HBToHwsvVoltageMsg()
 {
-    TRACDCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::HBVddrMsg()" );
-    TRACDCOMP( g_trac_volt, EXIT_MRK "HBVddrMsg::HBVddrMsg()" );
+    TRACDCOMP( g_trac_volt, ENTER_MRK "HBToHwsvVoltageMsg::HBToHwsvVoltageMsg()" );
+    TRACDCOMP( g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::HBToHwsvVoltageMsg()" );
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::~HBVddrMsg()
+// HBToHwsvVoltageMsg::~HBToHwsvVoltageMsg()
 ///////////////////////////////////////////////////////////////////////////////
-HBVddrMsg::~HBVddrMsg()
+HBToHwsvVoltageMsg::~HBToHwsvVoltageMsg()
 {
-    TRACDCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::~HBVddrMsg()" );
-    TRACDCOMP( g_trac_volt, EXIT_MRK "HBVddrMsg::~HBVddrMsg()" );
+    TRACDCOMP( g_trac_volt, ENTER_MRK "HBToHwsvVoltageMsg::~HBToHwsvVoltageMsg()" );
+    TRACDCOMP( g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::~HBToHwsvVoltageMsg()" );
 };
 
 
@@ -75,8 +72,8 @@ HBVddrMsg::~HBVddrMsg()
 ///////////////////////////////////////////////////////////////////////////////
 
 bool compareVids(
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
 {
     bool lhsLogicallyBeforeRhs = (i_lhs.domain < i_rhs.domain);
 
@@ -90,12 +87,33 @@ bool compareVids(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// compareSequenceOrder
+///////////////////////////////////////////////////////////////////////////////
+bool compareSequenceOrder(
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+{
+    // Sequencing order is VDN->VDD->VCS
+    // true means lhs should be ordered before rhs
+    //
+    // if both values are the same, preserve order: true
+    // if lhs is VDN, we know it goes first, order stays the same: true
+    // if rhs is VCS, we know it goes last, order stays the same: true
+    // else, lhs needs to be swapped with rhs
+    return ( (i_lhs.domainId == i_rhs.domainId) ||
+             (i_lhs.domainId == HBToHwsvVoltageMsg::VOLTAGE_DOMAIN_NEST_VDN) ||
+             (i_rhs.domainId == HBToHwsvVoltageMsg::VOLTAGE_DOMAIN_NEST_VCS) );
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // areVidsEqual
 ///////////////////////////////////////////////////////////////////////////////
 
 bool areVidsEqual(
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_lhs,
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_rhs)
 {
     return(   (   i_lhs.domain
                == i_rhs.domain)
@@ -103,15 +121,56 @@ bool areVidsEqual(
                == static_cast<uint16_t>(i_rhs.domainId)) );
 }
 
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // isUnusedVoltageDomain
 ///////////////////////////////////////////////////////////////////////////////
 
 bool isUnusedVoltageDomain(
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t i_vid)
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t i_vid)
 {
     return (!i_vid.voltageMillivolts);
 }
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// removeExtraRequests
+///////////////////////////////////////////////////////////////////////////////
+void removeExtraRequests( HBToHwsvVoltageMsg::RequestContainer & io_requests,
+                          HBToHwsvVoltageMsg::VOLT_MSG_TYPE i_requestType,
+                          size_t i_targetListSize )
+{
+    if( i_targetListSize > 1 )
+    {
+        // Take out the duplicate records in io_requests by first
+        // sorting and then removing the duplicates
+        std::sort(io_requests.begin(), io_requests.end(), compareVids);
+        std::vector<HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t>::iterator
+            pInvalidEntries = std:: unique(
+                    io_requests.begin(),
+                    io_requests.end(),
+                    areVidsEqual);
+        io_requests.erase(pInvalidEntries, io_requests.end());
+    }
+
+
+    if( ( (i_requestType == HBToHwsvVoltageMsg::HB_VOLT_ENABLE) ||
+              (i_requestType == HBToHwsvVoltageMsg::HB_VOLT_POST_DRAM_INIT_ENABLE) )
+           && (i_targetListSize > 1 ) )
+    {
+            // Inhibit sending any request to turn on a domain with no voltage.
+            // When disabling we don't need to do this because the voltage is
+            // ignored.
+            io_requests.erase(
+                std::remove_if(io_requests.begin(), io_requests.end(),
+                    isUnusedVoltageDomain),io_requests.end());
+    }
+
+}
+
 
 //******************************************************************************
 // addMemoryVoltageDomains (templated)
@@ -122,13 +181,13 @@ template<
     const ATTRIBUTE_ID VOLTAGE_ATTR_STATIC,
     const ATTRIBUTE_ID VOLTAGE_ATTR_DYNAMIC,
     const ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
-void HBVddrMsg::addMemoryVoltageDomains(
+void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
     const TARGETING::Target* const     i_pMcbist,
-          HBVddrMsg::RequestContainer& io_domains) const
+          HBToHwsvVoltageMsg::RequestContainer& io_domains) const
 {
     assert(
-        (i_pMcbist != NULL),
-        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed NULL "
+        (i_pMcbist != nullptr),
+        "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code bug!  Caller passed NULL "
         "MCBIST target handle.");
 
     assert(
@@ -136,7 +195,7 @@ void HBVddrMsg::addMemoryVoltageDomains(
               == TARGETING::CLASS_UNIT)
           && (   i_pMcbist->getAttr<TARGETING::ATTR_TYPE>()
               == TARGETING::TYPE_MCBIST)),
-        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  Caller passed non-"
+        "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code bug!  Caller passed non-"
         "MCBIST target handle of class = 0x%08X and type of 0x%08X.",
         i_pMcbist->getAttr<TARGETING::ATTR_CLASS>(),
         i_pMcbist->getAttr<TARGETING::ATTR_TYPE>());
@@ -146,7 +205,7 @@ void HBVddrMsg::addMemoryVoltageDomains(
 
     assert(
         (pSysTarget != nullptr),
-        "HBVddrMsg::addMemoryVoltageDomains: Code bug!  System target was "
+        "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code bug!  System target was "
         "NULL.");
 
     typename AttributeTraits< MSS_DOMAIN_PROGRAM >::Type
@@ -154,29 +213,29 @@ void HBVddrMsg::addMemoryVoltageDomains(
 
 
     // Initialized by constructor to invalid defaults
-    HBVddrMsg::hwsvPowrMemVoltDomainRequest_t entry;
+    HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t entry;
 
     switch(VOLTAGE_DOMAIN_ID_ATTR)
     {
         case TARGETING::ATTR_VDDR_ID:
-            entry.domain = MEM_VOLTAGE_DOMAIN_VDDR;
+            entry.domain = VOLTAGE_DOMAIN_MEM_VDDR;
             break;
         case TARGETING::ATTR_VCS_ID:
-            entry.domain = MEM_VOLTAGE_DOMAIN_VCS;
+            entry.domain = VOLTAGE_DOMAIN_MEM_VCS;
             break;
         case TARGETING::ATTR_VPP_ID:
-            entry.domain = MEM_VOLTAGE_DOMAIN_VPP;
+            entry.domain = VOLTAGE_DOMAIN_MEM_VPP;
             break;
         case TARGETING::ATTR_AVDD_ID:
-            entry.domain = MEM_VOLTAGE_DOMAIN_AVDD;
+            entry.domain = VOLTAGE_DOMAIN_MEM_AVDD;
             break;
         case TARGETING::ATTR_VDD_ID:
-            entry.domain = MEM_VOLTAGE_DOMAIN_VDD;
+            entry.domain = VOLTAGE_DOMAIN_MEM_VDD;
             break;
         default:
             assert(
                 0,
-                "HBVddrMsg::addMemoryVoltageDomains: Code Bug!  Unsupported "
+                "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code Bug!  Unsupported "
                 "voltage domain of 0x%08X.",
                 VOLTAGE_DOMAIN_ID_ATTR);
             break;
@@ -211,14 +270,14 @@ void HBVddrMsg::addMemoryVoltageDomains(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::createVddrData
+// HBToHwsvVoltageMsg::createVddrData
 ///////////////////////////////////////////////////////////////////////////////
 
-void HBVddrMsg::createVddrData(
-          VDDR_MSG_TYPE     i_requestType,
+void HBToHwsvVoltageMsg::createVddrData(
+          VOLT_MSG_TYPE     i_requestType,
           RequestContainer& io_request) const
 {
-    TRACFCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::createVddrData" );
+    TRACFCOMP( g_trac_volt, ENTER_MRK "HBToHwsvVoltageMsg::createVddrData" );
 
     // Go through all the mcbist targets and gather their domains, domain
     // specific IDs, and domain specific voltages
@@ -233,7 +292,7 @@ void HBVddrMsg::createVddrData(
 
         for (const auto & pMcbist: l_mcbistTargetList)
         {
-            if(i_requestType == HB_VDDR_ENABLE)
+            if(i_requestType == HB_VOLT_ENABLE)
             {
                 (void)addMemoryVoltageDomains<
                     TARGETING::ATTR_MSS_VDD_PROGRAM,
@@ -277,62 +336,131 @@ void HBVddrMsg::createVddrData(
                     io_request);
         }
 
-        if (l_mcbistTargetList.size() > 1)
-        {
-            // Take out the duplicate records in io_request by first
-            // sorting and then removing the duplicates
-            std::sort(io_request.begin(), io_request.end(), compareVids);
-            std::vector<hwsvPowrMemVoltDomainRequest_t>::iterator
-                pInvalidEntries = std::unique(
-                    io_request.begin(),
-                    io_request.end(),
-                    areVidsEqual);
-            io_request.erase(pInvalidEntries,io_request.end());
-        }
-
-        if( ( (i_requestType == HB_VDDR_ENABLE) ||
-              (i_requestType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
-           && (!l_mcbistTargetList.empty())      )
-        {
-            // Inhibit sending any request to turn on a domain with no voltage.
-            // When disabling we don't need to do this because the voltage is
-            // ignored.
-            io_request.erase(
-                std::remove_if(io_request.begin(), io_request.end(),
-                    isUnusedVoltageDomain),io_request.end());
-        }
+        // Remove duplicate records and requests containing invalid voltages
+        removeExtraRequests( io_request,
+                             i_requestType,
+                             l_mcbistTargetList.size());
 
     } while(0);
 
-    TRACFCOMP( g_trac_volt, EXIT_MRK "HBVddrMsg::createVddrData" );
+    TRACFCOMP( g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::createVddrData" );
     return;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::sendMsg
+// HBToHwsvVoltageMsg::sendRequestData
 ///////////////////////////////////////////////////////////////////////////////
-errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
+errlHndl_t HBToHwsvVoltageMsg::sendRequestData( RequestContainer & i_requests,
+                                       VOLT_MSG_TYPE i_msgType ) const
 {
-    errlHndl_t l_err = NULL;
+
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        size_t l_numRequests = i_requests.size();
+        TRACDCOMP(g_trac_volt,
+                "sendRequestData::l_numRequests = %d",
+                l_numRequests);
+
+
+        // Skip sending message if VPO
+        if( TARGETING::is_vpo())
+        {
+            TRACFCOMP( g_trac_volt,
+                    "hbToHwsvVoltageMsg::sendRequestData skipped because of"
+                   "  VPO environment!" );
+            break;
+        }
+
+
+        // Only send a message if there is data to send
+        if( l_numRequests )
+        {
+            uint32_t l_msgSize = l_numRequests *
+                    sizeof(hwsvPowrMemVoltDomainRequest_t);
+
+            // Create the message to send to HWSV
+            msg_t * l_msg = msg_allocate();
+            l_msg->type = i_msgType;
+            l_msg->data[0] = 0;
+            l_msg->data[1] = l_msgSize;
+
+            TRACDCOMP(g_trac_volt, INFO_MRK "hbToHwsvVoltageMsg::l_numRequests=%d, "
+                      "l_msgSize=%d",
+                      l_numRequests, l_msgSize);
+            void* l_data = malloc(l_msgSize);
+
+            hwsvPowrMemVoltDomainRequest_t* l_ptr =
+                reinterpret_cast<hwsvPowrMemVoltDomainRequest_t*>(l_data);
+
+            for (size_t j = 0; j<l_numRequests; ++j)
+            {
+                l_ptr->domain            = i_requests.at(j).domain;
+                l_ptr->domainId          = i_requests.at(j).domainId;
+                l_ptr->voltageMillivolts = i_requests.at(j).voltageMillivolts;
+
+                TRACFCOMP(g_trac_volt, ENTER_MRK "hbToHwsvVoltageMsg::sendRequestData "
+                          "Voltage domain type = 0x%08X, "
+                          "Voltage domain ID = 0x%04X, "
+                          "Voltage (mV) = %d, index = %d",
+                          l_ptr->domain,
+                          l_ptr->domainId,
+                          l_ptr->voltageMillivolts,
+                          j);
+                l_ptr++;
+            }
+
+            l_msg->extra_data = l_data;
+
+            TRACFBIN(g_trac_volt, "l_data", l_data, l_msgSize);
+            l_err = MBOX::sendrecv( MBOX::FSP_VDDR_MSGQ, l_msg );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_volt,
+                          ERR_MRK "Failed sending voltage message to FSP");
+            }
+            else
+            {
+                l_err = processMsg(l_msg);
+            }
+
+            // If there is still data in l_msg->extra_data
+            if( l_msg->extra_data )
+            {
+                free(l_msg->extra_data);
+                l_msg->extra_data = nullptr;
+
+                msg_free(l_msg);
+                l_msg = nullptr;
+            }
+        }
+    } while( 0 );
+
+    return l_err;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// HBToHwsvVoltageMsg::sendMsg
+///////////////////////////////////////////////////////////////////////////////
+errlHndl_t HBToHwsvVoltageMsg::sendMsg(VOLT_MSG_TYPE i_msgType) const
+{
+    errlHndl_t l_err = nullptr;
 
     TRACFCOMP(g_trac_volt, ENTER_MRK
-              "hbVddrMsg::sendMsg msg_type =0x%08X",i_msgType);
+              "hbToHwsvVoltageMsg::sendMsg msg_type =0x%08X",i_msgType);
 
     do
     {
         RequestContainer l_request;
-        if (TARGETING::is_vpo())
-        {
-            TRACFCOMP(g_trac_volt,
-                "hbVddrMsg::sendMsg skipped because of VPO environment");
-            break;
-        }
 
-        if ( ! ( (i_msgType == HB_VDDR_ENABLE) ||
-                 (i_msgType == HB_VDDR_DISABLE) ||
-                 (i_msgType == HB_VDDR_POST_DRAM_INIT_ENABLE) ) )
+        if ( ! ( (i_msgType == HB_VOLT_ENABLE) ||
+                 (i_msgType == HB_VOLT_DISABLE) ||
+                 (i_msgType == HB_VOLT_POST_DRAM_INIT_ENABLE) ) )
         {
-            TRACFCOMP(g_trac_volt, ERR_MRK "hbVddrMsg::send msg with non-"
+            TRACFCOMP(g_trac_volt, ERR_MRK "hbToHwsvVoltageMsg::send msg with non-"
                       "valid msg type%08X",i_msgType);
             /*@
              *   @errortype
@@ -351,65 +479,14 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
         }
         createVddrData(i_msgType, l_request);
 
-        size_t l_dataCount = l_request.size();
+        // Send the request data
+        l_err = sendRequestData( l_request, i_msgType );
 
-        // Only send a message if there is data to send
-        // Skip sending message if VPO
-        if ( l_dataCount )
+        if( l_err )
         {
-            uint32_t l_msgSize = l_dataCount *
-                sizeof(hwsvPowrMemVoltDomainRequest_t);
-
-            // Create the message to send to HWSV
-            msg_t* l_msg = msg_allocate();
-            l_msg->type = i_msgType;
-            l_msg->data[0] = 0;
-            l_msg->data[1] = l_msgSize;
-
-            TRACFCOMP(g_trac_volt, INFO_MRK "hbVddrMsg::l_dataCount=%d, "
-                      "l_msgSize=%d",
-                      l_dataCount, l_msgSize);
-            void* l_data = malloc(l_msgSize);
-
-            hwsvPowrMemVoltDomainRequest_t* l_ptr =
-                reinterpret_cast<hwsvPowrMemVoltDomainRequest_t*>(l_data);
-
-            for (size_t j = 0; j<l_dataCount; ++j)
-            {
-                l_ptr->domain=l_request.at(j).domain;
-                l_ptr->domainId=l_request.at(j).domainId;
-                l_ptr->voltageMillivolts=l_request.at(j).voltageMillivolts;
-
-                TRACFCOMP(g_trac_volt, ENTER_MRK "hbVddrMsg::sendMsg "
-                          "Voltage domain type = 0x%08X, "
-                          "Voltage domain ID = 0x%04X, "
-                          "Voltage (mV) = %d, index = %d",
-                          l_ptr->domain,
-                          l_ptr->domainId, l_ptr->voltageMillivolts,j);
-                l_ptr++;
-            }
-
-            l_msg->extra_data = l_data;
-
-            TRACFBIN(g_trac_volt, "l_data", l_data, l_msgSize);
-            l_err = MBOX::sendrecv( MBOX::FSP_VDDR_MSGQ, l_msg );
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_volt,
-                          ERR_MRK "Failed sending VDDR message to FSP");
-            }
-            else
-            {
-                l_err=processMsg(l_msg);
-            }
-
-            // If sendrecv returns error then it may not have freed the
-            // extra_data, else need to free the response message extra_data
-            free(l_msg->extra_data);
-            l_msg->extra_data = NULL;
-
-            msg_free(l_msg);
-            l_msg = NULL;
+            TRACFCOMP( g_trac_volt, "hbToHwsvVoltageMsg::sendMsg"
+                    "An error occurred when sending request data" );
+            break;
         }
     } while(0);
 
@@ -439,7 +516,7 @@ void calloutMcbistChildDimms( errlHndl_t & io_errl,
         for (const auto & l_dimm : l_dimmList)
         {
             TRACFCOMP( g_trac_volt, INFO_MRK
-                    "HBVddrMsg::calloutMcbistChildDimms Target HUID = 0x%08X" ,
+                    "HBToHwsvVoltageMsg::calloutMcbistChildDimms Target HUID = 0x%08X" ,
                     TARGETING::get_huid(l_dimm) );
 
             io_errl->addHwCallout( l_dimm,
@@ -458,26 +535,26 @@ void calloutMcbistChildDimms( errlHndl_t & io_errl,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::processVDDRmsg
+// HBToHwsvVoltageMsg::processVOLTmsg
 ///////////////////////////////////////////////////////////////////////////////
-errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
+errlHndl_t  HBToHwsvVoltageMsg::processVOLTmsg(msg_t* i_recvMsg) const
 {
-    TRACFCOMP(g_trac_volt, ENTER_MRK "HBVddrMsg::processVDDRmsg");
-    errlHndl_t l_errLog = NULL;
+    TRACFCOMP(g_trac_volt, ENTER_MRK "HBToHwsvVoltageMsg::processVOLTmsg");
+    errlHndl_t l_errLog = nullptr;
 
     //check to see if an error occurred from the powr Enable/Disable functions
     //and is inside the message
     uint32_t l_msgSize = i_recvMsg->data[1];
     uint16_t l_elementCount = l_msgSize/sizeof(hwsvPowrMemVoltDomainReply_t);
-    const uint8_t* l_extraData = NULL;
+    const uint8_t* l_extraData = nullptr;
     l_extraData=static_cast<uint8_t*>(i_recvMsg->extra_data);
 
     do{
-        if (l_extraData==NULL)
+        if (l_extraData==nullptr)
         {
             //an error occurred in obtaining the extra data from the response msg
             TRACFCOMP( g_trac_volt, ERR_MRK
-                       "HBVddrMsg::processVDDRmsg: l_extraData = NULL");
+                       "HBToHwsvVoltageMsg::processVOLTmsg: l_extraData = NULL");
             //create an errorlog
             /*@
             *   @errortype
@@ -495,11 +572,11 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             break;
         }
 
-        MEM_VOLTAGE_DOMAIN domain = MEM_VOLTAGE_DOMAIN_UNKNOWN;
+        VOLTAGE_DOMAIN domain = VOLTAGE_DOMAIN_UNKNOWN;
         TARGETING::ATTR_VDDR_ID_type l_domainId =0x0;
         uint32_t l_errPlid =0x0;
 
-        TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
+        TRACFCOMP( g_trac_volt, INFO_MRK "HBToHwsvVoltageMsg::processVOLTmsg: "
                     "l_elementCount=%d, l_msgSize =%d",
                     l_elementCount, l_msgSize);
         const hwsvPowrMemVoltDomainReply_t* l_ptr=
@@ -511,12 +588,12 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             l_domainId = l_ptr->domainId;
             l_errPlid = l_ptr->plid;
 
-            TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
+            TRACFCOMP( g_trac_volt, INFO_MRK "HBToHwsvVoltageMsg::processVOLTmsg: "
                       "domain = 0x%08X, l_domainId=0x%08X, l_errPlid=0x%08X",
                       domain,l_domainId,l_errPlid);
             if (l_errPlid == 0x0)
             {
-                TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
+                TRACFCOMP( g_trac_volt, INFO_MRK "HBToHwsvVoltageMsg::processVOLTmsg: "
                           "no plid error found for domain = 0x%08X, "
                           "l_domainId=0x%08X", domain, l_domainId);
             }
@@ -525,7 +602,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                 //error occurred so break out of the loop and indicate
                 //an error was present
                 TRACFCOMP( g_trac_volt, ERR_MRK
-                           "HBVddrMsg::processVDDRmsg: error occurred "
+                           "HBToHwsvVoltageMsg::processVOLTmsg: error occurred "
                            "on the powr function called in hwsv");
                 //create an errorlog
                 /*@
@@ -560,23 +637,23 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                     switch(domain)
                     {
                         // Add hw callouts for child DIMMs
-                        case MEM_VOLTAGE_DOMAIN_VDDR:
+                        case VOLTAGE_DOMAIN_MEM_VDDR:
                             l_attr_domainId =
                                 pMcbist->getAttr< TARGETING::ATTR_VDDR_ID >();
                             break;
-                        case MEM_VOLTAGE_DOMAIN_VCS:
+                        case VOLTAGE_DOMAIN_MEM_VCS:
                             l_attr_domainId =
                                    pMcbist->getAttr< TARGETING::ATTR_VCS_ID>();
                             break;
-                        case MEM_VOLTAGE_DOMAIN_VPP:
+                        case VOLTAGE_DOMAIN_MEM_VPP:
                             l_attr_domainId =
                                     pMcbist->getAttr< TARGETING::ATTR_VPP_ID>();
                             break;
-                        case MEM_VOLTAGE_DOMAIN_AVDD:
+                        case VOLTAGE_DOMAIN_MEM_AVDD:
                             l_attr_domainId =
                                    pMcbist->getAttr< TARGETING::ATTR_AVDD_ID>();
                             break;
-                        case MEM_VOLTAGE_DOMAIN_VDD:
+                        case VOLTAGE_DOMAIN_MEM_VDD:
                             l_attr_domainId =
                                     pMcbist->getAttr< TARGETING::ATTR_VDD_ID>();
                             break;
@@ -592,7 +669,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                     if((l_domain_found) && ( l_attr_domainId == l_domainId ))
                     {
                         TRACFCOMP( g_trac_volt, INFO_MRK
-                         "HBVddrMsg::processVDDRmsg MCBIST Target HUID = 0x%08X"
+                         "HBToHwsvVoltageMsg::processVOLTmsg MCBIST Target HUID = 0x%08X"
                          " matches failing domain 0x%08X and ID = 0x%08X",
                          TARGETING::get_huid(pMcbist), domain, l_domainId );
 
@@ -607,17 +684,17 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             l_ptr++;
         }
     }while(0);
-    TRACFCOMP(g_trac_volt, EXIT_MRK "HBVddrMsg::processVDDRmsg");
+    TRACFCOMP(g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::processVOLTmsg");
     return l_errLog;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::processMsg
+// HBToHwsvVoltageMsg::processMsg
 ///////////////////////////////////////////////////////////////////////////////
-errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
+errlHndl_t HBToHwsvVoltageMsg::processMsg(msg_t* i_Msg) const
 {
-    TRACFCOMP(g_trac_volt, ENTER_MRK "HBVddrMsg::processMsg");
-    errlHndl_t l_errLog = NULL;
+    TRACFCOMP(g_trac_volt, ENTER_MRK "HBToHwsvVoltageMsg::processMsg");
+    errlHndl_t l_errLog = nullptr;
 
     do
     {
@@ -631,13 +708,13 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             //process a response to a request
             uint32_t l_msgType =i_Msg->type;
             TRACFCOMP( g_trac_volt, INFO_MRK
-                       "HBVddrMsg::processMsg l_msgType=x%08X",l_msgType );
-            if ( (l_msgType == HB_VDDR_ENABLE) ||
-                 (l_msgType == HB_VDDR_DISABLE)||
-                 (l_msgType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
+                       "HBToHwsvVoltageMsg::processMsg l_msgType=x%08X",l_msgType );
+            if ( (l_msgType == HB_VOLT_ENABLE) ||
+                 (l_msgType == HB_VOLT_DISABLE)||
+                 (l_msgType == HB_VOLT_POST_DRAM_INIT_ENABLE) )
             {
-                //process a VDDR message
-                l_errLog=processVDDRmsg(i_Msg);
+                //process a voltage message
+                l_errLog=processVOLTmsg(i_Msg);
                 if (l_errLog)
                 {
                     break;
@@ -646,7 +723,7 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             else
             {
                 TRACFCOMP( g_trac_volt, ERR_MRK
-                           "HBVddrMsg::processMsg recv'd a non valid type");
+                           "HBToHwsvVoltageMsg::processMsg recv'd a non valid type");
                 //generate errorLog;
                 /*@
                  *   @errortype
@@ -667,7 +744,7 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
         {
             //an error occurred so should stop the IPL
             TRACFCOMP( g_trac_volt, ERR_MRK
-                       "HBVddrMsg::RecvMsgHndlr recv'd an error message" );
+                       "HBToHwsvVoltageMsg::RecvMsgHndlr recv'd an error message" );
 
             //generate an errorlog
             /*@
@@ -690,19 +767,19 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
 
     }while(0);
 
-    TRACFCOMP(g_trac_volt, EXIT_MRK "HBVddrMsg::processMsg");
+    TRACFCOMP(g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::processMsg");
     return l_errLog;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// HBVddrMsg::createErrLog
+// HBToHwsvVoltageMsg::createErrLog
 ///////////////////////////////////////////////////////////////////////////////
-void HBVddrMsg::createErrLog(errlHndl_t& io_err,
+void HBToHwsvVoltageMsg::createErrLog(errlHndl_t& io_err,
                              fapi::hwpfModuleId i_mod,
                              fapi::hwpfReasonCode i_rc,
                              uint32_t i_userData1) const
 {
-    if (io_err == NULL)
+    if (io_err == nullptr)
     {
         io_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                 i_mod,
@@ -715,9 +792,12 @@ void HBVddrMsg::createErrLog(errlHndl_t& io_err,
 }
 
 // External interfaces
+////////////////////////////////////////////////////////////////////////////////
+// platform_enable_vddr
+////////////////////////////////////////////////////////////////////////////////
 errlHndl_t platform_enable_vddr()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TARGETING::Target* pSysTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(pSysTarget);
@@ -729,9 +809,9 @@ errlHndl_t platform_enable_vddr()
     if((pSysTarget->getAttr< TARGETING::ATTR_SUPPORTS_DYNAMIC_MEM_VOLT >() == 1)
         && (INITSERVICE::spBaseServicesEnabled()))
     {
-        HBVddrMsg l_hbVddr;
+        HBToHwsvVoltageMsg l_hbVddr;
 
-        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_ENABLE);
+        l_err = l_hbVddr.sendMsg(HBToHwsvVoltageMsg::HB_VOLT_ENABLE);
         if (l_err)
         {
             TRACFCOMP(g_trac_volt,
@@ -755,14 +835,18 @@ errlHndl_t platform_enable_vddr()
     return l_err;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// platform_disable_vddr
+////////////////////////////////////////////////////////////////////////////////
 errlHndl_t platform_disable_vddr()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     if(INITSERVICE::spBaseServicesEnabled())
     {
-        HBVddrMsg l_hbVddr;
+        HBToHwsvVoltageMsg l_hbToHwsv;
 
-        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_DISABLE);
+        l_err = l_hbToHwsv.sendMsg(HBToHwsvVoltageMsg::HB_VOLT_DISABLE);
         if (l_err)
         {
             TRACFCOMP(g_trac_volt,
@@ -785,14 +869,18 @@ errlHndl_t platform_disable_vddr()
     return l_err;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// platform_adjust_vddr_post_dram_init
+////////////////////////////////////////////////////////////////////////////////
 errlHndl_t platform_adjust_vddr_post_dram_init()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     if(INITSERVICE::spBaseServicesEnabled())
     {
-        HBVddrMsg l_hbVddr;
+        HBToHwsvVoltageMsg l_hbVddr;
 
-        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_POST_DRAM_INIT_ENABLE);
+        l_err = l_hbVddr.sendMsg(HBToHwsvVoltageMsg::HB_VOLT_POST_DRAM_INIT_ENABLE);
         if (l_err)
         {
             TRACFCOMP(g_trac_volt,
@@ -811,6 +899,110 @@ errlHndl_t platform_adjust_vddr_post_dram_init()
         TRACFCOMP(g_trac_volt,"call_host_adjust_vddr_post_dram_init()"
                 "no-op because mbox not available");
     }
+
+    return l_err;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// platform_set_nest_voltages
+////////////////////////////////////////////////////////////////////////////////
+errlHndl_t platform_set_nest_voltages()
+{
+    errlHndl_t l_err = nullptr;
+
+    TARGETING::TargetHandleList l_procList;
+
+    HBToHwsvVoltageMsg::RequestContainer l_requests;
+
+    HBToHwsvVoltageMsg::VOLT_MSG_TYPE l_requestType =
+                              HBToHwsvVoltageMsg::HB_VOLT_POST_DRAM_INIT_ENABLE;
+
+    // Get the system's processors
+    TARGETING::getAllChips( l_procList,
+                            TARGETING::TYPE_PROC,
+                            true ); // true: return functional procs
+
+    for( const auto & l_procTarget : l_procList )
+    {
+
+        // Only send Voltage Rail data if not connected by AVSBus
+        //    -Denoted with a value of 0xFF in the Busnum for the rail
+
+        // VDN Rail
+        if( l_procTarget->getAttr<TARGETING::ATTR_VDN_AVSBUS_BUSNUM>() == 0xff )
+        {
+            HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t l_vdnRequest;
+
+            // Populate VDN request
+            l_vdnRequest.domain = HBToHwsvVoltageMsg::VOLTAGE_DOMAIN_NEST_VDN;
+            l_vdnRequest.domainId = l_procTarget->getAttr<TARGETING::ATTR_NEST_VDN_ID>();
+            l_vdnRequest.voltageMillivolts =
+                            l_procTarget->getAttr<TARGETING::ATTR_VDN_BOOT_VOLTAGE>();
+            l_requests.push_back( l_vdnRequest );
+        }
+
+        // VDD Rail
+        if( l_procTarget->getAttr<TARGETING::ATTR_VDD_AVSBUS_BUSNUM>() == 0xff)
+        {
+            // Create VRD Requests
+            HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t l_vddRequest;
+
+            // Populate VDD request
+            l_vddRequest.domain = HBToHwsvVoltageMsg::VOLTAGE_DOMAIN_NEST_VDD;
+            l_vddRequest.domainId = l_procTarget->getAttr<TARGETING::ATTR_NEST_VDD_ID>();
+            l_vddRequest.voltageMillivolts =
+                         l_procTarget->getAttr<TARGETING::ATTR_VDD_BOOT_VOLTAGE>();
+            l_requests.push_back( l_vddRequest );
+        }
+
+
+        // VCS Rail
+        if( l_procTarget->getAttr<TARGETING::ATTR_VCS_AVSBUS_BUSNUM>() == 0xff )
+        {
+            HBToHwsvVoltageMsg::hwsvPowrMemVoltDomainRequest_t l_vcsRequest;
+            // Populate VCS request
+            l_vcsRequest.domain = HBToHwsvVoltageMsg::VOLTAGE_DOMAIN_NEST_VCS;
+            l_vcsRequest.domainId = l_procTarget->getAttr<TARGETING::ATTR_NEST_VCS_ID>();
+            l_vcsRequest.voltageMillivolts =
+                            l_procTarget->getAttr<TARGETING::ATTR_VCS_BOOT_VOLTAGE>();
+            l_requests.push_back( l_vcsRequest );
+        }
+
+    } // Processor Loop
+
+
+    //Remove duplicate records and requests with invalid voltages
+    removeExtraRequests( l_requests,
+                         l_requestType,
+                         l_procList.size() );
+    TRACDCOMP(g_trac_volt,
+            "platform_set_nest_voltages - Sending %d requests", l_requests.size());
+
+
+    // Sort the list based on sequencing order
+    std::sort(l_requests.begin(), l_requests.end(), compareSequenceOrder );
+
+    size_t l_requestsSize = l_requests.size();
+    for( size_t i = 0; i < l_requestsSize ; i++ )
+    {
+        TRACDCOMP(g_trac_volt,
+                  "Rail data: domain = 0x%x, domainId = %d, mV = %d",
+                  l_requests.at(i).domain,
+                  l_requests.at(i).domainId,
+                  l_requests.at(i).voltageMillivolts );
+    }
+    //Send the actual data to HWSV
+    HBToHwsvVoltageMsg l_hbToHwsv;
+    l_err = l_hbToHwsv.sendRequestData(l_requests,
+                                     HBToHwsvVoltageMsg::HB_VOLT_POST_DRAM_INIT_ENABLE );
+
+    if( l_err )
+    {
+        TRACFCOMP(g_trac_volt,
+                ERR_MRK"hbToHwsvVoltageMsg.C::platform_set_nest_voltages - "
+                "Failed to send the Request Data to HWSV!" );
+    }
+
 
     return l_err;
 }
