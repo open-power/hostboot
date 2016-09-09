@@ -60,6 +60,15 @@ namespace dp16
 ///
 fapi2::ReturnCode dqs_polarity( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
+///
+/// @brief DP16 Read Diagnostic Configuration 5 work around
+/// Not in the Model 67 spydef, so we scom them. Should be removed when they are
+/// added to the spydef.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss

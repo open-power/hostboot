@@ -45,7 +45,6 @@ constexpr auto literal_0x5000 = 0x5000;
 constexpr auto literal_0x4040 = 0x4040;
 constexpr auto literal_0xE058 = 0xE058;
 constexpr auto literal_0x0202 = 0x0202;
-constexpr auto literal_0x4770 = 0x4770;
 
 fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0)
 {
@@ -3269,30 +3268,6 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x8000c00c0701103full)");
-                break;
-            }
-        }
-        {
-            l_rc = fapi2::getScom( TGT0, 0x8000c4140701103full, l_scom_buffer );
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: getScom (0x8000c4140701103full)");
-                break;
-            }
-
-            {
-                if (( true ))
-                {
-                    l_scom_buffer.insert<uint64_t> (literal_0x4770, 48, 16, 48 );
-                }
-            }
-
-            l_rc = fapi2::putScom(TGT0, 0x8000c4140701103full, l_scom_buffer);
-
-            if (l_rc)
-            {
-                FAPI_ERR("ERROR executing: putScom (0x8000c4140701103full)");
                 break;
             }
         }
