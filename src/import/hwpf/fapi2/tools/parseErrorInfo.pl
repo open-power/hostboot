@@ -32,7 +32,7 @@
 # *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 # *HWP Team: N/A
 # *HWP Level: 1
-# *HWP Consumed by: HB
+# *HWP Consumed by: HB/SBE/FSP
 #
 # Usage:
 # parseErrorInfo.pl <output dir> <filename1> <filename2> ...
@@ -64,17 +64,6 @@ my $buffer_ffdc_type = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type = "fapi2::ffdc_t";
 my $mcast_type = "fapi2::mcast_t";
-
-# We want to keep the signatures for the ffdc gathering hwp so that
-# we can create members of the proper types for the ffdc classes.
-my %signatures = ("proc_extract_pore_halt_ffdc" => ["por_base_state",
-                                                    "por_halt_type_t",
-                                                    "por_ffdc_offset_t"],
-                  "proc_example" => ["uint32_t","uint8_t"],
-                  "proc_extract_pore_base_ffdc" => ["por_base_state", "por_sbe_base_state"],
-                  "proc_tp_collect_dbg_data" => [$target_ffdc_type],
-                  "p9_collect_some_ffdc" => ["uint32_t","uint8_t"],
-    );
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -433,7 +422,6 @@ print EIFILE "#include <plat_trace.H>\n";
 print EIFILE "#include <hwp_return_codes.H>\n";
 print EIFILE "#include <hwp_executor.H>\n";
 print EIFILE "#include <set_sbe_error.H>\n";
-
 print EIFILE "/**\n";
 print EIFILE " * \@brief Error Information macros and HwpFfdcId enumeration\n";
 print EIFILE " *\/\n";
@@ -645,9 +633,7 @@ foreach my $argnum (0 .. $#ARGV)
             if ($count == 0)
             {
                 #this rc wont be used, except to indicate the FFDC collection failed
-                $collectFfdcStr =  "    fapi2::ReturnCode l_rc; \\\n";
-                # each collect ffdc function needs to populate this so we can add it to i_rc;
-                $collectFfdcStr .= "    std::vector<std::shared_ptr<ErrorInfoFfdc>>ffdc; \\\n";
+                $collectFfdcStr =  "\tfapi2::ReturnCode l_rc; \\\n";
             }
             $count++;
 
@@ -655,11 +641,11 @@ foreach my $argnum (0 .. $#ARGV)
             # but we need to create the arguments in the ffdc class. The first
             # element in the collectFfdc string is the function to call.
             my @elements = split /,/, $collectFfdc;
-            my @signature = @{$signatures{@elements[0]}};
+#            my @signature = @{$signatures{@elements[0]}};
 
             # build up the function call here
             @elements[0] =~ s/^\s+|\s+$//g;
-            $collectFfdc =  "@elements[0]" .",ffdc";
+            $collectFfdc =  "@elements[0]";
             for (my $i = 1; $i <= $#elements; $i++)
             {
                 $collectFfdc .= ",";
@@ -674,16 +660,22 @@ foreach my $argnum (0 .. $#ARGV)
 
                 # add a set method for each parameter too..
                 @elements[$i] =~ s/^\s+|\s+$//g;
-                addFfdcMethod(\%methods, @elements[$i], $err->{rc}, @signature[$i-1],$objNum);
+                addFfdcMethod(\%methods, @elements[$i], $err->{rc}, $ffdc_type ,$objNum);
 
                 $collectFfdc .=  "@elements[$i]"
 
             }
 
-            $collectFfdcStr .= "    FAPI_EXEC_HWP(l_rc, $collectFfdc); \\\n";
+            if( $#elements )
+            {
+                $collectFfdc .= ",";
+            }
+             $collectFfdc .=  "RC";
 
-            print EIFILE "\\\n{ \\\n$collectFfdcStr";
-            print EIFILE "    RC.addErrorInfo(ffdc); \\\n}";
+            $collectFfdcStr .= "\tFAPI_EXEC_HWP(l_rc, $collectFfdc); \\\n";
+
+            print EIFILE "\\\n{ \\\n$collectFfdcStr \\\n}";
+
         } #end collectFfdc tag
 
         print EIFILE "\n";
