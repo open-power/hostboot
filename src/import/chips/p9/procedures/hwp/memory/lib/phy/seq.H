@@ -250,6 +250,41 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Read SEQ_MEM_TIMING_PARAM2
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode read_timing2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING2_REG, o_data) );
+    FAPI_DBG("seq_timing2: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write SEQ_MEM_TIMING_PARAM2
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode write_timing2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("seq_timing2: 0x%016lx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING2_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 // TK read, write RD_WR_DATA
 
 ///
