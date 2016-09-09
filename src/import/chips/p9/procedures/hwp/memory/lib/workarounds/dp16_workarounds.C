@@ -84,6 +84,9 @@ fapi2::ReturnCode dqs_polarity( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
         FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_0, rx_config) );
     }
 
+    // Can't just return current_err, if we're not ports 2,3 we didn't touch it ...
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
