@@ -76,4 +76,26 @@ void testDecode_MT(void);
  */
 void testGetVPD_Override(void);
 
+/**
+ * @brief MCS getVpd DQ tests
+ *
+ * Test the getVPD DQ interface. Based on a VPDInfo configuration,
+ * verify the expected direct memory vpd is returned.
+ * There is a dependency to update standalone simics direct memory (dvpd.dat)
+ * for the configuration to map to a keyword, but there is no data dependency.
+ * expected data.
+ */
+void testGetVPD_DQ(void);
+
+/**
+ * @brief MCS getVpd CK tests
+ *
+ * Test the getVPD CK interface. Based on a VPDInfo configuration,
+ * verify the expected direct memory vpd is returned.
+ * There is a dependency to update standalone simics direct memory (dvpd.dat)
+ * for the configuration to map to a keyword, but there is no data dependency.
+ * expected data.
+ */
+void testGetVPD_CK(void);
+
 #endif

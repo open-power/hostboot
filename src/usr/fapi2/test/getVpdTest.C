@@ -227,7 +227,7 @@ void testDecode_MR(void)
                0};
 
         // decode keyword
-        keywordName_t l_keywordName = {0};
+        keywordInfo_t l_keywordInfo = {0};
         numTests++;
 
         FAPI_EXEC_HWP(l_rc,
@@ -236,7 +236,7 @@ void testDecode_MR(void)
                   l_info,
                   l_pMapping,
                   VPD_KEYWORD_SIZE,
-                  l_keywordName);
+                  l_keywordInfo);
         if(l_rc)
         {
             TS_FAIL  ("testDecode_MR:: p9_get_mem_vpd_keyword failed");
@@ -246,12 +246,12 @@ void testDecode_MR(void)
 
         // compare to expected test data
         numTests++;
-        if ( (l_keywordName[0] != 'J' ) &&
-             (l_keywordName[1] != '3' ) )
+        if ( (l_keywordInfo.kwName[0] != 'J' ) &&
+             (l_keywordInfo.kwName[1] != '3' ) )
         {
             TS_FAIL  ("testDecode_MR:: unexpected keyword name returned"
                      "value = %x %x expected = %x %x",
-                     l_keywordName[0],l_keywordName[1],'J','3');
+                     l_keywordInfo.kwName[0],l_keywordInfo.kwName[1],'J','3');
             numFails++;
         }
 
@@ -307,7 +307,7 @@ void testDecode_MT(void)
                0};
 
         // decode keyword
-        keywordName_t l_keywordName = {0};
+        keywordInfo_t l_keywordInfo = {0};
         numTests++;
         FAPI_EXEC_HWP(l_rc,
                   p9_get_mem_vpd_keyword,
@@ -315,7 +315,7 @@ void testDecode_MT(void)
                   l_info,
                   l_pMapping,
                   VPD_KEYWORD_SIZE,
-                  l_keywordName);
+                  l_keywordInfo);
         if(l_rc)
         {
             TS_FAIL  ("testDecode_MT:: p9_get_mem_vpd_keyword failed");
@@ -325,12 +325,12 @@ void testDecode_MT(void)
 
         // compare to expected test data
         numTests++;
-        if ( (l_keywordName[0] != 'X' ) &&
-             (l_keywordName[1] != '3' ) )
+        if ( (l_keywordInfo.kwName[0] != 'X' ) &&
+             (l_keywordInfo.kwName[1] != '3' ) )
         {
             TS_FAIL  ("testDecode_MT:: unexpected keyword name returned"
                      "value = %x %x expected = %x %x",
-                     l_keywordName[0],l_keywordName[1],'X','3');
+                     l_keywordInfo.kwName[0],l_keywordInfo.kwName[1],'X','3');
             numFails++;
         }
 
@@ -610,3 +610,99 @@ void testGetVPD_Override(void)
              numMRFails+numMTFails, numMRTests+numMTTests);
 }
 
+
+void testGetVPD_DQ(void)
+{
+    int numTests = 0;
+    int numFails = 0;
+    ReturnCode l_rc;
+
+    FAPI_DBG("testGetVPD DQ start");
+
+    do
+    {
+        numTests++; // find MCS MEMVPD_POS
+        // get a MCS fapi2 target for MEMVPD_POS 0
+        TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 0;
+
+        fapi2::Target<fapi2::TARGET_TYPE_MCS> l_fapiTarget;
+        TARGETING::Target * l_target;
+        if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
+        {
+            TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
+            break; //Target not found
+        }
+
+        // set up VPDInfo
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::DQ);
+
+        l_rc = testGetVPD(l_fapiTarget,
+                          l_info,
+                          fapi2::DQ,
+                          nullptr, //don't test data, just ability to access
+                          numTests,
+                          numFails);
+        if(l_rc)
+        {
+            TS_FAIL  ("testGetVPD DQ:: testGetVPD decode failed");
+            break; // decode failed (don't double count num tests and fails)
+        }
+
+    }
+    while(0);
+
+    FAPI_INF("testGetVPD DQ Test Complete, %d/%d fails",
+             numFails, numTests);
+}
+
+void testGetVPD_CK(void)
+{
+    int numTests = 0;
+    int numFails = 0;
+    ReturnCode l_rc;
+
+    FAPI_DBG("testGetVPD CK start");
+
+    do
+    {
+        numTests++;   // find MCS MEMVPD_POS
+
+        // get a MCS fapi2 target for MEMVPD_POS 0
+        TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 0;
+
+        fapi2::Target<fapi2::TARGET_TYPE_MCS> l_fapiTarget;
+        TARGETING::Target * l_target;
+        if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
+        {
+            TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
+            break; //Target not found
+        }
+
+        // set up VPDInfo
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::CK);
+
+        // modify this if the data changes (currently common for all positions)
+        const char testData[] = {0x80,0x40, 0};
+
+        l_rc = testGetVPD(l_fapiTarget,
+                          l_info,
+                          fapi2::CK,
+                          testData,
+                          numTests,
+                          numFails);
+        if(l_rc)
+        {
+            TS_FAIL  ("testGetVPD CK:: testGetVPD decode failed");
+            break; // decode failed (don't double count num tests and fails)
+        }
+
+    }
+    while(0);
+
+    FAPI_INF("testGetVPD CK Test Complete, %d/%d fails",
+             numFails, numTests);
+}

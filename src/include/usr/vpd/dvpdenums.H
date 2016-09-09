@@ -159,6 +159,16 @@ namespace DVPD
         XX      = 0x61,
         XY      = 0x62,
         XZ      = 0x63,
+        Q0      = 0x64,
+        Q1      = 0x65,
+        Q2      = 0x66,
+        Q3      = 0x67,
+        Q4      = 0x68,
+        Q5      = 0x69,
+        Q6      = 0x6A,
+        Q7      = 0x6B,
+        Q8      = 0x6C,
+        CK      = 0X6D,
 
         // Last Keyword
         DVPD_LAST_KEYWORD,
