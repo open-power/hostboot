@@ -641,6 +641,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Workarounds
         //
         FAPI_TRY( mss::workarounds::dp16::dqs_polarity(p) );
+        FAPI_TRY( mss::workarounds::dp16::rd_dia_config5(p) );
     }
 
 fapi_try_exit:
