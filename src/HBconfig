@@ -14,9 +14,16 @@ config ROM_CODE_PRESENT
     help
         Indicates that ROM code is available to call
 
-config INCLUDE_XML_OPENPOWER
+config INCLUDE_XML_OPPOWERVM
     default n
     help
         Indicates that a build should include the contents
         of attribute_types_oppowervm.xml and
         target_types_oppowervm.xml
+
+config INCLUDE_XML_OPENPOWER
+    default n
+    help
+        Indicates that a build should include the contents
+        of attribute_types_openpower.xml and
+        target_types_openpower.xml

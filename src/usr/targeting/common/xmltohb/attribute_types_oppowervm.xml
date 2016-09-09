@@ -26,8 +26,8 @@
 
 <!-- =====================================================================
      Contains the definition of attributes that are only available on
-     openpower systems.  This file is only compiled when
-     CONFIG_XML_INCLUDE_OPENPOWER is set to true and is always false on
+     openpower systems for a PowerVM build.  This file is only compiled when
+     CONFIG_XML_INCLUDE_OPPOWERVM is set to true and is always false on
      FSP based systems.
      =====================================================================
 -->
