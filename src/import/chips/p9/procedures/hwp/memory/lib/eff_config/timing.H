@@ -367,6 +367,8 @@ inline fapi2::ReturnCode dodt_on( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     FAPI_TRY( mss::eff_dram_cwl(i_target, l_cwl) );
 
     o_dodt = l_cwl + l_al + l_ca_parity_latency - 2;
+    FAPI_INF( "dodt_on %s %d", mss::c_str(i_target), o_dodt );
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -383,6 +385,40 @@ inline fapi2::ReturnCode dodt_off( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 {
     // Same for all frequencies of DDR4; DDR4 Full spec update(79-4B)
     return dodt_on(i_target, o_dodt);
+}
+
+///
+/// @brief Direct ODT turn on Latency - max value on port
+/// @param[in] i_target the MCA target
+/// @param[out] o_dodt *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode max_dodt_on( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_dodt )
+{
+    for (const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        uint8_t l_odt = 0;
+        FAPI_TRY( mss::dodt_on(d, l_odt) );
+
+        o_dodt = std::max(o_dodt, l_odt);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Direct ODT turn off Latency - max value on port
+/// @param[in] i_target the MCA
+/// @param[out] o_dodt *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode max_dodt_off( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_dodt )
+{
+    // Same for all frequencies of DDR4; DDR4 Full spec update(79-4B)
+    return max_dodt_on(i_target, o_dodt);
 }
 
 // TK RODTon - The use would be for the ODT in the PHY, but the max RODT is equal to or less than
