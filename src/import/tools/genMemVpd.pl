@@ -445,7 +445,7 @@ else
     verbose("    $cfgPrefix"."_trace.csv");
 }
 
-verbose("Sucessful completion");
+verbose("Successful completion");
 exit(0);
 
 ################################################################################
@@ -1180,7 +1180,7 @@ sub createCkBinaryFile
     # start with header
     #   - version
     #   - number of entries
-    #   - size of data entries
+    #   - size of data entries (blob size)
     #   - reserved
     my %num = newNum(MAPPING_LAYOUT_VERSION,"u8");
     filePushNum(\%fileInfo,\%num);
