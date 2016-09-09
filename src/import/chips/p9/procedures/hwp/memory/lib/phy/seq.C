@@ -169,8 +169,26 @@ fapi2::ReturnCode reset_timing1( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
 template<>
 fapi2::ReturnCode reset_timing2( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
-    // NO-OP right now.
-    return fapi2::FAPI2_RC_SUCCESS;
+    typedef seqTraits<TARGET_TYPE_MCA> TT;
+
+    // Reset value of SEQ_TIMING2 is lucky 7's - we'll fix up the first nibble with ODT info
+    fapi2::buffer<uint64_t> l_data(0x7777);
+
+    // Table 5-327. SEQ Memory Timing Parameter 2 Register
+    // TODTLON_OFF_CYCLES max(ODTLon, ODTLoff)
+    uint8_t l_odtlon = 0;
+    uint8_t l_odtloff = 0;
+    uint64_t l_odt = 0;
+    FAPI_TRY( mss::max_dodt_on(i_target, l_odtlon) );
+    FAPI_TRY( mss::max_dodt_off(i_target, l_odtloff) );
+
+    l_odt = std::max( l_odtlon, l_odtloff );
+    l_data.insertFromRight<TT::TODTLON_OFF_CYCLES, TT::TODTLON_OFF_CYCLES_LEN>( exp_helper(l_odt) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING2_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
