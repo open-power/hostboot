@@ -1141,7 +1141,6 @@
         <default>8</default>
     </attribute>
     <!-- End processor characteristics for HDAT -->
-
     <attribute><id>LPC_BASE_ADDR</id></attribute>
     <attribute><id>BOOT_FREQ_MHZ</id></attribute>
 
@@ -1160,6 +1159,12 @@
     <attribute><id>NEST_MEM_X_O_PCI_BYPASS</id></attribute>
     <attribute><id>DPLL_BYPASS</id></attribute>
 
+    <!-- Process Voltage Rail Ids -->
+    <attribute><id>NEST_VDD_ID</id></attribute>
+    <attribute><id>NEST_VDN_ID</id></attribute>
+    <attribute><id>NEST_VCS_ID</id></attribute>
+    <attribute><id>NEST_VIO_ID</id></attribute>
+    <attribute><id>NEST_VDDR_ID</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
