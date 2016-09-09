@@ -169,12 +169,13 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
                  i_section);
         return err;
     }
-    uint64_t l_vaddr = pnorSectionInfo.vaddr;
 
     // @TODO RTC:156118 remove workaround with getSectionInfo cleanup.
     #ifdef CONFIG_SECUREBOOT
     pnorSectionInfo.vaddr += PAGE_SIZE;
     #endif
+
+    uint64_t l_vaddr = pnorSectionInfo.vaddr;
 
     // XZ repository: http://git.tukaani.org/xz.git
     // Header specifics can be found in xz/doc/xz-file-format.txt
