@@ -1477,8 +1477,6 @@
     <attribute><id>MSS_DATABUS_UTIL</id></attribute>
     <attribute><id>MSS_THROTTLED_N_COMMANDS</id></attribute>
     <attribute><id>EFF_DRAM_MAC</id></attribute>
-    <attribute><id>VPD_RLO</id></attribute>
-    <attribute><id>VPD_WLO</id></attribute>
     <attribute><id>EFF_DRAM_MODULE_BUS_WIDTH</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_BC00</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_BC01</id></attribute>
@@ -1545,7 +1543,6 @@
     <attribute><id>EFF_DRAM_RON</id></attribute>
     <attribute><id>EFF_DRAM_RTT_NOM</id></attribute>
     <attribute><id>EFF_DRAM_RTT_WR</id></attribute>
-    <attribute><id>VPD_GPO</id></attribute>
     <attribute><id>EFF_DRAM_TDQS</id></attribute>
     <attribute><id>EFF_DRAM_TREFI</id></attribute>
     <attribute><id>EFF_DRAM_TRTP</id></attribute>
