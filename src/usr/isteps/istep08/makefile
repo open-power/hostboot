@@ -68,7 +68,6 @@ VPATH += ${PROCEDURES_PATH}/hwp/sbe/
 VPATH += ${PROCEDURES_PATH}/hwp/pm/
 VPATH += ${PROCEDURES_PATH}/hwp/lib
 
-
 include ${ROOTPATH}/procedure.rules.mk
 # host_slave_sbe_config
 include ${PROCEDURES_PATH}/hwp/perv/p9_setup_sbe_config.mk

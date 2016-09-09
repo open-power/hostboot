@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep13/hbVddrMsg.H $                          */
+/* $Source: src/usr/isteps/hbToHwsvVoltageMsg.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __HB_VDDR_MSG_H
-#define __HB_VDDR_MSG_H
+#ifndef __HB_VOLT_MSG_H
+#define __HB_VOLT_MSG_H
 
 /*****************************************************************************/
 // I n c l u d e s
@@ -52,15 +52,15 @@
 /*****************************************************************************/
 // Forward class declarations
 /*****************************************************************************/
-class HBVddrMsg;
+class HBToHwsvVoltageMsg;
 
 /**
- *  @brief  HBVddrMsg
+ *  @brief  HBToHwsvVoltageMsg
  *  This class provides interfaces to send and process messages to and from
  *  hwsv with respect to powr.  It also indicates when to stop the IPL via
  *  errorlogs
  */
-class HBVddrMsg
+class HBToHwsvVoltageMsg
 {
 
 public:
@@ -68,21 +68,26 @@ public:
     /**
      *  @brief Enum specifying a memory voltage domain type
      */
-    enum MEM_VOLTAGE_DOMAIN
+    enum VOLTAGE_DOMAIN
     {
         // For unknown / uninitialized values
-        MEM_VOLTAGE_DOMAIN_UNKNOWN = 0x00,
+        VOLTAGE_DOMAIN_UNKNOWN = 0x00,
 
         // Valid values
-        MEM_VOLTAGE_DOMAIN_VDD  = 0x01,
-        MEM_VOLTAGE_DOMAIN_AVDD = 0x02,
-        MEM_VOLTAGE_DOMAIN_VCS  = 0x03,
-        MEM_VOLTAGE_DOMAIN_VPP  = 0x04,
-        MEM_VOLTAGE_DOMAIN_VDDR = 0x05,  // aka VMEM
+        VOLTAGE_DOMAIN_MEM_VDD       = 0x01,
+        VOLTAGE_DOMAIN_MEM_AVDD      = 0x02,
+        VOLTAGE_DOMAIN_MEM_VCS       = 0x03,
+        VOLTAGE_DOMAIN_MEM_VPP       = 0x04,
+        VOLTAGE_DOMAIN_MEM_VDDR      = 0x05,  // aka VMEM
+        VOLTAGE_DOMAIN_NEST_VDD      = 0x06,
+        VOLTAGE_DOMAIN_NEST_VDN      = 0x07,
+        VOLTAGE_DOMAIN_NEST_VCS      = 0x08,
+        VOLTAGE_DOMAIN_NEST_VIO      = 0x09,
+        VOLTAGE_DOMAIN_NEST_VDDR     = 0x0A,
 
         // Good range markers - Need to be adjusted if the above change
-        MEM_VOLTAGE_DOMAIN_MIN_VALUE = MEM_VOLTAGE_DOMAIN_VDD,
-        MEM_VOLTAGE_DOMAIN_MAX_VALUE = MEM_VOLTAGE_DOMAIN_VDDR,
+        VOLTAGE_DOMAIN_MIN_VALUE = VOLTAGE_DOMAIN_MEM_VDD,
+        VOLTAGE_DOMAIN_MAX_VALUE = VOLTAGE_DOMAIN_NEST_VDDR,
     };
 
     /**
@@ -93,12 +98,12 @@ public:
      */
     struct hwsvPowrMemVoltDomainRequest_t
     {
-        MEM_VOLTAGE_DOMAIN            domain;
-        TARGETING::ATTR_VDDR_ID_type  domainId;
-        TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS_type voltageMillivolts;
+        VOLTAGE_DOMAIN      domain;
+        uint16_t            domainId;
+        uint32_t            voltageMillivolts;
 
         hwsvPowrMemVoltDomainRequest_t()
-            : domain(MEM_VOLTAGE_DOMAIN_UNKNOWN),
+            : domain(VOLTAGE_DOMAIN_UNKNOWN),
               domainId(0x0000),
               voltageMillivolts(0x00000000)
         {
@@ -115,12 +120,12 @@ public:
      */
     struct hwsvPowrMemVoltDomainReply_t
     {
-        MEM_VOLTAGE_DOMAIN           domain;
-        TARGETING::ATTR_VDDR_ID_type domainId;
-        uint32_t                     plid;
+        VOLTAGE_DOMAIN        domain;
+        uint16_t              domainId;
+        uint32_t              plid;
 
         hwsvPowrMemVoltDomainReply_t()
-            : domain(MEM_VOLTAGE_DOMAIN_UNKNOWN),
+            : domain(VOLTAGE_DOMAIN_UNKNOWN),
               domainId(0x0000),
               plid(0x00000000)
         {
@@ -129,16 +134,16 @@ public:
     } __attribute__ ((packed));
 
     /**
-     * @enum VDDR_MSG_TYPE
+     * @enum VOLT_MSG_TYPE
      *
      * @brief  Message enum to determine how the msg should be processed
      *
      */
-    enum VDDR_MSG_TYPE
+    enum VOLT_MSG_TYPE
     {
-        HB_VDDR_ENABLE = 0x40000041,
-        HB_VDDR_DISABLE = 0x40000042,
-        HB_VDDR_POST_DRAM_INIT_ENABLE = 0x40000043,
+        HB_VOLT_ENABLE = 0x40000041,
+        HB_VOLT_DISABLE = 0x40000042,
+        HB_VOLT_POST_DRAM_INIT_ENABLE = 0x40000043,
     };
 
     /**
@@ -150,7 +155,7 @@ public:
     /**
      * @brief Default constructor
      */
-    HBVddrMsg();
+    HBToHwsvVoltageMsg();
 
     /**
      * @brief   Destructor
@@ -160,7 +165,7 @@ public:
      * @return  None
      *
      */
-    ~HBVddrMsg();
+    ~HBToHwsvVoltageMsg();
 
     /**
      *  @brief Accumulates memory voltage domain type/ID/voltage records and
@@ -183,7 +188,7 @@ public:
      *  @return N/A
      */
     void createVddrData(
-              VDDR_MSG_TYPE     i_requestType,
+              VOLT_MSG_TYPE     i_requestType,
               RequestContainer& io_request) const;
 
     /**
@@ -195,14 +200,30 @@ public:
       *          FSP_VDDR_MSGQ as the message queue..
       *
       *  @param[in] i_msgType
-      *             HBVddrMsg::VDDR_MSG_TYPE passed in to define the
+      *             HBToHwsvVoltageMsg::VDDR_MSG_TYPE passed in to define the
       *             message policy.
       *
       *  @return     errlHndl_t
       *              return errl ==  NULL  -> success
       *              return errl !=  NULL  -> failure
      */
-    errlHndl_t sendMsg(VDDR_MSG_TYPE i_msgType) const;
+    errlHndl_t sendMsg(VOLT_MSG_TYPE i_msgType) const;
+
+
+    /**
+     * @brief Appropriately formats the request data and sends it to the FSP
+     *
+     * @param[in]     i_requests - A vector of requests
+     * @param[in]     i_msgType - the type of message we are sending
+     *
+     * @ return errlHndl_t
+     *          return errl == NULL  -> success
+     *          return errl != NULL  -> failure
+     */
+    errlHndl_t sendRequestData( RequestContainer & i_requests,
+                                VOLT_MSG_TYPE i_msgType ) const;
+
+
 
 private:
 
@@ -254,7 +275,7 @@ private:
         const TARGETING::ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
     void addMemoryVoltageDomains(
         const TARGETING::Target* const     i_pMcbist,
-              HBVddrMsg::RequestContainer& io_domains) const;
+              HBToHwsvVoltageMsg::RequestContainer& io_domains) const;
 
 protected:
 
@@ -283,7 +304,7 @@ protected:
      *              return errl ==  NULL  -> success
      *              return errl !=  NULL  -> failure
      */
-    errlHndl_t processVDDRmsg(msg_t* i_recvMsg)const;
+    errlHndl_t processVOLTmsg(msg_t* i_recvMsg)const;
 
      /**
      * @brief function to create error logs for errors that occured in FSP side
@@ -303,7 +324,14 @@ protected:
                       fapi::hwpfReasonCode i_rc,
                       uint32_t i_userData1=0x0) const;
 
+
 };
 
+//External Interfaces
+/**
+ * @brief Send processor voltage rail data to HWSV
+ * @return NULL | error handle on error
+ */
+errlHndl_t platform_set_nest_voltages();
 
 #endif
