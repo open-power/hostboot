@@ -43,7 +43,7 @@
 
 namespace fapi2
 {
-/// vpd keyword to be read based on input parameters and MR/MT mapping.
+/// vpd keyword to be read based on input parameters and MR/MT/DQ mapping.
 /// For example, X0...XZ for MT or J0...JZ for MR vpd data.
 /// Return as a string for convenient debug traces.
 enum
@@ -51,6 +51,14 @@ enum
     KEYWORD_BYTE_SIZE       = 2,
 };
 typedef char keywordName_t [KEYWORD_BYTE_SIZE + 1];
+
+typedef struct kwInfo
+{
+    keywordName_t kwName; // keyword, like X0..XZ, J0..JZ, Q1..Q8, or CK
+    uint16_t      kwBlobSize;    // blob size (valid for Q# and CK)
+    uint16_t      kwBlobIndex;   // offset of blob from start of keyword data
+} keywordInfo_t;
+
 }
 
 typedef fapi2::ReturnCode (*p9_get_mem_vpd_keyword_FP_t)(
@@ -58,7 +66,7 @@ typedef fapi2::ReturnCode (*p9_get_mem_vpd_keyword_FP_t)(
     const fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>&,
     const uint8_t*,
     const size_t,
-    fapi2::keywordName_t&);
+    fapi2::keywordInfo_t&);
 extern "C"
 {
 
@@ -88,7 +96,7 @@ extern "C"
     ///             0x80 index 0
     ///             ... through ..
     ///             0x10 index 3
-    //              (frequency index 4-7 reserved)
+    ///             (frequency index 4-7 reserved)
     /// dddd        second char in keyword name
     ///
     /// All the configurations for a particular keyword are 'OR'ed into the
@@ -98,19 +106,20 @@ extern "C"
     ///
     /// Note: this interface should not be called directly by HWPs,
     /// it is provided for platform use behind the getVPD() interface.
+    /// DQ keyword uses Q0 as a map to Q1-Q8 keywords.  Q0 and CK have a header.
     ///
     /// @param[in]  i_target, the MCS
     /// @param[in]  i_vpd_info, vpd criteria
-    /// @param[in]  i_pMapping, MR or MT keyword data
+    /// @param[in]  i_pMapping, MR, MT, Q0, or CK keyword data
     /// @param[in]  i_mappingSize, size of i_pMapping buffer
-    /// @param[out] o_keywordName, keyword with vpd
+    /// @param[out] o_keywordInfo, keyword with its vpd information
     /// @return FAPI2_RC_SUCCESS iff ok
     fapi2::ReturnCode p9_get_mem_vpd_keyword (
         const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& i_vpd_info,
         const uint8_t*               i_pMapping,
         const size_t                 i_mappingSize,
-        fapi2::keywordName_t& o_keywordName);
+        fapi2::keywordInfo_t& o_keywordInfo);
 
 }
 
