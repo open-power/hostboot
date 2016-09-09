@@ -56,9 +56,21 @@
 <!-- =====================================================================
      Start of temporary definitions
      ================================================================= -->
-  <attribute>
-      <id>ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG</id>
-    </attribute>
+     <attribute>
+          <id>ATTR_PM_SPWUP_IGNORE_XSTOP_FLAG</id>
+     </attribute>
+     <attribute>
+          <id>ATTR_VPD_OVERRIDE_DQ</id>
+     </attribute>
+     <attribute>
+          <id>ATTR_VPD_OVERRIDE_DQ_ENABLE</id>
+     </attribute>
+     <attribute>
+          <id>ATTR_VPD_OVERRIDE_CK</id>
+     </attribute>
+     <attribute>
+          <id>ATTR_VPD_OVERRIDE_CK_ENABLE</id>
+     </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
