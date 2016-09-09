@@ -78,6 +78,59 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_VPD_OVERRIDE_DQ</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Byte-for-byte override for the bucket of DQ data that would
+            normally come from VPD.  If ATTR_VPD_OVERRIDE_DQ_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getVPD() instead of the actual VPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>160</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_DQ_ENABLE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_DQ.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+        <attribute>
+        <id>ATTR_VPD_OVERRIDE_CK</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Byte-for-byte override for the bucket of CK data that would
+            normally come from VPD.  If ATTR_VPD_OVERRIDE_CK_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getVPD() instead of the actual VPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>16</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_CK_ENABLE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_CK.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+
+    <attribute>
         <id>ATTR_VPD_OVERRIDE_MW</id>
         <targetType>TARGET_TYPE_MCA</targetType>
         <description>
