@@ -35,6 +35,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <p9_misc_scom_addresses.H>
 #include <p9_build_smp_fbc_cd.H>
 #include <p9_build_smp_adu.H>
 #include <p9_fbc_cd_hp_scom.H>
@@ -59,7 +60,7 @@ fapi2::ReturnCode p9_build_smp_set_fbc_cd(p9_build_smp_system& i_smp)
              p_iter != g_iter->second.chips.end();
              ++p_iter)
         {
-            // run initfile HWP(s)
+            // initialize serial SCOM chains
             FAPI_EXEC_HWP(l_rc, p9_fbc_cd_hp_scom, *(p_iter->second.target), FAPI_SYSTEM);
 
             if (l_rc)
