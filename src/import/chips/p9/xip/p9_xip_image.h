@@ -244,8 +244,12 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ASSEMBLER__
-#include <stddef.h>
+#ifdef _WIN32
+#include "win32_stdint.h"
+#else
 #include <stdint.h>
+#endif
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
