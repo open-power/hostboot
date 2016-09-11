@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,17 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <p9_ring_identification.H>
+#ifdef WIN32
+    #include "win32_stdint.h"
+    #include "p9_ring_identification.H"
+#else
+    #ifdef __sun
+        #include <sys/int_types.h>
+        #include "p9_ring_identification.H"
+    #else
+        #include <p9_ring_identification.H>
+    #endif
+#endif
 
 const RingIdList RING_ID_LIST_PDG[] =
 {
@@ -151,10 +161,17 @@ const VPDRingList ALL_VPD_RINGS[NUM_OF_VPD_TYPES] =
     {RING_ID_LIST_PDR,  (sizeof(RING_ID_LIST_PDR) / sizeof(RING_ID_LIST_PDR[0]))},
 
 };
+#if defined(WIN32) || defined(__sun)
+const uint32_t RING_ID_LIST_PG_SIZE = sizeof(RING_ID_LIST_PDG) / sizeof(
+        RING_ID_LIST_PDG[0]);
+const uint32_t RING_ID_LIST_PR_SIZE = sizeof(RING_ID_LIST_PDR) / sizeof(
+        RING_ID_LIST_PDR[0]);
+#endif
 
 const uint32_t RING_ID_LIST_CORE_SIZE = 4;
 
 
+//@TODO: This function will be used in RTC158106 (VPD insertion ordering).
 // get_vpd_ring_list_entry() retrieves the MVPD list entry based on either a ringName
 //   or a ringId.  If both are supplied, only the ringName is used. If ringName==NULL,
 //   then the ringId is used. A pointer to the RingIdList is returned.

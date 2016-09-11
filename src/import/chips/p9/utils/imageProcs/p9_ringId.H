@@ -26,10 +26,15 @@
 #ifndef _P9_RINGID_H_
 #define _P9_RINGID_H_
 
-#include <stdint.h>
-#include <stddef.h>
 
-#include <p9_ring_id.h>
+#ifdef WIN32
+    #include "win32_stdint.h"
+    #include "p9_ring_id.h"
+#else
+    #include <stdint.h>
+    #include <stddef.h>
+    #include <p9_ring_id.h>
+#endif
 
 // General Ring ID list structure
 typedef struct

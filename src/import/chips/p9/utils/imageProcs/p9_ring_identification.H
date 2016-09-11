@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,15 @@
 #ifndef _P9_RING_IDENT_H_
 #define _P9_RING_IDENT_H_
 #include <stddef.h>
-#include <stdint.h>
+#ifdef WIN32
+    #include "win32_stdint.h"
+#else
+    #ifdef __sun
+        #include <sys/int_types.h>
+    #else
+        #include <stdint.h>
+    #endif
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <p9_ring_id.h>
@@ -54,6 +62,10 @@ extern const VPDRingList ALL_VPD_RINGS[];
 extern const uint32_t    RING_ID_LIST_CHIP_SIZE, RING_ID_LIST_CORE_SIZE,
        RING_ID_LIST_CME_SIZE, RING_ID_LIST_CC_SIZE;
 
+#if defined(WIN32) || defined(__sun)
+    extern const RingIdList  RING_ID_LIST_PDG[], RING_ID_LIST_PDR[];
+    extern const uint32_t    RING_ID_LIST_PG_SIZE, RING_ID_LIST_PR_SIZE;
+#endif
 
 // Enumerated VPD keyword values.
 // Note! This is DIFFERENT from the MvpdKeyword list in fapiMvpdAccess.H which

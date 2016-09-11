@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef _P9_XIP_CUSTOMIZE_
 #define _P9_XIP_CUSTOMIZE_
 
+#ifndef WIN32
 #include <fapi2.H>
 
 typedef fapi2::ReturnCode (*p9_xip_customize_FP_t) (
@@ -109,4 +110,22 @@ extern "C"
         uint32_t& io_bootCoreMask);
 
 }
+#else
+extern "C" {
+    int p9_xip_customize (
+        int& i_proc_target,
+        void*     i_image,
+        uint32_t& io_imageSize,
+        void*     i_ringSectionBuf,
+        uint32_t& io_ringSectionBufSize,
+        uint8_t   i_sysPhase,
+        uint8_t   i_modeBuild,
+        void*     i_ringBuf1,
+        uint32_t  i_ringBufSize1,
+        void*     i_ringBuf2,
+        uint32_t  i_ringBufSize2,
+        uint32_t& io_bootCoreMask);
+}
+#endif
+
 #endif

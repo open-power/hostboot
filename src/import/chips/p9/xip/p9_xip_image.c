@@ -37,19 +37,18 @@
 /// ensure that no memory outside of the putative bounds of the image is ever
 /// referenced during validation.
 
-#ifndef PLIC_MODULE
-    #include <stddef.h>
-    #include <stdint.h>
-    #include <stdlib.h>
-    #include <string.h>
-#endif // PLIC_MODULE
-
 #include <stddef.h>
-#include <stdint.h>
+#ifdef _WIN32
+    #include "win32_stdint.h"
+    #include "endian.h"
+#else
+    #include <stdint.h>
+    #include <endian.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
-#include <endian.h>
 #include "p9_xip_image.h"
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Local Functions

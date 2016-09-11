@@ -22,6 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifdef WIN32
+#include "win32_stdint.h"
+#include "endian.h"
+#include "win_sim_fapi.h"
+#include "p9_xip_customize.H"
+#include "p9_xip_image.h"
+#include "p9_ring_identification.H"
+#include "p9_tor.H"
+#include "p9_scan_compression.H"
+#include "p9_infrastruct_help.H"
+
+using namespace fapi2;
+#else
 #include <p9_xip_customize.H>
 #include <p9_xip_image.h>
 #include <p9_ring_identification.H>
@@ -149,6 +162,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#endif
 
 //  Function: _fetch_and_insert_vpd_rings()
 //
@@ -165,9 +179,13 @@ fapi_try_exit:
 //  const RingIdList i_ring:         The ring ID list (#G or #R list)
 //  uint32_t&  io_bootCoreMask:      Desired (in) and actual (out) boot cores.
 //
-
+#ifdef WIN32
+ReturnCode _fetch_and_insert_vpd_rings(
+    int& i_proc_target,
+#else
 fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+#endif
     void*           i_ringSection,
     uint32_t&       io_ringSectionSize,
     uint32_t        i_maxRingSectionSize,
@@ -228,11 +246,15 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
         for (l_evenOdd = 0; l_evenOdd < l_ringsPerChipletId; l_evenOdd++)
         {
-            FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02X,0x%02x)",
-                     i_ring.ringId, l_chipletId);
-
-            auto l_vpdRingSize = i_vpdRingSize;
+#ifdef WIN32
+            uint16_t l_vpdRingSize = i_vpdRingSize;
+#else
+            uint32_t l_vpdRingSize = i_vpdRingSize;
+#endif
             MvpdKeyword l_mvpdKeyword;
+
+            FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02x,0x%02x)",
+                     i_ring.ringId, l_chipletId);
 
             switch (i_ring.vpdKeyword)
             {
@@ -575,7 +597,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 } // End if(redundant)
 
             }
-            else if (l_fapiRc.isRC(RC_MVPD_RING_NOT_FOUND))
+            else if ((uint32_t)l_fapiRc == RC_MVPD_RING_NOT_FOUND)
             {
 
                 // No match, do nothing. Next chipletId.
@@ -595,11 +617,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 //--------------------------
                 // Handle other error cases
                 //--------------------------
-
                 // getMvpdRing failed due to insufficient ring buffer space.
                 // Assumption here is that getMvpdRing returns required buffer size
                 //   in l_vpdRingSize (and which it does!).
-                FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
+                FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_RING_BUFFER_TOO_SMALL,
                              fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
                              set_CHIP_TARGET(i_proc_target).
                              set_RING_ID(i_ring.ringId).
@@ -611,7 +632,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                              l_vpdRingSize, i_vpdRingSize );
 
                 // getMvpdRing failed due to invalid record data magic word.
-                FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
+                FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_INVALID_RS4_HEADER,
                              fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
                              set_CHIP_TARGET(i_proc_target).
                              set_RING_ID(i_ring.ringId).
@@ -621,8 +642,19 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 // getMvpdRing failed for some other reason aside from above handled cases.
                 if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
                 {
+#ifdef WIN32
+
+                    if (l_fapiRc == SKIP_RING_ID )
+                    {
+                        l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
+                        FAPI_DBG("N/A MVPD ring for chiptype: ringId=0x%02X, chipletId=0x%02X ",
+                                 i_ring.ringId, l_chipletId);
+                    }
+
+#else
                     FAPI_ERR("_fetch_and_insert_vpd_rings(): getMvpdRing failed "
                              " w/rc=0x%08X", (uint64_t)l_fapiRc);
+#endif
                     fapi2::current_err = l_fapiRc;
                     goto fapi_try_exit;
                 }
@@ -638,7 +670,7 @@ fapi_try_exit:
     FAPI_DBG("Exiting _fetch_and_insert_vpd_rings");
     return fapi2::current_err;
 
-}
+} // End of  _fetch_and_insert_vpd_rings()
 
 
 
@@ -656,8 +688,13 @@ fapi_try_exit:
 //  uint32_t   i_ringBufSize2:       Size of ring work buffer.
 //  uint32_t&  io_bootCoreMask:      Desired (in) and actual (out) boot cores.
 //
+#ifdef WIN32
+int fetch_and_insert_vpd_rings(
+    int i_proc_target,
+#else
 fapi2::ReturnCode fetch_and_insert_vpd_rings(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+#endif
     void*           i_ringSection,
     uint32_t&       io_ringSectionSize,     // Running size
     uint32_t        i_maxRingSectionSize,   // Max size
@@ -737,7 +774,6 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                 l_ring_id_list[iRing].vpdRingClass == VPD_RING_CLASS_EX_INS ||
                 l_ring_id_list[iRing].vpdRingClass == VPD_RING_CLASS_EC_INS)
             {
-
                 FAPI_TRY( _fetch_and_insert_vpd_rings( i_proc_target,
                                                        i_ringSection,
                                                        io_ringSectionSize,
@@ -765,12 +801,17 @@ fapi_try_exit:
     FAPI_DBG("Exiting fetch_and_insert_vpd_rings");
     return fapi2::current_err;
 
-}
+} // End of   fetch_and_insert_vpd_rings()
 
 
 
+#ifndef WIN32
 fapi2::ReturnCode p9_xip_customize (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+#else
+ReturnCode p9_xip_customize (
+    int& i_proc_target,
+#endif
     void*     io_image,
     uint32_t& io_imageSize,             // In: Max, Out: Actual
     void*     io_ringSectionBuf,
@@ -783,11 +824,15 @@ fapi2::ReturnCode p9_xip_customize (
     uint32_t  i_ringBufSize2,
     uint32_t& io_bootCoreMask )         // Bits(8:31) = EC00:EC23
 {
+#ifndef WIN32
     fapi2::ReturnCode   l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
-    int                 l_rc = 0; // Non-fapi RC
-
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+#else
+    ReturnCode   l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
+    ReturnCode   l_fapiRc2 = fapi2::FAPI2_RC_SUCCESS;
+#endif
+    int                 l_rc = 0; // Non-fapi RC
 
     P9XipSection    l_xipRingsSection;
     uint32_t        l_inputImageSize;
@@ -873,15 +918,15 @@ fapi2::ReturnCode p9_xip_customize (
                  (uintptr_t)i_ringBufSize1,
                  (uintptr_t)i_ringBufSize2 );
 
-
     FAPI_DBG("Input image size: %d", l_inputImageSize);
-
 
 
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Write mailbox attributes
     // System phase:       HB_SBE
     ///////////////////////////////////////////////////////////////////////////
+
+#ifndef WIN32
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
@@ -967,6 +1012,8 @@ fapi2::ReturnCode p9_xip_customize (
                   (uint64_t)fapi2::current_err );
 
     }
+
+#endif
 
 
 
@@ -1062,6 +1109,7 @@ fapi2::ReturnCode p9_xip_customize (
 
             FAPI_DBG("Image size before any VPD updates: %d", l_currentImageSize);
 
+#ifndef WIN32
             // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
             l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
 
@@ -1095,6 +1143,9 @@ fapi2::ReturnCode p9_xip_customize (
             }
 
             FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
+#else
+            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
+#endif
 
             // Make sure current image size isn't already too big for Seeprom
             FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
@@ -1202,6 +1253,8 @@ fapi2::ReturnCode p9_xip_customize (
             if (l_fapiRc)
             {
 
+#ifndef WIN32
+
                 if (l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW))
                 {
                     FAPI_INF("p9_xip_customize(): Image is full. Ran out of space appending VPD rings"
@@ -1258,6 +1311,9 @@ fapi2::ReturnCode p9_xip_customize (
 
                 }
 
+#else
+                FAPI_INF("fetch_and_insert_vpd_rings returned error rc=0x%08x", l_fapiRc);
+#endif
                 fapi2::current_err = l_fapiRc;
                 goto fapi_try_exit;
 
@@ -1369,6 +1425,7 @@ fapi2::ReturnCode p9_xip_customize (
 
             l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
 
+#ifndef WIN32
             // Extract the DD level to enable retrieval of correct CME/SGPE ring blocks
             l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_proc_target, attrDdLevel);
 
@@ -1377,6 +1434,9 @@ fapi2::ReturnCode p9_xip_customize (
                          set_CHIP_TARGET(i_proc_target).
                          set_OCCURRENCE(1),
                          "FAPI_ATTR_GET(ATTR_EC) failed." );
+#else
+            attrDdLevel = g_ddLevel;
+#endif
 
             FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
 
@@ -1443,7 +1503,7 @@ fapi2::ReturnCode p9_xip_customize (
             if (l_fapiRc)
             {
 
-                FAPI_ASSERT( !l_fapiRc.isRC(RC_XIPC_IMAGE_WOULD_OVERFLOW),
+                FAPI_ASSERT( (uint32_t)l_fapiRc != RC_XIPC_IMAGE_WOULD_OVERFLOW,
                              fapi2::XIPC_IMAGE_WOULD_OVERFLOW_BEFORE_REACHING_MIN_ECS().
                              set_CHIP_TARGET(i_proc_target).
                              set_REQUESTED_BOOT_CORE_MASK(l_requestedBootCoreMask).
@@ -1473,6 +1533,7 @@ fapi2::ReturnCode p9_xip_customize (
                          set_OCCURRENCE(1),
                          "Caller bug: Caller supplied unsupported value of sysPhase (=%d)",
                          i_sysPhase );
+
             break;
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,11 @@
 #ifndef _P9_INFRASTRUCT_HELP_H_
 #define _P9_INFRASTRUCT_HELP_H_
 
-#include <stdint.h>
+#ifdef WIN32
+    #include "win32_stdint.h"
+#else
+    #include <stdint.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -71,9 +75,15 @@ enum MODEBUILD
     #define MY_ERR(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
     #define MY_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
 #else
-    #define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
-    #define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
-    #define MY_DBG(_fmt_, _args_...) printf(_fmt_, ##_args_)
+    #ifdef WIN32
+        #define MY_INF(...) { printf(__VA_ARGS__); }
+        #define MY_ERR(...) { printf(__VA_ARGS__); }
+        #define MY_DBG(...) { printf(__VA_ARGS__); }
+    #else
+        #define MY_INF(_fmt_, _args_...) printf(_fmt_, ##_args_)
+        #define MY_ERR(_fmt_, _args_...) printf(_fmt_, ##_args_)
+        #define MY_DBG(_fmt_, _args_...) printf(_fmt_, ##_args_)
+    #endif
 #endif
 
 
