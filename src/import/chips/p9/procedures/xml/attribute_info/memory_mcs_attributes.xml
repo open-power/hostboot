@@ -1162,6 +1162,20 @@
     </attribute>
 
     <attribute>
+      <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Bit wise representation of master ranks in each DIMM that are used for reads and writes.
+        Used by PRD.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array> 2 2</array>
+      <mssAccessorName>eff_dimm_ranks_configed</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_EFF_NUM_PACKAGES_PER_RANK</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of DRAM packages per rank.</description>
