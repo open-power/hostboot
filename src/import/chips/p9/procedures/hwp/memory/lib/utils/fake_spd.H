@@ -32,27 +32,59 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
+
+// This shouldn't be callable by HB
+#ifndef __HOSTBOOT_MODULE
 #ifndef DOXYGEN
+
 #ifndef _MSS_FAKE_SPD_H_
-    #define _MSS_FAKE_SPD_H_
+#define _MSS_FAKE_SPD_H_
 
-    #include <fapi2.H>
+#include <fapi2.H>
+#include <cstdint>
 
-    ///
-    /// @brief Return a blob of SPD data from a DIMM
-    /// @param[in] i_target, a DIMM target representing the DIMM in question
-    /// @param[out] o_blob, the blob of data from the DIMM - raw
-    /// @param[out] o_size, o_size, the size of the blob
-    /// @return FAPI2_RC_SUCCESS if there's no problem
-    /// @note passing nullptr for o_blob will return the size of the blob
-    ///   size_t s;
-    ///   FAPI_TRY( getSPD(d->target(), nullptr, s) );
-    ///   {
-    ///       uint8_t blob[s];
-    ///       FAPI_TRY( getSPD(d->target(), blob, s) );
-    ///    }
-    ///
-    fapi2::ReturnCode getSPD(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_blob, size_t& s);
+enum class spd_type
+{
+    VBU_16GB_2RX4_2400_DDR4_RDIMM,
+    MICRON_8GB_1Rx8_2400_DDR4_RDIMM,
+    MICRON_32GB_2RX4_2400_DDR4_LRDIMM,
+    SAMSUNG_64GB_2S2RX4_2400_DDR4_RDIMM_3DS
+};
 
-#endif
-#endif
+///
+/// @brief SPD helper function that immitates getSPD behavior
+/// @tparam N size of the input array
+/// @param[in] i_raw_spd array of SPD data
+/// @param[out] o_blob the blob of data from the DIMM - raw
+/// @param[out] o_size the size of the blob
+///
+template< size_t N >
+void spd_helper( const uint8_t (&i_raw_spd)[N],
+                 uint8_t* o_blob,
+                 size_t& o_size )
+{
+    o_size = sizeof( i_raw_spd );
+
+    if( o_blob != nullptr )
+    {
+        memcpy( o_blob, i_raw_spd, o_size );
+    }
+}
+
+///
+/// @brief Return a blob of SPD data from a DIMM
+/// @param[in] i_target a DIMM target representing the DIMM in question
+/// @param[in] i_type SPD type (vendor, sdram type, etc)
+/// @param[out] o_blob the blob of data from the DIMM - raw
+/// @param[out] o_size the size of the blob
+/// @return FAPI2_RC_SUCCESS if there's no problem
+/// @note passing nullptr for o_blob will return the size of the blob
+///
+fapi2::ReturnCode getSPD( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                          const spd_type i_type,
+                          uint8_t* o_blob,
+                          size_t& o_size );
+
+#endif // _MSS_FAKE_SPD_H_
+#endif // DOXYGEN
+#endif // __HOSTBOOT_MODULE

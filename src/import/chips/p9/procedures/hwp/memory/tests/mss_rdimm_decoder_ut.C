@@ -137,19 +137,21 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
             {
                 size_t l_read_spd_size = 0;
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                spd_type l_spd_type = spd_type::VBU_16GB_2RX4_2400_DDR4_RDIMM;
 
                 // Enforce requirements
+                REQUIRE( spd_type::VBU_16GB_2RX4_2400_DDR4_RDIMM == l_spd_type );
                 REQUIRE(l_read_spd_size == 0);
                 REQUIRE_FALSE(fapi2::current_err);
 
                 // Get the SPD size
-                REQUIRE_FALSE(getSPD(l_dimm, nullptr, l_read_spd_size));
+                REQUIRE_FALSE(getSPD(l_dimm, l_spd_type, nullptr, l_read_spd_size));
 
                 // "Container" for SPD data
                 std::vector<uint8_t> l_spd(l_read_spd_size, 0);
 
                 // Retrive SPD data
-                REQUIRE_FALSE(getSPD(l_dimm, l_spd.data(), l_read_spd_size));
+                REQUIRE_FALSE(getSPD(l_dimm, l_spd_type, l_spd.data(), l_read_spd_size));
 
                 // Create RDIMM decoder w/good VBU SPD Data
                 mss::spd::rdimm_decoder_v1_0 l_decoder(l_dimm, l_spd);
@@ -453,19 +455,21 @@ SCENARIO_METHOD(mcbist_target_test_fixture, "Verify RDIMM SPD Decoding", "[rdimm
             {
                 size_t l_read_spd_size = 0;
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                spd_type l_spd_type = spd_type::VBU_16GB_2RX4_2400_DDR4_RDIMM;
 
                 // Enforce requirements
+                REQUIRE( spd_type::VBU_16GB_2RX4_2400_DDR4_RDIMM == l_spd_type );
                 REQUIRE(l_read_spd_size == 0);
                 REQUIRE_FALSE(fapi2::current_err);
 
                 // Get the SPD size
-                REQUIRE_FALSE(getSPD(l_dimm, nullptr, l_read_spd_size));
+                REQUIRE_FALSE(getSPD(l_dimm, l_spd_type, nullptr, l_read_spd_size));
 
                 // "Container" for SPD data
                 std::vector<uint8_t> l_spd(l_read_spd_size, 0);
 
                 // Retrive SPD data
-                REQUIRE_FALSE(getSPD(l_dimm, l_spd.data(), l_read_spd_size));
+                REQUIRE_FALSE(getSPD(l_dimm, l_spd_type, l_spd.data(), l_read_spd_size));
 
                 // Create RDIMM decoder w/good VBU SPD Data
                 mss::spd::rdimm_decoder_v1_0 l_decoder(l_dimm, l_spd);
