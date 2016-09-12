@@ -105,6 +105,27 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 break;
             }
         }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x301184dull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x301184dull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x1, 19, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x301184dull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x301184dull)");
+                break;
+            }
+        }
         fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE);
 
