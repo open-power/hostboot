@@ -173,34 +173,34 @@ extern "C" {
 /// @brief Finds the longest delay in the topology (additionally sets each node delay)
 /// @param[in]  i_tod_node      => Reference to TOD topology
 /// @param[in]  i_freq_x        => XBUS frequency in MHz
-/// @param[in]  i_freq_a        => ABUS frequency in MHz
+/// @param[in]  i_freq_o        => OBUS frequency in MHz
 /// @param[out] o_longest_delay => Longest delay in TOD-grid-cycles
 /// @return FAPI_RC_SUCCESS if a longest TOD delay was found in topology else FAPI or ECMD error is sent through
     fapi2::ReturnCode calculate_longest_topolopy_delay(tod_topology_node* i_tod_node,
             const uint32_t     i_freq_x,
-            const uint32_t     i_freq_a,
+            const uint32_t     i_freq_o,
             uint32_t&          o_longest_delay);
 
 /// @brief Calculates the delay for a node in TOD-grid-cycles
 /// @param[in]  i_tod_node   => Reference to TOD topology
 /// @param[in]  i_freq_x     => XBUS frequency in MHz
-/// @param[in]  i_freq_a     => ABUS frequency in MHz
+/// @param[in]  i_freq_o     => OBUS frequency in MHz
 /// @param[out] o_node_delay => Delay of a single node in TOD-grid-cycles
 /// @return FAPI_RC_SUCCESS if TOD node delay is successfully calculated else FAPI or ECMD error is sent through
     fapi2::ReturnCode calculate_node_link_delay(tod_topology_node* i_tod_node,
             const uint32_t     i_freq_x,
-            const uint32_t     i_freq_a,
+            const uint32_t     i_freq_o,
             uint32_t&          o_node_delay);
 
 /// @brief Updates the topology struct with the final delay values
 /// @param[in]  i_tod_node      => Reference to TOD topology
 /// @param[in]  i_freq_x        => XBUS frequency in MHz
-/// @param[in]  i_freq_a        => ABUS frequency in MHz
+/// @param[in]  i_freq_o        => OBUS frequency in MHz
 /// @param[in]  i_longest_delay => Longest delay in the topology
 /// @return FAPI_RC_SUCCESS if o_int_path_delay was set for every node in the topology else FAPI or ECMD error is sent through
     fapi2::ReturnCode set_topology_delays(tod_topology_node* i_tod_node,
                                           const uint32_t     i_freq_x,
-                                          const uint32_t     i_freq_a,
+                                          const uint32_t     i_freq_o,
                                           const uint32_t     i_longest_delay);
 
 
