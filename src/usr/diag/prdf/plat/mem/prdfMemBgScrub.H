@@ -40,16 +40,22 @@ namespace PRDF
 {
 
 /**
- * @brief Performs all actions necessary to start the background scrub
- * @param mcbChip The mcbist chip
- * @return SUCCESS when background scrub is started correctly, else Non-SUCCESS
+ * @brief  Performs all actions necessary to start the background scrubbing on
+ *         the first configured address of the given target.
+ * @param  i_chip MCBIST, MCA, or MBA.
+ * @return SUCCESS when background scrub is started correctly, else Non-SUCCESS.
  */
 template<TARGETING::TYPE T>
-int32_t startInitialBgScrub(ExtensibleChip* chip)
+uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[PRDF::startInitialBgScrub] "
+    using namespace TARGETING;
 
-    int32_t o_rc = SUCCESS;
+    #define PRDF_FUNC "[startInitialBgScrub] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( T == i_chip->getTrgtType() );
+
+    uint32_t o_rc = SUCCESS;
 
     // NOTE: It is possible for a chip mark to have been placed between MDIA
     //       and the initial start scrub. Those unverified chip marks will be
@@ -60,49 +66,70 @@ int32_t startInitialBgScrub(ExtensibleChip* chip)
     do
     {
         // Cleanup hardware before starting the maintenance command.
-        o_rc = clearCmdCompleteAttn<T>(chip);
+        o_rc = clearCmdCompleteAttn<T>( i_chip );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn failed" );
+            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn<T>(0x%08x) failed",
+                      i_chip->getHuid() );
             break;
         }
 
-        o_rc = clearEccCounters<T>(chip);
+        o_rc = clearEccCounters<T>( i_chip );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "clearEccCounters failed" );
+            PRDF_ERR( PRDF_FUNC "clearEccCounters<T>(0x%08x) failed",
+                      i_chip->getHuid() );
             break;
         }
 
-        o_rc = clearEccFirs<T>(chip);
+        o_rc = clearEccFirs<T>( i_chip );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "clearEccFirs failed" );
+            PRDF_ERR( PRDF_FUNC "clearEccFirs<T>(0x%08x) failed",
+                      i_chip->getHuid() );
             break;
         }
-
-        TARGETING::TargetHandle_t trgt = chip->GetChipHandle();
 
         // We can use the default constructor for MemRank to start rank 0
         MemRank rank;
 
-        o_rc = PlatServices::startBgScrub<T>(trgt, rank, 0);
+        // Start background scrubbing.
+        o_rc = PlatServices::startBgScrub<T>( i_chip->getTrgt(), rank );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d) failed",
+                      i_chip->getHuid(), rank.getMaster() );
+            break;
+        }
 
     } while (0);
 
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "chip:0x%08x", chip->GetId() );
-
-        int32_t l_rc = clearCmdCompleteAttn<T>(chip); // Just in case.
-        if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn() failed" );
-    }
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
-} //end namespace PRDF
+/** @brief Specialization for MCBIST. */
+template<>
+uint32_t startInitialBgScrub<TARGETING::TYPE_MCBIST>( ExtensibleChip * i_chip )
+{
+    using namespace TARGETING;
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getTrgtType() );
+
+    // Find the first configured MCA.
+    ExtensibleChip * mcaChip = nullptr;
+    for ( uint32_t p = 0; p < MAX_PORT_PER_MCBIST; p++ )
+    {
+        mcaChip = PlatServices::getConnectedChild( i_chip, TYPE_MCA, p );
+        if ( nullptr != mcaChip ) break;
+    }
+    PRDF_ASSERT( nullptr != mcaChip ); // MCBIST configured with no MCAs
+
+    return startInitialBgScrub<TYPE_MCA>( mcaChip );
+}
+
+} // end namespace PRDF
 
 #endif // __prdfMemBgScrub_H

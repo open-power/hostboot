@@ -114,7 +114,7 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
 }
 
 //##############################################################################
-//##                         MCBIST Command wrappers
+//##                    Nimbus Maintenance Command wrappers
 //##############################################################################
 
 template<>
@@ -122,6 +122,7 @@ uint32_t stopBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt )
 {
     #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MCBIST>] "
 
+    PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MCBIST == getTargetType(i_trgt) );
 
     uint32_t rc = SUCCESS;
@@ -143,8 +144,19 @@ uint32_t stopBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt )
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t stopBgScrub<TYPE_MCA>( TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+
+    return stopBgScrub<TYPE_MCBIST>( getConnectedParent(i_trgt, TYPE_MCBIST) );
+}
+
 //##############################################################################
-//##                         MBA Command wrappers
+//##                   Centaur Maintenance Command wrappers
 //##############################################################################
 
 template<>
@@ -152,6 +164,7 @@ uint32_t stopBgScrub<TYPE_MBA>( TargetHandle_t i_trgt )
 {
     #define PRDF_FUNC "[PlatServices::stopBgScrub<TYPE_MBA>] "
 
+    PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
     uint32_t rc = SUCCESS;
