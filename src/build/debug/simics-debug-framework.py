@@ -613,7 +613,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                 hb_tracBinaryBufferSz)
 
 
-        cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile >> %s 2>/dev/null) || true\")"\
+        cmd2 = "(shell \"(fsp-trace ./%s -s %s/hbotStringFile | sort -s -k 1,1 >> %s 2>/dev/null) || true\")"\
                 %(tracbin[node_num],\
                 os.environ['HB_TOOLPATH'],\
                 tracmerg[node_num])

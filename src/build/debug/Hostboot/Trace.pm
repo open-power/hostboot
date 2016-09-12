@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -163,8 +163,11 @@ sub main
 
     if ($foundBuffer)
     {
+        # Note: 'sort -s -k 1,1' restricts the sort to only act on the first
+        #   column (i.e. the timestamp) to avoid reordering traces that have
+        #   identical timestamps
         open TRACE, ($args->{"fsp-trace"}." $tmpdir -s ".
-                    ::getImgPath()."hbotStringFile $fsptrace_options |");
+                    ::getImgPath()."hbotStringFile $fsptrace_options | sort -s -k 1,1 |");        
         while (my $line = <TRACE>)
         {
             ::userDisplay $line;
