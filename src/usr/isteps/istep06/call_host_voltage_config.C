@@ -40,7 +40,8 @@
 #include    <p9_pm_get_poundv_bucket.H>
 #include    <p9_setup_evid.H>
 
-
+//SBE
+#include    <sbe/sbeif.H>
 
 using namespace TARGETING;
 
@@ -70,6 +71,7 @@ void* call_host_voltage_config( void *io_pArgs )
     uint32_t l_vddBootVoltage = 0;  //ATTR_VDD_BOOT_VOLTAGE
     uint32_t l_vdnBootVoltage = 0;  //ATTR_VDN_BOOT_VOLTAGE
     uint32_t l_vcsBootVoltage = 0;  //ATTR_VCS_BOOT_VOLTAGE
+    uint32_t l_nestFreq = 0;        //ATTR_FREQ_PB_MHZ
 
     bool l_firstPass = true;
 
@@ -84,6 +86,18 @@ void* call_host_voltage_config( void *io_pArgs )
     {
         // Get the system target
         targetService().getTopLevelTarget(l_sys);
+
+        // Set the Nest frequency to whatever we boot with
+        l_err = SBE::getBootNestFreq( l_nestFreq );
+
+        if( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_host_voltage_config.C::"
+                    "Failed getting the boot nest frequency from the SBE");
+        }
+
+        l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>( l_nestFreq );
 
         // Get the child proc chips
         getChildAffinityTargets( l_procList,
@@ -277,7 +291,6 @@ void* call_host_voltage_config( void *io_pArgs )
                 l_nominalFreq, l_floorFreq, l_ceilingFreq,
                 l_turboFreq, l_ultraTurboFreq );
 
-        // TODO RTC:157890  need interface to look at the SBE and set NEST_FREQ_MHZ and PREV_NEST_FREQ_MHZ to whatever we boot from
     } while( 0 );
 
     if( l_err )

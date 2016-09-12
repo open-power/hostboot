@@ -614,7 +614,7 @@ namespace SBE
 
     /**
      * @brief Checks the Nest Frequency value stored in the the version struct
-     *        and compares it ot the NEST_FREQ_MHZ attribute of the system
+     *        and compares it ot the FREQ_PB_MHZ attribute of the system
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
      *                              and is updated based on the situation

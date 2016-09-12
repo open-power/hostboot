@@ -151,6 +151,7 @@ const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libistep07.so),
         DEP_LIB(libisteps_mss.so),
+        DEP_LIB(libsbe.so),
         NULL
     }
 };

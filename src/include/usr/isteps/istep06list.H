@@ -233,6 +233,7 @@ const   TaskInfo    g_istep06[]  =   {
 const DepModInfo  g_istep06Dependancies = {
     {
       DEP_LIB(libistep06.so),
+      DEP_LIB(libsbe.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
       DEP_LIB(libocc.so),
 #endif

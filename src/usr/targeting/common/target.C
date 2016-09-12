@@ -691,28 +691,22 @@ bool Target::uninstallWriteAttributeCallback()
 //******************************************************************************
 // setFrequencyAttributes
 //******************************************************************************
-void setFrequencyAttributes(Target * i_sys, uint32_t i_newNestFreq)
+void setFrequencyAttributes( Target * i_sys,
+                             uint32_t i_newNestFreq,
+                             uint32_t i_i2cBusDiv )
 {
-
     // Calculate the new value for PIB_I2C_NEST_PLL using old freq attributes.
     uint32_t l_oldPll = i_sys->getAttr<TARGETING::ATTR_PIB_I2C_NEST_PLL>();
-    uint32_t l_oldNestFreq = i_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+    uint32_t l_oldNestFreq = i_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
     uint32_t l_newPll = (i_newNestFreq * l_oldPll)/l_oldNestFreq;
 
     //NEST_FREQ
+    //TODO RTC: 161596 - Remove references to deprecated NEST_FREQ_MHZ
     i_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>(i_newNestFreq);
     TRACFCOMP(g_trac_targeting,
             "ATTR_NEST_FREQ_MHZ getting set from %d to %d",
             l_oldNestFreq,
             i_newNestFreq );
-
-    //FREQ_X_MHZ
-    uint32_t l_freqX = i_newNestFreq * 2;
-    i_sys->setAttr<TARGETING::ATTR_FREQ_X_MHZ>(l_freqX);
-    TRACFCOMP(g_trac_targeting,
-            "ATTR_FREQ_X_MHZ getting set to from %d to %d",
-            l_oldNestFreq*2,
-            l_freqX );
 
     //FREQ_PB_MHZ
     uint32_t l_freqPb = i_newNestFreq;
@@ -729,7 +723,21 @@ void setFrequencyAttributes(Target * i_sys, uint32_t i_newNestFreq)
             l_oldPll,
             l_newPll);
 
-    return;
+    // Get the processor targets to set the i2c bus divisor.
+    TARGETING::TargetHandleList l_procList;
+    TARGETING::getAllChips( l_procList,
+                            TARGETING::TYPE_PROC,
+                            true ); // true: return functional procs
+
+    TargetHandleList::iterator l_procTarget;
+
+    for( l_procTarget = l_procList.begin();
+        l_procTarget != l_procList.end();
+        ++l_procTarget )
+    {
+        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_REF>(i_i2cBusDiv);
+    }
+
 }
 
 

@@ -84,7 +84,6 @@ static bool g_mbox_query_done   = false;
 static bool g_mbox_query_result = false;
 static bool g_istep_mode        = false;
 static bool g_update_both_sides = false;
-static uint32_t g_current_nest_freq = 0;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -185,9 +184,6 @@ namespace SBE
                     g_update_both_sides = true;
                 }
             }
-
-            // Collect ATTR_NEST_FREQ_MHZ for reference later
-            g_current_nest_freq = sys->getAttr<ATTR_NEST_FREQ_MHZ>();
 
             //Make sure procedure constants keep within expected range.
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
@@ -2468,6 +2464,8 @@ namespace SBE
         bool crc_check_dirty      = false;
         bool isSimics_check       = false;
 
+        TARGETING::Target * l_sys = nullptr;
+
         do{
 
             /**************************************************************/
@@ -2695,8 +2693,9 @@ namespace SBE
 
                 if (  io_sbeState.update_actions & UPDATE_SBE )
                 {
+                    TARGETING::targetService().getTopLevelTarget( l_sys );
                     io_sbeState.new_seeprom_ver.nest_freq_mhz =
-                                g_current_nest_freq;
+                             l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
                 }
                 else
                 {
@@ -3340,6 +3339,56 @@ namespace SBE
         }
     }
 
+/////////////////////////////////////////////////////////////////////
+    void setNestFreqAttributes(uint32_t i_nestFreq)
+    {
+
+        errlHndl_t l_err = nullptr;
+        uint64_t l_mboxScratchReg4 = 0;
+        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+        size_t l_indexSize = sizeof(l_mboxScratchReg4);
+        uint32_t l_i2cBusDiv = 0;
+
+        // Call targeting function to update NEST_FREQ
+        TargetService& tS = targetService();
+        TARGETING::Target * l_sys = nullptr;
+        TARGETING::Target * l_masterProc = nullptr;
+
+        (void) tS.getTopLevelTarget( l_sys );
+        assert( l_sys, "setNestFreqAttributes() system target is NULL");
+
+        (void) tS.masterProcChipTargetHandle( l_masterProc );
+        assert( l_masterProc, "setNestFreqAttributes() "
+                "Master Proc target is NULL");
+
+        // Get the i2c bus divisor
+        l_err = deviceRead( l_masterProc,
+                            &l_mboxScratchReg4,
+                            l_indexSize,
+                            DEVICE_SCOM_ADDRESS(
+                            INITSERVICE::SPLESS::MBOX_SCRATCH_REG4) );
+
+        if( l_err )
+        {
+            TRACFCOMP( g_trac_sbe,
+                       "setNestFreqAttributes::"
+                       "Failed to get the bucket index from scom address");
+            errlCommit( l_err, SBE_COMP_ID );
+        }
+
+        l_scratch4.data32 = static_cast<uint32_t>(l_mboxScratchReg4 >> 32);
+
+        // The Nest PLL Bucket ID ranges 1-5. Subtract 1 for zero-based indexing
+        l_i2cBusDiv = NEST_PLL_FREQ_I2CDIV_LIST[l_scratch4.nestPllBucket-1];
+
+        TRACFCOMP(g_trac_sbe, "setNestFreqAttributes(): "
+                  "UPDATE_NEST_FREQ to %d ",
+                  i_nestFreq);
+
+        TARGETING::setFrequencyAttributes(l_sys,
+                                          i_nestFreq,
+                                          l_i2cBusDiv );
+    }
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
@@ -4400,11 +4449,17 @@ namespace SBE
                               size_t   i_seeprom_num,
                               bool &   o_mismatch)
     {
+
+        TARGETING::Target * l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        uint32_t l_current_nest_freq =
+            l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+
         TRACUCOMP( g_trac_sbe,
                    ENTER_MRK"checkSeepromNestFreq: tgt=0x%X current_freq=%d, "
                    "default_freq=%d, version=0x%X, i_seeprom_nest_freq=%d, "
                    "seeprom_num=%d",
-                   TARGETING::get_huid(i_tgt), g_current_nest_freq,
+                   TARGETING::get_huid(i_tgt), l_current_nest_freq,
                    i_default_nest_freq, i_struct_version,
                    i_seeprom_nest_freq, i_seeprom_num);
 
@@ -4416,14 +4471,14 @@ namespace SBE
         {
             // Only version that tracks the nest freq when the image was
             // customized
-            if ( g_current_nest_freq == i_seeprom_nest_freq )
+            if ( l_current_nest_freq == i_seeprom_nest_freq )
             {
                 TRACUCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
                            "Seeprom%d: ver%d found and current "
                            "nest_freq(%d) and image nest_freq(%d) match",
                            TARGETING::get_huid(i_tgt),
                            i_seeprom_num, i_struct_version,
-                           g_current_nest_freq,
+                           l_current_nest_freq,
                            i_seeprom_nest_freq);
             }
             else
@@ -4434,7 +4489,7 @@ namespace SBE
                            "nest_freq(%d) and image nest_freq(%d) DO NOT match",
                            TARGETING::get_huid(i_tgt),
                            i_seeprom_num, i_struct_version,
-                           g_current_nest_freq, i_seeprom_nest_freq);
+                           l_current_nest_freq, i_seeprom_nest_freq);
             }
         }
 
@@ -4442,14 +4497,14 @@ namespace SBE
         {
             // Either uninitialized, simics, corrupted, etc
             // Assume SBE image created with the module's default frequency
-            if ( g_current_nest_freq == i_default_nest_freq )
+            if ( l_current_nest_freq == i_default_nest_freq )
             {
                 TRACUCOMP( g_trac_sbe,"checkSeepromNestFreq: tgt=0x%X: "
                            "Seeprom%d: ver=0x%X found and current "
                            "nest_freq(%d) and default nest_freq(%d) match",
                            TARGETING::get_huid(i_tgt),
                            i_seeprom_num, i_struct_version,
-                           g_current_nest_freq, i_default_nest_freq);
+                           l_current_nest_freq, i_default_nest_freq);
             }
             else
             {
@@ -4460,7 +4515,7 @@ namespace SBE
                            "DO NOT match. ",
                            TARGETING::get_huid(i_tgt),
                            i_seeprom_num, i_struct_version,
-                           g_current_nest_freq, i_default_nest_freq);
+                           l_current_nest_freq, i_default_nest_freq);
             }
 
         }
@@ -4498,6 +4553,7 @@ namespace SBE
             if( l_err )
             {
                 TRACFCOMP(g_trac_sbe,
+                        "getBootNestFreq::"
                         "Failed to get the bucket index from scom address");
                 errlCommit(l_err, SBE_COMP_ID);
                 break;
@@ -4567,9 +4623,9 @@ namespace SBE
                 break;
             }
 
-            TRACFCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
-                       "=%d, Boot Frequency=%d",
-                       g_current_nest_freq, default_nest_freq);
+            TRACFCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_FREQ_PB_MHZ"
+                       " Boot Frequency=%d",
+                       default_nest_freq);
             TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): "
                        "seeprom0 ver=%d freq=%d seeprom1 ver=%d freq=%d",
                        io_sbeState.seeprom_0_ver.struct_version,

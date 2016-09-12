@@ -371,6 +371,32 @@ else
     push @systemAttr, ['SUPPORTS_DYNAMIC_MEM_VOLT', 0];
 }
 
+
+my $nestFreq = $reqPol->{'proc_pb_frequency'}->{content};
+
+
+if($nestFreq == 1600)
+{
+    push @systemAttr, ['NEST_PLL_BUCKET', 1];
+}
+elsif ($nestFreq == 1866)
+{
+    push @systemAttr, ['NEST_PLL_BUCKET', 2];
+}
+elsif ($nestFreq == 2000)
+{
+    push @systemAttr, ['NEST_PLL_BUCKET', 3];
+}
+elsif ($nestFreq == 2133)
+{
+    push @systemAttr, ['NEST_PLL_BUCKET', 4];
+}
+elsif ($nestFreq == 2400)
+{
+    push @systemAttr, ['NEST_PLL_BUCKET', 5];
+}
+
+
 my %domainProgram = (   MSS_VDD_PROGRAM  => $reqPol->{'mss_vdd_program'},
                         MSS_VCS_PROGRAM  => $reqPol->{'mss_vcs_program'},
                         MSS_AVDD_PROGRAM => $reqPol->{'mss_avdd_program'},

@@ -86,7 +86,7 @@ ALWAYS_INLINE inline uint64_t i2cGetNestFreq()
   TARGETING::Target * sysTarget = NULL;
   tS.getTopLevelTarget( sysTarget );
 
-  return sysTarget->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+  return sysTarget->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 };
 static uint64_t g_I2C_NEST_FREQ_MHZ = i2cGetNestFreq();
 
