@@ -1755,6 +1755,7 @@
     <attribute><id>MSS_OCC_THROTTLED_N_CMDS</id></attribute>
     <attribute><id>MSS_VPD_CKE_MAP</id></attribute>
     <attribute><id>MSS_VPD_DQ_MAP</id></attribute>
+    <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
 </targetType>
 
 <targetType>
