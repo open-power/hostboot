@@ -47,6 +47,7 @@ constexpr auto literal_13 = 13;
 constexpr auto literal_14 = 14;
 constexpr auto literal_15 = 15;
 constexpr auto literal_1600 = 1600;
+constexpr auto literal_16 = 16;
 constexpr auto literal_2577 = 2577;
 
 fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
@@ -184,8 +185,8 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             break;
         }
 
-        auto l_def_A_CMD_RATE_4B_R = (((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577) % ((
-                                          l_TGT1_ATTR_FREQ_A_MHZ * literal_1600) * literal_2));
+        auto l_def_A_CMD_RATE_4B_R = (((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577) % (((
+                                          l_TGT1_ATTR_FREQ_A_MHZ * literal_16) * literal_1600) * literal_2));
         fapi2::ATTR_PROC_FABRIC_A_BUS_WIDTH_Type l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_BUS_WIDTH, TGT1, l_TGT1_ATTR_PROC_FABRIC_A_BUS_WIDTH);
 
@@ -195,10 +196,10 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             break;
         }
 
-        auto l_def_A_CMD_RATE_D = ((l_TGT1_ATTR_FREQ_A_MHZ * literal_1600) * literal_2);
+        auto l_def_A_CMD_RATE_D = (((l_TGT1_ATTR_FREQ_A_MHZ * literal_16) * literal_1600) * literal_2);
         auto l_def_A_CMD_RATE_4B_N = ((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577);
-        auto l_def_A_CMD_RATE_2B_R = (((literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577) % ((
-                                          l_TGT1_ATTR_FREQ_A_MHZ * literal_1600) * literal_2));
+        auto l_def_A_CMD_RATE_2B_R = (((literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577) % (((
+                                          l_TGT1_ATTR_FREQ_A_MHZ * literal_16) * literal_1600) * literal_2));
         auto l_def_A_CMD_RATE_2B_N = ((literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ) * literal_2577);
         {
             l_rc = fapi2::getScom( TGT0, 0x501180bull, l_scom_buffer );
@@ -859,7 +860,7 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             break;
         }
 
-        auto l_def_X_CMD_RATE_4B_R = ((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) % l_TGT1_ATTR_FREQ_X_MHZ);
+        auto l_def_X_CMD_RATE_4B_R = ((literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ) % (l_TGT1_ATTR_FREQ_X_MHZ * literal_8));
         fapi2::ATTR_PROC_FABRIC_X_BUS_WIDTH_Type l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_BUS_WIDTH, TGT1, l_TGT1_ATTR_PROC_FABRIC_X_BUS_WIDTH);
 
@@ -869,9 +870,9 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             break;
         }
 
-        auto l_def_X_CMD_RATE_D = l_TGT1_ATTR_FREQ_X_MHZ;
+        auto l_def_X_CMD_RATE_D = (l_TGT1_ATTR_FREQ_X_MHZ * literal_8);
         auto l_def_X_CMD_RATE_4B_N = (literal_6 * l_TGT1_ATTR_FREQ_PB_MHZ);
-        auto l_def_X_CMD_RATE_2B_R = ((literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ) % l_TGT1_ATTR_FREQ_X_MHZ);
+        auto l_def_X_CMD_RATE_2B_R = ((literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ) % (l_TGT1_ATTR_FREQ_X_MHZ * literal_8));
         auto l_def_X_CMD_RATE_2B_N = (literal_12 * l_TGT1_ATTR_FREQ_PB_MHZ);
         {
             l_rc = fapi2::getScom( TGT0, 0x501180full, l_scom_buffer );
