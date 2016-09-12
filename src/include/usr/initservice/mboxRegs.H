@@ -45,15 +45,34 @@ namespace SPLESS
         uint32_t data32;
         struct
         {
-            uint32_t istepMode:1;       //0
-            uint32_t goToRuntime:1;     //1
-            uint32_t isMpipl:1;         //2
-            uint32_t fspAttached:1;     //3
-            uint32_t sbeFFDC:1;         //4
-            uint32_t sbeInternalFFDC:1; //5
-            uint32_t reserved:26;       //6:31
+            uint32_t istepMode       :1;   //0
+            uint32_t goToRuntime     :1;   //1
+            uint32_t isMpipl         :1;   //2
+            uint32_t fspAttached     :1;   //3
+            uint32_t sbeFFDC         :1;   //4
+            uint32_t sbeInternalFFDC :1;   //5
+            uint32_t reserved        :26;  //6:31
         } PACKED;
     };
+
+    // Mailbox Scratch Register 4
+    union MboxScratch4_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t bootFreqMult        :16;   //0:15
+            uint32_t cpFilterBypass      :1;    //16
+            uint32_t ssFilterBypass      :1;    //17
+            uint32_t ioFilterBypass      :1;    //18
+            uint32_t dpllBypass          :1;    //19
+            uint32_t nestMemXoPcieBypass :1;    //20
+            uint32_t reserved            :3;    //21:23
+            uint32_t nestPllBucket       :8;    //24:31
+        } PACKED;
+    };
+
+
 };
 };
 #endif
