@@ -289,22 +289,26 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 }
 
 //##############################################################################
-//##                         MCBIST/Maintenance Command wrappers
+//##                    Nimbus Maintenance Command wrappers
 //##############################################################################
 
 template<>
-uint32_t startBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt,
-                                    const MemRank & i_rank,
-                                    uint8_t i_port )
+uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MCBIST>] "
+    #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MCA>] "
 
-    PRDF_ASSERT( TYPE_MCBIST == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_port < MAX_PORT_PER_MCBIST );
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
 
     uint32_t rc = SUCCESS;
 
-    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_trgt );
+    TargetHandle_t mcbTrgt = getConnectedParent( i_trgt, TYPE_MCBIST );
+    PRDF_ASSERT( nullptr != mcbTrgt );
+
+    uint32_t port = getTargetPosition( i_trgt );
+    PRDF_ASSERT( port < MAX_PORT_PER_MCBIST );
+
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbTrgt );
 
     mss::mcbist::stop_conditions stopCond;
     stopCond.set_thresh_nce_int(1)
@@ -319,7 +323,7 @@ uint32_t startBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt,
                                                         : mss::mcbist::BG_SCRUB;
 
     mss::mcbist::address saddr, eaddr;
-    mss::mcbist::address::get_srank_range( i_port,
+    mss::mcbist::address::get_srank_range( port,
                                            i_rank.getDimmSlct(),
                                            i_rank.getRankSlct(),
                                            i_rank.getSlave(),
@@ -342,17 +346,18 @@ uint32_t startBgScrub<TYPE_MCBIST>( TargetHandle_t i_trgt,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//##                   Centaur Maintenance Command wrappers
+//##############################################################################
 
 template<>
 uint32_t startBgScrub<TYPE_MBA>( TargetHandle_t i_trgt,
-                                 const MemRank & i_rank,
-                                 uint8_t i_port )
+                                 const MemRank & i_rank )
 {
     #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MBA>] "
 
+    PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
-    // i_port is not used in this function.
 
     uint32_t rc = SUCCESS;
 

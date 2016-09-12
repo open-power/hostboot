@@ -59,12 +59,12 @@ void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE );
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
 
 //##############################################################################
-//##                  MCBIST/Maintenance Command wrappers
+//##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################
 
 /**
  * @brief  Stops Background Scrubbing.
- * @param  i_trgt MCBIST or MBA target.
+ * @param  i_trgt MCBIST, MCA, or MBA target.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>

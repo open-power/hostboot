@@ -38,28 +38,28 @@ namespace PRDF
 {
 
 /**
- * @brief Clears the cmd complete attention from the inputted chip
- * @param chip The chip, either mba or mcbist
- * @return SUCCESS if the cmd complete attention is cleared, else Non-SUCCESS
+ * @brief  Clears the command complete and WAT workaround attentions.
+ * @param  i_chip MBA, MCA, or MCBIST.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t clearCmdCompleteAttn (ExtensibleChip* chip);
+uint32_t clearCmdCompleteAttn( ExtensibleChip * i_chip );
 
 /**
- * @brief Clears the ecc counters from the inputted chip
- * @param chip The chip, either mba or mcbist
- * @return SUCCESS if the ecc counters are cleared, else Non-SUCCESS
+ * @brief  Clears the maintenance ECC counters.
+ * @param  i_chip MBA, MCA, or MCBIST.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t clearEccCounters (ExtensibleChip* chip);
+uint32_t clearEccCounters( ExtensibleChip * i_chip );
 
 /**
- * @brief Clears the ecc firs from the inputted chip
- * @param chip The chip, either mba or mcbist
- * @return SUCCESS if the ecc firs are cleared, else Non-SUCCESS
+ * @brief  Clears the maintenance ECC FIRs.
+ * @param  i_chip MBA, MCA, or MCBIST.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t clearEccFirs (ExtensibleChip* chip);
+uint32_t clearEccFirs( ExtensibleChip * i_chip );
 
 } //end namespace PRDF
 
