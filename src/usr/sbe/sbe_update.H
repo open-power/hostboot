@@ -85,7 +85,7 @@ namespace SBE
                                                 - SBE_SEEPROM_ECC_PAD
                                                 - SBE_VERSION_SPACE_WITH_ECC;
 
-    //Used to read SBE Boot Side from processor
+    // Used to read SBE Boot Side from processor
     const uint64_t SBE_VITAL_REG_0x0005001C = 0x005001C;
     const uint64_t SBE_BOOT_SELECT_MASK = 0x0080000000000000;
 

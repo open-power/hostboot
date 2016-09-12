@@ -63,6 +63,10 @@
 #include <p9_xip_section_append.H>
 #include <p9_xip_image.h>
 
+#include <p9_frequency_buckets.H>
+#include <initservice/mboxRegs.H>
+
+
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
@@ -4405,6 +4409,64 @@ namespace SBE
         return;
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq )
+    {
+        errlHndl_t l_err = nullptr;
+        uint64_t l_mboxScratchReg4 = 0;
+
+        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+        size_t l_indexSize = sizeof(l_mboxScratchReg4);
+
+        TARGETING::Target * l_masterProcTarget = NULL;
+        TARGETING::targetService()
+                    .masterProcChipTargetHandle( l_masterProcTarget );
+
+        TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootNestFreq()");
+        do
+        {
+            l_err = deviceRead( l_masterProcTarget,
+                                &l_mboxScratchReg4,
+                                l_indexSize,
+                                DEVICE_SCOM_ADDRESS(
+                                INITSERVICE::SPLESS::MBOX_SCRATCH_REG4) );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_sbe,
+                        "Failed to get the bucket index from scom address");
+                errlCommit(l_err, SBE_COMP_ID);
+                break;
+            }
+
+            l_scratch4.data32 = static_cast<uint32_t>(l_mboxScratchReg4 >> 32);
+
+
+            TRACFCOMP(g_trac_sbe,
+                    "The nest PLL bucket id is %d",
+                    l_scratch4.nestPllBucket );
+
+            size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
+                               sizeof(NEST_PLL_FREQ_LIST[0]);
+
+
+
+            assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
+
+            // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
+            // take zero-based indexing into account.
+            o_bootNestFreq = NEST_PLL_FREQ_LIST[l_scratch4.nestPllBucket-1];
+
+            TRACFCOMP(g_trac_sbe, "getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
+                    o_bootNestFreq,
+                    l_scratch4.nestPllBucket );
+
+
+        }while( 0 );
+        TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootNestFreq()");
+
+        return l_err;
+    }
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState)
@@ -4422,15 +4484,19 @@ namespace SBE
             io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch = false;
             io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch = false;
 
-            // Get MRW DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
-            // @TODO RTC:138226 "We need to investigate if we can avoid needing
-            //                   this hack in P9"
-            default_nest_freq = 2400 /* io_sbeState.target->getAttr<
-                         TARGETING::ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ>()
-                         @TODO RTC:157890 */ ;
+            // Retrieve the boot frequency we booted from
+            err = getBootNestFreq(default_nest_freq);
 
-            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
-                       "=%d, ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ=%d",
+            if( err )
+            {
+                TRACFCOMP(g_trac_sbe,
+                     "There was an error getting the default boot frequency");
+
+                break;
+            }
+
+            TRACFCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
+                       "=%d, Boot Frequency=%d",
                        g_current_nest_freq, default_nest_freq);
             TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): "
                        "seeprom0 ver=%d freq=%d seeprom1 ver=%d freq=%d",

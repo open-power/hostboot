@@ -121,10 +121,16 @@ namespace SBE
      *        at the Golden side of PNOR.
      *       -Using master processor to make this determination.
      */
-
     errlHndl_t isGoldenSide( bool & o_isGolden );
 
-
+   /**
+    * @brief Determines what nest frequency we booted from
+    *
+    * @param[out] o_bootNestFreq - The nest frequency the system last booted on.
+    *
+    * @return errlHndl_t Error log handle on error.
+    */
+    errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq );
 
 } //end namespace SBE
 

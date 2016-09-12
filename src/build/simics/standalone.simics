@@ -45,4 +45,5 @@ echo "Enable the SBE"
 # Set mailbox scratch registers so that the SBE starts in plck mode
 ($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003F "20000000_00000000" 64
 ($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
+($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003B "00000001_00000000" 64
 ($hb_masterproc).proc_chip.invoke parallel_store FSIMBOX 0x01 "80000000" 32
