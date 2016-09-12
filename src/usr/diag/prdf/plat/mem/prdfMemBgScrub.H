@@ -90,8 +90,11 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
             break;
         }
 
-        // We can use the default constructor for MemRank to start rank 0
-        MemRank rank;
+        // Get the first configured rank.
+        std::vector<MemRank> ranklist;
+        PlatServices::getMasterRanks<T>( i_chip->getTrgt(), ranklist );
+        PRDF_ASSERT( !ranklist.empty() ); // i_chip configured with no ranks
+        MemRank rank = ranklist.front();
 
         // Start background scrubbing.
         o_rc = PlatServices::startBgScrub<T>( i_chip->getTrgt(), rank );

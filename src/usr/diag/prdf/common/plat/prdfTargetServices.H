@@ -48,7 +48,7 @@ namespace PRDF
 {
 
 class ExtensibleChip;
-//class CenRank; TODO: RTC 136126
+class MemRank;
 
 namespace PlatServices
 {
@@ -305,21 +305,6 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
 //##############################################################################
 
 /**
- * @brief   Returns the list of configured master ranks for an MBA.
- * @param   i_memTrgt MBA target or child of MBA.
- * @param   o_ranks   The returned list.
- * @param   i_ds      Dimm Slct for which rank information is required. If this
- *                    equals to MAX_DIMM_PER_PORT, function will return rank
- *                    information for both DIMMS on this MBA.
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
- */
-/* TODO: RTC 136126
-int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTrgt,
-                        std::vector<CenRank> & o_ranks,
-                        uint8_t i_ds = MAX_DIMM_PER_PORT );
-*/
-
-/**
  * @brief   Returns the DMI bus channel for the given memory target.
  * @param   i_memTarget MCS target or child of MCS.
  * @return  The DMI bus channel.
@@ -396,6 +381,20 @@ uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
  */
 uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
                                uint8_t i_ds );
+
+/**
+ * @brief  Returns a list of configured master ranks for an MCA or MBA.
+ * @param  i_trgt  MCA or MBA target.
+ * @param  o_ranks The returned list.
+ * @param  i_ds    When used, this function will only return the list of ranks
+ *                 for the target DIMM select. Otherwise, the default is to
+ *                 return the list for all DIMM selects.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
+                     std::vector<MemRank> & o_ranks,
+                     uint8_t i_ds = MAX_DIMM_PER_PORT );
 
 //##############################################################################
 //##

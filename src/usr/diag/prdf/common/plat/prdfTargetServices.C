@@ -48,8 +48,8 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 
-// Pegasus includes
-//#include <prdfCenAddress.H> TODO: RTC 136126
+// Platform includes
+#include <prdfMemAddress.H>
 
 using namespace TARGETING;
 
@@ -1163,85 +1163,6 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
 //##
 //##############################################################################
 
-/* TODO: RTC 136126
-int32_t getMasterRanks( TargetHandle_t i_memTrgt,
-                        std::vector<CenRank> & o_ranks,
-                        uint8_t i_ds )
-{
-    #define PRDF_FUNC "PlatServices::getMasterRanks] "
-
-    int32_t o_rc = FAIL;
-
-    o_ranks.clear();
-
-    do
-    {
-        if ( NULL == i_memTrgt ) break;
-
-        TargetHandle_t mbaTrgt = getConnectedParent( i_memTrgt, TYPE_MBA );
-        if ( NULL == mbaTrgt )
-        {
-            PRDF_ERR( PRDF_FUNC "getConnectedParent() failed" );
-            break;
-        }
-
-        if( MAX_DIMM_PER_PORT < i_ds )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid value for Dimm Slct:%u", i_ds );
-            break;
-        }
-
-        uint8_t info[MAX_PORT_PER_MBA][MAX_DIMM_PER_PORT];
-        if ( !mbaTrgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_EFF_DIMM_RANKS_CONFIGED" );
-            break;
-        }
-
-        // NOTE: DIMMs must be plugged into pairs. So the values for each port
-        //       select will be the same for each DIMM select. There is no need
-        //       to interate on both port selects.
-
-        for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
-        {
-            // if we are requested to get master ranks on a specific
-            // DIMM, ignore if ds does not match the specific DIMM.
-            // We have kept MAX_DIMM_PER_PORT as special value ( default )
-            // for getting total ranks across both DIMMS.
-
-            if( ( MAX_DIMM_PER_PORT != i_ds ) && ( ds != i_ds ) )
-                continue;
-
-            uint8_t rankMask = info[0][ds];
-
-            if ( 0 == (rankMask & 0xf0) ) continue; // Nothing configured.
-
-            for ( uint32_t rs = 0; rs < 4; rs++ )
-            {
-                if ( 0 != (rankMask & (0x80 >> rs)) )
-                {
-                    o_ranks.push_back( CenRank((ds << 2) | rs) );
-                }
-            }
-        }
-
-        o_rc = SUCCESS;
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_memTrgt=0x%08x", getHuid(i_memTrgt) );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
-
-//------------------------------------------------------------------------------
-
 uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
 {
     #define PRDF_FUNC "[PlatServices::getMemChnl] "
@@ -1468,6 +1389,77 @@ uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
     return rankCount;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
+                       uint8_t i_pos, uint8_t i_ds )
+{
+    #define PRDF_FUNC "[__getMasterRanks] "
+
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( T == getTargetType(i_trgt) );
+    PRDF_ASSERT( i_pos < 2 );
+    PRDF_ASSERT( i_ds <= MAX_DIMM_PER_PORT ); // can equal MAX_DIMM_PER_PORT
+
+    o_ranks.clear();
+
+    uint8_t info[2][2];
+    if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
+    {
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED> "
+                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
+    }
+
+    for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
+    {
+        // Check if user gave a specific value for i_ds.
+        if ( (MAX_DIMM_PER_PORT != i_ds) && (ds != i_ds) )
+            continue;
+
+        uint8_t rankMask = info[i_pos][ds];
+
+        // The configured rank selects are in the first nibble.
+        for ( uint32_t rs = 0; rs < 4; rs++ )
+        {
+            if ( 0 != (rankMask & (0x80 >> rs)) )
+            {
+                o_ranks.push_back( MemRank((ds << 2) | rs) );
+            }
+        }
+    }
+
+    #undef PRDF_FUNC
+}
+
+template<>
+void getMasterRanks<TYPE_MCA>( TargetHandle_t i_trgt,
+                               std::vector<MemRank> & o_ranks,
+                               uint8_t i_ds )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+
+    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
+    //       the position of the MCA relative to the MCS.
+    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
+    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
+
+    __getMasterRanks<TYPE_MCS>( mcsTrgt, o_ranks, relPos, i_ds );
+}
+
+template<>
+void getMasterRanks<TYPE_MBA>( TargetHandle_t i_trgt,
+                               std::vector<MemRank> & o_ranks,
+                               uint8_t i_ds )
+{
+    // NOTE: DIMMs must be plugged into pairs. So the values for each port
+    //       select will be the same for each DIMM select. There is no need to
+    //       iterate on both port selects.
+    __getMasterRanks<TYPE_MBA>( i_trgt, o_ranks, 0, i_ds );
 }
 
 //##############################################################################
