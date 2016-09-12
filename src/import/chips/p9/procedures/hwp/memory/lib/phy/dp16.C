@@ -1072,8 +1072,8 @@ fapi2::ReturnCode get_dq_dqs_drv_imp_field_value( const fapi2::Target<TARGET_TYP
         }
 
         //successfully got the value, print an info statement for debug
-        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "DRV", dp, l_vpd_value,
-                 o_reg_value);
+        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "DRV", dp, l_vpd_value[dp],
+                 o_reg_value[dp]);
     }
 
 fapi_try_exit:
@@ -1206,8 +1206,8 @@ fapi2::ReturnCode get_dq_dqs_rcv_imp_field_value( const fapi2::Target<TARGET_TYP
         }
 
         //successfully got the value, print an info statement for debug
-        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "RCV", dp, l_vpd_value,
-                 o_reg_value);
+        FAPI_INF("%s DQ/DQS %s impedance for DP[%u] VPD: %u register value 0x%02x", c_str(i_target), "RCV", dp, l_vpd_value[dp],
+                 o_reg_value[dp]);
 
     }
 
