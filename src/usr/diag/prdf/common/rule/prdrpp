@@ -78,5 +78,13 @@ sub open_file
             return;
         }
     }
-    print STDERR "prdrpp: $filename not found!\n";
+
+    # XML parser inserts lines into each rule file to allow for manually added
+    # registers and action classes. These include files don't exist unless
+    # needed, so suppress file not found errors for them.
+    if (index($filename, "_regs.rule") == -1 &&
+        index($filename, "_actions.rule") == -1)
+    {
+        print STDERR "prdrpp: $filename not found!\n";
+    }
 }
