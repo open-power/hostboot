@@ -815,25 +815,29 @@ extern "C"
         fapi2::buffer<uint64_t> data(0x0);
         uint32_t longest_delay = 0;
         uint32_t freq_x = 0;
-        uint32_t freq_a = 0;
+        uint32_t freq_o = 0;
 
 
         FAPI_DBG("Start");
         // retrieve X-bus and A-bus frequencies
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, FAPI_SYSTEM, freq_x),
                  "Failure reading XBUS frequency attribute!");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, FAPI_SYSTEM, freq_a),
-                 "Failure reading ABUS frequency attribute!");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, FAPI_SYSTEM, freq_o),
+                 "Failure reading OBUS frequency attribute!");
+
+        // multiply attribute (mesh speed) speed by link factor
+        freq_x *= 8;
+        freq_o *= 16;
 
         // Bus frequencies are global for the system (i.e. A0 and A1 will always run with the same frequency)
-        FAPI_DBG("XBUS=%dMHz ABUS=%dMHz", freq_x, freq_a);
+        FAPI_DBG("XBUS=%dMHz OBUS=%dMHz", freq_x, freq_o);
 
         // Find the most-delayed path in the topology; this is the MDMT's delay
-        FAPI_TRY(calculate_longest_topolopy_delay(i_tod_node, freq_x, freq_a, longest_delay),
+        FAPI_TRY(calculate_longest_topolopy_delay(i_tod_node, freq_x, freq_o, longest_delay),
                  "Failure calculating longest topology delay!");
         FAPI_DBG("the longest delay is %d TOD-grid-cycles.", longest_delay);
 
-        FAPI_TRY(set_topology_delays(i_tod_node, freq_x, freq_a, longest_delay),
+        FAPI_TRY(set_topology_delays(i_tod_node, freq_x, freq_o, longest_delay),
                  "Unable to set topology delays!");
 
         // Finally, the MDMT delay must include additional TOD-grid-cycles to account for staging latches in slaves
@@ -849,7 +853,7 @@ extern "C"
     //---------------------------------------------------------------------------------
     fapi2::ReturnCode calculate_longest_topolopy_delay(tod_topology_node* i_tod_node,
             const uint32_t     i_freq_x,
-            const uint32_t     i_freq_a,
+            const uint32_t     i_freq_o,
             uint32_t&          o_longest_delay)
     {
         uint32_t node_delay = 0;
@@ -857,7 +861,7 @@ extern "C"
 
         FAPI_DBG("Start");
 
-        FAPI_TRY(calculate_node_link_delay(i_tod_node, i_freq_x, i_freq_a, node_delay),
+        FAPI_TRY(calculate_node_link_delay(i_tod_node, i_freq_x, i_freq_o, node_delay),
                  "Failure calculating single node delay!");
         o_longest_delay = node_delay;
 
@@ -866,7 +870,7 @@ extern "C"
              ++child)
         {
             tod_topology_node* tod_node = *child;
-            FAPI_TRY(calculate_longest_topolopy_delay(tod_node, i_freq_x, i_freq_a, node_delay),
+            FAPI_TRY(calculate_longest_topolopy_delay(tod_node, i_freq_x, i_freq_o, node_delay),
                      "Failure calculating topology delay!");
 
             if (node_delay > current_longest_delay)
@@ -887,7 +891,7 @@ extern "C"
     //---------------------------------------------------------------------------------
     fapi2::ReturnCode calculate_node_link_delay(tod_topology_node* i_tod_node,
             const uint32_t     i_freq_x,
-            const uint32_t     i_freq_a,
+            const uint32_t     i_freq_o,
             uint32_t&          o_node_delay)
     {
         fapi2::buffer<uint64_t> data(0x0);
@@ -964,7 +968,7 @@ extern "C"
                                  || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[0] != 0)),
                                 fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS0),
                                 "i_tod_node->i_bus_rx is set to OBUS0 and it is not enabled");
-                    bus_freq = i_freq_x;
+                    bus_freq = i_freq_o;
                     data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_0>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_1>();
                     bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
                     bus_mode_sel_even = PB_OLINK_DLY_FMR0_LINK_DELAY_START_BIT;
@@ -977,7 +981,7 @@ extern "C"
                                  || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[1] != 0)),
                                 fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS1),
                                 "i_tod_node->i_bus_rx is set to OBUS1 and it is not enabled");
-                    bus_freq = i_freq_x;
+                    bus_freq = i_freq_o;
                     data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_2>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_3>();
                     bus_mode_addr = PU_IOE_PB_OLINK_DLY_0123_REG;
                     bus_mode_sel_even = PB_OLINK_DLY_FMR2_LINK_DELAY_START_BIT;
@@ -990,7 +994,7 @@ extern "C"
                                  || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[2] != 0)),
                                 fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS2),
                                 "i_tod_node->i_bus_rx is set to OBUS2 and it is not enabled");
-                    bus_freq = i_freq_x;
+                    bus_freq = i_freq_o;
                     data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_4>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_5>();
                     bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
                     bus_mode_sel_even = PB_OLINK_DLY_FMR4_LINK_DELAY_START_BIT;
@@ -1003,7 +1007,7 @@ extern "C"
                                  || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[3] != 0)),
                                 fapi2::P9_TOD_SETUP_INVALID_TOPOLOGY_RX().set_TARGET(target).set_RX(OBUS3),
                                 "i_tod_node->i_bus_rx is set to OBUS3 and it is not enabled");
-                    bus_freq = i_freq_x;
+                    bus_freq = i_freq_o;
                     data.setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_6>().setBit<PB_OLINK_RT_DELAY_CTL_SET_LINK_7>();
                     bus_mode_addr = PU_IOE_PB_OLINK_DLY_4567_REG;
                     bus_mode_sel_even = PB_OLINK_DLY_FMR6_LINK_DELAY_START_BIT;
@@ -1061,7 +1065,7 @@ extern "C"
     //---------------------------------------------------------------------------------
     fapi2::ReturnCode set_topology_delays(tod_topology_node* i_tod_node,
                                           const uint32_t     i_freq_x,
-                                          const uint32_t     i_freq_a,
+                                          const uint32_t     i_freq_o,
                                           const uint32_t     i_longest_delay)
     {
         FAPI_DBG("Start");
@@ -1081,7 +1085,7 @@ extern "C"
              ++child)
         {
             tod_topology_node* tod_node = *child;
-            FAPI_TRY(set_topology_delays(tod_node, i_freq_x, i_freq_a, i_tod_node->o_int_path_delay),
+            FAPI_TRY(set_topology_delays(tod_node, i_freq_x, i_freq_o, i_tod_node->o_int_path_delay),
                      "Failure calculating topology delay!");
         }
 
