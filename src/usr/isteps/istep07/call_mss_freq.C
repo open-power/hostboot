@@ -113,7 +113,22 @@ void*    call_mss_freq( void *io_pArgs )
         }
     } // End memBuf loop
 
+    // Set PB frequency to ASYNC_FREQ_MHZ
+    TARGETING::Target * l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( l_sys );
 
+    uint32_t l_originalNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+    uint32_t l_asyncFreq =
+          l_sys->getAttr<TARGETING::ATTR_ASYNC_NEST_FREQ_MHZ>();
+
+    l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(l_asyncFreq);
+
+    // Save MC_SYNC_MODE
+    TARGETING::Target * l_masterProc = nullptr;
+    TARGETING::targetService()
+            .masterProcChipTargetHandle( l_masterProc );
+    uint8_t l_prevSyncMode =
+          l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
 
 
     if(l_StepError.getErrorHandle() == NULL)
@@ -158,35 +173,49 @@ void*    call_mss_freq( void *io_pArgs )
                    "WARNING skipping p9_mss_freq_system HWP due to error detected in p9_mss_freq HWP. An error should have been committed.");
     }
 
-/*  TODO RTC: 157659 Trigger SBE update if nest frequency changed
-    // Check to see if the nest frequency changed
-    TARGETING::targetService().getTopLevelTarget( l_sys );
-    l_newNest = l_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
-    l_originalNest = l_sys->getAttr<TARGETING::ATTR_PREV_NEST_FREQ_MHZ>();
 
-    // Trigger sbe update if the nest frequency changed.
+    // Check MC_SYNC_MODE
+    uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+    uint32_t l_newNest = 0;
 
-    if( l_newNest != l_originalNest )
+    // TODO RTC: 161197 Remove logic to set nest based off sync mode
+    // Set the nest frequency based off mc_sync_mode
+    if( l_mcSyncMode == 0 )
     {
+        l_newNest = l_sys->getAttr<TARGETING::ATTR_ASYNC_NEST_FREQ_MHZ>();
+    }
+    else
+    {
+        TARGETING::TargetHandleList l_mcbists;
+        TARGETING::getAllChiplets(l_mcbists, TARGETING::TYPE_MCBIST);
+        l_newNest = l_mcbists.at(0)->getAttr<TARGETING::ATTR_MSS_FREQ>();
+    }
+    l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>( l_newNest );
+    // TODO RTC: 161596 - Set ATTR_NEST_FREQ_MHZ as well until we know it is not being used anymore
+    l_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>( l_newNest );
+
+    //Trigger sbe update if the nest frequency changed.
+    if( (l_newNest != l_originalNest) || (l_mcSyncMode != l_prevSyncMode) )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "The nest frequency or sync mode changed!"
+               " Original Nest: %d New Nest: %d"
+               " Original syncMode: %d New syncMode: %d",
+                l_originalNest, l_newNest, l_prevSyncMode, l_mcSyncMode );
         l_err = SBE::updateProcessorSbeSeeproms();
 
         if( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                      "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
         }
     }
-*/
-
-    // TODO RTC:138226
-    // 3c) FW examines current synchronous mode nest freq and will customize the
-    // SBE and reboot if necessary on the master only
-    // (slaves get data via mbox scratch registers)
-    /* FAPI_INVOKE_HWP(l_err, p9_xip_customize,
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-            const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_system_target,
-            void* io_image);
-    */
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 

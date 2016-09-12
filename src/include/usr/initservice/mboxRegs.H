@@ -72,6 +72,23 @@ namespace SPLESS
         } PACKED;
     };
 
+    // Mailbox Scratch Register 8
+    union MboxScratch8_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t validFwFunctionalEqEc    :1;  //0
+            uint32_t validSbeI2cBusSpeed      :1;  //1
+            uint32_t validFwMode              :1;  //2
+            uint32_t validBootFreq            :1;  //3
+            uint32_t validHwpControlFlags     :1;  //4
+            uint32_t validMasterSlaveChipNode :1;  //5
+            uint32_t validDrtmPayloadAddr     :1;  //6
+            uint32_t validBytes               :1;  //7
+            uint32_t reserved                 :24; //8:31
+        } PACKED;
+    };
 
 };
 };

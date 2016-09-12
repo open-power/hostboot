@@ -94,12 +94,12 @@
         </default>
     </attribute>
     <attribute>
-        <id>NEST_FREQ_MHZ</id>
-        <default>0x960</default>
+        <id>ASYNC_NEST_FREQ_MHZ</id>
+        <default>0x7D0</default>
     </attribute>
     <attribute>
-        <id>FREQ_PB_MHZ</id>
-        <default>0x7D0</default>
+        <id>REQUIRED_SYNCH_MODE</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>REQUIRED_SYNCH_MODE</id>

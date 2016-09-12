@@ -93,6 +93,7 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
+    <!-- TODO RTC: 161596 Remove references to deprecated NEST_FREQ_MHZ -->
     <attribute>
         <id>NEST_FREQ_MHZ</id>
         <default>0x960</default>

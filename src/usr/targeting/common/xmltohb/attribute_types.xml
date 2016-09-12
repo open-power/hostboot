@@ -6434,6 +6434,7 @@ firmware notes: Used as override attribute for pstate procedure
 
 <attribute>
     <id>NEST_FREQ_MHZ</id>
+    <!-- TODO RTC: 161596 - Remove deprecated NEST_FREQ_MHZ -->
     <description>
         Nest frequency in MHz
     </description>

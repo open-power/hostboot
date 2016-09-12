@@ -43,7 +43,9 @@ try {
 ###################################
 echo "Enable the SBE"
 # Set mailbox scratch registers so that the SBE starts in plck mode
-($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003F "20000000_00000000" 64
+# Set Boot Freq valid bit (bit 3) and valid data bit (bit 7)
+($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003F "31000000_00000000" 64
 ($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
-($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003B "00000001_00000000" 64
+# Set the Nest PLL Bucket ID to 3 in the 4th byte of Mbox Scratch Reg 4
+($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003B "00000003_00000000" 64
 ($hb_masterproc).proc_chip.invoke parallel_store FSIMBOX 0x01 "80000000" 32
