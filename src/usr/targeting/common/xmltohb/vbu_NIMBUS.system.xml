@@ -2432,6 +2432,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0D</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
@@ -2465,6 +2469,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0E</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
@@ -2496,6 +2504,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0F</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2532,6 +2544,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0D</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
@@ -2566,6 +2582,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0E</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
@@ -2597,6 +2617,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0E</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2633,6 +2657,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0F</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
@@ -2666,6 +2694,10 @@
         <default>4</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0F</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
@@ -2697,6 +2729,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x0F</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2802,6 +2838,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -4575,6 +4615,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x2</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-2</default>
     </attribute>
@@ -4606,6 +4650,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x4</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>

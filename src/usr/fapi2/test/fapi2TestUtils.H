@@ -48,9 +48,20 @@
 
 // non-core and non-cache chiplet ids
 #define START_PERV_CHIPLET_NUM    0x01
+// CAPI Unit(0,1 => 0x02, 0x04)
+#define START_CAPP_CHIPLET_NUM    0x02
+// NV (0, 1 => 0x05)
+#define START_NV_CHIPLET_NUM      0x05
+// XBUS (0, 1 => 0x6)
 #define START_XBUS_CHIPLET_NUM    0x06
+// MCBIST (0, 1 => 0x07, 0x08)
 #define START_MCBIST_CHIPLET_NUM  0x07
+// OBUS (0, 3 => 0x09, 0x0C)
 #define START_OBUS_CHIPLET_NUM    0x09
+// PEC (0, 1, 2 => 0x0D, 0x0E, 0x0F)
+#define START_PEC_0_CHIPLET_NUM   0x0D
+#define START_PEC_1_CHIPLET_NUM   0x0E
+#define START_PEC_2_CHIPLET_NUM   0x0F
 
 // All Cache Chiplets
 #define START_EQ_CHIPLET_NUM      0x10
@@ -93,7 +104,7 @@ enum PERVASIVE_CHILDREN {
     PERV_XBUS_CHILDREN     = 2,
     PERV_OBUS_CHILDREN     = 1,
     PERV_CAPP_CHILDREN     = 1,
-    PERV_NV_CHILDREN       = 1,
+    PERV_NV_CHILDREN       = 2,
     PERV_MCBIST_CHILDREN   = 1,
     PERV_MCS_CHILDREN      = 2,
     PERV_MCA_CHILDREN      = 4,
