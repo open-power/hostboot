@@ -124,6 +124,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->pnor_read = rt_pnor_read;
                 intf->pnor_write= rt_pnor_write;
                 intf->ipmi_msg= rt_ipmi_msg;
+                intf->get_interface_capabilities=rt_get_interface_capabilities;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -206,6 +207,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             if(it != cv_scomMap.end())
             {
                 *data64 = it->second;
+            }
+            else if( addr == 0x1234567887654321 )
+            {
+                // force special hack value for opal-prd bug
+                *data64 = 0xDEADBEEFDEADBEEF;
             }
             else if( (addr & 0x00FFFFFF) == 0x0F0100)
             {
@@ -555,6 +561,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return l_plid;
         }
 
+        static uint64_t rt_get_interface_capabilities( uint64_t i_set )
+        {
+            return 0;
+        }
 
         static uint64_t cv_vpd_addr;
         static uint64_t cv_vpd_phys_addr;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,6 +39,8 @@
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
 TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
+
+const uint64_t OPAL_SCOM_ERROR = 0xDEADBEEFDEADBEEF;
 
 namespace XSCOM
 {
@@ -155,6 +159,8 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
     errlHndl_t l_err = NULL;
     int rc = 0;
     RT_TARG::rtChipId_t proc_id = 0;
+    uint64_t* l_scomdata = static_cast<uint64_t*>(io_buffer);
+    bool l_skipcheck = false;
 
     // Convert target to something  Sapphire understands
     l_err = RT_TARG::getRtTarget(i_target,
@@ -172,6 +178,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
 
         if(i_ioType == DeviceFW::READ)
         {
+            *l_scomdata = 0;
             rc =
                 g_hostInterfaces->scom_read(proc_id,
                                             i_scomAddr,
@@ -180,6 +187,13 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
         }
         else if (i_ioType == DeviceFW::WRITE)
         {
+            // handle the improbable, but possible, case where we wrote
+            //  the magic pattern in ourselves
+            if( *l_scomdata == OPAL_SCOM_ERROR )
+            {
+                l_skipcheck = true;
+            }
+
             rc =
                 g_hostInterfaces->scom_write(proc_id,
                                              i_scomAddr,
@@ -194,14 +208,16 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
              * @errortype
              * @moduleid     XSCOM_RT_DO_OP
              * @reasoncode   XSCOM_RUNTIME_ERR
-             * @userdata1    Hypervisor return code
+             * @userdata1[00:31]    Hypervisor return code
+             * @userdata1[32:63]    Runtime Target
              * @userdata2    SCOM address
              * @devdesc      XSCOM access error
+             * @custdesc     Error accessing hardware registers
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                             XSCOM_RT_DO_OP,
                                             XSCOM_RUNTIME_ERR,
-                                            rc,
+                                            TWO_UINT32_TO_UINT64(rc,proc_id),
                                             i_scomAddr);
 
             // TODO - RTC 86782 need to know what kind of errors Sapphire can
@@ -212,6 +228,59 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
                                 HWAS::GARD_NULL);
 
             // Note: no trace buffer available at runtime
+        }
+        else
+        {
+            // Look for special pattern inside response to indicate an error,
+            //  needed to handle case where interface is not returning a bad rc
+            // Check is only valid if:
+            //   - we didn't attempt to use this same pattern ourselves
+            //   - the data we have matches the pattern
+            //   - the get_fix_list interface is not defined
+            //     OR it returns that the fix is not present
+            if( !l_skipcheck
+                && (*l_scomdata == OPAL_SCOM_ERROR)
+                && ((g_hostInterfaces->get_interface_capabilities
+                     &&
+                     !(g_hostInterfaces->
+                          get_interface_capabilities(HBRT_CAPS_SET1_OPAL)
+                       & HBRT_CAPS_OPAL_HAS_XSCOM_RC))
+                    ||
+                    !(g_hostInterfaces->get_interface_capabilities))
+                )
+            {
+                TRACFCOMP(g_trac_xscom,ERR_MRK
+                          "Hypervisor scom read/write failed with DEADBEEF. "
+                          "rc 0x%X target 0x%llX proc_id 0x%llX addr 0x%llX r/w %d",
+                          rc, get_huid(i_target), proc_id, i_scomAddr, i_ioType);
+
+                /*@
+                 * @errortype
+                 * @moduleid     XSCOM_RT_DO_OP
+                 * @reasoncode   XSCOM_RUNTIME_ERR2
+                 * @userdata1[00:31]    Runtime Target
+                 * @userdata1[32:63]    Target HUID
+                 * @userdata2    SCOM address
+                 * @devdesc      XSCOM access error indicated with bad
+                 *               buffer data
+                 * @custdesc     Error accessing hardware registers
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                             XSCOM_RT_DO_OP,
+                             XSCOM_RUNTIME_ERR2,
+                             TWO_UINT32_TO_UINT64(
+                                proc_id,
+                                TARGETING::get_huid(i_target)),
+                             i_scomAddr);
+
+                l_err->addHwCallout(i_target,
+                                    HWAS::SRCI_PRIORITY_LOW,
+                                    HWAS::NO_DECONFIG,
+                                    HWAS::GARD_NULL);
+
+                // Note: no trace buffer available at runtime
+            }
         }
     }
     else // Hypervisor interface not initialized

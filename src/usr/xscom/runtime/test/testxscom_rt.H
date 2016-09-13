@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -51,7 +53,7 @@ const uint32_t g_xscomAddrTableSz =
 
 class XscomTestSuite : public CxxTest::TestSuite
 {
-    public:
+  public:
     /**
      * @brief XSCOM test #1
      *        Write value and read back to verify
@@ -70,79 +72,79 @@ class XscomTestSuite : public CxxTest::TestSuite
         errlHndl_t l_err = NULL;
         for( uint32_t l_num=0; l_num < g_xscomAddrTableSz; l_num++)
         {
-             testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
+            testXscomAddrData l_testEntry = g_xscomAddrTable[l_num];
 
-             // Perform XSComOM read
-             uint64_t l_readData = 0;
-             uint64_t l_writeData = 0;
-             uint64_t l_savedData = 0;
-             l_err = deviceRead(l_testTarget,
-                                &l_readData,
+            // Perform XSComOM read
+            uint64_t l_readData = 0;
+            uint64_t l_writeData = 0;
+            uint64_t l_savedData = 0;
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(l_testEntry.addr));
+            if (l_err)
+            {
+                TS_FAIL("testXscom1: XSCom read: deviceRead() fails! Error committed.");
+                break;
+            }
+            else
+            {
+                TS_TRACE("testXscom1: XSCom read, Address 0x%.8X, Data %llx",
+                         l_testEntry.addr,
+                         (long long unsigned)l_readData);
+            }
+
+            // Perform an XSCom write
+            l_savedData = l_readData;
+            l_writeData = (l_readData | l_testEntry.data);
+            l_err = deviceWrite(l_testTarget,
+                                &l_writeData,
                                 l_size,
-                                DEVICE_SCOM_ADDRESS(l_testEntry.addr));
-             if (l_err)
-             {
-                 TS_FAIL("testXscom1: XSCom read: deviceRead() fails! Error committed.");
-                 break;
-             }
-             else
-             {
-                 TS_TRACE("testXscom1: XSCom read, Address 0x%.8X, Data %llx",
-                                                      l_testEntry.addr,
-                                                      (long long unsigned)l_readData);
-             }
+                                DeviceFW::SCOM,
+                                l_testEntry.addr);
 
-             // Perform an XSCom write
-             l_savedData = l_readData;
-             l_writeData = (l_readData | l_testEntry.data);
-             l_err = deviceWrite(l_testTarget,
-                     &l_writeData,
-                     l_size,
-                     DeviceFW::SCOM,
-                     l_testEntry.addr);
-
-             if (l_err)
-             {
-                 TS_FAIL("testXscom1: XSCom write: deviceWrite() fails!");
-                 break;
-             }
-             else
-             {
-                 TS_TRACE("testXscom1: XSCom write, Address 0x%.8X, Data %llx",
+            if (l_err)
+            {
+                TS_FAIL("testXscom1: XSCom write: deviceWrite() fails!");
+                break;
+            }
+            else
+            {
+                TS_TRACE("testXscom1: XSCom write, Address 0x%.8X, Data %llx",
                          l_testEntry.addr,
                          (long long unsigned)l_writeData);
-             }
+            }
 
-             // Read back
-             l_readData = 0;
-             l_err = deviceRead(l_testTarget,
-                                &l_readData,
+            // Read back
+            l_readData = 0;
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(l_testEntry.addr));
+            if (l_err)
+            {
+                TS_FAIL("testXscom1: XSCom read back: deviceRead() fails!");
+                break;
+            }
+
+            if( l_readData != l_writeData )
+            {
+                TS_FAIL("testXscom1: XSCom read back doesn't match write!");
+                break;
+            }
+
+            // Write back original value
+            l_err = deviceWrite(l_testTarget,
+                                &l_savedData,
                                 l_size,
-                                DEVICE_SCOM_ADDRESS(l_testEntry.addr));
-             if (l_err)
-             {
-                 TS_FAIL("testXscom1: XSCom read back: deviceRead() fails!");
-                 break;
-             }
+                                DeviceFW::SCOM,
+                                l_testEntry.addr);
 
-             if( l_readData != l_writeData )
-             {
-                 TS_FAIL("testXscom1: XSCom read back doesn't match write!");
-                 break;
-             }
-
-             // Write back original value
-             l_err = deviceWrite(l_testTarget,
-                      &l_savedData,
-                      l_size,
-                      DeviceFW::SCOM,
-                      l_testEntry.addr);
-
-              if (l_err)
-              {
-                  TS_FAIL("testXscom1: XSCom write back original fails!");
-                  break;
-              }
+            if (l_err)
+            {
+                TS_FAIL("testXscom1: XSCom write back original fails!");
+                break;
+            }
         }
 
         if (l_err)
@@ -155,5 +157,33 @@ class XscomTestSuite : public CxxTest::TestSuite
             TS_TRACE("testXscom1 runs successfully!");
         }
         return;
-  }
+    }
+
+    void testXscom_opalprdbug(void)
+    {
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget = NULL;
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != NULL);
+
+        size_t l_size = sizeof(uint64_t);
+
+        // Read a special address to trigger workaround
+        errlHndl_t l_err = NULL;
+        uint64_t l_readData = 0;
+        l_err = deviceRead(l_testTarget,
+                           &l_readData,
+                           l_size,
+                           DEVICE_SCOM_ADDRESS(0x1234567887654321));
+        if (!l_err)
+        {
+            TS_FAIL("testXscom_opalprdbug: XSCom read didn't return an error. l_readData=%.16X", l_readData);
+        }
+        else
+        {
+            TS_TRACE("testXscom_opalprdbug: XSCom read failed with RC=%.8X",
+                     ERRL_GETRC_SAFE(l_err));
+            delete l_err;
+        }
+    }
 };

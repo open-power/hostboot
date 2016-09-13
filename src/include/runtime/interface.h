@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,21 @@ enum MemoryError_t
 #define HBRT_I2C_MASTER_ENGINE_MASK       (0xfful << 8)
 #define HBRT_I2C_MASTER_PORT_SHIFT        0
 #define HBRT_I2C_MASTER_PORT_MASK         (0xfful)
+
+
+/**
+ * Specifiers for get_interface_capabilities
+ */
+
+/* Common Features */
+#define HBRT_CAPS_SET0_COMMON  0
+
+/* OPAL fixes */
+#define HBRT_CAPS_SET1_OPAL    1
+#define HBRT_CAPS_OPAL_HAS_XSCOM_RC     (1ul << 0)
+
+/* PHYP fixes */
+#define HBRT_CAPS_SET2_PHYP    2
 
 
 /** @typedef hostInterfaces_t
@@ -303,6 +318,23 @@ typedef struct hostInterfaces
      */
     int32_t (*memory_error)( uint64_t i_startAddr, uint64_t i_endAddr,
                              MemoryError_t i_errorType );
+
+
+    /**
+     * @brief Query the HBRT host for a list of fixes/features
+     *
+     * There are times when workarounds need to be put into place to handle
+     * issues with the hosting layer (e.g. opal-prd) while fixes are not yet
+     * released.  This is especially true because of the disconnected release
+     * streams for the firmware and the hosting environment.
+     *
+     * @param  i_set Indicates which set of fixes/features we're checking
+     *               see HBRT_CAPS_SET...
+     *
+     * @return a bitmask containing the relevant flags for the current
+     *         implementation, see HBRT_CAPS_FLAGS_...
+     */
+    uint64_t (*get_interface_capabilities)( uint64_t i_set );
 
 
     // Reserve some space for future growth.
