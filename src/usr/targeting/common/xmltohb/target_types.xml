@@ -496,6 +496,8 @@
     <attribute><id>CDM_DOMAIN</id><default>DIMM</default></attribute>
 
     <attribute><id>FRU_ID</id></attribute>
+    <attribute><id>SPD_OVERRIDE_ENABLE</id></attribute>
+    <attribute><id>SPD_OVERRIDE</id></attribute>
 </targetType>
 
 <targetType>
@@ -842,6 +844,24 @@
     <attribute><id>FSP_BAR_SIZE</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id></attribute>
+    <attribute><id>SYSTEM_IVRMS_ENABLED</id></attribute>
+    <attribute><id>SPIPSS_FREQUENCY</id></attribute>
+    <attribute><id>STOP11_DISABLE</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_STEP_DELAY</id></attribute>
+    <attribute><id>DPLL_DROOP_PROTECT_ENABLE</id></attribute>
+    <attribute><id>DPLL_DYNAMIC_FMIN_ENABLE</id></attribute>
+    <attribute><id>DPLL_DYNAMIC_FMAX_ENABLE</id></attribute>
+    <attribute><id>DPLL_VDM_RESPONSE</id></attribute>
+    <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPDELAY</id></attribute>
+    <attribute><id>SYSTEM_WOF_ENABLED</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPSIZE</id></attribute>
+    <attribute><id>VCS_I2C_BUSNUM</id></attribute>
+    <attribute><id>AVSBUS_FREQUENCY</id></attribute>
+    <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
+    <attribute><id>VDM_ENABLE</id></attribute>
+    <attribute><id>STOP8_DISABLE</id></attribute>
+    <attribute><id>STOP4_DISABLE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1206,6 +1226,29 @@
     <attribute><id>NEST_VDDR_ID</id></attribute>
 
     <attribute><id>MSS_FREQ</id></attribute>
+
+
+    <attribute><id>WAIT_N2</id></attribute>
+    <attribute><id>WAIT_N1</id></attribute>
+    <attribute><id>WAIT_N0</id></attribute>
+    <attribute><id>START_SEEPROM_ADDR</id></attribute>
+    <attribute><id>APSS_CHIP_SELECT</id></attribute>
+    <attribute><id>MASTER_CORE</id></attribute>
+    <attribute><id>MASTER_EX</id></attribute>
+    <attribute><id>CHIP_REGIONS_TO_ENABLE</id></attribute>
+    <attribute><id>PROC_PB_BNDY_DMIPLL_DATA</id></attribute>
+    <attribute><id>MB_BIT_RATE_DIVISOR_PLL</id></attribute>
+    <attribute><id>LEN_OF_SEEPROM_DATA</id></attribute>
+    <attribute><id>BRANCH_PIBMEM_ADDR</id></attribute>
+    <attribute><id>I2C_BUS_DIV_NEST</id></attribute>
+    <attribute><id>VCS_I2C_RAIL</id></attribute>
+    <attribute><id>START_PIBMEM_ADDR</id></attribute>
+    <attribute><id>VCS_I2C_BUSNUM</id></attribute>
+    <attribute><id>PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id></attribute>
+    <attribute><id>MB_BIT_RATE_DIVISOR_REFCLK</id></attribute>
+    <attribute><id>WAIT_N3</id></attribute>
+    <attribute><id>PROC_PERV_BNDY_PLL_DATA</id></attribute>
+    <attribute><id>DEVICE_ID</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
@@ -1756,6 +1799,9 @@
     <attribute><id>MSS_VPD_CKE_MAP</id></attribute>
     <attribute><id>MSS_VPD_DQ_MAP</id></attribute>
     <attribute><id>EFF_DIMM_RANKS_CONFIGED</id></attribute>
+    <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
+    <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
+    <attribute><id>MSS_MASTER_PWR_INTERCEPT</id></attribute>
 </targetType>
 
 <targetType>
@@ -1785,6 +1831,8 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+    <attribute><id>VPD_OVERRIDE_MW_ENABLE</id></attribute>
+    <attribute><id>VPD_OVERRIDE_MW</id></attribute>
 </targetType>
 
 <targetType>
