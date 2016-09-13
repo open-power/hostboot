@@ -4605,6 +4605,9 @@ sub generate_pec
 
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/pec-$pec";
 
+    #Chiplet IDs for pec 0,1,2 => 0xd, 0xe, 0xf
+    my $chipletId = sprintf("0x%X",($pec + 0xd));
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pec$pec</id>
@@ -4634,6 +4637,10 @@ sub generate_pec
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$pec</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$pec,"pec");
@@ -4666,6 +4673,11 @@ sub generate_phb_chiplet
         $pec = 2;
         $phb = $phb - 3;
     }
+
+    #Chiplet IDs for pec0phb0 => 0xd
+    #Chiplet IDs for pec1phb1, pec1phb2 => 0xe
+    #Chiplet IDs for pec2phb3, pec2phb4, pec2phb5 => 0xf
+    my $chipletId = sprintf("0x%X",($pec + 0xd));
 
     my $lognode;
     my $logid;
@@ -4713,6 +4725,10 @@ sub generate_phb_chiplet
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$phbChipUnit</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$phbChipUnit,"phb");
@@ -5067,6 +5083,9 @@ sub generate_capp
     my $fapi_name = sprintf("pu.capp:k0:n%d:s0:p%02d:c%d", $node, $proc,$capp);
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/capp-$capp";
 
+    #Chiplet IDs for capp 0 => 0x2 and capp 1 => 0x4
+    my $chipletId = sprintf("0x%X",(($capp + 1) * 2));
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}capp$capp</id>
@@ -5096,6 +5115,10 @@ sub generate_capp
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$capp</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$capp,"capp");
@@ -5224,6 +5247,9 @@ sub generate_a_nv
 
     my $fapi_name = "NA"; # NV not FAPI target
 
+    #Chiplet IDs for nv 0,1 => 0x5
+    my $chipletId = sprintf("0x%X",(0x5));
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}nv${nv}</id>
@@ -5249,6 +5275,10 @@ sub generate_a_nv
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$nv</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$nv,"nv");
