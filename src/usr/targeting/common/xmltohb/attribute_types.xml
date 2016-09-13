@@ -12027,7 +12027,6 @@ Measured in GB</description>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
         <macro>DIRECT</macro>
@@ -12045,7 +12044,6 @@ Measured in GB</description>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SBE_SEEPROM_I2C_PORT</id>
         <macro>DIRECT</macro>
@@ -18717,7 +18715,6 @@ DEPRECATED!!!!
         <uint8_t></uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <writeable/>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
@@ -19428,7 +19425,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19452,7 +19448,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19615,7 +19610,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19691,7 +19685,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -19712,7 +19705,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <enumerationType>
@@ -20056,7 +20048,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20083,7 +20074,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20110,7 +20100,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20186,7 +20175,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <!--<attribute>
@@ -20236,7 +20224,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20260,7 +20247,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <enumerationType>
@@ -20328,7 +20314,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <enumerationType>
@@ -20415,7 +20400,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20438,7 +20422,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20461,7 +20444,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -20484,7 +20466,6 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -21303,7 +21284,6 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
-  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
     <macro>DIRECT</macro>
@@ -22935,7 +22915,6 @@ DEPRECATED!!!!
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IO_X_DEBUG</id>
         <macro>DIRECT</macro>
