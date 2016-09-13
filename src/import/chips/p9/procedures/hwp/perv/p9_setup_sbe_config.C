@@ -55,22 +55,25 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_PROC_FABRIC_GROUP_ID_LENGTH = 3,
     ATTR_PROC_FABRIC_CHIP_ID_STARTBIT = 29,
     ATTR_PROC_FABRIC_CHIP_ID_LENGTH = 3,
-    ATTR_BOOT_FREQ_MULT_STARTBIT = 0,
-    ATTR_BOOT_FREQ_MULT_LENGTH = 16,
-    ATTR_CP_FILTER_BYPASS_BIT = 16,
-    ATTR_SS_FILTER_BYPASS_BIT = 17,
-    ATTR_IO_FILTER_BYPASS_BIT = 18,
-    ATTR_DPLL_BYPASS_BIT = 19,
-    ATTR_NEST_MEM_X_O_PCI_BYPASS_BIT = 20,
-    ATTR_NEST_PLL_BUCKET_STARTBIT = 24,
-    ATTR_NEST_PLL_BUCKET_LENGTH = 8,
     ATTR_CC_IPL_BIT = 0,
     ATTR_INIT_ALL_CORES_BIT = 1,
     ATTR_RISK_LEVEL_BIT = 2,
     ATTR_DISABLE_HBBL_VECTORS_BIT = 3,
     ATTR_MC_SYNC_MODE_BIT = 4,
     ATTR_PLL_MUX_STARTBIT = 12,
-    ATTR_PLL_MUX_LENGTH = 20
+    ATTR_PLL_MUX_LENGTH = 20,
+
+    // Scratch4 reg bit definitions
+    ATTR_BOOT_FREQ_MULT_STARTBIT       = 0,
+    ATTR_BOOT_FREQ_MULT_LENGTH         = 16,
+    ATTR_NEST_PLL_BUCKET_STARTBIT      = 24,
+    ATTR_NEST_PLL_BUCKET_LENGTH        = 8,
+    ATTR_CP_FILTER_BYPASS_BIT          = 16,
+    ATTR_SS_FILTER_BYPASS_BIT          = 17,
+    ATTR_IO_FILTER_BYPASS_BIT          = 18,
+    ATTR_DPLL_BYPASS_BIT               = 19,
+    ATTR_NEST_MEM_X_O_PCI_BYPASS_BIT   = 20,
+    ATTR_OBUS_RATIO_VALUE_BIT          = 21,
 };
 
 
@@ -165,6 +168,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_io_filter_bypass;
         uint8_t l_dpll_bypass;
         uint8_t l_nest_mem_x_o_pci_bypass;
+        uint8_t l_attr_obus_ratio = 0;
 
         FAPI_DBG("Reading Scratch_reg4");
         //Getting SCRATCH_REGISTER_4 register value
@@ -195,6 +199,11 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.writeBit<ATTR_IO_FILTER_BYPASS_BIT>(l_io_filter_bypass & 0x1);
         l_read_scratch_reg.writeBit<ATTR_DPLL_BYPASS_BIT>(l_dpll_bypass & 0x1);
         l_read_scratch_reg.writeBit<ATTR_NEST_MEM_X_O_PCI_BYPASS_BIT>(l_nest_mem_x_o_pci_bypass & 0x1);
+
+        // Setting OBUS ratio
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OBUS_RATIO_VALUE, i_target_chip,
+                               l_attr_obus_ratio));
+        l_read_scratch_reg.writeBit<ATTR_OBUS_RATIO_VALUE_BIT>(l_attr_obus_ratio & 0x1);
 
         FAPI_DBG("Setting up value of Scratch_reg4");
         //Setting SCRATCH_REGISTER_4 register value

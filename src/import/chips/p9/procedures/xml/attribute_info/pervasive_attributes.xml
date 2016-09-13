@@ -595,11 +595,19 @@
   <initToZero/>
 </attribute>
 
+<!-- TODO: Story 155081
+     Not supposed to be writeable, PPE needs to resolve this issue in
+     p9_sbe_attr_setup.C -->
 <attribute>
     <id>ATTR_OBUS_RATIO_VALUE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Holds Obus ratio value</description>
+    <description>Holds Obus ratio value
+        0b00     Normal speed.
+        0b01     Half speed.
+    </description>
     <valueType>uint8</valueType>
+    <persistRuntime/>
+    <platInit/>
     <writeable/>
 </attribute>
 
