@@ -92,7 +92,7 @@ typedef struct
  */
 typedef struct
 {
-    ScomEntry_t  nonCacheArea[MAX_NC_SCOM_ENTRIES];
+    ScomEntry_t  nonCacheArea[MAX_EQ_SCOM_ENTRIES];
     ScomEntry_t  l2CacheArea[MAX_L2_SCOM_ENTRIES];
     ScomEntry_t  l3CacheArea[MAX_L3_SCOM_ENTRIES];
 } StopCacheSection_t;
