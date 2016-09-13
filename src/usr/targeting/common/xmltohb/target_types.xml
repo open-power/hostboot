@@ -318,8 +318,6 @@
     <attribute><id>PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id></attribute>
     <attribute><id>PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id></attribute>
-    <attribute><id>POUNDV_BUCKET_NUM</id><default>0</default></attribute>
-    <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>UNIT_TEST_MCA_MEMORY_SIZES</id></attribute>
     <attribute><id>PROC_FABRIC_OPTICS_CONFIG_MODE</id></attribute>
     <attribute><id>PROC_FABRIC_A_AGGREGATE</id></attribute>
@@ -841,6 +839,7 @@
     <attribute><id>MSS_MRW_OFFSET_RLO</id></attribute>
     <attribute><id>MSS_MRW_TSYS_DATA</id></attribute>
     <attribute><id>MSS_MRW_TSYS_ADR</id></attribute>
+    <attribute><id>FSP_BAR_SIZE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1203,6 +1202,8 @@
     <attribute><id>NEST_VCS_ID</id></attribute>
     <attribute><id>NEST_VIO_ID</id></attribute>
     <attribute><id>NEST_VDDR_ID</id></attribute>
+
+    <attribute><id>MSS_FREQ</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
@@ -1779,7 +1780,6 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default> <!-- GARD | MEMDIAG -->
     </attribute>
-    <attribute><id>EFF_DIMM_SIZE</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
