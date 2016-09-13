@@ -725,7 +725,7 @@ StopReturnCode_t editScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
  * @return      STOP_SAVE_SUCCESS if new  entry is added, STOP_SAVE_FAIL otherwise.
  * @note        adds an entry at a given location. It can be used to add entry in
  *              place of NOP, at the end of table or as first entry of the cache
- *              sub-section(L2, L3 or NC ).
+ *              sub-section(L2, L3 or EQ ).
  */
 StopReturnCode_t updateScomEntry( uint32_t i_scomAddr, uint64_t i_scomData,
                                   ScomEntry_t* i_scomEntry   )
@@ -794,7 +794,7 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
         {
             // chiplet is a cache. let us find start address of cache section
             // associated with given chiplet. A cache section associated with
-            // given chiplet is split in to L2, L3 and NC area.
+            // given chiplet is split in to L2, L3 and EQ area.
             pStopCacheScomStart = CACHE_SECTN_START(i_pImage,
                                                     chipletId);
         }
@@ -810,9 +810,9 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
 
         switch( i_section )
         {
-            case P9_STOP_SECTION_NC:
+            case P9_STOP_SECTION_EQ_SCOM:
                 pScomEntry = pStopCacheScomStart->nonCacheArea;
-                entryLimit = MAX_NC_SCOM_ENTRIES;
+                entryLimit = MAX_EQ_SCOM_ENTRIES;
                 break;
 
             case P9_STOP_SECTION_L2:

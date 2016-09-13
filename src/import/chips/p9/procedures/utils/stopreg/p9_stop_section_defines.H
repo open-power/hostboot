@@ -48,13 +48,13 @@ enum
     ONE_MB                  = ONE_KB * ONE_KB,
     TWO_MB                  = 2 * ONE_MB,
     MAX_CORE_SCOM_ENTRIES = 15,
-    MAX_NC_SCOM_ENTRIES   = 15,
+    MAX_EQ_SCOM_ENTRIES   = 15,
     MAX_L2_SCOM_ENTRIES   = 16,
     MAX_L3_SCOM_ENTRIES   = 16,
     MAX_CORE_ID_SUPPORTED = 23,
     MAX_THREAD_ID_SUPPORTED = 3,
     MAX_CACHE_SECTN_SIZE_PER_CHIPLET =
-        MAX_NC_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES + MAX_L3_SCOM_ENTRIES,
+        MAX_EQ_SCOM_ENTRIES + MAX_L2_SCOM_ENTRIES + MAX_L3_SCOM_ENTRIES,
 
     // start offset for SPR register restore, core scom or cache scom register
     // restore regions in homer image.
@@ -86,14 +86,14 @@ enum
     CORE_SPR_SECTN_SIZE     = ONE_KB,
     L2_AREA                 = (SCOM_ENTRY_SIZE * MAX_L2_SCOM_ENTRIES),
     L3_AREA                 = (SCOM_ENTRY_SIZE * MAX_L2_SCOM_ENTRIES ),
-    NON_CACHE_AREA          = SCOM_ENTRY_SIZE * MAX_NC_SCOM_ENTRIES,
+    EQ_AREA                 = SCOM_ENTRY_SIZE * MAX_EQ_SCOM_ENTRIES,
     MAX_SIZE_PER_CORE       = 8 * ONE_KB,
     SPR_RESTORE_PER_CHIP    = ( MAX_SIZE_PER_CORE *
                                 ( MAX_CORE_ID_SUPPORTED + 1)) +
                               ( INTERRUPT_HANDLER_SIZE + THREAD_LAUNCHER_SIZE),
     SCOM_SIZE_PER_CORE      = ( MAX_CORE_SCOM_ENTRIES + 1 ) * SCOM_ENTRY_SIZE,
     SCOM_SIZE_PER_CHIP      = SCOM_SIZE_PER_CORE * ( MAX_CORE_ID_SUPPORTED + 1),
-    SCOM_SIZE_PER_CACHE_CHIPLET = L2_AREA + L3_AREA + NON_CACHE_AREA
+    SCOM_SIZE_PER_CACHE_CHIPLET = L2_AREA + L3_AREA + EQ_AREA
                                   + SCOM_ENTRY_SIZE,
 //size in byte ends
 };
