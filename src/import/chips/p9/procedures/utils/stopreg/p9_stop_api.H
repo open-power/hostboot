@@ -103,13 +103,12 @@ typedef enum
  */
 typedef enum
 {
-    P9_STOP_SECTION_MIN = 0,
-    P9_STOP_SECTION_CORE_SCOM = 1,
-    P9_STOP_SECTION_EQ_SCOM =  2,
-    P9_STOP_SECTION_NC =  2, //deprecated
-    P9_STOP_SECTION_L2  = 3,
-    P9_STOP_SECTION_L3  = 4,
-    P9_STOP_SECTION_MAX = 5
+    P9_STOP_SECTION_MIN         = 0,
+    P9_STOP_SECTION_CORE_SCOM   = 1,
+    P9_STOP_SECTION_EQ_SCOM     = 2,
+    P9_STOP_SECTION_L2          = 3,
+    P9_STOP_SECTION_L3          = 4,
+    P9_STOP_SECTION_MAX         = 5
 } ScomSection_t;
 
 #ifdef __cplusplus
