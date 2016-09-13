@@ -567,26 +567,30 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
         # Find the entry in the memory map that includes our
         #  base memory region. Can't assume object is "ram"
+        low_priority = 10
         mem_map_entries = (conf.system_cmp0.phys_mem).map
         for entry in mem_map_entries:
+            # 0=base, 1=name, 5=mirrored target, 6=priority
             #print ">> %d:%s" % (entry[0], entry[1])
             if (entry[0] == (node_num*per_node)) or (entry[0] == hb_hrmor):
                 target = entry[5]
+                priority = entry[6]
                 # Check if there is a target that needs to be investigated that
                 # points to another object or map
-                if target != None:
+                if (target != None) and (priority < low_priority):
                     #print "Continuous trace target = %s" % (target)
                     smm_map_entries = target.map
                     for smm_entry in smm_map_entries:
                         if (smm_entry[0] == (node_num*per_node)) or (entry[0] == hb_hrmor):
                             mem_object = simics.SIM_object_name(smm_entry[1])
                             #print "Found entry %s for hrmor %x" % (mem_object, hb_hrmor)
-                            break
+                            low_priority = priority
+                            #break
                     break
-                else:
+                elif priority < low_priority:
                     mem_object = simics.SIM_object_name(entry[1])
                     #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
-                    break
+                    #break
 
         if mem_object == None:
             print "Could not find entry for hrmor %d" % (hb_hrmor)
