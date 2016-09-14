@@ -118,6 +118,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief DP16 DQSCLK Offset work around
+/// Not in the Model 67 spydef, so we scom them. Should be removed when they are
+/// added to the spydef.
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // Config provided by S. Wyatt 9/13
+    constexpr uint64_t offset_val = 0x0800;
+
+    static const std::vector<uint64_t> l_addrs =
+    {
+        MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_0,
+        MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_1,
+        MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_2,
+        MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_3,
+        MCA_DDRPHY_DP16_DQSCLK_OFFSET_P0_4,
+    };
+
+    FAPI_TRY( mss::scom_blastah(i_target, l_addrs, offset_val) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss

@@ -500,7 +500,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Reset the training delay configureation
+/// @brief Reset the training delay configuration
 /// @param[in] i_target the port target
 /// @param[in] l_rank_pairs vector of rank pairs
 /// @return FAPI2_RC_SUCCES iff ok
@@ -519,11 +519,13 @@ fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
 
     fapi2::buffer<uint64_t> l_data;
 
+#if 0    // Don't reset the write level values before calibration, per S. Wyatt
     // Reset the write level values
     FAPI_INF( "Resetting write level values %s", mss::c_str(i_target) );
     FAPI_TRY( mss::wc::read_config2(i_target, l_data) );
     mss::wc::set_reset_wr_delay_wl(l_data);
     FAPI_TRY( mss::wc::write_config2(i_target, l_data) );
+#endif
 
     for (const auto& rp : l_rank_pairs)
     {
@@ -933,7 +935,7 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_UPPER_REG, 0xffe0) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_EXTRA_REG,       0x2020) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x0040) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x6740) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
 
