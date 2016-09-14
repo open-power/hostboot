@@ -26,10 +26,13 @@
 #ifndef MSS_VPD_ACCESS_H_
 #define MSS_VPD_ACCESS_H_
 
-#include <fapi2.H>
-#include <lib/mss_utils.H>
-#include <mss.H>
 #include <endian.h>
+
+#include <fapi2.H>
+
+#include <mss.H>
+#include <lib/shared/mss_const.H>
+#include <lib/mss_utils.H>
 
 namespace mss
 {
@@ -108,13 +111,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_ca(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 4 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2];
+    constexpr uint64_t l_length = 4 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 6 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -137,13 +144,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cke(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 4 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2];
+    constexpr uint64_t l_length = 4 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 10 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -166,13 +177,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 4 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2];
+    constexpr uint64_t l_length = 4 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 14 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -195,13 +210,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_odt(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 4 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2];
+    constexpr uint64_t l_length = 4 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 18 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -224,13 +243,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 22 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -253,13 +276,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 38 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -282,13 +309,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 54 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -311,13 +342,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 70 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -350,13 +385,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint32_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint32_t l_value[2];
+    constexpr uint64_t l_length = 8 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 86 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -394,13 +433,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint32_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint32_t l_value[2];
+    constexpr uint64_t l_length = 8 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 94 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -438,13 +481,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint32_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint32_t l_value[2];
+    constexpr uint64_t l_length = 8 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 102 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -480,13 +527,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint64_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint64_t l_value[2];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 110 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -522,13 +573,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint64_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint64_t l_value[2];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 126 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -556,13 +611,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 142 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -585,13 +644,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cmd_addr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 144 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -614,13 +677,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 146 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -643,13 +710,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cscid(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 148 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -672,13 +743,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][5];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 10 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][5];
+    constexpr uint64_t l_length = 10 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 150 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -701,13 +776,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][5];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 10 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][5];
+    constexpr uint64_t l_length = 10 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 160 + (l_index * l_length);
         memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -730,13 +809,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                        const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 170 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -759,13 +842,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                        const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2][2][4];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 16 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2][2][4];
+    constexpr uint64_t l_length = 16 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 186 + (l_index * l_length);
         memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -789,13 +876,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_preamble(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 202 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -818,13 +909,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint8_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 2 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint8_t l_value[2];
+    constexpr uint64_t l_length = 2 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 204 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -847,13 +942,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    uint32_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 8 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    uint32_t l_value[2];
+    constexpr uint64_t l_length = 8 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 206 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -881,13 +980,17 @@ fapi_try_exit:
 inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const std::vector<uint8_t*>& i_blobs)
 {
-    int16_t l_value[2];
-    const auto& l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
-    const uint64_t l_length = 4 / l_mcas.size();
-
-    for (const auto& l_mca : l_mcas)
+    if (i_blobs.size() != mss::PORTS_PER_MCS)
     {
-        const uint64_t l_index = mss::index(l_mca);
+        FAPI_ERR("%s found vpd blob vector with incorrect number of elements %d", mss::c_str(i_target), i_blobs.size());
+        fapi2::Assert(false);
+    }
+
+    int16_t l_value[2];
+    constexpr uint64_t l_length = 4 / mss::PORTS_PER_MCS;
+
+    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    {
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_start = 214 + (l_index * l_length);
         memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
