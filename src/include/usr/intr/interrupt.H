@@ -141,6 +141,7 @@ namespace INTR
         MSG_INTR_EOI,               //!< Issue EOI when received
         MSG_INTR_DRAIN_QUEUE,       //!< Allow intrp to drain Q of EOI
         MSG_INTR_COALESCE,          //!< Pending interrupt to be handled
+        MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSIHB Interrupts
     };
 
     /**
@@ -215,7 +216,7 @@ namespace INTR
      * @param[in] i_target  The target processor
      * @return error log handle on error
      */
-    //errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
+    errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
 
     /**
      * Return the interrupt presenter for requested target/thread
