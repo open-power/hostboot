@@ -38,6 +38,8 @@
 
 #include <p9_mss_draminit_mc.H>
 #include <lib/fir/memdiags_fir.H>
+#include <lib/utils/find.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -55,8 +57,15 @@ extern "C"
         FAPI_INF("Start draminit MC");
 
         // No need to check to see if we have ports - this loop will just be skipped
-        for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            //skip this MCA if we have no DIMM's configured
+            if(mss::count_dimm(p) == 0)
+            {
+                FAPI_INF("No DIMM's configured on %s. Skipping this MCA.", mss::c_str(p));
+                continue;
+            }
+
             // Don't do this yet - leverage the sim inits for the moment
 #if 0
             // All the scominit for this MCA
