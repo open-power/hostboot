@@ -105,8 +105,8 @@ inline void set_nce_galois( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         io_data.insertFromRight<TT::P0_NCE_GALOIS, TT::P0_NCE_GALOIS_LEN>(i_value);
     }
@@ -133,8 +133,8 @@ inline void get_nce_galois( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         i_data.extractToRight<TT::P0_NCE_GALOIS, TT::P0_NCE_GALOIS_LEN>(o_value);
     }
@@ -161,8 +161,8 @@ inline void set_nce_magnitude( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         io_data.insertFromRight<TT::P0_NCE_MAGNITUDE, TT::P0_NCE_MAGNITUDE_LEN>(i_value);
     }
@@ -189,8 +189,8 @@ inline void get_nce_magnitude( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         i_data.extractToRight<TT::P0_NCE_MAGNITUDE, TT::P0_NCE_MAGNITUDE_LEN>(o_value);
     }
@@ -217,8 +217,8 @@ inline void set_tce_galois( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         io_data.insertFromRight<TT::P0_TCE_GALOIS, TT::P0_TCE_GALOIS_LEN>(i_value);
     }
@@ -245,8 +245,8 @@ inline void get_tce_galois( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         i_data.extractToRight<TT::P0_TCE_GALOIS, TT::P0_TCE_GALOIS_LEN>(o_value);
     }
@@ -273,8 +273,8 @@ inline void set_tce_magnitude( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         io_data.insertFromRight<TT::P0_TCE_MAGNITUDE, TT::P0_TCE_MAGNITUDE_LEN>(i_value);
     }
@@ -301,8 +301,8 @@ inline void get_tce_magnitude( const fapi2::Target<T>& i_target,
 {
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
-    // divide by 2 because each register holds info for a pair of ports
-    if ((l_port % 2) == 0)
+    // check for even/odd since each register holds info for a pair of ports
+    if (!mss::is_odd(l_port))
     {
         i_data.extractToRight<TT::P0_TCE_MAGNITUDE, TT::P0_TCE_MAGNITUDE_LEN>(o_value);
     }

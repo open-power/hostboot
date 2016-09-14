@@ -45,6 +45,7 @@
 #include <lib/eff_config/memory_size.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
+#include <lib/utils/num.H>
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/settings.H>
 
@@ -2254,7 +2255,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, uint64_
         // The indexes are split in to even and odd where the odd indexes don't really exist.
         // They're just indicating that we want to grab the even index and invert it. So calculate
         // the proper vector index and acknowledge the inversion if necessary.
-        if ((i_pattern % 2) != 0)
+        if (mss::is_odd(i_pattern))
         {
             l_invert = true;
             i_pattern -= 1;

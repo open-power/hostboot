@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file num.H
+/// @brief Miscellaneous number checking functions
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_NUM_H_
+#define _MSS_NUM_H_
+
+namespace mss
+{
+
+///
+/// @brief Return whether or not a number is odd
+/// @param[in] i_number the number to check
+/// @return true if i_number is odd
+///
+template< typename T >
+constexpr bool is_odd(const T i_number)
+{
+    return (i_number & 0x1);
+}
+
+
+}
+#endif
