@@ -381,6 +381,138 @@ uint32_t startBgScrub<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
     return startBgScrub<TYPE_MCA>( i_mcaChip, i_rank );
 }
 
+//------------------------------------------------------------------------------
+
+uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
+                             mss::mcbist::address i_saddr,
+                             mss::mcbist::address i_eaddr,
+                             const mss::mcbist::stop_conditions & i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::__startTdScrub_mca] "
+
+    PRDF_ASSERT( nullptr != i_mcaChip );
+    PRDF_ASSERT( TYPE_MCA == i_mcaChip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get the MCBIST fapi target
+    ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
+    PRDF_ASSERT( nullptr != mcbChip );
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbChip->getTrgt() );
+
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      mcbChip->getHuid() );
+            break;
+        }
+
+        // Start the super fast read command.
+        fapi2::ReturnCode fapi_rc = memdiags::targeted_scrub( fapiTrgt,
+                                                i_stopCond, i_saddr, i_eaddr,
+                                                mss::mcbist::NONE );
+        errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "memdiags::targeted_scrub(0x%08x) failed",
+                      mcbChip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t __startTdScrubMaster_mca( ExtensibleChip * i_mcaChip,
+                              const MemRank & i_rank,
+                              const mss::mcbist::stop_conditions & i_stopCond )
+{
+    // Get the address rank of the master rank.
+    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
+    mss::mcbist::address saddr, eaddr;
+    mss::mcbist::address::get_mrank_range( port,
+                                           i_rank.getDimmSlct(),
+                                           i_rank.getRankSlct(),
+                                           saddr, eaddr );
+
+    return __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t __startTdScrubSlave_mca( ExtensibleChip * i_mcaChip,
+                              const MemRank & i_rank,
+                              const mss::mcbist::stop_conditions & i_stopCond )
+{
+    // Get the address rank of the slave rank.
+    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
+    mss::mcbist::address saddr, eaddr;
+    mss::mcbist::address::get_srank_range( port,
+                                           i_rank.getDimmSlct(),
+                                           i_rank.getRankSlct(),
+                                           i_rank.getSlave(),
+                                           saddr, eaddr );
+
+    return __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                   const MemRank & i_rank )
+{
+    mss::mcbist::stop_conditions stopCond;
+
+    return __startTdScrubMaster_mca( i_mcaChip, i_rank, stopCond );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                   const MemRank & i_rank )
+{
+    mss::mcbist::stop_conditions stopCond;
+
+    return __startTdScrubMaster_mca( i_mcaChip, i_rank, stopCond );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                   const MemRank & i_rank )
+{
+    mss::mcbist::stop_conditions stopCond;
+    stopCond.set_nce_soft_symbol_count_enable(mss::ON)
+            .set_nce_inter_symbol_count_enable(mss::ON);
+
+    return __startTdScrubSlave_mca( i_mcaChip, i_rank, stopCond );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
+                                   const MemRank & i_rank )
+{
+    mss::mcbist::stop_conditions stopCond;
+    stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+
+    return __startTdScrubSlave_mca( i_mcaChip, i_rank, stopCond );
+}
+
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
@@ -415,6 +547,46 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_mbaChip,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+                                   const MemRank & i_rank )
+{
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+                                   const MemRank & i_rank )
+{
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+                                   const MemRank & i_rank )
+{
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+                                   const MemRank & i_rank )
+{
+    PRDF_ERR( "function not implemented yet" ); // TODO RTC 136126
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
