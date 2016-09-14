@@ -30,13 +30,6 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_XSTOP_ERR</rc>
-    <description>Checkstop bit set in interrupt type reg</description>
-    <ffdc>READ_XSTOP</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_CALIBRATION_NOT_DONE</rc>
     <description>Precision Reference Voltage : Calibration not done</description>
   </hwpError>
