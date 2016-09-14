@@ -3526,6 +3526,16 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
             fapi2::Assert(false);
         }
 
+        // Make sure to create 0 filled blobs for all the possible blobs, not just for the
+        // chiplets which are configured. This prevents the decoder from accessing nullptrs
+        // but the code which uses the VPD will only access the information for the chiplets
+        // which exist - so the 0's are meaningless
+        for (auto& b : l_mt_blobs)
+        {
+            b = new uint8_t[mss::VPD_KEYWORD_MAX];
+            memset(b, 0, mss::VPD_KEYWORD_MAX);
+        }
+
         // For MT we need to fill in the rank information
         // But, of course, the rank information can differ per port. However, the vpd interface doesn't
         // allow this in a straight-forward way. So, we have to get VPD blobs for MCS which contain
@@ -3533,13 +3543,9 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
         // blob to the decoder for each MCA, regardless of whether the port configurations are the same.
         for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
         {
-            uint8_t* l_mt_blob = new uint8_t[mss::VPD_KEYWORD_MAX];
+            // Find our blob in the vector of blob pointers
+            uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
             uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
-
-            // Make sure the mt blob is all 0's. In the event that we get an MCA who has 0 ranks (no DIMM)
-            // we don't want to get the VPD (that will fail) but we can't give up. Cronus will
-            // give us MCA with 0 DIMM, so we'll just use a 0-filled VPD for those MCA.
-            memset(l_mt_blob, 0, mss::VPD_KEYWORD_MAX);
 
             // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
             // This will fill the VPD attributes with 0's which is perfectly ok.
@@ -3565,9 +3571,6 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
                 // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
                 FAPI_TRY( mss::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
             }
-
-            // Put it in the vector in the right place.
-            l_mt_blobs[mss::index(p)] = l_mt_blob;
         }
     }
 

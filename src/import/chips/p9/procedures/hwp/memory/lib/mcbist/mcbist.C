@@ -219,6 +219,12 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     bool l_poll_result = false;
     poll_parameters l_poll_parameters;
 
+    // Before we go off into the bushes, lets see if there are any instructions in the
+    // program. If not, we can save everyone the hassle
+    FAPI_ASSERT(0 != i_program.iv_subtests.size(),
+                fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_TARGET(i_target),
+                "Attempt to run an MCBIST program with no subtests on %s", mss::c_str(i_target));
+
     FAPI_TRY( clear_errors(i_target) );
 
     // Slam the address generator config

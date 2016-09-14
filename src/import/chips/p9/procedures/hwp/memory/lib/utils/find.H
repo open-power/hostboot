@@ -105,8 +105,8 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-        i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
@@ -126,8 +126,8 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets( const
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
 ///
 template<>
-inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 

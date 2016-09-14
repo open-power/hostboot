@@ -199,42 +199,42 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.additive_latency(l_dimm) );
         FAPI_TRY( l_eff_config.data_mask(l_dimm) );
 
-        // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
-        {
-            uint32_t l_m_dram_clocks[mss::PORTS_PER_MCS] = {0x200, 0x200};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS, i_target, l_m_dram_clocks ) );
-        }
-        //TODO RTC:160060 verify attributes are needed, best place to put them, and correct values
-        // TK hard coded for now, should change at some point. Most of these are set in eff_config_thermal
-        {
-            uint32_t l_mem_watt_target[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {{0x640, 0x640}, {0x640, 0x640}};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_WATT_TARGET, i_target,
-                                     l_mem_watt_target ) );
-        }
-        //Values taken from Mike Pardeik. Calculated to reach 90% util, will be removed once eff_config_thermal is implemented
-        {
-            uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target,
-                                     l_throttled_n_commands ) );
-        }
-
-        {
-            uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target,
-                                     l_throttled_n_commands ) );
-        }
-
-        {
-            uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
-        }
-
-        {
-            uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] = {0x01, 0x01};
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, i_target, l_temp_refresh_mode ) );
-        }
-
     }// dimm
+
+    // Hard-coded RIT protect attribute set (currently not taken account in eff_config)
+    {
+        uint32_t l_m_dram_clocks[mss::PORTS_PER_MCS] = {0x200, 0x200};
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS, i_target, l_m_dram_clocks ) );
+    }
+    //TODO RTC:160060 verify attributes are needed, best place to put them, and correct values
+    // TK hard coded for now, should change at some point. Most of these are set in eff_config_thermal
+    {
+        uint32_t l_mem_watt_target[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {{0x640, 0x640}, {0x640, 0x640}};
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_WATT_TARGET, i_target,
+                                 l_mem_watt_target ) );
+    }
+    //Values taken from Mike Pardeik. Calculated to reach 90% util, will be removed once eff_config_thermal is implemented
+    {
+        uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target,
+                                 l_throttled_n_commands ) );
+    }
+
+    {
+        uint32_t l_throttled_n_commands[mss::PORTS_PER_MCS] = {0x73, 0x73};
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target,
+                                 l_throttled_n_commands ) );
+    }
+
+    {
+        uint16_t l_cal_step[mss::PORTS_PER_MCS] = {0xFAC0, 0xFAC0};
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CAL_STEP_ENABLE, i_target, l_cal_step) );
+    }
+
+    {
+        uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] = {0x01, 0x01};
+        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, i_target, l_temp_refresh_mode ) );
+    }
 
     // Check plug rules. We check the MCS, and this will iterate down to children as needed.
     FAPI_TRY( l_eff_config.enforce_plug_rules(i_target) );

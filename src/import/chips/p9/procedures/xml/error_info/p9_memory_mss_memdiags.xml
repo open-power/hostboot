@@ -236,5 +236,15 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
+    <description>Attempt to run an MCBIST program with no subtests</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
 

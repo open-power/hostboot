@@ -40,6 +40,7 @@
 #include <lib/mcbist/mcbist.H>
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/sim.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -78,6 +79,13 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         mss::mcbist::address l_end;
 
         size_t l_rank_address_pair = 0;
+
+        // No point in bothering if we don't have any DIMM
+        if (mss::count_dimm(p) == 0)
+        {
+            FAPI_INF("No DIMM on %s, not running sf_init", mss::c_str(p));
+            continue;
+        }
 
         // In sim we know a few things ...
         // Get the primary ranks for this port. We know there can only be 4, and we know we only trained the primary
