@@ -57,8 +57,9 @@ enum P9_MEM_STARTCLOCKS_Private_Constants
     DONT_STARTSLAVE = 0x0
 };
 
-static fapi2::ReturnCode p9_mem_startclocks_check_checkstop_function(
-    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
+static fapi2::ReturnCode p9_mem_startclocks_fence_setup_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+    const fapi2::buffer<uint64_t> i_pg_vector);
 
 static fapi2::ReturnCode p9_mem_startclocks_cplt_ctrl_action_function(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
@@ -70,11 +71,19 @@ fapi2::ReturnCode p9_mem_startclocks(const
                                      fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     uint8_t l_sync_mode = 0;
-
+    fapi2::buffer<uint64_t> l_pg_vector;
     FAPI_DBG("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_sync_mode),
              "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
+
+    for (auto l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
+         (static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_NEST |
+                                           fapi2::TARGET_FILTER_TP), fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+        FAPI_TRY(p9_sbe_common_get_pg_vector(l_target_cplt, l_pg_vector));
+        FAPI_DBG("pg targets vector: %#018lX", l_pg_vector);
+    }
 
     if (!l_sync_mode)
     {
@@ -93,8 +102,8 @@ fapi2::ReturnCode p9_mem_startclocks(const
                                                     DONT_STARTSLAVE, DONT_STARTMASTER, REGIONS_ALL_EXCEPT_VITAL_NESTPLL,
                                                     CLOCK_TYPES));
 
-            FAPI_INF("Call p9_mem_startclocks_check_checkstop_function for Mc chiplets ");
-            FAPI_TRY(p9_mem_startclocks_check_checkstop_function(l_trgt_chplt));
+            FAPI_INF("Call p9_mem_startclocks_fence_setup_function for Mc chiplets ");
+            FAPI_TRY(p9_mem_startclocks_fence_setup_function(l_trgt_chplt, l_pg_vector));
 
             FAPI_INF("Call p9_mem_startclocks_flushmode for Mc chiplets");
             FAPI_TRY(p9_mem_startclocks_flushmode(l_trgt_chplt));
@@ -110,33 +119,42 @@ fapi_try_exit:
 }
 
 /// @brief --drop chiplet fence
-/// --check checkstop register
-/// --clear flush inhibit to go into flush mode
-///
 /// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-static fapi2::ReturnCode p9_mem_startclocks_check_checkstop_function(
-    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
+static fapi2::ReturnCode p9_mem_startclocks_fence_setup_function(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
+    const fapi2::buffer<uint64_t> i_pg_vector)
 {
-    fapi2::buffer<uint64_t> l_read_reg;
+    uint8_t l_read_attrunitpos = 0;
     fapi2::buffer<uint64_t> l_data64;
     FAPI_DBG("Entering ...");
 
-    FAPI_INF("Drop chiplet fence");
-    //Setting NET_CTRL0 register value
-    l_data64.flush<1>();
-    l_data64.clearBit<PEC_STACK0_NET_CTRL0_FENCE_EN>();  //NET_CTRL0.FENCE_EN = 0
-    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_NET_CTRL0_WAND, l_data64));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chiplet,
+                           l_read_attrunitpos));
 
-    FAPI_INF("Check checkstop register");
-    //Getting XFIR register value
-    FAPI_TRY(fapi2::getScom(i_target_chiplet, PERV_XFIR,
-                            l_read_reg)); //l_read_reg = XFIR
+    if ( l_read_attrunitpos == 0x07 )
+    {
+        if ( i_pg_vector.getBit<4>() == 1 )
+        {
+            FAPI_DBG("Drop chiplet fence");
+            //Setting NET_CTRL0 register value
+            l_data64.flush<1>();
+            l_data64.clearBit<PERV_1_NET_CTRL0_FENCE_EN>();  //NET_CTRL0.FENCE_EN = 0
+            FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_NET_CTRL0_WAND, l_data64));
+        }
+    }
 
-    FAPI_ASSERT(l_read_reg == 0,
-                fapi2::READ_ALL_CHECKSTOP_ERR()
-                .set_READ_ALL_CHECKSTOP(l_read_reg),
-                "ERROR: COMBINE ALL CHECKSTOP ERROR");
+    if ( l_read_attrunitpos == 0x08 )
+    {
+        if ( i_pg_vector.getBit<2>() == 1 )
+        {
+            FAPI_DBG("Drop chiplet fence");
+            //Setting NET_CTRL0 register value
+            l_data64.flush<1>();
+            l_data64.clearBit<PERV_1_NET_CTRL0_FENCE_EN>();  //NET_CTRL0.FENCE_EN = 0
+            FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_NET_CTRL0_WAND, l_data64));
+        }
+    }
 
     FAPI_DBG("Exiting ...");
 
