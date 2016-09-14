@@ -30,6 +30,8 @@
 #ifndef FAPI2_FFDC_H_
 #define FAPI2_FFDC_H_
 
+#if !defined (FAPI2_NO_FFDC) && !defined (MINIMUM_FFDC)
+
 #include <memory>
 #include <hwp_return_codes.H>
 #include <return_code_defs.H>
@@ -235,4 +237,5 @@ class FirstFailureData
 };
 
 }
+#endif // !defined (FAPI2_NO_FFDC) && !defined (MINIMUM_FFDC)
 #endif // FAPI2_FFDC_H_
