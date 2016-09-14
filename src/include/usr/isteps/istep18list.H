@@ -38,8 +38,14 @@
 
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
-#include <config.h>
+#include    <config.h>
 
+
+namespace   ISTEP_18
+{
+    void * call_tod_setup(void *dummy);
+    void * call_tod_init(void *dummy);
+}
 
 namespace   INITSERVICE
 {
@@ -91,20 +97,31 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
+                ISTEPNAME(18,09,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+
+        {
                 ISTEPNAME(18,10,""),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+
+// To reduce extended image size for VPO, don't run these isteps in VPO
+#ifndef CONFIG_VPO_COMPILE
         {
-                ISTEPNAME(18,11,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(18,11,"proc_tod_setup"),
+                ISTEP_18::call_tod_setup,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false,
+                        STARTING_OS }
         },
         {
-                ISTEPNAME(18,12,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(18,12,"proc_tod_init"),
+                ISTEP_18::call_tod_init,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+#endif
         {
                 ISTEPNAME(18,13,""),
                 NULL,
@@ -123,9 +140,12 @@ namespace   INITSERVICE
 };
 
 const DepModInfo g_istep18Dependancies = {
-    {
-        NULL
-    }
+        {
+#ifndef CONFIG_VPO_COMPILE
+            DEP_LIB(libistep18.so),
+#endif
+            NULL
+        }
 };
 
 const ExtTaskInfo g_istep18TaskList = {

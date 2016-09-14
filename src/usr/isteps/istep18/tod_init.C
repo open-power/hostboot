@@ -39,51 +39,53 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <initservice/initserviceif.H>
+
 #include "TodTrace.H"
-#include "tod_init.H"
-#include "TodSvc.H"
+// @TODO RTC:149253
+//#include "tod_init.H"
+//#include "TodSvc.H"
 
-namespace   TOD
+namespace   ISTEP_18
 {
-
-const char TOD_TRACE_NAME[] = "TOD";
-trace_desc_t* g_trac_tod = NULL;
-TRAC_INIT(&g_trac_tod, TOD_TRACE_NAME, KILOBYTE, TRACE::BUFFER_SLOW);
 
 void * call_tod_setup(void *dummy)
 {
-    errlHndl_t l_errl;
+    errlHndl_t l_errl = NULL;
 
-    if (!INITSERVICE::spBaseServicesEnabled())
-    {
-        l_errl = TodSvc::getTheInstance().todSetup();
+    TOD_ENTER("call_tod_setup");
+//    //@TODO RTC:149253 uncomment
+//    if (!INITSERVICE::spBaseServicesEnabled())
+//    {
+//        l_errl = TOD::TodSvc::getTheInstance().todSetup();
+//
+//        if (l_errl)
+//        {
+//            TOD_ERR("todSetup() return errl handle %p", l_errl);
+//            errlCommit( l_errl, TOD_COMP_ID );
+//        }
+//    }
 
-        if (l_errl)
-        {
-            TOD_ERR("todSetup() return errl handle %p", l_errl);
-            errlCommit( l_errl, TOD_COMP_ID );
-        }
-    }
-
-    return NULL;
+    return l_errl; // //@TODO RTC:149253 update later
 }
 
 void * call_tod_init(void *dummy)
 {
-    errlHndl_t l_errl;
+    errlHndl_t l_errl = NULL;
+    TOD_ENTER("call_init");
 
-    if (!INITSERVICE::spBaseServicesEnabled())
-    {
-        l_errl = TodSvc::getTheInstance().todInit();
+//    // @TODO RTC:149253
+//    if (!INITSERVICE::spBaseServicesEnabled())
+//    {
+//        l_errl = TOD::TodSvc::getTheInstance().todInit();
+//
+//        if (l_errl)
+//        {
+//            TOD_ERR("todInit() return errl handle %p", l_errl);
+//            errlCommit( l_errl, TOD_COMP_ID );
+//        }
+//    }
 
-        if (l_errl)
-        {
-            TOD_ERR("todInit() return errl handle %p", l_errl);
-            errlCommit( l_errl, TOD_COMP_ID );
-        }
-    }
-
-    return NULL;
+    return l_errl; //@TODO RTC:149253 update later
 }
 
 };   // end namespace

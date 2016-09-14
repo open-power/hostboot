@@ -36,6 +36,7 @@ SUBDIRS+=istep13.d
 SUBDIRS+=istep14.d
 SUBDIRS+=istep15.d
 SUBDIRS+=istep16.d
+SUBDIRS+=istep18.d
 SUBDIRS+=istep20.d
 SUBDIRS+=istep21.d
 SUBDIRS+=pm.d

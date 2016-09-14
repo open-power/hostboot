@@ -22,17 +22,22 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../../..
+ROOTPATH = ../../../..
 
-MODULE = tod_init
+MODULE = istep18
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/tod_init
+EXTRAINCDIR += ${PROCEDURES_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps
+
 
 ## pointer to common HWP files
 
 #@TODO-RTC:149253-Add TOD support
-#OBJS += tod_init.o
+OBJS += tod_init.o
 #OBJS += TodControls.o
 #OBJS += TodDrawer.o
 #OBJS += TodProc.o
@@ -41,9 +46,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 #OBJS += TodHwpIntf.o
 #OBJS += TodTopologyManager.o
 
-OBJS += proc_tod_setup.o
-OBJS += proc_tod_save_config.o
-OBJS += proc_tod_init.o
-OBJS += proc_tod_utils.o
+#OBJS += proc_tod_setup.o
+#OBJS += proc_tod_save_config.o
+#OBJS += proc_tod_init.o
+#OBJS += proc_tod_utils.o
+#OBJS += call_tod_setup.o
+#OBJS += call_tod_init.o
 
+include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
