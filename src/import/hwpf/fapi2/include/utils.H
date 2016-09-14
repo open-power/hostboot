@@ -38,7 +38,7 @@
 
 namespace fapi2
 {
-
+#ifndef __PPE__
 ///
 /// @brief Enable/Disable special wakeup on processor chip core(s)
 ///
@@ -128,7 +128,7 @@ void createPlatLog(
     fapi2::ReturnCode& io_rc,
     fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE
 );
-
+#endif // __PPE__
 ///
 /// @brief Delay this thread. Hostboot will use the nanoseconds parameter
 /// and make a syscall to nanosleep. While in the syscall, the hostboot

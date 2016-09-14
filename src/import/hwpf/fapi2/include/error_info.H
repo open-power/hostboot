@@ -32,7 +32,9 @@
 #define FAPI2_ERRORINFO_H_
 
 #include <stdint.h>
-#include <memory>
+#ifndef __PPE__
+    #include <memory>
+#endif
 #include <vector>
 #include <target.H>
 #include <error_info_defs.H>
