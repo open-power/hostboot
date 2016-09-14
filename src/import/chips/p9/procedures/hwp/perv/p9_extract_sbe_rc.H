@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------
 /// @file  p9_extract_sbe_rc.H
 ///
-/// @brief Check for errors on the PNOR , SEEPROM
+/// @brief Check for errors on the SBE, OTPROM, PIBMEM & SEEPROM
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Soma BhanuTej <soma.bhanu@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
@@ -42,16 +42,30 @@
 
 #include <fapi2.H>
 
+namespace P9_EXTRACT_SBE_RC
+{
+enum RETURN_ACTION
+{
+    RESTART_SBE       = 1, // Trigger external HRESET to reset SBE
+    RESTART_CBS       = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
+    REIPL_BKP_SEEPROM = 3, // Run IPL by selecting backup seeprom
+    RE_IPL            = 4, // Reload/update of SEEPROM required or deconfig the chip
+    NO_RECOVERY_ACTION = 5 // No recovery action possible to correct this error, Replace the chip with new one
+};
+};
 
-typedef fapi2::ReturnCode (*p9_extract_sbe_rc_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_extract_sbe_rc_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        P9_EXTRACT_SBE_RC::RETURN_ACTION&);
 
-/// @brief called on all chips(master and slaves) to look for any correctable errors on the PNOR and/or SEEPROM, the soft_error flag tells the procedure not to generate error if no HW issue.
+/// @brief called on all chips(master and slaves) to look for any correctable errors on the SBE, OTPROM, PIBMEM & SEEPROM, the soft_error flag tells the procedure not to generate error if no HW issue.
 ///
 /// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[out]    o_return_action    Returns the action to be taken on an error
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
-    fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+    fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+                                        P9_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action);
 }
 
 #endif

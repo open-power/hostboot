@@ -228,8 +228,12 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 " on processor target %.8X",
                   TARGETING::get_huid(l_cpu_target) );
 
+        //@TODO-RTC:100963-Do something with the RETURN_ACTION
+        P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction
+          = P9_EXTRACT_SBE_RC::RE_IPL;
         FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
-                        l_fapi2ProcTarget);
+                        l_fapi2ProcTarget,
+                        l_rcAction);
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

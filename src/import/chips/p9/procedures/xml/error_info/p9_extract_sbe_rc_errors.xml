@@ -27,76 +27,166 @@
 
 <hwpErrors>
   <!-- ******************************************************************** -->
-  <!-- Halt codes -->
+  <!-- Halt codes for PPE -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_NEVER_STARTED</rc>
+    <description>
+    SBE engine was probably never started
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT</rc>
-    <description>Program interrupt promoted</description>
+    <description>
+    Program interrupt promoted
+    Action:Code update required [RESTART_SBE]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
-    <description>Address scope out of range</description>
+    <description>
+    Address scope out of range
+    Action:Code update required [RESTART_SBE]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- Halt codes for OTPROM -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_OTPROM_UNCORRECTED_ERROR</rc>
+    <description>
+    Uncorrectable error detected in OTPROM memory read
+    Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH</rc>
-    <description>SEEPROM magic number didn't match</description>
+    <description>
+    SEEPROM magic number didn't match
+    Action:Reload/update of OTPROM and SEEPROM required [RE_IPL]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL</rc>
-    <description>Branch to SEEPROM didn't happen</description>
+    <description>
+    Branch to SEEPROM didn't happen
+    Action:Reload/update of OTPROM required [RE_IPL]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT</rc>
-    <description>Halted in OTPROM, but not at an expected halt location</description>
+    <description>
+    Halted in OTPROM, but not at an expected halt location
+    Action:Reload/update of OTPROM required [RE_IPL]
+    </description>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- Halt codes for PIBMEM -->
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_PIB</rc>
-    <description>Uncorrectable error occurred while PIB memory read</description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_PIBMEM_SOFT_ECC_ERROR_PIB</rc>
-    <description>WARN:Corrected error in PIB mem read from PIB side</description>
+    <description>
+    Uncorrectable error occurred while PIB memory read
+    Action:Reload/update of PIBMEM required [RESTART_SBE]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_UNCORRECTED_ERROR_FACES</rc>
-    <description>Uncorrectable error occurred while fast acess interface read</description>
+    <description>
+    Uncorrectable error occurred while fast acess interface read
+    Action:Reload/update of PIBMEM required [RESTART_SBE]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_PIBMEM_SOFT_ECC_ERROR_FACES</rc>
-    <description>WARN:Corrected error in fast acess read operation</description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_HALT_PIBMEM</rc>
-    <description>Halted in PIBMEM address location</description>
-  </hwpError>
+  <!-- Halt codes for SEEPROM -->
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR</rc>
-    <description>I2C bit rate divisor is less than min speed value</description>
+    <description>
+    I2C bit rate divisor is less than min speed value
+    Action:Reload/update of OTPROM required [RE_IPL]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_ERROR</rc>
+    <description>
+    There are an FI2C I2C Error detected
+    Action:Reload/update of SEEPROM required or switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_UNRECOVERABLE_ECC_SEEPROM</rc>
-    <description>There are 2 bit flips in read data which cannot be corrected</description>
+    <description>
+    There are 2 bit flips in read data which cannot be corrected
+    Action:Reload/update of SEEPROM required or switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- Halt codes for Data Machine Check -->
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_PIB_TIMEOUT</rc>
+    <description>
+    PIB Timeout error detected
+    Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_SOFT_ECC_ERROR_SEEPROM</rc>
-    <description>WARN:One bit flip was there in data and been corrected</description>
+    <rc>RC_EXTRACT_SBE_RC_SCOM_ERR</rc>
+    <description>
+    Scom error detected 
+    Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_HALT_SEEPROM</rc>
-    <description>Halted in SEEPROM address location</description>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ERR</rc>
+    <description>
+    Error detected during pibmem access
+    Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_TIMEOUT</rc>
+    <description>
+    FI2C Timeout error detected
+    Action:Reload/update of SEEPROM required or switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_SPRM_CFG_ERR</rc>
+    <description>
+    FI2C SEEPROM config error detected
+    Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_PIB_ERR</rc>
+    <description>
+    FI2C PIB error detected
+    Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_UNKNOWN_ERROR</rc>
+    <description>
+    Unknown error has occured, So debug has to be done to understand the error
+    Action:No automatic action can be taken [RE_IPL]
+    </description>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
