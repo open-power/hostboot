@@ -221,16 +221,6 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
         }
 
         // Start the super fast read command.
-        // TODO: RTC 159778 - Still waiting for Brian Silver to update this
-        //       interface. In the meantime, tell MDIA that command has
-        //       completed (even though it hasn't) so that we do not hang up
-        //       MDIA and the IPL.
-        o_rc = mdiaSendEventMsg( mcbChip->getTrgt(), MDIA::COMMAND_COMPLETE );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(COMMAND_COMPLETE) failed" );
-        }
-/*
         fapi2::ReturnCode fapi_rc = memdiags::sf_read( fapiTrgt, stopCond,
                                                        saddr );
         errlHndl_t errl = fapi2::rcToErrl( fapi_rc );
@@ -241,7 +231,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
-*/
+
     } while (0);
 
     return o_rc;
