@@ -484,25 +484,51 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             break;
         }
 
+        // inhibit any attempt to getSectionInfo on any attribute override
+        // sections if secureboot is enabled
+        bool l_inhibited = isInhibitedSection(id);
+
         // Zero-length means the section is invalid
-        if( 0 == iv_TOC[id].size )
+        if( 0 == iv_TOC[id].size
+            // attribute overrides inhibited by secure boot
+            || l_inhibited
+        )
         {
-            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d", i_section );
-            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[i_section].id, iv_TOC[i_section].size );
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section"
+                " Requested : i_section=%d", i_section );
+            #ifdef CONFIG_SECUREBOOT
+            if (l_inhibited)
+            {
+                TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> "
+                "attribute override inhibited by secureboot");
+            }
+            #endif
+
+            uint64_t size = iv_TOC[i_section].size;
+            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }",
+                             iv_TOC[i_section].id, size );
             /*@
              * @errortype
-             * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
-             * @reasoncode   PNOR::RC_INVALID_SECTION
-             * @userdata1    Requested Section
-             * @userdata2    TOC used
-             * @devdesc      PnorRP::getSectionInfo> Invalid Address for read/write
-             * @custdesc     A problem occurred while accessing the boot flash.
+             * @moduleid         PNOR::MOD_PNORRP_GETSECTIONINFO
+             * @reasoncode       PNOR::RC_INVALID_SECTION
+             * @userdata1        Size of section
+             * @userdata2[0:7]   TOC used
+             * @userdata2[8:15]  Inhibited flag
+             * @userdata2[16:23] Requested Section
+             * @devdesc          PnorRP::getSectionInfo> Invalid Address for
+             *                   read/write or prohibited by secureboot
+             * @custdesc         A problem occurred while accessing the boot
+             *                   flash.
             */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
-                                               TO_UINT64(i_section),
-                                               iv_TOC_used,
+                                               size,
+                                               TO_UINT64(FOUR_UINT8_TO_UINT32(
+                                                   iv_TOC_used,
+                                                   l_inhibited,
+                                                   i_section,
+                                                   0)),
                                                true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
 

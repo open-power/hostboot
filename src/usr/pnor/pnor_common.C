@@ -634,3 +634,15 @@ bool PNOR::isSecureSection(const uint32_t i_section)
     return false;
 #endif
 }
+
+bool PNOR::isInhibitedSection(const uint32_t i_section)
+{
+#ifdef CONFIG_SECUREBOOT
+    return (i_section == ATTR_PERM ||
+            i_section == ATTR_TMP) &&
+            SECUREBOOT::enabled();
+#else
+    return false;
+#endif
+}
+

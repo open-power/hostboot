@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/targeting/attrPlatOverride.C $                        */
+/* $Source: src/usr/targeting/runtime/attrPlatOverride_rt.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,10 @@
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <targeting/common/trace.H>
 #include <errl/errlmanager.H>
+#include <config.h>
+#include <secureboot/service.H>
+#include <targeting/common/targreasoncodes.H>
+#include <devicefw/userif.H>
 
 using namespace TARGETING;
 
@@ -44,44 +48,74 @@ int apply_attr_override(uint8_t* i_data,
 
     TRACFCOMP(g_trac_targeting, "enter apply_attr_override");
 
-    // Clear fapi and targeting attribute override tanks. The tanks are
-    // expected to be empty. The passed overrides are added, not updated
-    // in place.
-    AttributeTank * l_pAttributeTank =
+    bool l_allowOverrides = true;
+
+    #ifdef CONFIG_SECUREBOOT
+    l_allowOverrides = !SECUREBOOT::enabled();
+    #endif
+
+    if (l_allowOverrides)
+    {
+        // Clear fapi and targeting attribute override tanks. The tanks are
+        // expected to be empty. The passed overrides are added, not updated
+        // in place.
+        AttributeTank * l_pAttributeTank =
                     &fapi::theAttrOverrideSync().iv_overrideTank;
-    if ((*l_pAttributeTank).attributesExist())
-    {
-        TRACFCOMP(g_trac_targeting, "apply_attr_override:"
+        if ((*l_pAttributeTank).attributesExist())
+        {
+            TRACFCOMP(g_trac_targeting, "apply_attr_override:"
                                     " clear FAPI attribute overrides");
-        (*l_pAttributeTank).clearAllAttributes();
-    }
-    l_pAttributeTank = &Target::theTargOverrideAttrTank();
-    if ((*l_pAttributeTank).attributesExist())
-    {
-        TRACFCOMP(g_trac_targeting, "apply_attr_override:"
+            (*l_pAttributeTank).clearAllAttributes();
+        }
+        l_pAttributeTank = &Target::theTargOverrideAttrTank();
+        if ((*l_pAttributeTank).attributesExist())
+        {
+            TRACFCOMP(g_trac_targeting, "apply_attr_override:"
                                     " clear targeting attribute overrides");
-        (*l_pAttributeTank).clearAllAttributes();
-    }
+            (*l_pAttributeTank).clearAllAttributes();
+        }
 
-    // Pass attribute override blob as a pnor section
-    PNOR::SectionInfo_t l_sectionInfo;
-    l_sectionInfo.vaddr = (uint64_t)i_data;
-    l_sectionInfo.size = i_size;
-    l_sectionInfo.id = PNOR::ATTR_TMP;
-    l_sectionInfo.name = "Runtime TMP";
+        // Pass attribute override blob as a pnor section
+        PNOR::SectionInfo_t l_sectionInfo;
+        l_sectionInfo.vaddr = (uint64_t)i_data;
+        l_sectionInfo.size = i_size;
+        l_sectionInfo.id = PNOR::ATTR_TMP;
+        l_sectionInfo.name = "Runtime TMP";
 
-    // Process attribute overrides
-    l_errl = TARGETING::getAttrOverrides(l_sectionInfo);
-    if (l_errl)
-    {
-        TRACFCOMP(g_trac_targeting, "apply_attr_override:"
+        // Process attribute overrides
+        l_errl = TARGETING::getAttrOverrides(l_sectionInfo);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_targeting, "apply_attr_override:"
                                     " getAttrOverrides failed");
-        errlCommit(l_errl, TARG_COMP_ID);
-        rc = -1;
+            errlCommit(l_errl, TARG_COMP_ID);
+            rc = -1;
+        }
     }
     else
     {
-        TRACFCOMP(g_trac_targeting, "apply_attr_override succeed");
+#ifdef CONFIG_SECUREBOOT
+        TRACFCOMP(g_trac_targeting, "apply_attr_override: skipping override"
+            " due to SECUREBOOT enablement");
+
+        /* @
+         * @errortype
+         * @moduleid     TARG_APPLY_ATTR_OVER
+         * @reasoncode   TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED
+         * @devdesc      PnorRP::getSectionInfo> Skipping attribute override
+         *               because of secureboot enablement
+         * @custdesc     Attributes overrides are not allowed in secure mode.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        TARG_APPLY_ATTR_OVER,
+                                        TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED,
+                                        0,
+                                        0,
+                                        true /* Add HB SW Callout */);
+        l_errl->collectTrace(TARG_COMP_NAME);
+        errlCommit(l_errl, TARG_COMP_ID);
+        rc = -1;
+#endif
     }
     return rc;
 }
@@ -133,5 +167,3 @@ struct registerTargRT
 registerTargRT g_registerTargRT;
 
 } // end of namespace
-
-

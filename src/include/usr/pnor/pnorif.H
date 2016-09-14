@@ -227,6 +227,16 @@ errlHndl_t hasSecurebootMagicNumber(SectionId i_section, bool &o_valid);
 bool isSecureSection(const uint32_t i_section);
 
 /**
+ * @brief Determines whether the given section is inhibited by secure boot
+ *        for containing attribute overrides.
+ *
+ * @param[in] i_section PNOR section to test.
+ *
+ * @return bool True if inhibited section, false otherwise.
+ */
+bool isInhibitedSection(const uint32_t i_section);
+
+/**
  * @brief  Write the data back from hostboot memory to PNOR of a given section
  *         of PNOR
  *

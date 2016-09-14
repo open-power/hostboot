@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/settings.C $                          */
+/* $Source: src/usr/secureboot/common/securetrace.H $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,45 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <errl/errlentry.H>
-#include <devicefw/userif.H>
-#include <secureboot/service.H>
+/**
+ *  @file securetrace.H
+ *  @brief Provides trace interface for secureboot
+ */
 
-#include <secureboot/settings.H>
+#ifndef __SECURETRACE_H
+#define __SECURETRACE_H
 
-// SECUREBOOT : General driver traces
-extern trace_desc_t* g_trac_secure;
+#include <trace/interface.H>
 
 namespace SECUREBOOT
 {
-    void Settings::_init()
-    {
-        errlHndl_t l_errl = NULL;
-        size_t size = sizeof(iv_regValue);
 
-        // Read / cache security switch setting from processor.
-        l_errl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                            &iv_regValue, size,
-                            DEVICE_SCOM_ADDRESS(PROC_SECURITY_SWITCH_REGISTER));
+extern trace_desc_t* g_trac_secure;
 
-        // If this errors, we're in bad shape and shouldn't trust anything.
-        assert(NULL == l_errl);
-    }
-
-    bool Settings::getEnabled() const
-    {
-        return 0 != (getSecuritySwitch()
-                     & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK);
-    }
-
-    bool Settings::getJumperState() const
-    {
-        return 0 != (getSecuritySwitch()
-                     & PROC_SECURITY_SWITCH_JUMPER_STATE_MASK);
-    }
-
-    uint64_t Settings::getSecuritySwitch() const
-    {
-        return iv_regValue;
-    }
 }
+
+#define SB_ENTER(args...) \
+    TRACFCOMP(SECUREBOOT::g_trac_secure,ENTER_MRK " " args)
+
+#define SB_EXIT(args...) \
+    TRACFCOMP(SECUREBOOT::g_trac_secure,EXIT_MRK " " args)
+
+#define SB_ERR(args...) \
+    TRACFCOMP(SECUREBOOT::g_trac_secure,ERR_MRK " " args)
+
+#define SB_INF(args...) \
+    TRACFCOMP(SECUREBOOT::g_trac_secure,INFO_MRK " " args)
+
+#define SB_DBG(args...) \
+    TRACDCOMP(SECUREBOOT::g_trac_secure,INFO_MRK " " args)
+
+#define SB_INF_BIN(args...) \
+    TRACFBIN(SECUREBOOT::g_trac_secure,args)
+
+#define SB_DBG_BIN(args...) \
+    TRACDBIN(SECUREBOOT::g_trac_secure,args)
+
+#endif
+

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/settings.C $                          */
+/* $Source: src/usr/secureboot/runtime/rt_secureboot.C $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,45 +22,60 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <errl/errlentry.H>
-#include <devicefw/userif.H>
+#include <runtime/interface.h>
+#include <config.h>
 #include <secureboot/service.H>
+#include <errl/errlmanager.H>
+#include <secureboot/secure_reasoncodes.H>
+#include "common/securetrace.H"
 
-#include <secureboot/settings.H>
+#include <runtime/rt_targeting.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/targetservice.H>
+#include <devicefw/userif.H>
 
-// SECUREBOOT : General driver traces
-extern trace_desc_t* g_trac_secure;
 
 namespace SECUREBOOT
 {
-    void Settings::_init()
+    using namespace TARGETING;
+
+    bool enabled()
     {
         errlHndl_t l_errl = NULL;
-        size_t size = sizeof(iv_regValue);
+        uint64_t l_regValue = 0;
+        size_t l_size = sizeof(l_regValue);
 
-        // Read / cache security switch setting from processor.
-        l_errl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                            &iv_regValue, size,
+        TargetService& tS = targetService();
+        Target* masterProcChipTargetHandle = NULL;
+
+        do
+        {
+            l_errl = tS.queryMasterProcChipTargetHandle(
+                                                masterProcChipTargetHandle);
+
+            if (l_errl)
+            {
+                errlCommit(l_errl, SECURE_COMP_ID);
+                break;
+            }
+
+            l_errl = deviceRead(masterProcChipTargetHandle,
+                            &l_regValue, l_size,
                             DEVICE_SCOM_ADDRESS(PROC_SECURITY_SWITCH_REGISTER));
+            if (l_errl)
+            {
+                errlCommit(l_errl, SECURE_COMP_ID);
+                break;
+            }
 
-        // If this errors, we're in bad shape and shouldn't trust anything.
-        assert(NULL == l_errl);
+            assert(l_size == sizeof(l_regValue));
+        } while (0);
+
+        // if there was an error l_regValue is zero, so we return false.
+        // Unfortunately this is all we can do. These shouldn't fail.
+
+        return l_regValue & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK;
     }
 
-    bool Settings::getEnabled() const
-    {
-        return 0 != (getSecuritySwitch()
-                     & PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK);
-    }
+} // end of SECUREBOOT namespace
 
-    bool Settings::getJumperState() const
-    {
-        return 0 != (getSecuritySwitch()
-                     & PROC_SECURITY_SWITCH_JUMPER_STATE_MASK);
-    }
-
-    uint64_t Settings::getSecuritySwitch() const
-    {
-        return iv_regValue;
-    }
-}

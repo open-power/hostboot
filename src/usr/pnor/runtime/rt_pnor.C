@@ -38,6 +38,7 @@
 #include "../ffs.h"
 #include "../common/ffs_hb.H"
 #include <util/align.H>
+#include <config.h>
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
@@ -98,21 +99,35 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
     errlHndl_t l_err = NULL;
     do
     {
-        if (i_section == PNOR::INVALID_SECTION)
+        bool l_inhibited = false;
+        #ifdef CONFIG_SECUREBOOT
+        using namespace PNOR;
+        l_inhibited = isInhibitedSection(i_section);
+        #endif
+        if (i_section == PNOR::INVALID_SECTION || l_inhibited)
         {
             TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: Invalid Section"
                     " %d", (int)i_section);
+            #ifdef CONFIG_SECUREBOOT
+            if (l_inhibited)
+            {
+                TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: "
+                    "attribute overrides inhibited by secureboot");
+            }
+            #endif
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
              * @reasoncode  PNOR::RC_RTPNOR_INVALID_SECTION
              * @userdata1   PNOR::SectionId
-             * @devdesc     invalid section passed to getSectionInfo
+             * @userdata2   Inhibited by secureboot
+             * @devdesc     invalid section passed to getSectionInfo or
+             *              section prohibited by secureboot
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
                                             PNOR::RC_RTPNOR_INVALID_SECTION,
-                                            i_section, 0,true);
+                                            i_section, l_inhibited,true);
             break;
         }
 

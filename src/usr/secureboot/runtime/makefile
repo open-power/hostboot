@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/secureboot/makefile $
+# $Source: src/usr/secureboot/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,11 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
 
-SUBDIRS += base.d
-SUBDIRS += ext.d
-SUBDIRS += trusted.d
-SUBDIRS += runtime.d
+MODULE = secureboot_rt
 
-include ${ROOTPATH}/config.mk
+include ../common/common.mk
+CFLAGS += -iquote${ROOTPATH}/src/usr/secureboot
+
+OBJS += ${SECUREBOOT_COMMON_OBJS}
+OBJS += rt_secureboot.o
+
+VPATH += ../common
+
+include $(ROOTPATH)/config.mk
+
