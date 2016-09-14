@@ -27,6 +27,8 @@
 
 #include <errl/errlentry.H>
 #include <utility>
+#include <targeting/common/targetservice.H>
+#include <config.h>
 
 typedef uint8_t SHA512_t[64];
 
@@ -99,6 +101,24 @@ namespace SECUREBOOT
     /** @brief Determines if Secureboot is enabled.
      */
     bool enabled();
+
+    #ifdef CONFIG_SECUREBOOT
+    /** @brief Read the bar values for a given target (must be a processor)
+     *         and store its values for later matching against the expected
+     *         bar values as per the bar value attributes in PNOR.
+     *  @param[in] i_targ A target pointer. Must be a processor. Must not be
+     *                    NULL.
+     */
+    void readProcBars(TARGETING::Target* i_targ);
+
+    /** @brief Determine if the bar values match the expected values that
+     *         were read previously using the readProcBars call.
+     *  @param[in] i_targ A target pointer. Must be a processor. Must not be
+     *                    NULL.
+     *  @return NULL on success, otherwise a pointer to an error log.
+     */
+    errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ);
+    #endif
 
     /** @brief Returns the state of the secure jumper as reported by the master
      *      processor.

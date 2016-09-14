@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <util/sprintf.H>
-
+#include <config.h>
 
 namespace TRACE
 {

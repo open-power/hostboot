@@ -75,6 +75,11 @@
 // Custom compile configs
 #include <config.h>
 
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <util/misc.H>
+#endif
+
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <hwpf/hwp/occ/occ.H>
   #include <hwpf/hwp/occ/occ_common.H>
@@ -401,6 +406,41 @@ void* host_cancontinue_clear( void *io_pArgs )
     return errl;
 }
 
+#ifdef CONFIG_SECUREBOOT
+//******************************************************************************
+// match_bar_values_for_all_proc helper function
+//******************************************************************************
+void match_bar_values_for_all_proc()
+{
+    // For secureboot, check that the BARs read from the hardware
+    // as set by the SBE match the values customized into the SBE image
+    if (SECUREBOOT::enabled())
+    {
+        errlHndl_t l_errl = NULL;
+        TARGETING::TargetHandleList functionalProcChipList;
+        getAllChips(functionalProcChipList, TYPE_PROC, true);
+
+        // loop thru the list of processors
+        for (TargetHandleList::const_iterator
+            l_proc_iter = functionalProcChipList.begin();
+            l_proc_iter != functionalProcChipList.end();
+            ++l_proc_iter)
+        {
+            l_errl = SECUREBOOT::procBarValuesMatch(*l_proc_iter);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "match_bar_values_for_all_proc() System shutting down "
+                    "because the non-secure bar values do not match "
+                    "expected values.");
+                // stop IPL
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+            }
+        }
+    }
+}
+#endif
+
 //******************************************************************************
 // host_prd_hwreconfig function
 //******************************************************************************
@@ -413,6 +453,17 @@ void* host_prd_hwreconfig( void *io_pArgs )
     IStepError l_stepError;
     do
     {
+        #ifdef CONFIG_SECUREBOOT
+        // check the BAR values for all processors
+        // TODO RTC 156484 Remove the simics check below from around the BAR
+        // check as soon as simics has support for the BAR value registers.
+        // Also will need to remove include <util/misc.H> from top of this file.
+        if (!Util::isSimicsRunning())
+        {
+            match_bar_values_for_all_proc();
+        }
+        #endif
+
         // Flip the scom path back to FSI in case we enabled IBSCOM previously
         IBSCOM::enableInbandScoms(IBSCOM_DISABLE);
 

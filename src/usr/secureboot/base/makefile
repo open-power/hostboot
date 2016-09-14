@@ -41,6 +41,7 @@ OBJS += ${SECUREBOOT_COMMON_OBJS}
 VPATH += ../common
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 VPATH += ${ROOTPATH}/src/usr/secureboot/trusted/base
 
 CFLAGS += -iquote ../

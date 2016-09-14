@@ -115,6 +115,20 @@ bool enabled()
     return Singleton<Settings>::instance().getEnabled();
 }
 
+#ifdef CONFIG_SECUREBOOT
+////////////////////////////////////////////////////////////////////
+void readProcBars(TARGETING::Target* i_targ)
+{
+    Singleton<Settings>::instance().readProcBars(i_targ);
+}
+
+////////////////////////////////////////////////////////////////////
+errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ)
+{
+    return Singleton<Settings>::instance().procBarValuesMatch(i_targ);
+}
+#endif
+
 /////////////////////////////////////////////////////////////////////
 void secureSbeSeeproms( void )
 {

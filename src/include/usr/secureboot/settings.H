@@ -26,6 +26,9 @@
 #define __SECUREBOOT_SETTINGS_H
 
 #include <stdint.h>
+#include <map>
+#include <targeting/common/targetservice.H>
+#include <config.h>
 
 namespace SECUREBOOT
 {
@@ -41,6 +44,19 @@ namespace SECUREBOOT
 
             /** @brief Determine if Secureboot is enabled. */
             bool getEnabled() const;
+
+            #ifdef CONFIG_SECUREBOOT
+            /** @brief Reads in the bars for later matching with
+             *         the bar attributes. See wrapper in
+             *         secureboot/service.H for more information.
+             */
+            void readProcBars(TARGETING::Target* i_targ);
+
+            /** @brief Determine if bar values match. See wrapper in
+             *         secureboot/service.H for more information.
+             */
+            errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ);
+            #endif
 
             /** @brief Get security switch register value */
             uint64_t getSecuritySwitch() const;
@@ -74,6 +90,8 @@ namespace SECUREBOOT
 
             /** Cached register value. */
             uint64_t iv_regValue;
+
+            std::map<TARGETING::Target*, uint64_t*> iv_barValues;
     };
 }
 

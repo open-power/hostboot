@@ -70,6 +70,11 @@
 #include <pnor/pnorif.H>
 #include <sys/time.h>
 
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#endif
+
+
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
 const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
 const uint64_t MS_TO_WAIT_FIRST_SBE_START = 100; //(100 ms)
@@ -738,12 +743,36 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 
     getAllChips(functionalProcChipList, TYPE_PROC, true);
 
+    #ifdef CONFIG_SECUREBOOT
+    TARGETING::Target* l_mProc = NULL;
+    l_errl = targetService().queryMasterProcChipTargetHandle(l_mProc);
+    if (l_errl)
+    {
+        errlCommit(l_errl, HWPF_COMP_ID);
+        assert(false, "tS.queryMasterProcChipTargetHandle "
+            "returned errl for masterProcChipTargetHandle");
+    }
+    #endif
+
     // loop thru the list of processors
     for (TargetHandleList::const_iterator
             l_proc_iter = functionalProcChipList.begin();
             l_proc_iter != functionalProcChipList.end();
             ++l_proc_iter)
     {
+        #ifdef CONFIG_SECUREBOOT
+        if (SECUREBOOT::enabled())
+        {
+            // if this is not the master chip
+            if (*l_proc_iter != l_mProc)
+            {
+                // read the secure bar values for each cpu into secure boot
+                // to be matched later with the attribute bar values
+                SECUREBOOT::readProcBars(*l_proc_iter);
+            }
+        }
+        #endif
+
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "target HUID %.8X",
                 TARGETING::get_huid( *l_proc_iter ));
