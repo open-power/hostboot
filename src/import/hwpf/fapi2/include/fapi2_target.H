@@ -31,7 +31,9 @@
 #define __FAPI2_COMMON_TARGET__
 
 #include <stdint.h>
-#include <stdlib.h>
+#ifndef __PPE__
+    #include <stdlib.h>
+#endif // __PPE__
 #include <vector>
 #include <target_types.H>
 #include <target_states.H>
