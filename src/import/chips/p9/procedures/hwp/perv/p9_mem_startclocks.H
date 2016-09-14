@@ -52,7 +52,6 @@ typedef fapi2::ReturnCode (*p9_mem_startclocks_FP_t)(
 /// --Module clock start stop
 /// --Check clock stat SL, NSL , ARY
 /// --drop chiplet fence
-/// --check checkstop register
 /// --clear flush inhibit to go into flush mode
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target

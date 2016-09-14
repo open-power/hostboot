@@ -282,31 +282,6 @@ fapi_try_exit:
 
 }
 
-/// @brief --check checkstop register
-/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
-/// @return  FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
-    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
-{
-    fapi2::buffer<uint64_t> l_read_reg;
-    FAPI_INF("p9_sbe_common_check_checkstop_function: Entering ...");
-
-    FAPI_DBG("Check checkstop register");
-    //Getting XFIR register value
-    FAPI_TRY(fapi2::getScom(i_target_chiplet, PERV_XFIR,
-                            l_read_reg)); //l_read_reg = XFIR
-
-    FAPI_ASSERT(l_read_reg == 0,
-                fapi2::READ_ALL_CHECKSTOP_ERR()
-                .set_READ_ALL_CHECKSTOP(l_read_reg),
-                "ERROR: COMBINE ALL CHECKSTOP ERROR");
-
-    FAPI_INF("p9_sbe_common_check_checkstop_function: Exiting ...");
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}
 
 /// @brief check clocks status
 ///

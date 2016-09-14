@@ -52,9 +52,6 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
     const fapi2::buffer<uint16_t> i_regions,
     const fapi2::buffer<uint8_t> i_clock_types);
 
-fapi2::ReturnCode p9_sbe_common_check_checkstop_function(
-    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
-
 fapi2::ReturnCode p9_sbe_common_check_status(const fapi2::buffer<uint64_t>
         i_regions,
         const fapi2::buffer<uint64_t> i_clock_status,
