@@ -26,25 +26,32 @@
 #define TODTRACE_H
 
 #include <tracinterface.H>
+#include <initservice/isteps_trace.H>
 
 namespace TOD
 {
 
-extern trace_desc_t * g_trac_tod;
-
 // field traces -------------------
 
-#define TOD_TRAC(args...)  TRACFCOMP(TOD::g_trac_tod, args)
-#define TOD_ENTER(args...) TRACFCOMP(TOD::g_trac_tod, ENTER_MRK"" args)
-#define TOD_EXIT(args...)  TRACFCOMP(TOD::g_trac_tod, EXIT_MRK"" args)
-#define TOD_ERR(args...)   TRACFCOMP(TOD::g_trac_tod, ERR_MRK"" args)
-#define TOD_INF(args...)   TRACFCOMP(TOD::g_trac_tod, INFO_MRK"" args)
+#define TOD_TRAC(args...)  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                " TOD:: " args)
+#define TOD_ENTER(args...) TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                ENTER_MRK" TOD:: " args)
+#define TOD_EXIT(args...)  TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                EXIT_MRK" TOD:: " args)
+#define TOD_ERR(args...)   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                ERR_MRK" TOD:: " args)
+#define TOD_INF(args...)   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                INFO_MRK" TOD:: " args)
 
 // debug traces -------------------
 
-#define TOD_DTRAC(args...)  TRACDCOMP(TOD::g_trac_tod, args)
-#define TOD_DENTER(args...) TRACDCOMP(TOD::g_trac_tod, ENTER_MRK"" args)
-#define TOD_DEXIT(args...)  TRACDCOMP(TOD::g_trac_tod, EXIT_MRK"" args)
+#define TOD_DTRAC(args...)  TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                " TOD:: " args)
+#define TOD_DENTER(args...) TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                ENTER_MRK" TOD:: " args)
+#define TOD_DEXIT(args...)  TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,\
+                                EXIT_MRK" TOD:: " args)
 
 }
 

@@ -25,10 +25,4 @@
 #ifndef TOD_INIT_H
 #define TOD_INIT_H
 
-namespace   TOD
-{
-    void * call_tod_setup(void *dummy);
-    void * call_tod_init(void *dummy);
-};
-
 #endif
