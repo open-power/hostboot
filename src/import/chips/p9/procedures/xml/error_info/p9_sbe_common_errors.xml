@@ -81,12 +81,5 @@
     <description>sl_thold status not matching the expected value in clock start stop sequence</description>
     <ffdc>READ_CLK_SL</ffdc>
   </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_READ_ALL_CHECKSTOP_ERR</rc>
-    <description>Read and or all Checkstop error</description>
-    <ffdc>READ_ALL_CHECKSTOP</ffdc>
-  </hwpError> 
-  <!-- ******************************************************************** -->
+  <!-- ******************************************************************** --> 
 </hwpErrors>
