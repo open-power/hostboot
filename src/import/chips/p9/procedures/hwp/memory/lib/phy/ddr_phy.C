@@ -52,6 +52,7 @@
 #include <lib/utils/find.H>
 #include <lib/utils/dump_regs.H>
 #include <lib/utils/scom.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;
@@ -587,6 +588,14 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
+
+        // No point in bothering if we don't have any DIMM
+        if (mss::count_dimm(p) == 0)
+        {
+            FAPI_INF("No DIMM on %s, not running phy_scominit", mss::c_str(p));
+            continue;
+        }
+
         // The following registers must be configured to the correct operating environment:
 
         // Section 5.2.1.3 PC Rank Pair 0 on page 177
