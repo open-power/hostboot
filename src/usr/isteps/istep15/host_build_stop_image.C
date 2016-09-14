@@ -139,8 +139,8 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     uint32_t    l_rc        =   0;
     uint32_t    l_failAddr  =   0;
     //Register Values
-    uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR) ;
-    uint64_t    l_lpcrVal   =   cpu_spr_value( CPU_SPR_LPCR);
+    uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR);
+    uint64_t    l_lpcrVal   =   cpu_spr_value(CPU_SPR_LPCR);
 
     // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
     //  and 23.7.3.5 - 6 in Murano Book 4

@@ -81,6 +81,11 @@ struct PIR_t
         return word < r.word;
     }
 
+    bool operator== (const PIR_t& rhs)
+    {
+        return (word == rhs.word);
+    }
+
     // Some more handy constants
     enum
     {

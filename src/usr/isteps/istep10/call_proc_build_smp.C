@@ -36,8 +36,9 @@
 #include    <targeting/common/target.H>
 #include    <pbusLinkSvc.H>
 
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
+#include    <fapi2/target.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <intr/interrupt.H>
 
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
@@ -58,9 +59,6 @@ void* call_proc_build_smp (void *io_pArgs)
 
     IStepError l_StepError;
 
-    //@TODO RTC:150562 - Long term the INTRRP will set the BARs. This will
-    //                 be signaled via the INTRP::enablePsiIntr() function call
-    //                 and the INTRP will set this BAR like all the others
     errlHndl_t  l_errl  =   NULL;
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
@@ -139,6 +137,16 @@ void* call_proc_build_smp (void *io_pArgs)
                           ERR_MRK"Error enabling FSP BAR");
                 break;
             }
+
+            //Enable PSIHB Interrupts for slave proc
+            l_errl = INTR::enablePsiIntr(curproc);
+            if(l_errl)
+            {
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(curproc).addToLog( l_errl );
+                break;
+            }
+
         }
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>

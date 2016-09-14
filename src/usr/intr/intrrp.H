@@ -98,9 +98,7 @@ namespace INTR
             IntrRp() :
                 iv_msgQ(NULL),
                 iv_baseAddr(0),
-                iv_masterCpu(0),
-                iv_psiHbBaseAddr(NULL),
-                iv_psiHbEsbBaseAddr(NULL) {}
+                iv_masterCpu(0) {}
 
             /**
              * Destructor
@@ -179,9 +177,11 @@ namespace INTR
                 PSI_BRIDGE_BAR_ENABLE = 0x0000000000000001ULL,
                 PSI_BRIDGE_ENABLE_CEC_INTERRUPT = 0x1000000000000000ULL,
                 PSI_BRIDGE_ESB_BAR_SCOM_ADDR = 0x05012916,
+                PSI_BRIDGE_ENABLE_LSI_INTR_REMOTE = 0x0000000000000000ULL,
 
                 //PSI Host Bridge ESB Constants
                 PSI_BRIDGE_ESB_BAR_VALID = 0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_NOTIFY_VALID = 0x0000000000000001ULL,
                 PSI_BRIDGE_ESB_OFF_OFFSET = 0xD00,
                 PSI_BRIDGE_ESB_RESET_OFFSET = 0XC00,
                 PSI_BRIDGE_PSU_DOORBELL_REG = 0x000D0063,
@@ -194,6 +194,7 @@ namespace INTR
                 XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET =
                          XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET/sizeof(uint64_t),
                 XIVE_IC_THREAD0_ENABLE = 0x8000000000000000ULL,
+                XIVE_IC_ESB_LSI_TRIGGER_PAGE_OFFSET = 0x2000,
                 XIVE_IC_ESB_EOI_OFFSET = 0x3000,
                 XIVE_IC_LSI_EOI_OFFSET =
                                         XIVE_IC_ESB_EOI_OFFSET/sizeof(uint64_t),
@@ -279,7 +280,7 @@ namespace INTR
                 uint64_t dmaupaddr; //DMA Upper Address Register          - 0x50
                 uint64_t icr;      //Interrupt Control Register           - 0x58
                 uint64_t esbciaddr; //ESB CI Base Address                 - 0x60
-                uint64_t esbnotifaddr; //ESB Notification Address         - 0x68
+                uint64_t esbnotifyaddr; //ESB Notification Address        - 0x68
                 uint64_t ivtofforig; //IVT Offset Origin Register         - 0x70
                 uint64_t lsiintlevel; //LSI Int Level Register (lab use)  - 0x78
                 uint64_t lsiintstatus; //LSI Interrupt Status register    - 0x80
@@ -355,6 +356,20 @@ namespace INTR
 
             };
 
+            struct intr_hdlr_t
+            {
+                TARGETING::Target     *proc;
+                PSIHB_SW_INTERFACES_t *psiHbBaseAddr;
+                uint64_t              *psiHbEsbBaseAddr;
+                uint64_t              *xiveIcBarAddr;
+
+                intr_hdlr_t():  proc(NULL), psiHbBaseAddr(NULL),
+                                   psiHbEsbBaseAddr(NULL) {}
+                intr_hdlr_t(TARGETING::Target *i_target)  :
+                                   proc(i_target), psiHbBaseAddr(NULL),
+                                   psiHbEsbBaseAddr(NULL) {}
+            };
+
             enum
             {
                 CPU_WAKEUP_SECONDS = 1,
@@ -365,21 +380,26 @@ namespace INTR
 
             typedef std::map<ext_intr_t,intr_response_t> Registry_t;
             typedef std::vector<PIR_t> CpuList_t;
-            typedef std::vector<TARGETING::Target *> ChipList_t;
-            typedef  std::vector<ISNvalue_t> ISNList_t;
+            typedef std::vector<intr_hdlr_t *> ChipList_t;
+            typedef std::vector<ISNvalue_t> ISNList_t;
+            typedef std::vector<uint8_t> MaskList_t;
+            typedef std::vector< std::pair<PIR_t,ext_intr_t> >PendingIntrList_t;
 
             msg_q_t     iv_msgQ;        //!< Kernel Interrupt message queue
             Registry_t  iv_registry;    //!< registered interrupt type
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
 
-            PSIHB_SW_INTERFACES_t *iv_psiHbBaseAddr; //INTR PSIHB regs base addr
-            uint64_t    *iv_psiHbEsbBaseAddr; //INTR PSIHB ESB regs base addr
+            intr_hdlr_t *iv_masterHdlr; //!< Master cpu interrupt handler
             uint64_t    *iv_xiveIcBarAddress; //XIVE Controller regs base addr
             uint64_t    *iv_xiveTmBar1Address; //Xive Thread mgmt bar reg 1 addr
             CpuList_t   iv_cpuList;     //!< Other CPU chips
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
+            MaskList_t  iv_maskList;    //!< List of interrput sources which
+                                        //   are masked
+            PendingIntrList_t iv_pendingIntr; //!< List of pending interrupts
+                                              // That haven't been EOI'ed
 
             typedef std::pair<uint64_t, msg_t*> IPI_Info_t;
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
@@ -442,8 +462,10 @@ namespace INTR
 
             /**
              * Enable hardware to reporting external interrupts
+             * @param[in] i_proc Proc handler for processor to enable
+             *                   interrupts for
              */
-            errlHndl_t enableInterrupts();
+            errlHndl_t enableInterrupts(intr_hdlr_t *i_proc) ;
 
             /**
              * Disable hardware from reporting external interupts
@@ -473,7 +495,16 @@ namespace INTR
              * interrupts from the PSIHB to be sent to the HB kernel.
              * @return Errorlog from masking the sources
              */
-            errlHndl_t maskAllInterruptSources(void);
+            errlHndl_t maskAllInterruptSources();
+
+            /**
+             * Mask specific PSIHB Interrupt source
+             * @param[in] i_intr_source, The interrupt source to be masked
+             * @param[in] i_proc, The proc interrupt handler
+             * @return Errorlog from masking the source
+             */
+            errlHndl_t maskInterruptSource(uint8_t i_intr_source,
+                                           intr_hdlr_t *i_proc);
 
             /**
              * Mask specific PSIHB Interrupt source
@@ -485,16 +516,28 @@ namespace INTR
             /**
              * Unmask (enable) specific PSIHB Interrupt source
              * @param[in] i_intr_source, The interrupt source to be unmasked
+             * @param[in] i_proc, The proc interrupt handler to unmask the
+             *                   given interrupt source for
              * @return Errorlog from unmasking the source
              */
-            errlHndl_t unmaskInterruptSource(uint8_t i_intr_source);
+            errlHndl_t unmaskInterruptSource(uint8_t i_intr_source,
+                                             intr_hdlr_t *i_proc);
 
             /**
-             * Set all of the Interrupt BAR scom registers
+             * Set all of the Interrupt BAR scom registers specific
+             *   to the master chip.
              * @param[in] i_target, the Target.
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setInterruptBARs(TARGETING::Target * i_target);
+            errlHndl_t setMasterInterruptBARs(TARGETING::Target * i_target);
+
+            /**
+             * Set all of the Interrupt BAR scom registers common
+             *   to all the chips (procs)
+             * @param[in] i_proc, the interrupt handler for one chip
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setCommonInterruptBARs(intr_hdlr_t * i_proc);
 
             /**
              * Perform HW Functions to acknowledge Interrupt which will
@@ -505,9 +548,22 @@ namespace INTR
             /**
              * Send EOI (End of Interrupt) sequence
              * @param[in] i_intSource, interrupt source to perform EOI for
-             * @return Errorlog from DeviceWrite
+             * @param[in] i_pir, The PIR value for the proc where the
+             *      interrupt condtion occurred
+             * @return Errorlog from DeviceWriste
              */
-            errlHndl_t sendEOI(uint64_t& i_intSource);
+            errlHndl_t sendEOI(uint64_t& i_intSource, PIR_t& i_pir);
+
+            /**
+             * Route Interrupt to correct listener
+             * @param[in] i_proc, the proc intrp handler
+             * @param[in] i_type, the interrupt type
+             * @param[in] i_pir, the pir value for the proc the interrupt
+             *                   was seen on
+             */
+            void routeInterrupt(intr_hdlr_t* i_proc,
+                                ext_intr_t i_type,
+                                PIR_t& i_pir);
 
             /**
              * Handle Interrupt from PSU Source
@@ -515,48 +571,54 @@ namespace INTR
              *   - Clear Interrupt Condition
              *   - Issue EOI
              * @param[in] i_type, interrupt type encountered
+             * @param[in] i_proc, The proc interrupt handler for the proc
+             *                    the interrupt occurred on
+             * param[in]  i_pir, The PIR value for the proc the interrupt
+             *                    was seen on
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t handlePsuInterrupt(ext_intr_t i_type);
+            errlHndl_t handlePsuInterrupt(ext_intr_t i_type,
+                                          intr_hdlr_t* i_proc,
+                                          PIR_t& i_pir);
 
             /**
              * Set the PSI Host Bridge BAR scom register
-             * @param[in] i_target, the Target.
+             * @param[in] i_proc, the proc intrp handler
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setPsiHbBAR(TARGETING::Target * i_target);
+            errlHndl_t setPsiHbBAR(intr_hdlr_t* i_proc);
 
             /**
              * Set the PSI Host Bridge ESB BAR scom register
-             * @param[in] i_target, the Target.
+             * @param[in] i_proc, the proc intrp handler.
              * @param[in] i_enable, indicator to enable/disable the BAR
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setPsiHbEsbBAR(TARGETING::Target * i_target,
+            errlHndl_t setPsiHbEsbBAR(intr_hdlr_t* i_proc,
                                                 bool i_enable);
 
             /**
              * Set the XIVE Thread Management (TM) BAR1 scom register
-             * @param[in] i_target, the Target.
+             * @param[in] i_target, the Target
              * @return Errorlog from DeviceWrite
              */
             errlHndl_t setXiveIvpeTmBAR1(TARGETING::Target * i_target);
 
             /**
              * Set the XIVE Interrupt Controller (IC) BAR scom register
-             * @param[in] i_target, the Target.
+             * @param[in] i_proc, the proc intrp handler
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t setXiveIcBAR(TARGETING::Target * i_target);
+            errlHndl_t setXiveIcBAR(intr_hdlr_t* i_proc);
 
             /**
              * When in LSI mode the IC VPC flags and error, thus we
              * need to disable while we use, and enable after we clean
              * up
-             * @param[in] i_target, the Target.
+             * @param[in] i_proc, the proc intrp handler
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t disableVPCPullErr(TARGETING::Target * i_target);
+            errlHndl_t disableVPCPullErr(intr_hdlr_t* i_proc);
 
             /**
              * When in LSI mode the IC VPC flags and error, thus we
@@ -569,9 +631,26 @@ namespace INTR
 
             /**
              * Reset Interrupt Unit (both the XIVE and PSIHB Interrupt Units)
+             * @param[in] i_proc, the proc intrp handler
              * @return Errorlog from DeviceWrite
              */
-            errlHndl_t resetIntUnit();
+            errlHndl_t resetIntUnit(intr_hdlr_t* i_proc);
+
+            /**
+             * Setup structures, BAR Regs, Mask interrupts, and enable interrupt
+             * routing on non-master proc chip
+             * @param[in] i_target, the proc Target to enable
+             * @return Errorlog from enablement steps
+             */
+            errlHndl_t enableSlaveProcInterrupts(TARGETING::Target * i_target);
+
+            /**
+             * Set correct PSIHB Regs to route + enable LSI interrupts from
+             * non-master proc to correct address on master proc
+             * @param[in] i_proc, the proc intrp handler
+             * @return void
+             */
+            void enableSlaveProcInterruptRouting(intr_hdlr_t* i_proc);
 
             /**
              * Initialize the IRSCReg to enable PSI to present interrupts
