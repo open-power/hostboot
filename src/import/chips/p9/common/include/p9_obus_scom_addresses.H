@@ -239,6 +239,41 @@
 #include <p9_obus_scom_addresses_fixes.H>
 
 
+REG64( OBUS_FIR_ACTION0_REG                                    , RULL(0x09010C06), SH_UNT_OBUS     , SH_ACS_SCOM_RW   );
+REG64( OBUS_0_FIR_ACTION0_REG                                  , RULL(0x09010C06), SH_UNT_OBUS_0   , SH_ACS_SCOM_RW   );
+REG64( OBUS_3_FIR_ACTION0_REG                                  , RULL(0x0C010C06), SH_UNT_OBUS_3   , SH_ACS_SCOM_RW   );
+
+REG64( OBUS_FIR_ACTION1_REG                                    , RULL(0x09010C07), SH_UNT_OBUS     , SH_ACS_SCOM_RW   );
+REG64( OBUS_0_FIR_ACTION1_REG                                  , RULL(0x09010C07), SH_UNT_OBUS_0   , SH_ACS_SCOM_RW   );
+REG64( OBUS_3_FIR_ACTION1_REG                                  , RULL(0x0C010C07), SH_UNT_OBUS_3   , SH_ACS_SCOM_RW   );
+
+REG64( OBUS_FIR_MASK_REG                                       , RULL(0x09010C03), SH_UNT_OBUS     , SH_ACS_SCOM_RW   );
+REG64( OBUS_FIR_MASK_REG_AND                                   , RULL(0x09010C04), SH_UNT_OBUS     , SH_ACS_SCOM1_AND );
+REG64( OBUS_FIR_MASK_REG_OR                                    , RULL(0x09010C05), SH_UNT_OBUS     , SH_ACS_SCOM2_OR  );
+REG64( OBUS_0_FIR_MASK_REG                                     , RULL(0x09010C03), SH_UNT_OBUS_0   , SH_ACS_SCOM_RW   );
+REG64( OBUS_0_FIR_MASK_REG_AND                                 , RULL(0x09010C04), SH_UNT_OBUS_0   , SH_ACS_SCOM1_AND );
+REG64( OBUS_0_FIR_MASK_REG_OR                                  , RULL(0x09010C05), SH_UNT_OBUS_0   , SH_ACS_SCOM2_OR  );
+REG64( OBUS_3_FIR_MASK_REG                                     , RULL(0x0C010C03), SH_UNT_OBUS_3   , SH_ACS_SCOM_RW   );
+REG64( OBUS_3_FIR_MASK_REG_AND                                 , RULL(0x0C010C04), SH_UNT_OBUS_3   , SH_ACS_SCOM1_AND );
+REG64( OBUS_3_FIR_MASK_REG_OR                                  , RULL(0x0C010C05), SH_UNT_OBUS_3   , SH_ACS_SCOM2_OR  );
+
+REG64( OBUS_FIR_REG                                            , RULL(0x09010C00), SH_UNT_OBUS     , SH_ACS_SCOM_RW   );
+REG64( OBUS_FIR_REG_AND                                        , RULL(0x09010C01), SH_UNT_OBUS     , SH_ACS_SCOM1_AND );
+REG64( OBUS_FIR_REG_OR                                         , RULL(0x09010C02), SH_UNT_OBUS     , SH_ACS_SCOM2_OR  );
+REG64( OBUS_0_FIR_REG                                          , RULL(0x09010C00), SH_UNT_OBUS_0   , SH_ACS_SCOM_RW   );
+REG64( OBUS_0_FIR_REG_AND                                      , RULL(0x09010C01), SH_UNT_OBUS_0   , SH_ACS_SCOM1_AND );
+REG64( OBUS_0_FIR_REG_OR                                       , RULL(0x09010C02), SH_UNT_OBUS_0   , SH_ACS_SCOM2_OR  );
+REG64( OBUS_3_FIR_REG                                          , RULL(0x0C010C00), SH_UNT_OBUS_3   , SH_ACS_SCOM_RW   );
+REG64( OBUS_3_FIR_REG_AND                                      , RULL(0x0C010C01), SH_UNT_OBUS_3   , SH_ACS_SCOM1_AND );
+REG64( OBUS_3_FIR_REG_OR                                       , RULL(0x0C010C02), SH_UNT_OBUS_3   , SH_ACS_SCOM2_OR  );
+
+REG64( OBUS_FIR_WOF_REG                                        , RULL(0x09010C08), SH_UNT_OBUS     ,
+       SH_ACS_SCOM_WCLRREG );
+REG64( OBUS_0_FIR_WOF_REG                                      , RULL(0x09010C08), SH_UNT_OBUS_0   ,
+       SH_ACS_SCOM_WCLRREG );
+REG64( OBUS_3_FIR_WOF_REG                                      , RULL(0x0C010C08), SH_UNT_OBUS_3   ,
+       SH_ACS_SCOM_WCLRREG );
+
 REG64( OBUS_LL0_IOOL_CONFIG                                    , RULL(0x0901080A), SH_UNT_OBUS     , SH_ACS_SCOM      );
 REG64( OBUS_0_LL0_IOOL_CONFIG                                  , RULL(0x0901080A), SH_UNT_OBUS_0   , SH_ACS_SCOM      );
 
@@ -250,6 +285,11 @@ REG64( OBUS_0_LL0_IOOL_DLL_STATUS                              , RULL(0x09010828
 
 REG64( OBUS_LL0_IOOL_ERR_INJ_LFSR                              , RULL(0x0901081B), SH_UNT_OBUS     , SH_ACS_SCOM      );
 REG64( OBUS_0_LL0_IOOL_ERR_INJ_LFSR                            , RULL(0x0901081B), SH_UNT_OBUS_0   , SH_ACS_SCOM      );
+
+REG64( OBUS_LL0_IOOL_FIR_WOF_REG                               , RULL(0x09010808), SH_UNT_OBUS     ,
+       SH_ACS_SCOM_WCLRREG );
+REG64( OBUS_0_LL0_IOOL_FIR_WOF_REG                             , RULL(0x09010808), SH_UNT_OBUS_0   ,
+       SH_ACS_SCOM_WCLRREG );
 
 REG64( OBUS_LL0_IOOL_LAT_MEASURE                               , RULL(0x0901080E), SH_UNT_OBUS     , SH_ACS_SCOM      );
 REG64( OBUS_0_LL0_IOOL_LAT_MEASURE                             , RULL(0x0901080E), SH_UNT_OBUS_0   , SH_ACS_SCOM      );
@@ -366,6 +406,9 @@ REG64( OBUS_3_LL3_IOOL_CONTROL                                 , RULL(0x0C01080B
 REG64( OBUS_3_LL3_IOOL_DLL_STATUS                              , RULL(0x0C010828), SH_UNT_OBUS_3   , SH_ACS_SCOM_RO   );
 
 REG64( OBUS_3_LL3_IOOL_ERR_INJ_LFSR                            , RULL(0x0C01081B), SH_UNT_OBUS_3   , SH_ACS_SCOM      );
+
+REG64( OBUS_3_LL3_IOOL_FIR_WOF_REG                             , RULL(0x0C010808), SH_UNT_OBUS_3   ,
+       SH_ACS_SCOM_WCLRREG );
 
 REG64( OBUS_3_LL3_IOOL_LAT_MEASURE                             , RULL(0x0C01080E), SH_UNT_OBUS_3   , SH_ACS_SCOM      );
 
@@ -7078,6 +7121,13 @@ REG64( OBUS_RX0_RX_GLBSM_CNTL3_EO_PG                           , RULL(0x800AE800
 REG64( OBUS_0_RX0_RX_GLBSM_CNTL3_EO_PG                         , RULL(0x800AE80009010C3F), SH_UNT_OBUS_0   ,
        SH_ACS_SCOM      );
 REG64( OBUS_3_RX0_RX_GLBSM_CNTL3_EO_PG                         , RULL(0x800AE8000C010C3F), SH_UNT_OBUS_3   ,
+       SH_ACS_SCOM      );
+
+REG64( OBUS_RX0_RX_GLBSM_CNTL4_EO_PG                           , RULL(0x800AF00009010C3F), SH_UNT_OBUS     ,
+       SH_ACS_SCOM      );
+REG64( OBUS_0_RX0_RX_GLBSM_CNTL4_EO_PG                         , RULL(0x800AF00009010C3F), SH_UNT_OBUS_0   ,
+       SH_ACS_SCOM      );
+REG64( OBUS_3_RX0_RX_GLBSM_CNTL4_EO_PG                         , RULL(0x800AF0000C010C3F), SH_UNT_OBUS_3   ,
        SH_ACS_SCOM      );
 
 REG64( OBUS_RX0_RX_GLBSM_CNTLX1_EO_PG                          , RULL(0x800AB00009010C3F), SH_UNT_OBUS     ,
