@@ -2189,69 +2189,14 @@ p9_xip_get_element(void* i_image,
     int rc;
     P9XipItem item;
 
-    do
+    rc = p9_xip_find(i_image, i_id, &item);
+
+    if (rc)
     {
-        rc = p9_xip_find(i_image, i_id, &item);
-
-        if (rc)
-        {
-            break;
-        }
-
-        if ((item.iv_elements != 0) && (i_index >= item.iv_elements))
-        {
-            rc = TRACE_ERROR(P9_XIP_BOUNDS_ERROR);
-            break;
-        }
-
-        switch (item.iv_type)
-        {
-            case P9_XIP_UINT8:
-                *o_data = ((uint8_t*)(item.iv_imageData))[i_index];
-                break;
-
-            case P9_XIP_UINT16:
-                *o_data = htobe16(((uint16_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            case P9_XIP_UINT32:
-                *o_data = htobe32(((uint32_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            case P9_XIP_UINT64:
-                *o_data = htobe64(((uint64_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            case P9_XIP_INT8:
-                *o_data = ((int8_t*)(item.iv_imageData))[i_index];
-                break;
-
-            case P9_XIP_INT16:
-                *o_data = htobe16(((int16_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            case P9_XIP_INT32:
-                *o_data = htobe32(((int32_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            case P9_XIP_INT64:
-                *o_data = htobe64(((int64_t*)(item.iv_imageData))[i_index]);
-                break;
-
-            default:
-                rc = TRACE_ERROR(P9_XIP_TYPE_ERROR);
-                break;
-        }
-
-        if (rc)
-        {
-            break;
-        }
-
+        return rc;
     }
-    while (0);
 
-    return rc;
+    return p9_xip_get_item(&item, o_data, i_index);
 }
 
 
