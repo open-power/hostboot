@@ -99,9 +99,9 @@
     </attribute>
     <attribute>
         <id>FREQ_PB_MHZ</id>
-        <default>0x7D0</default>
+        <default>0x960</default>
     </attribute>
-     <attribute>
+    <attribute>
         <id>PAYLOAD_BASE</id>
         <!-- Value of 0x0 for standalone systems, no payload to start -->
         <default>0x0</default>
@@ -124,6 +124,10 @@
     </attribute>
     <attribute>
         <id>ISTEP_MODE</id>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
+        <id>IS_SIMULATION</id>
         <default>0x1</default>
     </attribute>
     <attribute>
