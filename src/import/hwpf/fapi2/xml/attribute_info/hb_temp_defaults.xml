@@ -78,6 +78,9 @@
           <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
           <default>3</default>
      </attribute>
+     <attribute>
+          <id>ATTR_SBE_SYS_CONFIG</id>
+     </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
