@@ -49,13 +49,6 @@
 //FIXREG64_FLD( PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE, 24, SH_UNT, SH_ACS_SCOM, SH_FLD_FBC_WITH_TM_QUIESCE,
 //              12);
 
-//static const uint64_t SH_UNT_PERV_CBS_ENVSTAT = 514;
-static const uint64_t SH_FLD_C4_TEST_ENABLE = 32000;
-static const uint64_t SH_FLD_C4_CARD_TEST_BSC = 32001;
-static const uint64_t SH_FLD_C4_VDN_GPOOD = 32002;
-static const uint64_t SH_FLD_C4_FSI_IN_ENA = 32003;
-static const uint64_t SH_FLD_C4_CHIP_MASTER = 32004;
-static const uint64_t SH_FLD_C4_SMD = 32005;
 static const uint64_t SH_FLD_CLOCK_REGION_ALL_UNITS = 32006;
 static const uint64_t SH_FLD_CLOCK_REGION_ALL_UNITS_LEN = 32007;
 static const uint64_t SH_FLD_SEL_THOLD_ALL = 32008;
@@ -69,24 +62,6 @@ static const uint64_t SH_FLD_SCAN_REGION_ALL_UNITS_LEN = 32015;
 static const uint64_t SH_FLD_SCAN_ALL_TYPES = 32016;
 static const uint64_t SH_FLD_SCAN_ALL_TYPES_LEN = 32017;
 
-REG64_FLD( PERV_CBS_ENVSTAT_C4_TEST_ENABLE                        , 0   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_TEST_ENABLE );
-REG64_FLD( PERV_CBS_ENVSTAT_C4_CARD_TEST_BSC                      , 1   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_CARD_TEST_BSC );
-REG64_FLD( PERV_CBS_ENVSTAT_C4_VDN_GPOOD                          , 2   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_VDN_GPOOD );
-REG64_FLD( PERV_CBS_ENVSTAT_C4_FSI_IN_ENA                         , 3   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_FSI_IN_ENA );
-REG64_FLD( PERV_CBS_ENVSTAT_C4_CHIP_MASTER                        , 4   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_CHIP_MASTER );
-REG64_FLD( PERV_CBS_ENVSTAT_C4_SMD                                , 5   , SH_UNT_PERV_CBS_ENVSTAT     ,
-           SH_ACS_SCOM     ,
-           SH_FLD_C4_SMD );
 
 REG64_FLD( PERV_1_CLK_REGION_CLOCK_REGION_ALL_UNITS           , 4   , SH_UNT_PERV_1   , SH_ACS_SCOM     ,
            SH_FLD_CLOCK_REGION_ALL_UNITS );

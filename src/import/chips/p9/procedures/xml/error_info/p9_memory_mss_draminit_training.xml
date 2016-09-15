@@ -113,7 +113,7 @@
   <scomRegister>MCA_DDRPHY_APB_FIR_ERR1_P0</scomRegister>
   <scomRegister>MCA_DDRPHY_APB_FIR_ERR2_P0</scomRegister>
   <scomRegister>MCA_DDRPHY_APB_FIR_ERR3_P0</scomRegister>
-  <scomRegister>MCA_PHY0_DDRPHY_FIR_REG</scomRegister>
+  <scomRegister>MCA_IOM_PHY0_DDRPHY_FIR_REG</scomRegister>
 </registerFfdc>
 
 <hwpError>

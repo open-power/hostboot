@@ -119,7 +119,6 @@ const uint32_t C_RAM_CTRL_INSTRUCTION_LEN          = 32;
 const uint32_t C_RAM_STATUS_ACCESS_DURING_RECOVERY = 0;
 const uint32_t C_RAM_STATUS_COMPLETION             = 1;
 const uint32_t C_RAM_STATUS_EXCEPTION              = 2;
-const uint32_t C_RAM_STATUS_LSU_EMPTY              = 3;
 
 //-----------------------------------------------------------------------------------
 // Function definitions
@@ -198,7 +197,7 @@ fapi2::ReturnCode RamCore::ram_setup()
     FAPI_TRY(fapi2::putScom(iv_target, C_SPR_MODE, l_data));
     l_data.flush<0>();
     FAPI_TRY(fapi2::getScom(iv_target, C_SCOMC, l_data));
-    l_data.insertFromRight<C_SCOMC_MODE, C_SCOMC_MODE_LEN>(0);
+    l_data.insertFromRight<C_SCOMC_MODE_CX, C_SCOMC_MODE_CX_LEN>(0);
     FAPI_TRY(fapi2::putScom(iv_target, C_SCOMC, l_data));
 
     //2.create mtsprd<gpr0> opcode, ram into thread to get GPR0
@@ -248,7 +247,7 @@ fapi2::ReturnCode RamCore::ram_cleanup()
     FAPI_TRY(fapi2::putScom(iv_target, C_SPR_MODE, l_data));
     l_data.flush<0>();
     FAPI_TRY(fapi2::getScom(iv_target, C_SCOMC, l_data));
-    l_data.insertFromRight<C_SCOMC_MODE, C_SCOMC_MODE_LEN>(0);
+    l_data.insertFromRight<C_SCOMC_MODE_CX, C_SCOMC_MODE_CX_LEN>(0);
     FAPI_TRY(fapi2::putScom(iv_target, C_SCOMC, l_data));
 
     // restore GPR1

@@ -104,6 +104,27 @@ REG64_FLD( C_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIOLATION , 33  , SH
 REG64_FLD( C_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER , 34  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER );
 
+REG64_FLD( EQ_ASSIST_INTERRUPT_REG_ATTN                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
+REG64_FLD( EQ_ASSIST_INTERRUPT_REG_RECOV                           , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+REG64_FLD( EQ_ASSIST_INTERRUPT_REG_XSTOP                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
+
+REG64_FLD( EX_ASSIST_INTERRUPT_REG_ATTN                            , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
+REG64_FLD( EX_ASSIST_INTERRUPT_REG_RECOV                           , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+REG64_FLD( EX_ASSIST_INTERRUPT_REG_XSTOP                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
+
+REG64_FLD( C_ASSIST_INTERRUPT_REG_ATTN                             , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
+REG64_FLD( C_ASSIST_INTERRUPT_REG_RECOV                            , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+REG64_FLD( C_ASSIST_INTERRUPT_REG_XSTOP                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
+
 REG64_FLD( EQ_ATOMIC_LOCK_MASK_LATCH_REG_MASK                      , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MASK       );
 REG64_FLD( EQ_ATOMIC_LOCK_MASK_LATCH_REG_MASK_LEN                  , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -151,6 +172,15 @@ REG64_FLD( C_ATOMIC_LOCK_REG_ACTIVITY                              , 8   , SH_UN
            SH_FLD_ACTIVITY   );
 REG64_FLD( C_ATOMIC_LOCK_REG_ACTIVITY_LEN                          , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_ACTIVITY_LEN );
+
+REG64_FLD( EQ_ATTN_INTERRUPT_REG_ATTN                              , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
+
+REG64_FLD( EX_ATTN_INTERRUPT_REG_ATTN                              , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
+
+REG64_FLD( C_ATTN_INTERRUPT_REG_ATTN                               , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ATTN       );
 
 REG64_FLD( EQ_BIST_TC_START_TEST_DC                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_TC_START_TEST_DC );
@@ -647,6 +677,10 @@ REG64_FLD( EX_CME_LCL_DBG_TRACE_MODE_SEL                           , 10  , SH_UN
            SH_FLD_TRACE_MODE_SEL );
 REG64_FLD( EX_CME_LCL_DBG_TRACE_MODE_SEL_LEN                       , 2   , SH_UNT_EX       , SH_ACS_PPE2     ,
            SH_FLD_TRACE_MODE_SEL_LEN );
+REG64_FLD( EX_CME_LCL_DBG_RESERVED12_15                            , 12  , SH_UNT_EX       , SH_ACS_PPE2     ,
+           SH_FLD_RESERVED12_15 );
+REG64_FLD( EX_CME_LCL_DBG_RESERVED12_15_LEN                        , 4   , SH_UNT_EX       , SH_ACS_PPE2     ,
+           SH_FLD_RESERVED12_15_LEN );
 REG64_FLD( EX_CME_LCL_DBG_FIR_TRIGGER                              , 16  , SH_UNT_EX       , SH_ACS_PPE2     ,
            SH_FLD_FIR_TRIGGER );
 REG64_FLD( EX_CME_LCL_DBG_MIB_GPIO                                 , 17  , SH_UNT_EX       , SH_ACS_PPE2     ,
@@ -657,6 +691,8 @@ REG64_FLD( EX_CME_LCL_DBG_TRACE_DATA_SEL                           , 20  , SH_UN
            SH_FLD_TRACE_DATA_SEL );
 REG64_FLD( EX_CME_LCL_DBG_TRACE_DATA_SEL_LEN                       , 4   , SH_UNT_EX       , SH_ACS_PPE2     ,
            SH_FLD_TRACE_DATA_SEL_LEN );
+REG64_FLD( EX_CME_LCL_DBG_HALT_INPUT                               , 24  , SH_UNT_EX       , SH_ACS_PPE2     ,
+           SH_FLD_HALT_INPUT );
 
 REG64_FLD( EQ_CME_LCL_EIMR_INTERRUPT_MASK                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_INTERRUPT_MASK );
@@ -866,6 +902,16 @@ REG64_FLD( EX_CME_LCL_EISR_RESERVED_42_43                          , 42  , SH_UN
 REG64_FLD( EX_CME_LCL_EISR_RESERVED_42_43_LEN                      , 2   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_RESERVED_42_43_LEN );
 
+REG64_FLD( EQ_CME_LCL_EISTR_INTERRUPT_STATUS                       , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_INTERRUPT_STATUS );
+REG64_FLD( EQ_CME_LCL_EISTR_INTERRUPT_STATUS_LEN                   , 44  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_INTERRUPT_STATUS_LEN );
+
+REG64_FLD( EX_CME_LCL_EISTR_INTERRUPT_STATUS                       , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_INTERRUPT_STATUS );
+REG64_FLD( EX_CME_LCL_EISTR_INTERRUPT_STATUS_LEN                   , 44  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_INTERRUPT_STATUS_LEN );
+
 REG64_FLD( EQ_CME_LCL_EITR_INTERRUPT_TYPE                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_INTERRUPT_TYPE );
 REG64_FLD( EQ_CME_LCL_EITR_INTERRUPT_TYPE_LEN                      , 44  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
@@ -903,21 +949,6 @@ REG64_FLD( EX_CME_LCL_ICSR_COMM_SEND                               , 0   , SH_UN
            SH_FLD_COMM_SEND  );
 REG64_FLD( EX_CME_LCL_ICSR_COMM_SEND_LEN                           , 32  , SH_UNT_EX       , SH_ACS_PPE      ,
            SH_FLD_COMM_SEND_LEN );
-
-REG64_FLD( EX_CME_LCL_LMCR_RESET_IMPRECISE_QERR                    , 32  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_RESET_IMPRECISE_QERR );
-REG64_FLD( EX_CME_LCL_LMCR_SET_ECC_INJECT_ERR                      , 33  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_SET_ECC_INJECT_ERR );
-REG64_FLD( EX_CME_LCL_LMCR_C0_HALTED_STOP_OVERRIDE_DISABLE         , 34  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_C0_HALTED_STOP_OVERRIDE_DISABLE );
-REG64_FLD( EX_CME_LCL_LMCR_C1_HALTED_STOP_OVERRIDE_DISABLE         , 35  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_C1_HALTED_STOP_OVERRIDE_DISABLE );
-REG64_FLD( EX_CME_LCL_LMCR_FENCE_EISR                              , 36  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_FENCE_EISR );
-REG64_FLD( EX_CME_LCL_LMCR_SPECIAL_WAKEUP_DONE_OVERRIDE            , 37  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_SPECIAL_WAKEUP_DONE_OVERRIDE );
-REG64_FLD( EX_CME_LCL_LMCR_PC_DISABLE_DROOP                        , 38  , SH_UNT_EX       , SH_ACS_PPE      ,
-           SH_FLD_PC_DISABLE_DROOP );
 
 REG64_FLD( EX_CME_LCL_PECESR0_PECE_C_N_T0                          , 0   , SH_UNT_EX       , SH_ACS_PPE      ,
            SH_FLD_PECE_C_N_T0 );
@@ -1392,96 +1423,6 @@ REG64_FLD( EX_CME_SCOM_FLAGS_DATA                                  , 0   , SH_UN
 REG64_FLD( EX_CME_SCOM_FLAGS_DATA_LEN                              , 32  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_DATA_LEN   );
 
-REG64_FLD( EQ_CME_SCOM_FWMR_PMCR_OVERRIDE_EN                       , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PMCR_OVERRIDE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_PSCR_OVERRIDE_EN                       , 1   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PSCR_OVERRIDE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_PMSR_OVERRIDE_EN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PMSR_OVERRIDE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_BCESCR_OVERRIDE_EN                     , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_BCESCR_OVERRIDE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_IDR_LCL_SAMPLE_EN                      , 4   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_IDR_LCL_SAMPLE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_VDM_LCL_SAMPLE_EN                      , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_VDM_LCL_SAMPLE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_FREQ_LCL_SAMPLE_EN                     , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_FREQ_LCL_SAMPLE_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_LOCK_PCB_ON_ERR                        , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_LOCK_PCB_ON_ERR );
-REG64_FLD( EQ_CME_SCOM_FWMR_QUEUED_WR_EN                           , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_QUEUED_WR_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_QUEUED_RD_EN                           , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_QUEUED_RD_EN );
-REG64_FLD( EQ_CME_SCOM_FWMR_MASK_PURGE_INTERFACE                   , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_MASK_PURGE_INTERFACE );
-REG64_FLD( EQ_CME_SCOM_FWMR_IGNORE_PECE                            , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_IGNORE_PECE );
-REG64_FLD( EQ_CME_SCOM_FWMR_STOP_OVERRIDE_MODE                     , 16  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP_OVERRIDE_MODE );
-REG64_FLD( EQ_CME_SCOM_FWMR_STOP_ACTIVE_MASK                       , 17  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP_ACTIVE_MASK );
-REG64_FLD( EQ_CME_SCOM_FWMR_AUTO_STOP1_DISABLE                     , 18  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AUTO_STOP1_DISABLE );
-REG64_FLD( EQ_CME_SCOM_FWMR_STOP1_ACTIVE_ENABLE                    , 19  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP1_ACTIVE_ENABLE );
-REG64_FLD( EQ_CME_SCOM_FWMR_FENCE_EISR                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_FENCE_EISR );
-REG64_FLD( EQ_CME_SCOM_FWMR_PC_DISABLE_DROOP                       , 21  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PC_DISABLE_DROOP );
-REG64_FLD( EQ_CME_SCOM_FWMR_SPARE_22_23                            , 22  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_SPARE_22_23 );
-REG64_FLD( EQ_CME_SCOM_FWMR_SPARE_22_23_LEN                        , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_SPARE_22_23_LEN );
-REG64_FLD( EQ_CME_SCOM_FWMR_AVG_FREQ_TSEL                          , 24  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AVG_FREQ_TSEL );
-REG64_FLD( EQ_CME_SCOM_FWMR_AVG_FREQ_TSEL_LEN                      , 4   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AVG_FREQ_TSEL_LEN );
-
-REG64_FLD( EX_CME_SCOM_FWMR_PMCR_OVERRIDE_EN                       , 0   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PMCR_OVERRIDE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_PSCR_OVERRIDE_EN                       , 1   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PSCR_OVERRIDE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_PMSR_OVERRIDE_EN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PMSR_OVERRIDE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_BCESCR_OVERRIDE_EN                     , 3   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_BCESCR_OVERRIDE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_IDR_LCL_SAMPLE_EN                      , 4   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_IDR_LCL_SAMPLE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_VDM_LCL_SAMPLE_EN                      , 5   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_VDM_LCL_SAMPLE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_FREQ_LCL_SAMPLE_EN                     , 6   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_FREQ_LCL_SAMPLE_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_LOCK_PCB_ON_ERR                        , 7   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_LOCK_PCB_ON_ERR );
-REG64_FLD( EX_CME_SCOM_FWMR_QUEUED_WR_EN                           , 8   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_QUEUED_WR_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_QUEUED_RD_EN                           , 9   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_QUEUED_RD_EN );
-REG64_FLD( EX_CME_SCOM_FWMR_MASK_PURGE_INTERFACE                   , 10  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_MASK_PURGE_INTERFACE );
-REG64_FLD( EX_CME_SCOM_FWMR_IGNORE_PECE                            , 11  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_IGNORE_PECE );
-REG64_FLD( EX_CME_SCOM_FWMR_STOP_OVERRIDE_MODE                     , 16  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP_OVERRIDE_MODE );
-REG64_FLD( EX_CME_SCOM_FWMR_STOP_ACTIVE_MASK                       , 17  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP_ACTIVE_MASK );
-REG64_FLD( EX_CME_SCOM_FWMR_AUTO_STOP1_DISABLE                     , 18  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AUTO_STOP1_DISABLE );
-REG64_FLD( EX_CME_SCOM_FWMR_STOP1_ACTIVE_ENABLE                    , 19  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_STOP1_ACTIVE_ENABLE );
-REG64_FLD( EX_CME_SCOM_FWMR_FENCE_EISR                             , 20  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_FENCE_EISR );
-REG64_FLD( EX_CME_SCOM_FWMR_PC_DISABLE_DROOP                       , 21  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_PC_DISABLE_DROOP );
-REG64_FLD( EX_CME_SCOM_FWMR_SPARE_22_23                            , 22  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_SPARE_22_23 );
-REG64_FLD( EX_CME_SCOM_FWMR_SPARE_22_23_LEN                        , 2   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_SPARE_22_23_LEN );
-REG64_FLD( EX_CME_SCOM_FWMR_AVG_FREQ_TSEL                          , 24  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AVG_FREQ_TSEL );
-REG64_FLD( EX_CME_SCOM_FWMR_AVG_FREQ_TSEL_LEN                      , 4   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
-           SH_FLD_AVG_FREQ_TSEL_LEN );
-
 REG64_FLD( EQ_CME_SCOM_IDCR_DROPOUT_EVENT_THRESHOLD                , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_DROPOUT_EVENT_THRESHOLD );
 REG64_FLD( EQ_CME_SCOM_IDCR_DROPOUT_EVENT_THRESHOLD_LEN            , 24  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
@@ -1576,9 +1517,25 @@ REG64_FLD( EQ_CME_SCOM_LFIR_BCE_ERROR                              , 10  , SH_UN
            SH_FLD_BCE_ERROR  );
 REG64_FLD( EQ_CME_SCOM_LFIR_SPARE11                                , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_SPARE11    );
-REG64_FLD( EQ_CME_SCOM_LFIR_FIR_PARITY_ERR_DUP                     , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EQ_CME_SCOM_LFIR_SPARE12                                , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE12    );
+REG64_FLD( EQ_CME_SCOM_LFIR_C0_IVRM_DROPOUT                        , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_C0_IVRM_DROPOUT );
+REG64_FLD( EQ_CME_SCOM_LFIR_C1_IVRM_DROPOUT                        , 14  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_C1_IVRM_DROPOUT );
+REG64_FLD( EQ_CME_SCOM_LFIR_CACHE_IVRM_DROPOUT                     , 15  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_CACHE_IVRM_DROPOUT );
+REG64_FLD( EQ_CME_SCOM_LFIR_EXTREME_DROOP_ERR                      , 16  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_EXTREME_DROOP_ERR );
+REG64_FLD( EQ_CME_SCOM_LFIR_LARGE_DROOP_ERR                        , 17  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_LARGE_DROOP_ERR );
+REG64_FLD( EQ_CME_SCOM_LFIR_SMALL_DROOP_ERR                        , 18  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SMALL_DROOP_ERR );
+REG64_FLD( EQ_CME_SCOM_LFIR_UNEXPECTED_DROOP_ENCODE                , 19  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNEXPECTED_DROOP_ENCODE );
+REG64_FLD( EQ_CME_SCOM_LFIR_FIR_PARITY_ERR_DUP                     , 20  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_PARITY_ERR_DUP );
-REG64_FLD( EQ_CME_SCOM_LFIR_FIR_PARITY_ERR                         , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EQ_CME_SCOM_LFIR_FIR_PARITY_ERR                         , 21  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_PARITY_ERR );
 
 REG64_FLD( EX_CME_SCOM_LFIR_PPE_INTERNAL_ERROR                     , 0   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
@@ -1605,40 +1562,178 @@ REG64_FLD( EX_CME_SCOM_LFIR_BCE_ERROR                              , 10  , SH_UN
            SH_FLD_BCE_ERROR  );
 REG64_FLD( EX_CME_SCOM_LFIR_SPARE11                                , 11  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_SPARE11    );
-REG64_FLD( EX_CME_SCOM_LFIR_FIR_PARITY_ERR_DUP                     , 12  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EX_CME_SCOM_LFIR_SPARE12                                , 12  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE12    );
+REG64_FLD( EX_CME_SCOM_LFIR_C0_IVRM_DROPOUT                        , 13  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_C0_IVRM_DROPOUT );
+REG64_FLD( EX_CME_SCOM_LFIR_C1_IVRM_DROPOUT                        , 14  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_C1_IVRM_DROPOUT );
+REG64_FLD( EX_CME_SCOM_LFIR_CACHE_IVRM_DROPOUT                     , 15  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_CACHE_IVRM_DROPOUT );
+REG64_FLD( EX_CME_SCOM_LFIR_EXTREME_DROOP_ERR                      , 16  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_EXTREME_DROOP_ERR );
+REG64_FLD( EX_CME_SCOM_LFIR_LARGE_DROOP_ERR                        , 17  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_LARGE_DROOP_ERR );
+REG64_FLD( EX_CME_SCOM_LFIR_SMALL_DROOP_ERR                        , 18  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SMALL_DROOP_ERR );
+REG64_FLD( EX_CME_SCOM_LFIR_UNEXPECTED_DROOP_ENCODE                , 19  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNEXPECTED_DROOP_ENCODE );
+REG64_FLD( EX_CME_SCOM_LFIR_FIR_PARITY_ERR_DUP                     , 20  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_PARITY_ERR_DUP );
-REG64_FLD( EX_CME_SCOM_LFIR_FIR_PARITY_ERR                         , 13  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EX_CME_SCOM_LFIR_FIR_PARITY_ERR                         , 21  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_PARITY_ERR );
 
 REG64_FLD( EQ_CME_SCOM_LFIRACT0_FIR_ACTION0                        , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION0 );
-REG64_FLD( EQ_CME_SCOM_LFIRACT0_FIR_ACTION0_LEN                    , 14  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
+REG64_FLD( EQ_CME_SCOM_LFIRACT0_FIR_ACTION0_LEN                    , 22  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION0_LEN );
 
 REG64_FLD( EX_CME_SCOM_LFIRACT0_FIR_ACTION0                        , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION0 );
-REG64_FLD( EX_CME_SCOM_LFIRACT0_FIR_ACTION0_LEN                    , 14  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+REG64_FLD( EX_CME_SCOM_LFIRACT0_FIR_ACTION0_LEN                    , 22  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION0_LEN );
 
 REG64_FLD( EQ_CME_SCOM_LFIRACT1_FIR_ACTION1                        , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION1 );
-REG64_FLD( EQ_CME_SCOM_LFIRACT1_FIR_ACTION1_LEN                    , 14  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
+REG64_FLD( EQ_CME_SCOM_LFIRACT1_FIR_ACTION1_LEN                    , 22  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION1_LEN );
 
 REG64_FLD( EX_CME_SCOM_LFIRACT1_FIR_ACTION1                        , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION1 );
-REG64_FLD( EX_CME_SCOM_LFIRACT1_FIR_ACTION1_LEN                    , 14  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+REG64_FLD( EX_CME_SCOM_LFIRACT1_FIR_ACTION1_LEN                    , 22  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_FIR_ACTION1_LEN );
 
 REG64_FLD( EQ_CME_SCOM_LFIRMASK_FIR_MASK                           , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_MASK   );
-REG64_FLD( EQ_CME_SCOM_LFIRMASK_FIR_MASK_LEN                       , 14  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EQ_CME_SCOM_LFIRMASK_FIR_MASK_LEN                       , 22  , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_MASK_LEN );
 
 REG64_FLD( EX_CME_SCOM_LFIRMASK_FIR_MASK                           , 0   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_MASK   );
-REG64_FLD( EX_CME_SCOM_LFIRMASK_FIR_MASK_LEN                       , 14  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+REG64_FLD( EX_CME_SCOM_LFIRMASK_FIR_MASK_LEN                       , 22  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_FIR_MASK_LEN );
+
+REG64_FLD( EQ_CME_SCOM_LMCR_PMCR_OVERRIDE_EN                       , 0   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PMCR_OVERRIDE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_PSCR_OVERRIDE_EN                       , 1   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PSCR_OVERRIDE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_PMSR_OVERRIDE_EN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PMSR_OVERRIDE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_BCECSR_OVERRIDE_EN                     , 3   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_BCECSR_OVERRIDE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_IDR_LCL_SAMPLE_EN                      , 4   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_IDR_LCL_SAMPLE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_VDM_LCL_SAMPLE_EN                      , 5   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_VDM_LCL_SAMPLE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_FREQ_LCL_SAMPLE_EN                     , 6   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_FREQ_LCL_SAMPLE_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_LOCK_PCB_ON_ERR                        , 7   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_LOCK_PCB_ON_ERR );
+REG64_FLD( EQ_CME_SCOM_LMCR_QUEUED_WR_EN                           , 8   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_QUEUED_WR_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_QUEUED_RD_EN                           , 9   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_QUEUED_RD_EN );
+REG64_FLD( EQ_CME_SCOM_LMCR_MASK_PURGE_INTERFACE                   , 10  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_MASK_PURGE_INTERFACE );
+REG64_FLD( EQ_CME_SCOM_LMCR_SPARE_11                               , 11  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_11   );
+REG64_FLD( EQ_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE         , 12  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_C0_AUTO_SPECIAL_WAKEUP_DISABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_C1_AUTO_SPECIAL_WAKEUP_DISABLE         , 13  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_C1_AUTO_SPECIAL_WAKEUP_DISABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_C0_HALTED_STOP_OVERRIDE_DISABLE        , 14  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_C0_HALTED_STOP_OVERRIDE_DISABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_C1_HALTED_STOP_OVERRIDE_DISABLE        , 15  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_C1_HALTED_STOP_OVERRIDE_DISABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_STOP_OVERRIDE_MODE                     , 16  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP_OVERRIDE_MODE );
+REG64_FLD( EQ_CME_SCOM_LMCR_STOP_ACTIVE_MASK                       , 17  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP_ACTIVE_MASK );
+REG64_FLD( EQ_CME_SCOM_LMCR_AUTO_STOP1_DISABLE                     , 18  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_AUTO_STOP1_DISABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_STOP1_ACTIVE_ENABLE                    , 19  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP1_ACTIVE_ENABLE );
+REG64_FLD( EQ_CME_SCOM_LMCR_FENCE_EISR                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_FENCE_EISR );
+REG64_FLD( EQ_CME_SCOM_LMCR_PC_DISABLE_DROOP                       , 21  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PC_DISABLE_DROOP );
+REG64_FLD( EQ_CME_SCOM_LMCR_SPARE_22_23                            , 22  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_22_23 );
+REG64_FLD( EQ_CME_SCOM_LMCR_SPARE_22_23_LEN                        , 2   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_22_23_LEN );
+REG64_FLD( EQ_CME_SCOM_LMCR_AVG_FREQ_TSEL                          , 24  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_AVG_FREQ_TSEL );
+REG64_FLD( EQ_CME_SCOM_LMCR_AVG_FREQ_TSEL_LEN                      , 4   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_AVG_FREQ_TSEL_LEN );
+REG64_FLD( EQ_CME_SCOM_LMCR_SPARE_28_31                            , 28  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_28_31 );
+REG64_FLD( EQ_CME_SCOM_LMCR_SPARE_28_31_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_28_31_LEN );
+REG64_FLD( EQ_CME_SCOM_LMCR_RESET_IMPRECISE_QERR                   , 32  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_RESET_IMPRECISE_QERR );
+REG64_FLD( EQ_CME_SCOM_LMCR_SET_ECC_INJECT_ERR                     , 33  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SET_ECC_INJECT_ERR );
+
+REG64_FLD( EX_CME_SCOM_LMCR_PMCR_OVERRIDE_EN                       , 0   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_PMCR_OVERRIDE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_PSCR_OVERRIDE_EN                       , 1   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_PSCR_OVERRIDE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_PMSR_OVERRIDE_EN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_PMSR_OVERRIDE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_BCECSR_OVERRIDE_EN                     , 3   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_BCECSR_OVERRIDE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_IDR_LCL_SAMPLE_EN                      , 4   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_IDR_LCL_SAMPLE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_VDM_LCL_SAMPLE_EN                      , 5   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_VDM_LCL_SAMPLE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_FREQ_LCL_SAMPLE_EN                     , 6   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_FREQ_LCL_SAMPLE_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_LOCK_PCB_ON_ERR                        , 7   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_LOCK_PCB_ON_ERR );
+REG64_FLD( EX_CME_SCOM_LMCR_QUEUED_WR_EN                           , 8   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_QUEUED_WR_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_QUEUED_RD_EN                           , 9   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_QUEUED_RD_EN );
+REG64_FLD( EX_CME_SCOM_LMCR_MASK_PURGE_INTERFACE                   , 10  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_MASK_PURGE_INTERFACE );
+REG64_FLD( EX_CME_SCOM_LMCR_SPARE_11                               , 11  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_11   );
+REG64_FLD( EX_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE         , 12  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_C0_AUTO_SPECIAL_WAKEUP_DISABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_C1_AUTO_SPECIAL_WAKEUP_DISABLE         , 13  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_C1_AUTO_SPECIAL_WAKEUP_DISABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_C0_HALTED_STOP_OVERRIDE_DISABLE        , 14  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_C0_HALTED_STOP_OVERRIDE_DISABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_C1_HALTED_STOP_OVERRIDE_DISABLE        , 15  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_C1_HALTED_STOP_OVERRIDE_DISABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_STOP_OVERRIDE_MODE                     , 16  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP_OVERRIDE_MODE );
+REG64_FLD( EX_CME_SCOM_LMCR_STOP_ACTIVE_MASK                       , 17  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP_ACTIVE_MASK );
+REG64_FLD( EX_CME_SCOM_LMCR_AUTO_STOP1_DISABLE                     , 18  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_AUTO_STOP1_DISABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_STOP1_ACTIVE_ENABLE                    , 19  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_STOP1_ACTIVE_ENABLE );
+REG64_FLD( EX_CME_SCOM_LMCR_FENCE_EISR                             , 20  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_FENCE_EISR );
+REG64_FLD( EX_CME_SCOM_LMCR_PC_DISABLE_DROOP                       , 21  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_PC_DISABLE_DROOP );
+REG64_FLD( EX_CME_SCOM_LMCR_SPARE_22_23                            , 22  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_22_23 );
+REG64_FLD( EX_CME_SCOM_LMCR_SPARE_22_23_LEN                        , 2   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_22_23_LEN );
+REG64_FLD( EX_CME_SCOM_LMCR_AVG_FREQ_TSEL                          , 24  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_AVG_FREQ_TSEL );
+REG64_FLD( EX_CME_SCOM_LMCR_AVG_FREQ_TSEL_LEN                      , 4   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_AVG_FREQ_TSEL_LEN );
+REG64_FLD( EX_CME_SCOM_LMCR_SPARE_28_31                            , 28  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_28_31 );
+REG64_FLD( EX_CME_SCOM_LMCR_SPARE_28_31_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPARE_28_31_LEN );
+REG64_FLD( EX_CME_SCOM_LMCR_RESET_IMPRECISE_QERR                   , 32  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_RESET_IMPRECISE_QERR );
+REG64_FLD( EX_CME_SCOM_LMCR_SET_ECC_INJECT_ERR                     , 33  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SET_ECC_INJECT_ERR );
 
 REG64_FLD( EQ_CME_SCOM_PMCRS0_DATA                                 , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_DATA       );
@@ -2352,8 +2447,8 @@ REG64_FLD( EQ_CME_SCOM_SICR_L2_PURGE                               , 18  , SH_UN
            SH_FLD_L2_PURGE   );
 REG64_FLD( EQ_CME_SCOM_SICR_L2_PURGE_ABORT                         , 19  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
            SH_FLD_L2_PURGE_ABORT );
-REG64_FLD( EQ_CME_SCOM_SICR_RESERVED20                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
-           SH_FLD_RESERVED20 );
+REG64_FLD( EQ_CME_SCOM_SICR_PC_THROTTLE_REQ                        , 20  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PC_THROTTLE_REQ );
 REG64_FLD( EQ_CME_SCOM_SICR_NCU_TLBIE_QUIESCE                      , 21  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
            SH_FLD_NCU_TLBIE_QUIESCE );
 REG64_FLD( EQ_CME_SCOM_SICR_NCU_PURGE                              , 22  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
@@ -2413,8 +2508,8 @@ REG64_FLD( EX_CME_SCOM_SICR_L2_PURGE                               , 18  , SH_UN
            SH_FLD_L2_PURGE   );
 REG64_FLD( EX_CME_SCOM_SICR_L2_PURGE_ABORT                         , 19  , SH_UNT_EX       , SH_ACS_SCOM2    ,
            SH_FLD_L2_PURGE_ABORT );
-REG64_FLD( EX_CME_SCOM_SICR_RESERVED20                             , 20  , SH_UNT_EX       , SH_ACS_SCOM2    ,
-           SH_FLD_RESERVED20 );
+REG64_FLD( EX_CME_SCOM_SICR_PC_THROTTLE_REQ                        , 20  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_PC_THROTTLE_REQ );
 REG64_FLD( EX_CME_SCOM_SICR_NCU_TLBIE_QUIESCE                      , 21  , SH_UNT_EX       , SH_ACS_SCOM2    ,
            SH_FLD_NCU_TLBIE_QUIESCE );
 REG64_FLD( EX_CME_SCOM_SICR_NCU_PURGE                              , 22  , SH_UNT_EX       , SH_ACS_SCOM2    ,
@@ -2730,6 +2825,46 @@ REG64_FLD( EX_CME_SCOM_VNCR_VDM_OVERVOLT_CTR                       , 40  , SH_UN
 REG64_FLD( EX_CME_SCOM_VNCR_VDM_OVERVOLT_CTR_LEN                   , 24  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_VDM_OVERVOLT_CTR_LEN );
 
+REG64_FLD( EQ_CME_SCOM_XIPCBMD0_PCBM_DATA                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA  );
+REG64_FLD( EQ_CME_SCOM_XIPCBMD0_PCBM_DATA_LEN                      , 27  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA_LEN );
+
+REG64_FLD( EX_CME_SCOM_XIPCBMD0_PCBM_DATA                          , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA  );
+REG64_FLD( EX_CME_SCOM_XIPCBMD0_PCBM_DATA_LEN                      , 27  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA_LEN );
+
+REG64_FLD( EQ_CME_SCOM_XIPCBMD1_PCBM_DATA                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA  );
+REG64_FLD( EQ_CME_SCOM_XIPCBMD1_PCBM_DATA_LEN                      , 27  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA_LEN );
+
+REG64_FLD( EX_CME_SCOM_XIPCBMD1_PCBM_DATA                          , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA  );
+REG64_FLD( EX_CME_SCOM_XIPCBMD1_PCBM_DATA_LEN                      , 27  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_DATA_LEN );
+
+REG64_FLD( EQ_CME_SCOM_XIPCBMI0_PCBM_INFO                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO  );
+REG64_FLD( EQ_CME_SCOM_XIPCBMI0_PCBM_INFO_LEN                      , 7   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO_LEN );
+
+REG64_FLD( EX_CME_SCOM_XIPCBMI0_PCBM_INFO                          , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO  );
+REG64_FLD( EX_CME_SCOM_XIPCBMI0_PCBM_INFO_LEN                      , 7   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO_LEN );
+
+REG64_FLD( EQ_CME_SCOM_XIPCBMI1_PCBM_INFO                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO  );
+REG64_FLD( EQ_CME_SCOM_XIPCBMI1_PCBM_INFO_LEN                      , 7   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO_LEN );
+
+REG64_FLD( EX_CME_SCOM_XIPCBMI1_PCBM_INFO                          , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO  );
+REG64_FLD( EX_CME_SCOM_XIPCBMI1_PCBM_INFO_LEN                      , 7   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCBM_INFO_LEN );
+
 REG64_FLD( EQ_CME_SCOM_XIPCBQ0_PCBQ_N_INFO                         , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_PCBQ_N_INFO );
 REG64_FLD( EQ_CME_SCOM_XIPCBQ0_PCBQ_N_INFO_LEN                     , 26  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
@@ -2749,6 +2884,1479 @@ REG64_FLD( EX_CME_SCOM_XIPCBQ1_PCBQ_N_INFO                         , 0   , SH_UN
            SH_FLD_PCBQ_N_INFO );
 REG64_FLD( EX_CME_SCOM_XIPCBQ1_PCBQ_N_INFO_LEN                     , 26  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_PCBQ_N_INFO_LEN );
+
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_ADDR                              , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_ADDR   );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_ADDR_LEN                          , 32  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_ADDR_LEN );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_R_NW                              , 32  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_R_NW   );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_BUSY                              , 33  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_BUSY   );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_IMPRECISE_ERROR_PENDING           , 34  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_IMPRECISE_ERROR_PENDING );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_RSP_INFO                          , 49  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_RSP_INFO );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_RSP_INFO_LEN                      , 3   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_RSP_INFO_LEN );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_IFETCH_PENDING                    , 62  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_IFETCH_PENDING );
+REG64_FLD( EQ_CME_SCOM_XISIB_PIB_DATAOP_PENDING                    , 63  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_DATAOP_PENDING );
+
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_ADDR                              , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_ADDR   );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_ADDR_LEN                          , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_ADDR_LEN );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_R_NW                              , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_R_NW   );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_BUSY                              , 33  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_BUSY   );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_IMPRECISE_ERROR_PENDING           , 34  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_IMPRECISE_ERROR_PENDING );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_RSP_INFO                          , 49  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_RSP_INFO );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_RSP_INFO_LEN                      , 3   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_RSP_INFO_LEN );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_IFETCH_PENDING                    , 62  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_IFETCH_PENDING );
+REG64_FLD( EX_CME_SCOM_XISIB_PIB_DATAOP_PENDING                    , 63  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PIB_DATAOP_PENDING );
+
+REG64_FLD( EQ_CONTROL_REG_RESET_TRIP_HISTORY                       , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_TRIP_HISTORY );
+REG64_FLD( EQ_CONTROL_REG_RESET_SAMPLE_PULSE_CNT                   , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_PULSE_CNT );
+REG64_FLD( EQ_CONTROL_REG_F_RESET_CPM_RD                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_RD );
+REG64_FLD( EQ_CONTROL_REG_F_RESET_CPM_WR                           , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_WR );
+REG64_FLD( EQ_CONTROL_REG_RESET_SAMPLE_DTS                         , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_DTS );
+REG64_FLD( EQ_CONTROL_REG_FORCE_SAMPLE_DTS                         , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS );
+REG64_FLD( EQ_CONTROL_REG_FORCE_SAMPLE_DTS_INTERRUPTIBLE           , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS_INTERRUPTIBLE );
+REG64_FLD( EQ_CONTROL_REG_FORCE_RESET_THRES_L1RESULTS              , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L1RESULTS );
+REG64_FLD( EQ_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS              , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L2RESULTS );
+REG64_FLD( EQ_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS              , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L3RESULTS );
+REG64_FLD( EQ_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE         , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_MEASURE_VOLT_INTERRUPTIBLE );
+REG64_FLD( EQ_CONTROL_REG_FORCE_RESET_MEASURE_VOLT                 , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_MEASURE_VOLT );
+REG64_FLD( EQ_CONTROL_REG_FORCE_SHIFT_SENSOR                       , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SHIFT_SENSOR );
+
+REG64_FLD( EX_CONTROL_REG_RESET_TRIP_HISTORY                       , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_TRIP_HISTORY );
+REG64_FLD( EX_CONTROL_REG_RESET_SAMPLE_PULSE_CNT                   , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_PULSE_CNT );
+REG64_FLD( EX_CONTROL_REG_F_RESET_CPM_RD                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_RD );
+REG64_FLD( EX_CONTROL_REG_F_RESET_CPM_WR                           , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_WR );
+REG64_FLD( EX_CONTROL_REG_RESET_SAMPLE_DTS                         , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_DTS );
+REG64_FLD( EX_CONTROL_REG_FORCE_SAMPLE_DTS                         , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS );
+REG64_FLD( EX_CONTROL_REG_FORCE_SAMPLE_DTS_INTERRUPTIBLE           , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS_INTERRUPTIBLE );
+REG64_FLD( EX_CONTROL_REG_FORCE_RESET_THRES_L1RESULTS              , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L1RESULTS );
+REG64_FLD( EX_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS              , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L2RESULTS );
+REG64_FLD( EX_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS              , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L3RESULTS );
+REG64_FLD( EX_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE         , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_MEASURE_VOLT_INTERRUPTIBLE );
+REG64_FLD( EX_CONTROL_REG_FORCE_RESET_MEASURE_VOLT                 , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_MEASURE_VOLT );
+REG64_FLD( EX_CONTROL_REG_FORCE_SHIFT_SENSOR                       , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SHIFT_SENSOR );
+
+REG64_FLD( C_CONTROL_REG_RESET_TRIP_HISTORY                        , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESET_TRIP_HISTORY );
+REG64_FLD( C_CONTROL_REG_RESET_SAMPLE_PULSE_CNT                    , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_PULSE_CNT );
+REG64_FLD( C_CONTROL_REG_F_RESET_CPM_RD                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_RD );
+REG64_FLD( C_CONTROL_REG_F_RESET_CPM_WR                            , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_F_RESET_CPM_WR );
+REG64_FLD( C_CONTROL_REG_RESET_SAMPLE_DTS                          , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESET_SAMPLE_DTS );
+REG64_FLD( C_CONTROL_REG_FORCE_SAMPLE_DTS                          , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS );
+REG64_FLD( C_CONTROL_REG_FORCE_SAMPLE_DTS_INTERRUPTIBLE            , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SAMPLE_DTS_INTERRUPTIBLE );
+REG64_FLD( C_CONTROL_REG_FORCE_RESET_THRES_L1RESULTS               , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L1RESULTS );
+REG64_FLD( C_CONTROL_REG_FORCE_RESET_THRES_L2RESULTS               , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L2RESULTS );
+REG64_FLD( C_CONTROL_REG_FORCE_RESET_THRES_L3RESULTS               , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_THRES_L3RESULTS );
+REG64_FLD( C_CONTROL_REG_FORCE_MEASURE_VOLT_INTERRUPTIBLE          , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_MEASURE_VOLT_INTERRUPTIBLE );
+REG64_FLD( C_CONTROL_REG_FORCE_RESET_MEASURE_VOLT                  , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_RESET_MEASURE_VOLT );
+REG64_FLD( C_CONTROL_REG_FORCE_SHIFT_SENSOR                        , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FORCE_SHIFT_SENSOR );
+
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_IF_SRAM_REC_ERROR             , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_SRAM_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_TC_FIR_XSTOP_ERROR            , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_TC_FIR_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_IF_RFILE_REC_ERROR            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_IF_RFILE_XSTOP_ERROR          , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_IF_LOG_REC_ERROR              , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_IF_LOG_XSTOP_ERROR            , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_6                      , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_6 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_7                      , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_7 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_RECOV_XSTOP_ERROR          , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_RFILE_REC_ERROR            , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_RFILE_XSTOP_ERROR          , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_LOG_REC_ERROR              , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_LOG_XSTOP_ERROR            , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_NOT_MT_CI_REC_ERROR        , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR     , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_L2_UE_ERROR                , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_L2_UE_OVER_THRES_ERROR     , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_CI_UE_ERROR                , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_CI_UE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_18                     , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_18 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_19                     , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_19 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_SD_SYS_XSTOP_ERROR            , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_21                     , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_21 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_22                     , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_22 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_23                     , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_23 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_VS_LOG_REC_ERROR              , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_VS_LOG_XSTOP_ERROR            , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_RECOV_IN_MAINT_ERROR       , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_VS_DU_LOG_REC_ERROR           , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_DU_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_SYS_XSTOP_ERROR            , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_SRAM_PARITY_ERROR          , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SRAM_PARITY_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_SETDELETE_ERROR            , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SETDELETE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_RFILE_REC_ERROR            , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_RFILE_XSTOP_ERROR          , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_TLB_MULTIHIT_ERROR         , 33  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_SLB_MULTIHIT_ERROR         , 34  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_DERAT_MULTIHIT_ERROR       , 35  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_FWD_PROGRESS_ERROR         , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_LOG_REC_ERROR              , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_LOG_XSTOP_ERROR            , 38  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_NOT_MT_REC_ERROR           , 39  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_NOT_MT_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_40                     , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_40 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_LS_SYS_XSTOP_ERROR            , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_42                     , 42  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_42 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_THREAD_HANG_REC_ERROR      , 43  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_44                     , 44  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_44 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_LOG_XSTOP_ERROR            , 45  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_46                     , 46  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_46 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_TFAC_XSTOP_ERROR           , 47  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_HYP_RES_ERROR              , 48  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HYP_RES_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_49                     , 49  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_49 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_50                     , 50  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_50 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_51                     , 51  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_51 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_HANG_RECOVERY_FAILED       , 52  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_HANG_DETECT_ERROR          , 53  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_UNUSED_54                     , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_54 );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_NEST_HANG_DETECT_ERROR     , 55  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_REC_ERROR    , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR  , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_SCOM_ERROR                 , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SCOM_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR , 60  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_FW_INJ_REC_ERROR           , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_FW_INJ_XSTOP_ERROR         , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION0_ACTION_PC_PHYP_XSTOP_ERROR           , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( C_CORE_ACTION0_ACTION_IF_SRAM_REC_ERROR                 , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_SRAM_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_TC_FIR_XSTOP_ERROR                , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_TC_FIR_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_IF_RFILE_REC_ERROR                , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_IF_RFILE_XSTOP_ERROR              , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_IF_LOG_REC_ERROR                  , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_IF_LOG_XSTOP_ERROR                , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_6                          , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_6 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_7                          , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_7 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_RECOV_XSTOP_ERROR              , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_RFILE_REC_ERROR                , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_RFILE_XSTOP_ERROR              , 10  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_LOG_REC_ERROR                  , 11  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_LOG_XSTOP_ERROR                , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_NOT_MT_CI_REC_ERROR            , 13  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR         , 14  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_L2_UE_ERROR                    , 15  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_L2_UE_OVER_THRES_ERROR         , 16  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_CI_UE_ERROR                    , 17  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_CI_UE_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_18                         , 18  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_18 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_19                         , 19  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_19 );
+REG64_FLD( C_CORE_ACTION0_ACTION_SD_SYS_XSTOP_ERROR                , 20  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_21                         , 21  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_21 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_22                         , 22  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_22 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_23                         , 23  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_23 );
+REG64_FLD( C_CORE_ACTION0_ACTION_VS_LOG_REC_ERROR                  , 24  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_VS_LOG_XSTOP_ERROR                , 25  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_RECOV_IN_MAINT_ERROR           , 26  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_VS_DU_LOG_REC_ERROR               , 27  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_DU_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_SYS_XSTOP_ERROR                , 28  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_SRAM_PARITY_ERROR              , 29  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SRAM_PARITY_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_SETDELETE_ERROR                , 30  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SETDELETE_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_RFILE_REC_ERROR                , 31  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_RFILE_XSTOP_ERROR              , 32  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_TLB_MULTIHIT_ERROR             , 33  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_SLB_MULTIHIT_ERROR             , 34  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_DERAT_MULTIHIT_ERROR           , 35  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_FWD_PROGRESS_ERROR             , 36  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_LOG_REC_ERROR                  , 37  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_LOG_XSTOP_ERROR                , 38  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_NOT_MT_REC_ERROR               , 39  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_NOT_MT_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_40                         , 40  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_40 );
+REG64_FLD( C_CORE_ACTION0_ACTION_LS_SYS_XSTOP_ERROR                , 41  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_42                         , 42  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_42 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_THREAD_HANG_REC_ERROR          , 43  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_44                         , 44  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_44 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_LOG_XSTOP_ERROR                , 45  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_46                         , 46  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_46 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_TFAC_XSTOP_ERROR               , 47  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_HYP_RES_ERROR                  , 48  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HYP_RES_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_49                         , 49  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_49 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_50                         , 50  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_50 );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_51                         , 51  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_51 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_HANG_RECOVERY_FAILED           , 52  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_HANG_DETECT_ERROR              , 53  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_UNUSED_54                         , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_54 );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_NEST_HANG_DETECT_ERROR         , 55  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_REC_ERROR        , 56  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR      , 57  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR  , 58  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_SCOM_ERROR                     , 59  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SCOM_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR     , 60  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_FW_INJ_REC_ERROR               , 61  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_REC_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_FW_INJ_XSTOP_ERROR             , 62  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION0_ACTION_PC_PHYP_XSTOP_ERROR               , 63  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_IF_SRAM_REC_ERROR             , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_SRAM_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_TC_FIR_XSTOP_ERROR            , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_TC_FIR_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_IF_RFILE_REC_ERROR            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_IF_RFILE_XSTOP_ERROR          , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_IF_LOG_REC_ERROR              , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_IF_LOG_XSTOP_ERROR            , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_6                      , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_6 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_7                      , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_7 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_RECOV_XSTOP_ERROR          , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_RFILE_REC_ERROR            , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_RFILE_XSTOP_ERROR          , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_LOG_REC_ERROR              , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_LOG_XSTOP_ERROR            , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_NOT_MT_CI_REC_ERROR        , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR     , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_L2_UE_ERROR                , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_L2_UE_OVER_THRES_ERROR     , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_CI_UE_ERROR                , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_CI_UE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_18                     , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_18 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_19                     , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_19 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_SD_SYS_XSTOP_ERROR            , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_21                     , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_21 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_22                     , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_22 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_23                     , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_23 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_VS_LOG_REC_ERROR              , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_VS_LOG_XSTOP_ERROR            , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_RECOV_IN_MAINT_ERROR       , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_VS_DU_LOG_REC_ERROR           , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_DU_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_SYS_XSTOP_ERROR            , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_SRAM_PARITY_ERROR          , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SRAM_PARITY_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_SETDELETE_ERROR            , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SETDELETE_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_RFILE_REC_ERROR            , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_RFILE_XSTOP_ERROR          , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_TLB_MULTIHIT_ERROR         , 33  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_SLB_MULTIHIT_ERROR         , 34  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_DERAT_MULTIHIT_ERROR       , 35  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_FWD_PROGRESS_ERROR         , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_LOG_REC_ERROR              , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_LOG_XSTOP_ERROR            , 38  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_NOT_MT_REC_ERROR           , 39  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_NOT_MT_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_40                     , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_40 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_LS_SYS_XSTOP_ERROR            , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_42                     , 42  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_42 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_THREAD_HANG_REC_ERROR      , 43  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_44                     , 44  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_44 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_LOG_XSTOP_ERROR            , 45  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_46                     , 46  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_46 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_TFAC_XSTOP_ERROR           , 47  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_HYP_RES_ERROR              , 48  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HYP_RES_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_49                     , 49  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_49 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_50                     , 50  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_50 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_51                     , 51  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_51 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_HANG_RECOVERY_FAILED       , 52  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_HANG_DETECT_ERROR          , 53  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_UNUSED_54                     , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_54 );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_NEST_HANG_DETECT_ERROR     , 55  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_REC_ERROR    , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR  , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_SCOM_ERROR                 , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SCOM_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR , 60  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_FW_INJ_REC_ERROR           , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_REC_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_FW_INJ_XSTOP_ERROR         , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_ACTION1_ACTION_PC_PHYP_XSTOP_ERROR           , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( C_CORE_ACTION1_ACTION_IF_SRAM_REC_ERROR                 , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_SRAM_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_TC_FIR_XSTOP_ERROR                , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_TC_FIR_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_IF_RFILE_REC_ERROR                , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_IF_RFILE_XSTOP_ERROR              , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_IF_LOG_REC_ERROR                  , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_IF_LOG_XSTOP_ERROR                , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_IF_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_6                          , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_6 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_7                          , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_7 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_RECOV_XSTOP_ERROR              , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_RFILE_REC_ERROR                , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_RFILE_XSTOP_ERROR              , 10  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_LOG_REC_ERROR                  , 11  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_LOG_XSTOP_ERROR                , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_NOT_MT_CI_REC_ERROR            , 13  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR         , 14  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_L2_UE_ERROR                    , 15  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_L2_UE_OVER_THRES_ERROR         , 16  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_CI_UE_ERROR                    , 17  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_CI_UE_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_18                         , 18  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_18 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_19                         , 19  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_19 );
+REG64_FLD( C_CORE_ACTION1_ACTION_SD_SYS_XSTOP_ERROR                , 20  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_SD_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_21                         , 21  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_21 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_22                         , 22  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_22 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_23                         , 23  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_23 );
+REG64_FLD( C_CORE_ACTION1_ACTION_VS_LOG_REC_ERROR                  , 24  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_VS_LOG_XSTOP_ERROR                , 25  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_RECOV_IN_MAINT_ERROR           , 26  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_VS_DU_LOG_REC_ERROR               , 27  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_VS_DU_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_SYS_XSTOP_ERROR                , 28  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_SRAM_PARITY_ERROR              , 29  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SRAM_PARITY_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_SETDELETE_ERROR                , 30  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SETDELETE_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_RFILE_REC_ERROR                , 31  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_RFILE_XSTOP_ERROR              , 32  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_TLB_MULTIHIT_ERROR             , 33  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_SLB_MULTIHIT_ERROR             , 34  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_DERAT_MULTIHIT_ERROR           , 35  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_FWD_PROGRESS_ERROR             , 36  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_LOG_REC_ERROR                  , 37  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_LOG_XSTOP_ERROR                , 38  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_NOT_MT_REC_ERROR               , 39  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_NOT_MT_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_40                         , 40  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_40 );
+REG64_FLD( C_CORE_ACTION1_ACTION_LS_SYS_XSTOP_ERROR                , 41  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_LS_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_42                         , 42  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_42 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_THREAD_HANG_REC_ERROR          , 43  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_44                         , 44  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_44 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_LOG_XSTOP_ERROR                , 45  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_46                         , 46  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_46 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_TFAC_XSTOP_ERROR               , 47  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_HYP_RES_ERROR                  , 48  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HYP_RES_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_49                         , 49  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_49 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_50                         , 50  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_50 );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_51                         , 51  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_51 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_HANG_RECOVERY_FAILED           , 52  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_HANG_DETECT_ERROR              , 53  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_UNUSED_54                         , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_UNUSED_54 );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_NEST_HANG_DETECT_ERROR         , 55  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_REC_ERROR        , 56  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR      , 57  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR  , 58  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_SCOM_ERROR                     , 59  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_SCOM_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR     , 60  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_FW_INJ_REC_ERROR               , 61  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_REC_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_FW_INJ_XSTOP_ERROR             , 62  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( C_CORE_ACTION1_ACTION_PC_PHYP_XSTOP_ERROR               , 63  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ACTION_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( EX_L2_CORE_FIR_IF_SRAM_REC_ERROR                        , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_SRAM_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_TC_FIR_XSTOP_ERROR                       , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_TC_FIR_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_IF_RFILE_REC_ERROR                       , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_IF_RFILE_XSTOP_ERROR                     , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_IF_LOG_REC_ERROR                         , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_IF_LOG_XSTOP_ERROR                       , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_6                                 , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_6   );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_7                                 , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_7   );
+REG64_FLD( EX_L2_CORE_FIR_PC_RECOV_XSTOP_ERROR                     , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_RFILE_REC_ERROR                       , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_RFILE_XSTOP_ERROR                     , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_LOG_REC_ERROR                         , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_LOG_XSTOP_ERROR                       , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_NOT_MT_CI_REC_ERROR                   , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_MCHK_AND_ME_EQ_0_ERROR                , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_L2_UE_ERROR                           , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_L2_UE_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_L2_UE_OVER_THRES_ERROR                , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_SD_CI_UE_ERROR                           , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_CI_UE_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_18                                , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_18  );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_19                                , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_19  );
+REG64_FLD( EX_L2_CORE_FIR_SD_SYS_XSTOP_ERROR                       , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_21                                , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_21  );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_22                                , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_22  );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_23                                , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_23  );
+REG64_FLD( EX_L2_CORE_FIR_VS_LOG_REC_ERROR                         , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_VS_LOG_XSTOP_ERROR                       , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_RECOV_IN_MAINT_ERROR                  , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_VS_DU_LOG_REC_ERROR                      , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_DU_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_SYS_XSTOP_ERROR                       , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_SRAM_PARITY_ERROR                     , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SRAM_PARITY_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_SETDELETE_ERROR                       , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SETDELETE_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_RFILE_REC_ERROR                       , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_RFILE_XSTOP_ERROR                     , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_TLB_MULTIHIT_ERROR                    , 33  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_SLB_MULTIHIT_ERROR                    , 34  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_DERAT_MULTIHIT_ERROR                  , 35  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_FWD_PROGRESS_ERROR                    , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_LOG_REC_ERROR                         , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_LOG_XSTOP_ERROR                       , 38  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_LS_NOT_MT_REC_ERROR                      , 39  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_NOT_MT_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_40                                , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_40  );
+REG64_FLD( EX_L2_CORE_FIR_LS_SYS_XSTOP_ERROR                       , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_42                                , 42  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_42  );
+REG64_FLD( EX_L2_CORE_FIR_PC_THREAD_HANG_REC_ERROR                 , 43  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_44                                , 44  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_44  );
+REG64_FLD( EX_L2_CORE_FIR_PC_LOG_XSTOP_ERROR                       , 45  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_46                                , 46  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_46  );
+REG64_FLD( EX_L2_CORE_FIR_PC_TFAC_XSTOP_ERROR                      , 47  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_HYP_RES_ERROR                         , 48  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_HYP_RES_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_49                                , 49  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_49  );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_50                                , 50  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_50  );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_51                                , 51  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_51  );
+REG64_FLD( EX_L2_CORE_FIR_PC_HANG_RECOVERY_FAILED                  , 52  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( EX_L2_CORE_FIR_PC_CORE_HANG_DETECT_ERROR                , 53  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_CORE_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_UNUSED_54                                , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_54  );
+REG64_FLD( EX_L2_CORE_FIR_PC_NEST_HANG_DETECT_ERROR                , 55  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_OTHER_CORE_CHIPLET_REC_ERROR          , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR        , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR    , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_SCOM_ERROR                            , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_SCOM_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_XSTOP_ON_DBG_TRIGGER_ERROR            , 60  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_FW_INJ_REC_ERROR                      , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FW_INJ_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_FW_INJ_XSTOP_ERROR                    , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIR_PC_PHYP_XSTOP_ERROR                      , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( C_CORE_FIR_IF_SRAM_REC_ERROR                            , 0   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_SRAM_REC_ERROR );
+REG64_FLD( C_CORE_FIR_TC_FIR_XSTOP_ERROR                           , 1   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_TC_FIR_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_IF_RFILE_REC_ERROR                           , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIR_IF_RFILE_XSTOP_ERROR                         , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_IF_LOG_REC_ERROR                             , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_IF_LOG_XSTOP_ERROR                           , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_IF_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_6                                     , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_6   );
+REG64_FLD( C_CORE_FIR_UNUSED_7                                     , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_7   );
+REG64_FLD( C_CORE_FIR_PC_RECOV_XSTOP_ERROR                         , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_SD_RFILE_REC_ERROR                           , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIR_SD_RFILE_XSTOP_ERROR                         , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_SD_LOG_REC_ERROR                             , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_SD_LOG_XSTOP_ERROR                           , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_SD_NOT_MT_CI_REC_ERROR                       , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( C_CORE_FIR_SD_MCHK_AND_ME_EQ_0_ERROR                    , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( C_CORE_FIR_SD_L2_UE_ERROR                               , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_L2_UE_ERROR );
+REG64_FLD( C_CORE_FIR_SD_L2_UE_OVER_THRES_ERROR                    , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( C_CORE_FIR_SD_CI_UE_ERROR                               , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_CI_UE_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_18                                    , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_18  );
+REG64_FLD( C_CORE_FIR_UNUSED_19                                    , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_19  );
+REG64_FLD( C_CORE_FIR_SD_SYS_XSTOP_ERROR                           , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SD_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_21                                    , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_21  );
+REG64_FLD( C_CORE_FIR_UNUSED_22                                    , 22  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_22  );
+REG64_FLD( C_CORE_FIR_UNUSED_23                                    , 23  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_23  );
+REG64_FLD( C_CORE_FIR_VS_LOG_REC_ERROR                             , 24  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_VS_LOG_XSTOP_ERROR                           , 25  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_PC_RECOV_IN_MAINT_ERROR                      , 26  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( C_CORE_FIR_VS_DU_LOG_REC_ERROR                          , 27  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_VS_DU_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_PC_SYS_XSTOP_ERROR                           , 28  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_LS_SRAM_PARITY_ERROR                         , 29  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SRAM_PARITY_ERROR );
+REG64_FLD( C_CORE_FIR_LS_SETDELETE_ERROR                           , 30  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SETDELETE_ERROR );
+REG64_FLD( C_CORE_FIR_LS_RFILE_REC_ERROR                           , 31  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIR_LS_RFILE_XSTOP_ERROR                         , 32  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_LS_TLB_MULTIHIT_ERROR                        , 33  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIR_LS_SLB_MULTIHIT_ERROR                        , 34  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIR_LS_DERAT_MULTIHIT_ERROR                      , 35  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIR_PC_FWD_PROGRESS_ERROR                        , 36  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( C_CORE_FIR_LS_LOG_REC_ERROR                             , 37  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_LS_LOG_XSTOP_ERROR                           , 38  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_LS_NOT_MT_REC_ERROR                          , 39  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_NOT_MT_REC_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_40                                    , 40  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_40  );
+REG64_FLD( C_CORE_FIR_LS_SYS_XSTOP_ERROR                           , 41  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_LS_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_42                                    , 42  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_42  );
+REG64_FLD( C_CORE_FIR_PC_THREAD_HANG_REC_ERROR                     , 43  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_44                                    , 44  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_44  );
+REG64_FLD( C_CORE_FIR_PC_LOG_XSTOP_ERROR                           , 45  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_46                                    , 46  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_46  );
+REG64_FLD( C_CORE_FIR_PC_TFAC_XSTOP_ERROR                          , 47  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_PC_HYP_RES_ERROR                             , 48  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_HYP_RES_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_49                                    , 49  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_49  );
+REG64_FLD( C_CORE_FIR_UNUSED_50                                    , 50  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_50  );
+REG64_FLD( C_CORE_FIR_UNUSED_51                                    , 51  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_51  );
+REG64_FLD( C_CORE_FIR_PC_HANG_RECOVERY_FAILED                      , 52  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( C_CORE_FIR_PC_CORE_HANG_DETECT_ERROR                    , 53  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_CORE_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_FIR_UNUSED_54                                    , 54  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_UNUSED_54  );
+REG64_FLD( C_CORE_FIR_PC_NEST_HANG_DETECT_ERROR                    , 55  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_FIR_PC_OTHER_CORE_CHIPLET_REC_ERROR              , 56  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_REC_ERROR );
+REG64_FLD( C_CORE_FIR_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR            , 57  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR        , 58  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_PC_SCOM_ERROR                                , 59  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_SCOM_ERROR );
+REG64_FLD( C_CORE_FIR_PC_XSTOP_ON_DBG_TRIGGER_ERROR                , 60  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( C_CORE_FIR_PC_FW_INJ_REC_ERROR                          , 61  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FW_INJ_REC_ERROR );
+REG64_FLD( C_CORE_FIR_PC_FW_INJ_XSTOP_ERROR                        , 62  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIR_PC_PHYP_XSTOP_ERROR                          , 63  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_IF_SRAM_REC_ERROR               , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_SRAM_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_TC_FIR_XSTOP_ERROR              , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_TC_FIR_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_IF_RFILE_REC_ERROR              , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_IF_RFILE_XSTOP_ERROR            , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_IF_LOG_REC_ERROR                , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_IF_LOG_XSTOP_ERROR              , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_6                        , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_6 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_7                        , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_7 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_RECOV_XSTOP_ERROR            , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_RFILE_REC_ERROR              , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_RFILE_XSTOP_ERROR            , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_LOG_REC_ERROR                , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_LOG_XSTOP_ERROR              , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_NOT_MT_CI_REC_ERROR          , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_MCHK_AND_ME_EQ_0_ERROR       , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_L2_UE_ERROR                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_L2_UE_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_L2_UE_OVER_THRES_ERROR       , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_CI_UE_ERROR                  , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_CI_UE_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_18                       , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_18 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_19                       , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_19 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_SD_SYS_XSTOP_ERROR              , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_21                       , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_21 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_22                       , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_22 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_23                       , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_23 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_VS_LOG_REC_ERROR                , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_VS_LOG_XSTOP_ERROR              , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_RECOV_IN_MAINT_ERROR         , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_VS_DU_LOG_REC_ERROR             , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_DU_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_SYS_XSTOP_ERROR              , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_SRAM_PARITY_ERROR            , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SRAM_PARITY_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_SETDELETE_ERROR              , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SETDELETE_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_RFILE_REC_ERROR              , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_RFILE_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_RFILE_XSTOP_ERROR            , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_TLB_MULTIHIT_ERROR           , 33  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_SLB_MULTIHIT_ERROR           , 34  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_DERAT_MULTIHIT_ERROR         , 35  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_FWD_PROGRESS_ERROR           , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_LOG_REC_ERROR                , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_LOG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_LOG_XSTOP_ERROR              , 38  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_NOT_MT_REC_ERROR             , 39  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_NOT_MT_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_40                       , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_40 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_LS_SYS_XSTOP_ERROR              , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_42                       , 42  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_42 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_THREAD_HANG_REC_ERROR        , 43  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_44                       , 44  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_44 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_LOG_XSTOP_ERROR              , 45  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_LOG_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_46                       , 46  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_46 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR             , 47  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_HYP_RES_ERROR                , 48  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HYP_RES_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_49                       , 49  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_49 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_50                       , 50  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_50 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_51                       , 51  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_51 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_HANG_RECOVERY_FAILED         , 52  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_HANG_DETECT_ERROR            , 53  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_UNUSED_54                       , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_54 );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_NEST_HANG_DETECT_ERROR       , 55  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_REC_ERROR      , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_XSTOP_ERROR    , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_SCOM_ERROR                   , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_SCOM_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_XSTOP_ON_DBG_TRIGGER_ERROR   , 60  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_FW_INJ_REC_ERROR             , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FW_INJ_REC_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_FW_INJ_XSTOP_ERROR           , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( EX_L2_CORE_FIRMASK_MASK_PC_PHYP_XSTOP_ERROR             , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( C_CORE_FIRMASK_MASK_IF_SRAM_REC_ERROR                   , 0   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_SRAM_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_TC_FIR_XSTOP_ERROR                  , 1   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_TC_FIR_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_IF_RFILE_REC_ERROR                  , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_IF_RFILE_XSTOP_ERROR                , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_IF_LOG_REC_ERROR                    , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_IF_LOG_XSTOP_ERROR                  , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_IF_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_6                            , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_6 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_7                            , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_7 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_RECOV_XSTOP_ERROR                , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_RFILE_REC_ERROR                  , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_RFILE_XSTOP_ERROR                , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_LOG_REC_ERROR                    , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_LOG_XSTOP_ERROR                  , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_NOT_MT_CI_REC_ERROR              , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_MCHK_AND_ME_EQ_0_ERROR           , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_L2_UE_ERROR                      , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_L2_UE_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_L2_UE_OVER_THRES_ERROR           , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_CI_UE_ERROR                      , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_CI_UE_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_18                           , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_18 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_19                           , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_19 );
+REG64_FLD( C_CORE_FIRMASK_MASK_SD_SYS_XSTOP_ERROR                  , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_SD_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_21                           , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_21 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_22                           , 22  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_22 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_23                           , 23  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_23 );
+REG64_FLD( C_CORE_FIRMASK_MASK_VS_LOG_REC_ERROR                    , 24  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_VS_LOG_XSTOP_ERROR                  , 25  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_RECOV_IN_MAINT_ERROR             , 26  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_VS_DU_LOG_REC_ERROR                 , 27  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_VS_DU_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_SYS_XSTOP_ERROR                  , 28  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_SRAM_PARITY_ERROR                , 29  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SRAM_PARITY_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_SETDELETE_ERROR                  , 30  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SETDELETE_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_RFILE_REC_ERROR                  , 31  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_RFILE_XSTOP_ERROR                , 32  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_TLB_MULTIHIT_ERROR               , 33  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_SLB_MULTIHIT_ERROR               , 34  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_DERAT_MULTIHIT_ERROR             , 35  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_FWD_PROGRESS_ERROR               , 36  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_LOG_REC_ERROR                    , 37  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_LOG_XSTOP_ERROR                  , 38  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_NOT_MT_REC_ERROR                 , 39  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_NOT_MT_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_40                           , 40  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_40 );
+REG64_FLD( C_CORE_FIRMASK_MASK_LS_SYS_XSTOP_ERROR                  , 41  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_LS_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_42                           , 42  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_42 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_THREAD_HANG_REC_ERROR            , 43  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_44                           , 44  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_44 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_LOG_XSTOP_ERROR                  , 45  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_46                           , 46  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_46 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR                 , 47  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_HYP_RES_ERROR                    , 48  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HYP_RES_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_49                           , 49  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_49 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_50                           , 50  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_50 );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_51                           , 51  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_51 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_HANG_RECOVERY_FAILED             , 52  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_HANG_DETECT_ERROR                , 53  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_UNUSED_54                           , 54  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_UNUSED_54 );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_NEST_HANG_DETECT_ERROR           , 55  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_REC_ERROR          , 56  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_XSTOP_ERROR        , 57  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR    , 58  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_OTHER_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_SCOM_ERROR                       , 59  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_SCOM_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_XSTOP_ON_DBG_TRIGGER_ERROR       , 60  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_FW_INJ_REC_ERROR                 , 61  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FW_INJ_REC_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_FW_INJ_XSTOP_ERROR               , 62  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( C_CORE_FIRMASK_MASK_PC_PHYP_XSTOP_ERROR                 , 63  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_MASK_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( EX_L2_CORE_FUSES_FP_THROTTLE_EN                         , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FP_THROTTLE_EN );
+REG64_FLD( EX_L2_CORE_FUSES_VMX_CRYPTO_DIS                         , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VMX_CRYPTO_DIS );
+
+REG64_FLD( C_CORE_FUSES_FP_THROTTLE_EN                             , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FP_THROTTLE_EN );
+REG64_FLD( C_CORE_FUSES_VMX_CRYPTO_DIS                             , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VMX_CRYPTO_DIS );
+
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT0_PSSCR_RL                    , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_PSSCR_RL );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT0_PSSCR_RL_LEN                , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_PSSCR_RL_LEN );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT1_PSSCR_RL                    , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_PSSCR_RL );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT1_PSSCR_RL_LEN                , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_PSSCR_RL_LEN );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT2_PSSCR_RL                    , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_PSSCR_RL );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT2_PSSCR_RL_LEN                , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_PSSCR_RL_LEN );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT3_PSSCR_RL                    , 44  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_PSSCR_RL );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT3_PSSCR_RL_LEN                , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_PSSCR_RL_LEN );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT0_STOP_STATE                  , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_STOP_STATE );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT1_STOP_STATE                  , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_STOP_STATE );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT2_STOP_STATE                  , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_STOP_STATE );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_VT3_STOP_STATE                  , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_STOP_STATE );
+REG64_FLD( EX_L2_CORE_THREAD_STATE_LPAR_FUSED_CORE_MODE            , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LPAR_FUSED_CORE_MODE );
+
+REG64_FLD( C_CORE_THREAD_STATE_VT0_PSSCR_RL                        , 32  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_PSSCR_RL );
+REG64_FLD( C_CORE_THREAD_STATE_VT0_PSSCR_RL_LEN                    , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_PSSCR_RL_LEN );
+REG64_FLD( C_CORE_THREAD_STATE_VT1_PSSCR_RL                        , 36  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_PSSCR_RL );
+REG64_FLD( C_CORE_THREAD_STATE_VT1_PSSCR_RL_LEN                    , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_PSSCR_RL_LEN );
+REG64_FLD( C_CORE_THREAD_STATE_VT2_PSSCR_RL                        , 40  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_PSSCR_RL );
+REG64_FLD( C_CORE_THREAD_STATE_VT2_PSSCR_RL_LEN                    , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_PSSCR_RL_LEN );
+REG64_FLD( C_CORE_THREAD_STATE_VT3_PSSCR_RL                        , 44  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_PSSCR_RL );
+REG64_FLD( C_CORE_THREAD_STATE_VT3_PSSCR_RL_LEN                    , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_PSSCR_RL_LEN );
+REG64_FLD( C_CORE_THREAD_STATE_VT0_STOP_STATE                      , 56  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_STOP_STATE );
+REG64_FLD( C_CORE_THREAD_STATE_VT1_STOP_STATE                      , 57  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_STOP_STATE );
+REG64_FLD( C_CORE_THREAD_STATE_VT2_STOP_STATE                      , 58  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_STOP_STATE );
+REG64_FLD( C_CORE_THREAD_STATE_VT3_STOP_STATE                      , 59  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_STOP_STATE );
+REG64_FLD( C_CORE_THREAD_STATE_LPAR_FUSED_CORE_MODE                , 63  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LPAR_FUSED_CORE_MODE );
+
+REG64_FLD( EX_CORE_WOF_WOF_IF_SRAM_REC_ERROR                       , 0   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_SRAM_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_TC_FIR_XSTOP_ERROR                      , 1   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_TC_FIR_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_IF_RFILE_REC_ERROR                      , 2   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_RFILE_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_IF_RFILE_XSTOP_ERROR                    , 3   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_IF_LOG_REC_ERROR                        , 4   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_LOG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_IF_LOG_XSTOP_ERROR                      , 5   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_LOG_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_6                                , 6   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_6 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_7                                , 7   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_7 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_RECOV_XSTOP_ERROR                    , 8   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_RFILE_REC_ERROR                      , 9   , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_RFILE_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_RFILE_XSTOP_ERROR                    , 10  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_LOG_REC_ERROR                        , 11  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_LOG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_LOG_XSTOP_ERROR                      , 12  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_LOG_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_NOT_MT_CI_REC_ERROR                  , 13  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_MCHK_AND_ME_EQ_0_ERROR               , 14  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_L2_UE_ERROR                          , 15  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_L2_UE_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_L2_UE_OVER_THRES_ERROR               , 16  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_SD_CI_UE_ERROR                          , 17  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_CI_UE_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_18                               , 18  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_18 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_19                               , 19  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_19 );
+REG64_FLD( EX_CORE_WOF_WOF_SD_SYS_XSTOP_ERROR                      , 20  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_SYS_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_21                               , 21  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_21 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_22                               , 22  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_22 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_23                               , 23  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_23 );
+REG64_FLD( EX_CORE_WOF_WOF_VS_LOG_REC_ERROR                        , 24  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_LOG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_VS_LOG_XSTOP_ERROR                      , 25  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_RECOV_IN_MAINT_ERROR                 , 26  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_VS_DU_LOG_REC_ERROR                     , 27  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_DU_LOG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_SYS_XSTOP_ERROR                      , 28  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_SYS_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_SRAM_PARITY_ERROR                    , 29  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SRAM_PARITY_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_SETDELETE_ERROR                      , 30  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SETDELETE_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_RFILE_REC_ERROR                      , 31  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_RFILE_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_RFILE_XSTOP_ERROR                    , 32  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_TLB_MULTIHIT_ERROR                   , 33  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_SLB_MULTIHIT_ERROR                   , 34  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_DERAT_MULTIHIT_ERROR                 , 35  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_FWD_PROGRESS_ERROR                   , 36  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_LOG_REC_ERROR                        , 37  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_LOG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_LOG_XSTOP_ERROR                      , 38  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_LOG_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_LS_NOT_MT_REC_ERROR                     , 39  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_NOT_MT_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_40                               , 40  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_40 );
+REG64_FLD( EX_CORE_WOF_WOF_LS_SYS_XSTOP_ERROR                      , 41  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SYS_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_42                               , 42  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_42 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_THREAD_HANG_REC_ERROR                , 43  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_44                               , 44  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_44 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_LOG_XSTOP_ERROR                      , 45  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_LOG_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_46                               , 46  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_46 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_TFAC_XSTOP_ERROR                     , 47  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_HYP_RES_ERROR                        , 48  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_HYP_RES_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_49                               , 49  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_49 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_50                               , 50  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_50 );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_51                               , 51  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_51 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_HANG_RECOVERY_FAILED                 , 52  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( EX_CORE_WOF_WOF_PC_CORE_HANG_DETECT_ERROR               , 53  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_CORE_HANG_DETECT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_UNUSED_54                               , 54  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_54 );
+REG64_FLD( EX_CORE_WOF_WOF_PC_NEST_HANG_DETECT_ERROR               , 55  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_REC_ERROR         , 56  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR       , 57  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR   , 58  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_SCOM_ERROR                           , 59  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_SCOM_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR           , 60  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_FW_INJ_REC_ERROR                     , 61  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FW_INJ_REC_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_FW_INJ_XSTOP_ERROR                   , 62  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( EX_CORE_WOF_WOF_PC_PHYP_XSTOP_ERROR                     , 63  , SH_UNT_EX       , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_PHYP_XSTOP_ERROR );
+
+REG64_FLD( C_CORE_WOF_WOF_IF_SRAM_REC_ERROR                        , 0   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_SRAM_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_TC_FIR_XSTOP_ERROR                       , 1   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_TC_FIR_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_IF_RFILE_REC_ERROR                       , 2   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_IF_RFILE_XSTOP_ERROR                     , 3   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_IF_LOG_REC_ERROR                         , 4   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_LOG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_IF_LOG_XSTOP_ERROR                       , 5   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_IF_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_6                                 , 6   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_6 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_7                                 , 7   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_7 );
+REG64_FLD( C_CORE_WOF_WOF_PC_RECOV_XSTOP_ERROR                     , 8   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_RECOV_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_RFILE_REC_ERROR                       , 9   , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_RFILE_XSTOP_ERROR                     , 10  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_LOG_REC_ERROR                         , 11  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_LOG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_LOG_XSTOP_ERROR                       , 12  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_NOT_MT_CI_REC_ERROR                   , 13  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_NOT_MT_CI_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_MCHK_AND_ME_EQ_0_ERROR                , 14  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_MCHK_AND_ME_EQ_0_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_L2_UE_ERROR                           , 15  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_L2_UE_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_L2_UE_OVER_THRES_ERROR                , 16  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_L2_UE_OVER_THRES_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_SD_CI_UE_ERROR                           , 17  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_CI_UE_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_18                                , 18  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_18 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_19                                , 19  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_19 );
+REG64_FLD( C_CORE_WOF_WOF_SD_SYS_XSTOP_ERROR                       , 20  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_SD_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_21                                , 21  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_21 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_22                                , 22  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_22 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_23                                , 23  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_23 );
+REG64_FLD( C_CORE_WOF_WOF_VS_LOG_REC_ERROR                         , 24  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_VS_LOG_XSTOP_ERROR                       , 25  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_RECOV_IN_MAINT_ERROR                  , 26  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_RECOV_IN_MAINT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_VS_DU_LOG_REC_ERROR                      , 27  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_VS_DU_LOG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_SYS_XSTOP_ERROR                       , 28  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_SRAM_PARITY_ERROR                     , 29  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SRAM_PARITY_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_SETDELETE_ERROR                       , 30  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SETDELETE_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_RFILE_REC_ERROR                       , 31  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_RFILE_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_RFILE_XSTOP_ERROR                     , 32  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_RFILE_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_TLB_MULTIHIT_ERROR                    , 33  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_TLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_SLB_MULTIHIT_ERROR                    , 34  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SLB_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_DERAT_MULTIHIT_ERROR                  , 35  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_DERAT_MULTIHIT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_FWD_PROGRESS_ERROR                    , 36  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FWD_PROGRESS_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_LOG_REC_ERROR                         , 37  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_LOG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_LOG_XSTOP_ERROR                       , 38  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_LS_NOT_MT_REC_ERROR                      , 39  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_NOT_MT_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_40                                , 40  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_40 );
+REG64_FLD( C_CORE_WOF_WOF_LS_SYS_XSTOP_ERROR                       , 41  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_LS_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_42                                , 42  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_42 );
+REG64_FLD( C_CORE_WOF_WOF_PC_THREAD_HANG_REC_ERROR                 , 43  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_THREAD_HANG_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_44                                , 44  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_44 );
+REG64_FLD( C_CORE_WOF_WOF_PC_LOG_XSTOP_ERROR                       , 45  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_LOG_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_46                                , 46  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_46 );
+REG64_FLD( C_CORE_WOF_WOF_PC_TFAC_XSTOP_ERROR                      , 47  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_TFAC_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_HYP_RES_ERROR                         , 48  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_HYP_RES_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_49                                , 49  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_49 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_50                                , 50  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_50 );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_51                                , 51  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_51 );
+REG64_FLD( C_CORE_WOF_WOF_PC_HANG_RECOVERY_FAILED                  , 52  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_HANG_RECOVERY_FAILED );
+REG64_FLD( C_CORE_WOF_WOF_PC_CORE_HANG_DETECT_ERROR                , 53  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_CORE_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_UNUSED_54                                , 54  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_UNUSED_54 );
+REG64_FLD( C_CORE_WOF_WOF_PC_NEST_HANG_DETECT_ERROR                , 55  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_NEST_HANG_DETECT_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_REC_ERROR          , 56  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR        , 57  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR    , 58  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_OTHER_CORE_CHIPLET_SYS_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_SCOM_ERROR                            , 59  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_SCOM_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR            , 60  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_XSTOP_ON_DBG_TRIGGER_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_FW_INJ_REC_ERROR                      , 61  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FW_INJ_REC_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_FW_INJ_XSTOP_ERROR                    , 62  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_FW_INJ_XSTOP_ERROR );
+REG64_FLD( C_CORE_WOF_WOF_PC_PHYP_XSTOP_ERROR                      , 63  , SH_UNT_C        , SH_ACS_SCOM_WCLRREG,
+           SH_FLD_WOF_PC_PHYP_XSTOP_ERROR );
 
 REG64_FLD( EQ_CPLT_CONF0_CTRL_MISC_PROBE0_SEL_DC                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_CTRL_MISC_PROBE0_SEL_DC );
@@ -3005,42 +4613,36 @@ REG64_FLD( C_CPLT_CONF0_RESERVED_ID_62C                            , 62  , SH_UN
 REG64_FLD( C_CPLT_CONF0_RESERVED_ID_63C                            , 63  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
            SH_FLD_RESERVED_ID_63C );
 
-REG64_FLD( EQ_CPLT_CONF1_UNUSED_0D                                 , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_0D  );
-REG64_FLD( EQ_CPLT_CONF1_UNUSED_1D                                 , 1   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_1D  );
-REG64_FLD( EQ_CPLT_CONF1_UNUSED_2D                                 , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_2D  );
-REG64_FLD( EQ_CPLT_CONF1_UNUSED_3D                                 , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_3D  );
-REG64_FLD( EQ_CPLT_CONF1_TC_PBIOO0_IOVALID                         , 4   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_PBIOO0_IOVALID );
-REG64_FLD( EQ_CPLT_CONF1_TC_PBIOO1_IOVALID                         , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_PBIOO1_IOVALID );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_6D                                , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_6D );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_7D                                , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_7D );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_8D                                , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_8D );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_9D                                , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_9D );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_10D                               , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_10D );
-REG64_FLD( EQ_CPLT_CONF1_IOVALID_11D                               , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_IOVALID_11D );
-REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_12D                            , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_FREE_USAGE_12D );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ                      , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_EQ );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ_LEN                  , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_EQ_LEN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP                  , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP_LEN              , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP_LEN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN                  , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN_LEN              , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN_LEN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP                   , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_L3_UP );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP_LEN               , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_L3_UP_LEN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN                   , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_L3_DN );
+REG64_FLD( EQ_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN_LEN               , 3   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TCEP_AMUX_VSELECT_L3_DN_LEN );
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_13D                            , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_13D );
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_14D                            , 14  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_14D );
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_15D                            , 15  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_15D );
-REG64_FLD( EQ_CPLT_CONF1_TC_OB_RATIO_DC                            , 16  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_OB_RATIO_DC );
-REG64_FLD( EQ_CPLT_CONF1_TC_OB_RATIO_DC_LEN                        , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_OB_RATIO_DC_LEN );
+REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_16D                            , 16  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_16D );
+REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_17D                            , 17  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_17D );
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_18D                            , 18  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_18D );
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_19D                            , 19  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
@@ -3070,26 +4672,38 @@ REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_30D                            , 30  , SH_UN
 REG64_FLD( EQ_CPLT_CONF1_FREE_USAGE_31D                            , 31  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_31D );
 
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ                      , 0   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_EQ );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ_LEN                  , 4   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_EQ_LEN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP                  , 4   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP_LEN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN                  , 6   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN_LEN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP                   , 8   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_UP );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP_LEN               , 4   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_UP_LEN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN                   , 12  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_DN );
-REG64_FLD( EX_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN_LEN               , 4   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_DN_LEN );
+REG64_FLD( EX_CPLT_CONF1_UNUSED_0D                                 , 0   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_0D  );
+REG64_FLD( EX_CPLT_CONF1_UNUSED_1D                                 , 1   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_1D  );
+REG64_FLD( EX_CPLT_CONF1_UNUSED_2D                                 , 2   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_2D  );
+REG64_FLD( EX_CPLT_CONF1_UNUSED_3D                                 , 3   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_3D  );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_4D                                , 4   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_4D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_5D                                , 5   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_5D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_6D                                , 6   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_6D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_7D                                , 7   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_7D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_8D                                , 8   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_8D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_9D                                , 9   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_9D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_10D                               , 10  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_10D );
+REG64_FLD( EX_CPLT_CONF1_IOVALID_11D                               , 11  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_11D );
+REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_12D                            , 12  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_12D );
+REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_13D                            , 13  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_13D );
+REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_14D                            , 14  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_14D );
+REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_15D                            , 15  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_15D );
 REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_16D                            , 16  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_16D );
 REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_17D                            , 17  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
@@ -3123,26 +4737,38 @@ REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_30D                            , 30  , SH_UN
 REG64_FLD( EX_CPLT_CONF1_FREE_USAGE_31D                            , 31  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_31D );
 
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ                       , 0   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_EQ );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_EQ_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_EQ_LEN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP                   , 4   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_UP_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_UP_LEN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN                   , 6   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_PWR_DN_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_PWR_DN_LEN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP                    , 8   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_UP );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_UP_LEN                , 4   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_UP_LEN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN                    , 12  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_DN );
-REG64_FLD( C_CPLT_CONF1_TCEP_AMUX_VSELECT_L3_DN_LEN                , 4   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TCEP_AMUX_VSELECT_L3_DN_LEN );
+REG64_FLD( C_CPLT_CONF1_UNUSED_0D                                  , 0   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_0D  );
+REG64_FLD( C_CPLT_CONF1_UNUSED_1D                                  , 1   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_1D  );
+REG64_FLD( C_CPLT_CONF1_UNUSED_2D                                  , 2   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_2D  );
+REG64_FLD( C_CPLT_CONF1_UNUSED_3D                                  , 3   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_3D  );
+REG64_FLD( C_CPLT_CONF1_IOVALID_4D                                 , 4   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_4D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_5D                                 , 5   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_5D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_6D                                 , 6   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_6D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_7D                                 , 7   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_7D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_8D                                 , 8   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_8D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_9D                                 , 9   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_9D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_10D                                , 10  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_10D );
+REG64_FLD( C_CPLT_CONF1_IOVALID_11D                                , 11  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_IOVALID_11D );
+REG64_FLD( C_CPLT_CONF1_FREE_USAGE_12D                             , 12  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_12D );
+REG64_FLD( C_CPLT_CONF1_FREE_USAGE_13D                             , 13  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_13D );
+REG64_FLD( C_CPLT_CONF1_FREE_USAGE_14D                             , 14  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_14D );
+REG64_FLD( C_CPLT_CONF1_FREE_USAGE_15D                             , 15  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_FREE_USAGE_15D );
 REG64_FLD( C_CPLT_CONF1_FREE_USAGE_16D                             , 16  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_16D );
 REG64_FLD( C_CPLT_CONF1_FREE_USAGE_17D                             , 17  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
@@ -3188,8 +4814,8 @@ REG64_FLD( EQ_CPLT_CTRL0_TC_UNIT_ARY_WRT_THRU_DC                   , 4   , SH_UN
            SH_FLD_TC_UNIT_ARY_WRT_THRU_DC );
 REG64_FLD( EQ_CPLT_CTRL0_TC_UNIT_AVP_MODE                          , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_TC_UNIT_AVP_MODE );
-REG64_FLD( EQ_CPLT_CTRL0_FREE_USAGE_6A                             , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_FREE_USAGE_6A );
+REG64_FLD( EQ_CPLT_CTRL0_TC_BIT6_CHIPLET_ID_DC                     , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_BIT6_CHIPLET_ID_DC );
 REG64_FLD( EQ_CPLT_CTRL0_FREE_USAGE_7A                             , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_FREE_USAGE_7A );
 REG64_FLD( EQ_CPLT_CTRL0_CTRL_CC_ABIST_RECOV_DISABLE_DC            , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
@@ -3537,24 +5163,24 @@ REG64_FLD( EQ_CPLT_CTRL1_TC_VITL_REGION_FENCE                      , 3   , SH_UN
            SH_FLD_TC_VITL_REGION_FENCE );
 REG64_FLD( EQ_CPLT_CTRL1_TC_PERV_REGION_FENCE                      , 4   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_TC_PERV_REGION_FENCE );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_5B                                 , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_5B  );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_6B                                 , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_6B  );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_7B                                 , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_7B  );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_8B                                 , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_8B  );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_9B                                 , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_9B  );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_10B                                , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_10B );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_11B                                , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_11B );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_12B                                , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_12B );
-REG64_FLD( EQ_CPLT_CTRL1_UNUSED_13B                                , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_UNUSED_13B );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION1_FENCE                          , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION1_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION2_FENCE                          , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION2_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION3_FENCE                          , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION3_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION4_FENCE                          , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION4_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION5_FENCE                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION5_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION6_FENCE                          , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION6_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION7_FENCE                          , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION7_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION8_FENCE                          , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION8_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION9_FENCE                          , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION9_FENCE );
 REG64_FLD( EQ_CPLT_CTRL1_UNUSED_14B                                , 14  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_UNUSED_14B );
 REG64_FLD( EQ_CPLT_CTRL1_RESERVED                                  , 15  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
@@ -3606,20 +5232,20 @@ REG64_FLD( EX_CPLT_CTRL1_TC_REGION1_FENCE                          , 5   , SH_UN
            SH_FLD_TC_REGION1_FENCE );
 REG64_FLD( EX_CPLT_CTRL1_TC_REGION2_FENCE                          , 6   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_TC_REGION2_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION3_FENCE                          , 7   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION3_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION4_FENCE                          , 8   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION4_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION5_FENCE                          , 9   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION5_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION6_FENCE                          , 10  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION6_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION7_FENCE                          , 11  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION7_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION8_FENCE                          , 12  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION8_FENCE );
-REG64_FLD( EX_CPLT_CTRL1_TC_REGION9_FENCE                          , 13  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION9_FENCE );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_7B                                 , 7   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_7B  );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_8B                                 , 8   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_8B  );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_9B                                 , 9   , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_9B  );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_10B                                , 10  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_10B );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_11B                                , 11  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_11B );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_12B                                , 12  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_12B );
+REG64_FLD( EX_CPLT_CTRL1_UNUSED_13B                                , 13  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_13B );
 REG64_FLD( EX_CPLT_CTRL1_UNUSED_14B                                , 14  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
            SH_FLD_UNUSED_14B );
 REG64_FLD( EX_CPLT_CTRL1_RESERVED                                  , 15  , SH_UNT_EX       , SH_ACS_SCOM2_CLEAR,
@@ -3671,20 +5297,20 @@ REG64_FLD( C_CPLT_CTRL1_TC_REGION1_FENCE                           , 5   , SH_UN
            SH_FLD_TC_REGION1_FENCE );
 REG64_FLD( C_CPLT_CTRL1_TC_REGION2_FENCE                           , 6   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
            SH_FLD_TC_REGION2_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION3_FENCE                           , 7   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION3_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION4_FENCE                           , 8   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION4_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION5_FENCE                           , 9   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION5_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION6_FENCE                           , 10  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION6_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION7_FENCE                           , 11  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION7_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION8_FENCE                           , 12  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION8_FENCE );
-REG64_FLD( C_CPLT_CTRL1_TC_REGION9_FENCE                           , 13  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
-           SH_FLD_TC_REGION9_FENCE );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_7B                                  , 7   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_7B  );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_8B                                  , 8   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_8B  );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_9B                                  , 9   , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_9B  );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_10B                                 , 10  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_10B );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_11B                                 , 11  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_11B );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_12B                                 , 12  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_12B );
+REG64_FLD( C_CPLT_CTRL1_UNUSED_13B                                 , 13  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_UNUSED_13B );
 REG64_FLD( C_CPLT_CTRL1_UNUSED_14B                                 , 14  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
            SH_FLD_UNUSED_14B );
 REG64_FLD( C_CPLT_CTRL1_RESERVED                                   , 15  , SH_UNT_C        , SH_ACS_SCOM2_CLEAR,
@@ -3806,10 +5432,10 @@ REG64_FLD( EX_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC                      , 8   , SH_UN
            SH_FLD_CC_CTRL_OPCG_DONE_DC );
 REG64_FLD( EX_CPLT_STAT0_CC_CTRL_CHIPLET_IS_ALIGNED_DC             , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_CC_CTRL_CHIPLET_IS_ALIGNED_DC );
-REG64_FLD( EX_CPLT_STAT0_FREE_USAGE_10E                            , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_FREE_USAGE_10E );
-REG64_FLD( EX_CPLT_STAT0_FREE_USAGE_11E                            , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_FREE_USAGE_11E );
+REG64_FLD( EX_CPLT_STAT0_PC_TC_VALID_NOT_HV_MODE                   , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PC_TC_VALID_NOT_HV_MODE );
+REG64_FLD( EX_CPLT_STAT0_PC_TC_AVP_OUT                             , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PC_TC_AVP_OUT );
 REG64_FLD( EX_CPLT_STAT0_FREE_USAGE_12E                            , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_FREE_USAGE_12E );
 REG64_FLD( EX_CPLT_STAT0_FREE_USAGE_13E                            , 13  , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -3855,10 +5481,10 @@ REG64_FLD( C_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC                       , 8   , SH_UN
            SH_FLD_CC_CTRL_OPCG_DONE_DC );
 REG64_FLD( C_CPLT_STAT0_CC_CTRL_CHIPLET_IS_ALIGNED_DC              , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_CC_CTRL_CHIPLET_IS_ALIGNED_DC );
-REG64_FLD( C_CPLT_STAT0_FREE_USAGE_10E                             , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_FREE_USAGE_10E );
-REG64_FLD( C_CPLT_STAT0_FREE_USAGE_11E                             , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_FREE_USAGE_11E );
+REG64_FLD( C_CPLT_STAT0_PC_TC_VALID_NOT_HV_MODE                    , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PC_TC_VALID_NOT_HV_MODE );
+REG64_FLD( C_CPLT_STAT0_PC_TC_AVP_OUT                              , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PC_TC_AVP_OUT );
 REG64_FLD( C_CPLT_STAT0_FREE_USAGE_12E                             , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_FREE_USAGE_12E );
 REG64_FLD( C_CPLT_STAT0_FREE_USAGE_13E                             , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -3975,6 +5601,98 @@ REG64_FLD( C_CPPM_CACSR_ACTUAL_CLK_SW_SPARE                        , 12  , SH_UN
            SH_FLD_ACTUAL_CLK_SW_SPARE );
 REG64_FLD( C_CPPM_CACSR_CLK_SYNC_DONE                              , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
            SH_FLD_CLK_SYNC_DONE );
+
+REG64_FLD( EX_CPPM_CIIR_MSGSND_INTR_INJECT                         , 28  , SH_UNT_EX       , SH_ACS_SCOM_4P  ,
+           SH_FLD_MSGSND_INTR_INJECT );
+REG64_FLD( EX_CPPM_CIIR_MSGSND_INTR_INJECT_LEN                     , 4   , SH_UNT_EX       , SH_ACS_SCOM_4P  ,
+           SH_FLD_MSGSND_INTR_INJECT_LEN );
+
+REG64_FLD( C_CPPM_CIIR_MSGSND_INTR_INJECT                          , 28  , SH_UNT_C        , SH_ACS_SCOM_4P  ,
+           SH_FLD_MSGSND_INTR_INJECT );
+REG64_FLD( C_CPPM_CIIR_MSGSND_INTR_INJECT_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM_4P  ,
+           SH_FLD_MSGSND_INTR_INJECT_LEN );
+
+REG64_FLD( EX_CPPM_CISR_HYP_INTR_PRESENT                           , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_PRESENT );
+REG64_FLD( EX_CPPM_CISR_HYP_INTR_PRESENT_LEN                       , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_PRESENT_LEN );
+REG64_FLD( EX_CPPM_CISR_OS_INTR_PRESENT                            , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_PRESENT );
+REG64_FLD( EX_CPPM_CISR_OS_INTR_PRESENT_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_PRESENT_LEN );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_PRESENT                        , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_PRESENT );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_PRESENT_LEN                    , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_PRESENT_LEN );
+REG64_FLD( EX_CPPM_CISR_EBB_INTR_PRESENT                           , 12  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_EBB_INTR_PRESENT );
+REG64_FLD( EX_CPPM_CISR_EBB_INTR_PRESENT_LEN                       , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_EBB_INTR_PRESENT_LEN );
+REG64_FLD( EX_CPPM_CISR_HYP_INTR_REQUESTED                         , 16  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_REQUESTED );
+REG64_FLD( EX_CPPM_CISR_HYP_INTR_REQUESTED_LEN                     , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_REQUESTED_LEN );
+REG64_FLD( EX_CPPM_CISR_OS_INTR_REQUESTED                          , 20  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_REQUESTED );
+REG64_FLD( EX_CPPM_CISR_OS_INTR_REQUESTED_LEN                      , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_REQUESTED_LEN );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_REQUESTED                      , 24  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_REQUESTED );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_REQUESTED_LEN                  , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_REQUESTED_LEN );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_SAMPLE                         , 28  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_SAMPLE );
+REG64_FLD( EX_CPPM_CISR_MSGSND_INTR_SAMPLE_LEN                     , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_SAMPLE_LEN );
+REG64_FLD( EX_CPPM_CISR_MSGSND_ACK                                 , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_ACK );
+REG64_FLD( EX_CPPM_CISR_MALF_ALERT_PRESENT                         , 33  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MALF_ALERT_PRESENT );
+REG64_FLD( EX_CPPM_CISR_MALF_ALERT_REQUESTED                       , 34  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MALF_ALERT_REQUESTED );
+REG64_FLD( EX_CPPM_CISR_CME_SPECIAL_WKUP_DONE                      , 35  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_CME_SPECIAL_WKUP_DONE );
+
+REG64_FLD( C_CPPM_CISR_HYP_INTR_PRESENT                            , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_PRESENT );
+REG64_FLD( C_CPPM_CISR_HYP_INTR_PRESENT_LEN                        , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_PRESENT_LEN );
+REG64_FLD( C_CPPM_CISR_OS_INTR_PRESENT                             , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_PRESENT );
+REG64_FLD( C_CPPM_CISR_OS_INTR_PRESENT_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_PRESENT_LEN );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_PRESENT                         , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_PRESENT );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_PRESENT_LEN                     , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_PRESENT_LEN );
+REG64_FLD( C_CPPM_CISR_EBB_INTR_PRESENT                            , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_EBB_INTR_PRESENT );
+REG64_FLD( C_CPPM_CISR_EBB_INTR_PRESENT_LEN                        , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_EBB_INTR_PRESENT_LEN );
+REG64_FLD( C_CPPM_CISR_HYP_INTR_REQUESTED                          , 16  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_REQUESTED );
+REG64_FLD( C_CPPM_CISR_HYP_INTR_REQUESTED_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HYP_INTR_REQUESTED_LEN );
+REG64_FLD( C_CPPM_CISR_OS_INTR_REQUESTED                           , 20  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_REQUESTED );
+REG64_FLD( C_CPPM_CISR_OS_INTR_REQUESTED_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_OS_INTR_REQUESTED_LEN );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_REQUESTED                       , 24  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_REQUESTED );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_REQUESTED_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_REQUESTED_LEN );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_SAMPLE                          , 28  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_SAMPLE );
+REG64_FLD( C_CPPM_CISR_MSGSND_INTR_SAMPLE_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_INTR_SAMPLE_LEN );
+REG64_FLD( C_CPPM_CISR_MSGSND_ACK                                  , 32  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MSGSND_ACK );
+REG64_FLD( C_CPPM_CISR_MALF_ALERT_PRESENT                          , 33  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MALF_ALERT_PRESENT );
+REG64_FLD( C_CPPM_CISR_MALF_ALERT_REQUESTED                        , 34  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MALF_ALERT_REQUESTED );
+REG64_FLD( C_CPPM_CISR_CME_SPECIAL_WKUP_DONE                       , 35  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_CME_SPECIAL_WKUP_DONE );
 
 REG64_FLD( EX_CPPM_CIVRMLCR_IVRM_LOCAL_CONTROL                     , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_IVRM_LOCAL_CONTROL );
@@ -4138,45 +5856,53 @@ REG64_FLD( EX_CPPM_ERR_PCB_INTERRUPT_PROTOCOL                      , 0   , SH_UN
            SH_FLD_PCB_INTERRUPT_PROTOCOL );
 REG64_FLD( EX_CPPM_ERR_SPECIAL_WKUP_PROTOCOL                       , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_SPECIAL_WKUP_PROTOCOL );
-REG64_FLD( EX_CPPM_ERR_PFET_SEQ_PROGRAM                            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_CPPM_ERR_SPECIAL_WKUP_DONE_PROTOCOL                  , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE_PROTOCOL );
+REG64_FLD( EX_CPPM_ERR_PFET_SEQ_PROGRAM                            , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_PFET_SEQ_PROGRAM );
-REG64_FLD( EX_CPPM_ERR_CLK_SYNC                                    , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_CPPM_ERR_CLK_SYNC                                    , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_CLK_SYNC   );
-REG64_FLD( EX_CPPM_ERR_PECE_INTR_DISABLED                          , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_CPPM_ERR_PECE_INTR_DISABLED                          , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_PECE_INTR_DISABLED );
-REG64_FLD( EX_CPPM_ERR_DECONFIGURED_INTR                           , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_CPPM_ERR_DECONFIGURED_INTR                           , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DECONFIGURED_INTR );
-REG64_FLD( EX_CPPM_ERR_RESERVED_6_7                                , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_RESERVED_6_7 );
-REG64_FLD( EX_CPPM_ERR_RESERVED_6_7_LEN                            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_RESERVED_6_7_LEN );
+REG64_FLD( EX_CPPM_ERR_RESERVED_7                                  , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_7 );
+REG64_FLD( EX_CPPM_ERR_RESERVED_8_11                               , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_8_11 );
+REG64_FLD( EX_CPPM_ERR_RESERVED_8_11_LEN                           , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_8_11_LEN );
 
 REG64_FLD( C_CPPM_ERR_PCB_INTERRUPT_PROTOCOL                       , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_PCB_INTERRUPT_PROTOCOL );
 REG64_FLD( C_CPPM_ERR_SPECIAL_WKUP_PROTOCOL                        , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_SPECIAL_WKUP_PROTOCOL );
-REG64_FLD( C_CPPM_ERR_PFET_SEQ_PROGRAM                             , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_CPPM_ERR_SPECIAL_WKUP_DONE_PROTOCOL                   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE_PROTOCOL );
+REG64_FLD( C_CPPM_ERR_PFET_SEQ_PROGRAM                             , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_PFET_SEQ_PROGRAM );
-REG64_FLD( C_CPPM_ERR_CLK_SYNC                                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_CPPM_ERR_CLK_SYNC                                     , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_CLK_SYNC   );
-REG64_FLD( C_CPPM_ERR_PECE_INTR_DISABLED                           , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_CPPM_ERR_PECE_INTR_DISABLED                           , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_PECE_INTR_DISABLED );
-REG64_FLD( C_CPPM_ERR_DECONFIGURED_INTR                            , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_CPPM_ERR_DECONFIGURED_INTR                            , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_DECONFIGURED_INTR );
-REG64_FLD( C_CPPM_ERR_RESERVED_6_7                                 , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_RESERVED_6_7 );
-REG64_FLD( C_CPPM_ERR_RESERVED_6_7_LEN                             , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_RESERVED_6_7_LEN );
+REG64_FLD( C_CPPM_ERR_RESERVED_7                                   , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_7 );
+REG64_FLD( C_CPPM_ERR_RESERVED_8_11                                , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_8_11 );
+REG64_FLD( C_CPPM_ERR_RESERVED_8_11_LEN                            , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESERVED_8_11_LEN );
 
-REG64_FLD( EX_CPPM_ERRMSK_RESERVED_0_7                             , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_7 );
-REG64_FLD( EX_CPPM_ERRMSK_RESERVED_0_7_LEN                         , 8   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_7_LEN );
+REG64_FLD( EX_CPPM_ERRMSK_RESERVED_0_11                            , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_11 );
+REG64_FLD( EX_CPPM_ERRMSK_RESERVED_0_11_LEN                        , 12  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_11_LEN );
 
-REG64_FLD( C_CPPM_ERRMSK_RESERVED_0_7                              , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_7 );
-REG64_FLD( C_CPPM_ERRMSK_RESERVED_0_7_LEN                          , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_7_LEN );
+REG64_FLD( C_CPPM_ERRMSK_RESERVED_0_11                             , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_11 );
+REG64_FLD( C_CPPM_ERRMSK_RESERVED_0_11_LEN                         , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_11_LEN );
 
 REG64_FLD( EX_CPPM_IPPMCMD_QPPM_REG                                , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_QPPM_REG   );
@@ -4229,6 +5955,68 @@ REG64_FLD( C_CPPM_IPPMWDATA_QPPM_WDATA                             , 0   , SH_UN
            SH_FLD_QPPM_WDATA );
 REG64_FLD( C_CPPM_IPPMWDATA_QPPM_WDATA_LEN                         , 64  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_QPPM_WDATA_LEN );
+
+REG64_FLD( EX_CPPM_NC0INDIR_NC_N_INDIRECT                          , 0   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT );
+REG64_FLD( EX_CPPM_NC0INDIR_NC_N_INDIRECT_LEN                      , 32  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT_LEN );
+
+REG64_FLD( C_CPPM_NC0INDIR_NC_N_INDIRECT                           , 0   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT );
+REG64_FLD( C_CPPM_NC0INDIR_NC_N_INDIRECT_LEN                       , 32  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT_LEN );
+
+REG64_FLD( EX_CPPM_NC1INDIR_NC_N_INDIRECT                          , 0   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT );
+REG64_FLD( EX_CPPM_NC1INDIR_NC_N_INDIRECT_LEN                      , 32  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT_LEN );
+
+REG64_FLD( C_CPPM_NC1INDIR_NC_N_INDIRECT                           , 0   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT );
+REG64_FLD( C_CPPM_NC1INDIR_NC_N_INDIRECT_LEN                       , 32  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_NC_N_INDIRECT_LEN );
+
+REG64_FLD( EX_CPPM_PECES_PECE_T0                                   , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T0    );
+REG64_FLD( EX_CPPM_PECES_PECE_T0_LEN                               , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T0_LEN );
+REG64_FLD( EX_CPPM_PECES_PECE_T1                                   , 8   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T1    );
+REG64_FLD( EX_CPPM_PECES_PECE_T1_LEN                               , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T1_LEN );
+REG64_FLD( EX_CPPM_PECES_PECE_T2                                   , 16  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T2    );
+REG64_FLD( EX_CPPM_PECES_PECE_T2_LEN                               , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T2_LEN );
+REG64_FLD( EX_CPPM_PECES_PECE_T3                                   , 24  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T3    );
+REG64_FLD( EX_CPPM_PECES_PECE_T3_LEN                               , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T3_LEN );
+REG64_FLD( EX_CPPM_PECES_USE_PECE                                  , 32  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_USE_PECE   );
+REG64_FLD( EX_CPPM_PECES_USE_PECE_LEN                              , 4   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_USE_PECE_LEN );
+
+REG64_FLD( C_CPPM_PECES_PECE_T0                                    , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T0    );
+REG64_FLD( C_CPPM_PECES_PECE_T0_LEN                                , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T0_LEN );
+REG64_FLD( C_CPPM_PECES_PECE_T1                                    , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T1    );
+REG64_FLD( C_CPPM_PECES_PECE_T1_LEN                                , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T1_LEN );
+REG64_FLD( C_CPPM_PECES_PECE_T2                                    , 16  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T2    );
+REG64_FLD( C_CPPM_PECES_PECE_T2_LEN                                , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T2_LEN );
+REG64_FLD( C_CPPM_PECES_PECE_T3                                    , 24  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T3    );
+REG64_FLD( C_CPPM_PECES_PECE_T3_LEN                                , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PECE_T3_LEN );
+REG64_FLD( C_CPPM_PECES_USE_PECE                                   , 32  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_USE_PECE   );
+REG64_FLD( C_CPPM_PECES_USE_PECE_LEN                               , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_USE_PECE_LEN );
 
 REG64_FLD( EX_CPPM_PERRSUM_ERROR                                   , 0   , SH_UNT_EX       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_ERROR      );
@@ -4314,6 +6102,8 @@ REG64_FLD( EX_L2_CTRL_T6_RUN_Q                                     , 54  , SH_UN
            SH_FLD_T6_RUN_Q   );
 REG64_FLD( EX_L2_CTRL_T7_RUN_Q                                     , 55  , SH_UNT_EX_L2    , SH_ACS_SCOM_NC  ,
            SH_FLD_T7_RUN_Q   );
+REG64_FLD( EX_L2_CTRL_RUN_LATCH                                    , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_NC  ,
+           SH_FLD_RUN_LATCH  );
 
 REG64_FLD( C_CTRL_T0_RUN_Q                                         , 48  , SH_UNT_C        , SH_ACS_SCOM_NC  ,
            SH_FLD_T0_RUN_Q   );
@@ -4331,6 +6121,8 @@ REG64_FLD( C_CTRL_T6_RUN_Q                                         , 54  , SH_UN
            SH_FLD_T6_RUN_Q   );
 REG64_FLD( C_CTRL_T7_RUN_Q                                         , 55  , SH_UNT_C        , SH_ACS_SCOM_NC  ,
            SH_FLD_T7_RUN_Q   );
+REG64_FLD( C_CTRL_RUN_LATCH                                        , 63  , SH_UNT_C        , SH_ACS_SCOM_NC  ,
+           SH_FLD_RUN_LATCH  );
 
 REG64_FLD( EQ_CTRL_ATOMIC_LOCK_REG_ENABLE                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE     );
@@ -5089,10 +6881,14 @@ REG64_FLD( EQ_DBG_MODE_REG_GLB_BRCST                               , 0   , SH_UN
            SH_FLD_GLB_BRCST  );
 REG64_FLD( EQ_DBG_MODE_REG_GLB_BRCST_LEN                           , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_GLB_BRCST_LEN );
-REG64_FLD( EQ_DBG_MODE_REG_TRACE_SEL                               , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+REG64_FLD( EQ_DBG_MODE_REG_TRACE_SEL                               , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_TRACE_SEL  );
-REG64_FLD( EQ_DBG_MODE_REG_TRIG_SEL                                , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+REG64_FLD( EQ_DBG_MODE_REG_TRACE_SEL_LEN                           , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_TRACE_SEL_LEN );
+REG64_FLD( EQ_DBG_MODE_REG_TRIG_SEL                                , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_TRIG_SEL   );
+REG64_FLD( EQ_DBG_MODE_REG_TRIG_SEL_LEN                            , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG_SEL_LEN );
 REG64_FLD( EQ_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION                 , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STOP_ON_XSTOP_SELECTION );
 REG64_FLD( EQ_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION             , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -5101,15 +6897,23 @@ REG64_FLD( EQ_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION                , 10  , SH_UN
            SH_FLD_STOP_ON_SPATTN_SELECTION );
 REG64_FLD( EQ_DBG_MODE_REG_FREEZE_SEL                              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_FREEZE_SEL );
+REG64_FLD( EQ_DBG_MODE_REG_SYNC_BRCST                              , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST );
+REG64_FLD( EQ_DBG_MODE_REG_SYNC_BRCST_LEN                          , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST_LEN );
 
 REG64_FLD( EX_DBG_MODE_REG_GLB_BRCST                               , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_GLB_BRCST  );
 REG64_FLD( EX_DBG_MODE_REG_GLB_BRCST_LEN                           , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_GLB_BRCST_LEN );
-REG64_FLD( EX_DBG_MODE_REG_TRACE_SEL                               , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_DBG_MODE_REG_TRACE_SEL                               , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_TRACE_SEL  );
-REG64_FLD( EX_DBG_MODE_REG_TRIG_SEL                                , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_DBG_MODE_REG_TRACE_SEL_LEN                           , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRACE_SEL_LEN );
+REG64_FLD( EX_DBG_MODE_REG_TRIG_SEL                                , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_TRIG_SEL   );
+REG64_FLD( EX_DBG_MODE_REG_TRIG_SEL_LEN                            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG_SEL_LEN );
 REG64_FLD( EX_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION                 , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_STOP_ON_XSTOP_SELECTION );
 REG64_FLD( EX_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION             , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -5118,15 +6922,23 @@ REG64_FLD( EX_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION                , 10  , SH_UN
            SH_FLD_STOP_ON_SPATTN_SELECTION );
 REG64_FLD( EX_DBG_MODE_REG_FREEZE_SEL                              , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_FREEZE_SEL );
+REG64_FLD( EX_DBG_MODE_REG_SYNC_BRCST                              , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST );
+REG64_FLD( EX_DBG_MODE_REG_SYNC_BRCST_LEN                          , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST_LEN );
 
 REG64_FLD( C_DBG_MODE_REG_GLB_BRCST                                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_GLB_BRCST  );
 REG64_FLD( C_DBG_MODE_REG_GLB_BRCST_LEN                            , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_GLB_BRCST_LEN );
-REG64_FLD( C_DBG_MODE_REG_TRACE_SEL                                , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_DBG_MODE_REG_TRACE_SEL                                , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_TRACE_SEL  );
-REG64_FLD( C_DBG_MODE_REG_TRIG_SEL                                 , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_DBG_MODE_REG_TRACE_SEL_LEN                            , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRACE_SEL_LEN );
+REG64_FLD( C_DBG_MODE_REG_TRIG_SEL                                 , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_TRIG_SEL   );
+REG64_FLD( C_DBG_MODE_REG_TRIG_SEL_LEN                             , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG_SEL_LEN );
 REG64_FLD( C_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION                  , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_STOP_ON_XSTOP_SELECTION );
 REG64_FLD( C_DBG_MODE_REG_STOP_ON_RECOV_ERR_SELECTION              , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -5135,6 +6947,10 @@ REG64_FLD( C_DBG_MODE_REG_STOP_ON_SPATTN_SELECTION                 , 10  , SH_UN
            SH_FLD_STOP_ON_SPATTN_SELECTION );
 REG64_FLD( C_DBG_MODE_REG_FREEZE_SEL                               , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_FREEZE_SEL );
+REG64_FLD( C_DBG_MODE_REG_SYNC_BRCST                               , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST );
+REG64_FLD( C_DBG_MODE_REG_SYNC_BRCST_LEN                           , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SYNC_BRCST_LEN );
 
 REG64_FLD( EQ_DBG_TRACE_MODE_REG_2_RUNN_COUNT_COMPARE_VALUE        , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_RUNN_COUNT_COMPARE_VALUE );
@@ -5577,6 +7393,189 @@ REG64_FLD( C_DBG_TRACE_REG_1_INST2_CHECKSTOP_MODE_LT_LEN           , 3   , SH_UN
 REG64_FLD( C_DBG_TRACE_REG_1_INST2_CHECKSTOP_MODE_SELECTOR         , 55  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_INST2_CHECKSTOP_MODE_SELECTOR );
 
+REG64_FLD( EQ_DEBUG_TRACE_CONTROL_SCOM_TRACE_START                 , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_START );
+REG64_FLD( EQ_DEBUG_TRACE_CONTROL_SCOM_TRACE_STOP                  , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_STOP );
+REG64_FLD( EQ_DEBUG_TRACE_CONTROL_SCOM_TRACE_RESET                 , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_RESET );
+
+REG64_FLD( EX_DEBUG_TRACE_CONTROL_SCOM_TRACE_START                 , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_START );
+REG64_FLD( EX_DEBUG_TRACE_CONTROL_SCOM_TRACE_STOP                  , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_STOP );
+REG64_FLD( EX_DEBUG_TRACE_CONTROL_SCOM_TRACE_RESET                 , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_RESET );
+
+REG64_FLD( C_DEBUG_TRACE_CONTROL_SCOM_TRACE_START                  , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_START );
+REG64_FLD( C_DEBUG_TRACE_CONTROL_SCOM_TRACE_STOP                   , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_STOP );
+REG64_FLD( C_DEBUG_TRACE_CONTROL_SCOM_TRACE_RESET                  , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SCOM_TRACE_RESET );
+
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T0_CLEAR_MAINT                 , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CLEAR_MAINT );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T0_SRESET_REQUEST              , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_SRESET_REQUEST );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T0_CORE_STEP                   , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_STEP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T0_CORE_START                  , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_START );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T0_CORE_STOP                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_STOP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T1_CLEAR_MAINT                 , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CLEAR_MAINT );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T1_SRESET_REQUEST              , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_SRESET_REQUEST );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T1_CORE_STEP                   , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_STEP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T1_CORE_START                  , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_START );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T1_CORE_STOP                   , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_STOP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T2_CLEAR_MAINT                 , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CLEAR_MAINT );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T2_SRESET_REQUEST              , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_SRESET_REQUEST );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T2_CORE_STEP                   , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_STEP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T2_CORE_START                  , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_START );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T2_CORE_STOP                   , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_STOP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T3_CLEAR_MAINT                 , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CLEAR_MAINT );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T3_SRESET_REQUEST              , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_SRESET_REQUEST );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T3_CORE_STEP                   , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_STEP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T3_CORE_START                  , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_START );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_DC_T3_CORE_STOP                   , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_STOP );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_WRITE_T0_PM_STATE                 , 32  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T0_PM_STATE );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T0_PLS                      , 33  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_PLS );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T0_PLS_LEN                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_PLS_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T0_SRR1                     , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_SRR1 );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T0_SRR1_LEN                 , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_SRR1_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_WRITE_T1_PM_STATE                 , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T1_PM_STATE );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T1_PLS                      , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_PLS );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T1_PLS_LEN                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_PLS_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T1_SRR1                     , 45  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_SRR1 );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T1_SRR1_LEN                 , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_SRR1_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_WRITE_T2_PM_STATE                 , 48  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T2_PM_STATE );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T2_PLS                      , 49  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_PLS );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T2_PLS_LEN                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_PLS_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T2_SRR1                     , 53  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_SRR1 );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T2_SRR1_LEN                 , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_SRR1_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_WRITE_T3_PM_STATE                 , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T3_PM_STATE );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T3_PLS                      , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_PLS );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T3_PLS_LEN                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_PLS_LEN );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T3_SRR1                     , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_SRR1 );
+REG64_FLD( EX_L2_DIRECT_CONTROLS_PSSCR_T3_SRR1_LEN                 , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_SRR1_LEN );
+
+REG64_FLD( C_DIRECT_CONTROLS_DC_T0_CLEAR_MAINT                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CLEAR_MAINT );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T0_SRESET_REQUEST                  , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_SRESET_REQUEST );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T0_CORE_STEP                       , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_STEP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T0_CORE_START                      , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_START );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T0_CORE_STOP                       , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T0_CORE_STOP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T1_CLEAR_MAINT                     , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CLEAR_MAINT );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T1_SRESET_REQUEST                  , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_SRESET_REQUEST );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T1_CORE_STEP                       , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_STEP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T1_CORE_START                      , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_START );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T1_CORE_STOP                       , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T1_CORE_STOP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T2_CLEAR_MAINT                     , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CLEAR_MAINT );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T2_SRESET_REQUEST                  , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_SRESET_REQUEST );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T2_CORE_STEP                       , 21  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_STEP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T2_CORE_START                      , 22  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_START );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T2_CORE_STOP                       , 23  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T2_CORE_STOP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T3_CLEAR_MAINT                     , 27  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CLEAR_MAINT );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T3_SRESET_REQUEST                  , 28  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_SRESET_REQUEST );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T3_CORE_STEP                       , 29  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_STEP );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T3_CORE_START                      , 30  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_START );
+REG64_FLD( C_DIRECT_CONTROLS_DC_T3_CORE_STOP                       , 31  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DC_T3_CORE_STOP );
+REG64_FLD( C_DIRECT_CONTROLS_WRITE_T0_PM_STATE                     , 32  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T0_PM_STATE );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T0_PLS                          , 33  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_PLS );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T0_PLS_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_PLS_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T0_SRR1                         , 37  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_SRR1 );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T0_SRR1_LEN                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T0_SRR1_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_WRITE_T1_PM_STATE                     , 40  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T1_PM_STATE );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T1_PLS                          , 41  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_PLS );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T1_PLS_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_PLS_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T1_SRR1                         , 45  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_SRR1 );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T1_SRR1_LEN                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T1_SRR1_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_WRITE_T2_PM_STATE                     , 48  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T2_PM_STATE );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T2_PLS                          , 49  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_PLS );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T2_PLS_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_PLS_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T2_SRR1                         , 53  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_SRR1 );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T2_SRR1_LEN                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T2_SRR1_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_WRITE_T3_PM_STATE                     , 56  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_T3_PM_STATE );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T3_PLS                          , 57  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_PLS );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T3_PLS_LEN                      , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_PLS_LEN );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T3_SRR1                         , 61  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_SRR1 );
+REG64_FLD( C_DIRECT_CONTROLS_PSSCR_T3_SRR1_LEN                     , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSSCR_T3_SRR1_LEN );
+
 REG64_FLD( EQ_DRAM_REF_REG_L3_TIMER_DIVIDE_MAJOR                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_TIMER_DIVIDE_MAJOR );
 REG64_FLD( EQ_DRAM_REF_REG_L3_TIMER_DIVIDE_MAJOR_LEN               , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -5725,6 +7724,21 @@ REG64_FLD( EX_L3_EDRAM_REG_L3_UTIL_MON_BITS                        , 7   , SH_UN
 REG64_FLD( EX_L3_EDRAM_REG_L3_UTIL_MON_BITS_LEN                    , 6   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_UTIL_MON_BITS_LEN );
 
+REG64_FLD( EQ_EDRAM_STATUS_STAT                                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STAT       );
+REG64_FLD( EQ_EDRAM_STATUS_STAT_LEN                                , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STAT_LEN   );
+
+REG64_FLD( EX_EDRAM_STATUS_STAT                                    , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STAT       );
+REG64_FLD( EX_EDRAM_STATUS_STAT_LEN                                , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STAT_LEN   );
+
+REG64_FLD( C_EDRAM_STATUS_STAT                                     , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STAT       );
+REG64_FLD( C_EDRAM_STATUS_STAT_LEN                                 , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STAT_LEN   );
+
 REG64_FLD( EQ_ED_RD_ERR_STAT_REG0_L3_VAL                           , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_VAL     );
 REG64_FLD( EQ_ED_RD_ERR_STAT_REG0_L3_1ST_BEAT_UE                   , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -5819,8 +7833,8 @@ REG64_FLD( EQ_ERROR_REG_PCB_INTERFACE                              , 16  , SH_UN
            SH_FLD_PCB_INTERFACE );
 REG64_FLD( EQ_ERROR_REG_CHIPLET_OFFLINE                            , 17  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CHIPLET_OFFLINE );
-REG64_FLD( EQ_ERROR_REG_CHIPLET_GRID_SKITTER                       , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_CHIPLET_GRID_SKITTER );
+REG64_FLD( EQ_ERROR_REG_EDRAM_SEQUENCE_ERR                         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EDRAM_SEQUENCE_ERR );
 REG64_FLD( EQ_ERROR_REG_CTRL_PARITY                                , 19  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CTRL_PARITY );
 REG64_FLD( EQ_ERROR_REG_ADDRESS_PARITY                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -5872,8 +7886,8 @@ REG64_FLD( EX_ERROR_REG_PCB_INTERFACE                              , 16  , SH_UN
            SH_FLD_PCB_INTERFACE );
 REG64_FLD( EX_ERROR_REG_CHIPLET_OFFLINE                            , 17  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_CHIPLET_OFFLINE );
-REG64_FLD( EX_ERROR_REG_CHIPLET_GRID_SKITTER                       , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_CHIPLET_GRID_SKITTER );
+REG64_FLD( EX_ERROR_REG_EDRAM_SEQUENCE_ERR                         , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EDRAM_SEQUENCE_ERR );
 REG64_FLD( EX_ERROR_REG_CTRL_PARITY                                , 19  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_CTRL_PARITY );
 REG64_FLD( EX_ERROR_REG_ADDRESS_PARITY                             , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -5925,8 +7939,8 @@ REG64_FLD( C_ERROR_REG_PCB_INTERFACE                               , 16  , SH_UN
            SH_FLD_PCB_INTERFACE );
 REG64_FLD( C_ERROR_REG_CHIPLET_OFFLINE                             , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_CHIPLET_OFFLINE );
-REG64_FLD( C_ERROR_REG_CHIPLET_GRID_SKITTER                        , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_CHIPLET_GRID_SKITTER );
+REG64_FLD( C_ERROR_REG_EDRAM_SEQUENCE_ERR                          , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_EDRAM_SEQUENCE_ERR );
 REG64_FLD( C_ERROR_REG_CTRL_PARITY                                 , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_CTRL_PARITY );
 REG64_FLD( C_ERROR_REG_ADDRESS_PARITY                              , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -5944,20 +7958,200 @@ REG64_FLD( C_ERROR_REG_PLL_UNLOCK                                  , 25  , SH_UN
 REG64_FLD( C_ERROR_REG_PLL_UNLOCK_LEN                              , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_PLL_UNLOCK_LEN );
 
-REG64_FLD( EQ_ERROR_STATUS_ERRORS                                  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS     );
-REG64_FLD( EQ_ERROR_STATUS_ERRORS_LEN                              , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS_LEN );
+REG64_FLD( EQ_ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR               , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_NOT_ALLOWED_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_READ_NOT_ALLOWED_ERR                , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_READ_NOT_ALLOWED_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_PARITY_ON_CMD_ERR                   , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_CMD_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_ADDRESS_NOT_VALID_ERR               , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_ADDRESS_NOT_VALID_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_PARITY_ON_ADDR_ERR                  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_ADDR_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_PARITY_ON_DATA_ERR                  , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_DATA_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_PROTECTED_ACCESS_INVALID_ERR        , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PROTECTED_ACCESS_INVALID_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_PARITY_ON_SPCIF_ERR                 , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_SPCIF_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PCB_WRITE_AND_OPCG_IP_ERR               , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_AND_OPCG_IP_ERR );
+REG64_FLD( EQ_ERROR_STATUS_SCAN_READ_AND_OPCG_IP_ERR               , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_READ_AND_OPCG_IP_ERR );
+REG64_FLD( EQ_ERROR_STATUS_CLOCK_CMD_CONFLICT_ERR                  , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_CONFLICT_ERR );
+REG64_FLD( EQ_ERROR_STATUS_SCAN_COLLISION_ERR                      , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_COLLISION_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PREVENTED_SCAN_COLLISION_ERR            , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PREVENTED_SCAN_COLLISION_ERR );
+REG64_FLD( EQ_ERROR_STATUS_OPCG_TRIGGER_ERR                        , 13  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_OPCG_TRIGGER_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PHASE_CNT_CORRUPTION_ERR                , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PHASE_CNT_CORRUPTION_ERR );
+REG64_FLD( EQ_ERROR_STATUS_CLOCK_CMD_PREVENTED_ERR                 , 15  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_PREVENTED_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_OPCG_SM_ERR                   , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_SM_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_CLOCK_MUX_REG_ERR             , 17  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_CLOCK_MUX_REG_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_OPCG_REG_ERR                  , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_REG_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_SYNC_CONFIG_REG_ERR           , 19  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SYNC_CONFIG_REG_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_XSTOP_REG_ERR                 , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_XSTOP_REG_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_GPIO_REG_ERR                  , 21  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_GPIO_REG_ERR );
+REG64_FLD( EQ_ERROR_STATUS_CLKCMD_REQUEST_ERR                      , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_CLKCMD_REQUEST_ERR );
+REG64_FLD( EQ_ERROR_STATUS_CBS_PROTOCOL_ERR                        , 23  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_CBS_PROTOCOL_ERR );
+REG64_FLD( EQ_ERROR_STATUS_VITL_ALIGN_ERR                          , 24  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_VITL_ALIGN_ERR );
+REG64_FLD( EQ_ERROR_STATUS_UNIT_SYNC_LVL_ERR                       , 25  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_SYNC_LVL_ERR );
+REG64_FLD( EQ_ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR        , 26  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SELFBOOT_CMD_STATE_ERR );
+REG64_FLD( EQ_ERROR_STATUS_UNUSED_ERROR27                          , 27  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR27 );
+REG64_FLD( EQ_ERROR_STATUS_UNUSED_ERROR28                          , 28  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR28 );
+REG64_FLD( EQ_ERROR_STATUS_UNUSED_ERROR29                          , 29  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR29 );
+REG64_FLD( EQ_ERROR_STATUS_UNUSED_ERROR30                          , 30  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR30 );
+REG64_FLD( EQ_ERROR_STATUS_UNUSED_ERROR31                          , 31  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR31 );
 
-REG64_FLD( EX_ERROR_STATUS_ERRORS                                  , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS     );
-REG64_FLD( EX_ERROR_STATUS_ERRORS_LEN                              , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS_LEN );
+REG64_FLD( EX_ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR               , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_NOT_ALLOWED_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_READ_NOT_ALLOWED_ERR                , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_READ_NOT_ALLOWED_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_PARITY_ON_CMD_ERR                   , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_CMD_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_ADDRESS_NOT_VALID_ERR               , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_ADDRESS_NOT_VALID_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_PARITY_ON_ADDR_ERR                  , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_ADDR_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_PARITY_ON_DATA_ERR                  , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_DATA_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_PROTECTED_ACCESS_INVALID_ERR        , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PROTECTED_ACCESS_INVALID_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_PARITY_ON_SPCIF_ERR                 , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_SPCIF_ERR );
+REG64_FLD( EX_ERROR_STATUS_PCB_WRITE_AND_OPCG_IP_ERR               , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_AND_OPCG_IP_ERR );
+REG64_FLD( EX_ERROR_STATUS_SCAN_READ_AND_OPCG_IP_ERR               , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_READ_AND_OPCG_IP_ERR );
+REG64_FLD( EX_ERROR_STATUS_CLOCK_CMD_CONFLICT_ERR                  , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_CONFLICT_ERR );
+REG64_FLD( EX_ERROR_STATUS_SCAN_COLLISION_ERR                      , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_COLLISION_ERR );
+REG64_FLD( EX_ERROR_STATUS_PREVENTED_SCAN_COLLISION_ERR            , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PREVENTED_SCAN_COLLISION_ERR );
+REG64_FLD( EX_ERROR_STATUS_OPCG_TRIGGER_ERR                        , 13  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_OPCG_TRIGGER_ERR );
+REG64_FLD( EX_ERROR_STATUS_PHASE_CNT_CORRUPTION_ERR                , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PHASE_CNT_CORRUPTION_ERR );
+REG64_FLD( EX_ERROR_STATUS_CLOCK_CMD_PREVENTED_ERR                 , 15  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_PREVENTED_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_OPCG_SM_ERR                   , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_SM_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_CLOCK_MUX_REG_ERR             , 17  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_CLOCK_MUX_REG_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_OPCG_REG_ERR                  , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_REG_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_SYNC_CONFIG_REG_ERR           , 19  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SYNC_CONFIG_REG_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_XSTOP_REG_ERR                 , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_XSTOP_REG_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_GPIO_REG_ERR                  , 21  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_GPIO_REG_ERR );
+REG64_FLD( EX_ERROR_STATUS_CLKCMD_REQUEST_ERR                      , 22  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CLKCMD_REQUEST_ERR );
+REG64_FLD( EX_ERROR_STATUS_CBS_PROTOCOL_ERR                        , 23  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CBS_PROTOCOL_ERR );
+REG64_FLD( EX_ERROR_STATUS_VITL_ALIGN_ERR                          , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_VITL_ALIGN_ERR );
+REG64_FLD( EX_ERROR_STATUS_UNIT_SYNC_LVL_ERR                       , 25  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_SYNC_LVL_ERR );
+REG64_FLD( EX_ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR        , 26  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SELFBOOT_CMD_STATE_ERR );
+REG64_FLD( EX_ERROR_STATUS_UNUSED_ERROR27                          , 27  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR27 );
+REG64_FLD( EX_ERROR_STATUS_UNUSED_ERROR28                          , 28  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR28 );
+REG64_FLD( EX_ERROR_STATUS_UNUSED_ERROR29                          , 29  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR29 );
+REG64_FLD( EX_ERROR_STATUS_UNUSED_ERROR30                          , 30  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR30 );
+REG64_FLD( EX_ERROR_STATUS_UNUSED_ERROR31                          , 31  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR31 );
 
-REG64_FLD( C_ERROR_STATUS_ERRORS                                   , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS     );
-REG64_FLD( C_ERROR_STATUS_ERRORS_LEN                               , 32  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_ERRORS_LEN );
+REG64_FLD( C_ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_NOT_ALLOWED_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_READ_NOT_ALLOWED_ERR                 , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_READ_NOT_ALLOWED_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_PARITY_ON_CMD_ERR                    , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_CMD_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_ADDRESS_NOT_VALID_ERR                , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_ADDRESS_NOT_VALID_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_PARITY_ON_ADDR_ERR                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_ADDR_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_PARITY_ON_DATA_ERR                   , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_DATA_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_PROTECTED_ACCESS_INVALID_ERR         , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PROTECTED_ACCESS_INVALID_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_PARITY_ON_SPCIF_ERR                  , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_PARITY_ON_SPCIF_ERR );
+REG64_FLD( C_ERROR_STATUS_PCB_WRITE_AND_OPCG_IP_ERR                , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PCB_WRITE_AND_OPCG_IP_ERR );
+REG64_FLD( C_ERROR_STATUS_SCAN_READ_AND_OPCG_IP_ERR                , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_READ_AND_OPCG_IP_ERR );
+REG64_FLD( C_ERROR_STATUS_CLOCK_CMD_CONFLICT_ERR                   , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_CONFLICT_ERR );
+REG64_FLD( C_ERROR_STATUS_SCAN_COLLISION_ERR                       , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SCAN_COLLISION_ERR );
+REG64_FLD( C_ERROR_STATUS_PREVENTED_SCAN_COLLISION_ERR             , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PREVENTED_SCAN_COLLISION_ERR );
+REG64_FLD( C_ERROR_STATUS_OPCG_TRIGGER_ERR                         , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_OPCG_TRIGGER_ERR );
+REG64_FLD( C_ERROR_STATUS_PHASE_CNT_CORRUPTION_ERR                 , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PHASE_CNT_CORRUPTION_ERR );
+REG64_FLD( C_ERROR_STATUS_CLOCK_CMD_PREVENTED_ERR                  , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CLOCK_CMD_PREVENTED_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_OPCG_SM_ERR                    , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_SM_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_CLOCK_MUX_REG_ERR              , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_CLOCK_MUX_REG_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_OPCG_REG_ERR                   , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_OPCG_REG_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_SYNC_CONFIG_REG_ERR            , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SYNC_CONFIG_REG_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_XSTOP_REG_ERR                  , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_XSTOP_REG_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_GPIO_REG_ERR                   , 21  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_GPIO_REG_ERR );
+REG64_FLD( C_ERROR_STATUS_CLKCMD_REQUEST_ERR                       , 22  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CLKCMD_REQUEST_ERR );
+REG64_FLD( C_ERROR_STATUS_CBS_PROTOCOL_ERR                         , 23  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CBS_PROTOCOL_ERR );
+REG64_FLD( C_ERROR_STATUS_VITL_ALIGN_ERR                           , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VITL_ALIGN_ERR );
+REG64_FLD( C_ERROR_STATUS_UNIT_SYNC_LVL_ERR                        , 25  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_SYNC_LVL_ERR );
+REG64_FLD( C_ERROR_STATUS_PARITY_ON_SELFBOOT_CMD_STATE_ERR         , 26  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PARITY_ON_SELFBOOT_CMD_STATE_ERR );
+REG64_FLD( C_ERROR_STATUS_UNUSED_ERROR27                           , 27  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR27 );
+REG64_FLD( C_ERROR_STATUS_UNUSED_ERROR28                           , 28  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR28 );
+REG64_FLD( C_ERROR_STATUS_UNUSED_ERROR29                           , 29  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR29 );
+REG64_FLD( C_ERROR_STATUS_UNUSED_ERROR30                           , 30  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR30 );
+REG64_FLD( C_ERROR_STATUS_UNUSED_ERROR31                           , 31  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED_ERROR31 );
 
 REG64_FLD( EQ_ERR_INJ_REG_L3_SINGLE_CAC                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_SINGLE_CAC );
@@ -5978,6 +8172,39 @@ REG64_FLD( EQ_ERR_INJ_REG_L3_SINGLE_LRU                            , 7   , SH_UN
 REG64_FLD( EQ_ERR_INJ_REG_L3_SOLID_LRU                             , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_SOLID_LRU );
 
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DCSET0                         , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET0 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DCSET1                         , 1   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET1 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DCSET2                         , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET2 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SLICE_DCD0                     , 3   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD0 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SLICE_DCD1                     , 4   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD1 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SLICE_DCD2                     , 5   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD2 );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DCACHE                         , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCACHE );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DDIR                           , 7   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DDIR );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SETP                           , 8   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SETP );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DERAT                          , 9   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DERAT );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DERAT_MULTIHIT                 , 10  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DERAT_MULTIHIT );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SLB                            , 11  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLB );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_SLB_MULTIHIT                   , 12  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLB_MULTIHIT );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_ITLB                           , 13  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_ITLB );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DTLB                           , 14  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DTLB );
+REG64_FLD( EX_ERR_INJ_REG_ERROR_INJ_DTLB_MULTIHIT                  , 15  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DTLB_MULTIHIT );
+
 REG64_FLD( EX_L2_ERR_INJ_REG_DW_TYPE                               , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_DW_TYPE    );
 REG64_FLD( EX_L2_ERR_INJ_REG_DW_TYPE_LEN                           , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
@@ -5996,6 +8223,41 @@ REG64_FLD( EX_L2_ERR_INJ_REG_CPI_TYPE_LEN                          , 3   , SH_UN
            SH_FLD_CPI_TYPE_LEN );
 REG64_FLD( EX_L2_ERR_INJ_REG_LVDIR_EN                              , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_LVDIR_EN   );
+REG64_FLD( EX_L2_ERR_INJ_REG_LRU_EN                                , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_LRU_EN     );
+
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DCSET0                          , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET0 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DCSET1                          , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET1 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DCSET2                          , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCSET2 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SLICE_DCD0                      , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD0 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SLICE_DCD1                      , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD1 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SLICE_DCD2                      , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLICE_DCD2 );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DCACHE                          , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DCACHE );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DDIR                            , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DDIR );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SETP                            , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SETP );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DERAT                           , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DERAT );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DERAT_MULTIHIT                  , 10  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DERAT_MULTIHIT );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SLB                             , 11  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLB );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_SLB_MULTIHIT                    , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_SLB_MULTIHIT );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_ITLB                            , 13  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_ITLB );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DTLB                            , 14  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DTLB );
+REG64_FLD( C_ERR_INJ_REG_ERROR_INJ_DTLB_MULTIHIT                   , 15  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ERROR_INJ_DTLB_MULTIHIT );
 
 REG64_FLD( EX_L3_ERR_INJ_REG_L3_SINGLE_CAC                         , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_SINGLE_CAC );
@@ -6016,6 +8278,8 @@ REG64_FLD( EX_L3_ERR_INJ_REG_L3_SINGLE_LRU                         , 7   , SH_UN
 REG64_FLD( EX_L3_ERR_INJ_REG_L3_SOLID_LRU                          , 8   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_SOLID_LRU );
 
+REG64_FLD( EQ_ERR_RPT0_RSV                                         , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RSV        );
 REG64_FLD( EQ_ERR_RPT0_FIR14_NCCTL_RLD_BARRIER                     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_FIR14_NCCTL_RLD_BARRIER );
 REG64_FLD( EQ_ERR_RPT0_FIR14_NCCTL_SNP                             , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -6099,6 +8363,8 @@ REG64_FLD( EQ_ERR_RPT0_FIR14_RCX_UNEXP_IDLE_PB_CRESP               , 40  , SH_UN
 REG64_FLD( EQ_ERR_RPT0_FIR14_COX_UNEXP_IDLE_PB_CRESP               , 41  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_FIR14_COX_UNEXP_IDLE_PB_CRESP );
 
+REG64_FLD( EX_L2_ERR_RPT0_RSV                                      , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RSV        );
 REG64_FLD( EX_L2_ERR_RPT0_FIR14_NCCTL_RLD_BARRIER                  , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_FIR14_NCCTL_RLD_BARRIER );
 REG64_FLD( EX_L2_ERR_RPT0_FIR14_NCCTL_SNP                          , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
@@ -6422,6 +8688,38 @@ REG64_FLD( EX_ERR_RPT_REG_FIR19_LD_TGT_NODAL_DINC                  , 28  , SH_UN
 REG64_FLD( EX_ERR_RPT_REG_FIR19_ST_TGT_NODAL_DINC                  , 29  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_FIR19_ST_TGT_NODAL_DINC );
 
+REG64_FLD( EQ_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_THERM_MODEREG_PARITY_ERR_HOLD         , 1   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THERM_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SKITTER_MODEREG_PARITY_ERR_HOLD       , 2   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SKITTER_FORCEREG_PARITY_ERR_HOLD      , 3   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_FORCEREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_VOLT_MODEREG_PARITY_ERR_HOLD          , 5   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VOLT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SKITTER_CLKSRCREG_PARITY_ERR_HOLD     , 6   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_CLKSRCREG_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_COUNT_STATE_ERR_HOLD                  , 7   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_RUN_STATE_ERR_HOLD                    , 8   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_THRES_THERM_STATE_ERR_HOLD            , 9   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_STATE_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_THRES_THERM_OVERFLOW_ERR_HOLD         , 10  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_OVERFLOW_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SHIFTER_PARITY_ERR_HOLD               , 11  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_PARITY_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_SHIFTER_VALID_ERR_HOLD                , 12  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_VALID_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_TIMEOUT_ERR_HOLD                      , 13  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TIMEOUT_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_F_SKITTER_ERR_HOLD                    , 14  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_F_SKITTER_ERR_HOLD );
+REG64_FLD( EQ_ERR_STATUS_REG_PCB_ERR_HOLD_OUT                      , 15  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCB_ERR_HOLD_OUT );
 REG64_FLD( EQ_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK   , 16  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK );
 REG64_FLD( EQ_ERR_STATUS_REG_THERM_MODEREG_PARITY_MASK             , 17  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
@@ -6452,7 +8750,69 @@ REG64_FLD( EQ_ERR_STATUS_REG_F_SKITTER_READ_MASK                   , 30  , SH_UN
            SH_FLD_F_SKITTER_READ_MASK );
 REG64_FLD( EQ_ERR_STATUS_REG_PCB_MASK                              , 31  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_PCB_MASK   );
+REG64_FLD( EQ_ERR_STATUS_REG_COUNT_STATE_LT                        , 40  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_COUNT_STATE_LT_LEN                    , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT_LEN );
+REG64_FLD( EQ_ERR_STATUS_REG_RUN_STATE_LT                          , 44  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_RUN_STATE_LT_LEN                      , 3   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT_LEN );
+REG64_FLD( EQ_ERR_STATUS_REG_SHIFT_DTS_LT                          , 47  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_DTS_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_SHIFT_VOLT_LT                         , 48  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_VOLT_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_READ_STATE_LT                         , 49  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_READ_STATE_LT_LEN                     , 2   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT_LEN );
+REG64_FLD( EQ_ERR_STATUS_REG_WRITE_STATE_LT                        , 51  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_WRITE_STATE_LT_LEN                    , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT_LEN );
+REG64_FLD( EQ_ERR_STATUS_REG_SAMPLE_DTS_LT                         , 55  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SAMPLE_DTS_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_MEASURE_VOLT_LT                       , 56  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MEASURE_VOLT_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_READ_CPM_LT                           , 57  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_CPM_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_WRITE_CPM_LT                          , 58  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_CPM_LT );
+REG64_FLD( EQ_ERR_STATUS_REG_UNUSED                                , 59  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
 
+REG64_FLD( EX_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_THERM_MODEREG_PARITY_ERR_HOLD         , 1   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THERM_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SKITTER_MODEREG_PARITY_ERR_HOLD       , 2   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SKITTER_FORCEREG_PARITY_ERR_HOLD      , 3   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_FORCEREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_VOLT_MODEREG_PARITY_ERR_HOLD          , 5   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VOLT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SKITTER_CLKSRCREG_PARITY_ERR_HOLD     , 6   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_CLKSRCREG_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_COUNT_STATE_ERR_HOLD                  , 7   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_RUN_STATE_ERR_HOLD                    , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_THRES_THERM_STATE_ERR_HOLD            , 9   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_STATE_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_THRES_THERM_OVERFLOW_ERR_HOLD         , 10  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_OVERFLOW_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SHIFTER_PARITY_ERR_HOLD               , 11  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_PARITY_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_SHIFTER_VALID_ERR_HOLD                , 12  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_VALID_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_TIMEOUT_ERR_HOLD                      , 13  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TIMEOUT_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_F_SKITTER_ERR_HOLD                    , 14  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_F_SKITTER_ERR_HOLD );
+REG64_FLD( EX_ERR_STATUS_REG_PCB_ERR_HOLD_OUT                      , 15  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCB_ERR_HOLD_OUT );
 REG64_FLD( EX_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK   , 16  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK );
 REG64_FLD( EX_ERR_STATUS_REG_THERM_MODEREG_PARITY_MASK             , 17  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
@@ -6483,7 +8843,69 @@ REG64_FLD( EX_ERR_STATUS_REG_F_SKITTER_READ_MASK                   , 30  , SH_UN
            SH_FLD_F_SKITTER_READ_MASK );
 REG64_FLD( EX_ERR_STATUS_REG_PCB_MASK                              , 31  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_PCB_MASK   );
+REG64_FLD( EX_ERR_STATUS_REG_COUNT_STATE_LT                        , 40  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT );
+REG64_FLD( EX_ERR_STATUS_REG_COUNT_STATE_LT_LEN                    , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT_LEN );
+REG64_FLD( EX_ERR_STATUS_REG_RUN_STATE_LT                          , 44  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT );
+REG64_FLD( EX_ERR_STATUS_REG_RUN_STATE_LT_LEN                      , 3   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT_LEN );
+REG64_FLD( EX_ERR_STATUS_REG_SHIFT_DTS_LT                          , 47  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_DTS_LT );
+REG64_FLD( EX_ERR_STATUS_REG_SHIFT_VOLT_LT                         , 48  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_VOLT_LT );
+REG64_FLD( EX_ERR_STATUS_REG_READ_STATE_LT                         , 49  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT );
+REG64_FLD( EX_ERR_STATUS_REG_READ_STATE_LT_LEN                     , 2   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT_LEN );
+REG64_FLD( EX_ERR_STATUS_REG_WRITE_STATE_LT                        , 51  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT );
+REG64_FLD( EX_ERR_STATUS_REG_WRITE_STATE_LT_LEN                    , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT_LEN );
+REG64_FLD( EX_ERR_STATUS_REG_SAMPLE_DTS_LT                         , 55  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_SAMPLE_DTS_LT );
+REG64_FLD( EX_ERR_STATUS_REG_MEASURE_VOLT_LT                       , 56  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_MEASURE_VOLT_LT );
+REG64_FLD( EX_ERR_STATUS_REG_READ_CPM_LT                           , 57  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_CPM_LT );
+REG64_FLD( EX_ERR_STATUS_REG_WRITE_CPM_LT                          , 58  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_CPM_LT );
+REG64_FLD( EX_ERR_STATUS_REG_UNUSED                                , 59  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
 
+REG64_FLD( C_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_THERM_MODEREG_PARITY_ERR_HOLD          , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_THERM_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SKITTER_MODEREG_PARITY_ERR_HOLD        , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SKITTER_FORCEREG_PARITY_ERR_HOLD       , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_FORCEREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD  , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SCAN_INIT_VERSION_REG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_VOLT_MODEREG_PARITY_ERR_HOLD           , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VOLT_MODEREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SKITTER_CLKSRCREG_PARITY_ERR_HOLD      , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SKITTER_CLKSRCREG_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_COUNT_STATE_ERR_HOLD                   , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_RUN_STATE_ERR_HOLD                     , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_THRES_THERM_STATE_ERR_HOLD             , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_STATE_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_THRES_THERM_OVERFLOW_ERR_HOLD          , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_THRES_THERM_OVERFLOW_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SHIFTER_PARITY_ERR_HOLD                , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_PARITY_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_SHIFTER_VALID_ERR_HOLD                 , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFTER_VALID_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_TIMEOUT_ERR_HOLD                       , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TIMEOUT_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_F_SKITTER_ERR_HOLD                     , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_F_SKITTER_ERR_HOLD );
+REG64_FLD( C_ERR_STATUS_REG_PCB_ERR_HOLD_OUT                       , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_PCB_ERR_HOLD_OUT );
 REG64_FLD( C_ERR_STATUS_REG_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK    , 16  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
            SH_FLD_SERIAL_SHIFTCNT_MODEREG_PARITY_MASK );
 REG64_FLD( C_ERR_STATUS_REG_THERM_MODEREG_PARITY_MASK              , 17  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
@@ -6514,6 +8936,36 @@ REG64_FLD( C_ERR_STATUS_REG_F_SKITTER_READ_MASK                    , 30  , SH_UN
            SH_FLD_F_SKITTER_READ_MASK );
 REG64_FLD( C_ERR_STATUS_REG_PCB_MASK                               , 31  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
            SH_FLD_PCB_MASK   );
+REG64_FLD( C_ERR_STATUS_REG_COUNT_STATE_LT                         , 40  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT );
+REG64_FLD( C_ERR_STATUS_REG_COUNT_STATE_LT_LEN                     , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_COUNT_STATE_LT_LEN );
+REG64_FLD( C_ERR_STATUS_REG_RUN_STATE_LT                           , 44  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT );
+REG64_FLD( C_ERR_STATUS_REG_RUN_STATE_LT_LEN                       , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUN_STATE_LT_LEN );
+REG64_FLD( C_ERR_STATUS_REG_SHIFT_DTS_LT                           , 47  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_DTS_LT );
+REG64_FLD( C_ERR_STATUS_REG_SHIFT_VOLT_LT                          , 48  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SHIFT_VOLT_LT );
+REG64_FLD( C_ERR_STATUS_REG_READ_STATE_LT                          , 49  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT );
+REG64_FLD( C_ERR_STATUS_REG_READ_STATE_LT_LEN                      , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_STATE_LT_LEN );
+REG64_FLD( C_ERR_STATUS_REG_WRITE_STATE_LT                         , 51  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT );
+REG64_FLD( C_ERR_STATUS_REG_WRITE_STATE_LT_LEN                     , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_STATE_LT_LEN );
+REG64_FLD( C_ERR_STATUS_REG_SAMPLE_DTS_LT                          , 55  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SAMPLE_DTS_LT );
+REG64_FLD( C_ERR_STATUS_REG_MEASURE_VOLT_LT                        , 56  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_MEASURE_VOLT_LT );
+REG64_FLD( C_ERR_STATUS_REG_READ_CPM_LT                            , 57  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_READ_CPM_LT );
+REG64_FLD( C_ERR_STATUS_REG_WRITE_CPM_LT                           , 58  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_CPM_LT );
+REG64_FLD( C_ERR_STATUS_REG_UNUSED                                 , 59  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
 
 REG64_FLD( EQ_FIR_ACTION0_REG_ACTION0                              , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_ACTION0    );
@@ -6565,6 +9017,8 @@ REG64_FLD( EX_L2_FIR_ERR_INJ_TO_VSU                                , 3   , SH_UN
            SH_FLD_TO_VSU     );
 REG64_FLD( EX_L2_FIR_ERR_INJ_TO_PC                                 , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_TO_PC      );
+REG64_FLD( EX_L2_FIR_ERR_INJ_RESERVED                              , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED   );
 REG64_FLD( EX_L2_FIR_ERR_INJ_ERROR_PULSE_OR_LEVEL                  , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_ERROR_PULSE_OR_LEVEL );
 REG64_FLD( EX_L2_FIR_ERR_INJ_CLEAR_STICKY_LEVEL                    , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
@@ -6606,6 +9060,8 @@ REG64_FLD( C_FIR_ERR_INJ_TO_VSU                                    , 3   , SH_UN
            SH_FLD_TO_VSU     );
 REG64_FLD( C_FIR_ERR_INJ_TO_PC                                     , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_TO_PC      );
+REG64_FLD( C_FIR_ERR_INJ_RESERVED                                  , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED   );
 REG64_FLD( C_FIR_ERR_INJ_ERROR_PULSE_OR_LEVEL                      , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_ERROR_PULSE_OR_LEVEL );
 REG64_FLD( C_FIR_ERR_INJ_CLEAR_STICKY_LEVEL                        , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
@@ -6702,6 +9158,77 @@ REG64_FLD( EX_L2_FIR_MASK_REG_L2                                   , 0   , SH_UN
            SH_FLD_L2         );
 REG64_FLD( EX_L2_FIR_MASK_REG_L2_LEN                               , 42  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_L2_LEN     );
+
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR_MASK , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_FIR_SPARE1_MASK                   , 1   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_FIR_SPARE1_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_FIR_SPARE2_MASK                   , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_FIR_SPARE2_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_DRAM_POS_WORDLINE_FAIL_MASK       , 3   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_DRAM_POS_WORDLINE_FAIL_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_RD_CE_DET_NOT_LINDEL_REQ_MASK , 4   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_RD_CE_DET_NOT_LINDEL_REQ_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_RD_UE_DET_MASK                , 5   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_RD_UE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_RD_SUE_DET_MASK               , 6   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_RD_SUE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_CE_FROM_PB_MASK       , 7   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_CE_FROM_PB_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_UE_FROM_PB_MASK       , 8   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_UE_FROM_PB_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_SUE_FROM_PB_MASK      , 9   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_SUE_FROM_PB_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_CE_FROM_L2_MASK       , 10  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_CE_FROM_L2_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_UE_FROM_L2_MASK       , 11  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_UE_FROM_L2_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_CAC_WR_DATA_SUE_FROM_L2_OR_WIHPC_MASK , 12  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_CAC_WR_DATA_SUE_FROM_L2_OR_WIHPC_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_DIR_RD_CE_DET_MASK                , 13  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_DIR_RD_CE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_DIR_RD_UE_DET_MASK                , 14  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_DIR_RD_UE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_DIR_RD_PHANTOM_ERROR_MASK         , 15  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_DIR_RD_PHANTOM_ERROR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PB_MAST_WR_ADDR_ERR_MASK          , 16  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PB_MAST_WR_ADDR_ERR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PB_MAST_RD_ADDR_ERR_MASK          , 17  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PB_MAST_RD_ADDR_ERR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_ADDR_HANG_DETECTED_MASK           , 18  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_ADDR_HANG_DETECTED_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_LRU_INVAL_CNT_MASK                , 19  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_LRU_INVAL_CNT_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PPE_RD_CE_DET_MASK                , 20  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PPE_RD_CE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PPE_RD_UE_DET_MASK                , 21  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PPE_RD_UE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PPE_RD_SUE_DET_MASK               , 22  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PPE_RD_SUE_DET_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_MACH_HANG_DETECTED_MASK           , 23  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_MACH_HANG_DETECTED_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_HW_CONTROL_ERR_MASK               , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_HW_CONTROL_ERR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_SNP_CACHE_INHIBIT_ERR_MASK        , 25  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_SNP_CACHE_INHIBIT_ERR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_LINE_DEL_CE_DONE_MASK             , 26  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_LINE_DEL_CE_DONE_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_DRAM_ERROR_MASK                   , 27  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_DRAM_ERROR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_LRU_ERROR_MASK                    , 28  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_LRU_ERROR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_ALL_MEMBERS_DELETED_ERROR_MASK    , 29  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_ALL_MEMBERS_DELETED_ERROR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_REFRESH_TIMER_ERROR_MASK          , 30  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_REFRESH_TIMER_ERROR_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PB_MAST_WR_ACK_DEAD_MASK          , 31  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PB_MAST_WR_ACK_DEAD_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_L3_PB_MAST_RD_ACK_DEAD_MASK          , 32  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_PB_MAST_RD_ACK_DEAD_MASK );
+REG64_FLD( EX_L3_FIR_MASK_REG_SCOM_ERR_MASK1                       , 33  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SCOM_ERR_MASK1 );
+REG64_FLD( EX_L3_FIR_MASK_REG_SCOM_ERR_MASK2                       , 34  , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SCOM_ERR_MASK2 );
 
 REG64_FLD( EQ_FIR_REG_CONTROL_ERR                                  , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_CONTROL_ERR );
@@ -6869,15 +9396,23 @@ REG64_FLD( EX_L2_FIR_REG_DARN_DATA_TIMEOUT                         , 28  , SH_UN
            SH_FLD_DARN_DATA_TIMEOUT );
 REG64_FLD( EX_L2_FIR_REG_RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_ALINKRECOV , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_RC_STORE_RECEIVED_PB_ACK_DEAD_FROM_ALINKRECOV );
+REG64_FLD( EX_L2_FIR_REG_SPARE2TO1                                 , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE2TO1  );
+REG64_FLD( EX_L2_FIR_REG_SPARE2TO1_LEN                             , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE2TO1_LEN );
 REG64_FLD( EX_L2_FIR_REG_CACHE_RD_CE_AND_UE                        , 36  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_CACHE_RD_CE_AND_UE );
+REG64_FLD( EX_L2_FIR_REG_SPARE1TO1                                 , 37  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE1TO1  );
+REG64_FLD( EX_L2_FIR_REG_SPARE1TO1_LEN                             , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE1TO1_LEN );
 REG64_FLD( EX_L2_FIR_REG_SCOM_ERR1                                 , 40  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_ERR1  );
 REG64_FLD( EX_L2_FIR_REG_SCOM_ERR2                                 , 41  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_ERR2  );
 
-REG64_FLD( EX_L3_FIR_REG_L3_SPARE0                                 , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
-           SH_FLD_L3_SPARE0  );
+REG64_FLD( EX_L3_FIR_REG_L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR     , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
+           SH_FLD_L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR );
 REG64_FLD( EX_L3_FIR_REG_L3_SPARE1                                 , 1   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
            SH_FLD_L3_SPARE1  );
 REG64_FLD( EX_L3_FIR_REG_L3_SPARE2                                 , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM2_OR ,
@@ -7271,6 +9806,10 @@ REG64_FLD( EX_L2_HANG_CONTROL_ACTIVE_MASK                          , 29  , SH_UN
            SH_FLD_ACTIVE_MASK );
 REG64_FLD( EX_L2_HANG_CONTROL_ACTIVE_MASK_LEN                      , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_ACTIVE_MASK_LEN );
+REG64_FLD( EX_L2_HANG_CONTROL_TLBIE_STALL_LIMIT                    , 34  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_TLBIE_STALL_LIMIT );
+REG64_FLD( EX_L2_HANG_CONTROL_TLBIE_STALL_LIMIT_LEN                , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_TLBIE_STALL_LIMIT_LEN );
 
 REG64_FLD( C_HANG_CONTROL_CORE_LIMIT                               , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_CORE_LIMIT );
@@ -7296,6 +9835,10 @@ REG64_FLD( C_HANG_CONTROL_ACTIVE_MASK                              , 29  , SH_UN
            SH_FLD_ACTIVE_MASK );
 REG64_FLD( C_HANG_CONTROL_ACTIVE_MASK_LEN                          , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_ACTIVE_MASK_LEN );
+REG64_FLD( C_HANG_CONTROL_TLBIE_STALL_LIMIT                        , 34  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_TLBIE_STALL_LIMIT );
+REG64_FLD( C_HANG_CONTROL_TLBIE_STALL_LIMIT_LEN                    , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_TLBIE_STALL_LIMIT_LEN );
 
 REG64_FLD( EQ_HANG_PULSE_0_REG_0                                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
            SH_FLD_0          );
@@ -7453,35 +9996,53 @@ REG64_FLD( EX_HEARTBEAT_REG_DEAD                                   , 0   , SH_UN
 REG64_FLD( C_HEARTBEAT_REG_DEAD                                    , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_DEAD       );
 
-REG64_FLD( EX_L2_HID_ONE_PPC                                       , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_ONE_PPC                                       , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_ONE_PPC    );
-REG64_FLD( EX_L2_HID_EN_INSTRUC_TRACE                              , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_EN_INSTRUC_TRACE                              , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_EN_INSTRUC_TRACE );
-REG64_FLD( EX_L2_HID_FLUSH_IC                                      , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_FLUSH_IC                                      , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_FLUSH_IC   );
-REG64_FLD( EX_L2_HID_EN_ATTN                                       , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_EN_ATTN                                       , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_EN_ATTN    );
-REG64_FLD( EX_L2_HID_HILE                                          , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_HILE                                          , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_HILE       );
-REG64_FLD( EX_L2_HID_DIS_RECOVERY                                  , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_DIS_RECOVERY                                  , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_DIS_RECOVERY );
-REG64_FLD( EX_L2_HID_MEGAMOUTH                                     , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+REG64_FLD( EX_L2_HID_MEGAMOUTH                                     , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
            SH_FLD_MEGAMOUTH  );
+REG64_FLD( EX_L2_HID_PREFETCH_RESET                                , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PREFETCH_RESET );
+REG64_FLD( EX_L2_HID_LSU_SPARE                                     , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_LSU_SPARE  );
 
-REG64_FLD( C_HID_ONE_PPC                                           , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_ONE_PPC                                           , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_ONE_PPC    );
-REG64_FLD( C_HID_EN_INSTRUC_TRACE                                  , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_EN_INSTRUC_TRACE                                  , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_EN_INSTRUC_TRACE );
-REG64_FLD( C_HID_FLUSH_IC                                          , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_FLUSH_IC                                          , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_FLUSH_IC   );
-REG64_FLD( C_HID_EN_ATTN                                           , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_EN_ATTN                                           , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_EN_ATTN    );
-REG64_FLD( C_HID_HILE                                              , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_HILE                                              , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_HILE       );
-REG64_FLD( C_HID_DIS_RECOVERY                                      , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_DIS_RECOVERY                                      , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_DIS_RECOVERY );
-REG64_FLD( C_HID_MEGAMOUTH                                         , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_HID_MEGAMOUTH                                         , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_MEGAMOUTH  );
+REG64_FLD( C_HID_PREFETCH_RESET                                    , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PREFETCH_RESET );
+REG64_FLD( C_HID_LSU_SPARE                                         , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_LSU_SPARE  );
+
+REG64_FLD( EX_L2_HMEER_ENABLE                                      , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE     );
+REG64_FLD( EX_L2_HMEER_ENABLE_LEN                                  , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE_LEN );
+
+REG64_FLD( C_HMEER_ENABLE                                          , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE     );
+REG64_FLD( C_HMEER_ENABLE_LEN                                      , 24  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE_LEN );
 
 REG64_FLD( EQ_HOSTATTN_IN0                                         , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_IN0        );
@@ -8023,6 +10584,468 @@ REG64_FLD( EX_HTM_TRIG_HTMSC_MARK_TYPE                             , 6   , SH_UN
 REG64_FLD( EX_HTM_TRIG_HTMSC_MARK_TYPE_LEN                         , 10  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
            SH_FLD_HTMSC_MARK_TYPE_LEN );
 
+REG64_FLD( EX_L2_HV_STATE_VT0_MSR_HV                               , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_MSR_HV );
+REG64_FLD( EX_L2_HV_STATE_VT1_MSR_HV                               , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_MSR_HV );
+REG64_FLD( EX_L2_HV_STATE_VT2_MSR_HV                               , 58  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_MSR_HV );
+REG64_FLD( EX_L2_HV_STATE_VT3_MSR_HV                               , 59  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_MSR_HV );
+REG64_FLD( EX_L2_HV_STATE_VT0_MSR_PR                               , 60  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_MSR_PR );
+REG64_FLD( EX_L2_HV_STATE_VT1_MSR_PR                               , 61  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_MSR_PR );
+REG64_FLD( EX_L2_HV_STATE_VT2_MSR_PR                               , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_MSR_PR );
+REG64_FLD( EX_L2_HV_STATE_VT3_MSR_PR                               , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_MSR_PR );
+
+REG64_FLD( C_HV_STATE_VT0_MSR_HV                                   , 56  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_MSR_HV );
+REG64_FLD( C_HV_STATE_VT1_MSR_HV                                   , 57  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_MSR_HV );
+REG64_FLD( C_HV_STATE_VT2_MSR_HV                                   , 58  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_MSR_HV );
+REG64_FLD( C_HV_STATE_VT3_MSR_HV                                   , 59  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_MSR_HV );
+REG64_FLD( C_HV_STATE_VT0_MSR_PR                                   , 60  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_MSR_PR );
+REG64_FLD( C_HV_STATE_VT1_MSR_PR                                   , 61  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_MSR_PR );
+REG64_FLD( C_HV_STATE_VT2_MSR_PR                                   , 62  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_MSR_PR );
+REG64_FLD( C_HV_STATE_VT3_MSR_PR                                   , 63  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_MSR_PR );
+
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_UNUSED                             , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_UNUSED_LEN                         , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_LEN );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_EAT_OVERFLOW_HOLD_OUT_2      , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EAT_OVERFLOW_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_EATAG_MISMATCHES_IFAR_HOLD_OUT_2 , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EATAG_MISMATCHES_IFAR_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_IFAR_PARITY_HOLD_OUT_2       , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_IFAR_PARITY_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_LNK_STK_OR_CC_PTY_HOLD_OUT_2 , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_LNK_STK_OR_CC_PTY_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_MULTI_THREAD_HOLD_OUT_2      , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_MULTI_THREAD_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFBC_EAT_UNDERFLOW_HOLD_OUT_2     , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EAT_UNDERFLOW_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFSE_SPR_PARITY_HOLD_OUT_2        , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFSE_SPR_PARITY_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFAC_EAT_WRITE_CONFLICT_HOLD_OUT_2 , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_EAT_WRITE_CONFLICT_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFEC_DYNAMIC_IC_DELETE_HOLD_OUT   , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_DYNAMIC_IC_DELETE_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFEC_EADIR_ILLEGAL_HOLD_OUT       , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_EADIR_ILLEGAL_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFEC_ERAT_PTY_HOLD_OUT            , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ERAT_PTY_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_0_IFFEC_ICACHE_MISSING_EADIR_WRT_HOLD_OUT , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ICACHE_MISSING_EADIR_WRT_HOLD_OUT );
+
+REG64_FLD( C_IFU_HOLD_OUT_0_UNUSED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
+REG64_FLD( C_IFU_HOLD_OUT_0_UNUSED_LEN                             , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_LEN );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_EAT_OVERFLOW_HOLD_OUT_2          , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EAT_OVERFLOW_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_EATAG_MISMATCHES_IFAR_HOLD_OUT_2 , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EATAG_MISMATCHES_IFAR_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_IFAR_PARITY_HOLD_OUT_2           , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_IFAR_PARITY_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_LNK_STK_OR_CC_PTY_HOLD_OUT_2     , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_LNK_STK_OR_CC_PTY_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_MULTI_THREAD_HOLD_OUT_2          , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_MULTI_THREAD_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFBC_EAT_UNDERFLOW_HOLD_OUT_2         , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFBC_EAT_UNDERFLOW_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFSE_SPR_PARITY_HOLD_OUT_2            , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFSE_SPR_PARITY_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFAC_EAT_WRITE_CONFLICT_HOLD_OUT_2    , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_EAT_WRITE_CONFLICT_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFEC_DYNAMIC_IC_DELETE_HOLD_OUT       , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_DYNAMIC_IC_DELETE_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFEC_EADIR_ILLEGAL_HOLD_OUT           , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_EADIR_ILLEGAL_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFEC_ERAT_PTY_HOLD_OUT                , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ERAT_PTY_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_0_IFFEC_ICACHE_MISSING_EADIR_WRT_HOLD_OUT , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ICACHE_MISSING_EADIR_WRT_HOLD_OUT );
+
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_ICACHE_PE_HOLD_OUT           , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ICACHE_PE_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IDIR_EA_PTY_HOLD_OUT         , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IDIR_EA_PTY_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IDIR_PTY_HOLD_OUT            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IDIR_PTY_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IERAT_WRT_EA_HOLD_OUT        , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IERAT_WRT_EA_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IFAR_CHECK1_HOLD_OUT         , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFAR_CHECK1_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IFAR_CHECK2_HOLD_OUT         , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFAR_CHECK2_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFEC_IFFIW_IDIR_HOLD_OUT          , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFFIW_IDIR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_0      , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_0 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2        , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_2      , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_3      , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_4      , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_4 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_5      , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_5 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFFLC_WRITE_COLL_HOLD_OUT_2        , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFLC_WRITE_COLL_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDFE_IDU_FETCH_LENGTH_ERROR_HOLD_OUT_2 , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDFE_IDU_FETCH_LENGTH_ERROR_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_1_IFDFE_IBUF_OVERRUN_ERROR_HOLD_OUT_2 , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDFE_IBUF_OVERRUN_ERROR_HOLD_OUT_2 );
+
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_ICACHE_PE_HOLD_OUT               , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_ICACHE_PE_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IDIR_EA_PTY_HOLD_OUT             , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IDIR_EA_PTY_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IDIR_PTY_HOLD_OUT                , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IDIR_PTY_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IERAT_WRT_EA_HOLD_OUT            , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IERAT_WRT_EA_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IFAR_CHECK1_HOLD_OUT             , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFAR_CHECK1_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IFAR_CHECK2_HOLD_OUT             , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFAR_CHECK2_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFEC_IFFIW_IDIR_HOLD_OUT              , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFEC_IFFIW_IDIR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_0          , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_0 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2            , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_2          , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_2 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_3          , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_3 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_4          , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_4 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDPOP_IBUF_PERR_HOLD_OUT_2_5          , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDPOP_IBUF_PERR_HOLD_OUT_2_5 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFFLC_WRITE_COLL_HOLD_OUT_2            , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFLC_WRITE_COLL_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDFE_IDU_FETCH_LENGTH_ERROR_HOLD_OUT_2 , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDFE_IDU_FETCH_LENGTH_ERROR_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_1_IFDFE_IBUF_OVERRUN_ERROR_HOLD_OUT_2    , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFDFE_IBUF_OVERRUN_ERROR_HOLD_OUT_2 );
+
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFSE_MFSPR_COLLISION_ERR_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFSE_MFSPR_COLLISION_ERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFPF_IFAR_VLD_IN_QERR_HOLD_OUT    , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_IFAR_VLD_IN_QERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFPF_L2_RELOAD_COMING_QERR_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_L2_RELOAD_COMING_QERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFPF_L2_RELOAD_INTERF_QERR_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_L2_RELOAD_INTERF_QERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFPF_MULTI_RLDM_HAS_SAME_EA_QERR_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_MULTI_RLDM_HAS_SAME_EA_QERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFCP_CIABR_PERR_HOLD_OUT          , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFCP_CIABR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_UNUSED_1                           , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_1   );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFFMSR_MSR_DATA_PERR_HOLD_OUT_3    , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFMSR_MSR_DATA_PERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBC_BREX_PRED_CHECKER_HOLD_OUT   , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_PRED_CHECKER_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_EAT_BR_ERR_HOLD_OUT_3  , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_EAT_BR_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_EAT_BRP1_ERR_HOLD_OUT_3 , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_EAT_BRP1_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT0_ARF_ERR_HOLD_OUT_3 , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT0_ARF_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT0_ROB_ERR_HOLD_OUT_3 , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT0_ROB_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT1_ARF_ERR_HOLD_OUT_3 , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT1_ARF_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT1_ROB_ERR_HOLD_OUT_3 , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT1_ROB_ERR_HOLD_OUT_3 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_2_IFBBC_BREX_ROB_WR_COLLISION_HOLD_OUT , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_ROB_WR_COLLISION_HOLD_OUT );
+
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFSE_MFSPR_COLLISION_ERR_HOLD_OUT     , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFSE_MFSPR_COLLISION_ERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFPF_IFAR_VLD_IN_QERR_HOLD_OUT        , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_IFAR_VLD_IN_QERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFPF_L2_RELOAD_COMING_QERR_HOLD_OUT   , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_L2_RELOAD_COMING_QERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFPF_L2_RELOAD_INTERF_QERR_HOLD_OUT   , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_L2_RELOAD_INTERF_QERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFPF_MULTI_RLDM_HAS_SAME_EA_QERR_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFPF_MULTI_RLDM_HAS_SAME_EA_QERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFCP_CIABR_PERR_HOLD_OUT              , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFCP_CIABR_PERR_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_UNUSED_1                               , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_1   );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFFMSR_MSR_DATA_PERR_HOLD_OUT_3        , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFMSR_MSR_DATA_PERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBC_BREX_PRED_CHECKER_HOLD_OUT       , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_PRED_CHECKER_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_EAT_BR_ERR_HOLD_OUT_3      , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_EAT_BR_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_EAT_BRP1_ERR_HOLD_OUT_3    , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_EAT_BRP1_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT0_ARF_ERR_HOLD_OUT_3   , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT0_ARF_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT0_ROB_ERR_HOLD_OUT_3   , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT0_ROB_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT1_ARF_ERR_HOLD_OUT_3   , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT1_ARF_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBX_RFILE_LKCT1_ROB_ERR_HOLD_OUT_3   , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBX_RFILE_LKCT1_ROB_ERR_HOLD_OUT_3 );
+REG64_FLD( C_IFU_HOLD_OUT_2_IFBBC_BREX_ROB_WR_COLLISION_HOLD_OUT   , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_ROB_WR_COLLISION_HOLD_OUT );
+
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBSC_MFSPR_LOG_CRIT_P_HOLD_OUT    , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_LOG_CRIT_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBSC_MFSPR_LOG_NONCRIT_P_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_LOG_NONCRIT_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBSC_MFSPR_RFILE_CRIT_P_HOLD_OUT  , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_RFILE_CRIT_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBSC_MFSPR_RFILE_NONCRIT_P_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_RFILE_NONCRIT_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBBC_BREX_EATAG_OUTOFRANGE_HOLD_OUT_2 , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_EATAG_OUTOFRANGE_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFBBC_BREX_FLUSH_CHECKER_HOLD_OUT_2 , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_FLUSH_CHECKER_HOLD_OUT_2 );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFAC_S0_NIA_P_HOLD_OUT            , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_NIA_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFAC_S0_TAIL_P_HOLD_OUT           , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_TAIL_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFAC_REFETCH_OUTOFRANGE_HOLD_OUT  , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_REFETCH_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFAC_S0_COMP_EATAG_OUTOFRANGE_HOLD_OUT , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_COMP_EATAG_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFAC_S0_NIA_EATAG_OUTOFRANGE_HOLD_OUT , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_NIA_EATAG_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_UNUSED_2                           , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_2   );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFRC_REFETCH_EAT_P_HOLD_OUT       , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFRC_REFETCH_EAT_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_IFFRC_REFETCH_SPR_P_HOLD_OUT       , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFRC_REFETCH_SPR_P_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_TCC_TC_FIR_SCOM_HOLD_OUT           , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_TCC_TC_FIR_SCOM_HOLD_OUT );
+REG64_FLD( EX_L2_IFU_HOLD_OUT_3_UNUSED                             , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
+
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBSC_MFSPR_LOG_CRIT_P_HOLD_OUT        , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_LOG_CRIT_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBSC_MFSPR_LOG_NONCRIT_P_HOLD_OUT     , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_LOG_NONCRIT_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBSC_MFSPR_RFILE_CRIT_P_HOLD_OUT      , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_RFILE_CRIT_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBSC_MFSPR_RFILE_NONCRIT_P_HOLD_OUT   , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBSC_MFSPR_RFILE_NONCRIT_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBBC_BREX_EATAG_OUTOFRANGE_HOLD_OUT_2 , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_EATAG_OUTOFRANGE_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFBBC_BREX_FLUSH_CHECKER_HOLD_OUT_2    , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFBBC_BREX_FLUSH_CHECKER_HOLD_OUT_2 );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFAC_S0_NIA_P_HOLD_OUT                , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_NIA_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFAC_S0_TAIL_P_HOLD_OUT               , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_TAIL_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFAC_REFETCH_OUTOFRANGE_HOLD_OUT      , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_REFETCH_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFAC_S0_COMP_EATAG_OUTOFRANGE_HOLD_OUT , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_COMP_EATAG_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFAC_S0_NIA_EATAG_OUTOFRANGE_HOLD_OUT , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFAC_S0_NIA_EATAG_OUTOFRANGE_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_UNUSED_2                               , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED_2   );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFRC_REFETCH_EAT_P_HOLD_OUT           , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFRC_REFETCH_EAT_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_IFFRC_REFETCH_SPR_P_HOLD_OUT           , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IFFRC_REFETCH_SPR_P_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_TCC_TC_FIR_SCOM_HOLD_OUT               , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TCC_TC_FIR_SCOM_HOLD_OUT );
+REG64_FLD( C_IFU_HOLD_OUT_3_UNUSED                                 , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_UNUSED     );
+
+REG64_FLD( EX_IMA_EVENT_MASK_ECONL_0                               , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_0    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECRL_0                                , 1   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_0     );
+REG64_FLD( EX_IMA_EVENT_MASK_ECH_0                                 , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_0      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECP_0                                 , 3   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_0      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECS_0                                 , 4   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_0      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECA_0                                 , 5   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_0      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA0_0                               , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_0    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA1_0                               , 7   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_0    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS0_0                               , 8   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_0    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS1_0                               , 9   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_0    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECONL_1                               , 10  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_1    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECRL_1                                , 11  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_1     );
+REG64_FLD( EX_IMA_EVENT_MASK_ECH_1                                 , 12  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_1      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECP_1                                 , 13  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_1      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECS_1                                 , 14  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_1      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECA_1                                 , 15  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_1      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA0_1                               , 16  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_1    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA1_1                               , 17  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_1    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS0_1                               , 18  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_1    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS1_1                               , 19  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_1    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECONL_2                               , 20  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_2    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECRL_2                                , 21  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_2     );
+REG64_FLD( EX_IMA_EVENT_MASK_ECH_2                                 , 22  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_2      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECP_2                                 , 23  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_2      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECS_2                                 , 24  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_2      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECA_2                                 , 25  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_2      );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA0_2                               , 26  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_2    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECTA1_2                               , 27  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_2    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS0_2                               , 28  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_2    );
+REG64_FLD( EX_IMA_EVENT_MASK_ECUS1_2                               , 29  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_2    );
+REG64_FLD( EX_IMA_EVENT_MASK_IC_TAP                                , 30  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_IC_TAP     );
+REG64_FLD( EX_IMA_EVENT_MASK_IC_TAP_LEN                            , 3   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_IC_TAP_LEN );
+REG64_FLD( EX_IMA_EVENT_MASK_DISABLE_WRAP                          , 33  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_DISABLE_WRAP );
+REG64_FLD( EX_IMA_EVENT_MASK_CME_POWSAV                            , 34  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CME_POWSAV );
+
+REG64_FLD( C_IMA_EVENT_MASK_ECONL_0                                , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_0    );
+REG64_FLD( C_IMA_EVENT_MASK_ECRL_0                                 , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_0     );
+REG64_FLD( C_IMA_EVENT_MASK_ECH_0                                  , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_0      );
+REG64_FLD( C_IMA_EVENT_MASK_ECP_0                                  , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_0      );
+REG64_FLD( C_IMA_EVENT_MASK_ECS_0                                  , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_0      );
+REG64_FLD( C_IMA_EVENT_MASK_ECA_0                                  , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_0      );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA0_0                                , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_0    );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA1_0                                , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_0    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS0_0                                , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_0    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS1_0                                , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_0    );
+REG64_FLD( C_IMA_EVENT_MASK_ECONL_1                                , 10  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_1    );
+REG64_FLD( C_IMA_EVENT_MASK_ECRL_1                                 , 11  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_1     );
+REG64_FLD( C_IMA_EVENT_MASK_ECH_1                                  , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_1      );
+REG64_FLD( C_IMA_EVENT_MASK_ECP_1                                  , 13  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_1      );
+REG64_FLD( C_IMA_EVENT_MASK_ECS_1                                  , 14  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_1      );
+REG64_FLD( C_IMA_EVENT_MASK_ECA_1                                  , 15  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_1      );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA0_1                                , 16  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_1    );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA1_1                                , 17  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_1    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS0_1                                , 18  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_1    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS1_1                                , 19  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_1    );
+REG64_FLD( C_IMA_EVENT_MASK_ECONL_2                                , 20  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECONL_2    );
+REG64_FLD( C_IMA_EVENT_MASK_ECRL_2                                 , 21  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECRL_2     );
+REG64_FLD( C_IMA_EVENT_MASK_ECH_2                                  , 22  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECH_2      );
+REG64_FLD( C_IMA_EVENT_MASK_ECP_2                                  , 23  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECP_2      );
+REG64_FLD( C_IMA_EVENT_MASK_ECS_2                                  , 24  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECS_2      );
+REG64_FLD( C_IMA_EVENT_MASK_ECA_2                                  , 25  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECA_2      );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA0_2                                , 26  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA0_2    );
+REG64_FLD( C_IMA_EVENT_MASK_ECTA1_2                                , 27  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECTA1_2    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS0_2                                , 28  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS0_2    );
+REG64_FLD( C_IMA_EVENT_MASK_ECUS1_2                                , 29  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ECUS1_2    );
+REG64_FLD( C_IMA_EVENT_MASK_IC_TAP                                 , 30  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_IC_TAP     );
+REG64_FLD( C_IMA_EVENT_MASK_IC_TAP_LEN                             , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_IC_TAP_LEN );
+REG64_FLD( C_IMA_EVENT_MASK_DISABLE_WRAP                           , 33  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_DISABLE_WRAP );
+REG64_FLD( C_IMA_EVENT_MASK_CME_POWSAV                             , 34  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CME_POWSAV );
+
+REG64_FLD( EX_IMA_TRACE_SAMPSEL                                    , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SAMPSEL    );
+REG64_FLD( EX_IMA_TRACE_SAMPSEL_LEN                                , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SAMPSEL_LEN );
+REG64_FLD( EX_IMA_TRACE_CPMC_LOAD                                  , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC_LOAD  );
+REG64_FLD( EX_IMA_TRACE_CPMC_LOAD_LEN                              , 32  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC_LOAD_LEN );
+REG64_FLD( EX_IMA_TRACE_CPMC1SEL                                   , 34  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC1SEL   );
+REG64_FLD( EX_IMA_TRACE_CPMC1SEL_LEN                               , 7   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC1SEL_LEN );
+REG64_FLD( EX_IMA_TRACE_CPMC2SEL                                   , 41  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC2SEL   );
+REG64_FLD( EX_IMA_TRACE_CPMC2SEL_LEN                               , 7   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC2SEL_LEN );
+
+REG64_FLD( C_IMA_TRACE_SAMPSEL                                     , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SAMPSEL    );
+REG64_FLD( C_IMA_TRACE_SAMPSEL_LEN                                 , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SAMPSEL_LEN );
+REG64_FLD( C_IMA_TRACE_CPMC_LOAD                                   , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC_LOAD  );
+REG64_FLD( C_IMA_TRACE_CPMC_LOAD_LEN                               , 32  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC_LOAD_LEN );
+REG64_FLD( C_IMA_TRACE_CPMC1SEL                                    , 34  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC1SEL   );
+REG64_FLD( C_IMA_TRACE_CPMC1SEL_LEN                                , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC1SEL_LEN );
+REG64_FLD( C_IMA_TRACE_CPMC2SEL                                    , 41  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC2SEL   );
+REG64_FLD( C_IMA_TRACE_CPMC2SEL_LEN                                , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_CPMC2SEL_LEN );
+
 REG64_FLD( EQ_INJECT_REG_THERM_TRIP                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_THERM_TRIP );
 REG64_FLD( EQ_INJECT_REG_THERM_TRIP_LEN                            , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -8060,6 +11083,410 @@ REG64_FLD( EX_INJ_REG_STQ_ERR                                      , 0   , SH_UN
 REG64_FLD( EX_INJ_REG_STQ_ERR_LEN                                  , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_STQ_ERR_LEN );
 
+REG64_FLD( EX_L2_INV_ERATE_INVALIDATE_ERAT                         , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_INVALIDATE_ERAT );
+
+REG64_FLD( C_INV_ERATE_INVALIDATE_ERAT                             , 63  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_INVALIDATE_ERAT );
+
+REG64_FLD( EX_L2_ISU_DEBUG_CTRL_ISU_HLD_OUT_REG6                   , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ISU_HLD_OUT_REG6 );
+REG64_FLD( EX_L2_ISU_DEBUG_CTRL_ISU_HLD_OUT_REG6_LEN               , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ISU_HLD_OUT_REG6_LEN );
+
+REG64_FLD( C_ISU_DEBUG_CTRL_ISU_HLD_OUT_REG6                       , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ISU_HLD_OUT_REG6 );
+REG64_FLD( C_ISU_DEBUG_CTRL_ISU_HLD_OUT_REG6_LEN                   , 18  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ISU_HLD_OUT_REG6_LEN );
+
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HEIR_CHKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_MSR_CHKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_SRR1_CHKSTOP_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_FSCR_CHKSTOP_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCX_SDCU_T0_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T0_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCR_ERR_INJ                    , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCR_ERR_INJ );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCC_T0_HEAD_TAIL_XSTOP         , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T0_HEAD_TAIL_XSTOP );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCC_T1_HEAD_TAIL_XSTOP         , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T1_HEAD_TAIL_XSTOP );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCC_T2_HEAD_TAIL_XSTOP         , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T2_HEAD_TAIL_XSTOP );
+REG64_FLD( EX_L2_ISU_REG0_HOLD_OUT_SDCC_T3_HEAD_TAIL_XSTOP         , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T3_HEAD_TAIL_XSTOP );
+
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HEIR_CHKSTOP_HOLD_OUT  , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_MSR_CHKSTOP_HOLD_OUT   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_SRR1_CHKSTOP_HOLD_OUT  , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_FSCR_CHKSTOP_HOLD_OUT  , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCO_T0_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T0_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCX_SDCU_T0_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T0_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCR_ERR_INJ                        , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCR_ERR_INJ );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCC_T0_HEAD_TAIL_XSTOP             , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T0_HEAD_TAIL_XSTOP );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCC_T1_HEAD_TAIL_XSTOP             , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T1_HEAD_TAIL_XSTOP );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCC_T2_HEAD_TAIL_XSTOP             , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T2_HEAD_TAIL_XSTOP );
+REG64_FLD( C_ISU_REG0_HOLD_OUT_SDCC_T3_HEAD_TAIL_XSTOP             , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T3_HEAD_TAIL_XSTOP );
+
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HEIR_CHKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_MSR_CHKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_SRR1_CHKSTOP_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_FSCR_CHKSTOP_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCX_SDCU_T1_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T1_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_ERR_INJ_RECOV                   , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_ERR_INJ_RECOV );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCCC_T0_COMP_RCOV              , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T0_COMP_RCOV );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCCC_T1_COMP_RCOV              , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T1_COMP_RCOV );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCCC_T2_COMP_RCOV              , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T2_COMP_RCOV );
+REG64_FLD( EX_L2_ISU_REG1_HOLD_OUT_SDCCC_T3_COMP_RCOV              , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T3_COMP_RCOV );
+
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HEIR_CHKSTOP_HOLD_OUT  , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_MSR_CHKSTOP_HOLD_OUT   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_SRR1_CHKSTOP_HOLD_OUT  , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_FSCR_CHKSTOP_HOLD_OUT  , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCO_T1_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T1_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCX_SDCU_T1_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T1_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_ERR_INJ_RECOV                       , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ERR_INJ_RECOV );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCCC_T0_COMP_RCOV                  , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T0_COMP_RCOV );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCCC_T1_COMP_RCOV                  , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T1_COMP_RCOV );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCCC_T2_COMP_RCOV                  , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T2_COMP_RCOV );
+REG64_FLD( C_ISU_REG1_HOLD_OUT_SDCCC_T3_COMP_RCOV                  , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCCC_T3_COMP_RCOV );
+
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HEIR_CHKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_MSR_CHKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_SRR1_CHKSTOP_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_FSCR_CHKSTOP_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCX_SDCU_T2_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T2_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_WAT_INJECT_INT                  , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WAT_INJECT_INT );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCA_RCOV                       , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCA_RCOV  );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCU_RAM_XSTOP                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCU_RAM_XSTOP );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_SDCU_XSTOP                      , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCU_XSTOP );
+REG64_FLD( EX_L2_ISU_REG2_HOLD_OUT_WAT_INJECT_INT_RECOV            , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_WAT_INJECT_INT_RECOV );
+
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HEIR_CHKSTOP_HOLD_OUT  , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_MSR_CHKSTOP_HOLD_OUT   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_SRR1_CHKSTOP_HOLD_OUT  , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_FSCR_CHKSTOP_HOLD_OUT  , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCO_T2_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T2_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCX_SDCU_T2_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T2_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_WAT_INJECT_INT                      , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WAT_INJECT_INT );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCA_RCOV                           , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCA_RCOV  );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCU_RAM_XSTOP                      , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCU_RAM_XSTOP );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_SDCU_XSTOP                          , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCU_XSTOP );
+REG64_FLD( C_ISU_REG2_HOLD_OUT_WAT_INJECT_INT_RECOV                , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WAT_INJECT_INT_RECOV );
+
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HEIR_CHKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_MSR_CHKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_SRR1_CHKSTOP_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_FSCR_CHKSTOP_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCX_SDCU_T3_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T3_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCV_T0_FLUSH_XSTOP             , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T0_FLUSH_XSTOP );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCV_T1_FLUSH_XSTOP             , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T1_FLUSH_XSTOP );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCV_T2_FLUSH_XSTOP             , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T2_FLUSH_XSTOP );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDCV_T3_FLUSH_XSTOP             , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T3_FLUSH_XSTOP );
+REG64_FLD( EX_L2_ISU_REG3_HOLD_OUT_SDKSMRF_SS0_EVEN_S0_1B          , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S0_1B );
+
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HEIR_CHKSTOP_HOLD_OUT  , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HEIR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HSRR1_CHKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HSRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_MSR_CHKSTOP_HOLD_OUT   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_MSR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_SRR1_CHKSTOP_HOLD_OUT  , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_SRR1_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_VRSAVE_BKUP_CHKSTOP_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_VRSAVE_BKUP_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_VRSAVE_CHKSTOP_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_VRSAVE_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_FSCR_CHKSTOP_HOLD_OUT  , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_FSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_HFSCR_CHKSTOP_HOLD_OUT , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_HFSCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_TEXASR_CHKSTOP_HOLD_OUT , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_TEXASR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCO_T3_BESCR_CHKSTOP_HOLD_OUT , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCO_T3_BESCR_CHKSTOP_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCX_SDCU_T3_MCHK_AND_ME_EQ_0_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCX_SDCU_T3_MCHK_AND_ME_EQ_0_HOLD_OUT );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCV_T0_FLUSH_XSTOP                 , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T0_FLUSH_XSTOP );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCV_T1_FLUSH_XSTOP                 , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T1_FLUSH_XSTOP );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCV_T2_FLUSH_XSTOP                 , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T2_FLUSH_XSTOP );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDCV_T3_FLUSH_XSTOP                 , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCV_T3_FLUSH_XSTOP );
+REG64_FLD( C_ISU_REG3_HOLD_OUT_SDKSMRF_SS0_EVEN_S0_1B              , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S0_1B );
+
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S1_1B          , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S1_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S2_1B          , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S2_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S0_1B           , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S0_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S1_1B           , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S1_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S2_1B           , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S2_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S0_1B          , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S0_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S1_1B          , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S1_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S2_1B          , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S2_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S0_1B           , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S0_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S1_1B           , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S1_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S2_1B           , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S2_1B );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S0_2B_XSTOP    , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S0_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S1_2B_XSTOP    , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S1_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S2_2B_XSTOP    , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S2_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S0_2B_XSTOP     , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S0_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S1_2B_XSTOP     , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S1_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S2_2B_XSTOP     , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S2_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S0_2B_XSTOP    , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S0_2B_XSTOP );
+
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S1_1B              , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S1_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S2_1B              , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S2_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S0_1B               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S0_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S1_1B               , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S1_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S2_1B               , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S2_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S0_1B              , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S0_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S1_1B              , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S1_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S2_1B              , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S2_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S0_1B               , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S0_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S1_1B               , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S1_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_ODD_S2_1B               , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S2_1B );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S0_2B_XSTOP        , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S0_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S1_2B_XSTOP        , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S1_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_EVEN_S2_2B_XSTOP        , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_EVEN_S2_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S0_2B_XSTOP         , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S0_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S1_2B_XSTOP         , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S1_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS0_ODD_S2_2B_XSTOP         , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS0_ODD_S2_2B_XSTOP );
+REG64_FLD( C_ISU_REG4_HOLD_OUT_SDKSMRF_SS1_EVEN_S0_2B_XSTOP        , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S0_2B_XSTOP );
+
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_EVEN_S1_2B_XSTOP    , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S1_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_EVEN_S2_2B_XSTOP    , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S2_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S0_2B_XSTOP     , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S0_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S1_2B_XSTOP     , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S1_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S2_2B_XSTOP     , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S2_2B_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDCXC_ERR_RPT                   , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCXC_ERR_RPT );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDCC_T0_CRITICAL_IS_XSTOP       , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T0_CRITICAL_IS_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDCC_T1_CRITICAL_IS_XSTOP       , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T1_CRITICAL_IS_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDCC_T2_CRITICAL_IS_XSTOP       , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T2_CRITICAL_IS_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_SDCC_T3_CRITICAL_IS_XSTOP       , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T3_CRITICAL_IS_XSTOP );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_GND                             , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_GND        );
+REG64_FLD( EX_L2_ISU_REG5_HOLD_OUT_GND_LEN                         , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_GND_LEN    );
+
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_EVEN_S1_2B_XSTOP        , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S1_2B_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_EVEN_S2_2B_XSTOP        , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_EVEN_S2_2B_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S0_2B_XSTOP         , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S0_2B_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S1_2B_XSTOP         , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S1_2B_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDKSMRF_SS1_ODD_S2_2B_XSTOP         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDKSMRF_SS1_ODD_S2_2B_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDCXC_ERR_RPT                       , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCXC_ERR_RPT );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDCC_T0_CRITICAL_IS_XSTOP           , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T0_CRITICAL_IS_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDCC_T1_CRITICAL_IS_XSTOP           , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T1_CRITICAL_IS_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDCC_T2_CRITICAL_IS_XSTOP           , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T2_CRITICAL_IS_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_SDCC_T3_CRITICAL_IS_XSTOP           , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SDCC_T3_CRITICAL_IS_XSTOP );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_GND                                 , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_GND        );
+REG64_FLD( C_ISU_REG5_HOLD_OUT_GND_LEN                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_GND_LEN    );
+
 REG64_FLD( EQ_L3TRA0_TR0_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
 REG64_FLD( EQ_L3TRA0_TR0_TRACE_HI_DATA_REG_DATA_LEN                , 64  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
@@ -8090,8 +11517,28 @@ REG64_FLD( EQ_L3TRA0_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -8183,6 +11630,14 @@ REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_L3TRA0_TR0_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_L3TRA0_TR1_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -8214,8 +11669,28 @@ REG64_FLD( EQ_L3TRA0_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -8307,6 +11782,14 @@ REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_L3TRA0_TR1_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_L3TRA1_TR0_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -8338,8 +11821,28 @@ REG64_FLD( EQ_L3TRA1_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -8431,6 +11934,14 @@ REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_L3TRA1_TR0_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_L3TRA1_TR1_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -8462,8 +11973,28 @@ REG64_FLD( EQ_L3TRA1_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -8555,6 +12086,14 @@ REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_L3TRA1_TR1_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_L3_ERR_RPT0_REG_L3SDRTL0_BAD_HPC                     , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3SDRTL0_BAD_HPC );
@@ -9416,18 +12955,294 @@ REG64_FLD( EX_L3_LRU_VIC_ALLOC_REG_L3_COLUMN_MD_CFG                , 20  , SH_UN
 REG64_FLD( EX_L3_LRU_VIC_ALLOC_REG_L3_COLUMN_MD_CFG_LEN            , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_COLUMN_MD_CFG_LEN );
 
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSEXEC_HYPERV_TRAP_CHECKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_HYPERV_TRAP_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSEXEC_BAD_DVAL_FINISH_CHECKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_BAD_DVAL_FINISH_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSEXEC_REJECT_FINISH_CHECKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_REJECT_FINISH_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_FLSH_FFN_AND_NOT_UC_HOLD_OUT    , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FFN_AND_NOT_UC_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_FLSH_FLUSH_NEXT_UCODE_HOLD_OUT  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_NEXT_UCODE_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_FLSH_INVALID_FLUSH_CASE_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_INVALID_FLUSH_CASE_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_FLSH_FLUSH_CRITICAL_OP_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_CRITICAL_OP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_FLSH_FLUSH_NEXT_NON_CRIT_ATOMIC_HOLD_OUT , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_NEXT_NON_CRIT_ATOMIC_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLRQE_CI_CDF_STUCK_HOLD_OUT    , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQE_CI_CDF_STUCK_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLRQE_OVERFLOW_HOLD_OUT        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQE_OVERFLOW_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLRQF_OVERFLOW_HOLD_OUT        , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQF_OVERFLOW_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLSAQ_OVERFLOW_HOLD_OUT        , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLSAQ_OVERFLOW_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLMQE_BAD_MC_RLD_DTYPE_ERR_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_BAD_MC_RLD_DTYPE_ERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLMQE_GOT_SV_TWICE_ERR_HOLD_OUT , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_GOT_SV_TWICE_ERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_LSLMQE_INV_RD_ERR_HOLD_OUT      , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_INV_RD_ERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG0_SCOM_PARITY_HOLD_OUT            , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_SCOM_PARITY_HOLD_OUT );
+
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSEXEC_HYPERV_TRAP_CHECKSTOP_HOLD_OUT , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_HYPERV_TRAP_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSEXEC_BAD_DVAL_FINISH_CHECKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_BAD_DVAL_FINISH_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSEXEC_REJECT_FINISH_CHECKSTOP_HOLD_OUT , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSEXEC_REJECT_FINISH_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_FLSH_FFN_AND_NOT_UC_HOLD_OUT        , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FFN_AND_NOT_UC_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_FLSH_FLUSH_NEXT_UCODE_HOLD_OUT      , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_NEXT_UCODE_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_FLSH_INVALID_FLUSH_CASE_HOLD_OUT    , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_INVALID_FLUSH_CASE_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_FLSH_FLUSH_CRITICAL_OP_HOLD_OUT     , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_CRITICAL_OP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_FLSH_FLUSH_NEXT_NON_CRIT_ATOMIC_HOLD_OUT , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_FLSH_FLUSH_NEXT_NON_CRIT_ATOMIC_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLRQE_CI_CDF_STUCK_HOLD_OUT        , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQE_CI_CDF_STUCK_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLRQE_OVERFLOW_HOLD_OUT            , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQE_OVERFLOW_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLRQF_OVERFLOW_HOLD_OUT            , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLRQF_OVERFLOW_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLSAQ_OVERFLOW_HOLD_OUT            , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLSAQ_OVERFLOW_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLMQE_BAD_MC_RLD_DTYPE_ERR_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_BAD_MC_RLD_DTYPE_ERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLMQE_GOT_SV_TWICE_ERR_HOLD_OUT    , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_GOT_SV_TWICE_ERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_LSLMQE_INV_RD_ERR_HOLD_OUT          , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSLMQE_INV_RD_ERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG0_SCOM_PARITY_HOLD_OUT                , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SCOM_PARITY_HOLD_OUT );
+
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_BUSY_CHECKSTOP_HOLD_OUT , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_BUSY_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_ERAT_WRITE_CHECKSTOP_HOLD_OUT , 1   , SH_UNT_EX_L2    ,
+           SH_ACS_SCOM_RO  , SH_FLD_LSSLBC_MULTI_ERAT_WRITE_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_GRANT_CHECKSTOP_HOLD_OUT , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_GRANT_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_PGSEL_CHECKSTOP_HOLD_OUT , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_PGSEL_CHECKSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_CORE_XSTOP_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_SYS_XSTOP_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_SYS_XSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LS_S2QR_PERR_P2_HOLD_OUT        , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_S2QR_PERR_P2_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSPRQ_SPR_PERR_HOLD_OUT         , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_SPR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSAMRD_SPR_PERR_HOLD_OUT        , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSAMRD_SPR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSAMRS_SPR_PERR_HOLD_OUT        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSAMRS_SPR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSINTR_SPR_PERR_HOLD_OUT        , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSINTR_SPR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSXREG_SPR_PERR_HOLD_OUT        , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSXREG_SPR_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_GRBC_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_GRBC_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_WPPM_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_WPPM_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_RECOV_HOLD_OUT , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_RECOV_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG1_LSS2Q_ERRC_RTYPE_CHECKSTOP_HOLD_OUT , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSS2Q_ERRC_RTYPE_CHECKSTOP_HOLD_OUT );
+
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_BUSY_CHECKSTOP_HOLD_OUT , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_BUSY_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_ERAT_WRITE_CHECKSTOP_HOLD_OUT , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_ERAT_WRITE_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_GRANT_CHECKSTOP_HOLD_OUT , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_GRANT_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSSLBC_MULTI_PGSEL_CHECKSTOP_HOLD_OUT , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSLBC_MULTI_PGSEL_CHECKSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_CORE_XSTOP_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_SYS_XSTOP_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_SYS_XSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LS_S2QR_PERR_P2_HOLD_OUT            , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_S2QR_PERR_P2_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSPRQ_SPR_PERR_HOLD_OUT             , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_SPR_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSAMRD_SPR_PERR_HOLD_OUT            , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSAMRD_SPR_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSAMRS_SPR_PERR_HOLD_OUT            , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSAMRS_SPR_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSINTR_SPR_PERR_HOLD_OUT            , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSINTR_SPR_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSXREG_SPR_PERR_HOLD_OUT            , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSXREG_SPR_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_GRBC_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_GRBC_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_WPPM_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WPPM_SPR_PARITY_ERROR_CORE_XSTOP_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSPRQ_CONTROL_ERROR_RECOV_HOLD_OUT  , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSPRQ_CONTROL_ERROR_RECOV_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG1_LSS2Q_ERRC_RTYPE_CHECKSTOP_HOLD_OUT , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSS2Q_ERRC_RTYPE_CHECKSTOP_HOLD_OUT );
+
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS0_DCAC_FIN_PERR_HOLD_OUT      , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS0_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS1_DCAC_FIN_PERR_HOLD_OUT      , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS1_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS2_DCAC_FIN_PERR_HOLD_OUT      , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS2_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS3_DCAC_FIN_PERR_HOLD_OUT      , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS3_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_SETC_RC6_RD23_PARITY_ERROR_TOTAL_HOLD_OUT , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_SETC_RC6_RD23_PARITY_ERROR_TOTAL_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_WDRD0_RC9_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_WDRD0_RC9_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_WDRD1_RC8_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_WDRD1_RC8_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_DYNAM_SET_DELETED_HOLD_OUT      , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DYNAM_SET_DELETED_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS_SLB_MULTIHIT_HOLD_OUT        , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_SLB_MULTIHIT_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS_SLB_P_HOLD_OUT               , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_SLB_P_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS_TLB_MULTIHIT_HOLD_OUT        , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_TLB_MULTIHIT_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_LS_TLB_P_HOLD_OUT               , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_TLB_P_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_STPM0_RP2_SETP_PERR_HOLD_OUT    , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM0_RP2_SETP_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_STPM1_RP2_SETP_PERR_HOLD_OUT    , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM1_RP2_SETP_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_STPM2_RP1_SETP_PERR_HOLD_OUT    , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM2_RP1_SETP_PERR_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG2_STPM3_RP1_SETP_PERR_HOLD_OUT    , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM3_RP1_SETP_PERR_HOLD_OUT );
+
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS0_DCAC_FIN_PERR_HOLD_OUT          , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS0_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS1_DCAC_FIN_PERR_HOLD_OUT          , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS1_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS2_DCAC_FIN_PERR_HOLD_OUT          , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS2_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS3_DCAC_FIN_PERR_HOLD_OUT          , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS3_DCAC_FIN_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_SETC_RC6_RD23_PARITY_ERROR_TOTAL_HOLD_OUT , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_SETC_RC6_RD23_PARITY_ERROR_TOTAL_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_WDRD0_RC9_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WDRD0_RC9_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_WDRD1_RC8_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WDRD1_RC8_DDIR_ANY_ERROR_ANY_SET_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_DYNAM_SET_DELETED_HOLD_OUT          , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DYNAM_SET_DELETED_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS_SLB_MULTIHIT_HOLD_OUT            , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_SLB_MULTIHIT_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS_SLB_P_HOLD_OUT                   , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_SLB_P_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS_TLB_MULTIHIT_HOLD_OUT            , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_TLB_MULTIHIT_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_LS_TLB_P_HOLD_OUT                   , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS_TLB_P_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_STPM0_RP2_SETP_PERR_HOLD_OUT        , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM0_RP2_SETP_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_STPM1_RP2_SETP_PERR_HOLD_OUT        , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM1_RP2_SETP_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_STPM2_RP1_SETP_PERR_HOLD_OUT        , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM2_RP1_SETP_PERR_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG2_STPM3_RP1_SETP_PERR_HOLD_OUT        , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_STPM3_RP1_SETP_PERR_HOLD_OUT );
+
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_DMAG0_FIN_RF_PARITY_HOLD_OUT    , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG0_FIN_RF_PARITY_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_DMAG1_FIN_RF_PARITY_HOLD_OUT    , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG1_FIN_RF_PARITY_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_DMAG2_RP2_RF_PARITY_HOLD_OUT    , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG2_RP2_RF_PARITY_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_DMAG3_RP2_RF_PARITY_HOLD_OUT    , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG3_RP2_RF_PARITY_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LS0_RP2_RSVT_MULTILMQ_HOLD_OUT  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS0_RP2_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LS1_RP2_RSVT_MULTILMQ_HOLD_OUT  , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS1_RP2_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LS2_RP1_RSVT_MULTILMQ_HOLD_OUT  , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS2_RP1_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LS3_RP1_RSVT_MULTILMQ_HOLD_OUT  , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS3_RP1_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LSERTD_FIN_P_HOLD_OUT           , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSERTD_FIN_P_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LSERTD_FIN_ERATMHE_HOLD_OUT     , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSERTD_FIN_ERATMHE_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LSS2Q_PC_S2Q_QUEUE_OVERFLOW_HOLD_OUT , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSS2Q_PC_S2Q_QUEUE_OVERFLOW_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_LSSRQ_RES_OVERFLOW_HOLD_OUT     , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSRQ_RES_OVERFLOW_HOLD_OUT );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_RESERVED0                       , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED0  );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_RESERVED1                       , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED1  );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_RESERVED2                       , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED2  );
+REG64_FLD( EX_L2_LSU_HOLD_OUT_REG3_RESERVED3                       , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED3  );
+
+REG64_FLD( C_LSU_HOLD_OUT_REG3_DMAG0_FIN_RF_PARITY_HOLD_OUT        , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG0_FIN_RF_PARITY_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_DMAG1_FIN_RF_PARITY_HOLD_OUT        , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG1_FIN_RF_PARITY_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_DMAG2_RP2_RF_PARITY_HOLD_OUT        , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG2_RP2_RF_PARITY_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_DMAG3_RP2_RF_PARITY_HOLD_OUT        , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DMAG3_RP2_RF_PARITY_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LS0_RP2_RSVT_MULTILMQ_HOLD_OUT      , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS0_RP2_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LS1_RP2_RSVT_MULTILMQ_HOLD_OUT      , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS1_RP2_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LS2_RP1_RSVT_MULTILMQ_HOLD_OUT      , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS2_RP1_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LS3_RP1_RSVT_MULTILMQ_HOLD_OUT      , 7   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LS3_RP1_RSVT_MULTILMQ_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LSERTD_FIN_P_HOLD_OUT               , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSERTD_FIN_P_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LSERTD_FIN_ERATMHE_HOLD_OUT         , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSERTD_FIN_ERATMHE_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LSS2Q_PC_S2Q_QUEUE_OVERFLOW_HOLD_OUT , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSS2Q_PC_S2Q_QUEUE_OVERFLOW_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_LSSRQ_RES_OVERFLOW_HOLD_OUT         , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LSSRQ_RES_OVERFLOW_HOLD_OUT );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_RESERVED0                           , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED0  );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_RESERVED1                           , 13  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED1  );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_RESERVED2                           , 14  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED2  );
+REG64_FLD( C_LSU_HOLD_OUT_REG3_RESERVED3                           , 15  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED3  );
+
 REG64_FLD( EQ_MIB_XIICAC_ICACHE_TAG_ADDR                           , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_TAG_ADDR );
 REG64_FLD( EQ_MIB_XIICAC_ICACHE_TAG_ADDR_LEN                       , 27  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_TAG_ADDR_LEN );
 REG64_FLD( EQ_MIB_XIICAC_ICACHE_ERR                                , 32  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_ERR );
+REG64_FLD( EQ_MIB_XIICAC_CME_SCOM_XISIB_PIB_IFETCH_PENDING         , 34  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_CME_SCOM_XISIB_PIB_IFETCH_PENDING );
 REG64_FLD( EQ_MIB_XIICAC_XIMEM_MEM_IFETCH_PENDING                  , 35  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_XIMEM_MEM_IFETCH_PENDING );
 REG64_FLD( EQ_MIB_XIICAC_ICACHE_VALID                              , 36  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_VALID );
 REG64_FLD( EQ_MIB_XIICAC_ICACHE_VALID_LEN                          , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_VALID_LEN );
+REG64_FLD( EQ_MIB_XIICAC_ICACHE_LINE2_VALID                        , 40  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_VALID );
+REG64_FLD( EQ_MIB_XIICAC_ICACHE_LINE2_VALID_LEN                    , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_VALID_LEN );
+REG64_FLD( EQ_MIB_XIICAC_ICACHE_LINE_PTR                           , 45  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE_PTR );
+REG64_FLD( EQ_MIB_XIICAC_ICACHE_LINE2_ERR                          , 46  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_ERR );
+REG64_FLD( EQ_MIB_XIICAC_ICACHE_PREFETCH_PENDING                   , 47  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_PREFETCH_PENDING );
 
 REG64_FLD( EX_MIB_XIICAC_ICACHE_TAG_ADDR                           , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_TAG_ADDR );
@@ -9435,12 +13250,24 @@ REG64_FLD( EX_MIB_XIICAC_ICACHE_TAG_ADDR_LEN                       , 27  , SH_UN
            SH_FLD_ICACHE_TAG_ADDR_LEN );
 REG64_FLD( EX_MIB_XIICAC_ICACHE_ERR                                , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_ERR );
+REG64_FLD( EX_MIB_XIICAC_CME_SCOM_XISIB_PIB_IFETCH_PENDING         , 34  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_CME_SCOM_XISIB_PIB_IFETCH_PENDING );
 REG64_FLD( EX_MIB_XIICAC_XIMEM_MEM_IFETCH_PENDING                  , 35  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_XIMEM_MEM_IFETCH_PENDING );
 REG64_FLD( EX_MIB_XIICAC_ICACHE_VALID                              , 36  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_VALID );
 REG64_FLD( EX_MIB_XIICAC_ICACHE_VALID_LEN                          , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
            SH_FLD_ICACHE_VALID_LEN );
+REG64_FLD( EX_MIB_XIICAC_ICACHE_LINE2_VALID                        , 40  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_VALID );
+REG64_FLD( EX_MIB_XIICAC_ICACHE_LINE2_VALID_LEN                    , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_VALID_LEN );
+REG64_FLD( EX_MIB_XIICAC_ICACHE_LINE_PTR                           , 45  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE_PTR );
+REG64_FLD( EX_MIB_XIICAC_ICACHE_LINE2_ERR                          , 46  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_LINE2_ERR );
+REG64_FLD( EX_MIB_XIICAC_ICACHE_PREFETCH_PENDING                   , 47  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ICACHE_PREFETCH_PENDING );
 
 REG64_FLD( EQ_MIB_XIMEM_MEM_ADDR                                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_MEM_ADDR   );
@@ -9692,6 +13519,10 @@ REG64_FLD( EX_L2_MODE_REG0_CFG_C1_L2_PB_ARB_RATE_SEL               , 35  , SH_UN
            SH_FLD_CFG_C1_L2_PB_ARB_RATE_SEL );
 REG64_FLD( EX_L2_MODE_REG0_CFG_C1_L2_PB_ARB_RATE_SEL_LEN           , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_CFG_C1_L2_PB_ARB_RATE_SEL_LEN );
+REG64_FLD( EX_L2_MODE_REG0_CFG_SKIP_GRP_SCOPE_EN                   , 38  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_CFG_SKIP_GRP_SCOPE_EN );
+REG64_FLD( EX_L2_MODE_REG0_MODE_REG0_SPARE                         , 39  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG0_SPARE );
 
 REG64_FLD( EX_L3_MODE_REG0_L3_DISABLED_CFG                         , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_DISABLED_CFG );
@@ -9751,6 +13582,10 @@ REG64_FLD( EX_L2_MODE_REG1_CFG_ECCCK_CE_UE_SUE_ERR_DET_DIS         , 0   , SH_UN
            SH_FLD_CFG_ECCCK_CE_UE_SUE_ERR_DET_DIS );
 REG64_FLD( EX_L2_MODE_REG1_CFG_ECCCK_UE_SUE_DET_DIS                , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_CFG_ECCCK_UE_SUE_DET_DIS );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE0                        , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE0 );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE0_LEN                    , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE0_LEN );
 REG64_FLD( EX_L2_MODE_REG1_HANG_POLL_PULSE_DIV                     , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_HANG_POLL_PULSE_DIV );
 REG64_FLD( EX_L2_MODE_REG1_HANG_POLL_PULSE_DIV_LEN                 , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
@@ -9759,14 +13594,26 @@ REG64_FLD( EX_L2_MODE_REG1_DATA_POLL_PULSE_DIV                     , 8   , SH_UN
            SH_FLD_DATA_POLL_PULSE_DIV );
 REG64_FLD( EX_L2_MODE_REG1_DATA_POLL_PULSE_DIV_LEN                 , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_DATA_POLL_PULSE_DIV_LEN );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE1                        , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE1 );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE1_LEN                    , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE1_LEN );
 REG64_FLD( EX_L2_MODE_REG1_PM03_SMT_ROTATION_DIS                   , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_PM03_SMT_ROTATION_DIS );
 REG64_FLD( EX_L2_MODE_REG1_PM47_SMT_ROTATION_DIS                   , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_PM47_SMT_ROTATION_DIS );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE2                        , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE2 );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE2_LEN                    , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE2_LEN );
 REG64_FLD( EX_L2_MODE_REG1_PM07_TID_ROTATE_PLSS_RATE               , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_PM07_TID_ROTATE_PLSS_RATE );
 REG64_FLD( EX_L2_MODE_REG1_PM07_TID_ROTATE_PLSS_RATE_LEN           , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_PM07_TID_ROTATE_PLSS_RATE_LEN );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE3                        , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE3 );
+REG64_FLD( EX_L2_MODE_REG1_MODE_REG1_SPARE3_LEN                    , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_MODE_REG1_SPARE3_LEN );
 REG64_FLD( EX_L2_MODE_REG1_PM03_L23_EVENT_TID_SEL_EN               , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_PM03_L23_EVENT_TID_SEL_EN );
 REG64_FLD( EX_L2_MODE_REG1_PM03_L23_EVENT_TID_SEL_NUM              , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
@@ -10205,10 +14052,8 @@ REG64_FLD( EQ_NET_CTRL0_CPLT_RCTRL                                 , 19  , SH_UN
            SH_FLD_CPLT_RCTRL );
 REG64_FLD( EQ_NET_CTRL0_CPLT_DCTRL                                 , 20  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
            SH_FLD_CPLT_DCTRL );
-REG64_FLD( EQ_NET_CTRL0_L3_EDRAM_ENABLE0                           , 23  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE0 );
-REG64_FLD( EQ_NET_CTRL0_L3_EDRAM_ENABLE1                           , 24  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE1 );
+REG64_FLD( EQ_NET_CTRL0_ADJ_FUNC_CLKSEL                            , 22  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
+           SH_FLD_ADJ_FUNC_CLKSEL );
 REG64_FLD( EQ_NET_CTRL0_TP_FENCE_PCB                               , 25  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
            SH_FLD_TP_FENCE_PCB );
 REG64_FLD( EQ_NET_CTRL0_LVLTRANS_FENCE                             , 26  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
@@ -10219,6 +14064,8 @@ REG64_FLD( EQ_NET_CTRL0_HTB_INTEST                                 , 28  , SH_UN
            SH_FLD_HTB_INTEST );
 REG64_FLD( EQ_NET_CTRL0_HTB_EXTEST                                 , 29  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
            SH_FLD_HTB_EXTEST );
+REG64_FLD( EQ_NET_CTRL0_PM_ACCESS                                  , 30  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PM_ACCESS  );
 REG64_FLD( EQ_NET_CTRL0_PLLFORCE_OUT_EN                            , 31  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
            SH_FLD_PLLFORCE_OUT_EN );
 
@@ -10264,10 +14111,8 @@ REG64_FLD( EX_NET_CTRL0_CPLT_RCTRL                                 , 19  , SH_UN
            SH_FLD_CPLT_RCTRL );
 REG64_FLD( EX_NET_CTRL0_CPLT_DCTRL                                 , 20  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_CPLT_DCTRL );
-REG64_FLD( EX_NET_CTRL0_L3_EDRAM_ENABLE0                           , 23  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE0 );
-REG64_FLD( EX_NET_CTRL0_L3_EDRAM_ENABLE1                           , 24  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE1 );
+REG64_FLD( EX_NET_CTRL0_ADJ_FUNC_CLKSEL                            , 22  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
+           SH_FLD_ADJ_FUNC_CLKSEL );
 REG64_FLD( EX_NET_CTRL0_TP_FENCE_PCB                               , 25  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_TP_FENCE_PCB );
 REG64_FLD( EX_NET_CTRL0_LVLTRANS_FENCE                             , 26  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
@@ -10278,6 +14123,8 @@ REG64_FLD( EX_NET_CTRL0_HTB_INTEST                                 , 28  , SH_UN
            SH_FLD_HTB_INTEST );
 REG64_FLD( EX_NET_CTRL0_HTB_EXTEST                                 , 29  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_HTB_EXTEST );
+REG64_FLD( EX_NET_CTRL0_PM_ACCESS                                  , 30  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PM_ACCESS  );
 REG64_FLD( EX_NET_CTRL0_PLLFORCE_OUT_EN                            , 31  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_PLLFORCE_OUT_EN );
 
@@ -10323,10 +14170,8 @@ REG64_FLD( C_NET_CTRL0_CPLT_RCTRL                                  , 19  , SH_UN
            SH_FLD_CPLT_RCTRL );
 REG64_FLD( C_NET_CTRL0_CPLT_DCTRL                                  , 20  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_CPLT_DCTRL );
-REG64_FLD( C_NET_CTRL0_L3_EDRAM_ENABLE0                            , 23  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE0 );
-REG64_FLD( C_NET_CTRL0_L3_EDRAM_ENABLE1                            , 24  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
-           SH_FLD_L3_EDRAM_ENABLE1 );
+REG64_FLD( C_NET_CTRL0_ADJ_FUNC_CLKSEL                             , 22  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
+           SH_FLD_ADJ_FUNC_CLKSEL );
 REG64_FLD( C_NET_CTRL0_TP_FENCE_PCB                                , 25  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_TP_FENCE_PCB );
 REG64_FLD( C_NET_CTRL0_LVLTRANS_FENCE                              , 26  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
@@ -10337,6 +14182,8 @@ REG64_FLD( C_NET_CTRL0_HTB_INTEST                                  , 28  , SH_UN
            SH_FLD_HTB_INTEST );
 REG64_FLD( C_NET_CTRL0_HTB_EXTEST                                  , 29  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_HTB_EXTEST );
+REG64_FLD( C_NET_CTRL0_PM_ACCESS                                   , 30  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
+           SH_FLD_PM_ACCESS  );
 REG64_FLD( C_NET_CTRL0_PLLFORCE_OUT_EN                             , 31  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_PLLFORCE_OUT_EN );
 
@@ -10378,6 +14225,10 @@ REG64_FLD( EQ_NET_CTRL1_CLK_PULSE_MODE                             , 26  , SH_UN
            SH_FLD_CLK_PULSE_MODE );
 REG64_FLD( EQ_NET_CTRL1_CLK_PULSE_MODE_LEN                         , 2   , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
            SH_FLD_CLK_PULSE_MODE_LEN );
+REG64_FLD( EQ_NET_CTRL1_PCB_ACCESS                                 , 28  , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS );
+REG64_FLD( EQ_NET_CTRL1_PCB_ACCESS_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS_LEN );
 
 REG64_FLD( EX_NET_CTRL1_PLL_CLKIN_SEL                              , 0   , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_PLL_CLKIN_SEL );
@@ -10417,6 +14268,10 @@ REG64_FLD( EX_NET_CTRL1_CLK_PULSE_MODE                             , 26  , SH_UN
            SH_FLD_CLK_PULSE_MODE );
 REG64_FLD( EX_NET_CTRL1_CLK_PULSE_MODE_LEN                         , 2   , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
            SH_FLD_CLK_PULSE_MODE_LEN );
+REG64_FLD( EX_NET_CTRL1_PCB_ACCESS                                 , 28  , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS );
+REG64_FLD( EX_NET_CTRL1_PCB_ACCESS_LEN                             , 4   , SH_UNT_EX       , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS_LEN );
 
 REG64_FLD( C_NET_CTRL1_PLL_CLKIN_SEL                               , 0   , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_PLL_CLKIN_SEL );
@@ -10456,16 +14311,20 @@ REG64_FLD( C_NET_CTRL1_CLK_PULSE_MODE                              , 26  , SH_UN
            SH_FLD_CLK_PULSE_MODE );
 REG64_FLD( C_NET_CTRL1_CLK_PULSE_MODE_LEN                          , 2   , SH_UNT_C        , SH_ACS_SCOM2_WOR,
            SH_FLD_CLK_PULSE_MODE_LEN );
+REG64_FLD( C_NET_CTRL1_PCB_ACCESS                                  , 28  , SH_UNT_C        , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS );
+REG64_FLD( C_NET_CTRL1_PCB_ACCESS_LEN                              , 4   , SH_UNT_C        , SH_ACS_SCOM2_WOR,
+           SH_FLD_PCB_ACCESS_LEN );
 
-REG64_FLD( EX_L2_OCC_SCOMC_MODE                                    , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE       );
-REG64_FLD( EX_L2_OCC_SCOMC_MODE_LEN                                , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE_LEN   );
+REG64_FLD( EX_L2_OCC_SCOMC_MODE_CX                                 , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX    );
+REG64_FLD( EX_L2_OCC_SCOMC_MODE_CX_LEN                             , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX_LEN );
 
-REG64_FLD( C_OCC_SCOMC_MODE                                        , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE       );
-REG64_FLD( C_OCC_SCOMC_MODE_LEN                                    , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE_LEN   );
+REG64_FLD( C_OCC_SCOMC_MODE_CX                                     , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX    );
+REG64_FLD( C_OCC_SCOMC_MODE_CX_LEN                                 , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX_LEN );
 
 REG64_FLD( EQ_OPCG_ALIGN_INOP                                      , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_INOP       );
@@ -11218,8 +15077,8 @@ REG64_FLD( EQ_OPCG_REG1_MISR_INIT_WAIT                             , 36  , SH_UN
            SH_FLD_MISR_INIT_WAIT );
 REG64_FLD( EQ_OPCG_REG1_MISR_INIT_WAIT_LEN                         , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MISR_INIT_WAIT_LEN );
-REG64_FLD( EQ_OPCG_REG1_SUPPRESS_EVEN_CLK                          , 48  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_SUPPRESS_EVEN_CLK );
+REG64_FLD( EQ_OPCG_REG1_SUPPRESS_LAST_RUNN_CLK                     , 48  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SUPPRESS_LAST_RUNN_CLK );
 REG64_FLD( EQ_OPCG_REG1_SCAN_CLK_USE_EVEN                          , 49  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_SCAN_CLK_USE_EVEN );
 REG64_FLD( EQ_OPCG_REG1_UNUSED2                                    , 50  , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -11261,8 +15120,8 @@ REG64_FLD( EX_OPCG_REG1_MISR_INIT_WAIT                             , 36  , SH_UN
            SH_FLD_MISR_INIT_WAIT );
 REG64_FLD( EX_OPCG_REG1_MISR_INIT_WAIT_LEN                         , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_MISR_INIT_WAIT_LEN );
-REG64_FLD( EX_OPCG_REG1_SUPPRESS_EVEN_CLK                          , 48  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_SUPPRESS_EVEN_CLK );
+REG64_FLD( EX_OPCG_REG1_SUPPRESS_LAST_RUNN_CLK                     , 48  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SUPPRESS_LAST_RUNN_CLK );
 REG64_FLD( EX_OPCG_REG1_SCAN_CLK_USE_EVEN                          , 49  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_SCAN_CLK_USE_EVEN );
 REG64_FLD( EX_OPCG_REG1_UNUSED2                                    , 50  , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -11304,8 +15163,8 @@ REG64_FLD( C_OPCG_REG1_MISR_INIT_WAIT                              , 36  , SH_UN
            SH_FLD_MISR_INIT_WAIT );
 REG64_FLD( C_OPCG_REG1_MISR_INIT_WAIT_LEN                          , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_MISR_INIT_WAIT_LEN );
-REG64_FLD( C_OPCG_REG1_SUPPRESS_EVEN_CLK                           , 48  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_SUPPRESS_EVEN_CLK );
+REG64_FLD( C_OPCG_REG1_SUPPRESS_LAST_RUNN_CLK                      , 48  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SUPPRESS_LAST_RUNN_CLK );
 REG64_FLD( C_OPCG_REG1_SCAN_CLK_USE_EVEN                           , 49  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_SCAN_CLK_USE_EVEN );
 REG64_FLD( C_OPCG_REG1_UNUSED2                                     , 50  , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -11466,8 +15325,16 @@ REG64_FLD( EQ_PHYP_PURGE_REG_L3_LINE_DEL_ON_NEXT_CE                , 5   , SH_UN
            SH_FLD_L3_LINE_DEL_ON_NEXT_CE );
 REG64_FLD( EQ_PHYP_PURGE_REG_L3_LINE_DEL_ON_ALL_CE                 , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_LINE_DEL_ON_ALL_CE );
+REG64_FLD( EQ_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_1              , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_1 );
+REG64_FLD( EQ_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_1_LEN          , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_1_LEN );
 REG64_FLD( EQ_PHYP_PURGE_REG_L3_BUSY_ERR                           , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_BUSY_ERR );
+REG64_FLD( EQ_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_2              , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_2 );
+REG64_FLD( EQ_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_2_LEN          , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_2_LEN );
 REG64_FLD( EQ_PHYP_PURGE_REG_L3_MEMBER                             , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_MEMBER  );
 REG64_FLD( EQ_PHYP_PURGE_REG_L3_MEMBER_LEN                         , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -11487,8 +15354,16 @@ REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_LINE_DEL_ON_NEXT_CE             , 5   , SH_UN
            SH_FLD_L3_LINE_DEL_ON_NEXT_CE );
 REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_LINE_DEL_ON_ALL_CE              , 6   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_LINE_DEL_ON_ALL_CE );
+REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_1           , 7   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_1 );
+REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_1_LEN       , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_1_LEN );
 REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_BUSY_ERR                        , 9   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_BUSY_ERR );
+REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_2           , 10  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_2 );
+REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_PHYP_PURGE_RESERVED_2_LEN       , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_L3_PHYP_PURGE_RESERVED_2_LEN );
 REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_MEMBER                          , 12  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_MEMBER  );
 REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_MEMBER_LEN                      , 5   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
@@ -11497,6 +15372,119 @@ REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_DIR_ADDR                        , 17  , SH_UN
            SH_FLD_L3_DIR_ADDR );
 REG64_FLD( EX_L3_PHYP_PURGE_REG_L3_DIR_ADDR_LEN                    , 12  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_DIR_ADDR_LEN );
+
+REG64_FLD( EQ_PLL_LOCK_REG_LOCK                                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCK       );
+REG64_FLD( EQ_PLL_LOCK_REG_LOCK_LEN                                , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCK_LEN   );
+
+REG64_FLD( EX_PLL_LOCK_REG_LOCK                                    , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCK       );
+REG64_FLD( EX_PLL_LOCK_REG_LOCK_LEN                                , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCK_LEN   );
+
+REG64_FLD( C_PLL_LOCK_REG_LOCK                                     , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LOCK       );
+REG64_FLD( C_PLL_LOCK_REG_LOCK_LEN                                 , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LOCK_LEN   );
+
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT0_SPR_HOLD_OUT                   , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT0_SPR_HOLD_OUT );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT0_SPR_HOLD_OUT_LEN               , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT0_SPR_HOLD_OUT_LEN );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT1_SPR_HOLD_OUT                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT1_SPR_HOLD_OUT );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT1_SPR_HOLD_OUT_LEN               , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT1_SPR_HOLD_OUT_LEN );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT2_SPR_HOLD_OUT                   , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT2_SPR_HOLD_OUT );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT2_SPR_HOLD_OUT_LEN               , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT2_SPR_HOLD_OUT_LEN );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT3_SPR_HOLD_OUT                   , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT3_SPR_HOLD_OUT );
+REG64_FLD( EX_L2_PMU_HOLD_OUT_PMUT3_SPR_HOLD_OUT_LEN               , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PMUT3_SPR_HOLD_OUT_LEN );
+
+REG64_FLD( C_PMU_HOLD_OUT_PMUT0_SPR_HOLD_OUT                       , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT0_SPR_HOLD_OUT );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT0_SPR_HOLD_OUT_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT0_SPR_HOLD_OUT_LEN );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT1_SPR_HOLD_OUT                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT1_SPR_HOLD_OUT );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT1_SPR_HOLD_OUT_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT1_SPR_HOLD_OUT_LEN );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT2_SPR_HOLD_OUT                       , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT2_SPR_HOLD_OUT );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT2_SPR_HOLD_OUT_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT2_SPR_HOLD_OUT_LEN );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT3_SPR_HOLD_OUT                       , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT3_SPR_HOLD_OUT );
+REG64_FLD( C_PMU_HOLD_OUT_PMUT3_SPR_HOLD_OUT_LEN                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PMUT3_SPR_HOLD_OUT_LEN );
+
+REG64_FLD( EX_L2_PMU_SCOMC_PMC1                                    , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC1       );
+REG64_FLD( EX_L2_PMU_SCOMC_PMC2                                    , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC2       );
+REG64_FLD( EX_L2_PMU_SCOMC_PMC3                                    , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC3       );
+REG64_FLD( EX_L2_PMU_SCOMC_PMC4                                    , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC4       );
+REG64_FLD( EX_L2_PMU_SCOMC_PMC5                                    , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC5       );
+REG64_FLD( EX_L2_PMU_SCOMC_PMC6                                    , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC6       );
+REG64_FLD( EX_L2_PMU_SCOMC_MMCRC                                   , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCRC      );
+REG64_FLD( EX_L2_PMU_SCOMC_MMCR0                                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR0      );
+REG64_FLD( EX_L2_PMU_SCOMC_MMCR1                                   , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR1      );
+REG64_FLD( EX_L2_PMU_SCOMC_MMCR2                                   , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR2      );
+REG64_FLD( EX_L2_PMU_SCOMC_MMCRA                                   , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCRA      );
+REG64_FLD( EX_L2_PMU_SCOMC_SIER                                    , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_SIER       );
+REG64_FLD( EX_L2_PMU_SCOMC_THREAD_ID                               , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THREAD_ID  );
+REG64_FLD( EX_L2_PMU_SCOMC_THREAD_ID_LEN                           , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THREAD_ID_LEN );
+
+REG64_FLD( C_PMU_SCOMC_PMC1                                        , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC1       );
+REG64_FLD( C_PMU_SCOMC_PMC2                                        , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC2       );
+REG64_FLD( C_PMU_SCOMC_PMC3                                        , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC3       );
+REG64_FLD( C_PMU_SCOMC_PMC4                                        , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC4       );
+REG64_FLD( C_PMU_SCOMC_PMC5                                        , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC5       );
+REG64_FLD( C_PMU_SCOMC_PMC6                                        , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PMC6       );
+REG64_FLD( C_PMU_SCOMC_MMCRC                                       , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCRC      );
+REG64_FLD( C_PMU_SCOMC_MMCR0                                       , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR0      );
+REG64_FLD( C_PMU_SCOMC_MMCR1                                       , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR1      );
+REG64_FLD( C_PMU_SCOMC_MMCR2                                       , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCR2      );
+REG64_FLD( C_PMU_SCOMC_MMCRA                                       , 10  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MMCRA      );
+REG64_FLD( C_PMU_SCOMC_SIER                                        , 11  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SIER       );
+REG64_FLD( C_PMU_SCOMC_THREAD_ID                                   , 12  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THREAD_ID  );
+REG64_FLD( C_PMU_SCOMC_THREAD_ID_LEN                               , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THREAD_ID_LEN );
+
+REG64_FLD( EX_L2_PMU_SCOMC_EN_ENABLE_INDIRECT_PMU_SCOM             , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE_INDIRECT_PMU_SCOM );
+
+REG64_FLD( C_PMU_SCOMC_EN_ENABLE_INDIRECT_PMU_SCOM                 , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_ENABLE_INDIRECT_PMU_SCOM );
 
 REG64_FLD( EQ_PM_L2_RCMD_DIS_REG_L3_CFG                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_CFG     );
@@ -11524,45 +15512,205 @@ REG64_FLD( EX_L3_PM_PURGE_REG_L3_BUSY_ERR                          , 1   , SH_UN
 REG64_FLD( EX_L3_PM_PURGE_REG_L3_ABORT                             , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
            SH_FLD_L3_ABORT   );
 
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_HS                                  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HS     );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_HC                                  , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC     );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_HC_LEN                              , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC_LEN );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_HCP                                 , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HCP    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_RIP                                 , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_RIP    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_SIP                                 , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SIP    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_TRAP                                , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRAP   );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_IAC                                 , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_IAC    );
 REG64_FLD( EQ_PPE_XIDBGPRO_NULL_MSR_SIBRC                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC );
 REG64_FLD( EQ_PPE_XIDBGPRO_NULL_MSR_SIBRC_LEN                      , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC_LEN );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_DACR                                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACR   );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_DACW                                , 13  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACW   );
 REG64_FLD( EQ_PPE_XIDBGPRO_NULL_MSR_WE                             , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_WE );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_TRH                                 , 15  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRH    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_SMS                                 , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_SMS_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS_LEN );
 REG64_FLD( EQ_PPE_XIDBGPRO_NULL_MSR_LP                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_LP );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_EP                                  , 21  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_EP     );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_PTR                                 , 24  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_PTR    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_ST                                  , 25  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_ST     );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_MFE                                 , 28  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MFE    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_MCS                                 , 29  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS    );
+REG64_FLD( EQ_PPE_XIDBGPRO_XSR_MCS_LEN                             , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS_LEN );
+REG64_FLD( EQ_PPE_XIDBGPRO_IAR                                     , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IAR        );
+REG64_FLD( EQ_PPE_XIDBGPRO_IAR_LEN                                 , 30  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IAR_LEN    );
 
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_HS                                  , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HS     );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_HC                                  , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC     );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_HC_LEN                              , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC_LEN );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_HCP                                 , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HCP    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_RIP                                 , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_RIP    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_SIP                                 , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SIP    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_TRAP                                , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRAP   );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_IAC                                 , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_IAC    );
 REG64_FLD( EX_PPE_XIDBGPRO_NULL_MSR_SIBRC                          , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC );
 REG64_FLD( EX_PPE_XIDBGPRO_NULL_MSR_SIBRC_LEN                      , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC_LEN );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_DACR                                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACR   );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_DACW                                , 13  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACW   );
 REG64_FLD( EX_PPE_XIDBGPRO_NULL_MSR_WE                             , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_WE );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_TRH                                 , 15  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRH    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_SMS                                 , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_SMS_LEN                             , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS_LEN );
 REG64_FLD( EX_PPE_XIDBGPRO_NULL_MSR_LP                             , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_LP );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_EP                                  , 21  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_EP     );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_PTR                                 , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_PTR    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_ST                                  , 25  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_ST     );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_MFE                                 , 28  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MFE    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_MCS                                 , 29  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS    );
+REG64_FLD( EX_PPE_XIDBGPRO_XSR_MCS_LEN                             , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS_LEN );
+REG64_FLD( EX_PPE_XIDBGPRO_IAR                                     , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IAR        );
+REG64_FLD( EX_PPE_XIDBGPRO_IAR_LEN                                 , 30  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IAR_LEN    );
 
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_HS                                  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HS     );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_HC                                  , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC     );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_HC_LEN                              , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC_LEN );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_HCP                                 , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HCP    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_RIP                                 , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_RIP    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_SIP                                 , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SIP    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_TRAP                                , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRAP   );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_IAC                                 , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_IAC    );
 REG64_FLD( EQ_PPE_XIRAMDBG_NULL_MSR_SIBRC                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC );
 REG64_FLD( EQ_PPE_XIRAMDBG_NULL_MSR_SIBRC_LEN                      , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC_LEN );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_DACR                                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACR   );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_DACW                                , 13  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACW   );
 REG64_FLD( EQ_PPE_XIRAMDBG_NULL_MSR_WE                             , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_WE );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_TRH                                 , 15  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRH    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_SMS                                 , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_SMS_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS_LEN );
 REG64_FLD( EQ_PPE_XIRAMDBG_NULL_MSR_LP                             , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_LP );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_EP                                  , 21  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_EP     );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_PTR                                 , 24  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_PTR    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_ST                                  , 25  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_ST     );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_MFE                                 , 28  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MFE    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_MCS                                 , 29  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS    );
+REG64_FLD( EQ_PPE_XIRAMDBG_XSR_MCS_LEN                             , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS_LEN );
 REG64_FLD( EQ_PPE_XIRAMDBG_XIRAMRA_SPRG0                           , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_XIRAMRA_SPRG0 );
 REG64_FLD( EQ_PPE_XIRAMDBG_XIRAMRA_SPRG0_LEN                       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_XIRAMRA_SPRG0_LEN );
 
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_HS                                  , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HS     );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_HC                                  , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC     );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_HC_LEN                              , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HC_LEN );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_HCP                                 , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_HCP    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_RIP                                 , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_RIP    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_SIP                                 , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SIP    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_TRAP                                , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRAP   );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_IAC                                 , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_IAC    );
 REG64_FLD( EX_PPE_XIRAMDBG_NULL_MSR_SIBRC                          , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC );
 REG64_FLD( EX_PPE_XIRAMDBG_NULL_MSR_SIBRC_LEN                      , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_SIBRC_LEN );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_DACR                                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACR   );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_DACW                                , 13  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_DACW   );
 REG64_FLD( EX_PPE_XIRAMDBG_NULL_MSR_WE                             , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_WE );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_TRH                                 , 15  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_TRH    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_SMS                                 , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_SMS_LEN                             , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_SMS_LEN );
 REG64_FLD( EX_PPE_XIRAMDBG_NULL_MSR_LP                             , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_NULL_MSR_LP );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_EP                                  , 21  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_EP     );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_PTR                                 , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_PTR    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_ST                                  , 25  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_ST     );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_MFE                                 , 28  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MFE    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_MCS                                 , 29  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS    );
+REG64_FLD( EX_PPE_XIRAMDBG_XSR_MCS_LEN                             , 3   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSR_MCS_LEN );
 REG64_FLD( EX_PPE_XIRAMDBG_XIRAMRA_SPRG0                           , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_XIRAMRA_SPRG0 );
 REG64_FLD( EX_PPE_XIRAMDBG_XIRAMRA_SPRG0_LEN                       , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -11658,6 +15806,156 @@ REG64_FLD( C_PPM_CGCR_RESERVED_1_2_LEN                             , 2   , SH_UN
            SH_FLD_RESERVED_1_2_LEN );
 REG64_FLD( C_PPM_CGCR_CLKGLM_SEL                                   , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_CLKGLM_SEL );
+
+REG64_FLD( EQ_PPM_GPMMR_SPECIAL_WKUP_DONE                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_GPMMR_SPECIAL_WKUP_ACTIVE                        , 1   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_ACTIVE );
+REG64_FLD( EQ_PPM_GPMMR_REGULAR_WKUP_ACTIVE                        , 2   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_ACTIVE );
+REG64_FLD( EQ_PPM_GPMMR_SPECIAL_WKUP_REQUESTED                     , 3   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_REQUESTED );
+REG64_FLD( EQ_PPM_GPMMR_REGULAR_WKUP_REQUESTED                     , 4   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_REQUESTED );
+REG64_FLD( EQ_PPM_GPMMR_REGULAR_WKUP_PRESENT                       , 5   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_PRESENT );
+REG64_FLD( EQ_PPM_GPMMR_BLOCK_REG_WKUP_EVENTS                      , 6   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_REG_WKUP_EVENTS );
+REG64_FLD( EQ_PPM_GPMMR_BLOCK_ALL_WKUP_EVENTS                      , 7   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_ALL_WKUP_EVENTS );
+REG64_FLD( EQ_PPM_GPMMR_WKUP_OVERRIDE_EN                           , 8   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_WKUP_OVERRIDE_EN );
+REG64_FLD( EQ_PPM_GPMMR_SPC_WKUP_OVERRIDE                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_SPC_WKUP_OVERRIDE );
+REG64_FLD( EQ_PPM_GPMMR_REG_WKUP_OVERRIDE                          , 10  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_REG_WKUP_OVERRIDE );
+REG64_FLD( EQ_PPM_GPMMR_CHIPLET_ENABLE                             , 11  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_CHIPLET_ENABLE );
+REG64_FLD( EQ_PPM_GPMMR_RESERVED_12_14                             , 12  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14 );
+REG64_FLD( EQ_PPM_GPMMR_RESERVED_12_14_LEN                         , 3   , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14_LEN );
+REG64_FLD( EQ_PPM_GPMMR_RESET_STATE_INDICATOR                      , 15  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_RESET_STATE_INDICATOR );
+
+REG64_FLD( EX_PPM_GPMMR_SPECIAL_WKUP_DONE                          , 0   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_GPMMR_SPECIAL_WKUP_ACTIVE                        , 1   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_ACTIVE );
+REG64_FLD( EX_PPM_GPMMR_REGULAR_WKUP_ACTIVE                        , 2   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_ACTIVE );
+REG64_FLD( EX_PPM_GPMMR_SPECIAL_WKUP_REQUESTED                     , 3   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_REQUESTED );
+REG64_FLD( EX_PPM_GPMMR_REGULAR_WKUP_REQUESTED                     , 4   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_REQUESTED );
+REG64_FLD( EX_PPM_GPMMR_REGULAR_WKUP_PRESENT                       , 5   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_PRESENT );
+REG64_FLD( EX_PPM_GPMMR_BLOCK_REG_WKUP_EVENTS                      , 6   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_REG_WKUP_EVENTS );
+REG64_FLD( EX_PPM_GPMMR_BLOCK_ALL_WKUP_EVENTS                      , 7   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_ALL_WKUP_EVENTS );
+REG64_FLD( EX_PPM_GPMMR_WKUP_OVERRIDE_EN                           , 8   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_WKUP_OVERRIDE_EN );
+REG64_FLD( EX_PPM_GPMMR_SPC_WKUP_OVERRIDE                          , 9   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_SPC_WKUP_OVERRIDE );
+REG64_FLD( EX_PPM_GPMMR_REG_WKUP_OVERRIDE                          , 10  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_REG_WKUP_OVERRIDE );
+REG64_FLD( EX_PPM_GPMMR_CHIPLET_ENABLE                             , 11  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_CHIPLET_ENABLE );
+REG64_FLD( EX_PPM_GPMMR_RESERVED_12_14                             , 12  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14 );
+REG64_FLD( EX_PPM_GPMMR_RESERVED_12_14_LEN                         , 3   , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14_LEN );
+REG64_FLD( EX_PPM_GPMMR_RESET_STATE_INDICATOR                      , 15  , SH_UNT_EX       , SH_ACS_SCOM2    ,
+           SH_FLD_RESET_STATE_INDICATOR );
+
+REG64_FLD( C_PPM_GPMMR_SPECIAL_WKUP_DONE                           , 0   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_GPMMR_SPECIAL_WKUP_ACTIVE                         , 1   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_ACTIVE );
+REG64_FLD( C_PPM_GPMMR_REGULAR_WKUP_ACTIVE                         , 2   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_ACTIVE );
+REG64_FLD( C_PPM_GPMMR_SPECIAL_WKUP_REQUESTED                      , 3   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_SPECIAL_WKUP_REQUESTED );
+REG64_FLD( C_PPM_GPMMR_REGULAR_WKUP_REQUESTED                      , 4   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_REQUESTED );
+REG64_FLD( C_PPM_GPMMR_REGULAR_WKUP_PRESENT                        , 5   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_REGULAR_WKUP_PRESENT );
+REG64_FLD( C_PPM_GPMMR_BLOCK_REG_WKUP_EVENTS                       , 6   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_REG_WKUP_EVENTS );
+REG64_FLD( C_PPM_GPMMR_BLOCK_ALL_WKUP_EVENTS                       , 7   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_BLOCK_ALL_WKUP_EVENTS );
+REG64_FLD( C_PPM_GPMMR_WKUP_OVERRIDE_EN                            , 8   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_WKUP_OVERRIDE_EN );
+REG64_FLD( C_PPM_GPMMR_SPC_WKUP_OVERRIDE                           , 9   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_SPC_WKUP_OVERRIDE );
+REG64_FLD( C_PPM_GPMMR_REG_WKUP_OVERRIDE                           , 10  , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_REG_WKUP_OVERRIDE );
+REG64_FLD( C_PPM_GPMMR_CHIPLET_ENABLE                              , 11  , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_CHIPLET_ENABLE );
+REG64_FLD( C_PPM_GPMMR_RESERVED_12_14                              , 12  , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14 );
+REG64_FLD( C_PPM_GPMMR_RESERVED_12_14_LEN                          , 3   , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_RESERVED_12_14_LEN );
+REG64_FLD( C_PPM_GPMMR_RESET_STATE_INDICATOR                       , 15  , SH_UNT_C        , SH_ACS_SCOM2    ,
+           SH_FLD_RESET_STATE_INDICATOR );
+
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_IVID                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID  );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_IVID_LEN                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID_LEN );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_PROTECT_ACTIVE                      , 8   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PROTECT_ACTIVE );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_PFET_STRENGTH                       , 11  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_PFET_STRENGTH_LEN                   , 5   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH_LEN );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_VID_VALID                           , 24  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VID_VALID );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_BYPASS_B                            , 25  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_BYPASS_B );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_POWERON                             , 26  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_POWERON );
+REG64_FLD( EQ_PPM_IVRMAVR_IVRM_VREG_SLOW_DC                        , 27  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VREG_SLOW_DC );
+
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_IVID                                , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID  );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_IVID_LEN                            , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID_LEN );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_PROTECT_ACTIVE                      , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PROTECT_ACTIVE );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_PFET_STRENGTH                       , 11  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_PFET_STRENGTH_LEN                   , 5   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH_LEN );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_VID_VALID                           , 24  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VID_VALID );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_BYPASS_B                            , 25  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_BYPASS_B );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_POWERON                             , 26  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_POWERON );
+REG64_FLD( EX_PPM_IVRMAVR_IVRM_VREG_SLOW_DC                        , 27  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VREG_SLOW_DC );
+
+REG64_FLD( C_PPM_IVRMAVR_IVRM_IVID                                 , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID  );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_IVID_LEN                             , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_IVID_LEN );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_PROTECT_ACTIVE                       , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PROTECT_ACTIVE );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_PFET_STRENGTH                        , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_PFET_STRENGTH_LEN                    , 5   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_PFET_STRENGTH_LEN );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_VID_VALID                            , 24  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VID_VALID );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_BYPASS_B                             , 25  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_BYPASS_B );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_POWERON                              , 26  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_POWERON );
+REG64_FLD( C_PPM_IVRMAVR_IVRM_VREG_SLOW_DC                         , 27  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IVRM_VREG_SLOW_DC );
 
 REG64_FLD( EQ_PPM_IVRMCR_IVRM_VID_VALID                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_IVRM_VID_VALID );
@@ -11995,6 +16293,117 @@ REG64_FLD( C_PPM_PFOFF_VCS_VOFF_SEL                                , 4   , SH_UN
 REG64_FLD( C_PPM_PFOFF_VCS_VOFF_SEL_LEN                            , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_VCS_VOFF_SEL_LEN );
 
+REG64_FLD( EQ_PPM_PFSNS_VDD_PFETS_ENABLED_SENSE                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_ENABLED_SENSE );
+REG64_FLD( EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE                   , 1   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_DISABLED_SENSE );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PFETS_ENABLED_SENSE                    , 2   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_ENABLED_SENSE );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PFETS_DISABLED_SENSE                   , 3   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_DISABLED_SENSE );
+REG64_FLD( EQ_PPM_PFSNS_RESERVED_4_15                              , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15 );
+REG64_FLD( EQ_PPM_PFSNS_RESERVED_4_15_LEN                          , 12  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15_LEN );
+REG64_FLD( EQ_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL                  , 16  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL );
+REG64_FLD( EQ_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL_LEN              , 8   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( EQ_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL                  , 24  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL );
+REG64_FLD( EQ_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL_LEN              , 8   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( EQ_PPM_PFSNS_VDD_PG_STATE                               , 42  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE );
+REG64_FLD( EQ_PPM_PFSNS_VDD_PG_STATE_LEN                           , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE_LEN );
+REG64_FLD( EQ_PPM_PFSNS_VDD_PG_SEL                                 , 46  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL );
+REG64_FLD( EQ_PPM_PFSNS_VDD_PG_SEL_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL_LEN );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PG_STATE                               , 50  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PG_STATE_LEN                           , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE_LEN );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PG_SEL                                 , 54  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL );
+REG64_FLD( EQ_PPM_PFSNS_VCS_PG_SEL_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL_LEN );
+
+REG64_FLD( EX_PPM_PFSNS_VDD_PFETS_ENABLED_SENSE                    , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_ENABLED_SENSE );
+REG64_FLD( EX_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE                   , 1   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_DISABLED_SENSE );
+REG64_FLD( EX_PPM_PFSNS_VCS_PFETS_ENABLED_SENSE                    , 2   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_ENABLED_SENSE );
+REG64_FLD( EX_PPM_PFSNS_VCS_PFETS_DISABLED_SENSE                   , 3   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_DISABLED_SENSE );
+REG64_FLD( EX_PPM_PFSNS_RESERVED_4_15                              , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15 );
+REG64_FLD( EX_PPM_PFSNS_RESERVED_4_15_LEN                          , 12  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15_LEN );
+REG64_FLD( EX_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL                  , 16  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL );
+REG64_FLD( EX_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL_LEN              , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( EX_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL                  , 24  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL );
+REG64_FLD( EX_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL_LEN              , 8   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( EX_PPM_PFSNS_VDD_PG_STATE                               , 42  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE );
+REG64_FLD( EX_PPM_PFSNS_VDD_PG_STATE_LEN                           , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE_LEN );
+REG64_FLD( EX_PPM_PFSNS_VDD_PG_SEL                                 , 46  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL );
+REG64_FLD( EX_PPM_PFSNS_VDD_PG_SEL_LEN                             , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL_LEN );
+REG64_FLD( EX_PPM_PFSNS_VCS_PG_STATE                               , 50  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE );
+REG64_FLD( EX_PPM_PFSNS_VCS_PG_STATE_LEN                           , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE_LEN );
+REG64_FLD( EX_PPM_PFSNS_VCS_PG_SEL                                 , 54  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL );
+REG64_FLD( EX_PPM_PFSNS_VCS_PG_SEL_LEN                             , 4   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL_LEN );
+
+REG64_FLD( C_PPM_PFSNS_VDD_PFETS_ENABLED_SENSE                     , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_ENABLED_SENSE );
+REG64_FLD( C_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE                    , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PFETS_DISABLED_SENSE );
+REG64_FLD( C_PPM_PFSNS_VCS_PFETS_ENABLED_SENSE                     , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_ENABLED_SENSE );
+REG64_FLD( C_PPM_PFSNS_VCS_PFETS_DISABLED_SENSE                    , 3   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PFETS_DISABLED_SENSE );
+REG64_FLD( C_PPM_PFSNS_RESERVED_4_15                               , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15 );
+REG64_FLD( C_PPM_PFSNS_RESERVED_4_15_LEN                           , 12  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RESERVED_4_15_LEN );
+REG64_FLD( C_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL                   , 16  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL );
+REG64_FLD( C_PPM_PFSNS_TP_VDD_PFET_ENABLE_ACTUAL_LEN               , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VDD_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( C_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL                   , 24  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL );
+REG64_FLD( C_PPM_PFSNS_TP_VCS_PFET_ENABLE_ACTUAL_LEN               , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_TP_VCS_PFET_ENABLE_ACTUAL_LEN );
+REG64_FLD( C_PPM_PFSNS_VDD_PG_STATE                                , 42  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE );
+REG64_FLD( C_PPM_PFSNS_VDD_PG_STATE_LEN                            , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_STATE_LEN );
+REG64_FLD( C_PPM_PFSNS_VDD_PG_SEL                                  , 46  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL );
+REG64_FLD( C_PPM_PFSNS_VDD_PG_SEL_LEN                              , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VDD_PG_SEL_LEN );
+REG64_FLD( C_PPM_PFSNS_VCS_PG_STATE                                , 50  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE );
+REG64_FLD( C_PPM_PFSNS_VCS_PG_STATE_LEN                            , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_STATE_LEN );
+REG64_FLD( C_PPM_PFSNS_VCS_PG_SEL                                  , 54  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL );
+REG64_FLD( C_PPM_PFSNS_VCS_PG_SEL_LEN                              , 4   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VCS_PG_SEL_LEN );
+
 REG64_FLD( EQ_PPM_PIG_REQ_INTR_TYPE                                , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_REQ_INTR_TYPE );
 REG64_FLD( EQ_PPM_PIG_REQ_INTR_TYPE_LEN                            , 3   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -12136,6 +16545,393 @@ REG64_FLD( EX_PPM_SPWKUP_OTR_OTR_SPECIAL_WKUP                      , 0   , SH_UN
 REG64_FLD( C_PPM_SPWKUP_OTR_OTR_SPECIAL_WKUP                       , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_OTR_SPECIAL_WKUP );
 
+REG64_FLD( EQ_PPM_SSHFSP_STOP_GATED                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EQ_PPM_SSHFSP_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_SSHFSP_STOP_TRANSITION                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EQ_PPM_SSHFSP_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EQ_PPM_SSHFSP_REQ_STOP_LEVEL                            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHFSP_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHFSP_ACT_STOP_LEVEL                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHFSP_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP );
+REG64_FLD( EQ_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP_LEN );
+REG64_FLD( EQ_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP                , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP );
+REG64_FLD( EQ_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP_LEN );
+REG64_FLD( EQ_PPM_SSHFSP_IVRM_ENABLED_HISTORY_FSP                  , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_FSP );
+
+REG64_FLD( EX_PPM_SSHFSP_STOP_GATED                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EX_PPM_SSHFSP_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_SSHFSP_STOP_TRANSITION                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EX_PPM_SSHFSP_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EX_PPM_SSHFSP_REQ_STOP_LEVEL                            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHFSP_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHFSP_ACT_STOP_LEVEL                            , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHFSP_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP );
+REG64_FLD( EX_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP_LEN );
+REG64_FLD( EX_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP                , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP );
+REG64_FLD( EX_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP_LEN );
+REG64_FLD( EX_PPM_SSHFSP_IVRM_ENABLED_HISTORY_FSP                  , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_FSP );
+
+REG64_FLD( C_PPM_SSHFSP_STOP_GATED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( C_PPM_SSHFSP_SPECIAL_WKUP_DONE                          , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_SSHFSP_STOP_TRANSITION                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( C_PPM_SSHFSP_STOP_TRANSITION_LEN                        , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( C_PPM_SSHFSP_REQ_STOP_LEVEL                             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHFSP_REQ_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHFSP_ACT_STOP_LEVEL                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHFSP_ACT_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP                 , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP );
+REG64_FLD( C_PPM_SSHFSP_DEEPEST_REQ_STOP_LEVEL_FSP_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_FSP_LEN );
+REG64_FLD( C_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP                 , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP );
+REG64_FLD( C_PPM_SSHFSP_DEEPEST_ACT_STOP_LEVEL_FSP_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_FSP_LEN );
+REG64_FLD( C_PPM_SSHFSP_IVRM_ENABLED_HISTORY_FSP                   , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_FSP );
+
+REG64_FLD( EQ_PPM_SSHHYP_STOP_GATED                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EQ_PPM_SSHHYP_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_SSHHYP_STOP_TRANSITION                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EQ_PPM_SSHHYP_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EQ_PPM_SSHHYP_REQ_STOP_LEVEL                            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHHYP_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHHYP_ACT_STOP_LEVEL                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHHYP_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP );
+REG64_FLD( EQ_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP_LEN );
+REG64_FLD( EQ_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP                , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP );
+REG64_FLD( EQ_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP_LEN );
+REG64_FLD( EQ_PPM_SSHHYP_IVRM_ENABLED_HISTORY_HYP                  , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_HYP );
+
+REG64_FLD( EX_PPM_SSHHYP_STOP_GATED                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EX_PPM_SSHHYP_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_SSHHYP_STOP_TRANSITION                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EX_PPM_SSHHYP_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EX_PPM_SSHHYP_REQ_STOP_LEVEL                            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHHYP_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHHYP_ACT_STOP_LEVEL                            , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHHYP_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP );
+REG64_FLD( EX_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP_LEN );
+REG64_FLD( EX_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP                , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP );
+REG64_FLD( EX_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP_LEN );
+REG64_FLD( EX_PPM_SSHHYP_IVRM_ENABLED_HISTORY_HYP                  , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_HYP );
+
+REG64_FLD( C_PPM_SSHHYP_STOP_GATED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( C_PPM_SSHHYP_SPECIAL_WKUP_DONE                          , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_SSHHYP_STOP_TRANSITION                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( C_PPM_SSHHYP_STOP_TRANSITION_LEN                        , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( C_PPM_SSHHYP_REQ_STOP_LEVEL                             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHHYP_REQ_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHHYP_ACT_STOP_LEVEL                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHHYP_ACT_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP                 , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP );
+REG64_FLD( C_PPM_SSHHYP_DEEPEST_REQ_STOP_LEVEL_HYP_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_HYP_LEN );
+REG64_FLD( C_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP                 , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP );
+REG64_FLD( C_PPM_SSHHYP_DEEPEST_ACT_STOP_LEVEL_HYP_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_HYP_LEN );
+REG64_FLD( C_PPM_SSHHYP_IVRM_ENABLED_HISTORY_HYP                   , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_HYP );
+
+REG64_FLD( EQ_PPM_SSHOCC_STOP_GATED                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EQ_PPM_SSHOCC_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_SSHOCC_STOP_TRANSITION                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EQ_PPM_SSHOCC_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EQ_PPM_SSHOCC_REQ_STOP_LEVEL                            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHOCC_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHOCC_ACT_STOP_LEVEL                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHOCC_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC );
+REG64_FLD( EQ_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC_LEN );
+REG64_FLD( EQ_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC                , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC );
+REG64_FLD( EQ_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC_LEN );
+REG64_FLD( EQ_PPM_SSHOCC_IVRM_ENABLED_HISTORY_OCC                  , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OCC );
+
+REG64_FLD( EX_PPM_SSHOCC_STOP_GATED                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EX_PPM_SSHOCC_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_SSHOCC_STOP_TRANSITION                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EX_PPM_SSHOCC_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EX_PPM_SSHOCC_REQ_STOP_LEVEL                            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHOCC_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHOCC_ACT_STOP_LEVEL                            , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHOCC_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC );
+REG64_FLD( EX_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC_LEN );
+REG64_FLD( EX_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC                , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC );
+REG64_FLD( EX_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC_LEN );
+REG64_FLD( EX_PPM_SSHOCC_IVRM_ENABLED_HISTORY_OCC                  , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OCC );
+
+REG64_FLD( C_PPM_SSHOCC_STOP_GATED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( C_PPM_SSHOCC_SPECIAL_WKUP_DONE                          , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_SSHOCC_STOP_TRANSITION                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( C_PPM_SSHOCC_STOP_TRANSITION_LEN                        , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( C_PPM_SSHOCC_REQ_STOP_LEVEL                             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHOCC_REQ_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHOCC_ACT_STOP_LEVEL                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHOCC_ACT_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC                 , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC );
+REG64_FLD( C_PPM_SSHOCC_DEEPEST_REQ_STOP_LEVEL_OCC_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OCC_LEN );
+REG64_FLD( C_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC                 , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC );
+REG64_FLD( C_PPM_SSHOCC_DEEPEST_ACT_STOP_LEVEL_OCC_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OCC_LEN );
+REG64_FLD( C_PPM_SSHOCC_IVRM_ENABLED_HISTORY_OCC                   , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OCC );
+
+REG64_FLD( EQ_PPM_SSHOTR_STOP_GATED                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EQ_PPM_SSHOTR_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_SSHOTR_STOP_TRANSITION                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EQ_PPM_SSHOTR_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EQ_PPM_SSHOTR_REQ_STOP_LEVEL                            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHOTR_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHOTR_ACT_STOP_LEVEL                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHOTR_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR                , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR );
+REG64_FLD( EQ_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR_LEN );
+REG64_FLD( EQ_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR                , 16  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR );
+REG64_FLD( EQ_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR_LEN            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR_LEN );
+REG64_FLD( EQ_PPM_SSHOTR_IVRM_ENABLED_HISTORY_OTR                  , 20  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OTR );
+
+REG64_FLD( EX_PPM_SSHOTR_STOP_GATED                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EX_PPM_SSHOTR_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_SSHOTR_STOP_TRANSITION                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EX_PPM_SSHOTR_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EX_PPM_SSHOTR_REQ_STOP_LEVEL                            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHOTR_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHOTR_ACT_STOP_LEVEL                            , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHOTR_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR );
+REG64_FLD( EX_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR_LEN );
+REG64_FLD( EX_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR                , 16  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR );
+REG64_FLD( EX_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR_LEN            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR_LEN );
+REG64_FLD( EX_PPM_SSHOTR_IVRM_ENABLED_HISTORY_OTR                  , 20  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OTR );
+
+REG64_FLD( C_PPM_SSHOTR_STOP_GATED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( C_PPM_SSHOTR_SPECIAL_WKUP_DONE                          , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_SSHOTR_STOP_TRANSITION                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( C_PPM_SSHOTR_STOP_TRANSITION_LEN                        , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( C_PPM_SSHOTR_REQ_STOP_LEVEL                             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHOTR_REQ_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHOTR_ACT_STOP_LEVEL                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHOTR_ACT_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR                 , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR );
+REG64_FLD( C_PPM_SSHOTR_DEEPEST_REQ_STOP_LEVEL_OTR_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_REQ_STOP_LEVEL_OTR_LEN );
+REG64_FLD( C_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR                 , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR );
+REG64_FLD( C_PPM_SSHOTR_DEEPEST_ACT_STOP_LEVEL_OTR_LEN             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DEEPEST_ACT_STOP_LEVEL_OTR_LEN );
+REG64_FLD( C_PPM_SSHOTR_IVRM_ENABLED_HISTORY_OTR                   , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IVRM_ENABLED_HISTORY_OTR );
+
+REG64_FLD( EQ_PPM_SSHSRC_STOP_GATED                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EQ_PPM_SSHSRC_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EQ_PPM_SSHSRC_STOP_TRANSITION                           , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EQ_PPM_SSHSRC_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EQ_PPM_SSHSRC_REQ_STOP_LEVEL                            , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHSRC_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHSRC_ACT_STOP_LEVEL                            , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EQ_PPM_SSHSRC_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EQ_PPM_SSHSRC_REQ_WRITE_ENABLE                          , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_WRITE_ENABLE );
+REG64_FLD( EQ_PPM_SSHSRC_ACT_WRITE_ENABLE                          , 13  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_WRITE_ENABLE );
+
+REG64_FLD( EX_PPM_SSHSRC_STOP_GATED                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( EX_PPM_SSHSRC_SPECIAL_WKUP_DONE                         , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( EX_PPM_SSHSRC_STOP_TRANSITION                           , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( EX_PPM_SSHSRC_STOP_TRANSITION_LEN                       , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( EX_PPM_SSHSRC_REQ_STOP_LEVEL                            , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHSRC_REQ_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHSRC_ACT_STOP_LEVEL                            , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( EX_PPM_SSHSRC_ACT_STOP_LEVEL_LEN                        , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( EX_PPM_SSHSRC_REQ_WRITE_ENABLE                          , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_REQ_WRITE_ENABLE );
+REG64_FLD( EX_PPM_SSHSRC_ACT_WRITE_ENABLE                          , 13  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ACT_WRITE_ENABLE );
+
+REG64_FLD( C_PPM_SSHSRC_STOP_GATED                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_GATED );
+REG64_FLD( C_PPM_SSHSRC_SPECIAL_WKUP_DONE                          , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPECIAL_WKUP_DONE );
+REG64_FLD( C_PPM_SSHSRC_STOP_TRANSITION                            , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION );
+REG64_FLD( C_PPM_SSHSRC_STOP_TRANSITION_LEN                        , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_STOP_TRANSITION_LEN );
+REG64_FLD( C_PPM_SSHSRC_REQ_STOP_LEVEL                             , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHSRC_REQ_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHSRC_ACT_STOP_LEVEL                             , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL );
+REG64_FLD( C_PPM_SSHSRC_ACT_STOP_LEVEL_LEN                         , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_STOP_LEVEL_LEN );
+REG64_FLD( C_PPM_SSHSRC_REQ_WRITE_ENABLE                           , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_REQ_WRITE_ENABLE );
+REG64_FLD( C_PPM_SSHSRC_ACT_WRITE_ENABLE                           , 13  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ACT_WRITE_ENABLE );
+
 REG64_FLD( EQ_PPM_VDMCR_VDM_POWERON                                , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
            SH_FLD_VDM_POWERON );
 REG64_FLD( EQ_PPM_VDMCR_VDM_DISABLE                                , 1   , SH_UNT_EQ       , SH_ACS_SCOM2_OR ,
@@ -12211,8 +17007,16 @@ REG64_FLD( EQ_PRD_PURGE_REG_L3_LINE_DEL_ON_NEXT_CE                 , 5   , SH_UN
            SH_FLD_L3_LINE_DEL_ON_NEXT_CE );
 REG64_FLD( EQ_PRD_PURGE_REG_L3_LINE_DEL_ON_ALL_CE                  , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_LINE_DEL_ON_ALL_CE );
+REG64_FLD( EQ_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_1                , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_1 );
+REG64_FLD( EQ_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_1_LEN            , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_1_LEN );
 REG64_FLD( EQ_PRD_PURGE_REG_L3_BUSY_ERR                            , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_BUSY_ERR );
+REG64_FLD( EQ_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_2                , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_2 );
+REG64_FLD( EQ_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_2_LEN            , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_2_LEN );
 REG64_FLD( EQ_PRD_PURGE_REG_L3_MEMBER                              , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_L3_MEMBER  );
 REG64_FLD( EQ_PRD_PURGE_REG_L3_MEMBER_LEN                          , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -12232,8 +17036,16 @@ REG64_FLD( EX_PRD_PURGE_REG_L3_LINE_DEL_ON_NEXT_CE                 , 5   , SH_UN
            SH_FLD_L3_LINE_DEL_ON_NEXT_CE );
 REG64_FLD( EX_PRD_PURGE_REG_L3_LINE_DEL_ON_ALL_CE                  , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_L3_LINE_DEL_ON_ALL_CE );
+REG64_FLD( EX_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_1                , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_1 );
+REG64_FLD( EX_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_1_LEN            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_1_LEN );
 REG64_FLD( EX_PRD_PURGE_REG_L3_BUSY_ERR                            , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_L3_BUSY_ERR );
+REG64_FLD( EX_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_2                , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_2 );
+REG64_FLD( EX_PRD_PURGE_REG_L3_PRD_PURGE_RESERVED_2_LEN            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_L3_PRD_PURGE_RESERVED_2_LEN );
 REG64_FLD( EX_PRD_PURGE_REG_L3_MEMBER                              , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_L3_MEMBER  );
 REG64_FLD( EX_PRD_PURGE_REG_L3_MEMBER_LEN                          , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -12257,6 +17069,21 @@ REG64_FLD( C_PRE_COUNTER_REG_COUNTER                               , 0   , SH_UN
            SH_FLD_COUNTER    );
 REG64_FLD( C_PRE_COUNTER_REG_COUNTER_LEN                           , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_COUNTER_LEN );
+
+REG64_FLD( EQ_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS                  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS );
+REG64_FLD( EQ_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS_LEN              , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS_LEN );
+
+REG64_FLD( EX_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS                  , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS );
+REG64_FLD( EX_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS_LEN              , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS_LEN );
+
+REG64_FLD( C_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS                   , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS );
+REG64_FLD( C_PRIMARY_ADDRESS_REG_PRIMARY_ADDRESS_LEN               , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PRIMARY_ADDRESS_LEN );
 
 REG64_FLD( EQ_PROTECT_MODE_REG_READ_ENABLE                         , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_READ_ENABLE );
@@ -12887,43 +17714,47 @@ REG64_FLD( EQ_QPPM_ERR_PCB_INTERRUPT_PROTOCOL                      , 0   , SH_UN
            SH_FLD_PCB_INTERRUPT_PROTOCOL );
 REG64_FLD( EQ_QPPM_ERR_SPECIAL_WKUP_PROTOCOL                       , 1   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_SPECIAL_WKUP_PROTOCOL );
-REG64_FLD( EQ_QPPM_ERR_PFET_SEQ_PROGRAM                            , 2   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_SPECIAL_WKUP_DONE_PROTOCOL                  , 2   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+           SH_FLD_SPECIAL_WKUP_DONE_PROTOCOL );
+REG64_FLD( EQ_QPPM_ERR_PFET_SEQ_PROGRAM                            , 3   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_PFET_SEQ_PROGRAM );
-REG64_FLD( EQ_QPPM_ERR_OCC_HEARTBEAT_LOSS                          , 3   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_OCC_HEARTBEAT_LOSS                          , 4   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_OCC_HEARTBEAT_LOSS );
-REG64_FLD( EQ_QPPM_ERR_L2_EX0_CLK_SYNC                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_L2_EX0_CLK_SYNC                             , 5   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_L2_EX0_CLK_SYNC );
-REG64_FLD( EQ_QPPM_ERR_L2_EX1_CLK_SYNC                             , 5   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_L2_EX1_CLK_SYNC                             , 6   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_L2_EX1_CLK_SYNC );
-REG64_FLD( EQ_QPPM_ERR_EDRAM_SEQUENCE                              , 6   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_EDRAM_SEQUENCE                              , 7   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_EDRAM_SEQUENCE );
-REG64_FLD( EQ_QPPM_ERR_EDRAM_PGATE                                 , 7   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_EDRAM_PGATE                                 , 8   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_EDRAM_PGATE );
-REG64_FLD( EQ_QPPM_ERR_DPLL_INT                                    , 8   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_DPLL_INT                                    , 9   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_DPLL_INT   );
-REG64_FLD( EQ_QPPM_ERR_DPLL_DYN_FMIN                               , 9   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_DPLL_DYN_FMIN                               , 10  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_DPLL_DYN_FMIN );
-REG64_FLD( EQ_QPPM_ERR_DPLL_DCO_FULL                               , 10  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_DPLL_DCO_FULL                               , 11  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_DPLL_DCO_FULL );
-REG64_FLD( EQ_QPPM_ERR_DPLL_DCO_EMPTY                              , 11  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_DPLL_DCO_EMPTY                              , 12  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_DPLL_DCO_EMPTY );
-REG64_FLD( EQ_QPPM_ERR_INVERTED_VDM_DATA                           , 12  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_INVERTED_VDM_DATA                           , 13  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_INVERTED_VDM_DATA );
 REG64_FLD( EQ_QPPM_ERR_INVERTED_VDM_DATA_LEN                       , 4   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_INVERTED_VDM_DATA_LEN );
-REG64_FLD( EQ_QPPM_ERR_CME0_IVRM_DROPOUT                           , 16  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_CME0_IVRM_DROPOUT                           , 17  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_CME0_IVRM_DROPOUT );
-REG64_FLD( EQ_QPPM_ERR_CME1_IVRM_DROPOUT                           , 17  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+REG64_FLD( EQ_QPPM_ERR_CME1_IVRM_DROPOUT                           , 18  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_CME1_IVRM_DROPOUT );
-REG64_FLD( EQ_QPPM_ERR_SPARE_18_19                                 , 18  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
-           SH_FLD_SPARE_18_19 );
-REG64_FLD( EQ_QPPM_ERR_SPARE_18_19_LEN                             , 2   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
-           SH_FLD_SPARE_18_19_LEN );
+REG64_FLD( EQ_QPPM_ERR_SPARE_19                                    , 19  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+           SH_FLD_SPARE_19   );
+REG64_FLD( EQ_QPPM_ERR_SPARE_20_23                                 , 20  , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+           SH_FLD_SPARE_20_23 );
+REG64_FLD( EQ_QPPM_ERR_SPARE_20_23_LEN                             , 4   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
+           SH_FLD_SPARE_20_23_LEN );
 
-REG64_FLD( EQ_QPPM_ERRMSK_RESERVED_0_19                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_19 );
-REG64_FLD( EQ_QPPM_ERRMSK_RESERVED_0_19_LEN                        , 20  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
-           SH_FLD_RESERVED_0_19_LEN );
+REG64_FLD( EQ_QPPM_ERRMSK_RESERVED_0_23                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_23 );
+REG64_FLD( EQ_QPPM_ERRMSK_RESERVED_0_23_LEN                        , 24  , SH_UNT_EQ       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RESERVED_0_23_LEN );
 
 REG64_FLD( EQ_QPPM_ERRSUM_PM_ERROR                                 , 0   , SH_UNT_EQ       , SH_ACS_SCOM_WCLEAR,
            SH_FLD_PM_ERROR   );
@@ -13102,8 +17933,8 @@ REG64_FLD( EQ_QPPM_QCCR_PULSE_DROOP_DATA_LEN                       , 4   , SH_UN
            SH_FLD_PULSE_DROOP_DATA_LEN );
 REG64_FLD( EQ_QPPM_QCCR_PULSE_DROOP_ENABLE                         , 24  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
            SH_FLD_PULSE_DROOP_ENABLE );
-REG64_FLD( EQ_QPPM_QCCR_PB_PURGE_PLS                               , 30  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
-           SH_FLD_PB_PURGE_PLS );
+REG64_FLD( EQ_QPPM_QCCR_PB_PURGE_REQ                               , 30  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_PB_PURGE_REQ );
 REG64_FLD( EQ_QPPM_QCCR_PB_PURGE_DONE_LVL                          , 31  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
            SH_FLD_PB_PURGE_DONE_LVL );
 REG64_FLD( EQ_QPPM_QCCR_L3_EX0_EDRAM_ENABLE_ACTUAL                 , 32  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
@@ -13196,6 +18027,164 @@ REG64_FLD( EQ_QPPM_VOLT_CHAR_VID_COMPARE_MIN_LEN                   , 8   , SH_UN
 REG64_FLD( EQ_QPPM_VOLT_CHAR_IVRM_ENABLED_HISTORY                  , 16  , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_IVRM_ENABLED_HISTORY );
 
+REG64_FLD( EX_RAM_CTRL_RAM_VTID                                    , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RAM_VTID   );
+REG64_FLD( EX_RAM_CTRL_RAM_VTID_LEN                                , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_RAM_VTID_LEN );
+REG64_FLD( EX_RAM_CTRL_PPC_PREDCD                                  , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_PREDCD );
+REG64_FLD( EX_RAM_CTRL_PPC_PREDCD_LEN                              , 4   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_PREDCD_LEN );
+REG64_FLD( EX_RAM_CTRL_SPARE                                       , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SPARE      );
+REG64_FLD( EX_RAM_CTRL_SPARE_LEN                                   , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SPARE_LEN  );
+REG64_FLD( EX_RAM_CTRL_PPC_INSTR                                   , 8   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_INSTR  );
+REG64_FLD( EX_RAM_CTRL_PPC_INSTR_LEN                               , 32  , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_INSTR_LEN );
+
+REG64_FLD( C_RAM_CTRL_RAM_VTID                                     , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_RAM_VTID   );
+REG64_FLD( C_RAM_CTRL_RAM_VTID_LEN                                 , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_RAM_VTID_LEN );
+REG64_FLD( C_RAM_CTRL_PPC_PREDCD                                   , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_PREDCD );
+REG64_FLD( C_RAM_CTRL_PPC_PREDCD_LEN                               , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_PREDCD_LEN );
+REG64_FLD( C_RAM_CTRL_SPARE                                        , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SPARE      );
+REG64_FLD( C_RAM_CTRL_SPARE_LEN                                    , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SPARE_LEN  );
+REG64_FLD( C_RAM_CTRL_PPC_INSTR                                    , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_INSTR  );
+REG64_FLD( C_RAM_CTRL_PPC_INSTR_LEN                                , 32  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_PPC_INSTR_LEN );
+
+REG64_FLD( EX_RAM_MODEREG_MODE_ENABLE                              , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_ENABLE );
+
+REG64_FLD( C_RAM_MODEREG_MODE_ENABLE                               , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_ENABLE );
+
+REG64_FLD( EX_L2_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV        , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RAM_CONTROL_ACCESS_DURING_RECOV );
+REG64_FLD( EX_L2_RAM_STATUS_RAM_COMPLETION                         , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RAM_COMPLETION );
+REG64_FLD( EX_L2_RAM_STATUS_RAM_EXCEPTION                          , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RAM_EXCEPTION );
+REG64_FLD( EX_L2_RAM_STATUS_LSU_EMPTY                              , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LSU_EMPTY  );
+
+REG64_FLD( C_RAM_STATUS_RAM_CONTROL_ACCESS_DURING_RECOV            , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RAM_CONTROL_ACCESS_DURING_RECOV );
+REG64_FLD( C_RAM_STATUS_RAM_COMPLETION                             , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RAM_COMPLETION );
+REG64_FLD( C_RAM_STATUS_RAM_EXCEPTION                              , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RAM_EXCEPTION );
+REG64_FLD( C_RAM_STATUS_LSU_EMPTY                                  , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LSU_EMPTY  );
+
+REG64_FLD( EX_L2_RAS_MODEREG_MR_DIS_PMON_INTR                      , 56  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_DIS_PMON_INTR );
+REG64_FLD( EX_L2_RAS_MODEREG_MR_FENCE_INTERRUPTS                   , 57  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_FENCE_INTERRUPTS );
+REG64_FLD( EX_L2_RAS_MODEREG_MR_BLOCK_HMI_IN_MAINT                 , 62  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_BLOCK_HMI_IN_MAINT );
+REG64_FLD( EX_L2_RAS_MODEREG_MR_FENCE_INTR_ON_CHECKSTOP            , 63  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_FENCE_INTR_ON_CHECKSTOP );
+
+REG64_FLD( C_RAS_MODEREG_MR_DIS_PMON_INTR                          , 56  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_DIS_PMON_INTR );
+REG64_FLD( C_RAS_MODEREG_MR_FENCE_INTERRUPTS                       , 57  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_FENCE_INTERRUPTS );
+REG64_FLD( C_RAS_MODEREG_MR_BLOCK_HMI_IN_MAINT                     , 62  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_BLOCK_HMI_IN_MAINT );
+REG64_FLD( C_RAS_MODEREG_MR_FENCE_INTR_ON_CHECKSTOP                , 63  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MR_FENCE_INTR_ON_CHECKSTOP );
+
+REG64_FLD( EX_L2_RAS_STATUS_T0_CORE_MAINT                          , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T0_CORE_MAINT );
+REG64_FLD( EX_L2_RAS_STATUS_T0_THREAD_QUIESCED                     , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T0_THREAD_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T0_ICT_EMPTY                           , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T0_ICT_EMPTY );
+REG64_FLD( EX_L2_RAS_STATUS_T0_LSU_QUIESCED                        , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T0_LSU_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T0_STEP_SUCCESS                        , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T0_STEP_SUCCESS );
+REG64_FLD( EX_L2_RAS_STATUS_T1_CORE_MAINT                          , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T1_CORE_MAINT );
+REG64_FLD( EX_L2_RAS_STATUS_T1_THREAD_QUIESCED                     , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T1_THREAD_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T1_ICT_EMPTY                           , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T1_ICT_EMPTY );
+REG64_FLD( EX_L2_RAS_STATUS_T1_LSU_QUIESCED                        , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T1_LSU_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T1_STEP_SUCCESS                        , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T1_STEP_SUCCESS );
+REG64_FLD( EX_L2_RAS_STATUS_T2_CORE_MAINT                          , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T2_CORE_MAINT );
+REG64_FLD( EX_L2_RAS_STATUS_T2_THREAD_QUIESCED                     , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T2_THREAD_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T2_ICT_EMPTY                           , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T2_ICT_EMPTY );
+REG64_FLD( EX_L2_RAS_STATUS_T2_LSU_QUIESCED                        , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T2_LSU_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T2_STEP_SUCCESS                        , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T2_STEP_SUCCESS );
+REG64_FLD( EX_L2_RAS_STATUS_T3_CORE_MAINT                          , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T3_CORE_MAINT );
+REG64_FLD( EX_L2_RAS_STATUS_T3_THREAD_QUIESCED                     , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T3_THREAD_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T3_ICT_EMPTY                           , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T3_ICT_EMPTY );
+REG64_FLD( EX_L2_RAS_STATUS_T3_LSU_QUIESCED                        , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T3_LSU_QUIESCED );
+REG64_FLD( EX_L2_RAS_STATUS_T3_STEP_SUCCESS                        , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_T3_STEP_SUCCESS );
+
+REG64_FLD( C_RAS_STATUS_T0_CORE_MAINT                              , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T0_CORE_MAINT );
+REG64_FLD( C_RAS_STATUS_T0_THREAD_QUIESCED                         , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T0_THREAD_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T0_ICT_EMPTY                               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T0_ICT_EMPTY );
+REG64_FLD( C_RAS_STATUS_T0_LSU_QUIESCED                            , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T0_LSU_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T0_STEP_SUCCESS                            , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T0_STEP_SUCCESS );
+REG64_FLD( C_RAS_STATUS_T1_CORE_MAINT                              , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T1_CORE_MAINT );
+REG64_FLD( C_RAS_STATUS_T1_THREAD_QUIESCED                         , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T1_THREAD_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T1_ICT_EMPTY                               , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T1_ICT_EMPTY );
+REG64_FLD( C_RAS_STATUS_T1_LSU_QUIESCED                            , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T1_LSU_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T1_STEP_SUCCESS                            , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T1_STEP_SUCCESS );
+REG64_FLD( C_RAS_STATUS_T2_CORE_MAINT                              , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T2_CORE_MAINT );
+REG64_FLD( C_RAS_STATUS_T2_THREAD_QUIESCED                         , 17  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T2_THREAD_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T2_ICT_EMPTY                               , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T2_ICT_EMPTY );
+REG64_FLD( C_RAS_STATUS_T2_LSU_QUIESCED                            , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T2_LSU_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T2_STEP_SUCCESS                            , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T2_STEP_SUCCESS );
+REG64_FLD( C_RAS_STATUS_T3_CORE_MAINT                              , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T3_CORE_MAINT );
+REG64_FLD( C_RAS_STATUS_T3_THREAD_QUIESCED                         , 25  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T3_THREAD_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T3_ICT_EMPTY                               , 26  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T3_ICT_EMPTY );
+REG64_FLD( C_RAS_STATUS_T3_LSU_QUIESCED                            , 27  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T3_LSU_QUIESCED );
+REG64_FLD( C_RAS_STATUS_T3_STEP_SUCCESS                            , 28  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_T3_STEP_SUCCESS );
+
 REG64_FLD( EQ_RD_EPS_REG_TIER0_VALUE                               , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_TIER0_VALUE );
 REG64_FLD( EQ_RD_EPS_REG_TIER0_VALUE_LEN                           , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -13221,6 +18210,53 @@ REG64_FLD( EX_L2_RD_EPS_REG_TIER2_VALUE                            , 24  , SH_UN
            SH_FLD_TIER2_VALUE );
 REG64_FLD( EX_L2_RD_EPS_REG_TIER2_VALUE_LEN                        , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_TIER2_VALUE_LEN );
+
+REG64_FLD( EX_L2_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG                , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RESET_FWD_PROG );
+REG64_FLD( EX_L2_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD                , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_FWD_PROG_THOLD );
+REG64_FLD( EX_L2_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN            , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_FWD_PROG_THOLD_LEN );
+
+REG64_FLD( C_RECOV_FWD_PROG_CTRL_RESET_FWD_PROG                    , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESET_FWD_PROG );
+REG64_FLD( C_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD                    , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FWD_PROG_THOLD );
+REG64_FLD( C_RECOV_FWD_PROG_CTRL_FWD_PROG_THOLD_LEN                , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_FWD_PROG_THOLD_LEN );
+
+REG64_FLD( EQ_RECOV_INTERRUPT_REG_RECOV                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+
+REG64_FLD( EX_RECOV_INTERRUPT_REG_RECOV                            , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+
+REG64_FLD( C_RECOV_INTERRUPT_REG_RECOV                             , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RECOV      );
+
+REG64_FLD( EX_L2_RECOV_THOLD_THRESHOLD_LIMIT                       , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_LIMIT );
+REG64_FLD( EX_L2_RECOV_THOLD_THRESHOLD_LIMIT_LEN                   , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_LIMIT_LEN );
+REG64_FLD( EX_L2_RECOV_THOLD_THRESHOLD_RESET                       , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_RESET );
+REG64_FLD( EX_L2_RECOV_THOLD_THRESHOLD_RESET_LEN                   , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_RESET_LEN );
+
+REG64_FLD( C_RECOV_THOLD_THRESHOLD_LIMIT                           , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_LIMIT );
+REG64_FLD( C_RECOV_THOLD_THRESHOLD_LIMIT_LEN                       , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_LIMIT_LEN );
+REG64_FLD( C_RECOV_THOLD_THRESHOLD_RESET                           , 8   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_RESET );
+REG64_FLD( C_RECOV_THOLD_THRESHOLD_RESET_LEN                       , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_THRESHOLD_RESET_LEN );
+
+REG64_FLD( EX_L2_RESET_KEEPER_RESET_KEEPER                         , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RESET_KEEPER );
+
+REG64_FLD( C_RESET_KEEPER_RESET_KEEPER                             , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RESET_KEEPER );
 
 REG64_FLD( EQ_RFIR_IN0                                             , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_IN0        );
@@ -13271,22 +18307,16 @@ REG64_FLD( C_RFIR_IN5                                              , 3   , SH_UN
 REG64_FLD( C_RFIR_IN5_LEN                                          , 21  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_IN5_LEN    );
 
-REG64_FLD( EQ_RING_FENCE_MASK_LATCH_REG_DISABLED                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_DISABLED   );
 REG64_FLD( EQ_RING_FENCE_MASK_LATCH_REG_ENABLE                     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE     );
 REG64_FLD( EQ_RING_FENCE_MASK_LATCH_REG_ENABLE_LEN                 , 15  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE_LEN );
 
-REG64_FLD( EX_RING_FENCE_MASK_LATCH_REG_DISABLED                   , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_DISABLED   );
 REG64_FLD( EX_RING_FENCE_MASK_LATCH_REG_ENABLE                     , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE     );
 REG64_FLD( EX_RING_FENCE_MASK_LATCH_REG_ENABLE_LEN                 , 15  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE_LEN );
 
-REG64_FLD( C_RING_FENCE_MASK_LATCH_REG_DISABLED                    , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_DISABLED   );
 REG64_FLD( C_RING_FENCE_MASK_LATCH_REG_ENABLE                      , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_ENABLE     );
 REG64_FLD( C_RING_FENCE_MASK_LATCH_REG_ENABLE_LEN                  , 15  , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -13445,15 +18475,35 @@ REG64_FLD( C_SCAN_REGION_TYPE_CMSK                                 , 58  , SH_UN
 REG64_FLD( C_SCAN_REGION_TYPE_INEX                                 , 59  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_INEX       );
 
-REG64_FLD( EX_L2_SCOMC_MODE                                        , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE       );
-REG64_FLD( EX_L2_SCOMC_MODE_LEN                                    , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE_LEN   );
+REG64_FLD( EX_L2_SCOMC_MODE_CX                                     , 54  , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX    );
+REG64_FLD( EX_L2_SCOMC_MODE_CX_LEN                                 , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX_LEN );
 
-REG64_FLD( C_SCOMC_MODE                                            , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE       );
-REG64_FLD( C_SCOMC_MODE_LEN                                        , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
-           SH_FLD_MODE_LEN   );
+REG64_FLD( C_SCOMC_MODE_CX                                         , 54  , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX    );
+REG64_FLD( C_SCOMC_MODE_CX_LEN                                     , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_MODE_CX_LEN );
+
+REG64_FLD( EX_L2_SHID0_TRIG2_TRACE_EN                              , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_TRIG2_TRACE_EN );
+REG64_FLD( EX_L2_SHID0_DIS_TRACE_SPR                               , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RW  ,
+           SH_FLD_DIS_TRACE_SPR );
+
+REG64_FLD( C_SHID0_TRIG2_TRACE_EN                                  , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_TRIG2_TRACE_EN );
+REG64_FLD( C_SHID0_DIS_TRACE_SPR                                   , 1   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_DIS_TRACE_SPR );
+
+REG64_FLD( EX_SIER_MASK_SIER_MASK_TBD                              , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SIER_MASK_TBD );
+REG64_FLD( EX_SIER_MASK_SIER_MASK_TBD_LEN                          , 64  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SIER_MASK_TBD_LEN );
+
+REG64_FLD( C_SIER_MASK_SIER_MASK_TBD                               , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SIER_MASK_TBD );
+REG64_FLD( C_SIER_MASK_SIER_MASK_TBD_LEN                           , 64  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SIER_MASK_TBD_LEN );
 
 REG64_FLD( EQ_SKITTER_CLKSRC_REG_SKITTER0                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_SKITTER0   );
@@ -13584,7 +18634,7 @@ REG64_FLD( EQ_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE                  , 7   , SH_UN
            SH_FLD_CFG_PM_MUX_DISABLE );
 REG64_FLD( EQ_SLAVE_CONFIG_REG_ERROR_MASK                          , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK );
-REG64_FLD( EQ_SLAVE_CONFIG_REG_ERROR_MASK_LEN                      , 5   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+REG64_FLD( EQ_SLAVE_CONFIG_REG_ERROR_MASK_LEN                      , 6   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK_LEN );
 
 REG64_FLD( EX_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK        , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
@@ -13605,7 +18655,7 @@ REG64_FLD( EX_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE                  , 7   , SH_UN
            SH_FLD_CFG_PM_MUX_DISABLE );
 REG64_FLD( EX_SLAVE_CONFIG_REG_ERROR_MASK                          , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK );
-REG64_FLD( EX_SLAVE_CONFIG_REG_ERROR_MASK_LEN                      , 5   , SH_UNT_EX       , SH_ACS_SCOM     ,
+REG64_FLD( EX_SLAVE_CONFIG_REG_ERROR_MASK_LEN                      , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK_LEN );
 
 REG64_FLD( C_SLAVE_CONFIG_REG_CFG_DISABLE_PERV_THOLD_CHECK         , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
@@ -13626,7 +18676,7 @@ REG64_FLD( C_SLAVE_CONFIG_REG_CFG_PM_MUX_DISABLE                   , 7   , SH_UN
            SH_FLD_CFG_PM_MUX_DISABLE );
 REG64_FLD( C_SLAVE_CONFIG_REG_ERROR_MASK                           , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK );
-REG64_FLD( C_SLAVE_CONFIG_REG_ERROR_MASK_LEN                       , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+REG64_FLD( C_SLAVE_CONFIG_REG_ERROR_MASK_LEN                       , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_ERROR_MASK_LEN );
 
 REG64_FLD( EQ_SPATTN_IN0                                           , 0   , SH_UNT_EQ       , SH_ACS_SCOM2_NC ,
@@ -13650,6 +18700,267 @@ REG64_FLD( EQ_SPATTN_IN8                                           , 8   , SH_UN
 REG64_FLD( EQ_SPATTN_IN9                                           , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_NC ,
            SH_FLD_IN9        );
 
+REG64_FLD( EX_SPATTN_LT0_SPR_INSTR_STOP                            , 0   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT0_ATTN_COMPLETE                             , 1   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 2   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT0_CORE_CODE_TO_SP                           , 3   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT1_SPR_INSTR_STOP                            , 4   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT1_ATTN_COMPLETE                             , 5   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 6   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT1_CORE_CODE_TO_SP                           , 7   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT2_SPR_INSTR_STOP                            , 8   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT2_ATTN_COMPLETE                             , 9   , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 10  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT2_CORE_CODE_TO_SP                           , 11  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT3_SPR_INSTR_STOP                            , 12  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT3_ATTN_COMPLETE                             , 13  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 14  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT3_CORE_CODE_TO_SP                           , 15  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT4_SPR_INSTR_STOP                            , 16  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT4_ATTN_COMPLETE                             , 17  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 18  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT4_CORE_CODE_TO_SP                           , 19  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT5_SPR_INSTR_STOP                            , 20  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT5_ATTN_COMPLETE                             , 21  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 22  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT5_CORE_CODE_TO_SP                           , 23  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT6_SPR_INSTR_STOP                            , 24  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT6_ATTN_COMPLETE                             , 25  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 26  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT6_CORE_CODE_TO_SP                           , 27  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_CORE_CODE_TO_SP );
+REG64_FLD( EX_SPATTN_LT7_SPR_INSTR_STOP                            , 28  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_SPR_INSTR_STOP );
+REG64_FLD( EX_SPATTN_LT7_ATTN_COMPLETE                             , 29  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_ATTN_COMPLETE );
+REG64_FLD( EX_SPATTN_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE         , 30  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_SPATTN_LT7_CORE_CODE_TO_SP                           , 31  , SH_UNT_EX       , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_CORE_CODE_TO_SP );
+
+REG64_FLD( EX_L2_SPATTN_LT0_SPR_INSTR_STOP                         , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT0_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT0_ATTN_COMPLETE                          , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT0_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT0_CORE_CODE_TO_SP                        , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT0_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT1_SPR_INSTR_STOP                         , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT1_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT1_ATTN_COMPLETE                          , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT1_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT1_CORE_CODE_TO_SP                        , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT1_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT2_SPR_INSTR_STOP                         , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT2_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT2_ATTN_COMPLETE                          , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT2_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT2_CORE_CODE_TO_SP                        , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT2_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT3_SPR_INSTR_STOP                         , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT3_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT3_ATTN_COMPLETE                          , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT3_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT3_CORE_CODE_TO_SP                        , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT3_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT4_SPR_INSTR_STOP                         , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT4_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT4_ATTN_COMPLETE                          , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT4_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT4_CORE_CODE_TO_SP                        , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT4_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT5_SPR_INSTR_STOP                         , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT5_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT5_ATTN_COMPLETE                          , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT5_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT5_CORE_CODE_TO_SP                        , 23  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT5_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT6_SPR_INSTR_STOP                         , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT6_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT6_ATTN_COMPLETE                          , 25  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT6_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 26  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT6_CORE_CODE_TO_SP                        , 27  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT6_CORE_CODE_TO_SP );
+REG64_FLD( EX_L2_SPATTN_LT7_SPR_INSTR_STOP                         , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT7_SPR_INSTR_STOP );
+REG64_FLD( EX_L2_SPATTN_LT7_ATTN_COMPLETE                          , 29  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT7_ATTN_COMPLETE );
+REG64_FLD( EX_L2_SPATTN_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE      , 30  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( EX_L2_SPATTN_LT7_CORE_CODE_TO_SP                        , 31  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_LT7_CORE_CODE_TO_SP );
+
+REG64_FLD( C_SPATTN_LT0_SPR_INSTR_STOP                             , 0   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT0_ATTN_COMPLETE                              , 1   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 2   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT0_CORE_CODE_TO_SP                            , 3   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT0_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT1_SPR_INSTR_STOP                             , 4   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT1_ATTN_COMPLETE                              , 5   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 6   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT1_CORE_CODE_TO_SP                            , 7   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT1_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT2_SPR_INSTR_STOP                             , 8   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT2_ATTN_COMPLETE                              , 9   , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 10  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT2_CORE_CODE_TO_SP                            , 11  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT2_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT3_SPR_INSTR_STOP                             , 12  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT3_ATTN_COMPLETE                              , 13  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 14  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT3_CORE_CODE_TO_SP                            , 15  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT3_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT4_SPR_INSTR_STOP                             , 16  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT4_ATTN_COMPLETE                              , 17  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 18  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT4_CORE_CODE_TO_SP                            , 19  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT4_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT5_SPR_INSTR_STOP                             , 20  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT5_ATTN_COMPLETE                              , 21  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 22  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT5_CORE_CODE_TO_SP                            , 23  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT5_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT6_SPR_INSTR_STOP                             , 24  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT6_ATTN_COMPLETE                              , 25  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 26  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT6_CORE_CODE_TO_SP                            , 27  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT6_CORE_CODE_TO_SP );
+REG64_FLD( C_SPATTN_LT7_SPR_INSTR_STOP                             , 28  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_SPR_INSTR_STOP );
+REG64_FLD( C_SPATTN_LT7_ATTN_COMPLETE                              , 29  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_ATTN_COMPLETE );
+REG64_FLD( C_SPATTN_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE          , 30  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_CORE_CHECKSTOP_RECOVERY_HANDSHAKE );
+REG64_FLD( C_SPATTN_LT7_CORE_CODE_TO_SP                            , 31  , SH_UNT_C        , SH_ACS_SCOM2_NC ,
+           SH_FLD_LT7_CORE_CODE_TO_SP );
+
+REG64_FLD( EX_L2_SPATTN_MASK_LT0_SPATTN_MASK                       , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT0_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT0_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT0_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT1_SPATTN_MASK                       , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT1_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT1_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT1_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT2_SPATTN_MASK                       , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT2_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT2_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT2_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT3_SPATTN_MASK                       , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT3_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT3_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT3_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT4_SPATTN_MASK                       , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT4_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT4_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT4_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT5_SPATTN_MASK                       , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT5_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT5_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT5_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT6_SPATTN_MASK                       , 24  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT6_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT6_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT6_SPATTN_MASK_LEN );
+REG64_FLD( EX_L2_SPATTN_MASK_LT7_SPATTN_MASK                       , 28  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT7_SPATTN_MASK );
+REG64_FLD( EX_L2_SPATTN_MASK_LT7_SPATTN_MASK_LEN                   , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_LT7_SPATTN_MASK_LEN );
+
+REG64_FLD( C_SPATTN_MASK_LT0_SPATTN_MASK                           , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT0_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT0_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT0_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT1_SPATTN_MASK                           , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT1_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT1_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT1_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT2_SPATTN_MASK                           , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT2_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT2_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT2_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT3_SPATTN_MASK                           , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT3_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT3_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT3_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT4_SPATTN_MASK                           , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT4_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT4_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT4_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT5_SPATTN_MASK                           , 20  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT5_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT5_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT5_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT6_SPATTN_MASK                           , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT6_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT6_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT6_SPATTN_MASK_LEN );
+REG64_FLD( C_SPATTN_MASK_LT7_SPATTN_MASK                           , 28  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT7_SPATTN_MASK );
+REG64_FLD( C_SPATTN_MASK_LT7_SPATTN_MASK_LEN                       , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LT7_SPATTN_MASK_LEN );
+
 REG64_FLD( EQ_SPA_MASK_IN                                          , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_IN         );
 REG64_FLD( EQ_SPA_MASK_IN_LEN                                      , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -13664,6 +18975,40 @@ REG64_FLD( C_SPA_MASK_IN                                           , 0   , SH_UN
            SH_FLD_IN         );
 REG64_FLD( C_SPA_MASK_IN_LEN                                       , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_IN_LEN     );
+
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_IMA_HOLD_OUT                    , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_IMA_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_PTID_RECONFIG_SM_HOLD_OUT       , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_PTID_RECONFIG_SM_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VS_ERR_HOLD_OUT                 , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VS_ERR_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VS_ERR_HOLD_OUT_LEN             , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VS_ERR_HOLD_OUT_LEN );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VT0_LPCR_ONL_PAR_HOLD_OUT       , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VT1_LPCR_ONL_PAR_HOLD_OUT       , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VT2_LPCR_ONL_PAR_HOLD_OUT       , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( EX_L2_SPR_CORE_HOLD_OUT_VT3_LPCR_ONL_PAR_HOLD_OUT       , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_LPCR_ONL_PAR_HOLD_OUT );
+
+REG64_FLD( C_SPR_CORE_HOLD_OUT_IMA_HOLD_OUT                        , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_IMA_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_PTID_RECONFIG_SM_HOLD_OUT           , 1   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_PTID_RECONFIG_SM_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VS_ERR_HOLD_OUT                     , 2   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VS_ERR_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VS_ERR_HOLD_OUT_LEN                 , 6   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VS_ERR_HOLD_OUT_LEN );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VT0_LPCR_ONL_PAR_HOLD_OUT           , 8   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT0_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VT1_LPCR_ONL_PAR_HOLD_OUT           , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT1_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VT2_LPCR_ONL_PAR_HOLD_OUT           , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT2_LPCR_ONL_PAR_HOLD_OUT );
+REG64_FLD( C_SPR_CORE_HOLD_OUT_VT3_LPCR_ONL_PAR_HOLD_OUT           , 11  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_VT3_LPCR_ONL_PAR_HOLD_OUT );
 
 REG64_FLD( EX_L2_SPR_MODE_MODEREG_TFAC_ERR_INJ                     , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
            SH_FLD_MODEREG_TFAC_ERR_INJ );
@@ -13741,6 +19086,16 @@ REG64_FLD( C_SPURR_FREQ_SCALE_FACTOR                               , 1   , SH_UN
 REG64_FLD( C_SPURR_FREQ_SCALE_FACTOR_LEN                           , 7   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
            SH_FLD_FACTOR_LEN );
 
+REG64_FLD( EX_SRC_MASK_SRC_MASK_TBD                                , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SRC_MASK_TBD );
+REG64_FLD( EX_SRC_MASK_SRC_MASK_TBD_LEN                            , 64  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SRC_MASK_TBD_LEN );
+
+REG64_FLD( C_SRC_MASK_SRC_MASK_TBD                                 , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SRC_MASK_TBD );
+REG64_FLD( C_SRC_MASK_SRC_MASK_TBD_LEN                             , 64  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SRC_MASK_TBD_LEN );
+
 REG64_FLD( EQ_SUM_MASK_REG_SMASK_IN0                               , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_SMASK_IN0  );
 REG64_FLD( EQ_SUM_MASK_REG_SMASK_IN1                               , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
@@ -13786,16 +19141,18 @@ REG64_FLD( EQ_SYNC_CONFIG_USE_FOR_SCAN                             , 6   , SH_UN
            SH_FLD_USE_FOR_SCAN );
 REG64_FLD( EQ_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED                 , 7   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CLEAR_CHIPLET_IS_ALIGNED );
-REG64_FLD( EQ_SYNC_CONFIG_UNIT_REGION_CLKCMD_DISABLE               , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_UNIT_REGION_CLKCMD_DISABLE );
+REG64_FLD( EQ_SYNC_CONFIG_UNIT_REGION_CLKCMD_ENABLE                , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_REGION_CLKCMD_ENABLE );
 REG64_FLD( EQ_SYNC_CONFIG_DISABLE_PCB_ITR                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_DISABLE_PCB_ITR );
 REG64_FLD( EQ_SYNC_CONFIG_ENABLE_VITL_ALIGN_CHECK                  , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE_VITL_ALIGN_CHECK );
-REG64_FLD( EQ_SYNC_CONFIG_UNUSED1119                               , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119 );
-REG64_FLD( EQ_SYNC_CONFIG_UNUSED1119_LEN                           , 9   , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119_LEN );
+REG64_FLD( EQ_SYNC_CONFIG_PULSE_OUT_DIS                            , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_PULSE_OUT_DIS );
+REG64_FLD( EQ_SYNC_CONFIG_UNUSED1219                               , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219 );
+REG64_FLD( EQ_SYNC_CONFIG_UNUSED1219_LEN                           , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219_LEN );
 
 REG64_FLD( EX_SYNC_CONFIG_PULSE_DELAY                              , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_PULSE_DELAY );
@@ -13809,16 +19166,18 @@ REG64_FLD( EX_SYNC_CONFIG_USE_FOR_SCAN                             , 6   , SH_UN
            SH_FLD_USE_FOR_SCAN );
 REG64_FLD( EX_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED                 , 7   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_CLEAR_CHIPLET_IS_ALIGNED );
-REG64_FLD( EX_SYNC_CONFIG_UNIT_REGION_CLKCMD_DISABLE               , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_UNIT_REGION_CLKCMD_DISABLE );
+REG64_FLD( EX_SYNC_CONFIG_UNIT_REGION_CLKCMD_ENABLE                , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_REGION_CLKCMD_ENABLE );
 REG64_FLD( EX_SYNC_CONFIG_DISABLE_PCB_ITR                          , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DISABLE_PCB_ITR );
 REG64_FLD( EX_SYNC_CONFIG_ENABLE_VITL_ALIGN_CHECK                  , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_ENABLE_VITL_ALIGN_CHECK );
-REG64_FLD( EX_SYNC_CONFIG_UNUSED1119                               , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119 );
-REG64_FLD( EX_SYNC_CONFIG_UNUSED1119_LEN                           , 9   , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119_LEN );
+REG64_FLD( EX_SYNC_CONFIG_PULSE_OUT_DIS                            , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PULSE_OUT_DIS );
+REG64_FLD( EX_SYNC_CONFIG_UNUSED1219                               , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219 );
+REG64_FLD( EX_SYNC_CONFIG_UNUSED1219_LEN                           , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219_LEN );
 
 REG64_FLD( C_SYNC_CONFIG_PULSE_DELAY                               , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_PULSE_DELAY );
@@ -13832,16 +19191,138 @@ REG64_FLD( C_SYNC_CONFIG_USE_FOR_SCAN                              , 6   , SH_UN
            SH_FLD_USE_FOR_SCAN );
 REG64_FLD( C_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED                  , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_CLEAR_CHIPLET_IS_ALIGNED );
-REG64_FLD( C_SYNC_CONFIG_UNIT_REGION_CLKCMD_DISABLE                , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_UNIT_REGION_CLKCMD_DISABLE );
+REG64_FLD( C_SYNC_CONFIG_UNIT_REGION_CLKCMD_ENABLE                 , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNIT_REGION_CLKCMD_ENABLE );
 REG64_FLD( C_SYNC_CONFIG_DISABLE_PCB_ITR                           , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_DISABLE_PCB_ITR );
 REG64_FLD( C_SYNC_CONFIG_ENABLE_VITL_ALIGN_CHECK                   , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_ENABLE_VITL_ALIGN_CHECK );
-REG64_FLD( C_SYNC_CONFIG_UNUSED1119                                , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119 );
-REG64_FLD( C_SYNC_CONFIG_UNUSED1119_LEN                            , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
-           SH_FLD_UNUSED1119_LEN );
+REG64_FLD( C_SYNC_CONFIG_PULSE_OUT_DIS                             , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PULSE_OUT_DIS );
+REG64_FLD( C_SYNC_CONFIG_UNUSED1219                                , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219 );
+REG64_FLD( C_SYNC_CONFIG_UNUSED1219_LEN                            , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_UNUSED1219_LEN );
+
+REG64_FLD( EX_L2_T0_PMU_SCOM_IDLE_DELAY                            , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( EX_L2_T0_PMU_SCOM_IDLE_DELAY_LEN                        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( EX_L2_T0_PMU_SCOM_COMPLETION_DELAY                      , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( EX_L2_T0_PMU_SCOM_COMPLETION_DELAY_LEN                  , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( EX_L2_T0_PMU_SCOM_SAMPLE_OVERRIDE                       , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( EX_L2_T0_PMU_SCOM_SPARE_CTRL                            , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( EX_L2_T0_PMU_SCOM_SPARE_CTRL_LEN                        , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( C_T0_PMU_SCOM_IDLE_DELAY                                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( C_T0_PMU_SCOM_IDLE_DELAY_LEN                            , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( C_T0_PMU_SCOM_COMPLETION_DELAY                          , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( C_T0_PMU_SCOM_COMPLETION_DELAY_LEN                      , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( C_T0_PMU_SCOM_SAMPLE_OVERRIDE                           , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( C_T0_PMU_SCOM_SPARE_CTRL                                , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( C_T0_PMU_SCOM_SPARE_CTRL_LEN                            , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( EX_L2_T1_PMU_SCOM_IDLE_DELAY                            , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( EX_L2_T1_PMU_SCOM_IDLE_DELAY_LEN                        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( EX_L2_T1_PMU_SCOM_COMPLETION_DELAY                      , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( EX_L2_T1_PMU_SCOM_COMPLETION_DELAY_LEN                  , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( EX_L2_T1_PMU_SCOM_SAMPLE_OVERRIDE                       , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( EX_L2_T1_PMU_SCOM_SPARE_CTRL                            , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( EX_L2_T1_PMU_SCOM_SPARE_CTRL_LEN                        , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( C_T1_PMU_SCOM_IDLE_DELAY                                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( C_T1_PMU_SCOM_IDLE_DELAY_LEN                            , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( C_T1_PMU_SCOM_COMPLETION_DELAY                          , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( C_T1_PMU_SCOM_COMPLETION_DELAY_LEN                      , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( C_T1_PMU_SCOM_SAMPLE_OVERRIDE                           , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( C_T1_PMU_SCOM_SPARE_CTRL                                , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( C_T1_PMU_SCOM_SPARE_CTRL_LEN                            , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( EX_L2_T2_PMU_SCOM_IDLE_DELAY                            , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( EX_L2_T2_PMU_SCOM_IDLE_DELAY_LEN                        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( EX_L2_T2_PMU_SCOM_COMPLETION_DELAY                      , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( EX_L2_T2_PMU_SCOM_COMPLETION_DELAY_LEN                  , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( EX_L2_T2_PMU_SCOM_SAMPLE_OVERRIDE                       , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( EX_L2_T2_PMU_SCOM_SPARE_CTRL                            , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( EX_L2_T2_PMU_SCOM_SPARE_CTRL_LEN                        , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( C_T2_PMU_SCOM_IDLE_DELAY                                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( C_T2_PMU_SCOM_IDLE_DELAY_LEN                            , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( C_T2_PMU_SCOM_COMPLETION_DELAY                          , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( C_T2_PMU_SCOM_COMPLETION_DELAY_LEN                      , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( C_T2_PMU_SCOM_SAMPLE_OVERRIDE                           , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( C_T2_PMU_SCOM_SPARE_CTRL                                , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( C_T2_PMU_SCOM_SPARE_CTRL_LEN                            , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( EX_L2_T3_PMU_SCOM_IDLE_DELAY                            , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( EX_L2_T3_PMU_SCOM_IDLE_DELAY_LEN                        , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( EX_L2_T3_PMU_SCOM_COMPLETION_DELAY                      , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( EX_L2_T3_PMU_SCOM_COMPLETION_DELAY_LEN                  , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( EX_L2_T3_PMU_SCOM_SAMPLE_OVERRIDE                       , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( EX_L2_T3_PMU_SCOM_SPARE_CTRL                            , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( EX_L2_T3_PMU_SCOM_SPARE_CTRL_LEN                        , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
+
+REG64_FLD( C_T3_PMU_SCOM_IDLE_DELAY                                , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY );
+REG64_FLD( C_T3_PMU_SCOM_IDLE_DELAY_LEN                            , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_IDLE_DELAY_LEN );
+REG64_FLD( C_T3_PMU_SCOM_COMPLETION_DELAY                          , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY );
+REG64_FLD( C_T3_PMU_SCOM_COMPLETION_DELAY_LEN                      , 9   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_COMPLETION_DELAY_LEN );
+REG64_FLD( C_T3_PMU_SCOM_SAMPLE_OVERRIDE                           , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SAMPLE_OVERRIDE );
+REG64_FLD( C_T3_PMU_SCOM_SPARE_CTRL                                , 19  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL );
+REG64_FLD( C_T3_PMU_SCOM_SPARE_CTRL_LEN                            , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CTRL_LEN );
 
 REG64_FLD( EQ_THERM_MODE_REG_DIS_CPM_BUBBLE_CORR                   , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_DIS_CPM_BUBBLE_CORR );
@@ -13877,6 +19358,10 @@ REG64_FLD( EQ_THERM_MODE_REG_DTS_ENABLE_L1                         , 20  , SH_UN
            SH_FLD_DTS_ENABLE_L1 );
 REG64_FLD( EQ_THERM_MODE_REG_DTS_ENABLE_L1_LEN                     , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_DTS_ENABLE_L1_LEN );
+REG64_FLD( EQ_THERM_MODE_REG_THERM_CPM_ENABLE_L1                   , 35  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1 );
+REG64_FLD( EQ_THERM_MODE_REG_THERM_CPM_ENABLE_L1_LEN               , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1_LEN );
 
 REG64_FLD( EX_THERM_MODE_REG_DIS_CPM_BUBBLE_CORR                   , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DIS_CPM_BUBBLE_CORR );
@@ -13912,6 +19397,10 @@ REG64_FLD( EX_THERM_MODE_REG_DTS_ENABLE_L1                         , 20  , SH_UN
            SH_FLD_DTS_ENABLE_L1 );
 REG64_FLD( EX_THERM_MODE_REG_DTS_ENABLE_L1_LEN                     , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DTS_ENABLE_L1_LEN );
+REG64_FLD( EX_THERM_MODE_REG_THERM_CPM_ENABLE_L1                   , 35  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1 );
+REG64_FLD( EX_THERM_MODE_REG_THERM_CPM_ENABLE_L1_LEN               , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1_LEN );
 
 REG64_FLD( C_THERM_MODE_REG_DIS_CPM_BUBBLE_CORR                    , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_DIS_CPM_BUBBLE_CORR );
@@ -13947,6 +19436,153 @@ REG64_FLD( C_THERM_MODE_REG_DTS_ENABLE_L1                          , 20  , SH_UN
            SH_FLD_DTS_ENABLE_L1 );
 REG64_FLD( C_THERM_MODE_REG_DTS_ENABLE_L1_LEN                      , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_DTS_ENABLE_L1_LEN );
+REG64_FLD( C_THERM_MODE_REG_THERM_CPM_ENABLE_L1                    , 35  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1 );
+REG64_FLD( C_THERM_MODE_REG_THERM_CPM_ENABLE_L1_LEN                , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_THERM_CPM_ENABLE_L1_LEN );
+
+REG64_FLD( EX_L2_THREAD_INFO_VTID0_V                               , 0   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_V    );
+REG64_FLD( EX_L2_THREAD_INFO_VTID1_V                               , 1   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_V    );
+REG64_FLD( EX_L2_THREAD_INFO_VTID2_V                               , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_V    );
+REG64_FLD( EX_L2_THREAD_INFO_VTID3_V                               , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_V    );
+REG64_FLD( EX_L2_THREAD_INFO_PTID0_V                               , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PTID0_V    );
+REG64_FLD( EX_L2_THREAD_INFO_PTID1_V                               , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PTID1_V    );
+REG64_FLD( EX_L2_THREAD_INFO_PTID2_V                               , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PTID2_V    );
+REG64_FLD( EX_L2_THREAD_INFO_PTID3_V                               , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PTID3_V    );
+REG64_FLD( EX_L2_THREAD_INFO_SMT_MODE                              , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SMT_MODE   );
+REG64_FLD( EX_L2_THREAD_INFO_SMT_MODE_LEN                          , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_SMT_MODE_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_VTID0_TO_PTID_MAP                     , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_TO_PTID_MAP );
+REG64_FLD( EX_L2_THREAD_INFO_VTID0_TO_PTID_MAP_LEN                 , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_TO_PTID_MAP_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_VTID1_TO_PTID_MAP                     , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_TO_PTID_MAP );
+REG64_FLD( EX_L2_THREAD_INFO_VTID1_TO_PTID_MAP_LEN                 , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_TO_PTID_MAP_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_VTID2_TO_PTID_MAP                     , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_TO_PTID_MAP );
+REG64_FLD( EX_L2_THREAD_INFO_VTID2_TO_PTID_MAP_LEN                 , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_TO_PTID_MAP_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_VTID3_TO_PTID_MAP                     , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_TO_PTID_MAP );
+REG64_FLD( EX_L2_THREAD_INFO_VTID3_TO_PTID_MAP_LEN                 , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_TO_PTID_MAP_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_RAM_THREAD_ACTIVE                     , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RAM_THREAD_ACTIVE );
+REG64_FLD( EX_L2_THREAD_INFO_RAM_THREAD_ACTIVE_LEN                 , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_RAM_THREAD_ACTIVE_LEN );
+REG64_FLD( EX_L2_THREAD_INFO_PSCOM_PURGE                           , 22  , SH_UNT_EX_L2    , SH_ACS_SCOM     ,
+           SH_FLD_PSCOM_PURGE );
+
+REG64_FLD( C_THREAD_INFO_VTID0_V                                   , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_V    );
+REG64_FLD( C_THREAD_INFO_VTID1_V                                   , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_V    );
+REG64_FLD( C_THREAD_INFO_VTID2_V                                   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_V    );
+REG64_FLD( C_THREAD_INFO_VTID3_V                                   , 3   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_V    );
+REG64_FLD( C_THREAD_INFO_PTID0_V                                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PTID0_V    );
+REG64_FLD( C_THREAD_INFO_PTID1_V                                   , 5   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PTID1_V    );
+REG64_FLD( C_THREAD_INFO_PTID2_V                                   , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PTID2_V    );
+REG64_FLD( C_THREAD_INFO_PTID3_V                                   , 7   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PTID3_V    );
+REG64_FLD( C_THREAD_INFO_SMT_MODE                                  , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SMT_MODE   );
+REG64_FLD( C_THREAD_INFO_SMT_MODE_LEN                              , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SMT_MODE_LEN );
+REG64_FLD( C_THREAD_INFO_VTID0_TO_PTID_MAP                         , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_TO_PTID_MAP );
+REG64_FLD( C_THREAD_INFO_VTID0_TO_PTID_MAP_LEN                     , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID0_TO_PTID_MAP_LEN );
+REG64_FLD( C_THREAD_INFO_VTID1_TO_PTID_MAP                         , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_TO_PTID_MAP );
+REG64_FLD( C_THREAD_INFO_VTID1_TO_PTID_MAP_LEN                     , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID1_TO_PTID_MAP_LEN );
+REG64_FLD( C_THREAD_INFO_VTID2_TO_PTID_MAP                         , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_TO_PTID_MAP );
+REG64_FLD( C_THREAD_INFO_VTID2_TO_PTID_MAP_LEN                     , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID2_TO_PTID_MAP_LEN );
+REG64_FLD( C_THREAD_INFO_VTID3_TO_PTID_MAP                         , 16  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_TO_PTID_MAP );
+REG64_FLD( C_THREAD_INFO_VTID3_TO_PTID_MAP_LEN                     , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_VTID3_TO_PTID_MAP_LEN );
+REG64_FLD( C_THREAD_INFO_RAM_THREAD_ACTIVE                         , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RAM_THREAD_ACTIVE );
+REG64_FLD( C_THREAD_INFO_RAM_THREAD_ACTIVE_LEN                     , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_RAM_THREAD_ACTIVE_LEN );
+REG64_FLD( C_THREAD_INFO_PSCOM_PURGE                               , 22  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PSCOM_PURGE );
+
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DIDT_THROTTLE                  , 0   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_THROTTLE );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DIDT_THROTTLE_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_THROTTLE_LEN );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DIDT_TRIGGER_ENABLE            , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_TRIGGER_ENABLE );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_CORE_SLOWDOWN                  , 3   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_CORE_SLOWDOWN );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_FORCE_DYN_SUPPRESS             , 4   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_FORCE_DYN_SUPPRESS );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DYN_SUPPRESS_ON_THROTTLE       , 5   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DYN_SUPPRESS_ON_THROTTLE );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DISABLE_DROOP                  , 6   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DISABLE_DROOP );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DISABLE_DROOP_LEN              , 3   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DISABLE_DROOP_LEN );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DROOP_MODE_DISABLE             , 9   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DROOP_MODE_DISABLE );
+REG64_FLD( EX_THROTTLE_CONTROL_SCOM_DROOP_MODE_DISABLE_LEN         , 2   , SH_UNT_EX       , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DROOP_MODE_DISABLE_LEN );
+
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DIDT_THROTTLE                   , 0   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_THROTTLE );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DIDT_THROTTLE_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_THROTTLE_LEN );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DIDT_TRIGGER_ENABLE             , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DIDT_TRIGGER_ENABLE );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_CORE_SLOWDOWN                   , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_CORE_SLOWDOWN );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_FORCE_DYN_SUPPRESS              , 4   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_FORCE_DYN_SUPPRESS );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DYN_SUPPRESS_ON_THROTTLE        , 5   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DYN_SUPPRESS_ON_THROTTLE );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DISABLE_DROOP                   , 6   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DISABLE_DROOP );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DISABLE_DROOP_LEN               , 3   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DISABLE_DROOP_LEN );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DROOP_MODE_DISABLE              , 9   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DROOP_MODE_DISABLE );
+REG64_FLD( C_THROTTLE_CONTROL_SCOM_DROOP_MODE_DISABLE_LEN          , 2   , SH_UNT_C        , SH_ACS_SCOM_RW  ,
+           SH_FLD_SCOM_DROOP_MODE_DISABLE_LEN );
+
+REG64_FLD( EQ_TIMEOUT_REG_INT_TIMEOUT                              , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT );
+REG64_FLD( EQ_TIMEOUT_REG_INT_TIMEOUT_LEN                          , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT_LEN );
+
+REG64_FLD( EX_TIMEOUT_REG_INT_TIMEOUT                              , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT );
+REG64_FLD( EX_TIMEOUT_REG_INT_TIMEOUT_LEN                          , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT_LEN );
+
+REG64_FLD( C_TIMEOUT_REG_INT_TIMEOUT                               , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT );
+REG64_FLD( C_TIMEOUT_REG_INT_TIMEOUT_LEN                           , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_INT_TIMEOUT_LEN );
 
 REG64_FLD( EQ_TIMESTAMP_COUNTER_READ_VALUE                         , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_VALUE      );
@@ -14181,13 +19817,53 @@ REG64_FLD( EX_TPLC20_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -14325,6 +20001,14 @@ REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_DISABLE_COMPRESSION , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DISABLE_COMPRESSION );
@@ -14370,6 +20054,14 @@ REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_TPLC20_TR1_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -14429,13 +20121,53 @@ REG64_FLD( EX_TPLC20_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EX       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -14573,6 +20305,14 @@ REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_DISABLE_COMPRESSION , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_DISABLE_COMPRESSION );
@@ -14618,6 +20358,14 @@ REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_TPLC21_TR0_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -14649,8 +20397,28 @@ REG64_FLD( EQ_TPLC21_TR0_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -14742,6 +20510,14 @@ REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
 
 REG64_FLD( EQ_TPLC21_TR1_TRACE_HI_DATA_REG_DATA                    , 0   , SH_UNT_EQ       , SH_ACS_SCOM_RO  ,
            SH_FLD_DATA       );
@@ -14773,8 +20549,28 @@ REG64_FLD( EQ_TPLC21_TR1_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN        , 10  , SH_UN
 
 REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE    , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_STORE_ON_TRIG_MODE );
-REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_STORE_ON_TRIG_MODE_LEN , 22  , SH_UNT_EQ       , SH_ACS_SCOM     ,
-           SH_FLD_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE     , 1   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE      , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_EXTEND_TRIG_MODE_LEN  , 8   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_EXTEND_TRIG_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_BANK_MODE             , 10  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_ENH_MODE              , 11  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL , 12  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_LOCAL_CLOCK_GATE_CONTROL_LEN , 2   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_LOCAL_CLOCK_GATE_CONTROL_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL         , 14  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_SELCT_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SELCT_CONTROL_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL         , 18  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG_SPARE_CONTROL_LEN     , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_CONTROL_LEN );
 
 REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63  , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_CMP_MSK_LT_B_TO_63 );
@@ -14866,6 +20662,390 @@ REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE      , 28  , SH_UN
            SH_FLD_MATCH_NOT_MODE );
 REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN  , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT       , 32  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN   , 4   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_DD1_STRETCH_TRIGGER_PULSES , 36  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_DD1_STRETCH_TRIGGER_PULSES );
+REG64_FLD( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9_SPARE_LT            , 37  , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
+
+REG64_FLD( EX_TRACE_HI_DATA_REG_DATA                               , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( EX_TRACE_HI_DATA_REG_DATA_LEN                           , 64  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+
+REG64_FLD( C_TRACE_HI_DATA_REG_DATA                                , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( C_TRACE_HI_DATA_REG_DATA_LEN                            , 64  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+
+REG64_FLD( EX_L3_TRACE_HI_DATA_REG_DATA                            , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( EX_L3_TRACE_HI_DATA_REG_DATA_LEN                        , 64  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+
+REG64_FLD( EX_TRACE_LO_DATA_REG_DATA                               , 0   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( EX_TRACE_LO_DATA_REG_DATA_LEN                           , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+REG64_FLD( EX_TRACE_LO_DATA_REG_ADDRESS                            , 32  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS    );
+REG64_FLD( EX_TRACE_LO_DATA_REG_ADDRESS_LEN                        , 10  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS_LEN );
+REG64_FLD( EX_TRACE_LO_DATA_REG_LAST_BANK                          , 42  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK  );
+REG64_FLD( EX_TRACE_LO_DATA_REG_LAST_BANK_LEN                      , 9   , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_LEN );
+REG64_FLD( EX_TRACE_LO_DATA_REG_LAST_BANK_VALID                    , 51  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_VALID );
+REG64_FLD( EX_TRACE_LO_DATA_REG_WRITE_ON_RUN                       , 52  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_ON_RUN );
+REG64_FLD( EX_TRACE_LO_DATA_REG_RUNNING                            , 53  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUNNING    );
+REG64_FLD( EX_TRACE_LO_DATA_REG_HOLD_ADDRESS                       , 54  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS );
+REG64_FLD( EX_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN                   , 10  , SH_UNT_EX       , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS_LEN );
+
+REG64_FLD( C_TRACE_LO_DATA_REG_DATA                                , 0   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( C_TRACE_LO_DATA_REG_DATA_LEN                            , 32  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+REG64_FLD( C_TRACE_LO_DATA_REG_ADDRESS                             , 32  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS    );
+REG64_FLD( C_TRACE_LO_DATA_REG_ADDRESS_LEN                         , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS_LEN );
+REG64_FLD( C_TRACE_LO_DATA_REG_LAST_BANK                           , 42  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK  );
+REG64_FLD( C_TRACE_LO_DATA_REG_LAST_BANK_LEN                       , 9   , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_LEN );
+REG64_FLD( C_TRACE_LO_DATA_REG_LAST_BANK_VALID                     , 51  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_VALID );
+REG64_FLD( C_TRACE_LO_DATA_REG_WRITE_ON_RUN                        , 52  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_ON_RUN );
+REG64_FLD( C_TRACE_LO_DATA_REG_RUNNING                             , 53  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUNNING    );
+REG64_FLD( C_TRACE_LO_DATA_REG_HOLD_ADDRESS                        , 54  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS );
+REG64_FLD( C_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN                    , 10  , SH_UNT_C        , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS_LEN );
+
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_DATA                            , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA       );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_DATA_LEN                        , 32  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_DATA_LEN   );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_ADDRESS                         , 32  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS    );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_ADDRESS_LEN                     , 10  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_ADDRESS_LEN );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_LAST_BANK                       , 42  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK  );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_LAST_BANK_LEN                   , 9   , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_LEN );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_LAST_BANK_VALID                 , 51  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_LAST_BANK_VALID );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_WRITE_ON_RUN                    , 52  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_WRITE_ON_RUN );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_RUNNING                         , 53  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_RUNNING    );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_HOLD_ADDRESS                    , 54  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS );
+REG64_FLD( EX_L3_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN                , 10  , SH_UNT_EX_L3    , SH_ACS_SCOM_RO  ,
+           SH_FLD_HOLD_ADDRESS_LEN );
+
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE                , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE      , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE_LEN  , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_BANK_MODE                        , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_ENH_MODE                         , 11  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL                , 12  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN            , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL_LEN );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D                  , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D );
+REG64_FLD( EX_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D_LEN              , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D_LEN );
+
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE                 , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE       , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE_LEN   , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_BANK_MODE                         , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_ENH_MODE                          , 11  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL                 , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN             , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL_LEN );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D                   , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D );
+REG64_FLD( C_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D_LEN               , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D_LEN );
+
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_WRITE_ON_RUN_MODE             , 1   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_WRITE_ON_RUN_MODE );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE   , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_EXTENDED_STORE_ON_TRIG_MODE_LEN , 8   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_EXTENDED_STORE_ON_TRIG_MODE_LEN );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_BANK_MODE                     , 10  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_BANK_MODE  );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_ENH_MODE                      , 11  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_ENH_MODE   );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL             , 12  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN         , 2   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_LCL_CLK_GATE_CTRL_LEN );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D               , 14  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D );
+REG64_FLD( EX_L3_TRACE_TRCTRL_CONFIG_TRCTRL_CONFIG_D_LEN           , 8   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_TRCTRL_CONFIG_D_LEN );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63             , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63 );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63_LEN         , 64  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63_LEN );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63              , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63 );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63_LEN          , 64  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63_LEN );
+
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63          , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63 );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_0_CMP_MSK_LT_B_TO_63_LEN      , 64  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_TO_63_LEN );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87          , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87 );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN      , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87_LEN );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87           , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87 );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN       , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87_LEN );
+
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87       , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87 );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_1_CMP_MSK_LT_B_64_TO_87_LEN   , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_CMP_MSK_LT_B_64_TO_87_LEN );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_2_PATTERNA                       , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA   );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_2_PATTERNA_LEN                   , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_2_PATTERNB                       , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB   );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_2_PATTERNB_LEN                   , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB_LEN );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_2_PATTERNA                        , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA   );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_2_PATTERNA_LEN                    , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_2_PATTERNB                        , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB   );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_2_PATTERNB_LEN                    , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB_LEN );
+
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_2_PATTERNA                    , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA   );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_2_PATTERNA_LEN                , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNA_LEN );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_2_PATTERNB                    , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB   );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_2_PATTERNB_LEN                , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNB_LEN );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_3_PATTERNC                       , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC   );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_3_PATTERNC_LEN                   , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_3_PATTERND                       , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND   );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_3_PATTERND_LEN                   , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND_LEN );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_3_PATTERNC                        , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC   );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_3_PATTERNC_LEN                    , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_3_PATTERND                        , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND   );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_3_PATTERND_LEN                    , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND_LEN );
+
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_3_PATTERNC                    , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC   );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_3_PATTERNC_LEN                , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERNC_LEN );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_3_PATTERND                    , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND   );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_3_PATTERND_LEN                , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_PATTERND_LEN );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_4_MASKA                          , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKA      );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_4_MASKA_LEN                      , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKA_LEN  );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_4_MASKB                          , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKB      );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_4_MASKB_LEN                      , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKB_LEN  );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_4_MASKA                           , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKA      );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_4_MASKA_LEN                       , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKA_LEN  );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_4_MASKB                           , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKB      );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_4_MASKB_LEN                       , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKB_LEN  );
+
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_4_MASKA                       , 0   , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_MASKA      );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_4_MASKA_LEN                   , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_MASKA_LEN  );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_4_MASKB                       , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_MASKB      );
+REG64_FLD( EX_L3_TRACE_TRDATA_CONFIG_4_MASKB_LEN                   , 24  , SH_UNT_EX_L3    , SH_ACS_SCOM     ,
+           SH_FLD_MASKB_LEN  );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_5_MASKC                          , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKC      );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_5_MASKC_LEN                      , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKC_LEN  );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_5_MASKD                          , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKD      );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_5_MASKD_LEN                      , 24  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MASKD_LEN  );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_5_MASKC                           , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKC      );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_5_MASKC_LEN                       , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKC_LEN  );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_5_MASKD                           , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKD      );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_5_MASKD_LEN                       , 24  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MASKD_LEN  );
+
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_DISABLE_COMPRESSION            , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_DISABLE_COMPRESSION );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK , 1   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_BIT_COMPRESSION_CARE_MASK );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHA_MUXSEL                  , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHA_MUXSEL );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHA_MUXSEL_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHA_MUXSEL_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHB_MUXSEL                  , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHB_MUXSEL );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHB_MUXSEL_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHB_MUXSEL_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHC_MUXSEL                  , 6   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHC_MUXSEL );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHC_MUXSEL_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHC_MUXSEL_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHD_MUXSEL                  , 8   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHD_MUXSEL );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCHD_MUXSEL_LEN              , 2   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCHD_MUXSEL_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG0_OR_MASK                  , 10  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_OR_MASK );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG0_OR_MASK_LEN              , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_OR_MASK_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG0_AND_MASK                 , 14  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_AND_MASK );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG0_AND_MASK_LEN             , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_AND_MASK_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG1_OR_MASK                  , 18  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_OR_MASK );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG1_OR_MASK_LEN              , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_OR_MASK_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG1_AND_MASK                 , 22  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_AND_MASK );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG1_AND_MASK_LEN             , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_AND_MASK_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG0_NOT_MODE                 , 26  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_NOT_MODE );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_TRIG1_NOT_MODE                 , 27  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_NOT_MODE );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE                 , 28  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCH_NOT_MODE );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN             , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT                  , 32  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN              , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_SPARE_LT                       , 36  , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
+REG64_FLD( EX_TRACE_TRDATA_CONFIG_9_SPARE_LT_LEN                   , 4   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT_LEN );
+
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_DISABLE_COMPRESSION             , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_DISABLE_COMPRESSION );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK , 1   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_BIT_COMPRESSION_CARE_MASK );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHA_MUXSEL                   , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHA_MUXSEL );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHA_MUXSEL_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHA_MUXSEL_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHB_MUXSEL                   , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHB_MUXSEL );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHB_MUXSEL_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHB_MUXSEL_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHC_MUXSEL                   , 6   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHC_MUXSEL );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHC_MUXSEL_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHC_MUXSEL_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHD_MUXSEL                   , 8   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHD_MUXSEL );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCHD_MUXSEL_LEN               , 2   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCHD_MUXSEL_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG0_OR_MASK                   , 10  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_OR_MASK );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG0_OR_MASK_LEN               , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_OR_MASK_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG0_AND_MASK                  , 14  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_AND_MASK );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG0_AND_MASK_LEN              , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_AND_MASK_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG1_OR_MASK                   , 18  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_OR_MASK );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG1_OR_MASK_LEN               , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_OR_MASK_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG1_AND_MASK                  , 22  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_AND_MASK );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG1_AND_MASK_LEN              , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_AND_MASK_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG0_NOT_MODE                  , 26  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG0_NOT_MODE );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_TRIG1_NOT_MODE                  , 27  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_TRIG1_NOT_MODE );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE                  , 28  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCH_NOT_MODE );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_MATCH_NOT_MODE_LEN              , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_MATCH_NOT_MODE_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT                   , 32  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_ERROR_MODE_LT_LEN               , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_ERROR_MODE_LT_LEN );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_SPARE_LT                        , 36  , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT   );
+REG64_FLD( C_TRACE_TRDATA_CONFIG_9_SPARE_LT_LEN                    , 4   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_SPARE_LT_LEN );
 
 REG64_FLD( EX_V0_HMER_MALFUNCTION_ALERT                            , 0   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_MALFUNCTION_ALERT );
@@ -14873,20 +21053,40 @@ REG64_FLD( EX_V0_HMER_CME_REQUEST                                  , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_V0_HMER_PROC_RCVY_DONE                               , 2   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_V0_HMER_SPARE_3                                      , 3   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_V0_HMER_TFAC_ERR                                     , 4   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_V0_HMER_TFMR_PARITY_ERR                              , 5   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_V0_HMER_SPARE_6                                      , 6   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_V0_HMER_SPARE_7                                      , 7   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_V0_HMER_XSCOM_FAIL                                   , 8   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_V0_HMER_XSCOM_DONE                                   , 9   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_V0_HMER_SPARE_10                                     , 10  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_V0_HMER_PROC_RCVY_AGAIN                              , 11  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_V0_HMER_SPARE_12                                     , 12  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_V0_HMER_SPARE_13                                     , 13  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_V0_HMER_SPARE_14                                     , 14  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_V0_HMER_SPARE_15                                     , 15  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_V0_HMER_SCOM_FIR_HMI                                 , 16  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_V0_HMER_TRIG_FIR_HMI                                 , 17  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_V0_HMER_SPARE_18                                     , 18  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_V0_HMER_SPARE_19                                     , 19  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_V0_HMER_HYP_RECOURCE_ERR                             , 20  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_V0_HMER_XSCOM_STATUS                                 , 21  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
@@ -14900,20 +21100,40 @@ REG64_FLD( EX_L2_V0_HMER_CME_REQUEST                               , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_L2_V0_HMER_PROC_RCVY_DONE                            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_L2_V0_HMER_SPARE_3                                   , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_L2_V0_HMER_TFAC_ERR                                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_L2_V0_HMER_TFMR_PARITY_ERR                           , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_L2_V0_HMER_SPARE_6                                   , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_L2_V0_HMER_SPARE_7                                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_L2_V0_HMER_XSCOM_FAIL                                , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_L2_V0_HMER_XSCOM_DONE                                , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_L2_V0_HMER_SPARE_10                                  , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_L2_V0_HMER_PROC_RCVY_AGAIN                           , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_L2_V0_HMER_SPARE_12                                  , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_L2_V0_HMER_SPARE_13                                  , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_L2_V0_HMER_SPARE_14                                  , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_L2_V0_HMER_SPARE_15                                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_L2_V0_HMER_SCOM_FIR_HMI                              , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_L2_V0_HMER_TRIG_FIR_HMI                              , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_L2_V0_HMER_SPARE_18                                  , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_L2_V0_HMER_SPARE_19                                  , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_L2_V0_HMER_HYP_RECOURCE_ERR                          , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_L2_V0_HMER_XSCOM_STATUS                              , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
@@ -14927,20 +21147,40 @@ REG64_FLD( C_V0_HMER_CME_REQUEST                                   , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( C_V0_HMER_PROC_RCVY_DONE                                , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( C_V0_HMER_SPARE_3                                       , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( C_V0_HMER_TFAC_ERR                                      , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( C_V0_HMER_TFMR_PARITY_ERR                               , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( C_V0_HMER_SPARE_6                                       , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( C_V0_HMER_SPARE_7                                       , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( C_V0_HMER_XSCOM_FAIL                                    , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( C_V0_HMER_XSCOM_DONE                                    , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( C_V0_HMER_SPARE_10                                      , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( C_V0_HMER_PROC_RCVY_AGAIN                               , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( C_V0_HMER_SPARE_12                                      , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( C_V0_HMER_SPARE_13                                      , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( C_V0_HMER_SPARE_14                                      , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( C_V0_HMER_SPARE_15                                      , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( C_V0_HMER_SCOM_FIR_HMI                                  , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( C_V0_HMER_TRIG_FIR_HMI                                  , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( C_V0_HMER_SPARE_18                                      , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( C_V0_HMER_SPARE_19                                      , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( C_V0_HMER_HYP_RECOURCE_ERR                              , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( C_V0_HMER_XSCOM_STATUS                                  , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
@@ -14954,20 +21194,40 @@ REG64_FLD( EX_V1_HMER_CME_REQUEST                                  , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_V1_HMER_PROC_RCVY_DONE                               , 2   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_V1_HMER_SPARE_3                                      , 3   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_V1_HMER_TFAC_ERR                                     , 4   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_V1_HMER_TFMR_PARITY_ERR                              , 5   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_V1_HMER_SPARE_6                                      , 6   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_V1_HMER_SPARE_7                                      , 7   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_V1_HMER_XSCOM_FAIL                                   , 8   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_V1_HMER_XSCOM_DONE                                   , 9   , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_V1_HMER_SPARE_10                                     , 10  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_V1_HMER_PROC_RCVY_AGAIN                              , 11  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_V1_HMER_SPARE_12                                     , 12  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_V1_HMER_SPARE_13                                     , 13  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_V1_HMER_SPARE_14                                     , 14  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_V1_HMER_SPARE_15                                     , 15  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_V1_HMER_SCOM_FIR_HMI                                 , 16  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_V1_HMER_TRIG_FIR_HMI                                 , 17  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_V1_HMER_SPARE_18                                     , 18  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_V1_HMER_SPARE_19                                     , 19  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_V1_HMER_HYP_RECOURCE_ERR                             , 20  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_V1_HMER_XSCOM_STATUS                                 , 21  , SH_UNT_EX       , SH_ACS_SCOM2_OR ,
@@ -14981,20 +21241,40 @@ REG64_FLD( EX_L2_V1_HMER_CME_REQUEST                               , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_L2_V1_HMER_PROC_RCVY_DONE                            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_L2_V1_HMER_SPARE_3                                   , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_L2_V1_HMER_TFAC_ERR                                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_L2_V1_HMER_TFMR_PARITY_ERR                           , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_L2_V1_HMER_SPARE_6                                   , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_L2_V1_HMER_SPARE_7                                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_L2_V1_HMER_XSCOM_FAIL                                , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_L2_V1_HMER_XSCOM_DONE                                , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_L2_V1_HMER_SPARE_10                                  , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_L2_V1_HMER_PROC_RCVY_AGAIN                           , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_L2_V1_HMER_SPARE_12                                  , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_L2_V1_HMER_SPARE_13                                  , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_L2_V1_HMER_SPARE_14                                  , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_L2_V1_HMER_SPARE_15                                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_L2_V1_HMER_SCOM_FIR_HMI                              , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_L2_V1_HMER_TRIG_FIR_HMI                              , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_L2_V1_HMER_SPARE_18                                  , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_L2_V1_HMER_SPARE_19                                  , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_L2_V1_HMER_HYP_RECOURCE_ERR                          , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_L2_V1_HMER_XSCOM_STATUS                              , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM1_WAND,
@@ -15008,20 +21288,40 @@ REG64_FLD( C_V1_HMER_CME_REQUEST                                   , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( C_V1_HMER_PROC_RCVY_DONE                                , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( C_V1_HMER_SPARE_3                                       , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( C_V1_HMER_TFAC_ERR                                      , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( C_V1_HMER_TFMR_PARITY_ERR                               , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( C_V1_HMER_SPARE_6                                       , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( C_V1_HMER_SPARE_7                                       , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( C_V1_HMER_XSCOM_FAIL                                    , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( C_V1_HMER_XSCOM_DONE                                    , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( C_V1_HMER_SPARE_10                                      , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( C_V1_HMER_PROC_RCVY_AGAIN                               , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( C_V1_HMER_SPARE_12                                      , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( C_V1_HMER_SPARE_13                                      , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( C_V1_HMER_SPARE_14                                      , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( C_V1_HMER_SPARE_15                                      , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( C_V1_HMER_SCOM_FIR_HMI                                  , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( C_V1_HMER_TRIG_FIR_HMI                                  , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( C_V1_HMER_SPARE_18                                      , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( C_V1_HMER_SPARE_19                                      , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( C_V1_HMER_HYP_RECOURCE_ERR                              , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( C_V1_HMER_XSCOM_STATUS                                  , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
@@ -15035,20 +21335,40 @@ REG64_FLD( EX_L2_V2_HMER_CME_REQUEST                               , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_L2_V2_HMER_PROC_RCVY_DONE                            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_L2_V2_HMER_SPARE_3                                   , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_L2_V2_HMER_TFAC_ERR                                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_L2_V2_HMER_TFMR_PARITY_ERR                           , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_L2_V2_HMER_SPARE_6                                   , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_L2_V2_HMER_SPARE_7                                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_L2_V2_HMER_XSCOM_FAIL                                , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_L2_V2_HMER_XSCOM_DONE                                , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_L2_V2_HMER_SPARE_10                                  , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_L2_V2_HMER_PROC_RCVY_AGAIN                           , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_L2_V2_HMER_SPARE_12                                  , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_L2_V2_HMER_SPARE_13                                  , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_L2_V2_HMER_SPARE_14                                  , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_L2_V2_HMER_SPARE_15                                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_L2_V2_HMER_SCOM_FIR_HMI                              , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_L2_V2_HMER_TRIG_FIR_HMI                              , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_L2_V2_HMER_SPARE_18                                  , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_L2_V2_HMER_SPARE_19                                  , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_L2_V2_HMER_HYP_RECOURCE_ERR                          , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_L2_V2_HMER_XSCOM_STATUS                              , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
@@ -15062,20 +21382,40 @@ REG64_FLD( C_V2_HMER_CME_REQUEST                                   , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( C_V2_HMER_PROC_RCVY_DONE                                , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( C_V2_HMER_SPARE_3                                       , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( C_V2_HMER_TFAC_ERR                                      , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( C_V2_HMER_TFMR_PARITY_ERR                               , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( C_V2_HMER_SPARE_6                                       , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( C_V2_HMER_SPARE_7                                       , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( C_V2_HMER_XSCOM_FAIL                                    , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( C_V2_HMER_XSCOM_DONE                                    , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( C_V2_HMER_SPARE_10                                      , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( C_V2_HMER_PROC_RCVY_AGAIN                               , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( C_V2_HMER_SPARE_12                                      , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( C_V2_HMER_SPARE_13                                      , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( C_V2_HMER_SPARE_14                                      , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( C_V2_HMER_SPARE_15                                      , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( C_V2_HMER_SCOM_FIR_HMI                                  , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( C_V2_HMER_TRIG_FIR_HMI                                  , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( C_V2_HMER_SPARE_18                                      , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( C_V2_HMER_SPARE_19                                      , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( C_V2_HMER_HYP_RECOURCE_ERR                              , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( C_V2_HMER_XSCOM_STATUS                                  , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
@@ -15089,20 +21429,40 @@ REG64_FLD( EX_L2_V3_HMER_CME_REQUEST                               , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( EX_L2_V3_HMER_PROC_RCVY_DONE                            , 2   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( EX_L2_V3_HMER_SPARE_3                                   , 3   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( EX_L2_V3_HMER_TFAC_ERR                                  , 4   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( EX_L2_V3_HMER_TFMR_PARITY_ERR                           , 5   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( EX_L2_V3_HMER_SPARE_6                                   , 6   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( EX_L2_V3_HMER_SPARE_7                                   , 7   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( EX_L2_V3_HMER_XSCOM_FAIL                                , 8   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( EX_L2_V3_HMER_XSCOM_DONE                                , 9   , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( EX_L2_V3_HMER_SPARE_10                                  , 10  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( EX_L2_V3_HMER_PROC_RCVY_AGAIN                           , 11  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( EX_L2_V3_HMER_SPARE_12                                  , 12  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( EX_L2_V3_HMER_SPARE_13                                  , 13  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( EX_L2_V3_HMER_SPARE_14                                  , 14  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( EX_L2_V3_HMER_SPARE_15                                  , 15  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( EX_L2_V3_HMER_SCOM_FIR_HMI                              , 16  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( EX_L2_V3_HMER_TRIG_FIR_HMI                              , 17  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( EX_L2_V3_HMER_SPARE_18                                  , 18  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( EX_L2_V3_HMER_SPARE_19                                  , 19  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( EX_L2_V3_HMER_HYP_RECOURCE_ERR                          , 20  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( EX_L2_V3_HMER_XSCOM_STATUS                              , 21  , SH_UNT_EX_L2    , SH_ACS_SCOM2_OR ,
@@ -15116,20 +21476,40 @@ REG64_FLD( C_V3_HMER_CME_REQUEST                                   , 1   , SH_UN
            SH_FLD_CME_REQUEST );
 REG64_FLD( C_V3_HMER_PROC_RCVY_DONE                                , 2   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_DONE );
+REG64_FLD( C_V3_HMER_SPARE_3                                       , 3   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_3    );
 REG64_FLD( C_V3_HMER_TFAC_ERR                                      , 4   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFAC_ERR   );
 REG64_FLD( C_V3_HMER_TFMR_PARITY_ERR                               , 5   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TFMR_PARITY_ERR );
+REG64_FLD( C_V3_HMER_SPARE_6                                       , 6   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_6    );
+REG64_FLD( C_V3_HMER_SPARE_7                                       , 7   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_7    );
 REG64_FLD( C_V3_HMER_XSCOM_FAIL                                    , 8   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_FAIL );
 REG64_FLD( C_V3_HMER_XSCOM_DONE                                    , 9   , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_XSCOM_DONE );
+REG64_FLD( C_V3_HMER_SPARE_10                                      , 10  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_10   );
 REG64_FLD( C_V3_HMER_PROC_RCVY_AGAIN                               , 11  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_PROC_RCVY_AGAIN );
+REG64_FLD( C_V3_HMER_SPARE_12                                      , 12  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_12   );
+REG64_FLD( C_V3_HMER_SPARE_13                                      , 13  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_13   );
+REG64_FLD( C_V3_HMER_SPARE_14                                      , 14  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_14   );
+REG64_FLD( C_V3_HMER_SPARE_15                                      , 15  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_15   );
 REG64_FLD( C_V3_HMER_SCOM_FIR_HMI                                  , 16  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_SCOM_FIR_HMI );
 REG64_FLD( C_V3_HMER_TRIG_FIR_HMI                                  , 17  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_TRIG_FIR_HMI );
+REG64_FLD( C_V3_HMER_SPARE_18                                      , 18  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_18   );
+REG64_FLD( C_V3_HMER_SPARE_19                                      , 19  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
+           SH_FLD_SPARE_19   );
 REG64_FLD( C_V3_HMER_HYP_RECOURCE_ERR                              , 20  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
            SH_FLD_HYP_RECOURCE_ERR );
 REG64_FLD( C_V3_HMER_XSCOM_STATUS                                  , 21  , SH_UNT_C        , SH_ACS_SCOM2_OR ,
@@ -15590,6 +21970,15 @@ REG64_FLD( C_XSTOP3_WAIT_CYCLES                                    , 48  , SH_UN
            SH_FLD_WAIT_CYCLES );
 REG64_FLD( C_XSTOP3_WAIT_CYCLES_LEN                                , 12  , SH_UNT_C        , SH_ACS_SCOM     ,
            SH_FLD_WAIT_CYCLES_LEN );
+
+REG64_FLD( EQ_XSTOP_INTERRUPT_REG_XSTOP                            , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
+
+REG64_FLD( EX_XSTOP_INTERRUPT_REG_XSTOP                            , 0   , SH_UNT_EX       , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
+
+REG64_FLD( C_XSTOP_INTERRUPT_REG_XSTOP                             , 0   , SH_UNT_C        , SH_ACS_SCOM     ,
+           SH_FLD_XSTOP      );
 
 REG64_FLD( EQ_XTRA_TRACE_MODE_DATA                                 , 0   , SH_UNT_EQ       , SH_ACS_SCOM     ,
            SH_FLD_DATA       );
