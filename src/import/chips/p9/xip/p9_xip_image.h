@@ -739,11 +739,13 @@ p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data);
 /// data. Assuming the item is located this variable is assigned by the call.
 /// In the event of an error the final state of \a o_data is not specified.
 ///
+/// \param[in] i_index The index of the vector element to return.
+///
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
 int
-p9_xip_get_item(const P9XipItem *i_item, uint64_t* o_data);
+p9_xip_get_item(const P9XipItem *i_item, uint64_t* o_data, uint32_t i_index);
 
 
 /// Get an integral element from a vector held in a P9-XIP image

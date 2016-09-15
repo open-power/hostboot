@@ -2102,43 +2102,53 @@ p9_xip_find(void* i_image,
 }
 
 int
-p9_xip_get_item(const P9XipItem* i_item, uint64_t* o_data)
+p9_xip_get_item(const P9XipItem* i_item, uint64_t* o_data, uint32_t i_index)
 {
+    if ((i_item->iv_elements != 0) && (i_index >= i_item->iv_elements))
+    {
+        return TRACE_ERROR(P9_XIP_BOUNDS_ERROR);
+    }
+
     switch (i_item->iv_type)
     {
         case P9_XIP_UINT8:
-            *o_data = *((uint8_t*)(i_item->iv_imageData));
+            *o_data = ((uint8_t*)(i_item->iv_imageData))[i_index];
             break;
 
         case P9_XIP_UINT16:
-            *o_data = htobe16(*((uint16_t*)(i_item->iv_imageData)));
+            *o_data = htobe16(((uint16_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_UINT32:
-            *o_data = htobe32(*((uint32_t*)(i_item->iv_imageData)));
+            *o_data = htobe32(((uint32_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_UINT64:
-            *o_data = htobe64(*((uint64_t*)(i_item->iv_imageData)));
+            *o_data = htobe64(((uint64_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_INT8:
-            *o_data = *((int8_t*)(i_item->iv_imageData));
+            *o_data = ((int8_t*)(i_item->iv_imageData))[i_index];
             break;
 
         case P9_XIP_INT16:
-            *o_data = htobe16(*((int16_t*)(i_item->iv_imageData)));
+            *o_data = htobe16(((int16_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_INT32:
-            *o_data = htobe32(*((int32_t*)(i_item->iv_imageData)));
+            *o_data = htobe32(((int32_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_INT64:
-            *o_data = htobe64(*((int64_t*)(i_item->iv_imageData)));
+            *o_data = htobe64(((int64_t*)(i_item->iv_imageData))[i_index]);
             break;
 
         case P9_XIP_ADDRESS:
+            if (i_index)
+            {
+                return TRACE_ERROR(P9_XIP_BOUNDS_ERROR);
+            }
+
             *o_data = i_item->iv_address;
             break;
 
@@ -2164,7 +2174,7 @@ p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
 
     if (!rc)
     {
-        rc = p9_xip_get_item(&item, o_data);
+        rc = p9_xip_get_item(&item, o_data, 0);
     }
 
     return rc;
