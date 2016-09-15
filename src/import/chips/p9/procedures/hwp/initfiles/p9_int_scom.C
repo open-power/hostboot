@@ -31,6 +31,7 @@ using namespace fapi2;
 
 constexpr auto literal_1 = 1;
 constexpr auto literal_0 = 0;
+constexpr auto literal_0x0070000072040140 = 0x0070000072040140;
 constexpr auto literal_0x0000004000028000 = 0x0000004000028000;
 constexpr auto literal_0x00000000040101C3 = 0x00000000040101C3;
 constexpr auto literal_0x9554021F80100E0C = 0x9554021F80100E0C;
@@ -108,6 +109,28 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x501300aull)");
+                break;
+            }
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x5013022ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5013022ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0x0070000072040140, 0, 64, 0 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x5013022ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5013022ull)");
                 break;
             }
         }
