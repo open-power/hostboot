@@ -1316,83 +1316,6 @@ bool isDramWidthX4( TargetHandle_t i_mba )
 
 //------------------------------------------------------------------------------
 
-uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
-{
-    #define PRDF_FUNC "[PlatServices::getRanksPerDimm] "
-
-    uint8_t rankCount = 0; // default if something fails
-
-    do
-    {
-        if ( MAX_DIMM_PER_PORT <= i_ds )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid parameters i_ds:%u", i_ds );
-            break;
-        }
-
-        // NOTE: Unable to use getAttr() because it is not able to return an
-        //       array. Otherwise, all of the following would be able to fit in
-        //       one line of code. The targeting may fix this later.
-
-        ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
-        if ( !i_mba->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
-        {
-            PRDF_ERR( PRDF_FUNC "failed to get ATTR_EFF_NUM_RANKS_PER_DIMM" );
-            break;
-        }
-
-        // Note that DIMMs are plugged in pairs so the rank numbers should be
-        // the same for each port.
-        rankCount = attr[0][i_ds];
-
-    } while(0);
-
-    return rankCount;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
-                               uint8_t i_ds )
-{
-    #define PRDF_FUNC "[PlatServices::getMasterRanksPerDimm] "
-
-    uint8_t rankCount = 0; // default if something fails
-
-    do
-    {
-        if ( MAX_DIMM_PER_PORT <= i_ds )
-        {
-            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ds:%u", i_ds );
-            break;
-        }
-
-        // NOTE: Unable to use getAttr() because it is not able to return an
-        //       array. Otherwise, all of the following would be able to fit in
-        //       one line of code. The targeting may fix this later.
-
-        ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type  attr;
-        if (!i_mbaTarget->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr))
-        {
-            PRDF_ERR(PRDF_FUNC"fail get ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM");
-            break;
-        }
-
-        // Note that DIMMs are plugged in pairs so the rank numbers should be
-        // the same for each port.
-        rankCount = attr[0][i_ds];
-
-    } while(0);
-
-    return rankCount;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T>
 void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
                        uint8_t i_pos, uint8_t i_ds )
@@ -1427,10 +1350,14 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
         {
             if ( 0 != (rankMask & (0x80 >> rs)) )
             {
+                // Note that the ranks are getting inserted in order so no need
+                // to sort later.
                 o_ranks.push_back( MemRank((ds << 2) | rs) );
             }
         }
     }
+
+    PRDF_ASSERT( !o_ranks.empty() ); // target configured with no ranks
 
     #undef PRDF_FUNC
 }
@@ -1460,6 +1387,158 @@ void getMasterRanks<TYPE_MBA>( TargetHandle_t i_trgt,
     //       select will be the same for each DIMM select. There is no need to
     //       iterate on both port selects.
     __getMasterRanks<TYPE_MBA>( i_trgt, o_ranks, 0, i_ds );
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
+                    uint8_t i_ds )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( T == getTargetType(i_trgt) );
+    PRDF_ASSERT( i_ds <= MAX_DIMM_PER_PORT ); // can equal MAX_DIMM_PER_PORT
+
+    o_ranks.clear();
+
+    for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
+    {
+        // Check if user gave a specific value for i_ds.
+        if ( (MAX_DIMM_PER_PORT != i_ds) && (ds != i_ds) )
+            continue;
+
+        // Get the number of slave ranks per master rank.
+        uint8_t numRanks       = getNumRanksPerDimm<T>      ( i_trgt, i_ds );
+        uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, i_ds );
+        uint8_t numSlaveRanks  = numRanks / numMasterRanks;
+
+        // Get the current list of master ranks for this DIMM select
+        std::vector<MemRank> tmpList;
+        getMasterRanks<T>( i_trgt, tmpList, i_ds );
+
+        // Start inserting the slave ranks into the list.
+        for ( auto & mrank : tmpList )
+        {
+            for ( uint8_t s = 0; s < numSlaveRanks; s++ )
+            {
+                // Note that the ranks are getting inserted in order so no need
+                // to sort later.
+                o_ranks.push_back( MemRank(mrank.getMaster(), s) );
+            }
+        }
+    }
+
+    PRDF_ASSERT( !o_ranks.empty() ); // target configured with no ranks
+}
+
+template<>
+void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
+                              std::vector<MemRank> & o_ranks,
+                              uint8_t i_ds );
+
+template<>
+void getSlaveRanks<TYPE_MBA>( TargetHandle_t i_trgt,
+                              std::vector<MemRank> & o_ranks,
+                              uint8_t i_ds );
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
+                                    uint8_t i_pos, uint8_t i_ds )
+{
+    #define PRDF_FUNC "[__getNumMasterRanksPerDimm] "
+
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( T == getTargetType(i_trgt) );
+    PRDF_ASSERT( i_pos < 2 );
+    PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
+
+    ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
+    if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
+    {
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM> "
+                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
+    }
+
+    return attr[i_pos][i_ds];
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint8_t getNumMasterRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt,
+                                            uint8_t i_ds )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+
+    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
+    //       the position of the MCA relative to the MCS.
+    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
+    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
+
+    return __getNumMasterRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
+}
+
+template<>
+uint8_t getNumMasterRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt,
+                                            uint8_t i_ds )
+{
+    // NOTE: DIMMs must be plugged into pairs. So the values for each port
+    //       select will be the same for each DIMM select. There is no need to
+    //       iterate on both port selects.
+    return __getNumMasterRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
+                              uint8_t i_pos, uint8_t i_ds )
+{
+    #define PRDF_FUNC "[__getNumRanksPerDimm] "
+
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( T == getTargetType(i_trgt) );
+    PRDF_ASSERT( i_pos < 2 );
+    PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
+
+    ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
+    if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
+    {
+        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM> "
+                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+        PRDF_ASSERT( false ); // attribute does not exist for target
+    }
+
+    return attr[i_pos][i_ds];
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint8_t getNumRanksPerDimm<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_ds )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MCA == getTargetType(i_trgt) );
+
+    // NOTE: The attribute lives on the MCS. So need to get the MCS target and
+    //       the position of the MCA relative to the MCS.
+    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
+    uint8_t relPos = getTargetPosition(i_trgt) % MAX_MCA_PER_MCS;
+
+    return __getNumRanksPerDimm<TYPE_MCS>( mcsTrgt, relPos, i_ds );
+}
+
+template<>
+uint8_t getNumRanksPerDimm<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_ds )
+{
+    // NOTE: DIMMs must be plugged into pairs. So the values for each port
+    //       select will be the same for each DIMM select. There is no need to
+    //       iterate on both port selects.
+    return __getNumRanksPerDimm<TYPE_MBA>( i_trgt, 0, i_ds );
 }
 
 //##############################################################################
