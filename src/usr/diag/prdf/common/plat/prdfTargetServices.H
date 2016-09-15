@@ -364,37 +364,56 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
                        uint8_t & o_colNum );
 
 /**
- * @brief   Obtains number of ranks (including slave ranks) per DIMM select.
- * @param   i_mbaTarget MBA target.
- * @param   i_ds        DIMM select for DIMM.
- * @return  Number of ranks confgured per DIMM select. If internal function
- *          fails it will return 0.
- */
-uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
-
-/**
- * @brief   Obtains number of MASTER ranks per DIMM select.
- * @param   i_mbaTarget MBA target.
- * @param   i_ds        DIMM select for DIMM.
- * @return  Number of MASTER ranks confgured per DIMM select. If internal function
- *          fails it will return 0.
- */
-uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
-                               uint8_t i_ds );
-
-/**
- * @brief  Returns a list of configured master ranks for an MCA or MBA.
+ * @brief  Returns a sorted list of configured master ranks for an MCA or MBA.
  * @param  i_trgt  MCA or MBA target.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
  *                 return the list for all DIMM selects.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note   Will assert if the list is empty because the target should not be
+ *         configured with no memory.
  */
 template<TARGETING::TYPE T>
 void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
                      std::vector<MemRank> & o_ranks,
                      uint8_t i_ds = MAX_DIMM_PER_PORT );
+
+/**
+ * @brief  Returns a sorted list of configured slave ranks for an MCA or MBA.
+ * @param  i_trgt  MCA or MBA target.
+ * @param  o_ranks The returned list.
+ * @param  i_ds    When used, this function will only return the list of ranks
+ *                 for the target DIMM select. Otherwise, the default is to
+ *                 return the list for all DIMM selects.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note   Will assert if the list is empty because the target should not be
+ *         configured with no memory.
+ */
+template<TARGETING::TYPE T>
+void getSlaveRanks( TARGETING::TargetHandle_t i_trgt,
+                    std::vector<MemRank> & o_ranks,
+                    uint8_t i_ds = MAX_DIMM_PER_PORT );
+
+/**
+ * @brief  Obtains the number of master ranks per DIMM select.
+ * @param  i_trgt MCA or MBA target.
+ * @param  i_ds   DIMM select.
+ * @return Total number of master ranks configured per DIMM select.
+ */
+template<TARGETING::TYPE T>
+uint8_t getNumMasterRanksPerDimm( TARGETING::TargetHandle_t i_trgt,
+                                  uint8_t i_ds );
+
+/**
+ * @brief  Obtains the total number of ranks (including slave ranks) per DIMM
+ *         select.
+ * @param  i_trgt MCA or MBA target.
+ * @param  i_ds   DIMM select.
+ * @return Total number of ranks configured per DIMM select.
+ */
+template<TARGETING::TYPE T>
+uint8_t getNumRanksPerDimm( TARGETING::TargetHandle_t i_trgt, uint8_t i_ds );
 
 //##############################################################################
 //##
