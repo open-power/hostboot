@@ -128,10 +128,10 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
             RETRAIN_PERCAL_SW = MCA_DDRPHY_PC_CONFIG1_P0_RETRAIN_PERCAL_SW,
 
 
-            // PC Config0 Protocol has been re-purposed for PDA enable.
-            // repurposed to pda_enable_override, so zero per John Bialas 4/16 JJM
-            PDA_ENABLE = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL,
-            PDA_ENABLE_LEN = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN,
+//            // PC Config0 Protocol has been re-purposed for PDA enable.
+//            // repurposed to pda_enable_override, so zero per John Bialas 4/16 JJM
+//            PDA_ENABLE = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL,
+//            PDA_ENABLE_LEN = MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN,
 
             DATA_MUX4_1MODE = MCA_DDRPHY_PC_CONFIG0_P0_DATA_MUX4_1MODE,
             DDR4_CMD_SIG_REDUCTION = MCA_DDRPHY_PC_CONFIG0_P0_DDR4_CMD_SIG_REDUCTION,
