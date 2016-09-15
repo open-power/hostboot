@@ -622,4 +622,13 @@
   <persistRuntime/>
 </attribute>
 
+<attribute>
+  <id>ATTR_SBE_SYS_CONFIG</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>System Configurtion information - 1 indicates a chip present</description>
+  <valueType>uint64</valueType>
+  <platInit/>
+</attribute>
+
+
 </attributes>
