@@ -65,7 +65,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
-    uint64_t l_masterCoreID = PIR_t::coreFromPir(task_getcpuid());
+    //track master group/chip/core (no threads)
+    uint64_t l_masterPIR_wo_thread = PIR_t(task_getcpuid()).word &
+                                     ~PIR_t::THREAD_MASK;
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
@@ -102,7 +104,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "pir for this core is: %lx", pir);
 
-        if (pir != l_masterCoreID)
+        //If not the master core, skip
+        if ((pir & ~PIR_t::THREAD_MASK) != l_masterPIR_wo_thread)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "call_host_activate_slave_cores: Waking %x.",
