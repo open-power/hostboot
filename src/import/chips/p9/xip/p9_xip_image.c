@@ -2165,22 +2165,6 @@ p9_xip_get_item(const P9XipItem* i_item, uint64_t* o_data, uint32_t i_index)
 }
 
 int
-p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
-{
-    int rc;
-    P9XipItem item;
-
-    rc = p9_xip_find(i_image, i_id, &item);
-
-    if (!rc)
-    {
-        rc = p9_xip_get_item(&item, o_data, 0);
-    }
-
-    return rc;
-}
-
-int
 p9_xip_get_element(void* i_image,
                    const char* i_id,
                    const uint32_t i_index,
@@ -2199,6 +2183,12 @@ p9_xip_get_element(void* i_image,
     return p9_xip_get_item(&item, o_data, i_index);
 }
 
+
+int
+p9_xip_get_scalar(void* i_image, const char* i_id, uint64_t* o_data)
+{
+    return p9_xip_get_element(i_image, i_id, 0, o_data);
+}
 
 int
 p9_xip_get_string(void* i_image, const char* i_id, char** o_data)
