@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,8 @@
     #include    <occ/occ_common.H>
 #endif
 
+#include <config.h>
+
 namespace   EDI_EI_INITIALIZATION
 {
 
@@ -117,6 +119,15 @@ void*    call_fabric_erepair( void    *io_pArgs )
     TARGETING::Target* l_sys = NULL;
     targetService().getTopLevelTarget(l_sys);
     assert( l_sys != NULL, "call_fabric_erepair: sys target is NULL" );
+
+    // Updating nest frequencies before the SMP is configured is explicitly
+    // disabled when secureboot is compiled in.  Due to hardware security
+    // constraints, it's not possible to update non-master processor secured
+    // SEEPROMS when hardware security is turned on (via jumper setting).
+    // While it would technically be possible to do this when hardware security
+    // is turned off, it is not supported to prevent giving a false sense of
+    // security that it will work when hardware security is on.
+    #ifndef CONFIG_SECUREBOOT
     MRW_NEST_CAPABLE_FREQUENCIES_SYS l_mrw_nest_capable;
     l_mrw_nest_capable =
                l_sys->getAttr<ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
@@ -136,8 +147,8 @@ void*    call_fabric_erepair( void    *io_pArgs )
             errlCommit( l_errl, HWPF_COMP_ID );
             break;
         }
-
     }
+    #endif
 
     std::vector<uint8_t> l_endp1_txFaillanes;
     std::vector<uint8_t> l_endp1_rxFaillanes;
