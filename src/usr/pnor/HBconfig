@@ -1,18 +1,24 @@
 config SFC_IS_IBM_DPSS
     default n
-    depends on !SFC_IS_AST2400 && !SFC_IS_FAKE
+    depends on !SFC_IS_AST2400 && !SFC_IS_FAKE && !SFC_IS_AST2500
     help
         The Serial Flash Controller is the IBM DPSS FPGA.
 
 config SFC_IS_AST2400
     default y
-    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2500
     help
         The Serial Flash Controller is the AST2400 BMC.
 
+config SFC_IS_AST2500
+    default n
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE && !SFC_IS_AST2400
+    help
+        The Serial Flash Controller is the AST2500 BMC.
+
 config SFC_IS_FAKE
     default n
-    depends on !SFC_IS_IBM_DPSS && !SFC_IS_AST2400
+    depends on !SFC_IS_IBM_DPSS && !SFC_IS_AST2400 && !SFC_IS_AST2500
     help
         The Serial Flash Controller is emulated using memory.
 

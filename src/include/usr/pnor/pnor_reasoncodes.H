@@ -77,12 +77,12 @@ namespace PNOR
         MOD_SFCFAKE_ERASEFLASH          = 0x63, /**< SfcFake::eraseFlash */
         MOD_SFCFAKE_SENDSPICMD          = 0x64, /**< SfcFake::sendSpiCmd */
 
-        // sfc_ast2400.C
-        MOD_SFCAST2400_ENABLEWRITEMODE  = 0x80, /**< SfcAST2400::verifyAddressRange */
-        MOD_SFCAST2400_READFLASH        = 0x81, /**< SfcAST2400::readFlash */
-        MOD_SFCAST2400_WRITEFLASH       = 0x82, /**< SfcAST2400::writeFlash */
-        MOD_SFCAST2400_POLLOPCOMPLETE   = 0x83, /**< SfcAST2400::pollSfcOpComplete */
-        MOD_SFCAST2400_ERASEFLASH       = 0x84, /**< SfcAST2400::eraseFlash */
+        // sfc_ast2X00.C
+        MOD_SFCAST2X00_ENABLEWRITEMODE  = 0x80, /**< SfcAST2X00::verifyAddressRange */
+        MOD_SFCAST2X00_READFLASH        = 0x81, /**< SfcAST2X00::readFlash */
+        MOD_SFCAST2X00_WRITEFLASH       = 0x82, /**< SfcAST2X00::writeFlash */
+        MOD_SFCAST2X00_POLLOPCOMPLETE   = 0x83, /**< SfcAST2X00::pollSfcOpComplete */
+        MOD_SFCAST2X00_ERASEFLASH       = 0x84, /**< SfcAST2X00::eraseFlash */
 
         // nor_micron.C
         MOD_NORMICRON_MICRONFLAGSTATUS  = 0xA0, /**< micronFlagStatus */

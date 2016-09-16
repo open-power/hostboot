@@ -37,12 +37,14 @@ OBJS += sfcdd.o
 
 #SFC Implementations
 OBJS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibm.o)
+OBJS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2X00.o)
+OBJS += $(if $(CONFIG_SFC_IS_AST2500),sfc_ast2X00.o)
 OBJS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400.o)
+OBJS += $(if $(CONFIG_SFC_IS_AST2500),sfc_ast2500.o)
 OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 
 #NOR Implementations
 OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
-
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

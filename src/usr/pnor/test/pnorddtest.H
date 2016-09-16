@@ -133,8 +133,8 @@ class PnorDdTest : public CxxTest::TestSuite
                 break;
             }
 
-           // Perform PnorDD read 1
-           uint64_t l_address =
+            // Perform PnorDD read 1
+            uint64_t l_address =
                       base_address + PNOR::pnorTestSec_readwrite_offset;
             uint64_t l_readData = 0;
             l_size = sizeof(uint64_t);
