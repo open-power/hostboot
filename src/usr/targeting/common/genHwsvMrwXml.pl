@@ -2785,10 +2785,10 @@ sub generate_sys
     print "    <attribute>
       <id>MEMVPD_FREQS_MHZ</id>
       <default>
-        1866,
         2133,
         2400,
-        2667,
+        0,
+        0
       </default>
     </attribute>\n";
 
