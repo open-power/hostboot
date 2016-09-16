@@ -417,11 +417,10 @@
   <id>ATTR_PG</id>
   <targetType>TARGET_TYPE_PERV</targetType>
   <description>
-      Chiplet Partial good info attribute. Provided by Ring scans.
+      Chiplet Partial good info attribute
       This should be a direct copy of the data from the PG keyword of VPD.
-      (Note : the 16-bit vpd data is right-justified into attribute)
   </description>
-  <valueType>uint32</valueType>
+  <valueType>uint16</valueType>
   <platInit/>
 </attribute>
 

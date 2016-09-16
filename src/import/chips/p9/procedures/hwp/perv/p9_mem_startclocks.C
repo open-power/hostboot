@@ -175,7 +175,7 @@ static fapi2::ReturnCode p9_mem_startclocks_cplt_ctrl_action_function(
     FAPI_DBG("Entering ...");
 
     // Local variable and constant definition
-    fapi2::buffer <uint32_t> l_attr_pg;
+    fapi2::buffer <uint16_t> l_attr_pg;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, i_target_chiplet, l_attr_pg));
 
@@ -185,29 +185,29 @@ static fapi2::ReturnCode p9_mem_startclocks_cplt_ctrl_action_function(
     //Setting CPLT_CTRL1 register value
     l_data64.flush<0>();
     //CPLT_CTRL1.TC_VITL_REGION_FENCE = l_attr_pg.getBit<19>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_VITL_REGION_FENCE>(l_attr_pg.getBit<19>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_TC_VITL_REGION_FENCE>(l_attr_pg.getBit<3>());
     //CPLT_CTRL1.TC_PERV_REGION_FENCE = l_attr_pg.getBit<20>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_PERV_REGION_FENCE>(l_attr_pg.getBit<20>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_TC_PERV_REGION_FENCE>(l_attr_pg.getBit<4>());
     //CPLT_CTRL1.TC_REGION1_FENCE = l_attr_pg.getBit<21>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION1_FENCE>(l_attr_pg.getBit<21>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION1_FENCE>(l_attr_pg.getBit<5>());
     //CPLT_CTRL1.TC_REGION2_FENCE = l_attr_pg.getBit<22>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION2_FENCE>(l_attr_pg.getBit<22>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_TC_REGION2_FENCE>(l_attr_pg.getBit<6>());
     //CPLT_CTRL1.TC_REGION3_FENCE = l_attr_pg.getBit<23>()
-    l_data64.writeBit<PERV_1_CPLT_CTRL1_TC_REGION3_FENCE>(l_attr_pg.getBit<23>());
+    l_data64.writeBit<PERV_1_CPLT_CTRL1_TC_REGION3_FENCE>(l_attr_pg.getBit<7>());
     //CPLT_CTRL1.TC_REGION4_FENCE = l_attr_pg.getBit<24>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION4_FENCE>(l_attr_pg.getBit<24>());
+    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION4_FENCE>(l_attr_pg.getBit<8>());
     //CPLT_CTRL1.TC_REGION5_FENCE = l_attr_pg.getBit<25>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION5_FENCE>(l_attr_pg.getBit<25>());
+    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION5_FENCE>(l_attr_pg.getBit<9>());
     //CPLT_CTRL1.TC_REGION6_FENCE = l_attr_pg.getBit<26>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION6_FENCE>(l_attr_pg.getBit<26>());
+    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION6_FENCE>(l_attr_pg.getBit<10>());
     //CPLT_CTRL1.TC_REGION7_FENCE = l_attr_pg.getBit<27>()
-    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION7_FENCE>(l_attr_pg.getBit<27>());
+    l_data64.writeBit<EQ_CPLT_CTRL1_TC_REGION7_FENCE>(l_attr_pg.getBit<11>());
     //CPLT_CTRL1.UNUSED_12B = l_attr_pg.getBit<28>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_12B>(l_attr_pg.getBit<28>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_12B>(l_attr_pg.getBit<12>());
     //CPLT_CTRL1.UNUSED_13B = l_attr_pg.getBit<29>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_13B>(l_attr_pg.getBit<29>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_13B>(l_attr_pg.getBit<13>());
     //CPLT_CTRL1.UNUSED_14B = l_attr_pg.getBit<30>()
-    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_14B>(l_attr_pg.getBit<30>());
+    l_data64.writeBit<PEC_CPLT_CTRL1_UNUSED_14B>(l_attr_pg.getBit<14>());
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL1_CLEAR, l_data64));
 
     FAPI_INF("reset abistclk_muxsel and syncclk_muxsel");
