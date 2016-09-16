@@ -77,6 +77,9 @@ extern "C"
     {
         const uint8_t MAX_MCD_DIRS = 2; //Max of 2 MCD Directories (even and odd)
         fapi2::buffer<uint64_t> fsi_data[MAX_MCD_DIRS];
+        fapi2::buffer<uint64_t> w_data(0x00030001);
+        fapi2::buffer<uint64_t> r_data;
+        const uint64_t C_INT_VC_VSD_TABLE_DATA(0x5013202);
         const uint64_t ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[MAX_MCD_DIRS] =
         {
             PU_BANK0_MCD_REC, //MCD even recovery control register address
@@ -87,6 +90,23 @@ extern "C"
             "Even", //Ptr to char string "Even" for even MCD
             "Odd"   //Ptr to char string "Odd" for odd MCD
         };
+
+
+        // HW386071:  INT unit has a defect that might result in fake ecc errors.  Have to do these four writes and reads to scom registers
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
+                 "putScom error selecting address 1");
+
+        FAPI_TRY(fapi2::getScom(i_target, C_INT_VC_VSD_TABLE_DATA, r_data),
+                 "getScom error reading from address 1");
+
+        w_data.clearBit<63>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
+                 "putScom error selecting address 0");
+
+        w_data.flush<0>();
+        FAPI_TRY(fapi2::putScom(i_target, C_INT_VC_VSD_TABLE_DATA, w_data),
+                 "putScom error writing to address 0");
+        // HW386071
 
         //Verify MCD recovery was previously disabled for even and odd slices
         //If not, this is an error condition
