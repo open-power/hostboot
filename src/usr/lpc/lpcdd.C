@@ -714,7 +714,8 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
-#if CONFIG_SFC_IS_AST2400  //TODO CQ:SW328950 to work around Simics AST2400 bug
+//TODO CQ:SW328950 to work around Simics AST2400 bug
+#if CONFIG_SFC_IS_AST2400 || CONFIG_SFC_IS_AST2500
         if( io_buflen <= sizeof(uint32_t) )
         {
             memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
@@ -790,7 +791,8 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
-#if CONFIG_SFC_IS_AST2400  //TODO CQ:SW328950 to work around Simics AST2400 bug
+//TODO CQ:SW328950 to work around Simics AST2400 bug
+#if CONFIG_SFC_IS_AST2400 || CONFIG_SFC_IS_AST2500
         memcpy(reinterpret_cast<void*>(l_addr), i_buffer, io_buflen);
 #else
         if( io_buflen == sizeof(uint8_t) )

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <targeting/common/targetservice.H>
 #include <errl/errlentry.H>
 #include "sfcdd.H"
+#include "sfc_ast2X00.H"
 #include <config.h>
 
 /** @file sfc_ast2400.H
@@ -42,10 +43,11 @@
  *    Provides the logic to access and configure the
  *    AST2400 BMC in order to access the PNOR
  */
-class SfcAST2400 : public SfcDD
+class SfcAST2400 : public SfcAST2X00
 {
 
   public: //SfcDD methods
+
     /**
      * @brief Initialize the SFC Hardware
      *
@@ -54,66 +56,13 @@ class SfcAST2400 : public SfcDD
     virtual errlHndl_t hwInit();
 
     /**
-     * @brief Read data from the PNOR flash
+     * @brief Enter/exit command mode
      *
-     * @parm i_addr  PNOR flash Address to read
-     * @parm i_size  Amount of data to read, in bytes.
-     * @parm o_data  Buffer to read data into
+     * @param[in] i_enter: true=enter cmd mode, false=exit cmd mode
      *
      * @return Error from operation
      */
-    virtual errlHndl_t readFlash(uint32_t i_addr,
-                                 size_t i_size,
-                                 void* o_data);
-
-    /**
-     * @brief Write data to the PNOR flash
-     *
-     * @parm i_addr  PNOR flash Address to write
-     * @parm i_size  Amount of data to write, in bytes.
-     * @parm i_data  Buffer containing data to write
-     *
-     * @return Error from operation
-     */
-    virtual errlHndl_t writeFlash(uint32_t i_addr,
-                                  size_t i_size,
-                                  void* i_data);
-
-    /**
-     * @brief Erase a block of flash
-     *
-     * @parm i_address  Offset into flash to erase, aligned to erase block
-     *
-     * @return Error from operation
-     */
-    virtual errlHndl_t eraseFlash(uint32_t i_address);
-
-
-    /**
-     * @brief Send a SPI command
-     *
-     * @parm[in] i_opCode: command to send into controller first
-     * @parm[in] i_address: address for those commands that need it
-     * @parm[in] i_writeCnt: number of bytes to write to device
-     * @parm[in] i_writeData: write data buffer
-     * @parm[in] i_readCnt: number of bytes to read from device
-     * @parm[out] o_readData: read data buffer
-     *
-     * @return Error from operation
-     */
-    virtual errlHndl_t sendSpiCmd( uint8_t i_opCode,
-                                   uint32_t i_address,
-                                   size_t i_writeCnt,
-                                   const uint8_t* i_writeData,
-                                   size_t i_readCnt,
-                                   uint8_t* o_readData );
-
-    /**
-     * @brief Add error registers to an existing Error Log
-     *
-     * @param[in] io_errhdl: Error log to add data to
-     */
-    virtual void addFFDC( errlHndl_t& io_errhdl );
+    virtual errlHndl_t commandMode( bool i_enter );
 
   public:
     /**
@@ -136,39 +85,6 @@ class SfcAST2400 : public SfcDD
         MISCCTLREG_10  = 0x10,
         READTIMEREG_14 = 0x14
     };
-
-    /**
-     * @brief Enable write mode
-     *
-     * @return Error from operation
-     */
-    errlHndl_t enableWriteMode( void );
-
-    /**
-     * @brief Enter/exit command mode
-     *
-     * @param[in] i_enter: true=enter cmd mode, false=exit cmd mode
-     *
-     * @return Error from operation
-     */
-    errlHndl_t commandMode( bool i_enter );
-
-    /**
-     * @brief Poll for completion of SPI operation
-     *
-     * @return Error from operation
-     */
-    errlHndl_t pollOpComplete( void );
-
-    /**
-     * @brief Prepare the iLPC2AHB address regs
-     *
-     * @param[in] i_addr: LPC address to access
-     *
-     * @return Error from operation
-     */
-    errlHndl_t setupAddrLPC2AHB( uint32_t i_addr );
-
 
     /**
      * @brief SPI0 Configuration Register
@@ -216,32 +132,6 @@ class SfcAST2400 : public SfcDD
      * @brief Default value of SPI04 (saves a read)
      */
     SpiControlReg04_t iv_ctlRegDefault;
-
-
-    /** @brief General Constants */
-    enum
-    {
-        /**< Offset to SPI Controller Register Space */
-        LPC_SFC_CTLR_BASE   = 0x1E789000,
-
-        /**< AHB address of SPI Flash controller */
-        SPIC_BASE_ADDR_AHB = 0x1E630000,
-
-        /**< AHB address of flash  */
-        FLASH_BASE_ADDR_AHB = 0x30000000,
-
-        /**< AHB address of LPC registers */
-        LPC_CTLR_BASE_ADDR_AHB = 0x1E789000,
-
-        /**< Maximum time to wait for a write/erase */
-        MAX_WRITE_TIME_NS = NS_PER_SEC,
-
-        /**< SuperIO Address Cycle */
-        SIO_ADDR_2E = 0x2E,
-
-        /**< SuperIO Data Cycle */
-        SIO_DATA_2F = 0x2F,
-    };
 
     friend class SfcAST2400Test;
 };

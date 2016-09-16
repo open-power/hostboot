@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pnor/sfc_ast2400.C $                                  */
+/* $Source: src/usr/pnor/sfc_ast2500.C $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +40,7 @@
 #include <sys/time.h>
 #include <errl/hberrltypes.H>
 #include <lpc/lpcif.H>
-#include "sfc_ast2400.H"
+#include "sfc_ast2500.H"
 #include "norflash.H"
 #include "sfc_ast2X00.H"
 #include <util/align.H>
@@ -69,8 +68,8 @@ errlHndl_t create_SfcDD( SfcDD*& o_sfc,
                          TARGETING::Target* i_proc )
 {
     errlHndl_t l_err = NULL;
-    TRACFCOMP( g_trac_pnor, "Creating SfcAST2400 object" );
-    o_sfc = new SfcAST2400( l_err, i_proc );
+    TRACFCOMP( g_trac_pnor, "Creating SfcAST2500 object" );
+    o_sfc = new SfcAST2500( l_err, i_proc );
     return l_err;
 }
 
@@ -79,18 +78,18 @@ errlHndl_t create_SfcDD( SfcDD*& o_sfc,
 /**
  * @brief Constructor
  */
-SfcAST2400::SfcAST2400( errlHndl_t& o_err,
+SfcAST2500::SfcAST2500( errlHndl_t& o_err,
                         TARGETING::Target* i_proc )
-: SfcAST2X00(o_err, i_proc)
+: SfcAST2X00(o_err,i_proc)
 {
 }
 
 /**
  * @brief Initialize and configure the SFC hardware
  */
-errlHndl_t SfcAST2400::hwInit( )
+errlHndl_t SfcAST2500::hwInit( )
 {
-    TRACFCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::hwInit>" );
+    TRACFCOMP( g_trac_pnor, ENTER_MRK"SfcAST2500::hwInit>" );
     errlHndl_t l_err = NULL;
     uint32_t l_lpc_addr;
     do
@@ -104,50 +103,101 @@ errlHndl_t SfcAST2400::hwInit( )
                           l_len,
                           DEVICE_SIO_ADDRESS(SIO::iLPC2AHB,0x30));
         if(l_err) { break; }
-        //** Setup the SPI Controller
 
-        /* Enable writing to the controller */
-        SpiControlReg04_t ctlreg;
-        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
-        l_err = ahbSioReadWrapper(ctlreg.data32, l_lpc_addr);
+        /* ----- Setup the SPI Controller ----- */
+
+        /* Enable write command mode to CE0 */
+        SpiCE0ControlReg10_t l_ctlregCE0;
+        l_lpc_addr = CE0_CTRLREG_10 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioReadWrapper(l_ctlregCE0.data32, l_lpc_addr);
         if( l_err ) { break; }
 
-        ctlreg.cmdMode = 0b10; //10:Normal Write (CMD + Address + Write data)
-        l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
+        l_ctlregCE0.cmdMode=0b10; //10:Normal Write (CMD + Address + Write data)
+        l_err = ahbSioWriteWrapper(l_ctlregCE0.data32, l_lpc_addr);
         if( l_err ) { break; }
 
+/* @TODO RTC:162680
+        // Enable write command mode to CE1
+        SpiCE1ControlReg14_t l_ctlregCE1;
+        l_lpc_addr = CE1_CTRLREG_14 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioReadWrapper(l_ctlregCE1.data32, l_lpc_addr);
+        if( l_err ) { break; }
+
+        l_ctlregCE1.cmdMode=0b10; //10:Normal Write (CMD + Address + Write data)
+        l_err = ahbSioWriteWrapper(l_ctlregCE1.data32, l_lpc_addr);
+        if( l_err ) { break; }
+**/
+
+        /* Enable writing to CE0 and CE1 */
         SpiConfigReg00_t confreg;
         l_lpc_addr = CONFREG_00 | SPIC_BASE_ADDR_AHB;
         l_err = ahbSioReadWrapper(confreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
-        confreg.inactiveX2mode = 1; //Enable CE# Inactive pulse width X2 mode
-        confreg.enableWrite = 1; //Enable flash memory write
+        confreg.enableCE0Write = 1; //Enable flash memory write for CE0
+        //@TODO RTC:162680 - confreg.enableCE1Write = 1;
         l_err = ahbSioWriteWrapper(confreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
+        /*
+         * Setup base CE Control reg for our use, four byte mode for address
+         * selection and setting 2x clock cycles
+         */
+        SpiCEControlReg04_t l_ceCtrlReg;
+        l_lpc_addr = CE_CTLREG_04 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioReadWrapper(confreg.data32, l_lpc_addr);
+        if( l_err ) { break; }
+
+        l_ceCtrlReg.enableCE0Div2 = 1; //Enable 2x clock cycles for CE0
+        l_ceCtrlReg.fourByteModeCE0 = 1;
+        /* @TODO RTC:162680
+         * l_ceCtrlReg.enableCE1Div2 = 1; //Enable 2x clock cycles for CE1
+         * l_ceCtrlReg.fourByteModeCE1 = 1;
+         */
+        l_err = ahbSioWriteWrapper(l_ceCtrlReg.data32, l_lpc_addr);
+        if( l_err ) { break; }
 
         /*
-         * Setup control reg and for our use, switching
-         * to 1-bit mode, clearing user mode if set, etc...
+         * Setup control regs for CE0 + CE1 for our use, switching
+         * to 1-bit mode (ioMode == 0b00), clearing user mode if
+         * set (cmdMode == 0b00)
+         * etc...
          *
          * Also configure SPI clock to something safe
          * like HCLK/8 (24Mhz)
          */
-        ctlreg.fourByteMode = 1;
-        ctlreg.ioMode = 0b00; //single bit or controlled by bit[3]
-        ctlreg.pulseWidth = 0x0; //0000: 16T (1T = 1 HCLK clock)
-        ctlreg.cmdData = 0x00;
-        ctlreg.spiClkFreq = 0x4; //HCLK/8
-        ctlreg.dummyCycleRead1 = 0; //no dummy cycles
-        ctlreg.dummyCycleRead2 = 0b00; //no dummy cycles
-        ctlreg.cmdMode = 0b00; //00:Normal Read (03h + Address + Read data)
-        iv_ctlRegDefault = ctlreg;  // Default setup is regular read mode
+        l_ctlregCE0.ioMode = 0b00; //single bit or controlled by bit[3]
+        l_ctlregCE0.pulseWidth = 0x0; //0000: 16T (1T = 1 HCLK clock)
+        l_ctlregCE0.cmdData = 0x00;
+        l_ctlregCE0.spiClkFreq = 0x4; //HCLK/8
+        l_ctlregCE0.dummyCycleRead1 = 0; //no dummy cycles
+        l_ctlregCE0.dummyCycleRead2 = 0b00; //no dummy cycles
+        l_ctlregCE0.cmdMode = 0b00; //00:Normal Read (03h + Address + Read data)
 
-        // Configure for read
-        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
-        l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
+        /* @TODO RTC:162680
+        l_ctlregCE1.ioMode = 0b00; //single bit or controlled by bit[3]
+        l_ctlregCE1.pulseWidth = 0x0; //0000: 16T (1T = 1 HCLK clock)
+        l_ctlregCE1.cmdData = 0x00;
+        l_ctlregCE1.spiClkFreq = 0x4; //HCLK/8
+        l_ctlregCE1.dummyCycleRead1 = 0; //no dummy cycles
+        l_ctlregCE1.dummyCycleRead2 = 0b00; //no dummy cycles
+        l_ctlregCE1.cmdMode = 0b00; //00:Normal Read (03h + Address + Read data)
+        **/
+
+        iv_ctlRegCE0Default = l_ctlregCE0; // Default setup is regular read mode
+        // @TODO RTC:162680 iv_ctlRegCE1Default = l_ctlregCE1;
+
+        // Configure CE0 for read
+        l_lpc_addr = CE0_CTRLREG_10 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioWriteWrapper(l_ctlregCE0.data32, l_lpc_addr);
         if( l_err ) { break; }
+
+        /*  @TODO RTC:162680
+        // Configure CE1 for read
+        l_lpc_addr = CE1_CTRLREG_14 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioWriteWrapper(l_ctlregCE1.data32, l_lpc_addr);
+        if( l_err ) { break; }
+        **/
 
         // Figure out what flash chip we have
         uint32_t chipid = 0;
@@ -158,18 +208,18 @@ errlHndl_t SfcAST2400::hwInit( )
 
     } while(0);
 
-    TRACFCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::hwInit> err=%.8X", ERRL_GETEID_SAFE(l_err) );
+    TRACFCOMP( g_trac_pnor, EXIT_MRK"SfcAST2500::hwInit> err=%.8X", ERRL_GETEID_SAFE(l_err) );
     return l_err;
 }
 
 /**
  * @brief Enter/exit command mode
  */
-errlHndl_t SfcAST2400::commandMode( bool i_enter )
+errlHndl_t SfcAST2500::commandMode( bool i_enter )
 {
     errlHndl_t l_err = NULL;
     uint32_t l_lpc_addr;
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::commandMode(%d)", i_enter );
+    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2500::commandMode(%d)", i_enter );
 
     /*
      * There is only a limited addressable window within LPC space.  The AST
@@ -185,12 +235,14 @@ errlHndl_t SfcAST2400::commandMode( bool i_enter )
      */
 
     do {
-        SpiControlReg04_t ctlreg = iv_ctlRegDefault;
+        //@TODO RTC:162680 - Does this path also need to enable
+        //  the CE1 control reg (0x14)
+        SpiCE0ControlReg10_t ctlreg = iv_ctlRegCE0Default;
 
         // Switch to user mode, CE# dropped
         ctlreg.stopActiveCtl = 1;
         ctlreg.cmdMode = 0b11; //User Mode (Read/Write Data)
-        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
+        l_lpc_addr = CE0_CTRLREG_10 | SPIC_BASE_ADDR_AHB;
         l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
@@ -204,11 +256,12 @@ errlHndl_t SfcAST2400::commandMode( bool i_enter )
         else //ast_sf_end_cmd
         {
             // Switch back to read mode
-            l_err = ahbSioWriteWrapper(iv_ctlRegDefault.data32, l_lpc_addr);
+            l_err = ahbSioWriteWrapper(iv_ctlRegCE0Default.data32, l_lpc_addr);
             if( l_err ) { break; }
         }
+
     } while(0);
 
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::commandMode> err=%.8X", ERRL_GETEID_SAFE(l_err) );
+    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2500::commandMode> err=%.8X", ERRL_GETEID_SAFE(l_err) );
     return l_err;
 }
