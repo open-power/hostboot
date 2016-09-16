@@ -167,6 +167,7 @@ p9_query_stop_state(
     uint32_t l_quadStopLevel = 0;
     uint32_t l_exPos = 0;
     uint32_t l_coreStopLevel[2] = {0, 0};
+    uint8_t  l_data8;
 
     stop_attrs_t  l_stop_attrs = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Initialize all fields to 1
     hw_state_t l_clk_pfet = {0, 0, {0, 0}, {0, 0}, 0, 0, {0, 0}}; // Initialize all fields to 0
@@ -346,8 +347,12 @@ p9_query_stop_state(
     FAPI_TRY(fapi2::getScom(l_eq_target, EQ_CLOCK_STAT_SL,  l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
 
 
-    l_data64.extractToRight<uint8_t>(l_clk_pfet.l2_hasclocks, eq_clk_l2_pos[l_exPos], 1);
-    l_data64.extractToRight<uint8_t>(l_clk_pfet.l3_hasclocks, eq_clk_l3_pos[l_exPos], 1);
+    l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l2_pos[l_exPos], 1);
+    l_clk_pfet.l2_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+
+    l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l3_pos[l_exPos], 1);
+    l_clk_pfet.l3_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+
 
     for (auto l_core_chplt : l_coreChiplets)
     {
@@ -362,9 +367,11 @@ p9_query_stop_state(
 
         FAPI_TRY(fapi2::getScom(l_core_chplt, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
 
-        l_data64.extractToRight<uint8_t>(l_clk_pfet.c_exec_hasclocks[l_pos], 6, 1);
-        l_data64.extractToRight<uint8_t>(l_clk_pfet.c_pc_hasclocks[l_pos],   5, 1);
+        l_data64.extractToRight<uint8_t>(l_data8, 6, 1);
+        l_clk_pfet.c_exec_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
 
+        l_data64.extractToRight<uint8_t>(l_data8, 5, 1);
+        l_clk_pfet.c_pc_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
     }
 
     FAPI_DBG("Comparing Stop State vs Actual HW settings");
