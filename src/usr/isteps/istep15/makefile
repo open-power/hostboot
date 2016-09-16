@@ -58,13 +58,9 @@ include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_hcode_image_build.mk
 include $(PROCEDURES_PATH)/utils/stopreg/p9_stop_api.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pba_init.mk
-include ${ROOTPATH}/src/import/chips/p9/xip/p9_xip_image.mk
-include ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/p9_tor.mk
-include ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/p9_ring_identification.mk
 include ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/p9_ringId.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
-VPATH += ${ROOTPATH}/src/import/chips/p9/xip/
 VPATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/

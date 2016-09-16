@@ -1611,6 +1611,7 @@ my @I2CHotPlug;
 foreach my $i (@{$i2cBus->{'i2c-device'}})
 {
 
+# @TODO RTC:161049 Should be able to get these values from MRW
     my $dev_addr = $i->{'address'};
     my $max_mem_size = "0x80";
     my $chip_count = "0x02";
@@ -1631,14 +1632,14 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_content_type'=>$i->{'content-type'},
          'i2c_part_id'=>$i->{'part-id'},
          'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
-         'i2c_devAddr'=>$dev_addr,
+         'i2c_devAddr'=>$dev_addr, # @TODO RTC:161049
          'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
          'i2c_speed'=>$i->{'speed'},
          'i2c_size'=>$i->{'size'},
 # @todo RTC 119382 - will eventually read these values from this file
          'i2c_byte_addr_offset'=> "0x02",
-         'i2c_max_mem_size' => $max_mem_size,
-         'i2c_chip_count' => $chip_count,
+         'i2c_max_mem_size' => $max_mem_size, # @TODO RTC:161049
+         'i2c_chip_count' => $chip_count, # @TODO RTC:161049
          'i2c_write_page_size' =>"0x80",
          'i2c_write_cycle_time' => "0x05" };
 
