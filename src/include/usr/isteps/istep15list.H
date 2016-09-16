@@ -133,6 +133,8 @@ const DepModInfo g_istep15Dependancies = {
     {
         DEP_LIB(libistep15.so),
         DEP_LIB(libp9_stop_util.so),
+        DEP_LIB(libpm.so),
+        DEP_LIB(libsbe.so),
         NULL
     }
 };

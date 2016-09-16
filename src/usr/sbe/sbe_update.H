@@ -100,9 +100,8 @@ namespace SBE
     const size_t   HBBL_MAX_SIZE       = 20*KILOBYTE;         // 20KB
     const uint64_t HBBL_END_EYECATCHER = 0x4842424C656E6400;  // 'HBBLend\0'
 
-    // Cacheline Size and Mask
+    // Cacheline Size
     const uint64_t CACHELINE_SIZE = 128;
-    const uint64_t CACHELINE_MASK = CACHELINE_SIZE - 1;
 
     // MVPD SB Keyword contants
     const size_t  MVPD_SB_RECORD_SIZE = 129;
@@ -420,23 +419,23 @@ namespace SBE
      *
      * @param[in] i_target      Target processor to customize
      *
-     * @param[in] i_sbePnorPtr  Pointer to SBE Image in PNOR
-     *                          Expected that this pointer was found with
-     *                          findSBEInPnor() function and is past any
-     *                          image header
+     * @param[in] i_sbeImgPtr   Pointer to SBE Image with HBBL appended
+     *                          Expected that this pointer points to memory
+     *                          where the SBE Image in PNOR was copied and
+     *                          the HBBL Image in PNOR was appended
      *
      * @param[in] i_maxImgSize  Maximum size of customized image
      *
      * @param[out] io_imgPtr    Pointer to SBE image in memory
      *                          Memory from this pointer through
-     *                          i_maxImgSize is expected to be pre-alloacted
+     *                          i_maxImgSize is expected to be pre-allocated
      *
      * @param[out] o_actImgSize  Actual size of the customized image
      *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
-                                   void* i_sbePnorPtr,
+                                   void* i_sbeImgPtr,
                                    size_t i_maxImgSize,
                                    void* io_imgPtr,
                                    size_t& o_actImgSize);
@@ -629,20 +628,6 @@ namespace SBE
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState);
-
-
-    /**
-     * @brief Calculates size for a block of code or data such that the block
-     *        can be aligned on cachelines.
-     *
-     * @param[in]  i_size     Size of block code or data
-     *
-     * @return Size of block adjusted to cacheline boundary
-     */
-    inline size_t setCachelineSize(size_t i_size)
-    {
-        return (i_size + CACHELINE_MASK) & ~(CACHELINE_MASK);
-    }
 
 
     /**

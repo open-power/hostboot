@@ -65,8 +65,8 @@ trace_desc_t* g_trac_eepromr = NULL;
 TRAC_INIT( & g_trac_eepromr, "EEPROMR", KILOBYTE );
 
 // Easy macro replace for unit testing
-#define TRACUCOMP(args...)  TRACFCOMP(args) // @TODO RTC: 138226
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 // ----------------------------------------------
 // Defines
@@ -575,7 +575,7 @@ errlHndl_t eepromRead ( TARGETING::Target * i_target,
                                                        l_pageTwoBuflen,
                                                        i_i2cInfo );
 
-       // Set addressing parameters
+        // Set addressing parameters
         err = eepromPrepareAddress( i_target,
                                     &byteAddr,
                                     byteAddrSize,
@@ -1091,15 +1091,11 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
                 l_originalPage = l_desiredPage;
             }
 
-
-            if(0 == total_bytes_written) { // @TODO RTC:138226
             TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop: %d/%d/0x%X "
                 "writeBuflen=%d, offset=0x%X, bAS=%d, diffs=%d/%d",
                 i_i2cInfo.port, i_i2cInfo.engine, i_i2cInfo.devAddr,
                 l_writeBuflen, i_i2cInfo.offset, byteAddrSize,
                 data_left, diff_wps);
-            } // @TODO RTC:138226
-
 
             // Perform the requested write operation
             err = eepromWriteData( i_target,
@@ -1129,12 +1125,10 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             // Update offset
             i_i2cInfo.offset += l_writeBuflen;
 
-            if(total_bytes_written >= io_buflen) { // @TODO RTC:138226
             TRACUCOMP(g_trac_eeprom,"eepromWrite() Loop End: "
                       "writeBuflen=%d, offset=0x%X, t_b_w=%d, io_buflen=%d",
                       l_writeBuflen, i_i2cInfo.offset,
                       total_bytes_written, io_buflen);
-            } // @TODO RTC:138226
         } // end of write for-loop
 
         // Release mutex lock
