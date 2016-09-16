@@ -179,6 +179,16 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
     // We need to keep trak of current_err ourselves as the FAPI_ASSERT_NOEXIT macro doesn't.
     fapi2::current_err = FAPI2_RC_SUCCESS;
 
+    // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
+    uint8_t l_ignore_plug_rules = 0;
+    FAPI_TRY( mss::ignore_plug_rules(mss::find_target<TARGET_TYPE_MCS>(i_target), l_ignore_plug_rules) );
+
+    if (fapi2::ENUM_ATTR_MSS_IGNORE_PLUG_RULES_YES == l_ignore_plug_rules)
+    {
+        FAPI_INF("attribute set to ignore plug rules");
+        return FAPI2_RC_SUCCESS;
+    }
+
     // If we have one DIMM, make sure it's in slot 0 and we're done.
     if (i_kinds.size() == 1)
     {
@@ -252,6 +262,9 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<TARGET_TYPE_MCA>& i_targ
 
         return fapi2::current_err;
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // close namespace plug_rule
@@ -283,6 +296,16 @@ fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARG
     // the another 45m to find the next DIMM, etc.
     fapi2::ReturnCodes l_rc = FAPI2_RC_SUCCESS;
 
+    // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
+    uint8_t l_ignore_plug_rules = 0;
+    FAPI_TRY( mss::ignore_plug_rules(i_target, l_ignore_plug_rules) );
+
+    if (fapi2::ENUM_ATTR_MSS_IGNORE_PLUG_RULES_YES == l_ignore_plug_rules)
+    {
+        FAPI_INF("attribute set to ignore plug rules");
+        return FAPI2_RC_SUCCESS;
+    }
+
     // We enforce DIMM type mixing per MCS
     l_rc = (plug_rule::dimm_type_mixing(l_dimm_kinds) == FAPI2_RC_SUCCESS) ? l_rc : FAPI2_RC_INVALID_PARAMETER;
 
@@ -293,6 +316,9 @@ fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARG
     }
 
     return l_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -317,6 +343,16 @@ fapi2::ReturnCode eff_config::enforce_plug_rules(const fapi2::Target<fapi2::TARG
     // We'll only use the master rank information to enforce the rank config rules (which will have been
     // decoded and are valid before VPD was asked for.)
     const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
+
+    // The user can avoid plug rules with an attribute. This is handy in partial good scenarios
+    uint8_t l_ignore_plug_rules = 0;
+    FAPI_TRY( mss::ignore_plug_rules(mss::find_target<TARGET_TYPE_MCS>(i_target), l_ignore_plug_rules) );
+
+    if (fapi2::ENUM_ATTR_MSS_IGNORE_PLUG_RULES_YES == l_ignore_plug_rules)
+    {
+        FAPI_INF("attribute set to ignore plug rules");
+        return FAPI2_RC_SUCCESS;
+    }
 
     // Note that we do limited rank config checking here. Most of the checking is done via VPD decoding,
     // meaning that if the VPD decoded the config then there's only a few rank related issues we need
