@@ -20824,8 +20824,8 @@ Measured in GB</description>
     Chiplet Partial good info attribute. Provided by Ring scans
   </description>
   <simpleType>
-    <uint32_t>
-    </uint32_t>
+    <uint16_t>
+    </uint16_t>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
