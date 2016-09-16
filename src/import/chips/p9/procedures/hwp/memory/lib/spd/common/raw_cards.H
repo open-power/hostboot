@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/rdimm/raw_cards.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/spd/common/raw_cards.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,24 +41,24 @@
 
 namespace mss
 {
+namespace rcd01
+{
 
 ///
 /// @brief raw card VBU settings
 /// @note contains RCD settings for hard-coded values
 /// that are not application specific.
+/// Application specific settings are dervied in eff_config
 struct raw_card_t
 {
     uint64_t iv_rc00;
     uint64_t iv_rc01;
     uint64_t iv_rc02;
-    uint64_t iv_rc03;
     uint64_t iv_rc06_07;
     uint64_t iv_rc08;
     uint64_t iv_rc09;
-    uint64_t iv_rc0a;
     uint64_t iv_rc0b;
     uint64_t iv_rc0c;
-    uint64_t iv_rc0d;
     uint64_t iv_rc0e;
     uint64_t iv_rc0f;
     uint64_t iv_rc1x;
@@ -98,25 +98,25 @@ struct raw_card_t
     /// @param[in] i_rcax setting for register control word (RCAX)
     /// @param[in] i_rcbx setting for register control word (RCBX)
     ///
-    raw_card_t( uint64_t i_rc00,
-                uint64_t i_rc01,
-                uint64_t i_rc02,
-                uint64_t i_rc06_07,
-                uint64_t i_rc08,
-                uint64_t i_rc09,
-                uint64_t i_rc0b,
-                uint64_t i_rc0c,
-                uint64_t i_rc0e,
-                uint64_t i_rc0f,
-                uint64_t i_rc1x,
-                uint64_t i_rc2x,
-                uint64_t i_rc4x,
-                uint64_t i_rc5x,
-                uint64_t i_rc6x,
-                uint64_t i_rc8x,
-                uint64_t i_rc9x,
-                uint64_t i_rcax,
-                uint64_t i_rcbx )
+    constexpr raw_card_t( const uint64_t i_rc00,
+                          const uint64_t i_rc01,
+                          const uint64_t i_rc02,
+                          const uint64_t i_rc06_07,
+                          const uint64_t i_rc08,
+                          const uint64_t i_rc09,
+                          const uint64_t i_rc0b,
+                          const uint64_t i_rc0c,
+                          const uint64_t i_rc0e,
+                          const uint64_t i_rc0f,
+                          const uint64_t i_rc1x,
+                          const uint64_t i_rc2x,
+                          const uint64_t i_rc4x,
+                          const uint64_t i_rc5x,
+                          const uint64_t i_rc6x,
+                          const uint64_t i_rc8x,
+                          const uint64_t i_rc9x,
+                          const uint64_t i_rcax,
+                          const uint64_t i_rcbx )
         : iv_rc00(i_rc00),
           iv_rc01(i_rc01),
           iv_rc02(i_rc02),
@@ -144,8 +144,9 @@ struct raw_card_t
     ~raw_card_t() = default;
 };
 
-extern const std::vector< std::pair< uint8_t, raw_card_t> > RDIMM_RAW_CARDS;
+extern const std::vector< std::pair< uint8_t, rcd01::raw_card_t> > RAW_CARDS;
 
+}// rcd01
 }// mss
 
 #endif //_MSS_RAW_CARDS_H_

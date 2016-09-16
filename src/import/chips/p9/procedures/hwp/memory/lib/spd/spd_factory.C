@@ -43,7 +43,7 @@
 // mss lib
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/rdimm/raw_cards.H>
+#include <lib/spd/common/raw_cards.H>
 #include <lib/utils/checker.H>
 #include <lib/utils/c_str.H>
 #include <lib/utils/conversions.H>
@@ -445,7 +445,7 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     uint8_t l_encoding_rev = 0;
     uint8_t l_additions_rev = 0;
     uint8_t l_ref_raw_card_rev = 0;
-    raw_card_t l_raw_card;
+    rcd01::raw_card_t l_raw_card;
 
     // Attribute setting needed by mss::c_str() which is used in
     // the SPD decoder for debugging help
@@ -462,7 +462,7 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     // raw card settings
     FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev) );
 
-    if( !find_value_from_key(RDIMM_RAW_CARDS, l_ref_raw_card_rev, l_raw_card) )
+    if( !find_value_from_key( rcd01::RAW_CARDS, l_ref_raw_card_rev, l_raw_card) )
     {
         FAPI_ERR( "Invalid reference raw card recieved: %d", l_ref_raw_card_rev );
         return fapi2::FAPI2_RC_FALSE;

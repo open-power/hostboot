@@ -42,7 +42,7 @@
 #include <lib/mss_vpd_decoder.H>
 #include <lib/spd/spd_factory.H>
 #include <lib/spd/common/spd_decoder.H>
-#include <lib/spd/rdimm/raw_cards.H>
+#include <lib/spd/common/raw_cards.H>
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
