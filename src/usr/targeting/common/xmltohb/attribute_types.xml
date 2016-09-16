@@ -31486,6 +31486,25 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+  <id>MSS_IGNORE_PLUG_RULES</id>
+  <description>
+    Set to IGNORE if you want to ignore the plug rules. Sometimes
+    this is needed in a partial-good configuration
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_MSS_IGNORE_PLUG_RULES</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>TOD_CPU_DATA</id>
     <description>TOD CHIP DATA for each CHIP
         The size of the TOD CHIP DATA must be equal to the sizeof(TodChipData)
