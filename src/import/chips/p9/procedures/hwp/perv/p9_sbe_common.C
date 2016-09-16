@@ -499,17 +499,17 @@ fapi_try_exit:
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
-    const fapi2::buffer<uint32_t> i_attr_pg)
+    const fapi2::buffer<uint16_t> i_attr_pg)
 {
     // Local variable and constant definition
     fapi2::buffer <uint16_t> l_cplt_ctrl_init;
-    fapi2::buffer<uint32_t> l_attr_pg;
+    fapi2::buffer<uint16_t> l_attr_pg;
     fapi2::buffer<uint64_t> l_data64;
     FAPI_INF("p9_sbe_common_cplt_ctrl_action_function: Entering ...");
 
     l_attr_pg = i_attr_pg;
     l_attr_pg.invert();
-    l_attr_pg.extractToRight<20, 11>(l_cplt_ctrl_init);
+    l_attr_pg.extractToRight<4, 11>(l_cplt_ctrl_init);
 
     // Not needed as have only nest chiplet (no dual clock controller) Bit 62 ->0
     //
@@ -517,7 +517,7 @@ fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
     //Setting CPLT_CTRL1 register value
     l_data64.flush<0>();
     l_data64.writeBit<PERV_1_CPLT_CTRL1_TC_VITL_REGION_FENCE>
-    (l_attr_pg.getBit<19>());  //CPLT_CTRL1.TC_VITL_REGION_FENCE = l_attr_pg.getBit<19>()
+    (l_attr_pg.getBit<3>());
     //CPLT_CTRL1.TC_ALL_REGIONS_FENCE = l_cplt_ctrl_init
     l_data64.insertFromRight<4, 11>(l_cplt_ctrl_init);
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_CPLT_CTRL1_CLEAR, l_data64));
