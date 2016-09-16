@@ -72,7 +72,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
 
 fapi2::ReturnCode p9_sbe_common_cplt_ctrl_action_function(
     const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet,
-    const fapi2::buffer<uint32_t> i_attr_pg);
+    const fapi2::buffer<uint16_t> i_attr_pg);
 
 fapi2::ReturnCode p9_sbe_common_flushmode(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
