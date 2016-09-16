@@ -3013,4 +3013,19 @@
         <mssAccessorName>eff_dram_txs</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MSS_IGNORE_PLUG_RULES</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Set to IGNORE if you want to ignore the plug rules. Sometimes
+          this is needed in a partial-good configuration
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>NO = 0, YES = 1</enum>
+        <mssUnits> bool </mssUnits>
+        <mssAccessorName>ignore_plug_rules</mssAccessorName>
+    </attribute>
+
 </attributes>
