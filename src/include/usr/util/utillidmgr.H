@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,6 +140,26 @@ class UtilLidMgr
      *                  return errl !=  NULL  -> failure
      */
     errlHndl_t getLid(void* i_dest, size_t i_destSize);
+
+    /**
+     *  @brief Get lid managers' pointer to the lid vaddr.
+     *
+     *  @return void* - Returns pointer to virtual address the lid lives in.
+     *                  Null if the lid is not in virtual address space.
+     *                  NOTE: Only supporting PNOR Virt Addr now
+     */
+    inline const void* getLidVirtAddr() const
+    {
+        const void* l_addr = NULL;
+        // Get pointer to PNOR vaddr
+        if (iv_isLidInPnor)
+        {
+            l_addr = reinterpret_cast<const void*>(iv_lidPnorInfo.vaddr);
+        }
+        // Add support for other virtual address spaces here
+
+        return l_addr;
+    }
 
 #ifdef __HOSTBOOT_RUNTIME
     /**

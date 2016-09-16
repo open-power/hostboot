@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,10 +135,8 @@ namespace HBOCC
         errlHndl_t l_errl = NULL;
         size_t lidSize = 0;
         void* l_occImage = NULL;
-        do {
-            // allocate memory big enough for all OCC
-            l_occImage = (void*)malloc(1*MEGABYTE);
 
+        do {
             UtilLidMgr lidMgr(HBOCC::OCC_LIDID);
 
             // Get the size of the OCC lid
@@ -151,21 +149,37 @@ namespace HBOCC
                 break;
             }
 
-            // Ensure occ lid size is less than memory allocated for it
-            assert(lidSize <= 1*MEGABYTE);
-
-            // Get the entire OCC lid and write it into temporary memory
-            l_errl = lidMgr.getLid(l_occImage, lidSize);
-            if(l_errl)
+            // Check if lid is in virtual address space to save on allocating
+            // a large local buffer to copy data to.
+            bool l_lidInVirtMem = false;
+            // Try to use virtual address space for accessing the lid
+            l_occImage = const_cast<void*>(lidMgr.getLidVirtAddr());
+            // Get lid from non virtual address space.
+            if( l_occImage == NULL )
             {
-                TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"loadOCCImageDuringIpl: Error getting lid. lidId=0x%.8x",
-                           OCC_LIDID);
-                break;
+                // allocate memory big enough for all OCC
+                l_occImage = reinterpret_cast<void*>(malloc(1*MEGABYTE));
+
+                // Ensure occ lid size is less than memory allocated for it
+                assert(lidSize <= 1*MEGABYTE);
+
+                // Get the entire OCC lid and write it into temporary memory
+                l_errl = lidMgr.getLid(l_occImage, lidSize);
+                if(l_errl)
+                {
+                    TRACFCOMP( g_fapiImpTd,
+                               ERR_MRK"loadOCCImageDuringIpl: Error getting lid. lidId=0x%.8x",
+                               OCC_LIDID);
+                    break;
+                }
             }
+            else
+            {
+                l_lidInVirtMem = true;
+            }
+
             // Pointer to OCC LID
             char *l_occLid = reinterpret_cast<char*>(l_occImage);
-
 
             // Get system target in order to access ATTR_NEST_FREQ_MHZ
             TARGETING::TargetService & tS = TARGETING::targetService();
@@ -177,12 +191,11 @@ namespace HBOCC
             ATTR_NEST_FREQ_MHZ_type l_nestFreq =
                                      sysTarget->getAttr<ATTR_FREQ_PB>();
 
-
             size_t l_length = 0; // length of this section
             size_t l_startOffset = 0; // offset to start of the section
 
             // offset to length of the section
-            size_t l_offsetToLength = OCC_OFFSET_LENGTH; 
+            size_t l_offsetToLength = OCC_OFFSET_LENGTH;
 
             // Get length of OCC bootloader
             uint32_t *ptrToLength = (uint32_t *)(l_occLid + l_offsetToLength);
@@ -194,16 +207,28 @@ namespace HBOCC
             // Write the OCC Bootloader into memory
             memcpy(i_occVirtAddr, l_occImage, l_length);
 
-
             // OCC Main Application
             l_startOffset = l_length; // after the Boot image
             char * l_occMainAppPtr = reinterpret_cast<char *>(l_occLid) +
-                            l_startOffset;
+                                     l_startOffset;
 
             // Get the length of the OCC Main application
             ptrToLength = (uint32_t *)(l_occMainAppPtr + l_offsetToLength);
             l_length = *ptrToLength;
+            size_t l_occMainLength = l_length;
 
+            // If LID is in vaddr space we do not want to modify directly.
+            if (l_lidInVirtMem)
+            {
+                // Allocate memory for size of modified section.
+                // [ipl flag and freq]
+                l_length = OCC_OFFSET_FREQ + sizeof(ATTR_NEST_FREQ_MHZ_type);
+                l_occImage = reinterpret_cast<void*>(malloc(l_length));
+                // Fill in modify buffer from pnor vaddr.
+                memcpy(l_occImage, l_occMainAppPtr, l_length);
+                // Move occ main app pointer
+                l_occMainAppPtr = reinterpret_cast<char*>(l_occImage);
+            }
 
             // write the IPL flag and the nest freq into OCC main app.
             // IPL_FLAG is a two byte field.  OR a 1 into these two bytes.
@@ -221,17 +246,90 @@ namespace HBOCC
 
             // Store the OCC Main applicatoin into ecmdDataBuffer
             // so we may write it to SRAM
-            ecmdDataBufferBase l_occAppData(l_length * 8 /* bits */);
-            uint32_t rc = l_occAppData.insert((uint32_t *)l_occMainAppPtr, 0,
+            TRACDCOMP( g_fapiImpTd, "loadOCCImageDuringIpl: ecmdDataBufferBase size = 0x%X",
+                       l_occMainLength);
+
+            ecmdDataBufferBase l_occAppData(l_occMainLength * 8 /* bits */);
+            assert(l_length < l_occMainLength, "Cannot write more OCC data than the ECMD buffer has rooom for. write size = 0x%X, ECMD buffer size = 0x%X",
+                       l_length, l_occMainLength);
+            uint32_t rc = l_occAppData.insert(
+                                reinterpret_cast<uint32_t *>(l_occMainAppPtr),
+                                0,
                                 l_length * 8 /* bits */);
             if (rc)
             {
                 TRACFCOMP( g_fapiImpTd,
-                           ERR_MRK"loadOCCImageDuringIpl: Error %d doing insert",
-                           rc);
-                // create l_errl
+                           ERR_MRK"loadOCCImageDuringIpl: Error %d doing insert, write size = 0x%X, ECMD buffer size = 0x%X",
+                           rc, l_length, l_occMainLength);
+                /*@
+                 * @errortype
+                 * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     fapi::MOD_LOAD_OCC_IMAGE_DURING_IPL
+                 * @reasoncode   fapi::RC_ECMD_INSERT_FAILED
+                 * @userdata1    Return Code
+                 * @userdata2    Data size to insert
+                 * @devdesc      ecmd insert failed for l_occAppData
+                 * @custdesc     A problem occurred during the IPL
+                 *               of the system.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          fapi::MOD_LOAD_OCC_IMAGE_DURING_IPL,
+                                          fapi::RC_ECMD_INSERT_FAILED,
+                                          rc,
+                                          l_length,
+                                          true);
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
                 break;
             }
+
+            // If the lid is in vaddr space we only wrote the modify length to
+            // ECMD buffer. Now need to write the rest here.
+            if(l_lidInVirtMem)
+            {
+                size_t l_remainingSize = (l_occMainLength - l_length);
+                // Move occ main pointer back to PNOR vaddr + modified length
+                l_occMainAppPtr = reinterpret_cast<char *>(l_occLid) +
+                                  l_startOffset + l_length;
+
+                // Write to rest of OCC Main to buffer. This means Main app size
+                // minus the modified size.
+                rc = l_occAppData.insert(
+                                reinterpret_cast<uint32_t *>(l_occMainAppPtr),
+                                l_length * 8 /* bits */,
+                                l_remainingSize * 8 /* bits */);
+                if (rc)
+                {
+                    TRACFCOMP( g_fapiImpTd,
+                               ERR_MRK"loadOCCImageDuringIpl: Error %d doing insert of remaining data, write size = 0x%X, ECMD buffer size = 0x%X",
+                               rc,
+                               l_remainingSize,
+                               l_occMainLength);
+                    /*@
+                     * @errortype
+                     * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid     fapi::MOD_LOAD_OCC_IMAGE_DURING_IPL
+                     * @reasoncode   fapi::RC_ECMD_INSERT_REMAINING_FAILED
+                     * @userdata1    Return Code
+                     * @userdata2    Remaining data size to insert
+                     * @devdesc      ecmd insert failed for l_occAppData
+                     * @custdesc     A problem occurred during the IPL
+                     *               of the system.
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          fapi::MOD_LOAD_OCC_IMAGE_DURING_IPL,
+                                          fapi::RC_ECMD_INSERT_REMAINING_FAILED,
+                                          rc,
+                                          l_remainingSize,
+                                          true);
+                    l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                    l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                    break;
+                }
+            }
+
             // Write the OCC Main app into SRAM
             const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
             l_errl = HBOCC::writeSRAM(i_target, l_SramAddrApp, l_occAppData);
@@ -241,7 +339,6 @@ namespace HBOCC
                            ERR_MRK"loadOCCImageDuringIpl: Error in writeSRAM of app");
                 break;
             }
-
 
         }while(0);
 
