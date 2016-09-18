@@ -92,7 +92,7 @@ extern "C"
     ///             ... through ..
     ///             0x0002 dimm0 rank count 4, dimm1 rank count 2
     ///             0x0001 dimm0 rank count 4, dimm1 rank count 4
-    /// ffff        frequency index from ATTR_MEMVPD_FREQS_MHZ
+    /// ffff        frequency index from ATTR_MSS_MRW_SUPPORTED_FREQ
     ///             0x80 index 0
     ///             ... through ..
     ///             0x10 index 3
