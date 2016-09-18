@@ -99,8 +99,20 @@
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>MCS_TARGET</target>
+      <childTargets>
+        <parent>MCS_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
     </deconfigure>
+  </hwpError>
+
+  <!-- Cronus only error when we can't match DIMM speeds to sync mode -->
+  <hwpError>
+    <rc>RC_MSS_FAILED_SYNC_MODE</rc>
+    <description>
+      DIMM speeds are different and sync mode is required
+    </description>
+    <ffdc>NEST_FREQ</ffdc>
   </hwpError>
 
   <!-- TK - Should this be FFDC or just return FAPI2_RC_FALSE? - AAM -->
@@ -124,5 +136,31 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_VPD_FREQ_MAX_FREQ_EMPTY_SET</rc>
+    <description>
+      When considering the frequencies in the VPD and the max supported
+      frequencies based on DIMM config, there are no applicable frequencies
+      remaining
+    </description>
+    <ffdc>MSS_VPD_FREQ_0</ffdc>
+    <ffdc>MSS_VPD_FREQ_1</ffdc>
+    <ffdc>MSS_VPD_FREQ_2</ffdc>
+    <ffdc>MSS_VPD_FREQ_3</ffdc>
+    <ffdc>MSS_MAX_FREQ_0</ffdc>
+    <ffdc>MSS_MAX_FREQ_1</ffdc>
+    <ffdc>MSS_MAX_FREQ_2</ffdc>
+    <ffdc>MSS_MAX_FREQ_3</ffdc>
+    <ffdc>MSS_MAX_FREQ_4</ffdc>
+    <ffdc>REQUIRED_SYNC_MODE</ffdc>
+    <ffdc>MAX_FREQ_FROM_DIMM</ffdc>
+    <callout>
+      <target>MCS_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCS_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 </hwpErrors>
