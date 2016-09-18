@@ -40,10 +40,6 @@
 # 2 proc system, there will only be 8 MCSs, but up to 16 is supported by the
 # script for the general case.
 #
-# It was 'decided' to support up to 4 data rates per system. The four values
-# are specified in MRW ATTR_MEMVPD_FREQS_MHZ. The four values are passed to
-# this script since the script has no connection to the MRW.
-#
 # Each dimm can have rank count 0 (not there), 1, 2, or 4 ranks. Each
 # 'pair' combination (dimm0 rank count by dimm1 rank count), may need
 # unique vpd attribute values. There are 16 combinations of dimm0 rank count by
@@ -130,11 +126,6 @@
 #
 # More details...
 #
-# The order of the frequencies passed to the script and the order in the MRW
-# is significant as the "index" into the list is encoded into the mapping
-# which will be matched to the "index" of the VPDInfo frequency to the MRW
-# list. The frequency list is a required parameter.
-#
 # The format of the file name of the vpd text files is:
 # $SystemName_$KeyWordType_$DecoderVersion_$KeyWordDependentInfo.vpd
 # $KeyWordType is expected to be MR or MT (case insensitive)
@@ -205,11 +196,11 @@ use constant CKE_BIN_FILE_SIZE => 136 ; # CKE full binary file size
 ################################################################################
 use constant MAPPING_LAYOUT_VERSION => 1; #version of decode algorithm
 
-my %g_freqMask = (               #MRW frequency index to mask
-                  0 => 0x80,     #first listed MRW freq...
-                  1 => 0x40,
-                  2 => 0x20,
-                  3 => 0x10);    #last listed MRW freq
+my %g_freqMask = (               #frequency index to mask
+                  1866 => 0x80,     #1866
+                  2133 => 0x40,     #2133
+                  2400 => 0x20,     #2400
+                  2666 => 0x10);    #2666
 use constant FREQ_ALL => 0xf0;
 
 my %g_rankMask = (                #dimm rank count pair to mask
@@ -259,7 +250,6 @@ use constant MAX_POSITION  => 3;
 ################################################################################
 # Global data
 ################################################################################
-my @g_MrwFreq = ();      #MRW MEMVPD_FREQS_MHZ input parameter
 my %g_configs = ();      #hash of configuration hashes (a list of all configs)
 my $g_tarType = "";      #supported target types (MR, MT, Q#, CK)
 
@@ -273,7 +263,6 @@ my $g_tarType = "";      #supported target types (MR, MT, Q#, CK)
 ################################################################################
 
 sub main{ }
-my $cfgMrwMemVpdFreqsMhz = undef;
 my $cfgPrefix = undef;
 my $cfgInputVpdTextDir = ".";
 my $cfgOutputVpdBinDir = ".";
@@ -282,8 +271,7 @@ my $cfgVerbose = 0;
 my %ckeKeywordData; # CKE hash table (mcsMask -> hash ref with blob data for those masked mcs's)
 
 # Process command line parameters, issue help text if needed
-GetOptions("mrw-MEMVPD-FREQS-MHZ:s" => \$cfgMrwMemVpdFreqsMhz,
-           "prefix:s" => \$cfgPrefix,
+GetOptions("prefix:s" => \$cfgPrefix,
            "input-vpd-text-dir:s" => \$cfgInputVpdTextDir,
            "output-vpd-bin-dir:s" => \$cfgOutputVpdBinDir,
            "help" => \$cfgHelp,
@@ -321,29 +309,6 @@ if ($cfgPrefix eq undef)
     }
 }
 
-if (($g_tarType ne "DQ_MAP") && ($g_tarType ne "CKE_MAP"))
-{
-    if ($cfgMrwMemVpdFreqsMhz eq undef)
-    {
-        print STDERR "\n==>mrw-MEMVPD-FREQS-MHZ is a required parameter\n";
-        display_help();
-        exit(1);
-    }
-
-
-    # Parse parameter MRW frequencys
-    {
-        my ($freq0,$freq1,$freq2,$freq3) = split(',',$cfgMrwMemVpdFreqsMhz);
-
-        fatal("missing frequency in parameters")
-            if (($freq0 eq undef) || ($freq1 eq undef) || ($freq2 eq undef) || ($freq3 eq undef));
-
-        @g_MrwFreq = (str2value($freq0),
-                      str2value($freq1),
-                      str2value($freq2),
-                      str2value($freq3));
-    }
-}
 # Ensure directories consistently end with a /
 {
     local $/ = '/';  #use temporary version of $/ for the chomp
@@ -357,8 +322,6 @@ if (($g_tarType ne "DQ_MAP") && ($g_tarType ne "CKE_MAP"))
 # Show parameters
 {
     verbose("Parameters=");
-    verbose("    MRW MEMVPD_FREQS_MHZ ="
-                  ." $g_MrwFreq[0],$g_MrwFreq[1],$g_MrwFreq[2],$g_MrwFreq[3]");
     verbose("    Prefix = $cfgPrefix");
     verbose("    Input vpd text file directory = $cfgInputVpdTextDir");
     verbose("    Ouput vpd bin file directory =  $cfgOutputVpdBinDir");
@@ -688,7 +651,7 @@ sub processVpdTextFile
             }
             elsif ($line =~ /target/)
             {
-                # MT files can default to all frequencies if not specificed
+                # MT files can default to all frequencies if not specified
                 if ((!$stateDataRateSet) &&
                     ("MT" eq $g_tarType))
                 {
@@ -809,21 +772,15 @@ sub procDataRate
                   "   row $row: $line");
         }
 
-        my $found=0;
-        for (my $i=0 ; $i < scalar @g_MrwFreq ; $i++)
+        if (undef eq $g_freqMask{$freq})
         {
-             if ($freq == $g_MrwFreq[$i])
-             {
-                 $freqMask |= $g_freqMask{$i};
-                 $found=1;
-                 last;
-             }
-        }
-        if (!$found)
-        {
-            fatal("$freq not in MRW freq list\n".
+            fatal("$freq not a supported value\n".
                   "   $file\n".
                   "   row $row: $line");
+        }
+        else
+        {
+            $freqMask |= $g_freqMask{$freq};
         }
     }
     trace ("Freq Mask = 0x".sprintf("%02X",$freqMask));
@@ -1387,20 +1344,21 @@ sub createReport
 
     for (my $i=0 ; $i<$numMCS ; $i++)
     {
-        for (my $j=0 ; $j<$numFreq ; $j++)
+        my @freqs = sort {$a <=> $b} keys %g_freqMask;
+        foreach my $freq (@freqs)
         {
             my @keys = sort {$a <=> $b} keys %g_rankMask;
             foreach my $key (@keys)
             {
                my @configList = checkConfig($g_mcsMask{$i},
-                                            $g_freqMask{$j},
+                                            $g_freqMask{$freq},
                                             $g_rankMask{$key});
                my $numHits = scalar @configList;
                my $status = "";
                if (0 == $numHits)
                {
                    $status = "UNF";
-                   print CSV_FILE "$status,$i,$g_MrwFreq[$j],".
+                   print CSV_FILE "$status,$i,$freq,".
                          "0x".sprintf("%02X",$key).',"",""'."\n";
                    $numUnf++;
                }
@@ -1418,7 +1376,7 @@ sub createReport
                    }
                    for (my $m=0; $m < $numHits ; $m++)
                    {
-                       print CSV_FILE "$status,$i,$g_MrwFreq[$j],".
+                       print CSV_FILE "$status,$i,$freq,".
                          "0x".sprintf("%02X",$key).",".
                          "$configList[$m]->{CONF_BIN_FILE},".
                          "$configList[$m]->{CONF_VPD_TEXT_FILE}\n";
@@ -1608,11 +1566,9 @@ sub display_help
     print STDERR "
 usage:
     $scriptname --help
-    $scriptname --mrw-MEMVPD-FREQS-MHZ --prefix
+    $scriptname --prefix <system_kw>
                 [--input-vpd-text-dir=./] [--output-vpd-bin-dir=./]
                 [--verbose]
-        --mrw-MEMVPD-FREQS-MHZ
-             Comma separated list of the 4 ATTR_MEMVPD_FREQS_MHZ data rates
         --prefix
              Prefix of vpd input files to process (template_mr or template_mt)
         --input-vpd-text-dir
