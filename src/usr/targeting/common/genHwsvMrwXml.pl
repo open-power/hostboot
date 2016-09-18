@@ -2771,7 +2771,7 @@ sub generate_sys
 
     #TODO CQ:SW352246 Replace hardcoded defaults with MRW values
     print "    <attribute>
-      <id>MEMVPD_FREQS_MHZ</id>
+      <id>MSS_MRW_SUPPORTED_FREQ</id>
       <default>
         2133,
         2400,
