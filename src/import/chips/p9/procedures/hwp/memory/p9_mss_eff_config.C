@@ -65,28 +65,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     // Caches
     FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
 
-    for( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
-    {
-        const auto l_dimm_pos = mss::pos(l_dimm);
-
-        // TODO RTC:152390 Create function to do map checking on cached values
-        // Find decoder factory for this dimm position
-        auto l_it = l_factory_caches.find(l_dimm_pos);
-
-        FAPI_TRY( mss::check::spd::invalid_cache(l_dimm,
-                  l_it != l_factory_caches.end(),
-                  l_dimm_pos),
-                  "Failed to get valid cache (rank decoder)");
-
-        l_eff_config.iv_pDecoder = l_it->second;
-
-        // <sigh> This is a little hackery. We needed to decode the DIMM's master ranks, so we can decode the VPD
-        // for this entire MCS. Which means we need to re-do the cache find and check which stinks.
-        FAPI_TRY( l_eff_config.master_ranks_per_dimm(l_dimm) );
-    }
-
     // We need to decode the VPD. We don't do this in the ctor as we need
-    // the rank information and for that we need the SPD caches (which we get above.)
+    // the rank information and for that we need the SPD caches (which we get when we populate the cache.)
     // However, we need to do the VPD decode before the others so that they might
     // be able to use VPD information to make decisions about setting up eff attributes.
     FAPI_TRY( l_eff_config.decode_vpd(i_target),
