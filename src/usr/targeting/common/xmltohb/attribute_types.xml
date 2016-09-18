@@ -10668,7 +10668,7 @@ firmware notes: Used as override attribute for pstate procedure
 
 <!--TOOD RTC: 151938 Make sure that these are set up by parseMRW script-->
 <attribute>
-    <id>MEMVPD_FREQS_MHZ</id>
+    <id>MSS_MRW_SUPPORTED_FREQ</id>
     <description>
     List of memory frequencies supported by the current system.
     </description>
@@ -10681,7 +10681,7 @@ firmware notes: Used as override attribute for pstate procedure
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MEMVPD_FREQS_MHZ</id>
+        <id>ATTR_MSS_MRW_SUPPORTED_FREQ</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -19124,17 +19124,23 @@ Measured in GB</description>
     <id>MAX_ALLOWED_DIMM_FREQ</id>
     <description>
       Maximum frequency (in MHz) that this system can run the DIMMs at.
-      There are 4 possible values determined by the dimm configuration.
+      There are 5 possible values determined by the dimm configuration.
+      For configurations which have mixed rank configurations, the lowest
+      frequency based on ranks of either DIMM is chosen. For example if
+      there was a 1R and a 2R DIMM installed, and 1R dual drop was a lower
+      max freq than 2R dual drop, then the 1R max freq would be the max allowed.
       [0]=One rank, single drop
       [1]=Two rank, single drop
-      [2]=One rank, dual drop
-      [3]=Two rank, dual drop
+      [2]=Four rank, single drop
+      [3]=One rank, dual drop
+      [4]=Two rank, dual drop
       A value of zero would indicate an unsupported configuration.
     </description>
     <simpleType>
         <uint32_t>
+            <default>2400,2400,2400,2400,2400</default>
         </uint32_t>
-        <array>4</array>
+        <array>5</array>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>

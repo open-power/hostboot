@@ -288,45 +288,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for number of master ranks per dimm
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_config::master_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    uint8_t l_decoder_val = 0;
-    fapi2::buffer<uint8_t> l_ranks_configed;
-    uint8_t l_attrs_master_ranks_per_dimm[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    uint8_t l_attrs_dimm_ranks_configed[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Get & update MCS attributes
-    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(i_target, l_decoder_val) );
-    FAPI_TRY(eff_num_master_ranks_per_dimm(l_mcs, &l_attrs_master_ranks_per_dimm[0][0]));
-    FAPI_TRY(eff_dimm_ranks_configed(l_mcs, &l_attrs_dimm_ranks_configed[0][0]));
-
-    l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)] = l_decoder_val;
-
-    // Set configed ranks. Set the bit representing the master rank configured (0 being left most.) So,
-    // a 4R DIMM would be 0b11110000 (0xF0). This is used by PRD.
-    FAPI_TRY( l_ranks_configed.setBit(0, l_decoder_val) );
-    l_attrs_dimm_ranks_configed[index(l_mca)][index(i_target)] = l_ranks_configed;
-
-    FAPI_INF( "%s Num Master Ranks %d, DIMM Ranks Configed 0x%x",
-              mss::c_str(i_target),
-              l_attrs_master_ranks_per_dimm[index(l_mca)][index(i_target)],
-              l_attrs_dimm_ranks_configed[index(l_mca)][index(i_target)] );
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, l_mcs, l_attrs_master_ranks_per_dimm) );
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, l_mcs, l_attrs_dimm_ranks_configed) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Determines & sets effective config for stack type
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay

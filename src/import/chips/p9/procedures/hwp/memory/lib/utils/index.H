@@ -64,6 +64,12 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
     return mss::pos(i_target) % PORTS_PER_MCS;
 }
 
+template<>
+inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
+{
+    return mss::pos(i_target) % MCS_PER_MC;
+}
+
 ///
 /// @brief Return an attribute array index from a rank number
 /// @param[in] i_rank uint64_t a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}

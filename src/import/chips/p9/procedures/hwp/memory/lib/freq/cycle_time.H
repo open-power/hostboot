@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file cycle_time.H
 /// @brief cycle time (tCK) data & functions needed for CAS latency algorithm
@@ -37,18 +38,10 @@
 
 #include <fapi2.H>
 #include <memory>
+#include <lib/freq/sync.H>
 
 namespace mss
 {
-
-enum FREQ_LIMITS
-{
-    // Can't add these limits in xml because
-    // Cronus won't know what ENUM to print out
-    // if there are two enums for the same value.
-    MAX_SUPPORTED_FREQ = fapi2::ENUM_ATTR_MSS_FREQ_MT2666,
-    MIN_SUPPORTED_FREQ = fapi2::ENUM_ATTR_MSS_FREQ_MT1866
-};
 
 enum FREQ_MARGIN : std::uint64_t
 {
@@ -58,17 +51,6 @@ enum FREQ_MARGIN : std::uint64_t
     // +5% of 2666 MT/s
     MAX_FREQ_MARGIN = 2799,
 };
-
-static const std::vector<uint64_t> P9_FREQS
-{
-    // P9 supported frequencies in addition to
-    // TK - How make sure thes vector is always updated if enums are changed?
-    fapi2::ENUM_ATTR_MSS_FREQ_MT1866,
-    fapi2::ENUM_ATTR_MSS_FREQ_MT2133,
-    fapi2::ENUM_ATTR_MSS_FREQ_MT2400,
-    fapi2::ENUM_ATTR_MSS_FREQ_MT2666,
-};
-
 
 // Proposed DDR4 Full spec update(79-4A)
 // Item No. 1716.78C
@@ -86,7 +68,10 @@ static const std::vector<uint64_t> tckmin_avg_ddr4
     /* 1250, // 1600 MT/s - don't think we support this one - AAM */
 };
 
+///
 /// @brief          Selects DIMM frequency to run based on supported system frequencies
+/// @tparam         T the fapi2::TargetType for which the DIMM information exists.
+/// @param[in]      target from which to get the dimm information
 /// @param[in,out]  io_dimm_freq input is current dimm freq & output is next
 ///                 lowest dimm freq between 1866 MT/s (-5% margin)  - 2666 MT/s (+5% margin)
 /// @return         FAPI2_RC_SUCCESS iff ok
@@ -94,8 +79,13 @@ static const std::vector<uint64_t> tckmin_avg_ddr4
 /// @note           From P9 User's Manual Version 0.8 - June 08, 2015
 /// @note           Memory Controller Unit - page 199 of 456
 ///
-inline fapi2::ReturnCode select_supported_freq(uint64_t& io_dimm_freq)
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode select_supported_freq(const fapi2::Target<T>& i_target, uint64_t& io_dimm_freq)
 {
+    uint32_t l_min_freq = 0;
+    uint32_t l_max_freq = 0;
+    std::vector<uint32_t> l_freqs;
+
     //TK - This 5% margin was done in P8, continue for P9 ?? - AAMARIN
 
     // Speed bins for P9 DDR4 are 1866 MT/s -  2666 MT/s
@@ -108,25 +98,31 @@ inline fapi2::ReturnCode select_supported_freq(uint64_t& io_dimm_freq)
                  "Unsupported frequency: %d.  DIMM Freq calculated is < 1773 or > 2799 MT/s",
                  io_dimm_freq);
 
+    FAPI_TRY( mss::supported_freqs(i_target, l_freqs) );
+    l_min_freq = *(l_freqs.begin());
+    l_max_freq = *(l_freqs.end() - 1);
+
     // Corner case to take into account -5% margin
-    if(io_dimm_freq  < MIN_SUPPORTED_FREQ)
+    if(io_dimm_freq  < l_min_freq)
     {
-        io_dimm_freq = MIN_SUPPORTED_FREQ;
+        io_dimm_freq = l_min_freq;
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Corner case to take into account +5% margin
-    if(io_dimm_freq > MAX_SUPPORTED_FREQ)
+    if(io_dimm_freq > l_max_freq)
     {
-        io_dimm_freq = MAX_SUPPORTED_FREQ;
+        io_dimm_freq = l_max_freq;
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Selects next lowest freq btw 1866 - 2666 [MT/s]
     {
-        auto iterator = std::upper_bound(P9_FREQS.begin(), P9_FREQS.end(), io_dimm_freq);
+        // supported_freqs sorts so upper_bound is valid.
+        auto iterator = std::upper_bound(l_freqs.begin(), l_freqs.end(), io_dimm_freq);
         io_dimm_freq = *(--iterator);
     }
+
 fapi_try_exit:
     return fapi2::current_err;
 }

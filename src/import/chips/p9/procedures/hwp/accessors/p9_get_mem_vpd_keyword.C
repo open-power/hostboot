@@ -129,7 +129,7 @@ extern "C"
         uint8_t  l_rankShift = 0;
         uint8_t  l_freqMask  = 0;
         uint32_t l_freqTableIndex = 0;
-        fapi2::ATTR_MEMVPD_FREQS_MHZ_Type l_freqTable = {0};
+        constexpr uint32_t l_freqTable[] = {1866, 2133, 2400, 2666};
         uint32_t l_freqTableCnt = sizeof(l_freqTable) / sizeof(l_freqTable[0]);
         uint32_t l_index = 0; //start with first criteria row
         uint32_t l_indexMax = MAPPING_LAYOUT_MAXROWS;
@@ -267,11 +267,6 @@ extern "C"
         else
         {
             // Get the frequency index and calculate mask
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEMVPD_FREQS_MHZ,
-                                   fapi2::Target<TARGET_TYPE_SYSTEM>(),
-                                   l_freqTable),
-                     "p9_get_mem_vpd_keyword: get ATTR_MEMVPD_FREQS_MHZ failed");
-
             for (; l_freqTableIndex < l_freqTableCnt; l_freqTableIndex++)
             {
                 if (i_vpd_info.iv_freq_mhz == l_freqTable[l_freqTableIndex])
@@ -289,7 +284,7 @@ extern "C"
                         set_MEMVPDFREQ3(uint32_t(l_freqTable[3])).
                         set_TARGET(i_target).
                         set_VPDTYPE(i_vpd_info.iv_vpd_type),
-                        "Frequency %d not in ATTR_MEMVPD_FREQS_MHZ",
+                        "Frequency %d not supported by Nimbus",
                         i_vpd_info.iv_freq_mhz);
             l_freqMask = (MAPPING_LAYOUT_FREQ_0 >> l_freqTableIndex); //zero based
             FAPI_DBG ("p9_get_mem_vpd_keyword: frequency index = %d mask=0x%02x",

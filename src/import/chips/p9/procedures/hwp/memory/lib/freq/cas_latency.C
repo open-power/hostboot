@@ -66,17 +66,17 @@ namespace mss
 /// @param[in]  i_caches decoder caches
 ///
 cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                         const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches)
+                         const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches):
+    iv_dimm_list_empty(false),
+    iv_largest_taamin(0),
+    iv_proposed_tck(0),
+    iv_common_CL(UINT64_MAX) // Masks out supported CLs
 {
-    iv_dimm_list_empty = false;
-    iv_common_CL = UINT64_MAX; // Masks out supported CLs
-    iv_largest_taamin = 0;
-    iv_proposed_tck = 0;
-
     const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(i_target);
 
     if(l_dimm_list.empty())
     {
+        FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::c_str(i_target));
         iv_dimm_list_empty = true;
         return;
     }

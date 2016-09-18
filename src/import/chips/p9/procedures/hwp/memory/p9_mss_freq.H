@@ -98,26 +98,30 @@ fapi_try_exit:
 ///
 /// @brief      Sets frequency attributes
 /// @param[in]  i_target the controller target
-/// @param[in]  i_dimm_freq final selected dimm freq in MT/s
+/// @param[in]  i_dimm_freq vector of freqs selected dimm freq in MT/s
 /// @return     FAPI2_RC_SUCCESS iff ok
-/// @note       P9 Nimbus will support DMI speeds 16GB and 9.6GB
 ///
-inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                        uint64_t i_dimm_freq)
+inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                        const std::vector<uint64_t>& i_dimm_freq)
 {
-    // TK - RIT, needsto be corrected
-    uint64_t l_nest_freq = 2;
-    const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    // Find the minimum (but non-0) freq in the vector. If we see all 0's we'll write a 0. However,
+    // we shouldn't as the caller should have been dealing with no DIMM before we got here.
+    uint64_t l_final_freq = UINT64_MAX;
 
-    FAPI_INF("Setting freq attrs for %s", mss::c_str(i_target));
+    for (const auto l_freq : i_dimm_freq)
+    {
+        if (l_freq != 0)
+        {
+            l_final_freq = std::min(l_final_freq, l_freq);
+        }
+    }
 
-    // TK
-    //Update for P9, what do we do w/setting nest freq? - AAM
-    // how do we select nest freq if we even have to??
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_NEST_CAPABLE_FREQUENCIES, l_mcbist, l_nest_freq),
-              "Failed to set nest capable frequencies attribute" );
+    // If we saw all 0's, write a 0.
+    l_final_freq = l_final_freq == UINT64_MAX ? 0 : l_final_freq;
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_FREQ, l_mcbist, i_dimm_freq),
+    FAPI_INF( "Final Chosen Frequency: %d (%s)", l_final_freq, mss::c_str(i_target) );
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_FREQ, i_target, l_final_freq),
              "Failed to set mss freq attribute");
 
 fapi_try_exit:

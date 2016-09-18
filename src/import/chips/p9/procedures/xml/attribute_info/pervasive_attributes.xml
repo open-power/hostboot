@@ -293,6 +293,8 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <writeable/>
+  <initToZero/>
+  <enum>IN_SYNC = 1, NOT_IN_SYNC = 0</enum>
 </attribute>
 
 <attribute>

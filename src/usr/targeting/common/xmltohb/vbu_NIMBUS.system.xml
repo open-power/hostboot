@@ -131,7 +131,7 @@
         <default>EPS_TYPE_LE</default>
     </attribute>
     <attribute>
-      <id>MEMVPD_FREQS_MHZ</id>
+      <id>MSS_MRW_SUPPORTED_FREQ</id>
       <default>
         1866,
         2133,
