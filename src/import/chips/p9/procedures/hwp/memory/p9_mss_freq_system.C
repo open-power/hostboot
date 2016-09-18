@@ -43,6 +43,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/freq/sync.H>
 
+
 using fapi2::TARGET_TYPE_SYSTEM;
 using fapi2::TARGET_TYPE_PROC_CHIP;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -79,8 +80,16 @@ extern "C"
         std::map< fapi2::Target<TARGET_TYPE_MCBIST>, uint64_t > l_freq_map;
         uint32_t l_nest_freq = 0;
         uint8_t l_required_sync_mode = 0;
-        mss::sync_mode l_mc_in_sync;
+        uint8_t l_mc_in_sync = 0;
+        uint64_t l_selected_nest_freq = 0;
         mss::speed_equality l_equal_dimm_speed;
+
+        // Get nest freq && F/W attr that tells me if sync mode is required
+        // or if I have to figure that out
+        FAPI_TRY( mss::required_synch_mode(l_required_sync_mode) );
+        FAPI_TRY( mss::freq_pb_mhz(l_nest_freq) );
+
+        FAPI_INF("Retrieved req'd sync mode: %d and nest freq %d", l_required_sync_mode, l_nest_freq);
 
         // Populate dimm speed map
         FAPI_TRY( mss::dimm_speed_map(i_targets, l_freq_map, l_equal_dimm_speed),
@@ -89,37 +98,34 @@ extern "C"
         FAPI_INF("Dimm speed for all MCBISTs are the same : %s",
                  uint8_t(l_equal_dimm_speed) ? "true" : "false");
 
-        // Get nest freq && F/W attr that tells me if sync mode is required
-        // or if I have to figure that out
-        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_REQUIRED_SYNCH_MODE,
-                                 fapi2::Target<TARGET_TYPE_SYSTEM>(),
-                                 l_required_sync_mode ) );
-
-        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_FREQ_PB_MHZ,
-                                 fapi2::Target<TARGET_TYPE_SYSTEM>(),
-                                 l_nest_freq) );
-
-        FAPI_INF("Retrieved req'd sync mode: %d and nest freq %d", l_required_sync_mode, l_nest_freq);
-
         // Select SYNCH mode
         FAPI_TRY( mss::select_sync_mode(l_freq_map,
                                         l_equal_dimm_speed,
                                         l_nest_freq,
                                         l_required_sync_mode,
-                                        l_mc_in_sync) );
+                                        l_mc_in_sync,
+                                        l_selected_nest_freq) );
 
-        FAPI_INF("Selected SYNC mode : %s", uint8_t(l_mc_in_sync) ? "MC in sync" : "MC NOT in sync");
+        FAPI_INF("Selected SYNC mode : %s",
+                 (l_mc_in_sync == fapi2::ENUM_ATTR_MC_SYNC_MODE_IN_SYNC) ? "MC in sync" : "MC NOT in sync");
 
-        // Set attribute
+        // Set attributes.
+        // set ATTR_FREQ_PB_MHZ based on sync logic
+        // set ATTR_MC_SYNC_MODE to 0 (not in sync) or 1 (in sync)
         for(const auto& l_mcbist : i_targets)
         {
+            // Convert from uint64_t to uint32_t for attribute macros
+            uint32_t l_pb_freq_value = l_selected_nest_freq;
             const auto& l_proc_chip = mss::find_target<TARGET_TYPE_PROC_CHIP>(l_mcbist);
 
-            // Cast converts enum class to uint8_t& expected for ATTR_SET
-            FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_MC_SYNC_MODE,
-                                     l_proc_chip,
-                                     reinterpret_cast<uint8_t(&)>(l_mc_in_sync) ),
-                      "Failed to set ATTR_MC_SYNC_MODE");
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MC_SYNC_MODE, l_proc_chip, l_mc_in_sync),
+                      "Failed to set ATTR_MC_SYNC_MODE" );
+
+            if (l_mc_in_sync == fapi2::ENUM_ATTR_MC_SYNC_MODE_IN_SYNC)
+            {
+                FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_FREQ_PB_MHZ, fapi2::Target<TARGET_TYPE_SYSTEM>(), l_pb_freq_value),
+                          "Failed to set ATTR_FREQ_PB_MHZ" );
+            }
         }
 
     fapi_try_exit:
