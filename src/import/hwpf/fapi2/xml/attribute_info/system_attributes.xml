@@ -46,15 +46,4 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_MEMVPD_FREQS_MHZ</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-      List of memory frequencies supported by the current system.
-    </description>
-    <valueType>uint32</valueType>
-    <array>4</array>
-    <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
 </attributes>
