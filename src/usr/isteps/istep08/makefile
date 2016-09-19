@@ -150,6 +150,9 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 # p9_setup_evid : apply voltage settings
 include ${PROCEDURES_PATH}/hwp/pm/p9_setup_evid.mk
 include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
+# TODO RTC: 164237
+# Take another look at PM lib
+include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 
 MODULE=istep08
 
