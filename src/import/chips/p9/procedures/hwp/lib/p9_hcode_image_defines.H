@@ -389,6 +389,20 @@ enum
     CME_BLOCK_READ_LEN          = 32,
     CME_BLK_SIZE_SHIFT          = 0x05,
 
+    //CME Image Flags
+    CME_STOP_3_TO_2_BIT_POS         =   0x80000000,
+    CME_STOP_4_TO_2_BIT_POS         =   0x40000000,
+    CME_STOP_5_TO_4_BIT_POS         =   0x20000000,
+    CME_STOP_8_TO_5_BIT_POS         =   0x10000000,
+    CME_STOP_11_TO_8_BIT_POS        =   0x08000000,
+    CME_SKIP_CORE_POWEROFF_BIT_POS  =   0x00000001,
+
+    //SGPE Image Flags
+    SGPE_STOP_4_TO_2_BIT_POS        =   0x80000000,
+    SGPE_STOP_5_TO_4_BIT_POS        =   0x40000000,
+    SGPE_STOP_8_TO_5_BIT_POS        =   0x20000000,
+    SGPE_STOP_11_TO_8_BIT_POS       =   0x10000000,
+
     // PPMR
 
     //** Boot Loaders
