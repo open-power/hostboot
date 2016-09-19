@@ -25,19 +25,33 @@
 <!-- This is an automatically generated file. -->
 <!-- File: p9_sbe_tp_chiplet_init3_errors.xml. -->
 <!-- Halt codes for p9_sbe_tp_chiplet_init3 -->
-
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_CALIBRATION_NOT_DONE</rc>
-    <description>Precision Reference Voltage : Calibration not done</description>
-  </hwpError>
+   <sbeTarget>MASTER_CHIP</sbeTarget>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_MF_OSC_ERR</rc>
     <description>MF Oscillator error active</description>
+    <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>OSC_ERROR_HOLD</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>OSC_SWITCH_SENSE_REGISTER</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
     <ffdc>READ_OSCERR_HOLD</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -45,6 +59,26 @@
     <sbeError/>
     <rc>RC_MF_OSC_NOT_TOGGLE</rc>
     <description>MF Oscillator not toggling</description>
+    <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>OSC_ERROR_HOLD</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	  <id>OSC_SWITCH_SENSE_REGISTER</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
     <ffdc>READ_SNS1LTH</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
