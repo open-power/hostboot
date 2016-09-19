@@ -82,12 +82,8 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
 /// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform specified error.
 ///
 ///
-template<TargetType T>
-inline ReturnCode platSpecialWakeup( const Target<T>& i_target, bool i_enable)
-{
-    //@TODO-RTC:150505-Implement real support
-    return FAPI2_RC_SUCCESS;
-}
+ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
+                              bool i_enable );
 
 } // End namespace fapi2
 

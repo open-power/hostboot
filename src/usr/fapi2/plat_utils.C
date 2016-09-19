@@ -41,6 +41,10 @@
 #include <errl/errlmanager.H>
 #include <hwpf_fapi2_reasoncodes.H>
 
+#if __HOSTBOOT_RUNTIME
+  #include "handleSpecialWakeup.H"
+#endif
+
 //******************************************************************************
 // Trace descriptors
 //******************************************************************************
@@ -1008,6 +1012,31 @@ bool platIsScanTraceEnabled()
 {
   // SCAN trace can be dynamically turned on/off, always return true here
   return 1;
+}
+
+//******************************************************************************
+// platSpecialWakeup
+//******************************************************************************
+fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
+                                    const bool i_enable)
+{
+    fapi2::ReturnCode fapi_rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_INF("platSpecialWakeup");
+
+#ifdef __HOSTBOOT_RUNTIME
+    TARGETING::Target* l_target =
+        reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    errlHndl_t err_SW = handleSpecialWakeup(l_target,i_enable);
+    if(err_SW)
+    {
+        fapi_rc.setPlatDataPtr(reinterpret_cast<void *>(err_SW));
+    }
+#endif
+
+    // On Hostboot, processor cores cannot sleep so return success to the
+    // fapiSpecialWakeup enable/disable calls
+    return fapi_rc;
 }
 
 } //end namespace
