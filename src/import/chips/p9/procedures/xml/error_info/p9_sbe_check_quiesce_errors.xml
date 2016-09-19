@@ -195,5 +195,17 @@
     <ffdc>DATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_CHECK_XSTOP</rc>
+    <description>
+      Procedure: p9_sbe_check_quiesce
+      If we hit a checkstop add the value of register 0x570F001C
+      If there is an error with setting the checkstop the value here will be 
+      0xDEADBEEFDEADBEEF 
+    </description>
+    <ffdc>CHECKSTOP_DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
 
