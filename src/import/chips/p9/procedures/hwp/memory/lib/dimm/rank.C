@@ -89,6 +89,7 @@ namespace rank
 // Index by [DIMM1 rank count][DIMM0 rank count] and first is the RANK_PAIR0 register,
 // second is RANK_PAIR1.
 //
+// TODO RTC 160869: Review hard coded values, possibly make into traits?
 static const std::vector< std::vector< std::pair< uint64_t, uint64_t > > > rank_pair_assignments =
 {
     { {0x0000, 0x0000}, {0x1000, 0x0000}, {0x1030, 0x0000}, {0x1030, 0x5000}, {0x1030, 0x5070} },
@@ -121,6 +122,17 @@ static const std::vector< std::vector< std::vector< uint64_t > > > single_dimm_r
     { {},           {0},          {0, 1},       {0, 1, 2},    {0, 1, 2, 3} },
     { {},           {4},          {4, 5},       {4, 5, 6},    {4, 5, 6, 7} },
 };
+
+// These fields represent the rank fields and valid bits from rank_pair_assignments
+constexpr uint64_t EVEN_PRIMARY_RANK = 48;
+constexpr uint64_t EVEN_SECONDARY_RANK = 52;
+constexpr uint64_t ODD_PRIMARY_RANK = 56;
+constexpr uint64_t ODD_SECONDARY_RANK = 60;
+constexpr uint64_t RANK_LEN = 3;
+constexpr uint64_t EVEN_PRIMARY_VALID = 51;
+constexpr uint64_t EVEN_SECONDARY_VALID = 55;
+constexpr uint64_t ODD_PRIMARY_VALID = 59;
+constexpr uint64_t ODD_SECONDARY_VALID = 63;
 
 ///
 /// @brief Return true iff this rank is on thie DIMM
@@ -311,6 +323,9 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
+    fapi2::buffer<uint64_t> l_rp_reg;
+    fapi2::buffer<uint64_t> l_rank_group;
+
     // If a memory system consists of four or less ranks, each Rank Pair must contain one rank. Each rank has
     // unique configuration registers, calibration registers, and registers to store delay values. When a system
     // contains four or less ranks, each rank number used by the system must be loaded into one of the Primary
@@ -329,23 +344,69 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 
     // need an extra pair of parens to make FAPI_TRY parsing work correctly
     FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 0 >(i_target, l_rp_registers.first)) );
-    FAPI_TRY( (mss::rank::write_rank_pair_reg< 0, 1 >(i_target, l_rp_registers.second)) );
+    FAPI_TRY( (mss::rank::write_rank_pair_reg< 2, 0 >(i_target, l_rp_registers.second)) );
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
 
-    // HACK HACK HACK: put this in the code properly!! BRS
-    {
-        fapi2::buffer<uint64_t> l_fix_me;
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP1_PRI>();
+    // Set primary and secondary mirror in RANK_GROUP register.
+    l_rp_reg = l_rp_registers.first;
+    FAPI_TRY( mss::rank::set_mirror_bits<0>(i_target, l_rp_reg, l_rank_group) );
+    FAPI_TRY( mss::rank::set_mirror_bits<1>(i_target, l_rp_reg, l_rank_group) );
+    l_rp_reg = l_rp_registers.second;
+    FAPI_TRY( mss::rank::set_mirror_bits<2>(i_target, l_rp_reg, l_rank_group) );
+    FAPI_TRY( mss::rank::set_mirror_bits<3>(i_target, l_rp_reg, l_rank_group) );
 
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A3_A4>();
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A5_A6>();
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A7_A8>();
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A11_A13>();
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BA0_BA1>();
-        l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BG0_BG1>();
-        FAPI_DBG("pc_rank_group: 0x%016llx", uint64_t(l_fix_me));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_GROUP_P0, l_fix_me) );
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A3_A4>();
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A5_A6>();
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A7_A8>();
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_A11_A13>();
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BA0_BA1>();
+    l_rank_group.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BG0_BG1>();
+    FAPI_TRY( write_rank_group(i_target, l_rank_group) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set rank mirror bits in RANK_GROUP register
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_rp_reg_value value of RANK_PAIR register
+/// @param[in, out] io_data the register value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+fapi2::ReturnCode set_mirror_bits( const fapi2::Target<T>& i_target,
+                                   const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                   fapi2::buffer<uint64_t>& io_data )
+{
+    uint64_t l_rank = 0;
+    bool l_mirrored = false;
+
+    if (mss::is_odd(RP))
+    {
+        i_rp_reg_value.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY( is_mirrored(i_target, l_rank, i_rp_reg_value.getBit<ODD_PRIMARY_VALID>(), l_mirrored) );
+        io_data.writeBit<TT::ADDR_MIRROR[0]>(l_mirrored);
+
+        i_rp_reg_value.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY( is_mirrored(i_target, l_rank, i_rp_reg_value.getBit<ODD_SECONDARY_VALID>(), l_mirrored) );
+        io_data.writeBit<TT::ADDR_MIRROR[1]>(l_mirrored);
     }
+    else
+    {
+        i_rp_reg_value.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY( is_mirrored(i_target, l_rank, i_rp_reg_value.getBit<EVEN_PRIMARY_VALID>(), l_mirrored) );
+        io_data.writeBit<TT::ADDR_MIRROR[0]>(l_mirrored);
+
+        i_rp_reg_value.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank);
+        FAPI_TRY( is_mirrored(i_target, l_rank, i_rp_reg_value.getBit<EVEN_SECONDARY_VALID>(), l_mirrored) );
+        io_data.writeBit<TT::ADDR_MIRROR[1]>(l_mirrored);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -399,52 +460,56 @@ fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_tar
     // 4 possible rank pair registers
     // TK this is a std::pair and needs to change to support 3DS
 
-    // So we're being a bit tricky here. The rp fields in the registers have
-    // a 'valid' bit. So, if you think about it, our 'rank' is really 3 bits
-    // of 'rank number' and a set valid-bit. So we move the rank over one
-    // and set the right-most bit. If this matches the 4 bits in the rp register
-    // then this is really the rank pair we're looking for.
-    constexpr uint64_t l_rp_even_primary_mask =   0xF000;
-    constexpr uint64_t l_rp_even_secondary_mask = 0x0F00;
-    constexpr uint64_t l_rp_odd_primary_mask =    0x00F0;
-    constexpr uint64_t l_rp_odd_secondary_mask =  0x000F;
-
-    // Shift rank over to accomoate the valid bit in the field, add one for the valid bit
-    i_rank = (i_rank << 1) + 1;
-
+    fapi2::buffer<uint64_t> l_rank_valid;
+    uint64_t l_rank_pri = 0;
+    uint64_t l_rank_sec = 0;
     std::pair<uint64_t, uint64_t> l_rp_registers;
     FAPI_TRY( get_rank_pair_assignments(i_target, l_rp_registers) );
 
-    FAPI_DBG("seeing rank pair registers: 0x%016lx 0x%016lx, rank %d (0x%x)",
-             l_rp_registers.first, l_rp_registers.second, i_rank >> 1, i_rank);
+    FAPI_DBG("seeing rank pair registers: 0x%016lx 0x%016lx, rank %d",
+             l_rp_registers.first, l_rp_registers.second, i_rank);
 
     // Check RP0
-    if ((((l_rp_registers.first & l_rp_even_primary_mask) >> 12) == i_rank) ||
-        (((l_rp_registers.first & l_rp_even_secondary_mask) >> 8) == i_rank))
+    l_rank_valid = l_rp_registers.first;
+    l_rank_valid.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
+    l_rank_valid.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
+
+    if (((l_rank_valid.getBit<EVEN_PRIMARY_VALID>()) && (l_rank_pri == i_rank)) ||
+        ((l_rank_valid.getBit<EVEN_SECONDARY_VALID>()) && (l_rank_sec == i_rank)))
     {
         o_pair = 0;
         return FAPI2_RC_SUCCESS;
     }
 
     // Check RP1
-    if ((((l_rp_registers.first & l_rp_odd_primary_mask) >> 4) == i_rank) ||
-        (((l_rp_registers.first & l_rp_odd_secondary_mask) >> 0) == i_rank))
+    l_rank_valid.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
+    l_rank_valid.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
+
+    if (((l_rank_valid.getBit<ODD_PRIMARY_VALID>()) && (l_rank_pri == i_rank)) ||
+        ((l_rank_valid.getBit<ODD_SECONDARY_VALID>()) && (l_rank_sec == i_rank)))
     {
         o_pair = 1;
         return FAPI2_RC_SUCCESS;
     }
 
     // Check RP2
-    if ((((l_rp_registers.second & l_rp_even_primary_mask) >> 12) == i_rank) ||
-        (((l_rp_registers.second & l_rp_even_secondary_mask) >> 8) == i_rank))
+    l_rank_valid = l_rp_registers.second;
+    l_rank_valid.extractToRight<EVEN_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
+    l_rank_valid.extractToRight<EVEN_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
+
+    if (((l_rank_valid.getBit<EVEN_PRIMARY_VALID>()) && (l_rank_pri == i_rank)) ||
+        ((l_rank_valid.getBit<EVEN_SECONDARY_VALID>()) && (l_rank_sec == i_rank)))
     {
         o_pair = 2;
         return FAPI2_RC_SUCCESS;
     }
 
     // Check RP3
-    if ((((l_rp_registers.second & l_rp_odd_primary_mask) >> 4) == i_rank) ||
-        (((l_rp_registers.second & l_rp_odd_secondary_mask) >> 0) == i_rank))
+    l_rank_valid.extractToRight<ODD_PRIMARY_RANK, RANK_LEN>(l_rank_pri);
+    l_rank_valid.extractToRight<ODD_SECONDARY_RANK, RANK_LEN>(l_rank_sec);
+
+    if (((l_rank_valid.getBit<ODD_PRIMARY_VALID>()) && (l_rank_pri == i_rank)) ||
+        ((l_rank_valid.getBit<ODD_SECONDARY_VALID>()) && (l_rank_sec == i_rank)))
     {
         o_pair = 3;
         return FAPI2_RC_SUCCESS;
