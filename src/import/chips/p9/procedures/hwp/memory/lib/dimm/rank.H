@@ -41,6 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/utils/scom.H>
+#include <lib/utils/num.H>
 
 namespace mss
 {
@@ -88,6 +89,8 @@ class rankPairTraits< fapi2::TARGET_TYPE_MCA, 0 >
         };
 
         // MCA rank config registers
+        constexpr static uint64_t RANK_GROUP = MCA_DDRPHY_PC_RANK_GROUP_P0;
+        constexpr static uint64_t RANK_GROUP_EXT = MCA_DDRPHY_PC_RANK_GROUP_EXT_P0;
         static const std::vector< uint64_t > RANK_PAIR_REGS;
 
         // Mapping for which fields below (primary, secondary, ...) go into which regs
@@ -114,6 +117,15 @@ class rankPairTraits< fapi2::TARGET_TYPE_MCA, 0 >
             MCA_DDRPHY_PC_RANK_PAIR0_P0_SEC_V,
             MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_TER_V,
             MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR0_QUA_V,
+        };
+
+        // PHY RANK_GROUP register ADDR_MIRROR fields, indexed by rank ordinal
+        constexpr static const uint64_t ADDR_MIRROR[] =
+        {
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP0_PRI,
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP0_SEC,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP0_TER,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP0_QUA,
         };
 };
 
@@ -159,6 +171,14 @@ class rankPairTraits< fapi2::TARGET_TYPE_MCA, 1 >
             MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_TER_V,
             MCA_DDRPHY_PC_RANK_PAIR2_P0_PAIR1_QUA_V,
         };
+        // PHY RANK_GROUP register ADDR_MIRROR fields, indexed by rank ordinal
+        constexpr static const uint64_t ADDR_MIRROR[] =
+        {
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP1_PRI,
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP1_SEC,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP1_TER,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP1_QUA,
+        };
 };
 
 ///
@@ -203,6 +223,14 @@ class rankPairTraits< fapi2::TARGET_TYPE_MCA, 2 >
             MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_TER_V,
             MCA_DDRPHY_PC_RANK_PAIR3_P0_PAIR2_QUA_V,
         };
+        // PHY RANK_GROUP register ADDR_MIRROR fields, indexed by rank ordinal
+        constexpr static const uint64_t ADDR_MIRROR[] =
+        {
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP2_PRI,
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP2_SEC,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP2_TER,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP2_QUA,
+        };
 };
 
 ///
@@ -246,6 +274,14 @@ class rankPairTraits< fapi2::TARGET_TYPE_MCA, 3 >
             MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_SEC_V,
             MCA_DDRPHY_PC_RANK_PAIR3_P0_TER_V,
             MCA_DDRPHY_PC_RANK_PAIR3_P0_QUA_V,
+        };
+        // PHY RANK_GROUP register ADDR_MIRROR fields, indexed by rank ordinal
+        constexpr static const uint64_t ADDR_MIRROR[] =
+        {
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP3_PRI,
+            MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_RP3_SEC,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP3_TER,
+            MCA_DDRPHY_PC_RANK_GROUP_EXT_P0_ADDR_MIRROR_RP3_QUA,
         };
 };
 
@@ -365,7 +401,75 @@ inline fapi2::ReturnCode write_rank_pair_reg( const fapi2::Target<T>& i_target, 
 {
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
     FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], i_data) );
-    FAPI_INF("write_rank_pair_reg:: 0x%016lx", i_data);
+    FAPI_INF("write_rank_pair_reg: 0x%016lx", i_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read PC Rank Group register
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, 0>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
+inline fapi2::ReturnCode read_rank_group( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::RANK_GROUP, o_data) );
+    FAPI_INF("read_rank_group: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC Rank Group register
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, 0>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_data the value to write to the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
+inline fapi2::ReturnCode write_rank_group( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::RANK_GROUP, i_data) );
+    FAPI_INF("write_rank_group: 0x%016lx", i_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read PC Rank Group Extension register
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, 0>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
+inline fapi2::ReturnCode read_rank_group_ext( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::RANK_GROUP_EXT, o_data) );
+    FAPI_INF("read_rank_group_ext: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC Rank Group Extension register
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, 0>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_data the value to write to the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
+inline fapi2::ReturnCode write_rank_group_ext( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::RANK_GROUP_EXT, i_data) );
+    FAPI_INF("write_rank_group_ext: 0x%016lx", i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -389,7 +493,7 @@ inline void set_rank_field( fapi2::buffer<uint64_t>& io_data, const uint64_t i_v
     // also set valid field
     io_data.writeBit<TT::RANK_PAIR_VALIDS[R]>(mss::YES);
 
-    FAPI_INF("set_rank_field: 0x%01lx", i_value);
+    FAPI_INF("set_rank_field (rp%d, r%d): 0x%01lx", RP, R, i_value);
 }
 
 ///
@@ -447,7 +551,7 @@ inline void get_rank_field( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_v
     static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
     i_data.extractToRight<TT::RANK_PAIR_FIELDS[R], TT::RANK_PAIR_LENGTHS[R]>(o_value);
 
-    FAPI_INF("get_rank_field: 0x%01lx", o_value);
+    FAPI_INF("get_rank_field (rp%d, r%d): 0x%01lx", RP, R, o_value);
 }
 
 ///
@@ -504,7 +608,7 @@ inline void set_pair_valid( fapi2::buffer<uint64_t>& io_data, const mss::states 
     static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
     io_data.writeBit<TT::RANK_PAIR_VALIDS[R]>(i_state);
 
-    FAPI_INF("set_pair_valid: 0x%01lx", i_state);
+    FAPI_INF("set_pair_valid (rp%d, r%d): 0x%01lx", RP, R, i_state);
 }
 
 ///
@@ -562,7 +666,7 @@ inline void get_pair_valid( const fapi2::buffer<uint64_t>& i_data, mss::states& 
     static_assert((R < TT::NUM_RANKS_IN_PAIR), "Rank index failed range check");
     o_state = (i_data.getBit<TT::RANK_PAIR_VALIDS[R]>() == false) ? mss::NO : mss::YES;
 
-    FAPI_INF("get_pair_valid: 0x%01lx", o_state);
+    FAPI_INF("get_pair_valid (rp%d, r%d): 0x%01lx", RP, R, o_state);
 }
 
 ///
@@ -656,7 +760,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief get_ranks_in_pair
+/// @brief Get the ordered list of ranks in a given pair
 /// @tparam RP rank pair (group) index
 /// @tparam T fapi2 Target Type - derived from i_target's type
 /// @tparam TT traits type defaults to rankPairTraits<T, RP>
@@ -700,6 +804,86 @@ fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Get the ordered list of ranks in all pairs
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[out] o_ranks vector of vectors of rank numbers (primary, secondary, tertiary, quaternary)
+/// @note Any ranks not marked as valid in the pair will be returned as enum NO_RANK
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode get_ranks_in_pairs( const fapi2::Target<T>& i_target,
+                                      std::vector<std::vector<uint64_t>>& o_ranks )
+{
+    o_ranks.clear();
+    std::vector<uint64_t> l_temp;
+
+    FAPI_TRY( get_ranks_in_pair<0>( i_target, l_temp ) );
+    o_ranks.push_back(l_temp);
+    FAPI_TRY( get_ranks_in_pair<1>( i_target, l_temp ) );
+    o_ranks.push_back(l_temp);
+    FAPI_TRY( get_ranks_in_pair<2>( i_target, l_temp ) );
+    o_ranks.push_back(l_temp);
+    FAPI_TRY( get_ranks_in_pair<3>( i_target, l_temp ) );
+    o_ranks.push_back(l_temp);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check whether a given rank needs to be mirrored
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_rank rank number
+/// @param[in] i_valid true if the rank is valid
+/// @param[out] o_mirrored true if rank needs to be mirrored
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode is_mirrored( const fapi2::Target<T>& i_target,
+                               const uint64_t i_rank,
+                               const bool i_valid,
+                               bool& o_mirrored )
+{
+    uint8_t l_mirror[MAX_DIMM_PER_PORT] = {0};
+    FAPI_TRY( eff_dimm_rcd_mirror_mode(i_target, l_mirror) );
+
+    o_mirrored = false;
+
+    // A rank is mirrored if all are true:
+    //  - the rank is valid
+    //  - the rank is odd
+    //  - the mirror mode attribute is set for the rank's DIMM
+    if (i_valid &&
+        mss::is_odd(i_rank) &&
+        (l_mirror[get_dimm_from_rank(i_rank)] == fapi2::ENUM_ATTR_EFF_DIMM_RCD_MIRROR_MODE_ON))
+    {
+        o_mirrored = true;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set rank mirror bits in RANK_GROUP register
+/// @tparam RP rank pair (group) index
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to rankPairTraits<T, RP>
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] i_rp_reg_value value of RANK_PAIR register
+/// @param[in, out] io_data the register value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP, fapi2::TargetType T, typename TT = rankPairTraits<T, RP> >
+fapi2::ReturnCode set_mirror_bits( const fapi2::Target<T>& i_target,
+                                   const fapi2::buffer<uint64_t>& i_rp_reg_value,
+                                   fapi2::buffer<uint64_t>& io_data );
 
 } // namespace rank
 
