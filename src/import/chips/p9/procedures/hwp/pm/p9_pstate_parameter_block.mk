@@ -23,8 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pstate_parameter_block
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers)
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
-#OBJS+=p9_pstates.o
-#p9_pstate_parameter_block_PATH+=$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib
+PPB_INCLUDES=$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm/include/registers
+PPB_INCLUDES+=$(PROJECT_ROOT)/chips/p9/common/pmlib/include
+PPB_INCLUDES+=$(PROJECT_ROOT)/chips/p9/procedures/hwp/lib
+PPB_INCLUDES+=$(PROJECT_ROOT)/chips/p9/procedures/hwp/pm
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PPB_INCLUDES))
+#$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_utils
 $(call BUILD_PROCEDURE)
