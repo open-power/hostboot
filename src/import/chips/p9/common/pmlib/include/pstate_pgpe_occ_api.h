@@ -41,6 +41,10 @@
 extern "C" {
 #endif
 
+// Maximum Number of Quads supported
+#define MAX_QUADS 6
+
+
 //---------------
 // IPC from 405
 //---------------
@@ -50,21 +54,26 @@ enum MESSAGE_ID_IPI2HI
     MSGID_405_INVALID       = 0,
     MSGID_405_START_SUSPEND = 1,
     MSGID_405_CLIPS         = 2,
-    MSGID_405_WOF_INDEX     = 3
+    MSGID_405_WOF_CONTROL   = 3,
+    MSGID_405_WOF_VFRT      = 4
 };
 
 //
 // Return Codes
 //
-// Will be filled in with the PK_PANIC code
+#define PGPE_RC_SUCCESS                 0x01
+#define PGPE_WOF_RC_NOT_ENABLED         0x10
+// Active quad mismatch with requested active quads.  PGPE did not switch
+// to using the new VFRT.  The original VFRT is still being used.
+#define PGPE_WOF_RC_VFRT_QUAD_MISMATCH  0x20
 
 //
 // PMCR Owner
 //
 enum PMCR_OWNER
 {
-    PMCR_OWNER_OCC          = 0,
-    PMCR_OWNER_HOST         = 1
+    PMCR_OWNER_HOST         = 0,
+    PMCR_OWNER_OCC          = 1
 };
 
 typedef struct ipcmsg_base
@@ -73,40 +82,51 @@ typedef struct ipcmsg_base
     uint8_t   rc;
 } ipcmsg_base_t;
 
+
+//
+// Start Suspend Actions
+//
+#define PGPE_ACTION_PSTATE_START   0
+#define PGPE_ACTION_PSTATE_SUSPEND 1
+
 typedef struct ipcmsg_start_suspend
 {
     ipcmsg_base_t   msg_cb;
     uint8_t         action;
     PMCR_OWNER      pmcr_owner;
-
 } ipcmsg_start_suspend_t;
 
 
-typedef struct ipcmsg_clips
+typedef struct ipcmsg_clip_update
 {
     ipcmsg_base_t   msg_cb;
-    uint8_t         ps_clip_min[MAX_QUADS];
-    uint8_t         ps_clip_max[MAX_QUADS];
+    uint8_t         ps_val_clip_min[MAX_QUADS];
+    uint8_t         ps_val_clip_max[MAX_QUADS];
     uint8_t         pad[2];
-} ipcmsg_clips_t;
+} ipcmsg_clip_update_t;
 
+//
+// WOF Control Actions
+//
+#define PGPE_ACTION_WOF_ON         1
+#define PGPE_ACTION_WOF_OFF        2
 
-typedef struct ipcmsg_wof
+typedef struct ipcmsg_wof_control
 {
     ipcmsg_base_t   msg_cb;
-    uint8_t         enable;         // WOF enable
-    uint8_t         ceff_vdd_index; // Effective Capacitance VDD
-    uint8_t         ceff_vdn_index; // Effective Capacitance VDN
-    uint8_t         fratio_index;   // Frequency Ratio
-    uint8_t         vratio_index;   // Voltage Ratio
+    uint8_t         action;
     uint8_t         pad;
-} ipcmsg_wof_t;
+} ipcmsg_wof_control_t;
 
 
-typedef struct ipcmsg_reset
+typedef struct ipcmsg_wof_vfrt
 {
     ipcmsg_base_t   msg_cb;
-} ipcmsg_reset_t;
+    uint8_t         active_quads; // OCC updated with the Active Quads that it
+    // is using for its Ceff calculations
+    uint8_t         pad;
+    VFRT_Hcode_t*   vfrt_ptr;     // Voltage Frequency Ratio Table
+} ipcmsg_wof_vfrt_t;
 
 
 // -----------------------------------------------------------------------------
@@ -256,7 +276,8 @@ typedef union quad_state1
     {
         uint64_t quad4_pstate             : 8;  // Pstate of Quad 4; 0xFF indicates EQ is off
         uint64_t quad5_pstate             : 8;  // Pstate of Quad 5; 0xFF indicates EQ is off
-        uint64_t quad_pstate_rsvd         : 16;
+        uint64_t requested_active_quad    : 6;  // Pstate of Quad 5; 0xFF indicates EQ is off
+        uint64_t quad_pstate_rsvd         : 10;
         uint64_t ivrm_state               : 2;  // ivrm state: bit vector 0:quad4, 1:quad5
         uint64_t ivrm_state_rsvd          : 6;
         uint64_t core_poweron_state       : 8;  // bit vector: 0:core16, 1:core17, ..., 7:core23

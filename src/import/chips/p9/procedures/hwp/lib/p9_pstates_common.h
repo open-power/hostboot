@@ -234,6 +234,27 @@ typedef struct
 
 } SysPowerDistParms;
 
+
+//
+// WOF Voltage, Frequency Ratio Tables
+//
+
+// VDN
+
+// Data is provided in 12ths (eg 12 core pairs on a 24 core chip)
+#define VFRT_VRATIO_SIZE 12
+
+// 100%/10% steps + 1 (for 0)
+#define VFRT_FRATIO_SIZE 11
+
+typedef uint16_t VFRT_Circuit_t;   // Holds a frequency in MHz
+typedef Pstate   VFRT_Hcode_t;
+
+extern VFRT_Circuit_t VFRTCircuitTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
+
+extern VFRT_Hcode_t   VFRTInputTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
+
+
 #ifdef __cplusplus
 } // end extern C
 #endif
