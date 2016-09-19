@@ -29,29 +29,163 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
-    <rc>RC_SBE_SCAN0_DONE_POLL_THRESHOLD_ERR</rc>
-    <description>Timeout waiting for scan0 to complete , loop count expired that polls for OPCG_DONE</description>
+     <sbeError/>
+     <rc>RC_SBE_SCAN0_DONE_POLL_THRESHOLD_ERR</rc>
+     <description>Timeout waiting for scan0 to complete , loop count expired that polls for OPCG_DONE</description>
+     <ffdc>TARGET_CHIPLET</ffdc>
+     <collectRegisterFfdc>
+	   <id>NET_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	   <id>CPLT_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	   <id>OPCG_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	   <id>CC_STATUS_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>ERROR_STATUS_OF_CC</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <ffdc>PERV_CPLT_STAT0</ffdc>
+      <ffdc>LOOP_COUNT</ffdc>
+      <ffdc>HW_DELAY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
-    <rc>RC_SBE_ARRAYINIT_POLL_THRESHOLD_ERR</rc>
-    <description>Polling for OPCG_DONE for arrayInit reached threshold , count expired.</description>
+      <sbeError/>
+      <rc>RC_SBE_ARRAYINIT_POLL_THRESHOLD_ERR</rc>
+      <description>Polling for OPCG_DONE for arrayInit reached threshold , count expired.</description>
+      <ffdc>TARGET_CHIPLET</ffdc>
+      <collectRegisterFfdc>
+	   <id>NET_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CPLT_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>OPCG_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_STATUS_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>ERROR_STATUS_OF_CC</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <ffdc>PERV_CPLT_STAT0</ffdc>
+      <ffdc>LOOP_COUNT</ffdc>
+      <ffdc>HW_DELAY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
-    <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
-    <description>SRAM abist done bit is not set</description>
-    <ffdc>READ_ABIST_DONE</ffdc>
+      <sbeError/>
+      <rc>RC_SRAM_ABIST_DONE_BIT_ERR</rc>
+      <description>SRAM abist done bit is not set</description>
+      <ffdc>TARGET_CHIPLET</ffdc>
+      <collectRegisterFfdc>
+	   <id>NET_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CPLT_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>OPCG_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_STATUS_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>ERROR_STATUS_OF_CC</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <ffdc>PERV_CPLT_STAT</ffdc>
+      <ffdc>SELECT_SRAM</ffdc>
+      <ffdc>READ_ABIST_DONE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
-    <rc>RC_EDRAM_ABIST_DONE_BIT_ERR</rc>
-    <description>EDRAM abist done bit is not set</description>
-    <ffdc>READ_ABIST_DONE</ffdc>
+      <sbeError/>
+      <rc>RC_EDRAM_ABIST_DONE_BIT_ERR</rc>
+      <description>EDRAM abist done bit is not set</description>
+      <ffdc>TARGET_CHIPLET</ffdc>
+      <collectRegisterFfdc>
+	   <id>NET_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CPLT_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>OPCG_CTRL_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_STATUS_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>ERROR_STATUS_OF_CC</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <collectRegisterFfdc>
+	   <id>CC_REGISTERS</id>
+	   <target>TARGET_CHIPLET</target>
+	   <targetType>TARGET_TYPE_PERV</targetType>
+      </collectRegisterFfdc>
+      <ffdc>PERV_CPLT_STAT</ffdc>
+      <ffdc>SELECT_EDRAM</ffdc>
+      <ffdc>READ_ABIST_DONE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
