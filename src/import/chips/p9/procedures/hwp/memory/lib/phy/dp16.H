@@ -43,6 +43,7 @@
 
 #include <lib/utils/scom.H>
 #include <lib/utils/find.H>
+#include <lib/mss_attribute_accessors.H>
 
 namespace mss
 {
@@ -119,6 +120,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         // Number of DP instances
         static constexpr uint64_t DP_COUNT = 5;
 
+        // Maximum number of DRAM's per DP
+        static constexpr uint64_t MAX_DRAM_PER_DP = 4;
+
         // Number of instances of the DLL per DP16. Used for checking parameters, the rest of the
         // code assumes 2 DLL per DP16. There are no DLL in Centaur so we don't need to worry about
         // any of this for some time.
@@ -152,6 +156,18 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
         static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
         static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
+
+        //WR VREF registers
+        static const std::vector< uint64_t > WR_VREF_CONFIG0_REG;
+        static const std::vector< uint64_t > WR_VREF_CONFIG1_REG;
+        static const std::vector< uint64_t > WR_VREF_STATUS0_REG;
+        static const std::vector< uint64_t > WR_VREF_STATUS1_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_ERROR_MASK_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_ERROR_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP0_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP1_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
 
         enum
         {
@@ -200,6 +216,81 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             IO_TX_PFET_TERM_EN_P_WR = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR,
             IO_TX_PFET_TERM_EN_P_WR_LEN = MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0_01_EN_P_WR_LEN,
 
+            ////////////////////////////////////////
+            // WR VREF register field information //
+            ////////////////////////////////////////
+            // CONFIG0
+            WR_VREF_CONFIG0_1D_ONLY_SWITCH = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH,
+            WR_VREF_CONFIG0_FULL_1D = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_RUN_FULL_1D,
+            WR_VREF_CONFIG0_2D_SMALL_STEP_VAL    = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_2D_SMALL_STEP_VAL    ,
+            WR_VREF_CONFIG0_2D_SMALL_STEP_VAL_LEN = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_2D_SMALL_STEP_VAL_LEN,
+            WR_VREF_CONFIG0_2D_BIG_STEP_VAL    = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_2D_BIG_STEP_VAL,
+            WR_VREF_CONFIG0_2D_BIG_STEP_VAL_LEN = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_2D_BIG_STEP_VAL_LEN,
+            WR_VREF_CONFIG0_NUM_BITS_TO_SKIP    = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_NUM_BITS_TO_SKIP,
+            WR_VREF_CONFIG0_NUM_BITS_TO_SKIP_LEN = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_NUM_BITS_TO_SKIP_LEN,
+            WR_VREF_CONFIG0_NUM_NO_INC_COMP    = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_NUM_NO_INC_COMP,
+            WR_VREF_CONFIG0_NUM_NO_INC_COMP_LEN = MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_NUM_NO_INC_COMP_LEN,
+
+            // CONFIG1
+            WR_VREF_CONFIG1_CTR_RANGE_SELECT         = MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0_01_CTR_RANGE_SELECT,
+            WR_VREF_CONFIG1_CTR_RANGE_CROSSOVER      = MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0_01_CTR_RANGE_CROSSOVER,
+            WR_VREF_CONFIG1_CTR_RANGE_CROSSOVER_LEN  = MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0_01_CTR_RANGE_CROSSOVER_LEN,
+            WR_VREF_CONFIG1_CTR_SINGLE_RANGE_MAX     = MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0_01_CTR_SINGLE_RANGE_MAX,
+            WR_VREF_CONFIG1_CTR_SINGLE_RANGE_MAX_LEN = MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0_01_CTR_SINGLE_RANGE_MAX_LEN,
+
+            // ERROR_MASK0/1 - note: all of these are one bit masks for error flags
+            WR_VREF_ERROR_MASK_MAX_RANGE_DRAM_EVEN       = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_MAX_RANGE   ,
+            WR_VREF_ERROR_MASK_MIN_RANGE_DRAM_EVEN       = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_MIN_RANGE   ,
+            WR_VREF_ERROR_MASK_TWO_RANGE_BEST_CASE_DRAM_EVEN = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_TWO_RANGE_BEST_CASE ,
+            WR_VREF_ERROR_MASK_BIT_STEP_DELTA_DRAM_EVEN      = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_BIT_STEP_DELTA ,
+            WR_VREF_ERROR_MASK_STEP_RANGE_EDGE_DRAM_EVEN     = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_STEP_RANGE_EDGE ,
+            WR_VREF_ERROR_MASK_NO_INCREASE_DRAM_EVEN         = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_NO_INCREASE ,
+            WR_VREF_ERROR_MASK_1D_EYE_NOISE_DRAM_EVEN        = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_1D_EYE_NOISE ,
+            WR_VREF_ERROR_MASK_BAD_BIT_DRAM_EVEN         = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_BAD_BIT   ,
+            WR_VREF_ERROR_MASK_MAX_RANGE_MASK_DRAM_ODD       = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_MAX_RANGE_MASK1 ,
+            WR_VREF_ERROR_MASK_MIN_RANGE_DRAM_ODD        = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_MIN_RANGE_MASK1 ,
+            WR_VREF_ERROR_MASK_TWO_RANGE_BEST_CASE_DRAM_ODD  = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_TWO_RANGE_BEST_CASE_MASK1,
+            WR_VREF_ERROR_MASK_BIT_STEP_DELTA_DRAM_ODD       = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_BIT_STEP_DELTA_MASK1 ,
+            WR_VREF_ERROR_MASK_STEP_RANGE_EDGE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_STEP_RANGE_EDGE_MASK1 ,
+            WR_VREF_ERROR_MASK_NO_INCREASE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_NO_INCREASE_MASK1 ,
+            WR_VREF_ERROR_MASK_1D_EYE_NOISE_DRAM_ODD         = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_1D_EYE_NOISE_MASK1 ,
+            WR_VREF_ERROR_MASK_BAD_BIT_DRAM_ODD          = MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0_01_BAD_BIT_MASK1 ,
+
+            // ERROR0/1 - note: all of these are one bit error flags
+            WR_VREF_ERROR_MAX_RANGE_DRAM_EVEN           = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_MAX_RANGE_ERR0   ,
+            WR_VREF_ERROR_MIN_RANGE_DRAM_EVEN           = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_MIN_RANGE_ERR0   ,
+            WR_VREF_ERROR_TWO_RANGE_BEST_CASE_DRAM_EVEN = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_TWO_RANGE_BEST_CASE_ERR0 ,
+            WR_VREF_ERROR_BIT_STEP_DELTA_DRAM_EVEN      = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_BIT_STEP_DELTA_ERR0 ,
+            WR_VREF_ERROR_STEP_RANGE_EDGE_DRAM_EVEN     = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_STEP_RANGE_EDGE_ERR0 ,
+            WR_VREF_ERROR_NO_INCREASE_DRAM_EVEN         = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_NO_INCREASE_ERR0 ,
+            WR_VREF_ERROR_1D_EYE_NOISE_DRAM_EVEN        = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_1D_EYE_NOISE_ERR0 ,
+            WR_VREF_ERROR_BAD_BIT_DRAM_EVEN             = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_BAD_BIT_ERR0     ,
+            WR_VREF_ERROR_MAX_RANGE_MASK_DRAM_ODD       = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_MAX_RANGE_ERR1        ,
+            WR_VREF_ERROR_MIN_RANGE_DRAM_ODD            = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_MIN_RANGE_ERR1   ,
+            WR_VREF_ERROR_TWO_RANGE_BEST_CASE_DRAM_ODD  = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_TWO_RANGE_BEST_CASE_ERR1 ,
+            WR_VREF_ERROR_BIT_STEP_DELTA_DRAM_ODD       = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_BIT_STEP_DELTA_ERR1 ,
+            WR_VREF_ERROR_STEP_RANGE_EDGE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_STEP_RANGE_EDGE_ERR1 ,
+            WR_VREF_ERROR_NO_INCREASE_DRAM_ODD          = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_NO_INCREASE_ERR1 ,
+            WR_VREF_ERROR_1D_EYE_NOISE_DRAM_ODD         = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_1D_EYE_NOISE_ERR1 ,
+            WR_VREF_ERROR_BAD_BIT_DRAM_ODD              = MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0_01_BAD_BIT_ERR1         ,
+
+            // STATUS0
+            WR_VREF_STATUS0_WRRD_CNT     = MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_0_01_CTR_NUM_WRRDREQ_CNT ,
+            WR_VREF_STATUS0_WRRD_CNT_LEN = MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_0_01_CTR_NUM_WRRDREQ_CNT_LEN ,
+
+            // STATUS1
+            WR_VREF_STATUS1_VREFREQ_CNT     = MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0_01_CTR_NUM_VREFREQ_CNT ,
+            WR_VREF_STATUS1_VREFREQ_CNT_LEN = MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0_01_CTR_NUM_VREFREQ_CNT_LEN ,
+            WR_VREF_STATUS1_CUR_VREF        = MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0_01_CTR_CUR      ,
+            WR_VREF_STATUS1_CUR_VREF_LEN    = MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0_01_CTR_CUR_LEN,
+
+            // VALUE0/1 for all rankpairs
+            WR_VREF_VALUE_RANGE_DRAM_EVEN     = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_RANGE_DRAM0 ,
+            WR_VREF_VALUE_VALUE_DRAM_EVEN     = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM0 ,
+            WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM0_LEN ,
+            WR_VREF_VALUE_RANGE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_RANGE_DRAM1 ,
+            WR_VREF_VALUE_VALUE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1 ,
+            WR_VREF_VALUE_VALUE_DRAM_ODD_LEN  = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1_LEN ,
         };
 };
 
@@ -968,6 +1059,612 @@ inline fapi2::ReturnCode write_dq_dqs_rcv_imp( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+////////////////////////////////////////
+//   all the WR VREF scom accessors   //
+////////////////////////////////////////
+///
+/// @brief Read WR_VREF_CONFIG0 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::WR_VREF_CONFIG0_REG[I], o_data) );
+    FAPI_INF("WR VREF config0 dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_CONFIG1 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::WR_VREF_CONFIG1_REG[I], o_data) );
+    FAPI_INF("WR VREF config1 dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_STATUS0 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::WR_VREF_STATUS0_REG[I], o_data) );
+    FAPI_INF("WR VREF status0 dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_STATUS1 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_status1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::WR_VREF_STATUS1_REG[I], o_data) );
+    FAPI_INF("WR VREF status1 dp16%d: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_ERROR_MASK register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_error_mask( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_ERROR_MASK_REG[I].first : TT::WR_VREF_ERROR_MASK_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Error mask reg dp16%d, DRAM%d: 0x%016lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_ERROR register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_error( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_ERROR_REG[I].first : TT::WR_VREF_ERROR_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Error reg dp16%d, DRAM%d: 0x%016lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_VALUE_RP0 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_value_rp0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP0_REG[I].first : TT::WR_VREF_VALUE_RP0_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Value reg RP0 dp16%d, DRAM%d: 0x%016lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_VALUE_RP1 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_value_rp1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP1_REG[I].first : TT::WR_VREF_VALUE_RP1_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Value reg RP1 dp16%d, DRAM%d: 1x%116lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_VALUE_RP2 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_value_rp2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP2_REG[I].first : TT::WR_VREF_VALUE_RP2_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Value reg RP2 dp16%d, DRAM%d: 2x%216lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read WR_VREF_VALUE_RP3 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_wr_vref_value_rp3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP3_REG[I].first : TT::WR_VREF_VALUE_RP3_REG[I].second);
+    FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
+
+    FAPI_INF("WR VREF Value reg RP3 dp16%d, DRAM%d: 3x%316lx", I, D, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_CONFIG0 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_config0( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("WR VREF config0 dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::WR_VREF_CONFIG0_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_CONFIG1 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_config1( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("WR VREF config1 dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::WR_VREF_CONFIG1_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_STATUS0 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_status0( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("WR VREF status0 dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::WR_VREF_STATUS0_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_STATUS1 register
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_status1( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("WR VREF status1 dp16%d: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::WR_VREF_STATUS1_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_ERROR_MASK register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_error_mask( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Error mask reg dp16%d, DRAM%d: 0x%016lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_ERROR_MASK_REG[I].first : TT::WR_VREF_ERROR_MASK_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_ERROR register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_error( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Error reg dp16%d, DRAM%d: 0x%016lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_ERROR_REG[I].first : TT::WR_VREF_ERROR_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_VALUE_RP0 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_value_rp0( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Value reg RP0 dp16%d, DRAM%d: 0x%016lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP0_REG[I].first : TT::WR_VREF_VALUE_RP0_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_VALUE_RP1 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_value_rp1( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Value reg RP1 dp16%d, DRAM%d: 1x%116lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP1_REG[I].first : TT::WR_VREF_VALUE_RP1_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_VALUE_RP2 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_value_rp2( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Value reg RP2 dp16%d, DRAM%d: 2x%216lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP2_REG[I].first : TT::WR_VREF_VALUE_RP2_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief write WR_VREF_VALUE_RP3 register
+/// @tparam I DP16 instance
+/// @tparam D DRAM within the DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value to set into the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, uint64_t D, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_wr_vref_value_rp3( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+    static_assert( D < TT::MAX_DRAM_PER_DP, "number of DRAM out of range");
+
+    FAPI_INF("WR VREF Value reg RP3 dp16%d, DRAM%d: 3x%316lx", I, D, i_data);
+
+    // DRAM 0/1 vs 2/s's address
+    const uint64_t l_addr = ((D < 2) ? TT::WR_VREF_VALUE_RP3_REG[I].first : TT::WR_VREF_VALUE_RP3_REG[I].second);
+    FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////
+// reset procedures for all the WR VREF registers //
+////////////////////////////////////////////////////
+///
+/// @brief Reset wr vref config0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_config0( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref config1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_config1( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref status0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_status0( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref status1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_status1( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref error_mask
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_error_mask( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref error
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_error( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref value rank pair 0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_value_rp0( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref value rank pair 1
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_value_rp1( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref value rank pair 2
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_value_rp2( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Reset wr vref value rank pair3
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_value_rp3( const fapi2::Target<T>& i_target );
+
+
+///
+/// @brief Resets all WR VREF registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_wr_vref_registers( const fapi2::Target<T>& i_target );
 
 } // close namespace dp16
 } // close namespace mss

@@ -646,6 +646,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Resets all of the IO impedances
         FAPI_TRY( mss::reset_io_impedances(p) );
 
+        // Resets all WR VREF related registers
+        FAPI_TRY( mss::dp16::reset_wr_vref_registers(p));
+
         //
         // Workarounds
         //

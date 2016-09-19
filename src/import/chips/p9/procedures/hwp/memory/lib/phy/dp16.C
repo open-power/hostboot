@@ -44,6 +44,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/phy/write_cntrl.H>
 
+#include <lib/dimm/rank.H>
 #include <lib/utils/scom.H>
 #include <lib/utils/pos.H>
 #include <lib/utils/c_str.H>
@@ -252,6 +253,100 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::PR_STATIC_OFFSET_REG
     MCA_DDRPHY_DP16_WRCLK_PR_P0_2,
     MCA_DDRPHY_DP16_WRCLK_PR_P0_3,
     MCA_DDRPHY_DP16_WRCLK_PR_P0_4,
+};
+
+//////////////////////////////////////
+// Defines all WR VREF registers    //
+//////////////////////////////////////
+// Definition of the WR VREF config0 register
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_CONFIG0_REG =
+{
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4,
+};
+// Definition of the WR VREF config1 register
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_CONFIG1_REG =
+{
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_1,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_2,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_3,
+    MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_4,
+};
+// Definition of the WR VREF status0 register
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_STATUS0_REG =
+{
+    MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_0,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_1,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_2,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_3,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_4,
+};
+// Definition of the WR VREF status1 register
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_STATUS1_REG =
+{
+    MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_1,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_2,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_3,
+    MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_4,
+};
+// Definition of the error mask registers element is DP16 number, first is mask 0 second is mask 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_ERROR_MASK_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_0, MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK1_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_1, MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK1_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_2, MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK1_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_3, MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK1_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK0_P0_4, MCA_DDRPHY_DP16_WR_VREF_ERROR_MASK1_P0_4 },
+};
+// Definition of the error registers element is DP16 number, first is error 0 second is error 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_ERROR_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0, MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_1, MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_2, MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_3, MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_4, MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_4 },
+};
+// Definition of the VREF value registers for RP0 element is DP16 number, first is value 0 second is value 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_VALUE_RP0_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_1, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_2, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_3, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_4, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_4 },
+};
+// Definition of the VREF value registers for RP1 element is DP16 number, first is value 0 second is value 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_VALUE_RP1_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_0, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_1, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_2, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_3, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_4, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_4 },
+};
+// Definition of the VREF value registers for RP2 element is DP16 number, first is value 0 second is value 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_VALUE_RP2_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_0, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_1, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_2, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_3, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_4, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_4 },
+};
+// Definition of the VREF value registers for RP3 element is DP16 number, first is value 0 second is value 1
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_VALUE_RP3_REG =
+{
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_0, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_0 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_1, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_1 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_2, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_2 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_3, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_3 },
+    { MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_4, MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_4 },
 };
 
 ///
@@ -1249,6 +1344,303 @@ fapi2::ReturnCode reset_dq_dqs_rcv_imp( const fapi2::Target<TARGET_TYPE_MCA>& i_
 
     }
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+////////////////////////////////////////////////////
+// reset procedures for all the WR VREF registers //
+////////////////////////////////////////////////////
+///
+/// @brief Reset wr vref config0 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_config0( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // builds up the base register value
+    fapi2::buffer<uint64_t> l_config0_data;
+    l_config0_data.clearBit<TT::WR_VREF_CONFIG0_FULL_1D>()
+    // TK putting hardcoded defaults here - revisit how to handle this (values should be obtained through characterization)
+    // smallest available step size - algorithm adds 1 so this is a 1 not a 0
+    .insertFromRight<TT::WR_VREF_CONFIG0_2D_SMALL_STEP_VAL, TT::WR_VREF_CONFIG0_2D_SMALL_STEP_VAL_LEN>(0b000)
+    // step size of 4 - algorithm adds 1 so this is a 4, not a 3
+    .insertFromRight<TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL, TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL_LEN>(0b0011)
+    // for intermediary bits, skip all 7, aka only run one bit on each DRAM for intermediary bits
+    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP, TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP_LEN>(0b111)
+    // run for two VREFs looking for an increase - this is register value + 1 to the algorithm, so it's a 1, not a 0
+    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP, TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP_LEN>(0b001);
+
+    // Whether the 2D VREF is enabled or not varies by the calibration attribute
+    constexpr uint16_t WR_VREF_CAL_ENABLED_BIT = 7;
+    fapi2::buffer<uint16_t> l_cal_steps_enabled;
+    FAPI_TRY( mss::cal_step_enable(i_target, l_cal_steps_enabled) );
+
+    // adds the information to the buffer
+    l_config0_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(l_cal_steps_enabled.getBit<WR_VREF_CAL_ENABLED_BIT>());
+
+    //blast out the scoms
+    FAPI_TRY( mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_config0_data) );
+
+    // return success
+    return fapi2::FAPI2_RC_SUCCESS;
+
+    // handle errors
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset wr vref config1 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_config1( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    //constants to make the compiler happy
+    constexpr uint64_t RANGE_CROSSOVER  = 0b0011000;
+    constexpr uint64_t SINGLE_RANGE_MAX = 0b0110010;
+
+    // builds up the base register value
+    fapi2::buffer<uint64_t> l_config1_data;
+    // default to algorithm to use range 1
+    l_config1_data.clearBit<TT::WR_VREF_CONFIG1_CTR_RANGE_SELECT>()
+    // JEDEC standard value for Range 2 to 1 crossover
+    .insertFromRight<TT::WR_VREF_CONFIG1_CTR_RANGE_CROSSOVER, TT::WR_VREF_CONFIG1_CTR_RANGE_CROSSOVER_LEN>(RANGE_CROSSOVER)
+    // JEDEC standard value for a single range max
+    .insertFromRight<TT::WR_VREF_CONFIG1_CTR_SINGLE_RANGE_MAX,
+                     TT::WR_VREF_CONFIG1_CTR_SINGLE_RANGE_MAX_LEN>(SINGLE_RANGE_MAX);
+
+    // blast out the scoms
+    return  mss::scom_blastah(i_target, TT::WR_VREF_CONFIG1_REG, l_config1_data) ;
+}
+
+
+///
+/// @brief Reset wr vref status0 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_status0( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // reset to all 0's
+    return mss::scom_blastah(i_target, TT::WR_VREF_STATUS0_REG, 0x0000 ) ;
+}
+
+///
+/// @brief Reset wr vref status1 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_status1( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // reset to all 0's
+    return mss::scom_blastah(i_target, TT::WR_VREF_STATUS1_REG, 0x0000 ) ;
+}
+
+///
+/// @brief Reset wr vref error_mask - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_error_mask( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // set all errors to be informational - masked off
+    // TK update this post characterization
+    // Note: the 0xffff includes the workaround for HW375535 - Error register latching
+    return mss::scom_blastah(i_target, TT::WR_VREF_ERROR_MASK_REG, 0xFFFF ) ;
+}
+
+///
+/// @brief Reset wr vref error - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_error( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // clears all errors
+    return mss::scom_blastah(i_target, TT::WR_VREF_ERROR_REG, 0x0000 ) ;
+}
+
+///
+/// @brief Resets the WR VREF values by rank pair for given registers
+/// @tparam uint64_t RP the rankpair to reset
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp_registers registers to reset
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t RP >
+fapi2::ReturnCode reset_wr_vref_value_by_rp( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const std::vector< std::pair<uint64_t, uint64_t> >& i_rp_registers )
+{
+    // traits definition
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // declares constants for the VREF train attributes - UT will fail if the ATTR changes
+    // Value start location and length
+    constexpr uint8_t VREF_VALUE_LOC = 2;
+    constexpr uint8_t VREF_VALUE_LEN = TT::WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN;
+    // VREF range start location - it's only one bit
+    constexpr uint8_t VREF_RANGE_LOC = 7;
+
+    // declares variables
+    uint64_t l_dimm = 0;
+    uint64_t l_rank = 0;
+    std::vector< uint64_t > l_prp;
+    uint8_t l_vref_value[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    uint8_t l_vref_range[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    fapi2::buffer<uint64_t> l_vref_reg_data;
+
+    // sets up the rank pair information
+    FAPI_TRY(mss::rank::primary_ranks(i_target, l_prp));
+
+    // if this rank is declared, set up it's values
+    // if not use the defaults of dimm = 0, rank = 0 - doesn't matter as this rank won't be calibrated
+    if(l_prp.size() > RP)
+    {
+        l_dimm = l_prp[RP] / MAX_RANK_PER_DIMM;
+        l_rank = l_prp[RP] % MAX_RANK_PER_DIMM;
+    }
+
+    FAPI_INF("%s %s RP %d found! using DIMM%d and Rank%d",
+             mss::c_str(i_target), ((l_prp.size() <= RP) ? "no" : ""), RP, 0, 0);
+
+    // gets the VREF information
+    FAPI_TRY( mss::eff_vref_dq_train_value(i_target, &l_vref_value[0][0]));
+    FAPI_TRY( mss::eff_vref_dq_train_range(i_target, &l_vref_range[0][0]));
+
+    //sets up the data
+    {
+        uint64_t l_value = 0;
+        const fapi2::buffer<uint8_t> l_vref_val_buf = l_vref_value[l_dimm][l_rank];
+        l_vref_val_buf.extractToRight<VREF_VALUE_LOC, VREF_VALUE_LEN>(l_value);
+
+        const fapi2::buffer<uint8_t> l_vref_range_buf = l_vref_range[l_dimm][l_rank];
+        const auto l_range = l_vref_range_buf.getBit<VREF_RANGE_LOC>();
+
+        l_vref_reg_data.writeBit<TT::WR_VREF_VALUE_RANGE_DRAM_EVEN>(l_range)
+        .writeBit<TT::WR_VREF_VALUE_RANGE_DRAM_ODD>(l_range)
+        .insertFromRight<TT::WR_VREF_VALUE_VALUE_DRAM_EVEN, TT::WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN>(l_value)
+        .insertFromRight<TT::WR_VREF_VALUE_VALUE_DRAM_ODD, TT::WR_VREF_VALUE_VALUE_DRAM_ODD_LEN>(l_value);
+    }
+
+    //blasts out the scoms
+    FAPI_INF("%s RP %d getting reset to values 0x%04lx", mss::c_str(i_target), RP, l_vref_value);
+    FAPI_TRY(mss::scom_blastah(i_target, i_rp_registers, l_vref_reg_data ));
+
+    // return success
+    return fapi2::FAPI2_RC_SUCCESS;
+
+    // handle errorss
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset wr vref value rank pair 0 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_value_rp0( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    return reset_wr_vref_value_by_rp<0>(i_target, TT::WR_VREF_VALUE_RP0_REG);
+}
+
+///
+/// @brief Reset wr vref value rank pair 1 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_value_rp1( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    return reset_wr_vref_value_by_rp<1>(i_target, TT::WR_VREF_VALUE_RP1_REG);
+}
+
+///
+/// @brief Reset wr vref value rank pair 2 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_value_rp2( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    return reset_wr_vref_value_by_rp<2>(i_target, TT::WR_VREF_VALUE_RP2_REG);
+}
+
+///
+/// @brief Reset wr vref value rank pair3 - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_value_rp3( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    return reset_wr_vref_value_by_rp<3>(i_target, TT::WR_VREF_VALUE_RP3_REG);
+}
+
+///
+/// @brief Resets all WR VREF registers - specialization for MCA
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_wr_vref_registers( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // resets all of the below registers
+    FAPI_TRY( reset_wr_vref_config0(i_target));
+    FAPI_TRY( reset_wr_vref_config1(i_target));
+    FAPI_TRY( reset_wr_vref_status0(i_target));
+    FAPI_TRY( reset_wr_vref_status1(i_target));
+    FAPI_TRY( reset_wr_vref_error_mask(i_target));
+    FAPI_TRY( reset_wr_vref_error(i_target));
+    FAPI_TRY( reset_wr_vref_value_rp0(i_target));
+    FAPI_TRY( reset_wr_vref_value_rp1(i_target));
+    FAPI_TRY( reset_wr_vref_value_rp2(i_target));
+    FAPI_TRY( reset_wr_vref_value_rp3(i_target));
+
+    // return success
+    return fapi2::FAPI2_RC_SUCCESS;
+
+    // handle errors
 fapi_try_exit:
     return fapi2::current_err;
 }
