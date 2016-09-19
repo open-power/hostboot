@@ -33,12 +33,6 @@
 
 using namespace fapi2;
 
-template<typename T>
-T min (T a, T b)
-{
-    return ((a < b) ? a : b);
-}
-
 #define MBOX_ATTR_WRITE(ID,TARGET,IMAGE) \
     { \
         fapi2::ID##_Type ID##_attrVal; \
@@ -906,6 +900,11 @@ fapi2::ReturnCode p9_xip_customize (
 
             io_ringSectionBufSize = l_xipRingsSection.iv_size;
 
+            FAPI_ASSERT( io_ringSectionBufSize > 0,
+                         fapi2::XIPC_EMPTY_RING_SECTION().
+                         set_CHIP_TARGET(i_proc_target),
+                         "Ring section size in SBE image is zero. No TOR. Can't append rings.");
+
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
 
             l_maxRingSectionSize = l_maxImageSize - l_imageSizeWithoutRings;
@@ -1093,6 +1092,12 @@ fapi2::ReturnCode p9_xip_customize (
                          set_OCCURRENCE(7),
                          "p9_xip_get_section() failed (7) getting .rings section w/rc=0x%08X",
                          (uint32_t)l_rc );
+
+            FAPI_ASSERT( l_xipRingsSection.iv_size > 0,
+                         fapi2::XIPC_EMPTY_RING_SECTION().
+                         set_CHIP_TARGET(i_proc_target),
+                         "CME or SGPE ring section size is zero (sysPhase=%d). No TOR. Can't append rings.",
+                         i_sysPhase );
 
             l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
 
