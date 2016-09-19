@@ -33,6 +33,8 @@ ROOTPATH = ../../../..
 
 MODULE = fapi2_rt
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/runtime
+
 SUBDIRS += test.d
 
 include ../fapi2.mk
