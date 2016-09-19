@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -541,6 +541,88 @@ extern "C"
 
         FAPI_INF("< copySectionToHomer");
         return retCode;
+    }
+
+//------------------------------------------------------------------------------
+
+    /**
+     * @brief   Update the CME/SGPE Image Header Flag field.
+     * @param   i_pChipHomer    points to HOMER image.
+     * @return  fapi2 return code.
+     */
+    fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer  )
+    {
+        uint8_t attrVal = 0;
+        uint32_t cmeFlag = 0;
+        uint32_t sgpeFlag = 0;
+
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+        sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
+
+
+        FAPI_DBG(" ==================== CME/SGPE Flags =================");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP4_DISABLE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_STOP4_DISABLE");
+
+        if( attrVal )
+        {
+            cmeFlag |= CME_STOP_4_TO_2_BIT_POS;
+            sgpeFlag |= SGPE_STOP_4_TO_2_BIT_POS;
+        }
+
+        FAPI_DBG("STOP_4_to_2           :   %s", attrVal ? "TRUE" : "FALSE" );
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP5_DISABLE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_STOP5_DISABLE");
+
+        if( attrVal )
+        {
+            cmeFlag |= CME_STOP_5_TO_4_BIT_POS;
+            sgpeFlag |= SGPE_STOP_5_TO_4_BIT_POS;
+        }
+
+        FAPI_DBG("STOP_5_to_4           :   %s", attrVal ? "TRUE" : "FALSE");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP8_DISABLE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_STOP8_DISABLE");
+
+        if( attrVal )
+        {
+            cmeFlag |= CME_STOP_8_TO_5_BIT_POS;
+            sgpeFlag |= SGPE_STOP_8_TO_5_BIT_POS;
+        }
+
+        FAPI_DBG("STOP_8_to_5           :   %s", attrVal ? "TRUE" : "FALSE" );
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP11_DISABLE,
+                               FAPI_SYSTEM,
+                               attrVal),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_STOP11_DISABLE");
+
+        if( attrVal )
+        {
+            cmeFlag |= CME_STOP_11_TO_8_BIT_POS;
+            sgpeFlag |= SGPE_STOP_11_TO_8_BIT_POS;
+        }
+
+        FAPI_DBG("STOP_11_to_8           :   %s", attrVal ? "TRUE" : "FALSE" );
+
+        pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
+        pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
+
+        FAPI_INF("CME Flag Value        : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
+        FAPI_INF("SGPE Flag Value       : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
+        FAPI_DBG(" ==================== CME/SGPE Flags Ends =================");
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 
 //------------------------------------------------------------------------------
@@ -2743,6 +2825,9 @@ extern "C"
                          fapi2::IMG_EXCEED_SRAM_SIZE( )
                          .set_BAD_IMG_SIZE( sramImgSize ),
                          "SRAM Image Size Exceeded Max Allowed Size" );
+
+            //Update CME/SGPE Flags in respective image header.
+            updateImageFlags( pChipHomer );
 
             //Finally update the attributes storing PGPE and SGPE's boot copier offset.
             retCode = updateGpeAttributes( pChipHomer, i_procTgt );

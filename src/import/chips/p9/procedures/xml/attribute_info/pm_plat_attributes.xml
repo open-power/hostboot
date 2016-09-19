@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -722,6 +722,24 @@
     Consumer:  p8_hcode_image_build.C
 
     Platform default:  OFF
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP5_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description> Control CME response to execution of PowerPC STOP instruction
+    if OFF, treat STOP5 as STOP5
+    if ON,  treat STOP5 as STOP4
+
+    Producer: ???
+
+    Consumer:  p8_hcode_image_build.C
+
+    Platform default: ON
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
