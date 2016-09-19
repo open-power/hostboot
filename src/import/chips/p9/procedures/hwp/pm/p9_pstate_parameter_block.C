@@ -796,7 +796,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_on[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data);
             FAPI_INF(" IVDDQ with all good cores ON, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -805,7 +805,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_cores_off[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data);
             FAPI_INF("IVDDQ with all cores and caches OFF, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -814,7 +814,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_off[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] = revle16(l_iddq_data);
             FAPI_INF("IVDDQ with all good cores OFF and caches ON, Measurement %d = %u", i, l_iddq_data);
             l_buffer_iq_inc += sizeof(iddq_entry_t);
         }
@@ -825,7 +825,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             for (j = 0; j < IDDQ_MEASUREMENTS; j++)
             {
                 l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-                io_iddqt->ivdd_quad_good_cores_on[i][j] = revle16(l_iddq_data);
+                io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] = revle16(l_iddq_data);
                 FAPI_INF(" IVDDQ will all good cores ON , Quad %d, Measurement %d = %u", i, j, l_iddq_data);
                 l_buffer_iq_inc += sizeof(iddq_entry_t);
             }

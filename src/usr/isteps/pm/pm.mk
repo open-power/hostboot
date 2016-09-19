@@ -51,6 +51,9 @@ OBJS += pm_common.o
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PATH} ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH}
 
+# TODO RTC: 164237
+# Take another look at PM lib
+
 include ${ROOTPATH}/procedure.rules.mk
 include ${HWP_PATH}/p9_pm_pba_bar_config.mk
 include ${HWP_PATH}/p9_pm_pba_init.mk

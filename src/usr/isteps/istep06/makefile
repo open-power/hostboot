@@ -62,6 +62,9 @@ include ${ROOTPATH}/procedure.rules.mk
 
 #Include all the procedure makefiles
 include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
+#TODO RTC: 164237
+# Take another look at PM lib
+include $(PM_HWP_PATH)/p9_pm_utils.mk
 include $(PM_HWP_PATH)/p9_setup_evid.mk
 include $(LIB_HWP_PATH)/p9_avsbus_lib.mk
 
