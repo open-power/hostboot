@@ -120,7 +120,11 @@ fapi2::ReturnCode p9_sbe_common_align_chiplets(const
     FAPI_DBG("Loop Count :%d", l_timeout);
 
     FAPI_ASSERT(l_timeout > 0,
-                fapi2::CPLT_NOT_ALIGNED_ERR(),
+                fapi2::CPLT_NOT_ALIGNED_ERR()
+                .set_TARGET_CHIPLET(i_target_chiplets)
+                .set_PERV_CPLT_STAT0(l_data64)
+                .set_LOOP_COUNT(l_timeout)
+                .set_HW_DELAY(NS_DELAY),
                 "ERROR:CHIPLET NOT ALIGNED");
 
     FAPI_DBG("For all chiplets: disable alignement");
@@ -185,6 +189,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_sl_clkregion_status == l_regions,
                         fapi2::NEST_SL_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_SL(l_sl_clock_status),
                         "Clock running for sl type not matching with expected values");
         }
@@ -198,6 +203,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_sl_clkregion_status == l_regions,
                         fapi2::NEST_SL_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_SL(l_sl_clock_status),
                         "Clock running for sl type not matching with expected values");
         }
@@ -221,6 +227,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
                         fapi2::NEST_NSL_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_NSL(l_nsl_clock_status),
                         "Clock running for nsl type not matching with expected values");
         }
@@ -234,6 +241,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_nsl_clkregion_status == l_regions,
                         fapi2::NEST_NSL_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_NSL(l_nsl_clock_status),
                         "Clock running for nsl type not matching with expected values");
         }
@@ -257,6 +265,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_ary_clkregion_status == l_regions,
                         fapi2::NEST_ARY_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_ARY(l_ary_clock_status),
                         "Clock running for ary type not matching with expected values");
         }
@@ -270,6 +279,7 @@ fapi2::ReturnCode p9_sbe_common_check_cc_status_function(
 
             FAPI_ASSERT(l_ary_clkregion_status == l_regions,
                         fapi2::NEST_ARY_ERR()
+                        .set_TARGET_CHIPLET(i_target)
                         .set_READ_CLK_ARY(l_ary_clock_status),
                         "Clock running for ary type not matching with expected values");
         }
@@ -429,7 +439,11 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     FAPI_DBG("Loop Count after CPLT_OPCG_DONE_DC polling:%d", l_timeout);
 
     FAPI_ASSERT(l_timeout > 0,
-                fapi2::CPLT_OPCG_DONE_NOT_SET_ERR(),
+                fapi2::CPLT_OPCG_DONE_NOT_SET_ERR()
+                .set_TARGET_CHIPLET(i_target)
+                .set_PERV_CPLT_STAT0(l_data64)
+                .set_LOOP_COUNT(l_timeout)
+                .set_HW_DELAY(NS_DELAY),
                 "ERROR:CHIPLET OPCG DONE NOT SET AFTER CLOCK START STOP CMD");
 
     //To do do checking only for chiplets that dont have Master-slave mode enabled
@@ -456,6 +470,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
 
         FAPI_ASSERT(l_sl_clock_status == l_exp_sl_clock_status,
                     fapi2::SL_ERR()
+                    .set_TARGET_CHIPLET(i_target)
                     .set_READ_CLK_SL(l_sl_clock_status),
                     "CLOCK RUNNING STATUS FOR SL TYPE NOT MATCHING WITH EXPECTED VALUES");
 
@@ -468,6 +483,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
 
         FAPI_ASSERT(l_nsl_clock_status == l_exp_nsl_clock_status,
                     fapi2::NSL_ERR()
+                    .set_TARGET_CHIPLET(i_target)
                     .set_READ_CLK_NSL(l_nsl_clock_status),
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR NSL TYPE");
 
@@ -480,6 +496,7 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
 
         FAPI_ASSERT(l_ary_clock_status == l_exp_ary_clock_status,
                     fapi2::ARY_ERR()
+                    .set_TARGET_CHIPLET(i_target)
                     .set_READ_CLK_ARY(l_ary_clock_status),
                     "CLOCK RUNNING STATUS IS NOT MATCHING WITH EXPECTED VALUE FOR ARRAY TYPE");
     }
