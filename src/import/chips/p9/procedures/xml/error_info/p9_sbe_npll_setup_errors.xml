@@ -27,33 +27,77 @@
 <!-- Halt codes for p9_sbe_npll_setup -->
 
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_SS_PLL_LOCK_ERR</rc>
-    <description>Spectrum pll not locked</description>
-    <ffdc>SS_PLL_READ</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_CP_FILTER_PLL_LOCK_ERR</rc>
-    <description>CP Filter PLL not locked</description>
-    <ffdc>CP_FILTER_PLL_READ</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_NEST_PLL_ERR</rc>
-    <description>Nest PLL not locked</description>
-    <ffdc>NEST_PLL_READ</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_IO_FILTER_PLL_LOCK_ERR</rc>
-    <description>IO Filter PLL not locked</description>
-    <ffdc>IO_FILTER_PLL_READ</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
+   <sbeTarget>MASTER_CHIP</sbeTarget>
+   <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_SS_PLL_LOCK_ERR</rc>
+     <description>Spectrum pll not locked</description>
+     <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <ffdc>SS_PLL_READ</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_CP_FILTER_PLL_LOCK_ERR</rc>
+     <description>CP Filter PLL not locked</description>
+     <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <ffdc>CP_FILTER_PLL_READ</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_NEST_PLL_ERR</rc>
+     <description>Nest PLL not locked</description>
+     <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <ffdc>NEST_PLL_READ</ffdc>
+     <ffdc>SS_FILTER_BYPASS_STATUS</ffdc>
+     <ffdc>CP_FILTER_BYPASS_STATUS</ffdc>
+     <ffdc>IO_FILTER_BYPASS_STATUS</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_IO_FILTER_PLL_LOCK_ERR</rc>
+     <description>IO Filter PLL not locked</description>
+     <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <ffdc>IO_FILTER_PLL_READ</ffdc>
+   </hwpError>
+   <!-- ******************************************************************** -->
 </hwpErrors>
