@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <lib/utils/scom.H>
+#include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
 
 namespace mss
@@ -119,6 +120,8 @@ class wcTraits<fapi2::TARGET_TYPE_MCA>
 
             RTT_WR_SWAP_ENABLE_P0_WL = MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0_WL,
             RTT_WR_SWAP_ENABLE_P0_CTR = MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0_CTR,
+            VREF_COUNTER_RESET_VAL = MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0_CTR_VREF_COUNTER_RESET_VAL,
+            VREF_COUNTER_RESET_VAL_LEN = MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0_CTR_VREF_COUNTER_RESET_VAL_LEN,
         };
 
 };
@@ -463,8 +466,17 @@ inline fapi2::ReturnCode reset_rtt_wr_swap_enable( const fapi2::Target<T>& i_tar
     FAPI_TRY( read_rtt_wr_swap_enable(i_target, l_data) );
 
     // Per John Bialas 1/16: The enable RTT_SWAP bit is causing problems.
+    // Per Glancy 9/16 DD1 has an issue w/ the WR_CTR RTT swap, it's only for WR VREF cal
     l_data.clearBit<TT::RTT_WR_SWAP_ENABLE_P0_WL>();
-    l_data.setBit<TT::RTT_WR_SWAP_ENABLE_P0_CTR>();
+    l_data.clearBit<TT::RTT_WR_SWAP_ENABLE_P0_CTR>();
+
+    // taken from JEDEC DDR4 SPEC 2015 specification
+    // specific value is for tVREFDQE/tVREFDQX - both are 150 ns
+    {
+        constexpr uint64_t VREFDQ_LATCH_TIME_NS = 150;
+        const uint64_t l_vref_counter_reset = ns_to_cycles(i_target, VREFDQ_LATCH_TIME_NS);
+        l_data.insertFromRight<TT::VREF_COUNTER_RESET_VAL, TT::VREF_COUNTER_RESET_VAL_LEN>(l_vref_counter_reset);
+    }
 
     FAPI_DBG("wc_rtt_wr_swap_enable reset 0x%llx", l_data);
     FAPI_TRY( write_rtt_wr_swap_enable(i_target, l_data) );
