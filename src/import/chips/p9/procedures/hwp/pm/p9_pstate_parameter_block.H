@@ -35,7 +35,11 @@
 #ifndef __P9_PSTATE_PARAMETER_BLOCK_H__
 #define __P9_PSTATE_PARAMETER_BLOCK_H__
 
-#include <p9_pstates.h>
+#include <p9_pm_utils.H>
+#include <p9_pstates_common.h>
+#include <p9_pstates_pgpe.h>
+#include <p9_pstates_cmeqm.h>
+#include <p9_pstates_occ.h>
 
 // ssrivath- See if this is required
 #ifdef __cplusplus
@@ -223,6 +227,31 @@ typedef struct
 
 
 } AttributeList;
+
+/// The layout of the various Pstate Parameter Blocks (PPBs) passed a single
+/// structure for data movement.
+///
+/// This structure is only used for passing Pstate data from
+/// p9_pstate_parameter_block to it caller for placement into HOMER for
+/// consumption by into OCC, the Pstate PGPE and CME. Therefore there is no
+/// alignment requirement.
+
+typedef struct
+{
+
+    /// Magic Number
+    uint64_t magic;
+
+    // PGPE content
+    GlobalPstateParmBlock globalppb;
+
+    // CME content
+    LocalPstateParmBlock localppb;
+
+    // OCC content
+    OCCPstateParmBlock occppb;
+
+} PstateSuperStructure;
 
 // Start of function declarations
 
