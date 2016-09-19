@@ -177,6 +177,16 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_EMPTY_RING_SECTION</rc>
+    <description>The ring section size is zero. No TOR. Can't append rings</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_IMAGE_WOULD_OVERFLOW</rc>
     <description>
       Ran out of image buffer space trying to append a ring to the .rings section
