@@ -25,4 +25,5 @@
 
 # Include the macros and things for MVPD ring procedures
 PROCEDURE=p9_get_mvpd_ring
+lib$(PROCEDURE)_DEPLIBS+=p9_mvpd_ring_funcs
 $(call BUILD_PROCEDURE)
