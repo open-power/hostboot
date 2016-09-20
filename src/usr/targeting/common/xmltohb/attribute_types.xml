@@ -22987,6 +22987,42 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>IO_X_MFG_CHK</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Indicate if manufacturing tests should be taken pre / post linktraining.
+        FALSE = 0x0,
+        TRUE = 0x1
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_X_MFG_CHK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_X_MFG_MIN_EYE_WIDTH</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Minimum eye width to allow passing through manufacturing.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_X_MFG_MIN_EYE_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>IO_XBUS_MASTER_MODE</id>
     <description>
        Flag to indicate if the target is a master.
