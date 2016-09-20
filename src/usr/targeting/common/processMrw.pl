@@ -1245,7 +1245,7 @@ sub setEepromAttributes
                "PHYS_PATH");
     my $mem  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "MEMORY_SIZE_IN_KB");
-    my $count  = 4; # @TODO RTC: 138226 Need place to get a chip count
+    my $count  = 2; # default for VPD SEEPROMs
     my $cycle  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
                "WRITE_CYCLE_TIME");
     my $page  = $targetObj->getAttribute($conn_target->{DEST_PARENT},
