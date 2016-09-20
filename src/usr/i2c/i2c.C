@@ -3174,14 +3174,17 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     continue;
                 }
 
-                // Do not do FSI I2C resets on engine 0 of slave processors
-                // if security is asserted via jumper to that processor.
+                // Do not do FSI I2C force unlock resets on engine 0 of slave
+                // processors if security is asserted via jumper to that
+                // processor.  Instead, do a basic reset, because that is
+                // tolerated by the hardware securiy restrictions.
                 // NOTE: getJumperState() returns state of master processor's
                 //       jumper (true==secure).  Since all secure jumpers
                 //       are required to have the same configuration in a
                 //       system, the master processor jumper bit is used as a
                 //       proxy for all slave processors.
                 // NOTE: Master Proc never uses FSI
+                i2c_reset_level opResetLevel = FORCE_UNLOCK_RESET;
                 if ( (i_processOperation & I2C_OP_RESET) &&
                      (engine == 0) &&
                      (io_args.switches.useFsiI2C == 1) &&
@@ -3191,16 +3194,16 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                    )
                 {
                     TRACUCOMP( g_trac_i2c,INFO_MRK
-                               "i2cProcessActiveMasters: skipping tgt=0x%X "
+                               "i2cProcessActiveMasters: for tgt=0x%08X, "
                                "due to ResetOp(%d), useFsiI2C(%d), engine (%d),"
-                               " TYPE(%d) --AND-- getJumperState(%d)",
+                               " TYPE(%d) --AND-- getJumperState(%d), "
+                               "use basic reset type",
                                TARGETING::get_huid(tgt), i_processOperation,
                                io_args.switches.useFsiI2C, engine,
                                tgt->getAttr<TARGETING::ATTR_TYPE>(),
                                SECUREBOOT::getJumperState());
-                    continue;
+                    opResetLevel=BASIC_RESET;
                 }
-
 
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
@@ -3304,8 +3307,8 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                   "i2cProcessActiveMasters: reset engine: %d",
                                   engine );
 
-                            err = i2cReset ( tgt, io_args,
-                                     FORCE_UNLOCK_RESET);
+                            err = i2cReset (tgt, io_args,
+                                            opResetLevel);
                             if( err )
                             {
                                 TRACFCOMP( g_trac_i2c,ERR_MRK
