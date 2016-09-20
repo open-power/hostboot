@@ -61,6 +61,37 @@ uint32_t clearEccCounters( ExtensibleChip * i_chip );
 template<TARGETING::TYPE T>
 uint32_t clearEccFirs( ExtensibleChip * i_chip );
 
+/** @brief Contains all supported ECC attentions. Each enum is used in a mask,
+ *         so the value of each enum must be unique and disjoint. */
+enum MaintEccAttns
+{
+    MAINT_NO_ERROR      = 0,    ///< No ECC errors found
+
+    // Common Nimbus and Centaur
+    MAINT_MPE           = 0x8000, ///< Chip mark placed
+    MAINT_SCE           = 0x4000, ///< CE on symbol mark
+    MAINT_MCE           = 0x2000, ///< CE on chip mark
+    MAINT_UE            = 0x1000, ///< UE
+    MAINT_HARD_NCE_ETE  = 0x0800, ///< Hard NCE threshold exceeed
+    MAINT_SOFT_NCE_ETE  = 0x0400, ///< Soft NCE threshold exceeed
+    MAINT_INT_NCE_ETE   = 0x0200, ///< Intermittent NCE threshold exceeed
+    MAINT_RCE_ETE       = 0x0100, ///< Retry CE threshold exceeed
+
+    // Nimbus only
+    MAINT_IUE           = 0x0080, ///< Intermittent UE
+    MAINT_IMPE          = 0x0040, ///< Intermittent chip mark
+};
+
+/**
+ * @brief  Checks for all currently active maintenance attentions.
+ * @param  i_chip     MBA or MCA.
+ * @param  o_eccAttns Mask of all currently active maintenance attentions. See
+ *                    enum MaintEccAttns for values.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
+
 } //end namespace PRDF
 
 #endif // __prdfMemScrubUtils_H
