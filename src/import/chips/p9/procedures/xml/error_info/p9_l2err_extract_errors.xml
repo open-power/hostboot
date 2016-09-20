@@ -1,0 +1,111 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_l2err_extract_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_TA_WRONG_SIZE_ERR</rc>
+    <description>
+      Procedure: p9_l2err_extract
+      Specified trace array length does not match expected length
+    </description>
+	<ffdc>TARGET</ffdc>
+	<ffdc>TA_DATA_SIZE</ffdc>
+	<ffdc>EXP_TA_DATA_SIZE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_DW_NOT_FOUND</rc>
+    <description>
+      Procedure: p9_l2err_extract
+      Could not find DW
+    </description>
+	<ffdc>TARGET</ffdc>
+	<ffdc>TRACE_ARRAY_1</ffdc>
+	<ffdc>TRACE_ARRAY_2</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_UNKNOWN_SYNDROME_ECC</rc>
+    <description>
+      Procedure: p9_l2err_extract
+      Syndrome ECC is unknown
+    </description>
+	<ffdc>TARGET</ffdc>
+	<ffdc>SYNDROME</ffdc>
+  </hwpError> 
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_BUILDING_DATA_ERROR</rc>
+    <description>
+      Procedure: p9_l2err_extract
+	  Error while extracting/building address data
+    </description>
+	<ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_DATA_BUFFER_ERROR</rc>
+    <description>
+      Procedure: p9_l2err_extract
+	  Error while extracting from trace array data buffer
+    </description>
+	<ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_NO_CEUE_FOUND</rc>
+    <description>
+      Procedure: p9_l2err_extract
+	  No CE or UE found in trace array
+    </description>
+	<ffdc>TARGET</ffdc>
+	<ffdc>TA_DATA</ffdc>
+	<ffdc>ERR_REQ_TYPE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
+    <description>
+      Procedure: p9_l2err_extract
+      Could not find syndrome
+    </description>
+	<ffdc>TARGET</ffdc>
+	<ffdc>TRACE_ARRAY_1</ffdc>
+	<ffdc>TRACE_ARRAY_2</ffdc>
+	<ffdc>TRACE_ARRAY_3</ffdc>
+	<ffdc>TRACE_ARRAY_4</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L2ERR_EXTRACT_SYNDROME_DATA</rc>
+    <description>
+      Procedure: p9_l2err_extract
+      Error while extracting syndrome data
+    </description>
+	<ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
