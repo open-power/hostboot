@@ -298,7 +298,7 @@ namespace DeviceFW
             // Check op type = i_opType registrations.
             if (0 != ops[i_opType].offset)
             {
-                // Check access type = WILDCARD registrations.
+                // Check access type = i_opType registrations.
                 if(ops[i_opType].flag)
                 {
                     l_devRoute =
@@ -320,6 +320,15 @@ namespace DeviceFW
 
                 TRACDCOMP(g_traceBuffer, "findDeviceRoute did not find "
                           "i_opType=%d registration match", i_opType );
+            }
+            else
+            {
+                TRACDCOMP(g_traceBuffer, "findDeviceRoute, no op type %d "
+                          "registrations, iv_routeMap=%d, routeMap=%p, "
+                          "i_accessType=%d, offset=%d, ops=%p, "
+                          "&ops[i_opType]=%p",
+                          i_opType, iv_routeMap, routeMap, i_accessType,
+                          routeMap[i_accessType].offset, ops, &ops[i_opType] );
             }
         } while(0);
 

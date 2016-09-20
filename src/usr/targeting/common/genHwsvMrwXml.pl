@@ -194,6 +194,8 @@ if ($build eq "fsp")
 
 if ($outFile ne "")
 {
+    # Uncomment to emit debug trace to STDERR
+    # print STDERR "Opening OUTFILE $outFile\n";
     open OUTFILE, '+>', $outFile ||
                 die "ERROR: unable to create $outFile\n";
     select OUTFILE;
@@ -2016,6 +2018,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             }
         }
 
+        # Uncomment to emit debug trace to STDERR
+        # print STDERR "Running generate_proc for $proc\n";
         generate_proc($proc, $is_master, $ipath, $lognode, $logid,
                       $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology,
                       \%fapiPosH,\%voltageRails );
@@ -6439,6 +6443,8 @@ sub addEepromsProc
     my $tmp_ct eq "";
 
     # Loop through all i2c devices
+    # Uncomment to emit debug trace to STDERR
+    # print STDERR "Loop through all $#I2Cdevices i2c devices\n";
     for my $i ( 0 .. $#I2Cdevices )
     {
         # FSP/Power systems:
@@ -6449,6 +6455,14 @@ sub addEepromsProc
             if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM")
                   &&
                   !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM1")
+                  &&
+                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB0")
+                  &&
+                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB1")
+                  &&
+                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC1")
+                  &&
+                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC3")
                 ) ||
                 !($I2Cdevices[$i]{i2cm_node} == $node) )
             {
@@ -6762,11 +6776,17 @@ sub addI2cBusSpeedArray
             if ( $haveFSPs == 1 )
             {
                 # Skip I2C devices that we don't care about
-                if( ( !($I2Cdevices[$i]{i2cm_uid}
-                      eq "I2CM_PROC_PROM")
+                if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM")
                       &&
-                      !($I2Cdevices[$i]{i2cm_uid}
-                        eq "I2CM_PROC_PROM1")
+                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM1")
+                      &&
+                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB0")
+                      &&
+                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB1")
+                      &&
+                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC1")
+                      &&
+                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC3")
                       &&
                       !( ($I2Cdevices[$i]{i2cm_uid}
                          eq "I2CM_HOTPLUG") &&
@@ -6842,8 +6862,12 @@ sub addI2cBusSpeedArray
         $tmp_offset = ($tmp_engine * 3) + $tmp_port;
 
         # @todo RTC 153696 - Default everything off except TPM until MRW is correct and simics model is complete
-        # @todo RTC 138226 - Also except SBE SEEPROM until MRW is correct and simics model is complete
-        if (($tmp_engine == 2 || $tmp_engine == 0) && $tmp_port == 0) {
+        # Also except SBE SEEPROM until MRW is correct and simics model is complete
+        if (($tmp_engine == 2 && $tmp_port == 0) ||
+            ($tmp_engine == 0 && $tmp_port == 0) ||
+            ($tmp_engine == 1 && $tmp_port == 1) ||
+            ($tmp_engine == 1 && $tmp_port == 0) ||
+            ($tmp_engine == 3 && $tmp_port == 1)) {
             $tmp_speed  = 400;
         } else {
             $tmp_speed = 0;
