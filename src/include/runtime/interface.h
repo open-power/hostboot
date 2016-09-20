@@ -620,9 +620,9 @@ typedef struct runtimeInterfaces
      *  @return 0 on success, else error code
      *  @platform FSP, OpenPOWER
      */
-    int run_command( int argc,
-                     const char** argv,
-                     char** o_outString );
+    int (*run_command)( int argc,
+                        const char** argv,
+                        char** o_outString );
 
     /**
      *  @brief Verify integrity of a secure container
