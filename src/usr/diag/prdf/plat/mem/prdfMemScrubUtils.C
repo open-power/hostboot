@@ -244,5 +244,134 @@ uint32_t clearEccFirs<TYPE_MBA>( ExtensibleChip * i_chip )
     return o_rc;
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t checkEccFirs<TYPE_MCA>( ExtensibleChip * i_chip,
+                                 uint32_t & o_eccAttns )
+{
+    #define PRDF_FUNC "[checkEccFirs<TYPE_MCA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_eccAttns = MAINT_NO_ERROR;
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getTrgtType() );
+
+    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+    PRDF_ASSERT( nullptr != mcbChip );
+
+    SCAN_COMM_REGISTER_CLASS * mcaeccfir = i_chip->getRegister(  "MCAECCFIR" );
+    SCAN_COMM_REGISTER_CLASS * mcbistfir = mcbChip->getRegister( "MCBISTFIR" );
+
+    do
+    {
+        o_rc = mcaeccfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCAECCFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // We can assume that any chip mark placed by a maintenance command was
+        // done on the rank in which the command stopped. So we can blindly
+        // check all bits to determine if there was an MPE on the stopped rank.
+        if ( 0 != mcaeccfir->GetBitFieldJustified(20,8) )
+            o_eccAttns |= MAINT_MPE;
+
+        if ( mcaeccfir->IsBitSet(30) ) o_eccAttns |= MAINT_SCE;
+        if ( mcaeccfir->IsBitSet(31) ) o_eccAttns |= MAINT_MCE;
+        if ( mcaeccfir->IsBitSet(34) ) o_eccAttns |= MAINT_UE;
+        if ( mcaeccfir->IsBitSet(37) ) o_eccAttns |= MAINT_IUE;
+        if ( mcaeccfir->IsBitSet(39) ) o_eccAttns |= MAINT_IMPE;
+
+        o_rc = mcbistfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR: mcbChip=0x%08x",
+                      mcbChip->getHuid() );
+            break;
+        }
+
+        if ( mcbistfir->IsBitSet(5) ) o_eccAttns |= MAINT_HARD_NCE_ETE;
+        if ( mcbistfir->IsBitSet(6) ) o_eccAttns |= MAINT_SOFT_NCE_ETE;
+        if ( mcbistfir->IsBitSet(7) ) o_eccAttns |= MAINT_INT_NCE_ETE;
+        if ( mcbistfir->IsBitSet(8) ) o_eccAttns |= MAINT_RCE_ETE;
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
+                                 uint32_t & o_eccAttns )
+{
+    #define PRDF_FUNC "[checkEccFirs<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_eccAttns = MAINT_NO_ERROR;
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getTrgtType() );
+
+    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+    PRDF_ASSERT( nullptr != membChip );
+
+    uint32_t pos = getTargetPosition( i_chip->getTrgt() );
+    const char * reg = (0 == pos) ? "MBA0_MBSECCFIR" : "MBA1_MBSECCFIR";
+
+    SCAN_COMM_REGISTER_CLASS * mbseccfir = membChip->getRegister( reg );
+    SCAN_COMM_REGISTER_CLASS * mbspa     = i_chip->getRegister( "MBASPA" );
+
+    do
+    {
+        o_rc = mbseccfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s: membChip=0x%08x",
+                      reg, membChip->getHuid() );
+            break;
+        }
+
+        // We can assume that any chip mark placed by a maintenance command was
+        // done on the rank in which the command stopped. So we can blindly
+        // check all bits to determine if there was an MPE.
+        if ( 0 != mbseccfir->GetBitFieldJustified(20,8) )
+            o_eccAttns |= MAINT_MPE;
+
+        if ( mbseccfir->IsBitSet(37) ) o_eccAttns |= MAINT_SCE;
+        if ( mbseccfir->IsBitSet(38) ) o_eccAttns |= MAINT_MCE;
+        if ( mbseccfir->IsBitSet(41) ) o_eccAttns |= MAINT_UE;
+
+        o_rc = mbspa->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBASPA: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        if ( mbspa->IsBitSet(1) ) o_eccAttns |= MAINT_HARD_NCE_ETE;
+        if ( mbspa->IsBitSet(2) ) o_eccAttns |= MAINT_SOFT_NCE_ETE;
+        if ( mbspa->IsBitSet(3) ) o_eccAttns |= MAINT_INT_NCE_ETE;
+        if ( mbspa->IsBitSet(4) ) o_eccAttns |= MAINT_RCE_ETE;
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace PRDF
 
