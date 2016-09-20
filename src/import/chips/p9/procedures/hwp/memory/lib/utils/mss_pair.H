@@ -33,3 +33,51 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
+
+#ifndef _MSS_PAIR_CONST_H_
+#define _MSS_PAIR_CONST_H_
+
+#include <fapi2.H>
+#include <lib/utils/find.H>
+#include <lib/utils/c_str.H>
+
+namespace mss
+{
+
+///
+/// @brief a version of std::pair that has a constexpr constructor
+/// allows for MUCH cleaner code and code that can be run at compile time
+/// @tparam T1 - type of first
+/// @tparam T2 - type of second
+///
+template <typename T1, typename T2>
+struct pair
+{
+    // forces the user to initialize the values
+    pair() = delete;
+
+    // disables the copy constructor
+    pair( const pair<T1, T2>& i_rhs) = delete;
+
+    ///
+    /// @brief default destructor
+    ///
+    ~pair() = default;
+
+    ///
+    /// @brief constexpr constructor
+    /// @param[in] i_first - input to the first internal variable
+    /// @param[in] i_second - input to the second internal variable
+    ///
+    constexpr pair(const T1& i_first, const T2& i_second) :
+        first(i_first),
+        second(i_second)
+    {}
+
+    // not using iv_ to keep this as close as possible to pair
+    T1 first;
+    T2 second;
+};
+
+}
+#endif
