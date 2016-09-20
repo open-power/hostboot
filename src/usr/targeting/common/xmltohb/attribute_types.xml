@@ -31498,4 +31498,31 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+<attribute>
+  <id>SUPPORTED_STOP_STATES</id>
+  <description>
+      STOP levels supported at runtime (sent to Host via HDAT):
+        Bit 0: STOP0 Supported - Quiesce thread only
+        Bit 1: STOP1 Supported - P8 Nap
+        Bit 2: STOP2 Supported - P8 Fast Sleep
+        Bit 3: STOP3 Supported - P8 Fast Sleep using iVRMs
+        Bit 4: STOP4 supported - P8 Deep Sleep
+        Bit 5: STOP5 Supported - WOF-friendly "Instant on"
+        Bit 6,7: Reserved
+        Bit 8: STOP8 supported - Half Quad Sleep
+        Bit 9: STOP9 supported - P8 Fast Winkle
+        Bit 10: Reserved
+        Bit 11: STOP11 supported - P8 Deep Winkle
+        Bit 12-15 : Reserved
+        Bits 16..31 - Reserved
+  </description>
+  <simpleType>
+    <uint32_t>
+       <default>0x80000000</default>
+    </uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+</attribute>
+
 </attributes>
