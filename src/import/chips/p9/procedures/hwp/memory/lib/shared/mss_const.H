@@ -272,5 +272,10 @@ enum class shmoo_edge : std::size_t
     RIGHT
 };
 
+enum visual_max : uint64_t
+{
+    MAX_VISUAL_VALUE = 9999
+};
+
 } // namespace mss
 #endif
