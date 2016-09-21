@@ -572,7 +572,6 @@
   <valueType>uint8</valueType>
   <platInit/>
   <writeable/>
-  <initToZero/>
 </attribute>
 
 <attribute>
@@ -583,6 +582,7 @@
   <valueType>uint8</valueType>
   <platInit/>
   <writeable/>
+  <initToZero/>
 </attribute>
 
 <attribute>
