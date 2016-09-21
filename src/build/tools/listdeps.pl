@@ -221,6 +221,7 @@ my $resident_modules = {
     "libsbeio.so"               => '1',
     "libvpd.so"                 => '1',
     "libsecureboot_trusted.so"  => '1',
+    "libsecureboot_base.so"  => '1',
 };
 
 # A list of the dependent libraries in each istep.

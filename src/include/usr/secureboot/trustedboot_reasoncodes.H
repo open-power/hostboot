@@ -56,6 +56,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_PCREXTEND               = 0x0A,
         MOD_TPM_TPMDAEMON               = 0x0B,
         MOD_TPM_SYNCRESPONSE            = 0x0C,
+        MOD_TPM_SEPARATOR               = 0x0D,
 
         MOD_TPMLOGMGR_INITIALIZE        = 0x10,
         MOD_TPMLOGMGR_ADDEVENT          = 0x11,
@@ -84,8 +85,8 @@ namespace TRUSTEDBOOT
         RC_TPM_COMMAND_FAIL             = SECURE_COMP_ID | 0xAE,
         RC_TPM_INVALID_ARGS             = SECURE_COMP_ID | 0xAF,
         RC_TPMLOGMGR_LOGWALKFAIL        = SECURE_COMP_ID | 0xB0,
-        RC_PCREXTEND_SENDRECV_FAIL      = SECURE_COMP_ID | 0xB1,
-        RC_PCREXTEND_SEND_FAIL          = SECURE_COMP_ID | 0xB2,
+        RC_SENDRECV_FAIL                = SECURE_COMP_ID | 0xB1,
+        RC_SEND_FAIL                    = SECURE_COMP_ID | 0xB2,
         RC_MSGRESPOND_FAIL              = SECURE_COMP_ID | 0xB3,
     };
 #ifdef __cplusplus

@@ -109,36 +109,37 @@ namespace TRUSTEDBOOT
 
     /**
      * @brief Initialize the log manager to use a pre-existing buffer
-     * @param[in] val TpmLogMgr structure
-     * @param[in] eventLogPtr Pointer to event log to use
-     * @param[in] eventLogSize Allocated log buffer size
+     * @param[in] i_val TpmLogMgr structure
+     * @param[in] i_eventLogPtr Pointer to event log to use
+     * @param[in] i_eventLogSize Allocated log buffer size
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* val,
-                                                    uint8_t* eventLogPtr,
-                                                    uint32_t eventLogSize);
+    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* i_val,
+                                                    uint8_t* i_eventLogPtr,
+                                                    uint32_t i_eventLogSize);
 
     /**
      * @brief Add a new event to the log
-     * @param[in] val TpmLogMgr structure
-     * @param[in] logEvent Event log entry to add
+     * @param[in] i_val TpmLogMgr structure
+     * @param[in] i_logEvent Event log entry to add
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *       error log.
      */
-    errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* val, TCG_PCR_EVENT2* logEvent);
+    errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* i_val,
+                                  TCG_PCR_EVENT2* i_logEvent);
 
     /**
      * @brief Get current log size in bytes
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @return uint32_t Byte size of log
      */
-    uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val);
+    uint32_t TpmLogMgr_getLogSize(TpmLogMgr* i_val);
 
 #ifdef __HOSTBOOT_MODULE
     /**
      * @brief Retrieve devtree information
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @param[in/out] io_logAddr TPM Log address
      * @param[out] o_allocationSize Total memory allocated for log
      * @param[out] o_xscomAddr Chip Xscom Address
@@ -148,7 +149,7 @@ namespace TRUSTEDBOOT
      * Function will allocate a new region in memory to store log
      *  for passing to opal
      */
-     errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* val,
+     errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* i_val,
                                          uint64_t & io_logAddr,
                                          size_t & o_allocationSize,
                                          uint64_t & o_xscomAddr,
@@ -156,11 +157,11 @@ namespace TRUSTEDBOOT
 
     /**
      * @brief Store TPM devtree node information
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @param[in] i_xscomAddr Chip Xscom Address
      * @param[in] i_i2cMasterOffset i2c Master Offset
      */
-    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* val,
+    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* i_val,
                                      uint64_t i_xscomAddr,
                                      uint32_t i_i2cMasterOffset);
 #endif
@@ -168,24 +169,25 @@ namespace TRUSTEDBOOT
 
     /**
      * @brief Calculate the log size in bytes by walking the log
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @return uint32_t Byte size of log
      */
-    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* val);
+    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* i_val);
 
     /**
      * @brief Get pointer to first event in eventLog past the header event
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @return uint8_t First event handle
      * @retval NULL On empty log
      * @retval !NULL First event handle
      */
-    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* val);
+    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* i_val);
 
     /**
      * @brief Get pointer to next event in log and unmarshal log contents
      *        into i_eventLog
      *
+     * @param[in] i_val         TpmLogMgr structure
      * @param[in] i_handle      Current event to unmarshal
      * @param[in] i_eventLog    EVENT2 structure to populate
      * @param[in] o_err         Indicates if an error occurred during
@@ -195,7 +197,7 @@ namespace TRUSTEDBOOT
      * @retval NULL When val contains last entry in log
      * @retval !NULL When addition log entries available
      */
-    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* val,
+    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* i_val,
                                           const uint8_t* i_handle,
                                           TCG_PCR_EVENT2* i_eventLog,
                                           bool* o_err);
@@ -225,16 +227,16 @@ namespace TRUSTEDBOOT
 
     /**
      * @brief Dump contents of log to a trace
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      */
-    void TpmLogMgr_dumpLog(TpmLogMgr* val);
+    void TpmLogMgr_dumpLog(TpmLogMgr* i_val);
 
     /**
      * @brief Return a pointer to the start of the log
-     * @param[in] val TpmLogMgr structure
+     * @param[in] i_val TpmLogMgr structure
      * @return uint8_t* Pointer to the start of the TPM log
      */
-    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* val);
+    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* i_val);
 
 
 #ifdef __cplusplus

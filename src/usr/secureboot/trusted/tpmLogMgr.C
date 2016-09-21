@@ -36,6 +36,7 @@
 // Includes
 // ----------------------------------------------
 #include <string.h>
+#include <endian.h>
 #include "tpmLogMgr.H"
 #ifdef __HOSTBOOT_MODULE
 #include <sys/mm.h>
@@ -59,7 +60,7 @@ namespace TRUSTEDBOOT
     }
 
 #ifdef __HOSTBOOT_MODULE
-    errlHndl_t TpmLogMgr_initialize(TpmLogMgr* val)
+    errlHndl_t TpmLogMgr_initialize(TpmLogMgr* i_val)
     {
         errlHndl_t err = TB_SUCCESS;
         const char vendorInfo[] = "IBM";
@@ -70,7 +71,7 @@ namespace TRUSTEDBOOT
 
         TRACUCOMP( g_trac_trustedboot, ">>initialize()");
 
-        if (NULL == val)
+        if (NULL == i_val)
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM LOG INIT FAIL");
@@ -92,15 +93,15 @@ namespace TRUSTEDBOOT
         else
         {
 
-            memset(val, 0, sizeof(TpmLogMgr));
-            val->logMaxSize = TPMLOG_BUFFER_SIZE;
+            memset(i_val, 0, sizeof(TpmLogMgr));
+            i_val->logMaxSize = TPMLOG_BUFFER_SIZE;
 
-            mutex_init( &val->logMutex );
-            mutex_lock( &val->logMutex );
+            mutex_init( &i_val->logMutex );
+            mutex_lock( &i_val->logMutex );
 
             // Assign our new event pointer to the start
-            val->newEventPtr = val->eventLog;
-            memset(val->eventLog, 0, TPMLOG_BUFFER_SIZE);
+            i_val->newEventPtr = i_val->eventLog;
+            memset(i_val->eventLog, 0, TPMLOG_BUFFER_SIZE);
 
             eventData = (TCG_EfiSpecIdEventStruct*) eventLogEntry.event;
 
@@ -125,30 +126,30 @@ namespace TRUSTEDBOOT
             eventData->digestSizes[1].digestSize = htole16(TPM_ALG_SHA1_SIZE);
             eventData->vendorInfoSize = sizeof(vendorInfo);
             memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
-            val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
-                                                        val->newEventPtr);
+            i_val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
+                                                          i_val->newEventPtr);
 
             // Done, move our pointers
-            val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
+            i_val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
 
-            mutex_unlock( &val->logMutex );
+            mutex_unlock( &i_val->logMutex );
 
             // Debug display of raw data
             TRACUBIN(g_trac_trustedboot, "tpmInitialize: Header Entry",
-                     val->eventLog, val->logSize);
+                     i_val->eventLog, i_val->logSize);
 
             TRACUCOMP( g_trac_trustedboot,
                        "<<initialize() LS:%d - %s",
-                       val->logSize,
+                       i_val->logSize,
                        ((TB_SUCCESS == err) ? "No Error" : "With Error") );
         }
         return err;
     }
 #endif
 
-    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* val,
-                                                    uint8_t* eventLogPtr,
-                                                    uint32_t eventLogSize)
+    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* i_val,
+                                                    uint8_t* i_eventLogPtr,
+                                                    uint32_t i_eventLogSize)
     {
         errlHndl_t err = TB_SUCCESS;
         TRACUCOMP( g_trac_trustedboot,
@@ -157,16 +158,16 @@ namespace TRUSTEDBOOT
         do
         {
 
-            mutex_init( &val->logMutex );
-            mutex_lock( &val->logMutex );
+            mutex_init( &i_val->logMutex );
+            mutex_lock( &i_val->logMutex );
 
-            val->logMaxSize = eventLogSize;
-            val->eventLogInMem = eventLogPtr;
+            i_val->logMaxSize = i_eventLogSize;
+            i_val->eventLogInMem = i_eventLogPtr;
 
             // Ok, walk the log to figure out how big this is
-            val->logSize = TpmLogMgr_calcLogSize(val);
+            i_val->logSize = TpmLogMgr_calcLogSize(i_val);
 
-            if (0 == val->logSize)
+            if (0 == i_val->logSize)
             {
                 TRACFCOMP( g_trac_trustedboot,
                        "TPM LOG INIT WALK FAIL");
@@ -187,50 +188,52 @@ namespace TRUSTEDBOOT
                 break;
             }
             // We are good, let's move the newEventLogPtr
-            val->newEventPtr = val->eventLogInMem + val->logSize;
+            i_val->newEventPtr = i_val->eventLogInMem + i_val->logSize;
 
         }
         while(0);
 
         if (TB_SUCCESS != err)
         {
-            val->eventLogInMem = NULL;
-            val->newEventPtr = NULL;
-            val->logMaxSize = 0;
-            val->logSize = 0;
+            i_val->eventLogInMem = NULL;
+            i_val->newEventPtr = NULL;
+            i_val->logMaxSize = 0;
+            i_val->logSize = 0;
         }
 
-        mutex_unlock( &val->logMutex );
+        mutex_unlock( &i_val->logMutex );
 
         return err;
     }
 
-    errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* val,
-                                  TCG_PCR_EVENT2* logEvent)
+    errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* i_val,
+                                  TCG_PCR_EVENT2* i_logEvent)
     {
         errlHndl_t err = TB_SUCCESS;
-        size_t newLogSize = TCG_PCR_EVENT2_marshalSize(logEvent);
+        size_t newLogSize = TCG_PCR_EVENT2_marshalSize(i_logEvent);
 
         TRACUCOMP( g_trac_trustedboot,
                    ">>tpmAddEvent() PCR:%d Type:%d Size:%d",
-                   logEvent->pcrIndex, logEvent->eventType, (int)newLogSize);
+                   i_logEvent->pcrIndex,
+                   i_logEvent->eventType,
+                   (int)newLogSize);
 
-        mutex_lock( &val->logMutex );
+        mutex_lock( &i_val->logMutex );
 
         do
         {
 
             // Need to ensure we have room for the new event
             // We have to leave room for the log full event as well
-            if (NULL == val->newEventPtr ||
-                val->logSize + newLogSize > val->logMaxSize)
+            if (NULL == i_val->newEventPtr ||
+                i_val->logSize + newLogSize > i_val->logMaxSize)
             {
                 TRACFCOMP( g_trac_trustedboot,
                            "TPM LOG ADD FAIL PNULL(%d) LS(%d) New LS(%d)"
                            " Max LS(%d)",
-                           (NULL == val->newEventPtr ? 0 : 1),
-                           (int)val->logSize, (int)newLogSize,
-                           (int)val->logMaxSize);
+                           (NULL == i_val->newEventPtr ? 0 : 1),
+                           (int)i_val->logSize, (int)newLogSize,
+                           (int)i_val->logMaxSize);
 
                 /*@
                  * @errortype
@@ -246,18 +249,18 @@ namespace TRUSTEDBOOT
                  */
                 err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
                                          RC_TPMLOGMGR_ADDEVENT_FAIL,
-                                         (uint64_t)val->logMaxSize << 32 |
-                                         (NULL == val->newEventPtr ? 0 : 1),
-                                         (uint64_t)val->logSize << 32 |
+                                         (uint64_t)i_val->logMaxSize << 32 |
+                                         (NULL == i_val->newEventPtr ? 0 : 1),
+                                         (uint64_t)i_val->logSize << 32 |
                                          newLogSize);
 
                 break;
             }
 
-            val->newEventPtr = TCG_PCR_EVENT2_logMarshal(logEvent,
-                                                         val->newEventPtr);
+            i_val->newEventPtr = TCG_PCR_EVENT2_logMarshal(i_logEvent,
+                                                           i_val->newEventPtr);
 
-            if (NULL == val->newEventPtr)
+            if (NULL == i_val->newEventPtr)
             {
                 TRACFCOMP( g_trac_trustedboot,
                            "TPM LOG MARSHAL Fail");
@@ -279,50 +282,50 @@ namespace TRUSTEDBOOT
                 break;
             }
 
-            val->logSize += newLogSize;
+            i_val->logSize += newLogSize;
 
 
         } while ( 0 );
 
         TRACUCOMP( g_trac_trustedboot,
                    "<<tpmAddEvent() LS:%d - %s",
-                   (int)val->logSize,
+                   (int)i_val->logSize,
                    ((TB_SUCCESS == err) ? "No Error" : "With Error") );
 
-        mutex_unlock( &val->logMutex );
+        mutex_unlock( &i_val->logMutex );
         return err;
     }
 
-    uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val)
+    uint32_t TpmLogMgr_getLogSize(TpmLogMgr* i_val)
     {
-        return val->logSize;
+        return i_val->logSize;
     }
 
-    void TpmLogMgr_dumpLog(TpmLogMgr* val)
+    void TpmLogMgr_dumpLog(TpmLogMgr* i_val)
     {
 
         // Debug display of raw data
         TRACUCOMP(g_trac_trustedboot, "tpmDumpLog Size : %d",
-                  (int)val->logSize);
+                  (int)i_val->logSize);
 
 #ifdef __HOSTBOOT_MODULE
         // Debug display of raw data
-        if (NULL == val->eventLogInMem)
+        if (NULL == i_val->eventLogInMem)
         {
             TRACUBIN(g_trac_trustedboot, "tpmDumpLog",
-                     val->eventLog, val->logSize);
+                     i_val->eventLog, i_val->logSize);
         }
         else
         {
 #endif
             TRACUBIN(g_trac_trustedboot, "tpmDumpLog From Memory",
-                     val->eventLogInMem, val->logSize);
+                     i_val->eventLogInMem, i_val->logSize);
 #ifdef __HOSTBOOT_MODULE
         }
 #endif
     }
 
-    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* val)
+    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* i_val)
     {
         uint32_t logSize = 0;
         TCG_PCR_EVENT event;
@@ -334,7 +337,7 @@ namespace TRUSTEDBOOT
         TRACUCOMP( g_trac_trustedboot, ">>calcLogSize");
 
         // Start walking events
-        prevLogHandle = TpmLogMgr_getLogStartPtr(val);
+        prevLogHandle = TpmLogMgr_getLogStartPtr(i_val);
         do
         {
 
@@ -353,8 +356,8 @@ namespace TRUSTEDBOOT
                 break;
             }
 
-            if (( nextLogHandle - TpmLogMgr_getLogStartPtr(val)) >
-                val->logMaxSize)
+            if (( nextLogHandle - TpmLogMgr_getLogStartPtr(i_val)) >
+                i_val->logMaxSize)
             {
                 TRACFCOMP( g_trac_trustedboot, "calcLogSize overflow");
                 prevLogHandle = NULL;
@@ -375,8 +378,8 @@ namespace TRUSTEDBOOT
                     // Failed parsing so we must have hit the end of log
                     break;
                 }
-                if (( nextLogHandle - TpmLogMgr_getLogStartPtr(val)) >
-                    val->logMaxSize)
+                if (( nextLogHandle - TpmLogMgr_getLogStartPtr(i_val)) >
+                    i_val->logMaxSize)
                 {
                     TRACFCOMP( g_trac_trustedboot, "calcLogSize overflow");
                     prevLogHandle = NULL;
@@ -393,28 +396,28 @@ namespace TRUSTEDBOOT
         }
         else
         {
-            logSize = (prevLogHandle - TpmLogMgr_getLogStartPtr(val));
+            logSize = (prevLogHandle - TpmLogMgr_getLogStartPtr(i_val));
         }
         TRACUCOMP( g_trac_trustedboot, "<<calcLogSize : %d", logSize);
 
         return logSize;
     }
 
-    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* val)
+    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* i_val)
     {
         TCG_PCR_EVENT event;
         bool err = false;
         const uint8_t* result = NULL;
 
         // Header event in the log is always first, we skip over that
-        const uint8_t* firstEvent = TpmLogMgr_getLogStartPtr(val);
+        const uint8_t* firstEvent = TpmLogMgr_getLogStartPtr(i_val);
         memset(&event, 0, sizeof(TCG_PCR_EVENT));
 
         firstEvent = TCG_PCR_EVENT_logUnmarshal(&event, firstEvent,
                                                 sizeof(TCG_PCR_EVENT),
                                                 &err);
         if (NULL != firstEvent && !err &&
-            firstEvent < val->newEventPtr)
+            firstEvent < i_val->newEventPtr)
         {
             result = firstEvent;
         }
@@ -422,7 +425,7 @@ namespace TRUSTEDBOOT
         return result;
     }
 
-    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* val,
+    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* i_val,
                                           const uint8_t* i_handle,
                                           TCG_PCR_EVENT2* i_eventLog,
                                           bool* o_err)
@@ -444,7 +447,7 @@ namespace TRUSTEDBOOT
                 // An error was detected, ensure o_err is set
                 *o_err = true;
             }
-            else if (l_resultPtr >= val->newEventPtr)
+            else if (l_resultPtr >= i_val->newEventPtr)
             {
                 l_resultPtr = NULL;
             }
@@ -505,18 +508,19 @@ namespace TRUSTEDBOOT
     }
 
 
-    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* val)
+    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* i_val)
     {
 #ifdef __HOSTBOOT_MODULE
-        return (val->eventLogInMem == NULL ?
-           reinterpret_cast<uint8_t*>(&(val->eventLog)) : val->eventLogInMem);
+        return (i_val->eventLogInMem == NULL ?
+           reinterpret_cast<uint8_t*>(&(i_val->eventLog)) :
+                i_val->eventLogInMem);
 #else
-        return val->eventLogInMem;
+        return i_val->eventLogInMem;
 #endif
     }
 
 #ifdef __HOSTBOOT_MODULE
-    errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* val,
+    errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* i_val,
                                         uint64_t & io_logAddr,
                                         size_t & o_allocationSize,
                                         uint64_t & o_xscomAddr,
@@ -524,31 +528,31 @@ namespace TRUSTEDBOOT
     {
         errlHndl_t err = NULL;
 
-        mutex_lock( &val->logMutex );
+        mutex_lock( &i_val->logMutex );
 
         assert(io_logAddr != 0, "Invalid starting log address");
-        assert(val->eventLogInMem == NULL,
+        assert(i_val->eventLogInMem == NULL,
                "getDevtreeInfo can only be called once");
 
         io_logAddr -= ALIGN_PAGE(TPMLOG_DEVTREE_SIZE);
         // Align to 64KB for Opal
         io_logAddr = ALIGN_DOWN_X(io_logAddr,64*KILOBYTE);
 
-        val->inMemlogBaseAddr = io_logAddr;
+        i_val->inMemlogBaseAddr = io_logAddr;
         o_allocationSize = TPMLOG_DEVTREE_SIZE;
-        o_xscomAddr = val->devtreeXscomAddr;
-        o_i2cMasterOffset = val->devtreeI2cMasterOffset;
+        o_xscomAddr = i_val->devtreeXscomAddr;
+        o_i2cMasterOffset = i_val->devtreeI2cMasterOffset;
 
         // Copy image.
-        val->eventLogInMem = (uint8_t*)(mm_block_map(
+        i_val->eventLogInMem = (uint8_t*)(mm_block_map(
                                  (void*)(io_logAddr),
                                  ALIGN_PAGE(TPMLOG_DEVTREE_SIZE)));
         // Copy log into new location
-        memset(val->eventLogInMem, 0, TPMLOG_DEVTREE_SIZE);
-        memcpy(val->eventLogInMem, val->eventLog, val->logSize);
-        val->newEventPtr = val->eventLogInMem + val->logSize;
+        memset(i_val->eventLogInMem, 0, TPMLOG_DEVTREE_SIZE);
+        memcpy(i_val->eventLogInMem, i_val->eventLog, i_val->logSize);
+        i_val->newEventPtr = i_val->eventLogInMem + i_val->logSize;
 
-        mutex_unlock( &val->logMutex );
+        mutex_unlock( &i_val->logMutex );
 
         TRACUCOMP( g_trac_trustedboot,
                    "<<getDevtreeInfo() Addr:%lX - %s",
@@ -558,12 +562,12 @@ namespace TRUSTEDBOOT
     }
 
 
-    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* val,
+    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* i_val,
                                      uint64_t i_xscomAddr,
                                      uint32_t i_i2cMasterOffset)
     {
-        val->devtreeXscomAddr = i_xscomAddr;
-        val->devtreeI2cMasterOffset = i_i2cMasterOffset;
+        i_val->devtreeXscomAddr = i_xscomAddr;
+        i_val->devtreeI2cMasterOffset = i_i2cMasterOffset;
     }
 
 #endif

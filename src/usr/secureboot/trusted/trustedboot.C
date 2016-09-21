@@ -593,27 +593,9 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
         mutex_lock( &io_target.tpmMutex );
         unlock = true;
 
-        // Allocate the TPM log if it hasn't been already
-        if (!io_target.failed &&
-            io_target.available &&
-            NULL == io_target.logMgr)
-        {
-            io_target.logMgr = new TpmLogMgr;
-            err = TpmLogMgr_initialize(io_target.logMgr);
-            if (NULL != err)
-            {
-                break;
-            }
-        }
-
-        // Log the event, we will do this in two scenarios
-        //  - !initAttempted - prior to IPL of the TPM we log for replay
-        //  - initAttempted && !failed - TPM is functional so we log
-        if ((io_target.available &&
-             !io_target.initAttempted) ||
-            (io_target.available &&
-             io_target.initAttempted &&
-             !io_target.failed))
+        // Log the event
+        if (io_target.available &&
+             !io_target.failed)
         {
             // Fill in TCG_PCR_EVENT2 and add to log
             eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr,
@@ -627,14 +609,6 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
             {
                 break;
             }
-        }
-
-        // If the TPM init has occurred and it is currently
-        //  functional we will do our extension
-        if (io_target.available &&
-            io_target.initAttempted &&
-            !io_target.failed)
-        {
 
             // Perform the requested extension and also force into the
             // SHA1 bank
@@ -647,6 +621,91 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
                                        i_digest,
                                        i_digestSize);
         }
+    } while ( 0 );
+
+    if (NULL != err)
+    {
+        // We failed to extend to this TPM we can no longer use it
+        tpmMarkFailed(&io_target);
+
+        // Log this failure
+        errlCommit(err, SECURE_COMP_ID);
+    }
+
+    if (unlock)
+    {
+        mutex_unlock(&io_target.tpmMutex);
+    }
+    return;
+}
+
+void pcrExtendSeparator(TpmTarget & io_target)
+{
+    errlHndl_t err = NULL;
+    TCG_PCR_EVENT2 eventLog;
+    bool unlock = false;
+
+    // Separators are always the same values
+    // The digest is a sha1 hash of 0xFFFFFFFF
+    const uint8_t sha1_digest[] = {
+        0xd9, 0xbe, 0x65, 0x24, 0xa5, 0xf5, 0x04, 0x7d,
+        0xb5, 0x86, 0x68, 0x13, 0xac, 0xf3, 0x27, 0x78,
+        0x92, 0xa7, 0xa3, 0x0a};
+    // The digest is a sha256 hash of 0xFFFFFFFF
+    const uint8_t sha256_digest[] = {
+        0xAD, 0x95, 0x13, 0x1B, 0xC0, 0xB7, 0x99, 0xC0,
+        0xB1, 0xAF, 0x47, 0x7F, 0xB1, 0x4F, 0xCF, 0x26,
+        0xA6, 0xA9, 0xF7, 0x60, 0x79, 0xE4, 0x8B, 0xF0,
+        0x90, 0xAC, 0xB7, 0xE8, 0x36, 0x7B, 0xFD, 0x0E};
+    // The event message is 0xFFFFFFFF
+    const char logMsg[] = { 0xFF, 0xFF, 0xFF, 0xFF, '\0'};
+
+    memset(&eventLog, 0, sizeof(eventLog));
+    do
+    {
+        mutex_lock( &io_target.tpmMutex );
+        unlock = true;
+
+        for (TPM_Pcr curPcr = PCR_0; curPcr <= PCR_7;
+             curPcr = static_cast<TPM_Pcr>(curPcr + 1))
+        {
+
+            // Log the separator
+            if (io_target.available &&
+                !io_target.failed)
+            {
+                // Fill in TCG_PCR_EVENT2 and add to log
+                eventLog = TpmLogMgr_genLogEventPcrExtend(curPcr,
+                                                          TPM_ALG_SHA1,
+                                                          sha1_digest,
+                                                          sizeof(sha1_digest),
+                                                          TPM_ALG_SHA256,
+                                                          sha256_digest,
+                                                          sizeof(sha256_digest),
+                                                          logMsg);
+                err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
+                if (NULL != err)
+                {
+                    break;
+                }
+
+                // Perform the requested extension
+                err = tpmCmdPcrExtend2Hash(&io_target,
+                                           curPcr,
+                                           TPM_ALG_SHA1,
+                                           sha1_digest,
+                                           sizeof(sha1_digest),
+                                           TPM_ALG_SHA256,
+                                           sha256_digest,
+                                           sizeof(sha256_digest));
+                if (NULL != err)
+                {
+                    break;
+                }
+
+            }
+        }
+
     } while ( 0 );
 
     if (NULL != err)
@@ -812,6 +871,25 @@ void* tpmDaemon(void* unused)
                                    msgData->mDigest,
                                    msgData->mDigestSize,
                                    msgData->mLogMsg);
+                  }
+
+                  // Lastly make sure we are in a state
+                  //  where we have a functional TPM
+                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
+              }
+              break;
+          case TRUSTEDBOOT::MSG_TYPE_SEPARATOR:
+              {
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+
+                  for (size_t idx = 0;
+                       idx < TRUSTEDBOOT::MAX_SYSTEM_TPMS; idx++)
+                  {
+                      // Add the separator to this TPM,
+                      // if an error occurs the TPM will
+                      //  be marked as failed and the error log committed
+                      TRUSTEDBOOT::pcrExtendSeparator(
+                                   TRUSTEDBOOT::systemTpms.tpm[idx]);
                   }
 
                   // Lastly make sure we are in a state
