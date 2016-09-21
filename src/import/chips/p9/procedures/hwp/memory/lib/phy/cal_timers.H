@@ -122,23 +122,32 @@ uint64_t read_ctr_cycles(const fapi2::Target<T>& i_target )
 /// @brief Return the cycles taken for write centering on a single rank
 /// @tparam T the target type used to get attributes
 /// @param[in] i_target used to get attributes
-/// @return uint64_t, the cycles taken for write centering on a single rank
+/// @param[out] o_cycles the cycles taken for write centering on a single rank
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<fapi2::TargetType T>
-uint64_t write_ctr_cycles(const fapi2::Target<T>& i_target )
+fapi2::ReturnCode write_ctr_cycles(const fapi2::Target<T>& i_target, uint64_t& o_cycles)
 {
     // 1000 + (NUM_VALID_SAMPLES * (FW_WR_RD + FW_RD_WR + 16) *
     // (1024/(SMALL_STEP +1) + 128/(BIG_STEP +1)) + 2 * (BIG_STEP+1)/(SMALL_STEP+1)) x 24 DRAM
     // clocks per rank pair.
-    uint64_t l_write_ctr_cycles = 1000 + (WR_LVL_NUM_VALID_SAMPLES * (WR_CNTR_FW_WR_RD + WR_CNTR_FW_RD_WR + 16) *
-                                          (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
-                                          (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
+    constexpr uint64_t WR_CNTR_FW_WR_RD = mss::fw_wr_rd();
+    uint8_t l_fw_rd_wr = 0;
+
+    FAPI_TRY( mss::fw_rd_wr(i_target, l_fw_rd_wr) );
+
+    o_cycles = 1000 + (WR_LVL_NUM_VALID_SAMPLES * (WR_CNTR_FW_WR_RD + l_fw_rd_wr + 16) *
+                       (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
+                       (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
 
     FAPI_DBG("write_ctr_cycles: %lu(%luns) (%u, %u, %u, %u, %u)",
-             l_write_ctr_cycles, mss::cycles_to_ns(i_target, l_write_ctr_cycles),
-             WR_LVL_NUM_VALID_SAMPLES, WR_CNTR_FW_WR_RD, WR_CNTR_FW_RD_WR, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
+             o_cycles, mss::cycles_to_ns(i_target, o_cycles),
+             WR_LVL_NUM_VALID_SAMPLES, WR_CNTR_FW_WR_RD, l_fw_rd_wr, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
 
-    return l_write_ctr_cycles;
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -186,13 +195,18 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         poll_parameters& i_poll,
         const fapi2::buffer<uint16_t>& i_cal_steps_enabled)
 {
+    uint64_t l_write_cntr_cycles = 0;
+    uint64_t l_total_cycles = 0;
+    int64_t l_ns_left = 0;
+    FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles) );
+
     // First, calculate the total number of cycles this cal should take if everything
     // runs to completion
-    uint64_t l_total_cycles = i_cal_steps_enabled.getBit<WR_LEVEL>() ? wr_lvl_cycles(i_target) : 0;
+    l_total_cycles = i_cal_steps_enabled.getBit<WR_LEVEL>()     ? wr_lvl_cycles(i_target)      : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<DQS_ALIGN>()   ? dqs_align_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<RDCLK_ALIGN>() ? rdclk_align_cycles(i_target) : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<READ_CTR>()    ? read_ctr_cycles(i_target)    : 0;
-    l_total_cycles += i_cal_steps_enabled.getBit<WRITE_CTR>()   ? write_ctr_cycles(i_target)   : 0;
+    l_total_cycles += i_cal_steps_enabled.getBit<WRITE_CTR>()   ? l_write_cntr_cycles          : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_WR>()   ? coarse_wr_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_RD>()   ? coarse_rd_cycles(i_target)   : 0;
 
@@ -211,8 +225,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
     // Round up to the cycles left after the initial delay
-    int64_t l_ns_left = std::max(0L,
-                                 (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
+    l_ns_left = std::max(0L, (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
     i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
     i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
@@ -232,8 +245,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
         // Round up to the cycles left after the initial delay
-        int64_t l_ns_left = std::max(0L,
-                                     (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
+        l_ns_left = std::max(0L, (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
         i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
         i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
@@ -253,6 +265,9 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
              i_poll.iv_initial_sim_delay, i_poll.iv_delay, i_poll.iv_sim_delay, i_poll.iv_poll_count);
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 }
