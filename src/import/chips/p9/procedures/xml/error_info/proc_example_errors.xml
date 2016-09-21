@@ -78,7 +78,7 @@
         test example
     </description>
     <buffer>BUFFER</buffer>
-    <!--collectFfdc>p9_collect_some_ffdc,parm1</collectFfdc-->
+    <collectFfdc>p9_collect_some_ffdc,parm1</collectFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -112,26 +112,6 @@
        </basedOnPresentChildren>
     </collectRegisterFfdc>
 </hwpError>
-
-<hwpError>
-    <sbeError/>
-    <rc>RC_PIB_ERROR_1</rc>
-    <description>
-        Return code used for testing collectFfdc - returns single piece of data
-    </description>
-    <ffdc>FFDC_DATA1</ffdc>
-</hwpError>
-<hwpError>
-    <sbeError/>
-    <rc>RC_PIB_ERROR_2</rc>
-    <description>
-        Return code used for testing collectFfdc - returns two pieces of
-        ffdc data
-    </description>
-    <ffdc>FFDC_DATA1</ffdc>
-    <ffdc>FFDC_DATA2</ffdc>
-</hwpError>
-
 
 </hwpErrors>
 
