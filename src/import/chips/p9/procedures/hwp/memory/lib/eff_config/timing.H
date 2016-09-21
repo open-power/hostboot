@@ -425,5 +425,45 @@ inline fapi2::ReturnCode max_dodt_off( const fapi2::Target<fapi2::TARGET_TYPE_MC
 // the max DODTon/off so it would really never be used anyway there anyway. We can implement it if
 // we find another need for it.
 
+///
+/// @brief Number of memory clock cycles to wait between the write and
+/// read command pairs during Write Centering.
+/// @return constexpr value of 0 clocks
+///
+constexpr uint64_t fw_wr_rd()
+{
+    // Per PHY spec, defaults to 0. Would need an attribute to drive differently
+    return 0;
+}
+
+///
+/// @brief This value sets the delay between a read and write command in memory clock cycles.
+/// This delay value is used in two places in the write centering algorithm.
+/// @param[in] i_target the MCA
+/// @param[out] o_fw_rd_wr *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+inline fapi2::ReturnCode fw_rd_wr( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint8_t& o_fw_rd_wr )
+{
+    // From the PHY spec. Also confirmed with S. Wyatt as this is different than the calculation used in Centaur.
+    // This field must be set to the larger of the two values in number of memory clock cycles.
+    // FW_RD_WR = max(tWTR + 11, AL + tRTP + 3)
+    // Note from J. Bialas: The difference between tWTR_S and tWTR_L is that _S is write to read
+    // time to different bank groups, while _L is to the same. The algorithm should be switching
+    // bank groups so tWTR_S can be used
+    uint8_t l_trtp = 0;
+    uint8_t l_twtr_s = 0;
+    uint8_t l_al = 0;
+    FAPI_TRY( mss::eff_dram_trtp(i_target, l_trtp) );
+    FAPI_TRY( mss::eff_dram_twtr_s(i_target, l_twtr_s) );
+    FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
+
+    o_fw_rd_wr = std::max(l_twtr_s + 11, l_al + l_trtp + 3);
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // mss
 #endif
