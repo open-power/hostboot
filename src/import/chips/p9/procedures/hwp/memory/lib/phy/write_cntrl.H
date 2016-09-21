@@ -382,9 +382,12 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T
 inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
+    uint8_t l_fw_rd_wr = 0;
+
+    FAPI_TRY( mss::fw_rd_wr(i_target, l_fw_rd_wr) );
 
     l_data.insertFromRight<TT::NUM_VALID_SAMPLES, TT::NUM_VALID_SAMPLES_LEN>(WR_LVL_NUM_VALID_SAMPLES);
-    l_data.insertFromRight<TT::FW_RD_WR, TT::FW_RD_WR_LEN>(WR_CNTR_FW_RD_WR);
+    l_data.insertFromRight<TT::FW_RD_WR, TT::FW_RD_WR_LEN>(l_fw_rd_wr);
 
     FAPI_DBG("wc_config2 reset 0x%llx", l_data);
     FAPI_TRY( write_config2(i_target, l_data) );
