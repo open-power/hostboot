@@ -99,7 +99,6 @@ void* call_host_set_voltages(void *io_pArgs)
 
         if( l_noError )
         {
-#if 0 // TODO RTC: 160517 - Uncomment the call to send processor voltage data to HWSV
             //If FSP is present, send voltage information to HWSV
             if( INITSERVICE::spBaseServicesEnabled() )
             {
@@ -118,7 +117,6 @@ void* call_host_set_voltages(void *io_pArgs)
 
                 }
             }
-#endif
         }
     }while( 0 );
 
