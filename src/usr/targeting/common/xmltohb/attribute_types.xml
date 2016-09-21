@@ -7186,6 +7186,28 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
+    <id>EFF_DRAM_MFG_ID</id>
+    <description>
+        DRAM Manufacturer ID Code
+        Decodes SPD Byte 350 and 351
+        creator: mss_eff_cnfg
+        consumer: power_thermal::decoder
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_EFF_DRAM_MFG_ID</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>EFF_DRAM_WIDTH</id>
     <description>
       DRAM Device Width: X4, X8, X16, X32.

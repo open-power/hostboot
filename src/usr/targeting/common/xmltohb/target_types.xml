@@ -1808,6 +1808,7 @@
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
     <attribute><id>DMI_REFCLOCK_SWIZZLE</id></attribute>
     <attribute><id>MSS_MASTER_PWR_INTERCEPT</id></attribute>
+    <attribute><id>EFF_DRAM_MFG_ID</id></attribute>
 </targetType>
 
 <targetType>
