@@ -82,6 +82,81 @@ TpmTarget::TpmTarget()
 #endif
 
 
+errlHndl_t pcrExtendSeparator(bool i_sendAsync)
+{
+    errlHndl_t err = NULL;
+#ifdef CONFIG_TPMDD
+    MessageMode mode = (i_sendAsync) ? MSG_MODE_ASYNC : MSG_MODE_SYNC;
+
+    TRACUCOMP( g_trac_trustedboot,
+               ENTER_MRK"pcrExtendSeparator()");
+
+    Message* msg = Message::factory(MSG_TYPE_SEPARATOR,
+                                    0,
+                                    NULL,
+                                    mode);
+    assert(msg !=NULL, "BUG! Message is NULL");
+    if (!i_sendAsync)
+    {
+        int rc = msg_sendrecv(systemTpms.msgQ, msg->iv_msg);
+        if (0 == rc)
+        {
+            err = msg->iv_errl;
+            msg->iv_errl = NULL;
+        }
+        // Sendrecv failure
+        else
+        {
+            /*@
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        MOD_TPM_SEPARATOR
+             * @reasoncode      RC_SENDRECV_FAIL
+             * @userdata1       rc from msq_sendrecv()
+             * @devdesc         msg_sendrecv() failed
+             * @custdesc        Firmware error during system boot
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_TPM_SEPARATOR,
+                                          RC_SENDRECV_FAIL,
+                                          rc,
+                                          0,
+                                          true);
+            err->collectTrace(SECURE_COMP_NAME);
+        }
+        delete msg;
+        msg = NULL;
+    }
+    else
+    {
+        int rc = msg_send(systemTpms.msgQ, msg->iv_msg);
+        if (rc)
+        {
+            /*@
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        MOD_TPM_SEPARATOR
+             * @reasoncode      RC_SEND_FAIL
+             * @userdata1       rc from msq_send()
+             * @devdesc         msg_send() failed
+             * @custdesc        Firmware error during system boot
+             */
+            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_TPM_SEPARATOR,
+                                          RC_SEND_FAIL,
+                                          rc,
+                                          0,
+                                          true);
+            err->collectTrace(SECURE_COMP_NAME);
+        }
+    }
+
+    TRACUCOMP( g_trac_trustedboot,
+               EXIT_MRK"pcrExtendSeparator() - %s",
+               ((NULL == err) ? "No Error" : "With Error") );
+
+#endif
+    return err;
+}
+
 errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                      const uint8_t* i_digest,
                      size_t  i_digestSize,
@@ -97,8 +172,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                ENTER_MRK"pcrExtend() pcr=%d msg='%s'", i_pcr, i_logMsg);
     TRACUBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
-    // msgData will be freed when message is processed for async
-    //   or below for sync message
+    // msgData will be freed when message is freed
     PcrExtendMsgData* msgData = new PcrExtendMsgData;
     memset(msgData, 0, sizeof(PcrExtendMsgData));
     msgData->mPcrIndex = i_pcr;
@@ -143,14 +217,14 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
             /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
              * @moduleid        MOD_TPM_PCREXTEND
-             * @reasoncode      RC_PCREXTEND_SENDRECV_FAIL
+             * @reasoncode      RC_SENDRECV_FAIL
              * @userdata1       rc from msq_sendrecv()
              * @devdesc         msg_sendrecv() failed
              * @custdesc        Firmware error during system boot
              */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           MOD_TPM_PCREXTEND,
-                                          RC_PCREXTEND_SENDRECV_FAIL,
+                                          RC_SENDRECV_FAIL,
                                           rc,
                                           0,
                                           true);
@@ -167,14 +241,14 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
             /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
              * @moduleid        MOD_TPM_PCREXTEND
-             * @reasoncode      RC_PCREXTEND_SEND_FAIL
+             * @reasoncode      RC_SEND_FAIL
              * @userdata1       rc from msq_send()
              * @devdesc         msg_send() failed
              * @custdesc        Firmware error during system boot
              */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           MOD_TPM_PCREXTEND,
-                                          RC_PCREXTEND_SEND_FAIL,
+                                          RC_SEND_FAIL,
                                           rc,
                                           0,
                                           true);

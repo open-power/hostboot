@@ -750,10 +750,13 @@ class TrustedBootTest: public CxxTest::TestSuite
     {
         int64_t fails = 0, num_ops = 0;
         uint8_t digest[TPM_ALG_SHA256_SIZE];
+        TpmLogMgr logMgr;
 
         TRACFCOMP( g_trac_trustedboot,
                    "testExtendPCR - Start" );
         TpmTarget target = getTestTarget();
+        // Assign our log manager
+        target.logMgr = &logMgr;
 
         do
         {
@@ -763,6 +766,8 @@ class TrustedBootTest: public CxxTest::TestSuite
                 TS_FAIL( "testExtendPCR - Master TPM not functional" );
                 break;
             }
+
+            TpmLogMgr_initialize(&logMgr);
 
             for (size_t idx = 0; idx < sizeof(digest); idx++)
             {
@@ -798,10 +803,6 @@ class TrustedBootTest: public CxxTest::TestSuite
                    "testExtendPCR - End: %d/%d fails",
                    fails, num_ops );
 
-        if (NULL != target.logMgr)
-        {
-            delete target.logMgr;
-        }
     }
 
     /**

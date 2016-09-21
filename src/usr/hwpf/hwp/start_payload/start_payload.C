@@ -47,6 +47,7 @@
 #include    <initservice/initserviceif.H>
 #include    <initservice/extinitserviceif.H>
 #include    <initservice/istepdispatcherif.H>
+#include    <secureboot/trustedbootif.H>
 #include    <usr/cxxtest/TestSuite.H>
 #include    <hwpf/istepreasoncodes.H>
 #include    <errl/errludtarget.H>
@@ -506,6 +507,10 @@ void*    call_host_start_payload( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_start_payload entry" );
 
+    // Place a separator in the TPM to indicate we are passing control
+    //  to the next level of firmware in the stack
+    l_errl = TRUSTEDBOOT::pcrExtendSeparator();
+
     // For single-node systems, the non-master processors can be in a
     // different logical (powerbus) node.  Need to migrate task to master.
     task_affinity_pin();
@@ -558,7 +563,10 @@ void*    call_host_start_payload( void    *io_pArgs )
 #endif
 
     // broadcast shutdown to other HB instances.
-    l_errl = broadcastShutdown(this_node);
+    if( l_errl == NULL)
+    {
+        l_errl = broadcastShutdown(this_node);
+    }
 
     if( l_errl == NULL)
     {

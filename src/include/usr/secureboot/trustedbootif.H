@@ -73,9 +73,12 @@ namespace TRUSTEDBOOT
     {
         PCR_0     = 0,
         PCR_1     = 1,
+        PCR_2     = 2,
+        PCR_3     = 3,
         PCR_4     = 4,
         PCR_5     = 5,
         PCR_6     = 6,
+        PCR_7     = 7,
         PCR_DEBUG = 16,
         PLATFORM_PCR = 24, ///< The number of PCR required by the platform spec
         IMPLEMENTATION_PCR = 24, ///< The number of PCRs implemented by TPM
@@ -109,6 +112,14 @@ namespace TRUSTEDBOOT
                          size_t  i_digestSize,
                          const char* i_logMsg,
                          bool i_sendAsync = true);
+
+    /**
+     * @brief Extend a separator into the TPMs and log atomically
+     * @param[in] i_sendAsync Perform extension asynchronously, default true
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t pcrExtendSeparator(bool i_sendAsync = true);
 
     /**
      * @brief Return a set of information related to every unique

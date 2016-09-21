@@ -129,6 +129,11 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
                         size_t  i_digestSize,
                         const char* i_logMsg);
 
+/**
+ * @brief Extend a separator into a TPM and log
+ * @param[in/out] io_target Current TPM target structure
+ */
+void pcrExtendSeparator(TpmTarget & io_target);
 
 /**
  * @brief Is the TPM_REQUIRED flag set such that the
