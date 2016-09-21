@@ -2815,8 +2815,270 @@ fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::T
 }
 
 ///
+/// @brief Decodes module manufacturer ID code
+/// @param[in] i_target TARGET_TYPE_DIMM
+/// @param[out] o_value module manufacturing id code
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 320 (bit 7~0), 321 (6~0)
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 3
+/// @note Page 4.1.2.12 - 54
+///
+fapi2::ReturnCode decoder::module_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint16_t& o_value)
+{
+
+    constexpr size_t BYTE_INDEX_MSB = 320;
+    uint8_t mfgid_MSB = iv_spd_data[BYTE_INDEX_MSB];
+
+    constexpr size_t BYTE_INDEX_LSB = 321;
+    uint8_t mfgid_LSB = iv_spd_data[BYTE_INDEX_LSB];
+
+    constexpr size_t MSB_START = 0;
+    constexpr size_t MSB_LEN = 8;
+    constexpr size_t LSB_START = 8;
+    constexpr size_t LSB_LEN = 8;
+
+    fapi2::buffer<uint16_t> l_buffer;
+    l_buffer.insertFromRight<MSB_START, MSB_LEN>( mfgid_MSB )
+    .insertFromRight<LSB_START, LSB_LEN>( mfgid_LSB );
+
+    o_value = l_buffer;
+
+    FAPI_INF("%s.Module Manufacturer ID Code: %x",
+             mss::c_str(i_target),
+             o_value);
+
+    // Returns "happy" until we can figure out a way to test this - AAM
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes Module Manufacturing Location
+/// @param[in] i_target dimm target
+/// @param[out] o_value uint8_t identifier for manufacturing location of memory module
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 322
+/// @note Item JC-45-2220.01x
+/// @note Page 55
+/// @note DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode decoder::module_manufacturing_location(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
+{
+    // Trace in the front assists w/ debug
+    constexpr size_t BYTE_INDEX = 322;
+
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             BYTE_INDEX,
+             iv_spd_data[BYTE_INDEX]);
+
+    o_value = iv_spd_data[BYTE_INDEX];
+
+    FAPI_INF("%s. Module Manufacturing Location: %x",
+             mss::c_str(i_target),
+             o_value);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodesmodule manufacturing date
+/// @param[in] i_target TARGET_TYPE_DIMM
+/// @param[out] o_value the 2 byte date of manufacturing in BCD format
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 323-324
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @note Page 4.1.2.12 - 54
+/// @note in Binary Coded Decimal (BCD)
+/// @note MSB = year, LSB = week
+///
+fapi2::ReturnCode decoder::module_manufacturing_date(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint16_t& o_value)
+{
+
+    constexpr size_t BYTE_INDEX_MSB = 323;
+    uint8_t date_MSB = iv_spd_data[BYTE_INDEX_MSB];
+
+    constexpr size_t BYTE_INDEX_LSB = 324;
+    uint8_t date_LSB = iv_spd_data[BYTE_INDEX_LSB];
+
+    constexpr size_t MSB_START = 0;
+    constexpr size_t MSB_LEN = 8;
+    constexpr size_t LSB_START = 8;
+    constexpr size_t LSB_LEN = 8;
+
+    //Using insertFromRight because IBM is backwards
+    fapi2::buffer<uint16_t> l_buffer;
+    l_buffer.insertFromRight<MSB_START, MSB_LEN>( date_MSB )
+    .insertFromRight<LSB_START, LSB_LEN>( date_LSB );
+
+    o_value = l_buffer;
+
+    FAPI_INF("%s.Module Manufacturer ID date: %x",
+             mss::c_str(i_target),
+             o_value);
+
+    // Returns "happy" until we can figure out a way to test this - AAM
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes module's unique serial number
+/// @param[in] i_target TARGET_TYPE_DIMM
+/// @param[out] o_value
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 325-328
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @note Page 4.1.2.12 - 54
+/// @note in Binary Coded Decimal (BCD)
+///
+fapi2::ReturnCode decoder::module_serial_number(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint32_t& o_value)
+{
+    constexpr size_t BYTE_INDEX_0 = 325;
+    uint8_t sn_byte_0 = iv_spd_data[BYTE_INDEX_0];
+
+    constexpr size_t BYTE_INDEX_1 = 326;
+    uint8_t sn_byte_1 = iv_spd_data[BYTE_INDEX_1];
+
+    constexpr size_t BYTE_INDEX_2 = 327;
+    uint8_t sn_byte_2 = iv_spd_data[BYTE_INDEX_2];
+
+    constexpr size_t BYTE_INDEX_3 = 328;
+    uint8_t sn_byte_3 = iv_spd_data[BYTE_INDEX_3];
+
+    constexpr size_t START_BYTE_0 = 0;
+    constexpr size_t LEN_BYTE_0 = 8;
+    constexpr size_t START_BYTE_1 = 8;
+    constexpr size_t LEN_BYTE_1 = 8;
+    constexpr size_t START_BYTE_2 = 16;
+    constexpr size_t LEN_BYTE_2 = 8;
+    constexpr size_t START_BYTE_3 = 24;
+    constexpr size_t LEN_BYTE_3 = 8;
+
+    //Goes down the batting order, Inserts from left side because IBM
+    fapi2::buffer<uint32_t> l_buffer;
+    l_buffer.insertFromRight<START_BYTE_0, LEN_BYTE_0>( sn_byte_0 )
+    .insertFromRight<START_BYTE_1, LEN_BYTE_1>( sn_byte_1 )
+    .insertFromRight<START_BYTE_2, LEN_BYTE_2>( sn_byte_2 )
+    .insertFromRight<START_BYTE_3, LEN_BYTE_3>( sn_byte_3 );
+
+    o_value = l_buffer;
+
+    FAPI_INF("%s.Module Serial Number : %x",
+             mss::c_str(i_target),
+             o_value);
+
+    // Returns "happy" until we can figure out a way to test this - AAM
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes Module Revision Code
+/// @param[in] i_target dimm target
+/// @param[out] o_value uint8_t identifier for revision code
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 349
+/// @note Item JC-45-2220.01x
+/// @note Page 55
+/// @note DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode decoder::module_revision_code(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
+{
+    // Trace in the front assists w/ debug
+    constexpr size_t BYTE_INDEX = 349;
+
+    FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             BYTE_INDEX,
+             iv_spd_data[BYTE_INDEX]);
+
+    o_value = iv_spd_data[BYTE_INDEX];
+
+    FAPI_INF("%s. Module Revision Code: %x",
+             mss::c_str(i_target),
+             o_value);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes DRAM Manufacturer ID code
+/// @param[in] i_target TARGET_TYPE_DIMM
+/// @param[out] o_value dram manufacturing id code
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 350 351
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @note Page 4.1.2.12 - 54
+///
+fapi2::ReturnCode decoder::dram_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint16_t& o_value)
+{
+    constexpr size_t BYTE_INDEX_MSB = 350;
+    uint8_t mfgid_MSB = iv_spd_data[BYTE_INDEX_MSB];
+
+    constexpr size_t BYTE_INDEX_LSB = 351;
+    uint8_t mfgid_LSB = iv_spd_data[BYTE_INDEX_LSB];
+
+    constexpr size_t MSB_START = 0;
+    constexpr size_t MSB_LEN = 8;
+    constexpr size_t LSB_START = 8;
+    constexpr size_t LSB_LEN = 8;
+
+    fapi2::buffer<uint16_t> l_buffer;
+    l_buffer.insertFromRight<MSB_START, MSB_LEN>( mfgid_MSB )
+    .insertFromRight<LSB_START, LSB_LEN>( mfgid_LSB );
+
+    o_value = l_buffer;
+
+    FAPI_INF("%s.DRAM Manufacturer ID Code (dram_mfg_id): %x",
+             mss::c_str(i_target),
+             o_value);
+
+    // Returns "happy" until we can figure out a way to test this - AAM
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes DRAM Stepping
+/// @param[in] i_target dimm target
+/// @param[out] o_value uint8_t  DRAM Stepping val
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 353
+/// @note Item JC-45-2220.01x
+/// @note Page 56
+/// @note DDR4 SPD Document Release 3
+/// @note also called die revision level
+///
+fapi2::ReturnCode decoder::dram_stepping(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_value)
+{
+    // Trace in the front assists w/ debug
+    constexpr size_t BYTE_INDEX = 352;
+
+    FAPI_INF("%s SPD data at Byte %d: 0x%01X.",
+             mss::c_str(i_target),
+             BYTE_INDEX,
+             iv_spd_data[BYTE_INDEX]);
+
+    o_value = iv_spd_data[BYTE_INDEX];
+
+    FAPI_INF("%s. DRAM stepping: %x",
+             mss::c_str(i_target),
+             o_value);
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Returns Logical ranks in Primary SDRAM type
 /// @param[in] i_target dimm target
+/// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_logical_ranks number of logical ranks
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///

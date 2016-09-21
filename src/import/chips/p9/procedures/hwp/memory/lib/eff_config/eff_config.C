@@ -183,6 +183,32 @@ fapi_try_exit:
 }// dimm_type
 
 ///
+/// @brief Determines & sets effective config for dram_mfg_id type from SPD
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_mfg_id(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+
+    uint16_t l_decoder_val = 0;
+    uint16_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_mfg_id(l_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(i_target, l_decoder_val) );
+
+    l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_MFG_ID, l_mcs, l_mcs_attrs) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}// dimm_type
+
+///
 /// @brief Determines & sets effective config for dram width
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay

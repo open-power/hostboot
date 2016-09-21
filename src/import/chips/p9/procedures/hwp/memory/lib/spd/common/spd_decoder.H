@@ -100,7 +100,7 @@ enum factory_byte_extract
 /// @param[in] i_spd_data the SPD data
 /// @return extracted byte (right aligned)
 ///
-template<uint8_t I, uint8_t S, uint8_t L>
+template<size_t I, uint8_t S, uint8_t L>
 inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const std::vector<uint8_t>& i_spd_data)
 {
@@ -421,12 +421,22 @@ class decoder
             // Bytes 117 - 125 : Entire byte used
 
             // Byte 126
+            CRC_LSB_START = 0,
+            CRC_LSB_LEN = 8,
+
+            // Byte 127
             CRC_MSB_START = 0,
             CRC_MSB_LEN = 8,
 
-            // Byte 127
-            CRC_LSB_START = 0,
-            CRC_LSB_LEN = 8,
+            // Byte 320
+            // Skip SPD most signigicant bit, so our 0
+            MOD_MFG_LSB_START = 0,
+            MOD_MFG_LSB_LEN = 8,
+
+            // Byte 321
+            MOD_MFG_MSB_START = 0,
+            MOD_MFG_MSB_LEN = 8,
+
         };
 
     public:
@@ -1250,13 +1260,102 @@ class decoder
                 uint16_t& o_value);
 
         ///
+        /// @brief Decodes module manufacturer ID code
+        /// @param[in] i_target TARGET_TYPE_DIMM
+        /// @param[out] o_output module manufacturing id code
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 320 (bit 7~0), 321 (6~0)
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 3
+        /// @note Page 4.1.2.12 - 54
+        ///
+        virtual fapi2::ReturnCode module_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint16_t& o_value);
+        ///
+        /// @brief Decodes Module Manufacturing Location
+        /// @param[in] i_target dimm target
+        /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 322
+        /// @note Item JC-45-2220.01x
+        /// @note Page 55
+        /// @note DDR4 SPD Document Release 3
+        ///
+        virtual fapi2::ReturnCode module_manufacturing_location(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint8_t& o_value);
+        ///
+        /// @brief Decodesmodule manufacturing date
+        /// @param[in] i_target TARGET_TYPE_DIMM
+        /// @param[out] o_output the 2 byte date of manufacturing in BCD format
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 323 & 324
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 54
+        /// @note in Binary Coded Decimal (BCD)
+        /// @note MSB = year, LSB = week
+        ///
+        virtual fapi2::ReturnCode module_manufacturing_date(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint16_t& o_output);
+
+        ///
+        /// @brief Decodes module's unique serial number
+        /// @param[in] i_target TARGET_TYPE_DIMM
+        /// @param[out] o_output
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 325-328
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 54
+        ///
+        virtual fapi2::ReturnCode module_serial_number(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint32_t& o_output);
+        ///
+        /// @brief Decodes Module Revision Code
+        /// @param[in] i_target dimm target
+        /// @param[out] o_value uint8_t identifier for revision code
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 349
+        /// @note Item JC-45-2220.01x
+        /// @note Page 55
+        /// @note DDR4 SPD Document Release 3
+        ///
+        virtual fapi2::ReturnCode module_revision_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint8_t& o_value);
+        ///
+        /// @brief Decodes DRAM Manufacturer ID code
+        /// @param[in] i_target TARGET_TYPE_DIMM
+        /// @param[out] o_output dram manufacturing id code
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 350 - 351
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 54
+        ///
+        virtual fapi2::ReturnCode dram_manufacturer_id_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint16_t& o_output);
+        ///
+        /// @brief Decodes DRAM Stepping
+        /// @param[in] i_target dimm target
+        /// @param[out] o_value uint8_t DRAM Stepping val
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 352
+        /// @note Item JC-45-2220.01x
+        /// @note Page 56
+        /// @note DDR4 SPD Document Release 3
+        /// @note also called die revision level
+        ///
+        virtual fapi2::ReturnCode dram_stepping(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                uint8_t& o_value);
+
+        ///
         /// @brief Returns Logical ranks per DIMM
         /// @param[in] i_target dimm target
         /// @param[out] o_logical_ranks number of logical ranks
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode logical_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                uint8_t& o_logical_rank_per_dimm) ;
+                uint8_t& o_logical_rank_per_dimm);
 
     protected:
         // TODO RTC:159362

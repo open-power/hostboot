@@ -118,17 +118,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>dimm_mfg_id_code</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DIMM_SPARE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>

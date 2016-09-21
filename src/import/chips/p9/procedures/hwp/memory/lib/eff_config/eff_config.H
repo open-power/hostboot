@@ -122,6 +122,13 @@ class eff_config
                                     const std::vector<uint8_t>& i_spd_data);
 
         ///
+        /// @brief Determines & sets effective config for dram_mfg_id type from SPD
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_mfg_id(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
         /// @brief Determines & sets effective config for primary stack type
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay

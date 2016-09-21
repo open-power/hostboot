@@ -196,13 +196,13 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes manufacturer ID code
+        /// @brief Decodes register manufacturer ID code
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         /// @note SPD Byte 134 (Bits 7~0)
         /// @note Item JEDEC Standard No. 21-C
         ///
-        virtual fapi2::ReturnCode manufacturer_id_code(uint8_t& o_output)
+        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output)
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;

@@ -359,7 +359,7 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Decodes manufacturer ID code
+/// @brief Decodes register manufacturer ID code
 /// @param[out] o_output drive strength encoding from SPD
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD Byte 134 (bit 7~0)
@@ -367,7 +367,7 @@ fapi_try_exit:
 /// @note DDR4 SPD Document Release 2
 /// @note Page 4.1.2.12 - 51
 ///
-fapi2::ReturnCode rdimm_decoder_v1_0::manufacturer_id_code(uint8_t& o_output)
+fapi2::ReturnCode rdimm_decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output)
 {
     constexpr size_t BYTE_INDEX = 134;
     uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];

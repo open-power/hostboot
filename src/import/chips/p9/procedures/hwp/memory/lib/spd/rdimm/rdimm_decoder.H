@@ -226,7 +226,7 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output) override;
 
         ///
-        /// @brief Decodes manufacturer ID code
+        /// @brief Decodes register manufacturer ID code
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         /// @note SPD Byte 133 (bit 6~0)
@@ -234,7 +234,7 @@ class rdimm_decoder_v1_0 : public dimm_module_decoder
         /// @note DDR4 SPD Document Release 2
         /// @note Page 4.1.2.12 - 51
         ///
-        virtual fapi2::ReturnCode manufacturer_id_code(uint8_t& o_output) override;
+        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output) override;
 
         ///
         /// @brief Decodes register revision number

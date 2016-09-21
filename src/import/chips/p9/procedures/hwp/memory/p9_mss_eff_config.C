@@ -108,6 +108,7 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         l_eff_config.iv_pDecoder = l_it->second;
 
         FAPI_TRY( l_eff_config.dimm_type(l_dimm, l_it->second->iv_spd_data) );
+        FAPI_TRY( l_eff_config.dram_mfg_id(l_dimm) );
         FAPI_TRY( l_eff_config.dram_gen(l_dimm, l_it->second->iv_spd_data) );
         FAPI_TRY( l_eff_config.dram_width(l_dimm) );
         FAPI_TRY( l_eff_config.dram_density(l_dimm) );

@@ -586,4 +586,22 @@
         <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_EFF_DRAM_MFG_ID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DRAM Manufacturer ID Code
+            Decodes SPD Byte 350 and 351
+            creator: mss_eff_cnfg
+            consumer: power_thermal::decoder
+        </description>
+        <enum>MICRON = 0x802C, SAMSUNG = 0x80CE, HYNIX = 0x80AD </enum>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array> 2 2</array>
+        <mssAccessorName>eff_dram_mfg_id</mssAccessorName>
+    </attribute>
+
+
 </attributes>
