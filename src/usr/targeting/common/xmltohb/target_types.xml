@@ -849,6 +849,7 @@
     <attribute><id>VDM_VID_COMPARE_OVERRIDE_MV</id></attribute>
     <attribute><id>IVRM_DEADZONE_MV</id></attribute>
     <attribute><id>PM_SAFE_FREQUENCY_MHZ</id></attribute>
+    <attribute><id>PM_SAFE_VOLTAGE_MV</id></attribute>
     <attribute><id>MSS_MRW_OFFSET_WLO</id></attribute>
     <attribute><id>MSS_MRW_OFFSET_GPO</id></attribute>
     <attribute><id>MSS_MRW_OFFSET_RLO</id></attribute>

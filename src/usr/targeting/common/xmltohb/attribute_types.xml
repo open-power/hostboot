@@ -20867,10 +20867,16 @@ Measured in GB</description>
 <!-- name changed in ekb, need to have both to push interim commits through -->
 <attribute>
   <id>PROC_FABRIC_SYSTEM_ID</id>
-  <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
+  <description>
+      Logical fabric system ID associated with this chip.
+      Would only need to be a non-zero to support CCSM
+      (coherent cluster shared memory) system topologies
+      Provided by the MRW.
+  </description>
   <simpleType>
-    <uint32_t>
-    </uint32_t>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -21096,6 +21102,21 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<enumerationType>
+    <id>PROC_FABRIC_X_BUS_WIDTH</id>
+    <description>
+        Enumeration indicating the PROC_FABRIC_X_BUS_WIDTH
+    </description>
+    <enumerator>
+        <name>2_BYTE</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>4_BYTE</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
 <attribute>
   <id>PROC_FABRIC_X_BUS_WIDTH</id>
   <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
@@ -21105,7 +21126,10 @@ Measured in GB</description>
     2_BYTE = 0x01, 4_BYTE = 0x02
   </description>
   <simpleType>
-    <uint8_t></uint8_t>
+      <enumeration>
+        <id>PROC_FABRIC_X_BUS_WIDTH</id>
+        <default>4_BYTE</default>
+      </enumeration>
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
@@ -31345,10 +31369,27 @@ Measured in GB</description>
     <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_SAFE_FREQUENCY_MHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_SAFE_VOLTAGE_MV</id>
+    <description>
+        Voltage (in mV) to move to if the Power Management function fails.
+        Provided by the MRW.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SAFE_VOLTAGE_MV</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
