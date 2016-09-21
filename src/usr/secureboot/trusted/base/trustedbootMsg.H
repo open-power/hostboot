@@ -52,6 +52,7 @@ namespace TRUSTEDBOOT
     {
         MSG_TYPE_NOOP,
         MSG_TYPE_PCREXTEND,
+        MSG_TYPE_SEPARATOR,
         MSG_TYPE_SHUTDOWN,
         MSG_TYPE_LAST = MSG_TYPE_SHUTDOWN
     };
@@ -94,9 +95,11 @@ namespace TRUSTEDBOOT
         /// @brief Message dtor
         virtual ~Message(void)
         {
-            // Do NOT delete[] iv_data here. For synchronous messages
-            // the caller wants this data and expects to delete[] it
-            // itself. For async messages it is deleted in the dtor
+            if (NULL != iv_data)
+            {
+                delete[] iv_data;
+                iv_data = NULL;
+            }
 
             // Do NOT delete iv_errl here.  For synchronous messages
             // iv_errl is returned to the caller to commit and for
@@ -137,8 +140,6 @@ namespace TRUSTEDBOOT
         /// @brief Dtor
         virtual ~SyncMessage(void)
         {
-            delete[] iv_data;
-            iv_data = NULL;
         }
 
         /// @brief complete the processing when a response arrives
@@ -161,8 +162,6 @@ namespace TRUSTEDBOOT
         /// @brief Dtor
         virtual ~AsyncMessage(void)
         {
-            delete[] iv_data;
-            iv_data = NULL;
         }
 
         /// @brief complete the processing when a response arrives

@@ -31,6 +31,7 @@
 #include <isteps/istep_reasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
+#include <secureboot/trustedbootif.H>
 #include <sys/task.h>
 #include <initservice/extinitserviceif.H>
 #include <hbotcompid.H>
@@ -127,6 +128,10 @@ void* call_host_start_payload (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_start_payload entry" );
+
+    // Place a separator in the TPM to indicate we are passing control
+    //  to the next level of firmware in the stack
+    l_errl = TRUSTEDBOOT::pcrExtendSeparator();
 
     // For single-node systems, the non-master processors can be in a
     // different logical (powerbus) group.  Need to migrate task to master.

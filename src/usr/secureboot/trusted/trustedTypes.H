@@ -62,7 +62,6 @@ namespace TRUSTEDBOOT
 
     typedef enum
     {
-        TPM_ALG_NUM_SUPPORTED = 1,       ///< Number of algorithms supported
         TPM_ALG_SHA1_SIZE     = 20,      ///< SHA1 digest byte size
         TPM_ALG_SHA256_SIZE   = 32,      ///< SHA256 digest byte size
         TPM_ALG_INVALID_SIZE             ///< Used for error checking

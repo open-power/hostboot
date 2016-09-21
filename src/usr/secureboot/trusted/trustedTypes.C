@@ -36,6 +36,7 @@
 // Includes
 // ----------------------------------------------
 #include <string.h>
+#include <endian.h>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 
