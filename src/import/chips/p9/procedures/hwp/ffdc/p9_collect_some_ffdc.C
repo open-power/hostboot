@@ -27,20 +27,70 @@
 ///
 
 #include <stdint.h>
+#include <hwp_error_info.H>
 #include <fapi2.H>
 
 using fapi2::FAPI2_RC_FALSE;
 
+const uint32_t PIB_RC_EXAMPLE_1 = 0x01;
+const uint32_t PIB_RC_EXAMPLE_2 = 0x02;
+
 extern "C"
 {
-    fapi2::ReturnCode p9_collect_some_ffdc(std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& o_ffdc_data, uint32_t a,
-                                           uint8_t b)
+    fapi2::ReturnCode p9_collect_some_ffdc(fapi2::ffdc_t& param1,  fapi2::ReturnCode& o_rc)
     {
-        FAPI_INF("parm1=%d and parm2=%d", a, b);
-        o_ffdc_data.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new fapi2::ErrorInfoFfdc( 0xdeadbeef, &a, sizeof(a))));
-        o_ffdc_data.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new fapi2::ErrorInfoFfdc( 0xcafebabe, &b, sizeof(b))));
+        FAPI_INF("parm1=%d\n", param1);
 
+        // define reference to data to be captured by the macro below
+        // ffdc classes use these ffdc_t types so all data should be stored
+        // in  one.
+        fapi2::ffdc_t FFDC_DATA1;
+        fapi2::ffdc_t FFDC_DATA2;
+
+        // some piece of ffdc we collected or this failure, through a register
+        // read or function call
+        uint32_t my_ffdc_data = 32;
+        uint64_t more_ffdc_data = 0x10002005;
+
+        // get the actual data from the parameter, in this case its a pretend
+        // pib_rc we can check and add different FFDC data depending on the
+        // RC
+        const uint32_t pib_rc = *(reinterpret_cast<const uint32_t*>(param1.ptr()));
+
+        switch( pib_rc )
+        {
+            case PIB_RC_EXAMPLE_1:
+                {
+                    FFDC_DATA1.ptr() = static_cast<void*>(&my_ffdc_data);
+                    FFDC_DATA1.size() = sizeof(my_ffdc_data);
+
+                    // add our ffdc to the returnCode passed in - see sample
+                    // xml for details on the xml
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PIB_ERROR_1);
+                }
+                break;
+
+            case PIB_RC_EXAMPLE_2:
+                {
+                    FFDC_DATA1.ptr() = static_cast<void*>(&my_ffdc_data);
+                    FFDC_DATA1.size() = sizeof(my_ffdc_data);
+
+                    FFDC_DATA2.ptr() = static_cast<void*>(&more_ffdc_data);
+                    FFDC_DATA2.size() = sizeof(&more_ffdc_data);
+
+                    // add our ffdc to the returnCode passed in - see sample
+                    // xml for details on the xml
+                    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_PIB_ERROR_2);
+
+                }
+                break;
+
+            default:
+                // do nothing
+                break;
+        }
+
+        // just return success
         return fapi2::ReturnCode();
     }
-
 }

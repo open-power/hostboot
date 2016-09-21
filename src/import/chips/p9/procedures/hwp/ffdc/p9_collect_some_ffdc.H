@@ -28,15 +28,15 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <fapi2.H>
+#include <return_code.H>
+#include <error_info_defs.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_collect_some_ffdc_FP_t)(std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& o_ffdc_data,
-        uint32_t a, uint8_t b);
+typedef fapi2::ReturnCode (*p9_collect_some_ffdc_FP_t)(fapi2::ffdc_t& i_param1, fapi2::ReturnCode&);
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -52,15 +52,17 @@ extern "C"
 ///
 /// @brief Sample procedure used to demonstrate FFDC collection using
 ///        collectFfdc tag in xml files
-/// @param[in] o_ffdc_data - default parameter ffdc data returned in this
 ///                           vector
-///  @param[in] a - parameter passed from the SBE through the ffdc data buffer
-///  @param[in] b - parameter passed from the SBE through the ffdc data buffer
+///  @param[in] a - parameter passed in from calling context
+///  @param[out] o_rc - return code to add FFDC data to.
 ///
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_collect_some_ffdc(std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& o_ffdc_data, uint32_t a,
-                                           uint8_t b);
+/// NOTE: All input parameters must be of type fapi2::ffdc_t and converted
+///       to the correct type inside the function.
+///
+    fapi2::ReturnCode p9_collect_some_ffdc(fapi2::ffdc_t&,
+                                           fapi2::ReturnCode& );
 
 } // extern "C"
 
