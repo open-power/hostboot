@@ -71,7 +71,9 @@
      <attribute>
           <id>ATTR_VPD_OVERRIDE_CK_ENABLE</id>
      </attribute>
-
+     <attribute>
+          <id>ATTR_EFF_DRAM_MFG_ID</id>
+     </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
