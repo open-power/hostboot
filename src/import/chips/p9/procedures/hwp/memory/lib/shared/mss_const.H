@@ -68,12 +68,6 @@ enum sizes
     WR_LVL_PRE_DLY = 0b101010,
     WR_LVL_NUM_VALID_SAMPLES = 0x5,
 
-    // THIS IS LIKELY INCORRECT - Should be defined in the DDR4 write centering protocol BRS
-    // This field must be set to the larger of the two values in number of memory clock cycles.
-    // FW_RD_WR = max(tWTR + 11, AL + tRTP + 3)
-    WR_CNTR_FW_RD_WR = 0x11 + 4,
-    WR_CNTR_FW_WR_RD = 0x0,
-
     // Attribute? BRS
     COARSE_CAL_STEP_SIZE = 0x4,
     CONSEQ_PASS = 0x8,
