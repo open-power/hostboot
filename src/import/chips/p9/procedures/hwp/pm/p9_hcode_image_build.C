@@ -747,6 +747,13 @@ extern "C"
                 break;
             }
 
+            if( ppeSection.iv_size == 0 )
+            {
+                FAPI_ERR("Empty .rings section not allowed: <.rings>.iv_size=%d", ppeSection.iv_size);
+                rc = BUILD_FAIL_CMN_RINGS;
+                break;
+            }
+
             uint8_t* pScanRing = ppeSection.iv_offset + (uint8_t*) (i_pImageIn );
 
             if( ( PLAT_CME != i_platId ) && ( PLAT_SGPE != i_platId ) )
