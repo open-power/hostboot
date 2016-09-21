@@ -269,6 +269,7 @@ push @systemAttr,
     "EXTERNAL_VRM_STEPDELAY", $reqPol->{'pm_external_vrm_stepdelay'},
     "PM_SPIVID_FREQUENCY", $reqPol->{'pm_spivid_frequency'}->{content},
     "PM_SAFE_FREQUENCY", $reqPol->{'pm_safe_frequency'}->{content},
+    "PM_SAFE_FREQUENCY_MHZ", $reqPol->{'pm_safe_frequency'}->{content},
     "PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY",
         $reqPol->{'pm_resonant_clock_full_clock_sector_buffer_frequency'}->
             {content},
@@ -353,6 +354,17 @@ elsif ($reqPol->{'required_synch_mode'} eq 'undetermined')
 }
 
 
+my $xBusWidth = $reqPol->{'proc_x_bus_width'};
+if( $xBusWidth == 1 )
+{
+    push @systemAttr, ['PROC_FABRIC_X_BUS_WIDTH', '2_BYTE'];
+}
+else
+{
+    push @systemAttr, ['PROC_FABRIC_X_BUS_WIDTH', '4_BYTE'];
+}
+
+
 # Note - if below attribute is specified with im-id, it will not get
 #  set into the output
 if( exists $reqPol->{'mss_interleave_enable'} )
@@ -422,7 +434,6 @@ for my $domain (keys %domainProgram)
         push @systemAttr, [$domain, POWERON_PROGRAM];
     }
 }
-
 
 my %procLoadline = ();
 $procLoadline{PROC_R_LOADLINE_VDD_UOHM}{sys}
