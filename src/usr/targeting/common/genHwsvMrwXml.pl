@@ -360,8 +360,6 @@ my %domainProgram = (   MSS_VDD_PROGRAM  => $reqPol->{'mss_vdd_program'},
                         MSS_VPP_PROGRAM  => $reqPol->{'mss_vpp_program'} );
 for my $domain (keys %domainProgram)
 {
-# RTC:159848 - remove the defaulting to poweron when HWSV support is in
-=domain_default
     if ($domainProgram{$domain} eq "poweron")
     {
         push @systemAttr, [$domain, POWERON_PROGRAM];
@@ -375,7 +373,6 @@ for my $domain (keys %domainProgram)
         push @systemAttr, [$domain, DYNAMIC_PROGRAM];
     }
     else
-=cut
     {
         # default to not program in host_enable_memvolt
         push @systemAttr, [$domain, POWERON_PROGRAM];
