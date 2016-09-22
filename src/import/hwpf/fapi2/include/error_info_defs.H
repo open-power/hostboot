@@ -76,7 +76,7 @@ typedef struct
 struct ffdc_struct
 {
     const void* ptr;
-    int16_t size;
+    size_t size;
 };
 
 
@@ -101,11 +101,11 @@ class ffdc_t
             return *(reinterpret_cast<const uint8_t*>(iv_value.ptr));
         }
 
-        int16_t size(void) const
+        size_t size(void) const
         {
             return iv_value.size;
         }
-        int16_t& size(void)
+        size_t& size(void)
         {
             return iv_value.size;
         }
@@ -257,8 +257,7 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc )
 {
     fapi2::ffdc_t temp;
 
-    // passed in size is a uint32_t but, needs to be uint16_t
-    temp.size() = static_cast<uint16_t>(i_sbeFfdc.size);
+    temp.size() = static_cast<size_t>(i_sbeFfdc.size);
 
     if(temp.size() == EI_FFDC_SIZE_TARGET)
     {
