@@ -133,12 +133,6 @@ void* call_host_load_payload (void *io_pArgs)
     return l_err;
 }
 
-static void simics_load_payload(uint64_t addr) __attribute__((noinline));
-static void simics_load_payload(uint64_t addr)
-{
-    MAGIC_INSTRUCTION(MAGIC_LOAD_PAYLOAD);
-}
-
 static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         uint64_t i_physAddr)
 {
@@ -183,61 +177,45 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
             i_physAddr );
 
     void * loadAddr = NULL;
-    // Use simics optimization if we are running under simics which has very
-    // slow PNOR access.
-    if ( Util::isSimicsRunning()  )
+    // Map in the physical memory we are loading into.
+    // If we are not xz compressed, the uncompressedSize
+    // is equal to the original size.
+    loadAddr = mm_block_map( reinterpret_cast<void*>( i_physAddr ),
+                             uncompressedPayloadSize );
+
+    // Print out inital progress bar.
+#ifdef CONFIG_CONSOLE
+    const int progressSteps = 80;
+    int progress = 0;
+    for ( int i = 0; i < progressSteps; ++i )
     {
-        //TODO RTC 143500
-        if(l_pnor_is_XZ_compressed)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  "If you are running simics, and have xz compressed ",
-                  "payload image, you are going to fail. RTC 143500");
-        }
-        simics_load_payload( i_physAddr );
+        printk( "." );
     }
-    else
+    printk( "\r" );
+#endif
+
+    if(!l_pnor_is_XZ_compressed)
     {
-        // Map in the physical memory we are loading into.
-        // If we are not xz compressed, the uncompressedSize
-        // is equal to the original size.
-        loadAddr = mm_block_map( reinterpret_cast<void*>( i_physAddr ),
-                                   uncompressedPayloadSize );
-
-        // Print out inital progress bar.
+        // Load the data block by block and update the progress bar.
+        const uint32_t BLOCK_SIZE = 4096;
+        for ( uint32_t i = 0; i < originalPayloadSize; i += BLOCK_SIZE )
+        {
+            memcpy( reinterpret_cast<void*>(
+                      reinterpret_cast<uint64_t>(loadAddr) + i ),
+                    reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
+                    std::min( originalPayloadSize - i, BLOCK_SIZE ) );
 #ifdef CONFIG_CONSOLE
-        const int progressSteps = 80;
-        int progress = 0;
-        for ( int i = 0; i < progressSteps; ++i )
-        {
-            printk( "." );
-        }
-        printk( "\r" );
-#endif
-
-        if(!l_pnor_is_XZ_compressed)
-        {
-            // Load the data block by block and update the progress bar.
-            const uint32_t BLOCK_SIZE = 4096;
-            for ( uint32_t i = 0; i < originalPayloadSize; i += BLOCK_SIZE )
+            for ( int new_progress = (i * progressSteps) /
+                  originalPayloadSize;
+                  progress <= new_progress; progress++ )
             {
-                memcpy( reinterpret_cast<void*>( 
-                          reinterpret_cast<uint64_t>(loadAddr) + i ),
-                        reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
-                        std::min( originalPayloadSize - i, BLOCK_SIZE ) );
-#ifdef CONFIG_CONSOLE
-                for ( int new_progress = (i * progressSteps) /
-                                         originalPayloadSize;
-                      progress <= new_progress; progress++ )
-                {
-                    printk( "=" );
-                }
-#endif
+                printk( "=" );
             }
-#ifdef CONFIG_CONSOLE
-            printk( "\n" );
 #endif
         }
+#ifdef CONFIG_CONSOLE
+        printk( "\n" );
+#endif
     }
 
     if(l_pnor_is_XZ_compressed)

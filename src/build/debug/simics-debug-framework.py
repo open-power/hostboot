@@ -520,11 +520,15 @@ def magic_instruction_callback(user_arg, cpu, arg):
         print "TimeManager::cv_isSimicsRunning = true"
 
     if arg == 7012:  # MAGIC_LOAD_PAYLOAD
-        load_addr = cpu.r3
-        flash_file = conf.fpga0.sfc_master_mmio_image.files[0][0]
-        print 'loading payload from', flash_file, 'to 0x%x' % load_addr
-        cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
-        SIM_run_alone( run_command, cmd )
+        #For P9 the Payload load is much faster due to PNOR
+        # not being behind cec-chip model, removing this but leaving
+        # as comments if needed in the future
+        #load_addr = cpu.r3
+        #flash_file = conf.fpga0.sfc_master_mmio_image.files[0][0]
+        #print 'loading payload from', flash_file, 'to 0x%x' % load_addr
+        #cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
+        #SIM_run_alone( run_command, cmd )
+      print "MAGIC_LOAD_PAYLOAD not implemented\n";
 
     if arg == 7016:
         print "Wake up rest of CORE0 - 7017 start \n";
