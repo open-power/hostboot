@@ -31525,4 +31525,22 @@ Measured in GB</description>
   <readable/>
 </attribute>
 
+<attribute>
+    <id>REL_POS</id>
+    <description>
+        Logical position of this unit/dimm relative to its immediate parent
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_REL_POS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
