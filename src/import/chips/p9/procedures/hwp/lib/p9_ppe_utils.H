@@ -38,15 +38,22 @@
 #define __P9_PPE_UTILS_H__
 typedef struct
 {
-    uint16_t     number;
+    uint16_t    number;
+    uint32_t    value;
+} PPERegValue_t;
+
+typedef struct
+{
+    PPERegValue_t     reg;
     std::string  name;
 } PPEReg_t;
 
 typedef struct
 {
-    PPEReg_t    reg;
-    uint32_t    value;
-} PPERegValue_t;
+    uint16_t     number;
+    std::string  name;
+} PPEReg_num_name_t;
+
 
 typedef struct
 {
@@ -100,17 +107,18 @@ enum PPE_XIRS
     XIR_SPRG0,
 };
 
-enum PPE_SPECIAL_ACCESS
-{
-    MSR,
-    CR,
-};
+//enum PPE_SPECIAL_ACCESS
+//{
+//    MSR,
+//    CR,
+//};
 enum PPE_SPRS
 {
     CTR     = 9,
     DACR    = 316,
     DBCR    = 308,
     DEC     = 22,
+    EDR     = 61,
     IVPR    = 63,
     ISR     = 62,
     LR      = 8,
@@ -121,7 +129,14 @@ enum PPE_SPRS
     SRR1    = 27,
     TCR     = 340,
     TSR     = 336,
-    XER     = 1, //336,
+    XER     = 1,
+    //Some unique identification no. FOR OTHER REGS(non sprn)
+    XSR     = 4200,
+    IAR     = 2,
+    IR      = 3,
+    MSR     = 42,
+    CR      = 420,
+
 };
 
 
