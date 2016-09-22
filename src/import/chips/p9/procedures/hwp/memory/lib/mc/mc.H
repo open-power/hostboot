@@ -41,6 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
+#include <lib/dimm/kind.H>
 #include <lib/utils/scom.H>
 
 namespace mss
@@ -182,6 +183,19 @@ fapi2::ReturnCode setup_perf2_register(const fapi2::Target<fapi2::TARGET_TYPE_MC
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode calculate_perf2(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_value);
+
+///
+/// @brief Helper to setup the translation map - useful for testing
+/// @param[in] i_dimm_kinds std::vector of DIMM kind's representing the DIMM (Not const as we sort the vector)
+/// @param[out] fapi2::buffer<uint64_t> o_xlate0  - xlt register 0's value
+/// @param[out] fapi2::buffer<uint64_t> o_xlate1  - xlt register 1's value
+/// @param[out] fapi2::buffer<uint64_t> o_xlate2  - xlt register 2's value
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& i_dimm_kinds,
+        fapi2::buffer<uint64_t>& o_xlate0,
+        fapi2::buffer<uint64_t>& o_xlate1,
+        fapi2::buffer<uint64_t>& o_xlate2 );
 
 ///
 /// @brief Perform initializations of the MC translation
