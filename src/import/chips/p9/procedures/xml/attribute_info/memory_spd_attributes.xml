@@ -113,6 +113,7 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
+        <enum> 4G = 4, 8G = 8, 16G = 16 </enum>
         <writeable/>
         <array>2 2</array>
         <mssUnit>Gb</mssUnit>
