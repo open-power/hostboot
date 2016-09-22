@@ -68,9 +68,11 @@
 #include <freqVoltageSvc.H>
 #include <config.h>
 #include <pnor/pnorif.H>
+#include <sys/time.h>
 
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
 const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
+const uint64_t MS_TO_WAIT_FIRST_SBE_START = 100; //(100 ms)
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -447,6 +449,12 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
+
+    // Secureboot code pins the SBE image such that it doesn't need to be
+    // re-read from PNOR.  In that case, Hostboot races ahead so fast that it
+    // doesn't see SBE as started in the HWP.  Give some time for the SBEs to
+    // start.
+    nanosleep(0,MS_TO_WAIT_FIRST_SBE_START*NS_PER_MSEC);
 
     //If in FSPless environment -- give time for SBE to complete on first chip
     if (!INITSERVICE::spBaseServicesEnabled())
