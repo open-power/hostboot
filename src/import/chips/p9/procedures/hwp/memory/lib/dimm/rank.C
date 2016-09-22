@@ -190,7 +190,7 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
 
     for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
     {
-        FAPI_TRY( mss::eff_num_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
+        FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
     FAPI_DBG("ranks: %d, %d", l_rank_count[0], l_rank_count[1]);
@@ -239,7 +239,7 @@ template<>
 fapi2::ReturnCode ranks( const fapi2::Target<TARGET_TYPE_DIMM>& i_target, std::vector< uint64_t >& o_ranks )
 {
     uint8_t l_ranks = 0;
-    FAPI_TRY( eff_num_ranks_per_dimm(i_target, l_ranks) );
+    FAPI_TRY( eff_num_master_ranks_per_dimm(i_target, l_ranks) );
 
     o_ranks = single_dimm_ranks[mss::index(i_target)][l_ranks];
 
@@ -290,7 +290,7 @@ fapi2::ReturnCode get_rank_pair_assignments(const fapi2::Target<TARGET_TYPE_MCA>
 
     for (auto d : i_target.getChildren<TARGET_TYPE_DIMM>())
     {
-        FAPI_TRY( mss::eff_num_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
+        FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
     o_registers = rank_pair_assignments[l_rank_count[1]][l_rank_count[0]];

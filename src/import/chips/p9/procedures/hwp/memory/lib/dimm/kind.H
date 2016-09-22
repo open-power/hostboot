@@ -81,7 +81,7 @@ class kind
         {
             iv_target = i_rhs.iv_target;
             iv_master_ranks = i_rhs.iv_master_ranks;
-            iv_slave_ranks = i_rhs.iv_slave_ranks;
+            iv_total_ranks = i_rhs.iv_total_ranks;
             iv_dram_density = i_rhs.iv_dram_density;
             iv_dram_width = i_rhs.iv_dram_width;
             iv_dram_generation = i_rhs.iv_dram_generation;
@@ -100,7 +100,7 @@ class kind
         inline bool operator==(const kind& i_rhs) const
         {
             return ((iv_master_ranks == i_rhs.iv_master_ranks) &&
-                    (iv_slave_ranks == i_rhs.iv_slave_ranks) &&
+                    (iv_total_ranks == i_rhs.iv_total_ranks) &&
                     (iv_dram_density == i_rhs.iv_dram_density) &&
                     (iv_dram_width == i_rhs.iv_dram_width) &&
                     (iv_dram_generation == i_rhs.iv_dram_generation) &&
@@ -116,18 +116,14 @@ class kind
         kind(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target):
             iv_target(i_target)
         {
-            uint8_t l_ranks = 0;
-
             FAPI_TRY( mss::eff_dram_gen(i_target, iv_dram_generation) );
             FAPI_TRY( mss::eff_dimm_type(i_target, iv_dimm_type) );
             FAPI_TRY( mss::eff_dram_density(i_target, iv_dram_density) );
             FAPI_TRY( mss::eff_dram_width(i_target, iv_dram_width) );
             FAPI_TRY( mss::eff_num_master_ranks_per_dimm(i_target, iv_master_ranks) );
-            FAPI_TRY( mss::eff_num_ranks_per_dimm(i_target, l_ranks) );
+            FAPI_TRY( mss::eff_num_ranks_per_dimm(i_target, iv_total_ranks) );
             FAPI_TRY( mss::eff_dram_row_bits(i_target, iv_rows) );
             FAPI_TRY( mss::eff_dimm_size(i_target, iv_size) );
-
-            iv_slave_ranks = l_ranks - iv_master_ranks;
 
             return;
 
@@ -140,7 +136,7 @@ class kind
         ///
         /// @brief Construct a DIMM kind used to identify this DIMM for tables.
         /// @param[in] i_master_ranks number of master ranks on the DIMM
-        /// @param[in] i_slave_ranks number of slave ranks on the DIMM
+        /// @param[in] i_total_ranks total number of ranks on the DIMM
         /// @param[in] i_dram_density density of the DRAM
         /// @param[in] i_dram_width width of the DRAM
         /// @param[in] i_dram_generation DRAM generation
@@ -150,7 +146,7 @@ class kind
         /// @note can't be constexpr as fapi2::Target doesn't have a constexpr ctor.
         ///
         kind( const uint8_t i_master_ranks,
-              const uint8_t i_slave_ranks,
+              const uint8_t i_total_ranks,
               const uint8_t i_dram_density,
               const uint8_t i_dram_width,
               const uint8_t i_dram_generation,
@@ -159,19 +155,32 @@ class kind
               const uint32_t i_size ):
             iv_target(0),
             iv_master_ranks(i_master_ranks),
-            iv_slave_ranks(i_slave_ranks),
+            iv_total_ranks(i_total_ranks),
             iv_dram_density(i_dram_density),
             iv_dram_width(i_dram_width),
             iv_dram_generation(i_dram_generation),
             iv_dimm_type(i_dimm_type),
             iv_rows(i_rows),
+            // TK consider calculating size rather than requiring it be set.
             iv_size(i_size)
         {
+            // Bit of an idiot-check to be sure a hand-crafted dimm::kind make sense wrt slaves, masters, packages, etc.
+            if (iv_master_ranks > iv_total_ranks)
+            {
+                FAPI_ERR("Not enough total ranks? master: %d total: %d", iv_master_ranks, iv_total_ranks);
+                fapi2::Assert(false);
+            }
+
+            if ((iv_total_ranks % iv_master_ranks) != 0)
+            {
+                FAPI_ERR("total or master ranks seems incorrect. master: %d total: %d", iv_master_ranks, iv_total_ranks);
+                fapi2::Assert(false);
+            }
         }
 
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
         uint8_t iv_master_ranks;
-        uint8_t iv_slave_ranks;
+        uint8_t iv_total_ranks;
         uint8_t iv_dram_density;
         uint8_t iv_dram_width;
         uint8_t iv_dram_generation;
