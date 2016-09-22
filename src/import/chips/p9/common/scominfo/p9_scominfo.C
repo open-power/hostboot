@@ -717,6 +717,20 @@ extern "C"
         return (!l_scom.is_valid());
     }
 
+    uint32_t p9_scominfo_fixChipUnitScomAddrOrTarget(const p9ChipUnits_t i_p9CU, const uint32_t i_targetChipUnitNum,
+            const uint64_t i_scomaddr, uint64_t& o_modifiedScomAddr, p9ChipUnits_t& o_p9CU,
+            uint32_t& o_modifiedChipUnitNum, const uint32_t i_mode)
+    {
+        uint32_t rc = 0;
+
+        o_modifiedScomAddr = i_scomaddr;
+        o_p9CU = i_p9CU;
+        o_modifiedChipUnitNum = i_targetChipUnitNum;
+
+        return rc;
+    }
+
+
 } // extern "C"
 
 #undef P9_SCOMINFO_C
