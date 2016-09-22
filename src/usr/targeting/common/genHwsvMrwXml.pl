@@ -3267,6 +3267,8 @@ sub calcAndAddFapiPos
     my ($type,$affinityPath,
         $relativePos,$fapiPosHr,$parentFapiPosOverride, $noprint) = @_;
 
+    my $fapiPos = 0xFF;
+
     # Uncomment to emit debug trace to STDERR
     #print STDERR "$affinityPath,";
 
@@ -3338,7 +3340,7 @@ sub calcAndAddFapiPos
         # have to take the value mod the architecture limit.  Note that this
         # scheme only holds up because every parent also had the same type of
         # calculation to compute its own FAPI_POS.
-        my $fapiPos = ($parentFapiPos
+        $fapiPos = ($parentFapiPos
             * $typeToLimit{$type}) + ($relativePos % $typeToLimit{$type});
 
         $fapiPosHr->{$affinityPath} = $fapiPos;
@@ -3353,22 +3355,13 @@ sub calcAndAddFapiPos
        <default>$fapiPos</default>
    </attribute>" unless ($noprint);
 
-        #mcs MEMVPD_POS is the same as FAPI_POS on single node systems.
-        if($type eq "mcs")
-        {
-            # Uncomment to emit debug trace to STDERR
-            # print STDERR "MEMVPD_POS=$fapiPos\n";
-        print "
-   <attribute>
-       <id>MEMVPD_POS</id>
-       <default>$fapiPos</default>
-   </attribute>" unless ($noprint);
-        }
     }
     else
     {
         die "Invalid type of $type specified";
     }
+
+    return $fapiPos;
 }
 
 sub generate_proc
@@ -4065,7 +4058,12 @@ sub generate_ex
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$ex</default>
+    </attribute>
+    ";
 
     calcAndAddFapiPos("ex",$affinityPath,$ex_orig,$fapiPosHr);
 
@@ -4209,7 +4207,12 @@ sub generate_core
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$core</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$core_orig,"core");
 
@@ -4304,7 +4307,12 @@ sub generate_eq
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$eq</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$eq,"eq");
 
@@ -4416,11 +4424,23 @@ sub generate_mcs
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
     </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>";
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$mcs</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$mcs_orig,"mcs");
 
-    calcAndAddFapiPos("mcs",$affinityPath,$mcs_orig,$fapiPosHr);
+    my $fapi_pos = calcAndAddFapiPos("mcs",$affinityPath,$mcs_orig,$fapiPosHr);
+
+    #mcs MEMVPD_POS is the same as FAPI_POS on single node systems.
+    print "
+    <attribute>
+       <id>MEMVPD_POS</id>
+       <default>$fapi_pos</default>
+     </attribute>";
 
     # call to do any fsp per-mcs attributes
     do_plugin('fsp_mcs', $proc, $mcs, $ordinalId );
@@ -4497,7 +4517,12 @@ sub generate_mca
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$mca</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$mca_orig,"mca");
 
@@ -4577,7 +4602,12 @@ sub generate_mcbist
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$mcbist</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$mcbist,"mcbist");
 
@@ -4651,7 +4681,12 @@ sub generate_pec
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$pec</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$pec,"pec");
 
@@ -4739,7 +4774,12 @@ sub generate_phb_chiplet
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$phb</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$phbChipUnit,"phb");
 
@@ -4803,7 +4843,12 @@ sub generate_ppe
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$ppe</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$ppe</default>
+    </attribute>
+    ";
 
     calcAndAddFapiPos("ppe",$affinityPath,$ppe,$fapiPosHr);
 
@@ -4873,7 +4918,12 @@ sub generate_obus
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$obus</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$obus,"obus");
 
@@ -4971,7 +5021,12 @@ sub generate_xbus
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$xbus</default>
+    </attribute>
+    ";
 
     if ($peer)
     {
@@ -5060,7 +5115,12 @@ sub generate_perv
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$perv</default>
+    </attribute>
+    ";
 
     calcAndAddFapiPos("perv",$affinityPath,$perv,$fapiPosHr);
 
@@ -5129,7 +5189,12 @@ sub generate_capp
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$capp</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$capp,"capp");
 
@@ -5192,7 +5257,13 @@ sub generate_sbe
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$sbe</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$sbe</default>
+    </attribute>
+    ";
+
 
     calcAndAddFapiPos("sbe",$affinityPath,$sbe,$fapiPosHr);
 
@@ -5289,7 +5360,12 @@ sub generate_a_nv
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$nv</default>
+    </attribute>
+    ";
 
     addPervasiveParentLink($sys,$node,$proc,$nv,"nv");
 
@@ -5335,17 +5411,18 @@ sub generate_nx
     my $ipath = $nxList{$node}{$proc}->{'instancePath'};
     my $mruData = get_mruid($ipath);
     my $fapi_name = "NA"; # nx not FAPI target
+    my $nx = 0;
 
     print "\n<!-- $SYSNAME n${node}p$proc NX units -->\n";
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}nx0</id>
+    <id>sys${sys}node${node}proc${proc}nx$nx</id>
     <type>unit-nx-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/nx-0</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/nx-$nx</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -5353,7 +5430,7 @@ sub generate_nx
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/nx-0</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/nx-$nx</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5366,7 +5443,12 @@ sub generate_nx
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$nx</default>
+    </attribute>
+    ";
 
     # call to do any fsp per-nx attributes
     do_plugin('fsp_nx', $proc, $ordinalId );
@@ -5728,7 +5810,12 @@ sub generate_mba
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$mba</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$mba</default>
+    </attribute>
+    ";
 
     calcAndAddFapiPos("mba",$affinityPath,$mba,$fapiPosHr);
 
@@ -5784,7 +5871,12 @@ sub generate_l4
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$l4</default>
-    </attribute>";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>$l4</default>
+    </attribute>
+    ";
 
     calcAndAddFapiPos("l4",$affinityPath,$l4,$fapiPosHr);
 
@@ -5888,7 +5980,14 @@ sub generate_is_dimm
         <default>$pos</default>
     </attribute>";
 
-        calcAndAddFapiPos("isdimm",$affinityPath,$dimm,$fapiPosHr);
+        my $fapi_pos = calcAndAddFapiPos("isdimm",$affinityPath,$dimm,$fapiPosHr);
+        my $dimm_drop = $fapi_pos % 2;
+        print "
+    <attribute>
+        <id>REL_POS</id>
+        <default>$dimm_drop</default>
+    </attribute>
+    ";
 
         # call to do any fsp per-dimm attributes
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
@@ -6308,7 +6407,12 @@ sub generate_occ
     <attribute>
         <id>OCC_MASTER_CAPABLE</id>
         <default>$mastercapable</default>
-    </attribute>\n";
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    ";
 
     # $TODO RTC:110399
     # hardcode for now both palmetto and habenaro are

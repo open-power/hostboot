@@ -350,6 +350,7 @@
     <attribute>
         <id>CHIPLET_ID</id>
     </attribute>
+    <attribute><id>REL_POS</id></attribute>
 </targetType>
 
 <!-- Memory Buffer Target Types -->
@@ -498,6 +499,7 @@
     <attribute><id>FRU_ID</id></attribute>
     <attribute><id>SPD_OVERRIDE_ENABLE</id></attribute>
     <attribute><id>SPD_OVERRIDE</id></attribute>
+    <attribute><id>REL_POS</id></attribute>
 </targetType>
 
 <targetType>
