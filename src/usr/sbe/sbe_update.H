@@ -696,6 +696,20 @@ namespace SBE
                                    const uint64_t i_offset,
                                    const uint64_t i_boundary);
 
+    /**
+     * @brief Add ring overrides to SBE image if present in PNOR partition
+     *
+     * @param[out] io_imgPtr      Pointer to current SBE image in memory
+     *                            Memory from this pointer through io_actImgSize
+     *                            is expected to be pre-allocated
+     *
+     * @param[out] io_actImgSize   Max size as input, actual size of the
+     *                            customized image as output
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t ringOvd(void *io_imgPtr,
+                       uint32_t & io_ovdImgSize);
 
 } //end namespace SBE
 #endif
