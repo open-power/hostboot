@@ -12,35 +12,35 @@ target_type 0 TARGET_TYPE_PROC_CHIP;
 #      these are n1 n3
 ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC01.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC01.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC01.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC23.PORT0.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC23.PORT1.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC23.PORT2.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 ispy  MC23.PORT3.ATCL.CL.CLSCOM.MCPERF0_PREFETCH_LIMIT [when=L] {
   spyv;
-  0b000000;
+  0b111111;
 }
 
 # Static hpc_wr/ig_wr CL reservation
