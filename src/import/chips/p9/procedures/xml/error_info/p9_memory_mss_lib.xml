@@ -378,7 +378,7 @@
     <rc>RC_MSS_NO_XLATE_FOR_DIMM</rc>
     <description>Indicates there wasn't an address translation defined for the DIMM</description>
     <ffdc>MASTER_RANKS</ffdc>
-    <ffdc>SLAVE_RANKS</ffdc>
+    <ffdc>TOTAL_RANKS</ffdc>
     <ffdc>DRAM_DENSITY</ffdc>
     <ffdc>DRAM_WIDTH</ffdc>
     <ffdc>DRAM_GENERATION</ffdc>
