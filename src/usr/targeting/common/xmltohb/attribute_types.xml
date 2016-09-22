@@ -9798,18 +9798,22 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
     <id>MSS_INTERLEAVE_ENABLE</id>
     <description>
-        Used in the setting of MCS groups. It is a bitfield.
-        - If 0x01 is set then groups of 1 are enabled and the SMP fabric must
-          be set in checkerboard mode (see ALL_MCS_IN_INTERLEAVING_GROUP).
-        - If 0x02 is set then groups of 2 are possible.
-        - If 0x04 is set then groups of 4 are possible.
-        - If 0x08 is set then groups of 8 are possible.
+      Used in the setting of groups.  It is a bit vector.  If the value
+      BITWISE_AND  0x01 = 0x01 then groups of 1 are enabled,
+      if the value BITWISE_AND  0x02 = 0x02, then groups of 2 are possible,
+      if the value BITWISE_AND  0x04 = 0x04, then group of 3 are possible,
+      if the value BITWISE_AND  0x08 = 0x08, then groups of 4 are possible,
+      if the value BITWISE_AND 0x20 = 0x20, then groups of 6 are possible,
+      if the value BITWISE_AND 0x80 = 0x80, then groups of 8 are possible.
+      If no groups can formed according to this input, then an error will
+      be thrown.
+      Provided by the MRW
         This attribute is based on Machine-Type-Model (MTM) and is setup by
           the service processor.
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x07</default>
+            <default>0xAF</default><!-- Maximum interleaving -->
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
