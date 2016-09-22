@@ -74,6 +74,20 @@ extern "C"
     uint32_t p9_scominfo_isChipUnitScom(const uint64_t i_scomAddr, bool& o_chipUnitRelated,
                                         std::vector<p9_chipUnitPairing_t>& o_chipUnitPairing, const uint32_t i_mode = 0);
 
+
+    /// @brief Alter the unit/unitnum of a target for spys where the clocks-on vs clocks-off targets are different.
+    /// @param[in] i_p9CU target used for the spy request
+    /// @param[in] i_targetChipUnitNum the instance number of the target used for the spy request
+    /// @param[in] i_scomaddr the scom from the clocks-on portion of the spy
+    /// @param[out] o_modifiedScomAddr the translated scom address (none may be needed)
+    /// @param[out] o_p9CU the translated target type
+    /// @param[out] o_modifiedChipUnitNum the translated target instance number
+    /// @param[in] i_mode Could be used in the future to indicate if the translation is from clocks-on or clocks-off state
+    /// @retval uint32_t Return non-zero for error
+    uint32_t p9_scominfo_fixChipUnitScomAddrOrTarget(const p9ChipUnits_t i_p9CU, const uint32_t i_targetChipUnitNum,
+            const uint64_t i_scomaddr, uint64_t& o_modifiedScomAddr, p9ChipUnits_t& o_p9CU,
+            uint32_t& o_modifiedChipUnitNum, const uint32_t i_mode = 0);
+
 } // extern "C"
 
 #endif /* P9_SCOMINFO_H */
