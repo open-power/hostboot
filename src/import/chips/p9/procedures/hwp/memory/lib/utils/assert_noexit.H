@@ -55,7 +55,7 @@
     {                                                                   \
         __ffdc__.execute(fapi2::FAPI2_ERRL_SEV_UNDEFINED, true);        \
         FAPI_ERR(__VA_ARGS__);                                          \
-        fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;         \
+        fapi2::current_err = fapi2::FAPI2_RC_FALSE;                     \
     }
 
 #endif
