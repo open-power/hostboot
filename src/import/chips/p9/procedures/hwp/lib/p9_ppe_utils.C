@@ -43,6 +43,7 @@
 #include <fapi2.H>
 #include <p9_ppe_utils.H>
 #include <p9_hcd_common.H>
+#include <map>
 
 /**
  * @brief enumerates opcodes for few instructions.
@@ -60,17 +61,93 @@ enum
     ORIS_CONST        = 25,
 };
 
+
 // Vector defining the special acceess egisters
-std::vector<PPEReg_t> v_ppe_special_regs =
+std::vector<uint16_t> v_ppe_special_regs =
 {
-    { MSR,   "MSR"    },
-    { CR,    "CR"     },
+    { MSR   },
+    { CR    },
+};
+// Vector defining the other xsr regs
+std::vector<uint16_t> v_ppe_xsr_regs =
+{
+    { XSR    },
+    { IAR    },
+    { IR     },
+    { EDR    },
+    { SPRG0  },
+
+
 };
 
 // Vector defining the major SPRs
 // Note: SPRG0 is not include as it is saved and restored as the means for
 // accessing the other SPRS
-std::vector<PPEReg_t> v_ppe_major_sprs =
+std::vector<uint16_t> v_ppe_major_sprs =
+{
+    { CTR    },
+    { LR     },
+    { ISR    },
+    { SRR0   },
+    { SRR1   },
+    { TCR    },
+    { TSR    },
+};
+
+// Vector defining the minor SPRs
+std::vector<uint16_t> v_ppe_minor_sprs =
+{
+    { DACR  },
+    { DBCR  },
+    { DEC   },
+    { IVPR  },
+    { PIR   },
+    { PVR   },
+    { XER   },
+};
+
+// Vector defining the GPRs
+std::vector<uint16_t> v_ppe_gprs =
+{
+    { R0 },
+    { R1 },
+    { R2 },
+    { R3 },
+    { R4 },
+    { R5 },
+    { R6 },
+    { R7 },
+    { R8 },
+    { R9 },
+    { R10},
+    { R13},
+    { R28},
+    { R29},
+    { R30},
+    { R31},
+};
+
+
+// Vector defining the special acceess egisters
+const std::map<uint16_t, std::string> v_ppe_special_num_name =
+{
+    { MSR,   "MSR"    },
+    { CR,    "CR"     }
+};
+// Vector defining the other xsr regs
+const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
+{
+    { XSR,   "XSR"    },
+    { IAR,   "IAR"    },
+    { IR,    "IR"     },
+    { EDR,   "EDR"    },
+    { SPRG0, "SPRG0"  }
+};
+
+// Vector defining the major SPRs
+// Note: SPRG0 is not include as it is saved and restored as the means for
+// accessing the other SPRS
+const std::map<uint16_t, std::string> v_ppe_major_num_name =
 {
     { CTR,   "CTR"    },
     { LR,    "LR"     },
@@ -78,11 +155,11 @@ std::vector<PPEReg_t> v_ppe_major_sprs =
     { SRR0,  "SRR0"   },
     { SRR1,  "SRR1"   },
     { TCR,   "TCR"    },
-    { TSR,   "TSR"    },
+    { TSR,   "TSR"    }
 };
 
 // Vector defining the minor SPRs
-std::vector<PPEReg_t> v_ppe_minor_sprs =
+const std::map<uint16_t, std::string> v_ppe_minor_num_name =
 {
     { DACR,  "DACR"   },
     { DBCR,  "DBCR"   },
@@ -90,11 +167,11 @@ std::vector<PPEReg_t> v_ppe_minor_sprs =
     { IVPR,  "IVPR"   },
     { PIR,   "PIR"    },
     { PVR,   "PVR"    },
-    { XER,   "XER"    },
+    { XER,   "XER"    }
 };
 
 // Vector defining the GPRs
-std::vector<PPEReg_t> v_ppe_gprs =
+const std::map<uint16_t, std::string> v_ppe_gprs_num_name =
 {
     { R0,    "R0"     },
     { R1,    "R1"     },
@@ -111,9 +188,8 @@ std::vector<PPEReg_t> v_ppe_gprs =
     { R28,   "R28"    },
     { R29,   "R29"    },
     { R30,   "R30"    },
-    { R31,   "R31"    },
+    { R31,   "R31"    }
 };
-
 
 
 //-----------------------------------------------------------------------------
@@ -299,32 +375,6 @@ fapi2::ReturnCode ppe_force_halt(
 fapi_try_exit:
     return fapi2::current_err;
 }
-//-----------------------------------------------------------------------------
-
-/**
- * @brief single step the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with single step  tosingle step the engine.
- */
-fapi2::ReturnCode ppe_single_step(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const uint64_t i_base_address)
-{
-    fapi2::buffer<uint64_t> l_data64;
-
-    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
-    FAPI_INF("   Send Single step command via XCR...");
-    l_data64.flush<0>().insertFromRight(p9hcd::SINGLE_STEP, 1, 3);
-
-    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64),
-             "Error in PUTSCOM in XCR to generate Single Step condition");
-
-    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 //-----------------------------------------------------------------------------
 
@@ -481,5 +531,98 @@ fapi2::ReturnCode ppe_RAM(
 fapi_try_exit:
     return fapi2::current_err;
 }
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief single step the engine
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR with single step  tosingle step the engine.
+ */
+fapi2::ReturnCode ppe_single_step(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint16_t i_Rs,
+    uint64_t i_step_count)
+{
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_dbcr_save;
+    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    FAPI_INF("   Read and Save DBCR");
+    FAPI_DBG("Move DBCR to i_Rs");
+    l_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, DBCR), 0, 32);
+    FAPI_DBG("getMfsprInstruction(%d, DBCR): 0x%16llX", i_Rs, l_data64 );
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
+
+    FAPI_DBG("Move i_Rs to SPRG0 : so now SPRG0 has DBCR value");
+    l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMtsprInstruction(%d, SPRG0): 0x%16llX", i_Rs, l_data64 );
+
+    FAPI_DBG("Save SPRG0 i.e. DBCR");
+    FAPI_TRY(getScom(i_target, i_base_address + PPE_XIRAMDBG, l_data64), "Error in GETSCOM");
+    l_data64.extractToRight(l_dbcr_save, 32, 32);
+    FAPI_DBG("Saved DBCR value : 0x%08llX", l_dbcr_save );
+
+    FAPI_DBG("clear DBCR[8] IACE and DBCR[12:13] DACE");
+    FAPI_TRY(ppe_update_dbcr(i_target, i_base_address, ANDIS_CONST, 0x0F73, R31));
+
+    while(i_step_count != 0)
+    {
+        FAPI_DBG("   Send Single step command via XCR...step count = 0x%16llx", i_step_count);
+        l_data64.flush<0>().insertFromRight(p9hcd::SINGLE_STEP, 1, 3);
+        FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64),
+                 "Error in PUTSCOM in XCR to generate Single Step condition");
+        --i_step_count;  //Decrement step count
+        FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    }
+
+    FAPI_INF("   Restore DBCR");
+    FAPI_INF("   Write orig. DBCR into SPRG0");
+
+    l_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMfsprInstruction(%d, SPRG0): 0x%16llX", i_Rs, l_data64 );
+    l_data64.insertFromRight(l_dbcr_save, 32, 32);
+    FAPI_DBG("Final Instr + SPRG0: 0x%16llX", l_data64 );
+    //write sprg0 with address and ram mfsprg0 to i_Rs
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMGA, l_data64 ));
+
+    //then mtDBCR from i_Rs
+    l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, DBCR), 0, 32);
+    FAPI_DBG("getMtsprInstruction(%d, DBCR): 0x%16llX", i_Rs, l_data64  );
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
 
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief single step the engine
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note   output is l_ppe_regs.] which has reg name added along with value and number
+ *         this will be used for printing in the wrapper
+ */
+fapi2::ReturnCode ppe_regs_populate_name(
+    std::vector<PPERegValue_t> l_ppe_regs_value,
+    const std::map<uint16_t, std::string> l_ppe_regs_num_name,
+    std::vector<PPEReg_t>& l_ppe_regs)
+
+{
+    PPEReg_t l_reg;
+    FAPI_INF("   populating reg names");
+
+    if (!l_ppe_regs_value.empty())
+    {
+        for (auto it : l_ppe_regs_value)
+        {
+            auto search = l_ppe_regs_num_name.find(it.number);
+            l_reg.name  = search->second;
+            l_reg.reg = it;
+            l_ppe_regs.push_back(l_reg);
+        }
+    }
+
+    return fapi2::current_err;
+}
