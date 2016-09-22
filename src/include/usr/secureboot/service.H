@@ -173,7 +173,15 @@ namespace SECUREBOOT
      *
      * @return void   - All error logs are handled internally in this function
      */
-    void secureSbeSeeproms( void ) ;
+    void secureSbeSeeproms( void );
+
+    /**
+     * @brief Common secureboot handler for secureboot failures.
+     *        Properly handles callouts etc.
+     *
+     * @return i_err   - Error log to cascade through failure path.
+     */
+    void handleSecurebootFailure(errlHndl_t &i_err);
 
 }
 

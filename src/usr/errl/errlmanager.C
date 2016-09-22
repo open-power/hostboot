@@ -125,7 +125,8 @@ ErrlManager::ErrlManager() :
     iv_isMboxEnabled(false),    // assume mbox isn't ready yet..
     iv_isIpmiEnabled(false),    // assume ipmi isn't ready yet..
     iv_nonInfoCommitted(false),
-    iv_isErrlDisplayEnabled(false)
+    iv_isErrlDisplayEnabled(false),
+    iv_isTargetServiceEnabled(false)
 {
     TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
 
@@ -262,6 +263,7 @@ void ErrlManager::errlogMsgHndlr ()
             case ERRLOG_ACCESS_TARG_TYPE:
                 {
                     // TARGETING is up and running now.
+                    iv_isTargetServiceEnabled = true;
 
                     //  do we NOT need to send the error?
                     TARGETING::Target * sys = NULL;

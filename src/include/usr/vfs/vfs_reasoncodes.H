@@ -37,6 +37,7 @@ namespace VFS
         VFS_WATCHER                 = 0x03,
         VFS_MODULE_LOAD_MONITOR     = 0x04,
         VFS_MODULE_EXEC_MONITOR     = 0x05,
+        VFS_VERIFY_PAGE             = 0x06,
     };
 
     enum VfsReasonCode
@@ -47,7 +48,8 @@ namespace VFS
         VFS_PERMS_VMEM_FAILED =     VFS_COMP_ID | 0x04,
         VFS_MODULE_DOES_NOT_EXIST = VFS_COMP_ID | 0x05,
         VFS_INVALID_DATA_MODULE   = VFS_COMP_ID | 0x06,
-        VFS_TASK_CRASHED          = VFS_COMP_ID | 0x07
+        VFS_TASK_CRASHED          = VFS_COMP_ID | 0x07,
+        VFS_PAGE_VERIFY_FAILED    = VFS_COMP_ID | 0x08
     };
 };
 

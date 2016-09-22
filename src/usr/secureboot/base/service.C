@@ -37,6 +37,9 @@
 #include <initservice/initserviceif.H>
 #include <secureboot/settings.H>
 #include <secureboot/header.H>
+#include <sys/misc.h>
+#include <kernel/console.H>
+#include <console/consoleif.H>
 
 #include "coreops.H"
 
@@ -266,6 +269,32 @@ void secureSbeSeeproms( void )
 bool getJumperState()
 {
     return Singleton<Settings>::instance().getJumperState();
+}
+
+void handleSecurebootFailure(errlHndl_t &i_err)
+{
+    TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
+
+    assert(i_err != NULL, "Secureboot Failure has a NULL error log")
+
+    // Grab errlog reason code before committing.
+    uint16_t l_rc = i_err->reasonCode();
+
+#ifdef CONFIG_CONSOLE
+    CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+                      i_err->plid(), l_rc);
+    CONSOLE::flush();
+#endif
+    printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+           i_err->plid(),l_rc);
+
+    // Add Verification callout
+    i_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
+                               HWAS::SRCI_PRIORITY_HIGH);
+    errlCommit(i_err, SECURE_COMP_ID);
+
+    // Shutdown with Secureboot error status
+    INITSERVICE::doShutdown(l_rc);
 }
 
 }  //namespace SECUREBOOT

@@ -320,14 +320,14 @@ class SecureROMTest : public CxxTest::TestSuite
         // Verify a page
         TRACUCOMP(g_trac_secure, "SecureROMTest::test_hash_page_table_verify vaddr = 0x%X, base offset = 0x%X, hash page table offset = 0x%X",
                   l_vaddr, l_baseOffset, l_hashPageTableOffset);
-        uint64_t l_rc = VFS::VfsRp::getInstance().verify_page(
-                                                    l_vaddr,
-                                                    l_baseOffset,
-                                                    l_hashPageTableOffset);
+        l_errl = VFS::VfsRp::getInstance().verify_page(l_vaddr,
+                                                       l_baseOffset,
+                                                       l_hashPageTableOffset);
         // Failed to pass secureboot verification
-        if(l_rc)
+        if (l_errl)
         {
             TS_FAIL("SecureROMTest::test_hash_page_table_verify failed");
+            errlCommit(l_errl, SECURE_COMP_ID);
             break;
         }
 
@@ -346,20 +346,21 @@ class SecureROMTest : public CxxTest::TestSuite
         // Corrupt page
         uint8_t l_corruptByte = 0xFF;
         memcpy(reinterpret_cast<uint8_t*>(l_pnorVaddr), &l_corruptByte, sizeof(uint8_t));
-        l_rc = VFS::VfsRp::getInstance().verify_page(
-                                        l_vaddr,
-                                        l_baseOffset,
-                                        l_hashPageTableOffset);
+        l_errl =  VFS::VfsRp::getInstance().verify_page(l_vaddr,
+                                                        l_baseOffset,
+                                                        l_hashPageTableOffset);
 
         // Fix page back up
         memcpy(reinterpret_cast<uint8_t*>(l_pnorVaddr), l_originPage, PAGESIZE);
 
         // Failed to catch secureboot verification failure
-        if(!l_rc)
+        if (!l_errl)
         {
             TS_FAIL("SecureROMTest::test_hash_page_table_verify did not catch verification error");
             break;
         }
+        delete l_errl;
+        l_errl = NULL;
 
         } while(0);
 

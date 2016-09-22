@@ -189,17 +189,19 @@ namespace VFS
              *
              * @param[in] i_vaddr address to verify
              * @param[in] i_baseOffset base offset within a PNOR section
-             *                         [Optional - Used by test cases]
+             *                         [Default 0 when called within VfsRP.
+             *                          Fill for test cases]
              * @param[in] i_hashPageTableOffset hash page table offset based on
              *                          iv_pnor_vaddr
-             *                         [Default to 0 when called within VfsRP,
-             *                          Filled in by test cases]
+             *                         [Default 0 when called within VfsRP to
+             *                          get internal hpt offset. Otherwise
+             *                          filled in by test cases]
              *
-             * @return return code on error
+             * @return errlog - error log to pass along shutdown path.
              */
-            uint64_t verify_page(uint64_t i_vaddr,
-                                 uint64_t i_baseOffset = 0,
-                                 uint64_t i_hashPageTableOffset = 0) const;
+            errlHndl_t verify_page(uint64_t i_vaddr,
+                                   uint64_t i_baseOffset = 0,
+                                   uint64_t i_hashPageTableOffset = 0) const;
 
             /**
              * @brief  Determines the hash page table index associated with a

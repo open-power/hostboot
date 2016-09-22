@@ -99,7 +99,6 @@ void getHwKeyHash(sha2_hash_t o_hash)
 
 }; //end SECUREBOOT namespace
 
-
 /********************
  Public Methods
  ********************/
@@ -409,9 +408,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container,
  */
 errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const
 {
-
-    TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
-              "supported, but not returning error log");
+    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::hashBlob()");
 
     errlHndl_t  l_errl      =   NULL;
 

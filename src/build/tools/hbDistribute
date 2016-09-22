@@ -104,6 +104,7 @@ do
 
         "--key-transition")
             KEY_TRANSITION=1
+            shift
         ;;
 
         --*)

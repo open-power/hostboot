@@ -234,11 +234,11 @@ if ($secureboot)
         # and '/i' with a perl constant
         if ($value eq "" || $value =~ m/^${\(CORRUPT_PROTECTED)}/i)
         {
-            $partitionsToCorrupt{$key} = CORRUPT_PROTECTED
+            $partitionsToCorrupt{uc($key)} = CORRUPT_PROTECTED
         }
         elsif ($value =~ m/^${\(CORRUPT_UNPROTECTED)}/i)
         {
-            $partitionsToCorrupt{$key} = CORRUPT_UNPROTECTED;
+            $partitionsToCorrupt{uc($key)} = CORRUPT_UNPROTECTED;
         }
         else
         {
@@ -416,7 +416,7 @@ sub manipulateImages
                     {
                         trace(1,"Adding hash page table for $eyeCatch");
                         my $hashPageTableSize = -s $tempImages{hashPageTable};
-                        die "hashPageTable size undefined" unless(defined $hashPageTableSize);
+                        die "hashPageTable size undefined: errno = $!" unless(defined $hashPageTableSize);
                         # Move protected offset after hash page table.
                         $protectedOffset += $hashPageTableSize;
                         if ($eyeCatch eq "HBI")
@@ -623,6 +623,7 @@ sub manipulateImages
                     # Remove PAGE_SIZE bytes from generated dummy content of file
                     # to make room for the secure header
                     my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
+                    die "fileSize undefined: errno = $!" unless(defined $fileSize);
                     run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
                     # @TODO RTC:155374 Remove when official signing supported
                     run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");

@@ -845,7 +845,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // Check to make sure targeting is initialized. If so, collect part and
     // serial numbers
-    if( TARGETING::targetService().isInitialized() )
+    if (ERRORLOG::theErrlManager::instance().isTargetServiceEnabled())
     {
         // If this error was a hardware callout, add the serial and part numbers
         // to the log. FSP provides this data so if there is no FSP, get them here.

@@ -136,6 +136,7 @@ errlHndl_t SPnorRP::allocBlock(msg_q_t i_mq, void* i_va, uint64_t i_size) const
             "with mm_alloc_block at address 0x%.16llX : rc=%d", i_va, rc );
         /*@
          * @errortype
+         * @severity     ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid     PNOR::MOD_SPNORRP_ALLOCATE_BLOCK
          * @reasoncode   PNOR::RC_EXTERNAL_ERROR
          * @userdata1    Requested Address
@@ -144,7 +145,7 @@ errlHndl_t SPnorRP::allocBlock(msg_q_t i_mq, void* i_va, uint64_t i_size) const
          * @custdesc     A problem occurred while initializing secure PNOR
          */
         l_errhdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                            PNOR::MOD_SPNORRP_ALLOCATE_BLOCK,
                            PNOR::RC_EXTERNAL_ERROR,
                            TO_UINT64(reinterpret_cast<uint64_t>(i_va)),
@@ -171,6 +172,7 @@ errlHndl_t SPnorRP::setPermission(void* i_va, uint64_t i_size,
             "with mm_set_permission at address 0x%.16llX : rc=%d",i_va, rc );
         /*@
          * @errortype
+         * @severity      ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid      PNOR::MOD_SPNORRP_SET_PERMISSION
          * @reasoncode    PNOR::RC_EXTERNAL_ERROR
          * @userdata1     Requested Address
@@ -180,7 +182,7 @@ errlHndl_t SPnorRP::setPermission(void* i_va, uint64_t i_size,
          * @custdesc      A problem occurred while initializing secure PNOR
          */
         l_errhdl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                             PNOR::MOD_SPNORRP_SET_PERMISSION,
                             PNOR::RC_EXTERNAL_ERROR,
                             TO_UINT64(reinterpret_cast<uint64_t>(i_va)),
@@ -450,14 +452,17 @@ void SPnorRP::verifySections(LoadRecord* o_rec, SectionId i_id)
     {
         uint32_t l_errPlid = l_errhdl->plid();
         iv_startupRC = l_errhdl->reasonCode();
-        errlCommit(l_errhdl,PNOR_COMP_ID);
-        TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections there was an error");
-        if (failedVerify) {
-            // TODO RTC 125309
-            // Change failedVerify from doShutdown to something more clever.
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections failed verify");
+        TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
+        if (failedVerify)
+        {
+            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections failed verify");
+            SECUREBOOT::handleSecurebootFailure(l_errhdl);
         }
-        INITSERVICE::doShutdown(l_errPlid);
+        else
+        {
+            errlCommit(l_errhdl,PNOR_COMP_ID);
+            INITSERVICE::doShutdown(l_errPlid);
+        }
     }
 }
 
@@ -598,11 +603,12 @@ void SPnorRP::waitForMessage()
                     break;
 
                 default:
-                    TRACDCOMP( g_trac_pnor, "SPnorRP::waitForMessage> "
+                    TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> "
                     "Unrecognized message type : user_addr=%p, eff_addr=%p,"
                     " msgtype=%d", user_addr, eff_addr, message->type );
                     /*@
                      * @errortype
+                     * @severity     ERRL_SEV_CRITICAL_SYS_TERM
                      * @moduleid     PNOR::MOD_SPNORRP_WAITFORMESSAGE
                      * @reasoncode   PNOR::RC_INVALID_MESSAGE_TYPE
                      * @userdata1    Message type
@@ -613,7 +619,7 @@ void SPnorRP::waitForMessage()
                      *               the boot flash.
                      */
                     l_errhdl = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                            PNOR::MOD_SPNORRP_WAITFORMESSAGE,
                                            PNOR::RC_INVALID_MESSAGE_TYPE,
                                            TO_UINT64(message->type),
@@ -683,8 +689,10 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     //else remove the if clause below at some point
     if (rc != 0)
     {
-        /*
-         * @errortype
+
+        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> Error from msg_sendrecv rc=%d",
+                  rc );
+        /* @errorlog
          * @severity          ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid          MOD_PNORRP_LOADSECURESECTION
          * @reasoncode        RC_EXTERNAL_ERROR
@@ -695,19 +703,15 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
          * @custdesc          Security failure: unable to securely load
          *                    requested firmware.
          */
-
-        err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,   // severity
-             MOD_PNORRP_LOADSECURESECTION,           // moduleid
-             RC_EXTERNAL_ERROR,                      // reason Code
-             rc,                                     // user1 = msg_sendrecv rc
-             TWO_UINT32_TO_UINT64(
-               PNOR::MSG_LOAD_SECTION,               // user2 = message type
-               i_section                             //         and section Id
-             ),
-             true /* Add HB Software Callout */
-            );
+        err = new ERRORLOG::ErrlEntry(
+                         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                         MOD_PNORRP_LOADSECURESECTION,
+                         RC_EXTERNAL_ERROR,
+                         rc,
+                         TWO_UINT32_TO_UINT64(PNOR::MSG_LOAD_SECTION,
+                                              i_section),
+                         true /* Add HB Software Callout */);
+        err->collectTrace(PNOR_COMP_NAME);
     }
     msg_free(msg);
     return err;
@@ -792,21 +796,25 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
         TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
                         l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
 
-        /*@
-         * @errortype
+        // Memcpy needed for measured hash to avoid gcc error: dereferencing
+        // type-punned pointer will break strict-aliasing rules
+        uint64_t l_measuredHash = 0;
+        memcpy(&l_measuredHash, l_hashSwSigs, sizeof(l_measuredHash));
+        /*@ errorlog
          * @severity        ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid        MOD_SPNORRP_BASE_EXT_VER_CHK
          * @reasoncode      RC_BASE_EXT_MISMATCH
-         * @userdata1       0
-         * @userdata2       0
+         * @userdata1       First 8 bytes of hash of measured SW signatures
+         * @userdata2       First 8 bytes of hash of stored SW signatures in
+         *                  hash page table
          * @devdesc         Hostboot Base and Extend code do not match versions.
          * @custdesc        Firmware level mismatch.
          */
-        l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                          MOD_SPNORRP_BASE_EXT_VER_CHK,
-                                          RC_BASE_EXT_MISMATCH,
-                                          0,
-                                          0);
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+            MOD_SPNORRP_BASE_EXT_VER_CHK,
+            RC_BASE_EXT_MISMATCH,
+            l_measuredHash,
+            TO_UINT64(*reinterpret_cast<const uint64_t*>(l_hashPageTableSaltEntry)));
         l_errl->collectTrace(PNOR_COMP_NAME);
         l_errl->collectTrace(SECURE_COMP_NAME);
     }

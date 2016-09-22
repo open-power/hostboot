@@ -217,6 +217,15 @@ public:
      */
     static uint8_t iv_hiddenErrLogsEnable;
 
+    /**
+     * @brief   Determines if the target service is enabled or not.
+     * @return bool - true if enabled, false otherwise.
+     */
+    inline const bool isTargetServiceEnabled() const
+    {
+        return iv_isTargetServiceEnabled;
+    }
+
 protected:
     /**
      * @brief   Destructor
@@ -522,6 +531,7 @@ private:
     bool iv_isIpmiEnabled;      // are we able to send to BMC via IPMI
     bool iv_nonInfoCommitted;   // Keeps track of any non-informational logs.
     bool iv_isErrlDisplayEnabled; // are we able to use the errorDisplay
+    bool iv_isTargetServiceEnabled; // Indiciates if Target Service up or not
 
     // Errl flags which represent processing needed by the errl
     // represented as a bit field (8 bits)

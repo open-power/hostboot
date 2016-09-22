@@ -44,7 +44,6 @@
 #include <errl/errlmanager.H>
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
-#include <kernel/console.H>
 #include <config.h>
 
 using namespace VFS;
@@ -349,11 +348,14 @@ void VfsRp::msgHandler()
                         #ifdef CONFIG_SECUREBOOT
                         if (SECUREBOOT::enabled())
                         {
-                            uint64_t l_rc = verify_page(vaddr);
+                            errlHndl_t l_errl = verify_page(vaddr);
                             // Failed to pass secureboot verification
-                            if(l_rc)
+                            if(l_errl)
                             {
-                                msg->data[1] = -l_rc;
+                                SECUREBOOT::handleSecurebootFailure(l_errl);
+                                // The previous call will never return, but
+                                // just in case set proper kernel rc.
+                                msg->data[1] = -EACCES;
                                 break;
                             }
                         }
@@ -385,10 +387,10 @@ void VfsRp::msgHandler()
     } // while(1)
 }
 
-uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
-                            uint64_t i_hashPageTableOffset) const
+errlHndl_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
+                              uint64_t i_hashPageTableOffset) const
 {
-    uint64_t rc = 0;
+    errlHndl_t l_errl = NULL;
     uint64_t l_pnorVaddr = iv_pnor_vaddr + i_vaddr;
 
     // Get current hash page table entry
@@ -427,11 +429,27 @@ uint64_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
         TRACFCOMP(g_trac_vfs, "ERROR:>VfsRp::verify_page secureboot verify fail on vaddr 0x%llX, offset into HBI 0x%llX",
                               i_vaddr,
                               i_vaddr+PAGE_SIZE+iv_payloadTextSize);
-        printk("Secureboot Verification Failure in HBI\n");
-        rc = EACCES;
+        /*@
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        VFS_VERIFY_PAGE
+         * @reasoncode      VFS_PAGE_VERIFY_FAILED
+         * @userdata1       Kernel RC
+         * @userdata2       virtual address accessed
+         *
+         * @devdesc         Secureboot page verify failure.
+         * @custdesc  Corrupted flash image or firmware error during system boot
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                         VFS_VERIFY_PAGE,
+                                         VFS_PAGE_VERIFY_FAILED,
+                                         TO_UINT64(EACCES),
+                                         i_vaddr,
+                                         true);
+        l_errl->collectTrace(VFS_COMP_NAME);
+        l_errl->collectTrace(PNOR_COMP_NAME);
     }
 
-    return rc;
+    return l_errl;
 }
 
 // ----------------------------------------------------------------------------
