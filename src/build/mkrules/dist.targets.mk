@@ -81,6 +81,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/attribute_types.xml:openpower \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
+    src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
