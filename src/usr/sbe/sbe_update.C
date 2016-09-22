@@ -881,6 +881,77 @@ namespace SBE
         return err;
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t ringOvd(void *io_imgPtr,
+                       uint32_t & io_ovdImgSize)
+    {
+        errlHndl_t l_err = nullptr;
+        PNOR::SectionInfo_t l_pnorRingOvd;
+
+        do {
+            l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"ringOvd():Error trying to read RINGOVD "
+                           "from PNOR!");
+                io_ovdImgSize = 0;
+                break;
+            }
+            if(l_pnorRingOvd.size == 0)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"ringOvd(): No RINGOVD section in PNOR");
+                io_ovdImgSize = 0;
+                break;
+            }
+
+            TRACDBIN( g_trac_sbe,
+                      "ringOvd():100 bytes of RINGOVD section",
+                      (void *)l_pnorRingOvd.vaddr,100);
+
+            // If first 8 bytes are just FF's then we know there's no override
+            if((*(static_cast<uint64_t *>((void *)l_pnorRingOvd.vaddr))) ==
+                    0xFFFFFFFFFFFFFFFF)
+            {
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"ringOvd():No overrides in RINGOVD section "
+                           "found");
+                io_ovdImgSize = 0;
+                break;
+            }
+
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"ringOvd():Valid overrides, applying them");
+
+            fapi2::ReturnCode rc_fapi = fapi2::FAPI2_RC_SUCCESS;
+
+            // Hard coded value, pass in 2KB max
+            uint32_t RING_OVD_SIZE = 0x800;
+            FAPI_INVOKE_HWP(l_err,p9_xip_section_append,
+                            (void *)l_pnorRingOvd.vaddr,
+                            RING_OVD_SIZE,
+                            P9_XIP_SECTION_SBE_OVERRIDES,
+                            io_imgPtr,
+                            io_ovdImgSize);
+
+            if ( l_err )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"ringOvd(): FAPI_EXEC_HWP("
+                           "p9_xip_section_append) failed, PLID=0x%x",
+                           l_err->plid());
+
+                l_err->collectTrace(SBE_COMP_NAME, 256);
+
+                io_ovdImgSize = 0;
+                break;
+            }
+
+        }while(0);
+
+        return l_err;
+    }
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t procCustomizeSbeImg(TARGETING::Target* i_target,
@@ -947,27 +1018,52 @@ namespace SBE
 
                 if( !INITSERVICE::spBaseServicesEnabled() )  // FSP not present ==> ok to call @TODO RTC:160466
                 {
-                uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
-                uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
-                FAPI_EXEC_HWP( rc_fapi,
-                               p9_xip_customize,
-                               l_fapiTarg,
-                               io_imgPtr, //image in/out
-                               tmpImgSize,
-                               (void*)l_ringSectionBuf,
-                               l_ringSectionBufSize,
-                               SYSPHASE_HB_SBE,
-                               MODEBUILD_IPL,
-                               (void*)RING_BUF1_VADDR,
-                               (uint32_t)MAX_RING_BUF_SIZE,
-                               (void*)RING_BUF2_VADDR,
-                               (uint32_t)MAX_RING_BUF_SIZE,
-                               procIOMask ); // Bits(8:31) = EC00:EC23
+                    uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
+                    uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
+                    FAPI_EXEC_HWP( rc_fapi,
+                                   p9_xip_customize,
+                                   l_fapiTarg,
+                                   io_imgPtr, //image in/out
+                                   tmpImgSize,
+                                   (void*)l_ringSectionBuf,
+                                   l_ringSectionBufSize,
+                                   SYSPHASE_HB_SBE,
+                                   MODEBUILD_IPL,
+                                   (void*)RING_BUF1_VADDR,
+                                   (uint32_t)MAX_RING_BUF_SIZE,
+                                   (void*)RING_BUF2_VADDR,
+                                   (uint32_t)MAX_RING_BUF_SIZE,
+                                   procIOMask ); // Bits(8:31) = EC00:EC23
                 } // @TODO RTC:160466 remove conditional wrapping this call
 
                 // Check the return code
                 if ( !rc_fapi )
                 {
+                    // Check if we have a valid ring override section and
+                    // append it in if so
+                    uint32_t l_ovdImgSize = static_cast<uint32_t>(i_maxImgSize);
+                    err = ringOvd(io_imgPtr,l_ovdImgSize);
+                    if(err)
+                    {
+                        TRACFCOMP( g_trac_sbe,
+                              ERR_MRK"procCustomizeSbeImg(): "
+                              "Error in call to ringOvd!");
+                        break;
+                    }
+                    // If it's larger then the original size then we added some
+                    // overrides
+                    if(l_ovdImgSize > tmpImgSize)
+                    {
+                        // We added an override so adjust tmpImgSize
+                        TRACFCOMP( g_trac_sbe,
+                              INFO_MRK"procCustomizeSbeImg(): We added some "
+                              "ring overrides, initial image size:%u "
+                              "new image size:%u",
+                              tmpImgSize, l_ovdImgSize);
+
+                        tmpImgSize = l_ovdImgSize;
+                    }
+
                     // Procedure was successful
                     procedure_success = true;
 
