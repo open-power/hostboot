@@ -29,6 +29,7 @@ PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
@@ -38,7 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 
 OBJS += call_host_activate_master.o
 OBJS += call_host_activate_slave_cores.o
-OBJS += call_host_secure_rng.o
+OBJS += call_p9_rng_init_phase2.o
 OBJS += call_mss_scrub.o
 OBJS += call_host_ipl_complete.o
 
@@ -47,8 +48,10 @@ include ${ROOTPATH}/procedure.rules.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_block_wakeup_intr.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
+include  ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase2.mk
 include ${ROOTPATH}/config.mk
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/

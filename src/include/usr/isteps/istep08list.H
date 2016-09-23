@@ -69,7 +69,7 @@
  *           : Apply sequenced scom inits
  *    08.19    proc_chiplet_enable_ridi
  *           : Enable RI/DI chip wide
- *    08.20    host_rng_bist
+ *    08.20    p9_rng_init_phase1
  *           : Trigger Built In Self Test for RNG
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -270,14 +270,14 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs );
 void*    call_proc_chiplet_enable_ridi( void    *io_pArgs );
 
 /**
- *  @brief   host_rng_bist
+ *  @brief   p9_rng_init_phase1
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any error logs to istep
  *
  */
-void*    call_host_rng_bist( void    *io_pArgs );
+void*    call_p9_rng_init_phase1( void    *io_pArgs );
 
 /**
  *  @brief host_set_voltages
@@ -398,8 +398,8 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(08,20,"host_rng_bist"),
-                ISTEP_08::call_host_rng_bist,
+                ISTEPNAME(08,20,"p9_rng_init_phase1"),
+                ISTEP_08::call_p9_rng_init_phase1,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 

@@ -58,7 +58,7 @@ OBJS += call_proc_npu_scominit.o
 OBJS += call_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
 OBJS += call_proc_chiplet_enable_ridi.o
-OBJS += call_host_rng_bist.o
+OBJS += call_p9_rng_init_phase1.o
 OBJS += call_host_set_voltages.o
 OBJS += call_host_attnlisten_proc.o
 
@@ -142,6 +142,7 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 
 # host_rng_bist : Trigger Built In Self Test
 # HWP not ready - p9_trigger_rng_bist.mk
+include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 
 # p9_setup_evid : apply voltage settings
 include ${PROCEDURES_PATH}/hwp/pm/p9_setup_evid.mk
