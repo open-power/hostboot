@@ -172,6 +172,17 @@ class MemTdCtlr
      */
     uint32_t initStoppedRank();
 
+    /**
+     * @brief  This is called when handling a command complete attention for a
+     *         non-TD command to check for ECC errors. This must be called after
+     *         initStoppedRank() to ensure iv_stoppedRank is initialized.
+     * @param  o_errorsFound True if errors where found and handled. False
+     *                       otherwise.
+     * @param  io_sc         The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t checkEcc( bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /**

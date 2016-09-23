@@ -186,6 +186,11 @@ class TdQueue
         {
             iv_queue.push_back( i_e );
         }
+        else
+        {
+            // The event is already in the queue. So free up the memory.
+            delete i_e;
+        }
     }
 
     /**
