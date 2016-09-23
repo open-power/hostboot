@@ -117,6 +117,19 @@
        <scomRegister>PU_I2C_BUSY_REGISTER_B</scomRegister>
     </registerFfdc>
     <registerFfdc>
+       <id>PIBMEM_REGISTERS</id>
+       <scomRegister>PU_PIBMEM_CONTROL_REGISTER</scomRegister>
+       <scomRegister>PU_PIBMEM_STATUS_REG</scomRegister>
+       <scomRegister>PU_PIBMEM_REPAIR_REGISTER_0</scomRegister>
+       <scomRegister>PU_PIBMEM_REPAIR_REGISTER_1</scomRegister>
+       <scomRegister>PU_PIBMEM_REPAIR_REGISTER_2</scomRegister>
+       <scomRegister>PU_PIBMEM_REPAIR_REGISTER_3</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>OTPROM_STATUS</id>
+       <scomRegister>PU_STATUS_REGISTER</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
        <id>OPCG_CTRL_REGISTERS</id>
        <scomRegister>PERV_OPCG_ALIGN</scomRegister>
        <scomRegister>PERV_OPCG_REG0</scomRegister>
@@ -145,7 +158,16 @@
         <scomRegister>PERV_OPCG_CAPT2</scomRegister>
         <scomRegister>PERV_OPCG_CAPT3</scomRegister>
         <scomRegister>PERV_DBG_CBS_CC</scomRegister>
-     </registerFfdc>    
+     </registerFfdc>
+     <registerFfdc>
+        <id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id>
+        <scomRegister>PU_PPE_XIDBGPRO</scomRegister>
+        <scomRegister>PU_PPE_XIRAMEDR</scomRegister>
+        <scomRegister>PU_PPE_XIRAMDBG</scomRegister>
+        <scomRegister>PU_PPE_XIRAMGA</scomRegister>
+        <scomRegister>PU_PPE_XIRAMRA</scomRegister>
+        <scomRegister>PU_PPE_XIXCR</scomRegister>
+     </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
       <sbeError/>
