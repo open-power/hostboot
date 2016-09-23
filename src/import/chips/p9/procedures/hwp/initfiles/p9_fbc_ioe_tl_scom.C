@@ -47,7 +47,7 @@ constexpr auto literal_0b0001101 = 0b0001101;
 constexpr auto literal_13 = 13;
 constexpr auto literal_0b0001100 = 0b0001100;
 constexpr auto literal_0x1F = 0x1F;
-constexpr auto literal_0x40 = 0x40;
+constexpr auto literal_0x3E = 0x3E;
 constexpr auto literal_0x3C = 0x3C;
 constexpr auto literal_0b0101 = 0b0101;
 
@@ -420,8 +420,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (l_def_X0_ENABLED)
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 1, 7, 57 );
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 33, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 1, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 33, 7, 57 );
                 }
             }
 
@@ -468,8 +468,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (l_def_X1_ENABLED)
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 1, 7, 57 );
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 33, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 1, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 33, 7, 57 );
                 }
             }
 
@@ -516,8 +516,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 if (l_def_X2_ENABLED)
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 1, 7, 57 );
-                    l_scom_buffer.insert<uint64_t> (literal_0x40, 33, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 1, 7, 57 );
+                    l_scom_buffer.insert<uint64_t> (literal_0x3E, 33, 7, 57 );
                 }
             }
 
