@@ -461,7 +461,7 @@ void IntrRp::msgHandler()
             case MSG_INTR_COALESCE:
             case MSG_INTR_EXTERN:
                 {
-                    ext_intr_t type = NO_INTERRUPT;
+                    std::vector<ext_intr_t> l_pendingInterruptTypes;
                     uint32_t ackResponse =
                                         static_cast<uint32_t>(msg->data[0]>>32);
                     //Check if LSI-Based Interrupt
@@ -474,9 +474,21 @@ void IntrRp::msgHandler()
                         uint64_t lsiIntStatus = l_psihb_ptr->lsiintstatus;
                         TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() "
                                          "lsiIntStatus 0x%016lx", lsiIntStatus);
-                        LSIvalue_t l_intrType = static_cast<LSIvalue_t>
-                             (__builtin_clzl(lsiIntStatus));
-                        type = static_cast<ext_intr_t>(l_intrType);
+
+                        //Loop through each bit, and add any pending interrupts
+                        // to list for later handling
+                        for (uint8_t i=0; i < LSI_LAST_SOURCE; i++)
+                        {
+                            uint64_t lsiIntMask = 0x8000000000000000 >> i;
+                            if (lsiIntMask & lsiIntStatus)
+                            {
+                                TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() "
+                                            "Interrupt Type: %d found", i);
+                                //Pending interrupt for this source type
+                                l_pendingInterruptTypes.push_back(
+                                                static_cast<ext_intr_t>(i));
+                            }
+                        }
                     }
 
                     // xirr was read by interrupt message handler.
@@ -505,43 +517,46 @@ void IntrRp::msgHandler()
                         msg_respond(iv_msgQ, msg);
                     }
 
-                    //Search if anyone is subscribed to the given
-                    // interrupt source
-                    Registry_t::iterator r = iv_registry.find(type);
-
-                    if(r != iv_registry.end() && type != INTERPROC_XISR)
+                    for (auto l_type : l_pendingInterruptTypes)
                     {
-                        msg_q_t msgQ = r->second.msgQ;
+                        //Search if anyone is subscribed to the given
+                        // interrupt source
+                        Registry_t::iterator r = iv_registry.find(l_type);
 
-                        msg_t * rmsg = msg_allocate();
-                        rmsg->type = r->second.msgType;
-                        rmsg->data[0] = type;  // interrupt type
-                        rmsg->data[1] = l_xirr_pir;
-                        rmsg->extra_data = NULL;
-
-                        int rc = msg_sendrecv_noblk(msgQ,rmsg, iv_msgQ);
-                        if(rc)
+                        if(r != iv_registry.end() && l_type != INTERPROC_XISR)
                         {
-                            TRACFCOMP(g_trac_intr,ERR_MRK
+                            msg_q_t msgQ = r->second.msgQ;
+
+                            msg_t * rmsg = msg_allocate();
+                            rmsg->type = r->second.msgType;
+                            rmsg->data[0] = l_type;  // interrupt type
+                            rmsg->data[1] = l_xirr_pir;
+                            rmsg->extra_data = NULL;
+
+                            int rc = msg_sendrecv_noblk(msgQ,rmsg, iv_msgQ);
+                            if(rc)
+                            {
+                                TRACFCOMP(g_trac_intr,ERR_MRK
                                       "External Interrupt received type = %d, "
                                       "but could not send message to registered"
                                       " handler. Ignoring it. rc = %d",
-                                      (uint32_t) type, rc);
+                                      (uint32_t) l_type, rc);
+                            }
                         }
-                    }
-                    else if (type == LSI_PSU)
-                    {
-                        TRACFCOMP(g_trac_intr, "PSU Interrupt Detected");
-                        handlePsuInterrupt(type);
-                    }
-                    else  // no queue registered for this interrupt type
-                    {
-                        // Throw it away for now.
-                        TRACFCOMP(g_trac_intr,ERR_MRK
+                        else if (l_type == LSI_PSU)
+                        {
+                            TRACFCOMP(g_trac_intr, "PSU Interrupt Detected");
+                            handlePsuInterrupt(l_type);
+                        }
+                        else  // no queue registered for this interrupt type
+                        {
+                            // Throw it away for now.
+                            TRACFCOMP(g_trac_intr,ERR_MRK
                                   "External Interrupt received type = %d, but "
                                   "nothing registered to handle it. "
                                   "Ignoring it.",
-                                  (uint32_t)type);
+                                  (uint32_t)l_type);
+                        }
                     }
                 }
                 break;
