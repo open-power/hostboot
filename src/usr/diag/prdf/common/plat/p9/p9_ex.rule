@@ -249,12 +249,12 @@ rule rL2FIR
 group gL2FIR filter singlebit
 {
     /** L2FIR[0]
-     *  
+     *  L2 cache read CE
      */
     (rL2FIR, bit(0)) ? defaultMaskedError;
 
     /** L2FIR[1]
-     *  
+     *  L2 cache read UE
      */
     (rL2FIR, bit(1)) ? defaultMaskedError;
 
@@ -319,7 +319,7 @@ group gL2FIR filter singlebit
     (rL2FIR, bit(13)) ? level2_th_1;
 
     /** L2FIR[14]
-     *  
+     *  Hardware control error
      */
     (rL2FIR, bit(14)) ? defaultMaskedError;
 
@@ -344,7 +344,7 @@ group gL2FIR filter singlebit
     (rL2FIR, bit(18)) ? level2_dump_SH;
 
     /** L2FIR[19]
-     *  
+     *  Rc or NCU Pb data CE error
      */
     (rL2FIR, bit(19)) ? defaultMaskedError;
 
@@ -596,12 +596,12 @@ group gL3FIR filter singlebit
     (rL3FIR, bit(3)) ? self_th_1;
 
     /** L3FIR[4]
-     *  
+     *  CE detected on L3 cache read
      */
     (rL3FIR, bit(4)) ? l3_cache_ce;
 
     /** L3FIR[5]
-     *  
+     *  UE detected on L3 cache read
      */
     (rL3FIR, bit(5)) ? defaultMaskedError;
 
@@ -631,7 +631,7 @@ group gL3FIR filter singlebit
     (rL3FIR, bit(10)) ? self_th_32perDay;
 
     /** L3FIR[11]
-     *  
+     *  L3 cache write data UE from L2
      */
     (rL3FIR, bit(11)) ? defaultMaskedError;
 
@@ -671,9 +671,9 @@ group gL3FIR filter singlebit
     (rL3FIR, bit(18)) ? defaultMaskedError;
 
     /** L3FIR[19]
-     *  No LRU member count=0
+     *  reserved
      */
-    (rL3FIR, bit(19)) ? self_th_1;
+    (rL3FIR, bit(19)) ? defaultMaskedError;
 
     /** L3FIR[20]
      *  CE detected on PowerBus read for PPE

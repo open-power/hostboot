@@ -265,17 +265,17 @@ rule rIOPCIFIR
 group gIOPCIFIR filter singlebit
 {
     /** IOPCIFIR[0]
-     *  
+     *  HSS ZCAL Calibration Error
      */
     (rIOPCIFIR, bit(0)) ? defaultMaskedError;
 
     /** IOPCIFIR[1]
-     *  
+     *  HSS CAL PLL A Calibration error
      */
     (rIOPCIFIR, bit(1)) ? defaultMaskedError;
 
     /** IOPCIFIR[2]
-     *  
+     *  HSS CAL PLL B Calibration error
      */
     (rIOPCIFIR, bit(2)) ? defaultMaskedError;
 
@@ -290,22 +290,22 @@ group gIOPCIFIR filter singlebit
     (rIOPCIFIR, bit(4)) ? defaultMaskedError;
 
     /** IOPCIFIR[5]
-     *  
+     *  TX Lane C Calibration Error
      */
     (rIOPCIFIR, bit(5)) ? defaultMaskedError;
 
     /** IOPCIFIR[6]
-     *  
+     *  TX Lane D Calibration Error
      */
     (rIOPCIFIR, bit(6)) ? defaultMaskedError;
 
     /** IOPCIFIR[7]
-     *  
+     *  TX Lane E Calibration Error
      */
     (rIOPCIFIR, bit(7)) ? defaultMaskedError;
 
     /** IOPCIFIR[8]
-     *  
+     *  TX Lane F Calibration Error
      */
     (rIOPCIFIR, bit(8)) ? defaultMaskedError;
 
@@ -320,22 +320,22 @@ group gIOPCIFIR filter singlebit
     (rIOPCIFIR, bit(10)) ? defaultMaskedError;
 
     /** IOPCIFIR[11]
-     *  
+     *  TX Lane I Calibration Error
      */
     (rIOPCIFIR, bit(11)) ? defaultMaskedError;
 
     /** IOPCIFIR[12]
-     *  
+     *  TX Lane J Calibration Error
      */
     (rIOPCIFIR, bit(12)) ? defaultMaskedError;
 
     /** IOPCIFIR[13]
-     *  
+     *  TX Lane K Calibration Error
      */
     (rIOPCIFIR, bit(13)) ? defaultMaskedError;
 
     /** IOPCIFIR[14]
-     *  
+     *  TX Lane L Calibration Error
      */
     (rIOPCIFIR, bit(14)) ? defaultMaskedError;
 
@@ -350,22 +350,22 @@ group gIOPCIFIR filter singlebit
     (rIOPCIFIR, bit(16)) ? defaultMaskedError;
 
     /** IOPCIFIR[17]
-     *  
+     *  TX Lane O Calibration Error
      */
     (rIOPCIFIR, bit(17)) ? defaultMaskedError;
 
     /** IOPCIFIR[18]
-     *  
+     *  TX Lane P Calibration Error
      */
     (rIOPCIFIR, bit(18)) ? defaultMaskedError;
 
     /** IOPCIFIR[19]
-     *  
+     *  RX Lane A Calibration Error
      */
     (rIOPCIFIR, bit(19)) ? defaultMaskedError;
 
     /** IOPCIFIR[20]
-     *  
+     *  RX Lane B Calibration Error
      */
     (rIOPCIFIR, bit(20)) ? defaultMaskedError;
 
@@ -380,24 +380,24 @@ group gIOPCIFIR filter singlebit
     (rIOPCIFIR, bit(22)) ? defaultMaskedError;
 
     /** IOPCIFIR[23]
-     *  
+     *  RX Lane E Calibration Error
      */
     (rIOPCIFIR, bit(23)) ? defaultMaskedError;
 
     /** IOPCIFIR[24]
-     *  
+     *  RX Lane F Calibration Error
      */
     (rIOPCIFIR, bit(24)) ? defaultMaskedError;
 
     /** IOPCIFIR[25]
-     *  
+     *  RX Lane G Calibration Error
      */
     (rIOPCIFIR, bit(25)) ? defaultMaskedError;
 
     /** IOPCIFIR[26]
      *  RX Lane H Calibration Error
      */
-    (rIOPCIFIR, bit(26)) ? threshold_and_mask;
+    (rIOPCIFIR, bit(26)) ? defaultMaskedError;
 
     /** IOPCIFIR[27]
      *  RX Lane I Calibration Error
