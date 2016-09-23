@@ -878,14 +878,14 @@
     <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      An 8 bit vector that would be a designation of which MC (Nimbus MCS or
+      An 8 bit vector that would be a designation of which MC (Nimbus MCA or
       Cumulus MI) are involved in the group.
       So the bits would represent
                   Nimbus   Cumulus
-        Bit 0     MCS0     MI0
-        Bit 1     MCS1     MI1
+        Bit 0     MCA0     MI0
+        Bit 1     MCA1     MI1
         .....
-        Bit 7     MCS7     MI7
+        Bit 7     MCA7     MI7
       Set by p9_mss_eff_grouping
     </description>
     <valueType>uint8</valueType>
