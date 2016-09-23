@@ -39,6 +39,7 @@
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
 #include <sys/task.h>
+#include <sys/misc.h>
 #include <util/utilmbox_scratch.H>
 
 #include "utilbase.H"
@@ -92,7 +93,8 @@ namespace Util
     void writeDebugCommRegs(uint8_t i_usage, uint32_t i_addr, uint32_t i_size)
     {
         //convert input into uint64_t for scom write
-        uint64_t l_bufAddr = i_addr;
+        uint64_t l_hrmorVal  =   cpu_spr_value(CPU_SPR_HRMOR);
+        uint64_t l_bufAddr = i_addr | l_hrmorVal; //OR in HRMOR for RA
         uint64_t l_bufSize = (i_size & MSG_DATA_SIZE_MASK) |
                              (i_usage << MSG_USAGE_SHIFT);
 

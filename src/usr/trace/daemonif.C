@@ -70,7 +70,10 @@ namespace TRACE
     {
         msg_t* msg = msg_allocate();
         msg->type = TRACE_CONT_TRACE_STATE;
-        msg->data[0] = i_enable ? 0x1 : 0x0; //needs to be a zero/one
+        //Send a 0x2 to enable CONT_TRACE_FORCE_ENABLE_DEBUG_COMM
+        //As this function is only called by debug comm routines (FSP
+        //sends directly message)
+        msg->data[0] = i_enable ? 0x2 : 0x0;
         msg_sendrecv(iv_queue, msg);
         msg_free(msg);
     }
