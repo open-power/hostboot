@@ -357,7 +357,7 @@ class ScomReader<TARGET_TYPE_DIMM>
 ///
 template< typename T, class U>
 ReturnCode collectRegisterData(std::vector<T>& i_addresses, U& i_reader,
-                               uint32_t i_offset, uint8_t* o_pData)
+                               uint32_t i_offset, uint8_t*& o_pData)
 {
     FAPI_DBG("collectRegisterData -> address count: 0x%lx", i_addresses.size());
 
