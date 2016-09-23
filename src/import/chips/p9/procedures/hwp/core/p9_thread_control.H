@@ -30,7 +30,7 @@
 // *!               Also used to query the state of a thread.
 //------------------------------------------------------------------------------
 
-// *HWP HWP Owner: Nick Klazynski <dyem@us.ibm.com>
+// *HWP HWP Owner: Nick Klazynski <jklazyns@us.ibm.com>
 // *HWP FW Owner:  Thi Tran <thi@us.ibm.com>
 // *HWP Team:  Quad
 // *HWP Level: 2
@@ -105,8 +105,8 @@ extern "C"
 
     enum PTC_Constants
     {
-        RAS_MODE_STEP_SHIFT       = 52,
-        PTC_STEP_COMP_POLL_LIMIT  = 10,
+        RAS_MODE_MR_FENCE_INTERRUPTS = 57,
+        PTC_STEP_COMP_POLL_LIMIT     = 10,
     };
 
 // Bit positions in the DIRECT_CONTROL register

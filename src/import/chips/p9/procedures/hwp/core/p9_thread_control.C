@@ -427,6 +427,20 @@ fapi2::ReturnCode p9_thread_control_sreset(
     FAPI_DBG("p9_thread_control_sreset : Initiating sreset command to core PC logic for threads 0x%x",
              i_threads);
     // No Precondition for Sreset; power management is handled by platform
+    // Clear blocking interrupts
+    {
+        fapi2::buffer<uint64_t> l_mode_data;
+
+        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+                 i_threads);
+
+        l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
+                 i_threads);
+    }
+
     // Setup & Initiate SReset Command
     {
         fapi2::buffer<uint64_t> l_scom_data(
@@ -493,6 +507,20 @@ fapi2::ReturnCode p9_thread_control_start(
                         .set_THREAD(i_threads),
                         "p9_thread_control_start: ERROR: Cannot issue Thread Start because the threads aren't in maint mode (threads=%x).",
                         i_threads);
+    }
+
+    // Clear blocking interrupts
+    {
+        fapi2::buffer<uint64_t> l_mode_data;
+
+        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+                 i_threads);
+
+        l_mode_data.clearBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
+                 i_threads);
     }
 
     // Start the threads
@@ -564,6 +592,19 @@ fapi2::ReturnCode p9_thread_control_stop(
                         "p9_thread_control_stop: ERROR: Threads cannot be stopped because they aren't running (threads=%x).", i_threads);
     }
 
+    // Block interrupts while stopped
+    {
+        fapi2::buffer<uint64_t> l_mode_data;
+        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+                 i_threads);
+
+        l_mode_data.setBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
+        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
+                 i_threads);
+    }
+
     // Stop the threads
     {
         fapi2::buffer<uint64_t> l_scom_data(g_control_reg_map[i_threads] >> CORE_STOP);
@@ -633,20 +674,7 @@ fapi2::ReturnCode p9_thread_control_step(
 
     // Setup single step mode and issue step.
     {
-        fapi2::buffer<uint64_t> l_mode_data;
         fapi2::buffer<uint64_t> l_step_data(g_control_reg_map[i_threads] >> CORE_STEP);
-
-        // Set single step mode.
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                 i_threads);
-
-        // i_threads is right aligned
-        l_mode_data |=
-            fapi2::buffer<uint64_t>().insertFromRight<RAS_MODE_STEP_SHIFT, 4>(i_threads);
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
-                 i_threads);
 
         // Set issue the step
         FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_step_data),
@@ -681,22 +709,6 @@ fapi2::ReturnCode p9_thread_control_step(
                         i_threads);
     }
 
-
-    // Reset single step mode
-    {
-        fapi2::buffer<uint64_t> l_mode_data;
-
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                 i_threads);
-
-        // i_threads is right aligned
-        l_mode_data &= ~
-                       (fapi2::buffer<uint64_t>().insertFromRight<RAS_MODE_STEP_SHIFT, 4>(i_threads));
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
-                 i_threads);
-    }
 
 fapi_try_exit:
     return fapi2::current_err;
