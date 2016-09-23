@@ -71,17 +71,13 @@ static const struct channelPerGroupTable_t
 } CHANNEL_PER_GROUP_TABLE[] =
 {
     // Port 0    Port 1    Channel/group value
-    {    1,         0,           0b0000    },      // 1 MC port/group for port0, port1 is not populated.
     {    1,         1,           0b0000    },      // 1 MC port/group for both port0 and port1
     {    1,         3,           0b0001    },      // 1 MC port/group for port0, 3 MC port/group for port1
-    {    0,         1,           0b0000    },      // 1 MC port/group for port1, port0 is not populated.
     {    2,         1,           0b0100    },      // 2 MC port/group different MC port pairs
     {    3,         1,           0b0010    },      // 3 MC port/group for port0, 1 MC port/group for port1
     {    3,         3,           0b0011    },      // 3 MC port/group for port0, 3 MC port/group for port1
-    {    2,         0,           0b0100    },      // 2 MC port/group different MC port pairs
     {    2,         2,           0b0101    },      // 2 MC port/group in the same MC port pairs (Need additional verification in code below)
     {    2,         3,           0b0100    },      // 2 MC port/group different MC port pairs
-    {    0,         2,           0b0100    },      // 2 MC port/group different MC port pairs
     {    1,         2,           0b0100    },      // 2 MC port/group different MC port pairs
     {    3,         2,           0b0100    },      // 2 MC port/group different MC port pairs
     {    4,         4,           0b0110    },      // 4 MC ports/group, two ports in the same MC pairs
@@ -460,8 +456,24 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
          ii < (sizeof(CHANNEL_PER_GROUP_TABLE) / sizeof(channelPerGroupTable_t));
          ii++)
     {
-        if ( (i_portInfo[0].numPortsInGroup == CHANNEL_PER_GROUP_TABLE[ii].port0_ports_in_group) &&
-             (i_portInfo[1].numPortsInGroup == CHANNEL_PER_GROUP_TABLE[ii].port1_ports_in_group) )
+        uint8_t l_port0_lookup_val = i_portInfo[0].numPortsInGroup;
+        uint8_t l_port1_lookup_val = i_portInfo[1].numPortsInGroup;
+
+        // If port is disabled, treat as single port.  However, this
+        // port will be set invalid in MCFGP reg further below
+        //
+        if (l_port0_lookup_val == 0)
+        {
+            l_port0_lookup_val = 1;
+        }
+
+        if (l_port1_lookup_val == 0)
+        {
+            l_port1_lookup_val = 1;
+        }
+
+        if ( (l_port0_lookup_val == CHANNEL_PER_GROUP_TABLE[ii].port0_ports_in_group) &&
+             (l_port1_lookup_val == CHANNEL_PER_GROUP_TABLE[ii].port1_ports_in_group) )
         {
             o_mcsBarData.MCFGP_chan_per_group = CHANNEL_PER_GROUP_TABLE[ii].channel_per_group;
         }
@@ -475,8 +487,7 @@ fapi2::ReturnCode getBarData(const mcsPortGroupInfo_t i_portInfo[],
                 .set_PORT_1_PORTS_IN_GROUP(i_portInfo[1].numPortsInGroup)
                 .set_PORT_1_GROUP(i_portInfo[1].myGroup),
                 "Error: ports 0/1 config doesn't match any entry in Channel/group table. "
-                "Port_0: group %u, ports in group %u",
-                "Port_1: group %u, ports in group %u",
+                "Port_0: group %u, ports in group %u, Port_1: group %u, ports in group %u",
                 i_portInfo[0].myGroup, i_portInfo[0].numPortsInGroup,
                 i_portInfo[1].myGroup, i_portInfo[1].numPortsInGroup);
 
@@ -621,18 +632,18 @@ void displayMCPortInfoData(const fapi2::Target<fapi2::TARGET_TYPE_MCS> i_mcTarge
 {
     for (uint8_t ii = 0; ii < MAX_MC_PORTS_PER_MCS; ii++)
     {
-        FAPI_DBG("    Port %u:", ii);
-        FAPI_DBG("        myGroup %u", i_portInfo[ii].myGroup);
-        FAPI_DBG("        numPortsInGroup %u", i_portInfo[ii].numPortsInGroup);
-        FAPI_DBG("        groupSize %u", i_portInfo[ii].groupSize);
-        FAPI_DBG("        groupBaseAddr %u", i_portInfo[ii].groupBaseAddr);
-        FAPI_DBG("        channelId %u", i_portInfo[ii].channelId);
+        FAPI_INF("    Port %u:", ii);
+        FAPI_INF("        myGroup %u", i_portInfo[ii].myGroup);
+        FAPI_INF("        numPortsInGroup %u", i_portInfo[ii].numPortsInGroup);
+        FAPI_INF("        groupSize %u", i_portInfo[ii].groupSize);
+        FAPI_INF("        groupBaseAddr %u", i_portInfo[ii].groupBaseAddr);
+        FAPI_INF("        channelId %u", i_portInfo[ii].channelId);
 
         for (uint8_t jj = 0; jj < MAX_ALT_MEM_REGIONS; jj++)
         {
-            FAPI_DBG("        altMemValid[%u] %u", jj, i_portInfo[ii].altMemValid[jj]);
-            FAPI_DBG("        altMemSize[%u]  %u", jj, i_portInfo[ii].altMemSize[jj]);
-            FAPI_DBG("        altBaseAddr[%u] %u", jj, i_portInfo[ii].altBaseAddr[jj]);
+            FAPI_INF("        altMemValid[%u] %u", jj, i_portInfo[ii].altMemValid[jj]);
+            FAPI_INF("        altMemSize[%u]  %u", jj, i_portInfo[ii].altMemSize[jj]);
+            FAPI_INF("        altBaseAddr[%u] %u", jj, i_portInfo[ii].altBaseAddr[jj]);
         }
     }
 
@@ -666,26 +677,26 @@ template<> // TARGET_TYPE_MCS
 void displayMCBarData(const fapi2::Target<fapi2::TARGET_TYPE_MCS> i_mcTarget,
                       const mcsBarData_t i_mcBarData)
 {
-    FAPI_DBG("    BAR data:");
-    FAPI_DBG("        MCS_MCFGP_VALID %u", i_mcBarData.MCS_MCFGP_VALID);
-    FAPI_DBG("        MCFGP_chan_per_group %u", i_mcBarData.MCFGP_chan_per_group);
-    FAPI_DBG("        MCFGP_chan0_group_member_id %u", i_mcBarData.MCFGP_chan0_group_member_id);
-    FAPI_DBG("        MCFGP_chan1_group_member_id %u", i_mcBarData.MCFGP_chan1_group_member_id);
-    FAPI_DBG("        MCFGP_group_size %u", i_mcBarData.MCFGP_group_size);
-    FAPI_DBG("        MCFGP_groupBaseAddr %u", i_mcBarData.MCFGP_groupBaseAddr);
-    FAPI_DBG("        MCS_MCFGPM_VALID %u", i_mcBarData.MCS_MCFGPM_VALID);
-    FAPI_DBG("        MCFGPM_group_size %u", i_mcBarData.MCFGPM_group_size);
-    FAPI_DBG("        MCFGPM_groupBaseAddr %u", i_mcBarData.MCFGPM_groupBaseAddr);
+    FAPI_INF("    BAR data:");
+    FAPI_INF("        MCS_MCFGP_VALID %u", i_mcBarData.MCS_MCFGP_VALID);
+    FAPI_INF("        MCFGP_chan_per_group %u", i_mcBarData.MCFGP_chan_per_group);
+    FAPI_INF("        MCFGP_chan0_group_member_id %u", i_mcBarData.MCFGP_chan0_group_member_id);
+    FAPI_INF("        MCFGP_chan1_group_member_id %u", i_mcBarData.MCFGP_chan1_group_member_id);
+    FAPI_INF("        MCFGP_group_size %u", i_mcBarData.MCFGP_group_size);
+    FAPI_INF("        MCFGP_groupBaseAddr %u", i_mcBarData.MCFGP_groupBaseAddr);
+    FAPI_INF("        MCS_MCFGPM_VALID %u", i_mcBarData.MCS_MCFGPM_VALID);
+    FAPI_INF("        MCFGPM_group_size %u", i_mcBarData.MCFGPM_group_size);
+    FAPI_INF("        MCFGPM_groupBaseAddr %u", i_mcBarData.MCFGPM_groupBaseAddr);
 
     for (uint8_t jj = 0; jj < MAX_ALT_MEM_REGIONS; jj++)
     {
-        FAPI_DBG("        MCFGPA_HOLE_valid[%u]      %u", jj, i_mcBarData.MCFGPA_HOLE_valid[jj]);
-        FAPI_DBG("        MCFGPA_HOLE_LOWER_addr[%u] %u", jj, i_mcBarData.MCFGPA_HOLE_LOWER_addr[jj]);
-        FAPI_DBG("        MCFGPA_HOLE_UPPER_addr[%u] %u", jj, i_mcBarData.MCFGPA_HOLE_UPPER_addr[jj]);
+        FAPI_INF("        MCFGPA_HOLE_valid[%u]      %u", jj, i_mcBarData.MCFGPA_HOLE_valid[jj]);
+        FAPI_INF("        MCFGPA_HOLE_LOWER_addr[%u] %u", jj, i_mcBarData.MCFGPA_HOLE_LOWER_addr[jj]);
+        FAPI_INF("        MCFGPA_HOLE_UPPER_addr[%u] %u", jj, i_mcBarData.MCFGPA_HOLE_UPPER_addr[jj]);
 
-        FAPI_DBG("        MCFGPMA_HOLE_valid[%u]      %u", jj, i_mcBarData.MCFGPMA_HOLE_valid[jj]);
-        FAPI_DBG("        MCFGPMA_HOLE_LOWER_addr[%u] %u", jj, i_mcBarData.MCFGPMA_HOLE_LOWER_addr[jj]);
-        FAPI_DBG("        MCFGPMA_HOLE_UPPER_addr[%u] %u", jj, i_mcBarData.MCFGPMA_HOLE_UPPER_addr[jj]);
+        FAPI_INF("        MCFGPMA_HOLE_valid[%u]      %u", jj, i_mcBarData.MCFGPMA_HOLE_valid[jj]);
+        FAPI_INF("        MCFGPMA_HOLE_LOWER_addr[%u] %u", jj, i_mcBarData.MCFGPMA_HOLE_LOWER_addr[jj]);
+        FAPI_INF("        MCFGPMA_HOLE_UPPER_addr[%u] %u", jj, i_mcBarData.MCFGPMA_HOLE_UPPER_addr[jj]);
 
     }
 
