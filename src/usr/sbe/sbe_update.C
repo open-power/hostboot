@@ -93,6 +93,7 @@ namespace SBE
 {
     errlHndl_t updateProcessorSbeSeeproms(sbeUpdateCheckType i_check_type)
     {
+        return NULL;//@fixme-Temp hack to fix master
         errlHndl_t err = NULL;
         errlHndl_t err_cleanup = NULL;
         sbeTargetState_t sbeState;
