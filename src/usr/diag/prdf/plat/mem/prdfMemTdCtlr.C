@@ -83,16 +83,21 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                 break;
             }
 
-            // TODO: RTC 157892 Check why the command stopped and take actions
-            //       appropriately. Note that since nothing is happening here at
-            //       the moment, the code will simply assume the command stopped
-            //       at the end of memory with no errors.
+            // Then, check for ECC errors, if they exist.
+            bool errorsFound = false;
+            o_rc = checkEcc( errorsFound, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "checkEcc(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
 
             // If the command completed successfully with no error, the error
             // log will not have any useful information. Therefore, do not
             // commit the error log. This is done to avoid useless
             // informational error logs.
-            io_sc.service_data->setDontCommitErrl();
+            if ( !errorsFound ) io_sc.service_data->setDontCommitErrl();
         }
 
         // Move onto the next step in the state machine.
