@@ -7837,42 +7837,42 @@ group gMC0_CHIPLET_FIR filter singlebit
     (rMC0_CHIPLET_FIR, bit(3)) ? analyze(gMC_LFIR_0);
 
     /** MC0_CHIPLET_FIR[4]
-     *  Attention from MCAECCFIR 0
+     *  Attention from MCACALFIR 0
      */
     (rMC0_CHIPLET_FIR, bit(4)) ? analyzeConnectedMCA0;
 
     /** MC0_CHIPLET_FIR[5]
-     *  Attention from MCACALFIR 0
+     *  Attention from MCAECCFIR 0
      */
     (rMC0_CHIPLET_FIR, bit(5)) ? analyzeConnectedMCA0;
 
     /** MC0_CHIPLET_FIR[6]
-     *  Attention from MCAECCFIR 1
+     *  Attention from MCACALFIR 1
      */
     (rMC0_CHIPLET_FIR, bit(6)) ? analyzeConnectedMCA1;
 
     /** MC0_CHIPLET_FIR[7]
-     *  Attention from MCACALFIR 1
+     *  Attention from MCAECCFIR 1
      */
     (rMC0_CHIPLET_FIR, bit(7)) ? analyzeConnectedMCA1;
 
     /** MC0_CHIPLET_FIR[8]
-     *  Attention from MCAECCFIR 2
+     *  Attention from MCACALFIR 2
      */
     (rMC0_CHIPLET_FIR, bit(8)) ? analyzeConnectedMCA2;
 
     /** MC0_CHIPLET_FIR[9]
-     *  Attention from MCACALFIR 2
+     *  Attention from MCAECCFIR 2
      */
     (rMC0_CHIPLET_FIR, bit(9)) ? analyzeConnectedMCA2;
 
     /** MC0_CHIPLET_FIR[10]
-     *  Attention from MCAECCFIR 3
+     *  Attention from MCACALFIR 3
      */
     (rMC0_CHIPLET_FIR, bit(10)) ? analyzeConnectedMCA3;
 
     /** MC0_CHIPLET_FIR[11]
-     *  Attention from MCACALFIR 3
+     *  Attention from MCAECCFIR 3
      */
     (rMC0_CHIPLET_FIR, bit(11)) ? analyzeConnectedMCA3;
 
@@ -7887,14 +7887,14 @@ group gMC0_CHIPLET_FIR filter singlebit
     (rMC0_CHIPLET_FIR, bit(13)) ? analyzeConnectedMCA0;
 
     /** MC0_CHIPLET_FIR[14]
-     *  Attention from DDRPHYFIR 1
-     */
-    (rMC0_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA1;
-
-    /** MC0_CHIPLET_FIR[15]
      *  Attention from DDRPHYFIR 2
      */
-    (rMC0_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA2;
+    (rMC0_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA2;
+
+    /** MC0_CHIPLET_FIR[15]
+     *  Attention from DDRPHYFIR 1
+     */
+    (rMC0_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA1;
 
     /** MC0_CHIPLET_FIR[16]
      *  Attention from DDRPHYFIR 3
@@ -8147,42 +8147,42 @@ group gMC1_CHIPLET_FIR filter singlebit
     (rMC1_CHIPLET_FIR, bit(3)) ? analyze(gMC_LFIR_1);
 
     /** MC1_CHIPLET_FIR[4]
-     *  Attention from MCAECCFIR 4
+     *  Attention from MCACALFIR 4
      */
     (rMC1_CHIPLET_FIR, bit(4)) ? analyzeConnectedMCA4;
 
     /** MC1_CHIPLET_FIR[5]
-     *  Attention from MCACALFIR 4
+     *  Attention from MCAECCFIR 4
      */
     (rMC1_CHIPLET_FIR, bit(5)) ? analyzeConnectedMCA4;
 
     /** MC1_CHIPLET_FIR[6]
-     *  Attention from MCAECCFIR 5
+     *  Attention from MCACALFIR 5
      */
     (rMC1_CHIPLET_FIR, bit(6)) ? analyzeConnectedMCA5;
 
     /** MC1_CHIPLET_FIR[7]
-     *  Attention from MCACALFIR 5
+     *  Attention from MCAECCFIR 5
      */
     (rMC1_CHIPLET_FIR, bit(7)) ? analyzeConnectedMCA5;
 
     /** MC1_CHIPLET_FIR[8]
-     *  Attention from MCAECCFIR 6
+     *  Attention from MCACALFIR 6
      */
     (rMC1_CHIPLET_FIR, bit(8)) ? analyzeConnectedMCA6;
 
     /** MC1_CHIPLET_FIR[9]
-     *  Attention from MCACALFIR 6
+     *  Attention from MCAECCFIR 6
      */
     (rMC1_CHIPLET_FIR, bit(9)) ? analyzeConnectedMCA6;
 
     /** MC1_CHIPLET_FIR[10]
-     *  Attention from MCAECCFIR 7
+     *  Attention from MCACALFIR 7
      */
     (rMC1_CHIPLET_FIR, bit(10)) ? analyzeConnectedMCA7;
 
     /** MC1_CHIPLET_FIR[11]
-     *  Attention from MCACALFIR 7
+     *  Attention from MCAECCFIR 7
      */
     (rMC1_CHIPLET_FIR, bit(11)) ? analyzeConnectedMCA7;
 
@@ -8197,14 +8197,14 @@ group gMC1_CHIPLET_FIR filter singlebit
     (rMC1_CHIPLET_FIR, bit(13)) ? analyzeConnectedMCA4;
 
     /** MC1_CHIPLET_FIR[14]
-     *  Attention from DDRPHYFIR 5
-     */
-    (rMC1_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA5;
-
-    /** MC1_CHIPLET_FIR[15]
      *  Attention from DDRPHYFIR 6
      */
-    (rMC1_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA6;
+    (rMC1_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA6;
+
+    /** MC1_CHIPLET_FIR[15]
+     *  Attention from DDRPHYFIR 5
+     */
+    (rMC1_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA5;
 
     /** MC1_CHIPLET_FIR[16]
      *  Attention from DDRPHYFIR 7
