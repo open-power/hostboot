@@ -225,7 +225,7 @@ group gMCACALFIR filter singlebit
     (rMCACALFIR, bit(0)) ? self_th_1;
 
     /** MCACALFIR[1]
-     *  
+     *  MBA Nonrecoverable Error
      */
     (rMCACALFIR, bit(1)) ? defaultMaskedError;
 
@@ -240,7 +240,7 @@ group gMCACALFIR filter singlebit
     (rMCACALFIR, bit(3)) ? defaultMaskedError;
 
     /** MCACALFIR[4]
-     *  
+     *  A RCD parity error has been detected
      */
     (rMCACALFIR, bit(4)) ? defaultMaskedError;
 
@@ -285,7 +285,7 @@ group gMCACALFIR filter singlebit
     (rMCACALFIR, bit(12)) ? self_th_1;
 
     /** MCACALFIR[13]
-     *  
+     *  Persistent RCD error, port failed
      */
     (rMCACALFIR, bit(13)) ? defaultMaskedError;
 
@@ -365,17 +365,17 @@ group gMCAECCFIR filter singlebit
     (rMCAECCFIR, bit(14)) ? mainline_ce_ue_handling;
 
     /** MCAECCFIR[15]
-     *  
+     *  Mainline read RCD
      */
     (rMCAECCFIR, bit(15)) ? defaultMaskedError;
 
     /** MCAECCFIR[16]
-     *  
+     *  Mainline read IAUE
      */
     (rMCAECCFIR, bit(16)) ? defaultMaskedError;
 
     /** MCAECCFIR[17]
-     *  
+     *  Mainline read IUE
      */
     (rMCAECCFIR, bit(17)) ? defaultMaskedError;
 
@@ -430,17 +430,17 @@ group gMCAECCFIR filter singlebit
     (rMCAECCFIR, bit(34)) ? defaultMaskedError;
 
     /** MCAECCFIR[35]
-     *  
+     *  Maintenance RCD
      */
     (rMCAECCFIR, bit(35)) ? defaultMaskedError;
 
     /** MCAECCFIR[36]
-     *  
+     *  Maintenance IAUE
      */
     (rMCAECCFIR, bit(36)) ? defaultMaskedError;
 
     /** MCAECCFIR[37]
-     *  
+     *  Maintenance IUE
      */
     (rMCAECCFIR, bit(37)) ? defaultMaskedError;
 
@@ -586,12 +586,12 @@ rule rDDRPHYFIR
 group gDDRPHYFIR filter singlebit
 {
     /** DDRPHYFIR[54]
-     *  
+     *  Non-recoverable FSM error
      */
     (rDDRPHYFIR, bit(54)) ? defaultMaskedError;
 
     /** DDRPHYFIR[55]
-     *  
+     *  Full bus impact Register Parity Error
      */
     (rDDRPHYFIR, bit(55)) ? defaultMaskedError;
 
@@ -601,17 +601,17 @@ group gDDRPHYFIR filter singlebit
     (rDDRPHYFIR, bit(56)) ? self_th_32perDay;
 
     /** DDRPHYFIR[57]
-     *  
+     *  FSM errors
      */
     (rDDRPHYFIR, bit(57)) ? defaultMaskedError;
 
     /** DDRPHYFIR[58]
-     *  
+     *  Register parity error impacting 16 bits
      */
     (rDDRPHYFIR, bit(58)) ? defaultMaskedError;
 
     /** DDRPHYFIR[59]
-     *  
+     *  Register parity error impacting 8 bits
      */
     (rDDRPHYFIR, bit(59)) ? defaultMaskedError;
 

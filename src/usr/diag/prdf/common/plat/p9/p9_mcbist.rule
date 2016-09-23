@@ -147,7 +147,7 @@ group gMCBISTFIR filter singlebit
     (rMCBISTFIR, bit(0)) ? defaultMaskedError;
 
     /** MCBISTFIR[1]
-     *  
+     *  COMMAND_ADDRESS_TIMEOUT
      */
     (rMCBISTFIR, bit(1)) ? defaultMaskedError;
 

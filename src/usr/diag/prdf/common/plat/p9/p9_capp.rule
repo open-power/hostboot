@@ -155,7 +155,7 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(3)) ? self_th_1;
 
     /** CXAFIR[4]
-     *  
+     *  CXA Timer expired recoverable error
      */
     (rCXAFIR, bit(4)) ? defaultMaskedError;
 
@@ -165,12 +165,12 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(5)) ? self_th_1;
 
     /** CXAFIR[6]
-     *  
+     *  XPT saw UE on PB data
      */
     (rCXAFIR, bit(6)) ? defaultMaskedError;
 
     /** CXAFIR[7]
-     *  
+     *  XPT saw SUE on PB data
      */
     (rCXAFIR, bit(7)) ? defaultMaskedError;
 
@@ -190,17 +190,17 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(10)) ? self_th_1;
 
     /** CXAFIR[11]
-     *  
+     *  Illegal LPC BAR access Masked for DD1
      */
     (rCXAFIR, bit(11)) ? defaultMaskedError;
 
     /** CXAFIR[12]
-     *  
+     *  XPT recoverable error
      */
     (rCXAFIR, bit(12)) ? defaultMaskedError;
 
     /** CXAFIR[13]
-     *  
+     *  Recoverable errors detected in Master
      */
     (rCXAFIR, bit(13)) ? defaultMaskedError;
 
@@ -260,12 +260,12 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(24)) ? defaultMaskedError;
 
     /** CXAFIR[25]
-     *  
+     *  Misc informational PowerBus error
      */
     (rCXAFIR, bit(25)) ? defaultMaskedError;
 
     /** CXAFIR[26]
-     *  
+     *  CXA Parity error on PowerBus interface
      */
     (rCXAFIR, bit(26)) ? defaultMaskedError;
 
@@ -290,7 +290,7 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(30)) ? level2_th_1;
 
     /** CXAFIR[31]
-     *  
+     *  CXA: PPHB0 or PHB1 i linkdown
      */
     (rCXAFIR, bit(31)) ? defaultMaskedError;
 
@@ -320,17 +320,17 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(36)) ? defaultMaskedError;
 
     /** CXAFIR[37]
-     *  
+     *  CXA: TLBI Timeout error.
      */
     (rCXAFIR, bit(37)) ? defaultMaskedError;
 
     /** CXAFIR[38]
-     *  
+     *  CXA: TLBI seq_err.
      */
     (rCXAFIR, bit(38)) ? defaultMaskedError;
 
     /** CXAFIR[39]
-     *  
+     *  CXA: TLBI bad op error.
      */
     (rCXAFIR, bit(39)) ? defaultMaskedError;
 
@@ -365,7 +365,7 @@ group gCXAFIR filter singlebit
     (rCXAFIR, bit(45)) ? self_th_1;
 
     /** CXAFIR[46]
-     *  
+     *  PSL credit timeout error
      */
     (rCXAFIR, bit(46)) ? defaultMaskedError;
 
@@ -377,7 +377,7 @@ group gCXAFIR filter singlebit
     /** CXAFIR[48]
      *  Hypervisor asserted
      */
-    (rCXAFIR, bit(48)) ? defaultMaskedError;
+    (rCXAFIR, bit(48)) ? level2_th_1;
 
     /** CXAFIR[49]
      *  spare

@@ -408,12 +408,12 @@ group gCOREFIR filter singlebit
     (rCOREFIR, bit(12)) ? self_th_1;
 
     /** COREFIR[13]
-     *  
+     *  ISU errr, recov if not in mt window
      */
-    (rCOREFIR, bit(13)) ? defaultMaskedError;
+    (rCOREFIR, bit(13)) ? self_th_5perHour;
 
     /** COREFIR[14]
-     *  
+     *  Machine check and ME = 0 Err
      */
     (rCOREFIR, bit(14)) ? defaultMaskedError;
 
@@ -433,9 +433,9 @@ group gCOREFIR filter singlebit
     (rCOREFIR, bit(17)) ? defaultMaskedError;
 
     /** COREFIR[18]
-     *  
+     *  SW initiated reboot with diagnostics
      */
-    (rCOREFIR, bit(18)) ? defaultMaskedError;
+    (rCOREFIR, bit(18)) ? level2_th_1;
 
     /** COREFIR[19]
      *  spare
@@ -553,9 +553,9 @@ group gCOREFIR filter singlebit
     (rCOREFIR, bit(38)) ? self_th_1;
 
     /** COREFIR[39]
-     *  
+     *  LSU err, recov if not in mt window
      */
-    (rCOREFIR, bit(39)) ? defaultMaskedError;
+    (rCOREFIR, bit(39)) ? self_th_5perHour;
 
     /** COREFIR[40]
      *  spare
@@ -638,7 +638,7 @@ group gCOREFIR filter singlebit
     (rCOREFIR, bit(54)) ? defaultMaskedError;
 
     /** COREFIR[55]
-     *  
+     *  Nest hang detected, recovery attempted
      */
     (rCOREFIR, bit(55)) ? defaultMaskedError;
 

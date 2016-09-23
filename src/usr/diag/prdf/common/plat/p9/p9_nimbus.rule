@@ -2449,7 +2449,7 @@ group gOCCFIR filter singlebit
     (rOCCFIR, bit(1)) ? defaultMaskedError;
 
     /** OCCFIR[2]
-     *  
+     *  OCC_CME_ERROR_NOTIFY
      */
     (rOCCFIR, bit(2)) ? defaultMaskedError;
 
@@ -2459,7 +2459,7 @@ group gOCCFIR filter singlebit
     (rOCCFIR, bit(3)) ? threshold_and_mask;
 
     /** OCCFIR[4]
-     *  
+     *  OCC_HB_ERROR
      */
     (rOCCFIR, bit(4)) ? defaultMaskedError;
 
@@ -2494,12 +2494,12 @@ group gOCCFIR filter singlebit
     (rOCCFIR, bit(10)) ? threshold_and_mask;
 
     /** OCCFIR[11]
-     *  
+     *  GPE2 asserted an error condition
      */
     (rOCCFIR, bit(11)) ? defaultMaskedError;
 
     /** OCCFIR[12]
-     *  
+     *  GPE3 asserted an error condition
      */
     (rOCCFIR, bit(12)) ? defaultMaskedError;
 
@@ -2948,209 +2948,214 @@ rule rNXCQFIR
 group gNXCQFIR filter singlebit
 {
     /** NXCQFIR[0]
-     *  
+     *  PBI internal parity error
      */
     (rNXCQFIR, bit(0)) ? defaultMaskedError;
 
     /** NXCQFIR[1]
-     *  
+     *  PowerBus CE error
      */
     (rNXCQFIR, bit(1)) ? defaultMaskedError;
 
     /** NXCQFIR[2]
-     *  
+     *  PowerBus UE error
      */
     (rNXCQFIR, bit(2)) ? defaultMaskedError;
 
     /** NXCQFIR[3]
-     *  
+     *  PBUS_ECC_SUE_FIR: PowerBus SUE error
      */
     (rNXCQFIR, bit(3)) ? defaultMaskedError;
 
     /** NXCQFIR[4]
-     *  
+     *  Inbound array CE error
      */
     (rNXCQFIR, bit(4)) ? defaultMaskedError;
 
     /** NXCQFIR[5]
-     *  
+     *  Inbound array UE error
      */
     (rNXCQFIR, bit(5)) ? defaultMaskedError;
 
     /** NXCQFIR[6]
-     *  
+     *  PASTE_REJECT_FIR: Paste request rejected
      */
     (rNXCQFIR, bit(6)) ? defaultMaskedError;
 
     /** NXCQFIR[7]
-     *  
+     *  PowerBus command hang error
      */
     (rNXCQFIR, bit(7)) ? defaultMaskedError;
 
     /** NXCQFIR[8]
-     *  
+     *  PowerBus read address error
      */
     (rNXCQFIR, bit(8)) ? defaultMaskedError;
 
     /** NXCQFIR[9]
-     *  
+     *  PowerBus write address error
      */
     (rNXCQFIR, bit(9)) ? defaultMaskedError;
 
     /** NXCQFIR[10]
-     *  
+     *  PowerBus miscellaneous error
      */
     (rNXCQFIR, bit(10)) ? defaultMaskedError;
 
     /** NXCQFIR[11]
-     *  
+     *  MMIO_BAR_PE_FIR: MMIO BAR parity error
      */
     (rNXCQFIR, bit(11)) ? defaultMaskedError;
 
     /** NXCQFIR[12]
-     *  
+     *  UMAC detected SUE on WC Interrupt
      */
     (rNXCQFIR, bit(12)) ? defaultMaskedError;
 
     /** NXCQFIR[13]
-     *  
+     *  ACK_DEAD cresp received by read command
      */
     (rNXCQFIR, bit(13)) ? defaultMaskedError;
 
     /** NXCQFIR[14]
-     *  
+     *  ACK_DEAD cresp received by write command
      */
     (rNXCQFIR, bit(14)) ? defaultMaskedError;
 
     /** NXCQFIR[15]
-     *  
+     *  Link check aborted while waiting on data
      */
     (rNXCQFIR, bit(15)) ? defaultMaskedError;
 
     /** NXCQFIR[16]
-     *  
+     *  internal transfer hang poll time expired
      */
     (rNXCQFIR, bit(16)) ? defaultMaskedError;
 
     /** NXCQFIR[17]
-     *  
+     *  Parity error on ERAT arrays
      */
     (rNXCQFIR, bit(17)) ? defaultMaskedError;
 
     /** NXCQFIR[18]
-     *  
+     *  Correctable error on ERAT arrays
      */
     (rNXCQFIR, bit(18)) ? defaultMaskedError;
 
     /** NXCQFIR[19]
-     *  
+     *  Uncorrectable error on ERAT arrays
      */
     (rNXCQFIR, bit(19)) ? defaultMaskedError;
 
     /** NXCQFIR[20]
-     *  
+     *  SUE on ERAT arrays
      */
     (rNXCQFIR, bit(20)) ? defaultMaskedError;
 
     /** NXCQFIR[21]
-     *  
+     *  NMMU hang on checkin/checkout request
      */
     (rNXCQFIR, bit(21)) ? defaultMaskedError;
 
     /** NXCQFIR[22]
-     *  
+     *  ERAT control logic error
      */
     (rNXCQFIR, bit(22)) ? defaultMaskedError;
 
     /** NXCQFIR[23]
-     *  
+     *  UEon the Powerbus data for xlate
      */
     (rNXCQFIR, bit(23)) ? defaultMaskedError;
 
     /** NXCQFIR[24]
-     *  
+     *  SUE on the Powerbus data for xlate
      */
     (rNXCQFIR, bit(24)) ? defaultMaskedError;
 
     /** NXCQFIR[25]
-     *  
+     *  ACK_DEAD cresp received by UMAC read
      */
     (rNXCQFIR, bit(25)) ? defaultMaskedError;
 
     /** NXCQFIR[26]
-     *  
+     *  Link check aborted waiting on UMAC data
      */
     (rNXCQFIR, bit(26)) ? defaultMaskedError;
 
     /** NXCQFIR[27]
-     *  
+     *  Uncorrectable error on CRB QW0/4
      */
     (rNXCQFIR, bit(27)) ? defaultMaskedError;
 
     /** NXCQFIR[28]
-     *  
+     *  Special uncorrectable error on CRB QW0/4
      */
     (rNXCQFIR, bit(28)) ? defaultMaskedError;
 
     /** NXCQFIR[29]
-     *  
+     *  UMAC has detected a control logic error
      */
     (rNXCQFIR, bit(29)) ? defaultMaskedError;
 
     /** NXCQFIR[30]
-     *  
+     *  Reserved fieldUMAC_SCOM_sat_err)
      */
     (rNXCQFIR, bit(30)) ? defaultMaskedError;
 
     /** NXCQFIR[31]
-     *  
+     *  Reserved field (Access type is spare)
      */
     (rNXCQFIR, bit(31)) ? defaultMaskedError;
 
     /** NXCQFIR[32]
-     *  
+     *  first noise source in the RNG has failed
      */
     (rNXCQFIR, bit(32)) ? defaultMaskedError;
 
     /** NXCQFIR[33]
-     *  
+     *  second noise source in the RNG failed
      */
     (rNXCQFIR, bit(33)) ? defaultMaskedError;
 
     /** NXCQFIR[34]
-     *  
+     *  RNG has detected a control logic error
      */
     (rNXCQFIR, bit(34)) ? defaultMaskedError;
 
     /** NXCQFIR[35]
-     *  
+     *  NMMU has signaled local checkstop
      */
     (rNXCQFIR, bit(35)) ? defaultMaskedError;
 
     /** NXCQFIR[36]
-     *  
+     *  VAS has signaled local checkstop
      */
     (rNXCQFIR, bit(36)) ? defaultMaskedError;
 
     /** NXCQFIR[37]
-     *  
+     *  PBCQ has detected a control logic error
      */
     (rNXCQFIR, bit(37)) ? defaultMaskedError;
 
     /** NXCQFIR[38]
-     *  
+     *  PBCQ detected failed link
      */
     (rNXCQFIR, bit(38)) ? defaultMaskedError;
 
     /** NXCQFIR[39:41]
-     *  spare
+     *  Reserved field (Access type is spares)
      */
     (rNXCQFIR, bit(39|40|41)) ? defaultMaskedError;
 
-    /** NXCQFIR[42:43]
+    /** NXCQFIR[42]
      *  scom error
      */
-    (rNXCQFIR, bit(42|43)) ? defaultMaskedError;
+    (rNXCQFIR, bit(42)) ? defaultMaskedError;
+
+    /** NXCQFIR[43]
+     *  scom error
+     */
+    (rNXCQFIR, bit(43)) ? defaultMaskedError;
 
 };
 
@@ -3176,7 +3181,7 @@ group gNXDMAENGFIR filter singlebit
     (rNXDMAENGFIR, bit(0)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[1]
-     *  
+     *  ICS invalid state
      */
     (rNXDMAENGFIR, bit(1)) ? defaultMaskedError;
 
@@ -3186,22 +3191,22 @@ group gNXDMAENGFIR filter singlebit
     (rNXDMAENGFIR, bit(2|3)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[4]
-     *  
+     *  Channel 0 842 engine ECC CE error
      */
     (rNXDMAENGFIR, bit(4)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[5]
-     *  
+     *  Channel 0 842 engine ECC UE error
      */
     (rNXDMAENGFIR, bit(5)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[6]
-     *  
+     *  Channel 1 842 engine ECC CE error
      */
     (rNXDMAENGFIR, bit(6)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[7]
-     *  
+     *  Channel 1 842 engine ECC UE error
      */
     (rNXDMAENGFIR, bit(7)) ? defaultMaskedError;
 
@@ -3211,12 +3216,12 @@ group gNXDMAENGFIR filter singlebit
     (rNXDMAENGFIR, bit(8)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[9]
-     *  
+     *  DMA array ECC CE error
      */
     (rNXDMAENGFIR, bit(9)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[10]
-     *  
+     *  DMA outWR/inRD ECC CE error
      */
     (rNXDMAENGFIR, bit(10)) ? defaultMaskedError;
 
@@ -3241,47 +3246,47 @@ group gNXDMAENGFIR filter singlebit
     (rNXDMAENGFIR, bit(14)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[15]
-     *  
+     *  DMA invalid state error (unrecoverable)
      */
     (rNXDMAENGFIR, bit(15)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[16]
-     *  
+     *  DMA invalid state error (unrecoverable)
      */
     (rNXDMAENGFIR, bit(16)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[17]
-     *  
+     *  DMA array ECC UE error
      */
     (rNXDMAENGFIR, bit(17)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[18]
-     *  
+     *  DMA outWR/inRD ECC UE error
      */
     (rNXDMAENGFIR, bit(18)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[19]
-     *  
+     *  DMA inRD done error
      */
     (rNXDMAENGFIR, bit(19)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[20]
-     *  
+     *  Channel 0 invalid state error
      */
     (rNXDMAENGFIR, bit(20)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[21]
-     *  
+     *  Channel 1 invalid state error
      */
     (rNXDMAENGFIR, bit(21)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[22]
-     *  
+     *  Channel 2 invalid state error
      */
     (rNXDMAENGFIR, bit(22)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[23]
-     *  
+     *  Channel 3 invalid state error
      */
     (rNXDMAENGFIR, bit(23)) ? defaultMaskedError;
 
@@ -3321,12 +3326,12 @@ group gNXDMAENGFIR filter singlebit
     (rNXDMAENGFIR, bit(30)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[31]
-     *  
+     *  CRB UE, on CSB/CCB
      */
     (rNXDMAENGFIR, bit(31)) ? defaultMaskedError;
 
     /** NXDMAENGFIR[32]
-     *  
+     *  CRB SUE, on CSB/CCB
      */
     (rNXDMAENGFIR, bit(32)) ? defaultMaskedError;
 
@@ -3781,117 +3786,117 @@ rule rVASFIR
 group gVASFIR filter singlebit
 {
     /** VASFIR[0]
-     *  
+     *  Egress Hardware Error
      */
     (rVASFIR, bit(0)) ? defaultMaskedError;
 
     /** VASFIR[1]
-     *  
+     *  Ingress Hardware Error
      */
     (rVASFIR, bit(1)) ? defaultMaskedError;
 
     /** VASFIR[2]
-     *  
+     *  PowerBus (CQ) Hardware Error
      */
     (rVASFIR, bit(2)) ? defaultMaskedError;
 
     /** VASFIR[3]
-     *  
+     *  Window Context Cache Hardware Error
      */
     (rVASFIR, bit(3)) ? defaultMaskedError;
 
     /** VASFIR[4]
-     *  
+     *  Register/MMIO Hardware Error
      */
     (rVASFIR, bit(4)) ? defaultMaskedError;
 
     /** VASFIR[5]
-     *  
+     *  PowerBus (CQ) Interface Parity Error
      */
     (rVASFIR, bit(5)) ? defaultMaskedError;
 
     /** VASFIR[6]
-     *  
+     *  PB(CQ) Addr Error CRESP on Read
      */
     (rVASFIR, bit(6)) ? defaultMaskedError;
 
     /** VASFIR[7]
-     *  
+     *  PB (CQ) Address Error CRESP on Read
      */
     (rVASFIR, bit(7)) ? defaultMaskedError;
 
     /** VASFIR[8]
-     *  
+     *  Egress Correctable ECC Error
      */
     (rVASFIR, bit(8)) ? defaultMaskedError;
 
     /** VASFIR[9]
-     *  
+     *  Ingress Correctable ECC Error
      */
     (rVASFIR, bit(9)) ? defaultMaskedError;
 
     /** VASFIR[10]
-     *  
+     *  PB (CQ) CE on inbound/array data
      */
     (rVASFIR, bit(10)) ? defaultMaskedError;
 
     /** VASFIR[11]
-     *  
+     *  WC Correctable ECC Error
      */
     (rVASFIR, bit(11)) ? defaultMaskedError;
 
     /** VASFIR[12]
-     *  
+     *  Register/MMIO Correctable ECC Error
      */
     (rVASFIR, bit(12)) ? defaultMaskedError;
 
     /** VASFIR[13]
-     *  
+     *  PB Correctable Error on outbound data
      */
     (rVASFIR, bit(13)) ? defaultMaskedError;
 
     /** VASFIR[14]
-     *  
+     *  PB Uncorrectable  Error on outbound data
      */
     (rVASFIR, bit(14)) ? defaultMaskedError;
 
     /** VASFIR[15]
-     *  
+     *  PB Master State Machine Hang
      */
     (rVASFIR, bit(15)) ? defaultMaskedError;
 
     /** VASFIR[16]
-     *  
+     *  EG Uncorrectable ECC Error
      */
     (rVASFIR, bit(16)) ? defaultMaskedError;
 
     /** VASFIR[17]
-     *  
+     *  IN Uncorrectable ECC Error
      */
     (rVASFIR, bit(17)) ? defaultMaskedError;
 
     /** VASFIR[18]
-     *  
+     *  PB UE on inbound array data
      */
     (rVASFIR, bit(18)) ? defaultMaskedError;
 
     /** VASFIR[19]
-     *  
+     *  WC Uncorrectable ECC Error
      */
     (rVASFIR, bit(19)) ? defaultMaskedError;
 
     /** VASFIR[20]
-     *  
+     *  RG/MMIO Uncorrectable ECC Error
      */
     (rVASFIR, bit(20)) ? defaultMaskedError;
 
     /** VASFIR[21]
-     *  
+     *  IN CAM Parity Error
      */
     (rVASFIR, bit(21)) ? defaultMaskedError;
 
     /** VASFIR[22]
-     *  
+     *  IN software castout to active window
      */
     (rVASFIR, bit(22)) ? defaultMaskedError;
 
@@ -3901,102 +3906,102 @@ group gVASFIR filter singlebit
     (rVASFIR, bit(23)) ? defaultMaskedError;
 
     /** VASFIR[24]
-     *  
+     *  EG Special UE (SUE) Error
      */
     (rVASFIR, bit(24)) ? defaultMaskedError;
 
     /** VASFIR[25]
-     *  
+     *  IN SUE Error
      */
     (rVASFIR, bit(25)) ? defaultMaskedError;
 
     /** VASFIR[26]
-     *  
+     *  PB SUE Error
      */
     (rVASFIR, bit(26)) ? defaultMaskedError;
 
     /** VASFIR[27]
-     *  
+     *  WC SUE Error
      */
     (rVASFIR, bit(27)) ? defaultMaskedError;
 
     /** VASFIR[28]
-     *  
+     *  RG/MMIO SUE Error
      */
     (rVASFIR, bit(28)) ? defaultMaskedError;
 
     /** VASFIR[29]
-     *  
+     *  PB Link Error on Read
      */
     (rVASFIR, bit(29)) ? defaultMaskedError;
 
     /** VASFIR[30]
-     *  
+     *  PB Link Error on Write
      */
     (rVASFIR, bit(30)) ? defaultMaskedError;
 
     /** VASFIR[31]
-     *  
+     *  PB Link Abort Op Received
      */
     (rVASFIR, bit(31)) ? defaultMaskedError;
 
     /** VASFIR[32]
-     *  
+     *  MMIO Read to Unimplemented Reg (HYP)
      */
     (rVASFIR, bit(32)) ? defaultMaskedError;
 
     /** VASFIR[33]
-     *  
+     *  MMIO Read to Unimplemented Reg (OS)
      */
     (rVASFIR, bit(33)) ? defaultMaskedError;
 
     /** VASFIR[34]
-     *  
+     *  MMIO Write to Unimplemented Reg (HYP)
      */
     (rVASFIR, bit(34)) ? defaultMaskedError;
 
     /** VASFIR[35]
-     *  
+     *  MMIO Write to Unimplemented Reg (OS)
      */
     (rVASFIR, bit(35)) ? defaultMaskedError;
 
     /** VASFIR[36]
-     *  
+     *  non-8B MMIO Detected (HYP)
      */
     (rVASFIR, bit(36)) ? defaultMaskedError;
 
     /** VASFIR[37]
-     *  
+     *  non-8B MMIO Detected (OS)
      */
     (rVASFIR, bit(37)) ? defaultMaskedError;
 
     /** VASFIR[38]
-     *  
+     *  Write Monitor Op to non-open Window
      */
     (rVASFIR, bit(38)) ? defaultMaskedError;
 
     /** VASFIR[39]
-     *  
+     *  Multiple Wr Mon Register Match
      */
     (rVASFIR, bit(39)) ? defaultMaskedError;
 
     /** VASFIR[40]
-     *  
+     *  Page Migration Requested but not enabled
      */
     (rVASFIR, bit(40)) ? defaultMaskedError;
 
     /** VASFIR[41]
-     *  
+     *  Page Migration size != FIFO size
      */
     (rVASFIR, bit(41)) ? defaultMaskedError;
 
     /** VASFIR[42]
-     *  
+     *  ASB Notify not claimed
      */
     (rVASFIR, bit(42)) ? defaultMaskedError;
 
     /** VASFIR[43]
-     *  
+     *  Write Monitor Op error
      */
     (rVASFIR, bit(43)) ? defaultMaskedError;
 
@@ -4011,7 +4016,7 @@ group gVASFIR filter singlebit
     (rVASFIR, bit(45)) ? defaultMaskedError;
 
     /** VASFIR[46]
-     *  
+     *  Incoming PB Parity Error
      */
     (rVASFIR, bit(46)) ? defaultMaskedError;
 
@@ -4616,42 +4621,42 @@ rule rNPU0FIR
 group gNPU0FIR filter singlebit
 {
     /** NPU0FIR[0]
-     *  
+     *  NTL array CE
      */
     (rNPU0FIR, bit(0)) ? defaultMaskedError;
 
     /** NPU0FIR[1]
-     *  
+     *  NTL header array UE
      */
     (rNPU0FIR, bit(1)) ? defaultMaskedError;
 
     /** NPU0FIR[2]
-     *  
+     *  NTL Data Array UE
      */
     (rNPU0FIR, bit(2)) ? defaultMaskedError;
 
     /** NPU0FIR[3]
-     *  
+     *  NTL NVLInk Control/Header/AE PE
      */
     (rNPU0FIR, bit(3)) ? defaultMaskedError;
 
     /** NPU0FIR[4]
-     *  
+     *  NTL NVLink Data Parity error
      */
     (rNPU0FIR, bit(4)) ? defaultMaskedError;
 
     /** NPU0FIR[5]
-     *  
+     *  NTL NVLink Malformed Packet
      */
     (rNPU0FIR, bit(5)) ? defaultMaskedError;
 
     /** NPU0FIR[6]
-     *  
+     *  NTL NVLink Unsupported Packet
      */
     (rNPU0FIR, bit(6)) ? defaultMaskedError;
 
     /** NPU0FIR[7]
-     *  
+     *  NTL NVLink Config errors
      */
     (rNPU0FIR, bit(7)) ? defaultMaskedError;
 
@@ -4661,12 +4666,12 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(8)) ? defaultMaskedError;
 
     /** NPU0FIR[9]
-     *  
+     *  NTL PRI errors
      */
     (rNPU0FIR, bit(9)) ? defaultMaskedError;
 
     /** NPU0FIR[10]
-     *  
+     *  NTL logic error
      */
     (rNPU0FIR, bit(10)) ? defaultMaskedError;
 
@@ -4681,7 +4686,7 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(12)) ? defaultMaskedError;
 
     /** NPU0FIR[13]
-     *  
+     *  CQ CTL/SM ASBE Array single-bit CE
      */
     (rNPU0FIR, bit(13)) ? defaultMaskedError;
 
@@ -4691,12 +4696,12 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(14)) ? defaultMaskedError;
 
     /** NPU0FIR[15]
-     *  
+     *  CQ CTL/SM REG Register ring error
      */
     (rNPU0FIR, bit(15)) ? defaultMaskedError;
 
     /** NPU0FIR[16]
-     *  
+     *  Data UE for MMIO store data
      */
     (rNPU0FIR, bit(16)) ? defaultMaskedError;
 
@@ -4706,12 +4711,12 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(17)) ? defaultMaskedError;
 
     /** NPU0FIR[18]
-     *  
+     *  CQ CTL/SM NCF NVLink config error
      */
     (rNPU0FIR, bit(18)) ? defaultMaskedError;
 
     /** NPU0FIR[19]
-     *  
+     *  CQ CTL/SM NVF NVLink fatal error
      */
     (rNPU0FIR, bit(19)) ? defaultMaskedError;
 
@@ -4721,32 +4726,32 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(20)) ? defaultMaskedError;
 
     /** NPU0FIR[21]
-     *  
+     *  CQ CTL/SM AUE Array UE
      */
     (rNPU0FIR, bit(21)) ? defaultMaskedError;
 
     /** NPU0FIR[22]
-     *  
+     *  CQ CTL/SM PBP PowerBus parity error
      */
     (rNPU0FIR, bit(22)) ? defaultMaskedError;
 
     /** NPU0FIR[23]
-     *  
+     *  CQ CTL/SM PBF PowerBus Fatal Error
      */
     (rNPU0FIR, bit(23)) ? defaultMaskedError;
 
     /** NPU0FIR[24]
-     *  
+     *  PowerBus configuration error
      */
     (rNPU0FIR, bit(24)) ? defaultMaskedError;
 
     /** NPU0FIR[25]
-     *  
+     *  CQ CTL/SM FWD Forward-Progress error
      */
     (rNPU0FIR, bit(25)) ? defaultMaskedError;
 
     /** NPU0FIR[26]
-     *  
+     *  CQ CTL/SM NLG NPU Logic error
      */
     (rNPU0FIR, bit(26)) ? defaultMaskedError;
 
@@ -4761,37 +4766,37 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(28)) ? defaultMaskedError;
 
     /** NPU0FIR[29]
-     *  
+     *  CQ DAT ECC UE/SUE on data/BE arrays
      */
     (rNPU0FIR, bit(29)) ? defaultMaskedError;
 
     /** NPU0FIR[30]
-     *  
+     *  CQ DAT ECC CE on data/BE arrays
      */
     (rNPU0FIR, bit(30)) ? defaultMaskedError;
 
     /** NPU0FIR[31]
-     *  
+     *  CQ DAT parity error on data/BE latches
      */
     (rNPU0FIR, bit(31)) ? defaultMaskedError;
 
     /** NPU0FIR[32]
-     *  
+     *  CQ DAT parity errs on config regs
      */
     (rNPU0FIR, bit(32)) ? defaultMaskedError;
 
     /** NPU0FIR[33]
-     *  
+     *  CQ DAT parity errs/PowerBus rtag
      */
     (rNPU0FIR, bit(33)) ? defaultMaskedError;
 
     /** NPU0FIR[34]
-     *  
+     *  CQ DAT parity errs nternal state latches
      */
     (rNPU0FIR, bit(34)) ? defaultMaskedError;
 
     /** NPU0FIR[35]
-     *  
+     *  CQ DAT logic error
      */
     (rNPU0FIR, bit(35)) ? defaultMaskedError;
 
@@ -4811,37 +4816,37 @@ group gNPU0FIR filter singlebit
     (rNPU0FIR, bit(38|39)) ? defaultMaskedError;
 
     /** NPU0FIR[40]
-     *  
+     *  XTS internal logic error
      */
     (rNPU0FIR, bit(40)) ? defaultMaskedError;
 
     /** NPU0FIR[41]
-     *  
+     *  XTS correctable errs in XTS SRAM
      */
     (rNPU0FIR, bit(41)) ? defaultMaskedError;
 
     /** NPU0FIR[42]
-     *  
+     *  XTS Ues in XTS internal SRAM
      */
     (rNPU0FIR, bit(42)) ? defaultMaskedError;
 
     /** NPU0FIR[43]
-     *  
+     *  XTS CE on incoming stack transactions
      */
     (rNPU0FIR, bit(43)) ? defaultMaskedError;
 
     /** NPU0FIR[44]
-     *  
+     *  XTS  errs incoming stack transaction
      */
     (rNPU0FIR, bit(44)) ? defaultMaskedError;
 
     /** NPU0FIR[45]
-     *  
+     *  XTS errs on incoming PBUS transaction
      */
     (rNPU0FIR, bit(45)) ? defaultMaskedError;
 
     /** NPU0FIR[46]
-     *  
+     *  XTS Translate Request Fail
      */
     (rNPU0FIR, bit(46)) ? defaultMaskedError;
 
@@ -4889,7 +4894,7 @@ rule rNPU1FIR
 group gNPU1FIR filter singlebit
 {
     /** NPU1FIR[0]
-     *  
+     *  NDL Brick0 stall
      */
     (rNPU1FIR, bit(0)) ? defaultMaskedError;
 
@@ -4899,7 +4904,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(1)) ? defaultMaskedError;
 
     /** NPU1FIR[2]
-     *  
+     *  NDL Brick1 stall
      */
     (rNPU1FIR, bit(2)) ? defaultMaskedError;
 
@@ -4909,7 +4914,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(3)) ? defaultMaskedError;
 
     /** NPU1FIR[4]
-     *  
+     *  NDL Brick2 stall
      */
     (rNPU1FIR, bit(4)) ? defaultMaskedError;
 
@@ -4919,7 +4924,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(5)) ? defaultMaskedError;
 
     /** NPU1FIR[6]
-     *  
+     *  NDL Brick3 stall
      */
     (rNPU1FIR, bit(6)) ? defaultMaskedError;
 
@@ -4929,7 +4934,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(7)) ? defaultMaskedError;
 
     /** NPU1FIR[8]
-     *  
+     *  NDL Brick4 stall
      */
     (rNPU1FIR, bit(8)) ? defaultMaskedError;
 
@@ -4939,7 +4944,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(9)) ? defaultMaskedError;
 
     /** NPU1FIR[10]
-     *  
+     *  NDL Brick5 stall
      */
     (rNPU1FIR, bit(10)) ? defaultMaskedError;
 
@@ -4949,22 +4954,22 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(11)) ? defaultMaskedError;
 
     /** NPU1FIR[12]
-     *  
+     *  MISC Register ring error (ie noack)
      */
     (rNPU1FIR, bit(12)) ? defaultMaskedError;
 
     /** NPU1FIR[13]
-     *  
+     *  MISC Parity error from ibr addr regi
      */
     (rNPU1FIR, bit(13)) ? defaultMaskedError;
 
     /** NPU1FIR[14]
-     *  
+     *  MISC Parity error on SCOM D/A addr reg
      */
     (rNPU1FIR, bit(14)) ? defaultMaskedError;
 
     /** NPU1FIR[15]
-     *  
+     *  MISC Parity error on MISC Cntrl reg
      */
     (rNPU1FIR, bit(15)) ? defaultMaskedError;
 
@@ -4989,7 +4994,7 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(19)) ? defaultMaskedError;
 
     /** NPU1FIR[20]
-     *  
+     *  ATS Effective Address hit multiple TCE
      */
     (rNPU1FIR, bit(20)) ? defaultMaskedError;
 
@@ -4999,72 +5004,72 @@ group gNPU1FIR filter singlebit
     (rNPU1FIR, bit(21)) ? defaultMaskedError;
 
     /** NPU1FIR[22]
-     *  
+     *  ATS Timeout on TCE tree walk
      */
     (rNPU1FIR, bit(22)) ? defaultMaskedError;
 
     /** NPU1FIR[23]
-     *  
+     *  ATS Parity error on TCE cache dir array
      */
     (rNPU1FIR, bit(23)) ? defaultMaskedError;
 
     /** NPU1FIR[24]
-     *  
+     *  ATS Parity error on TCE cache data array
      */
     (rNPU1FIR, bit(24)) ? defaultMaskedError;
 
     /** NPU1FIR[25]
-     *  
+     *  ATS ECC UE on Effective Address array
      */
     (rNPU1FIR, bit(25)) ? defaultMaskedError;
 
     /** NPU1FIR[26]
-     *  
+     *  ATS ECC CE on Effective Address array
      */
     (rNPU1FIR, bit(26)) ? defaultMaskedError;
 
     /** NPU1FIR[27]
-     *  
+     *  ATS ECC UE on TDRmem array
      */
     (rNPU1FIR, bit(27)) ? defaultMaskedError;
 
     /** NPU1FIR[28]
-     *  
+     *  ATS ECC CE on TDRmem array
      */
     (rNPU1FIR, bit(28)) ? defaultMaskedError;
 
     /** NPU1FIR[29]
-     *  
+     *  ATS ECC UE on CQ CTL DMA Read
      */
     (rNPU1FIR, bit(29)) ? defaultMaskedError;
 
     /** NPU1FIR[30]
-     *  
+     *  ATS ECC CE on CQ CTL DMA Read
      */
     (rNPU1FIR, bit(30)) ? defaultMaskedError;
 
     /** NPU1FIR[31]
-     *  
+     *  ATS Parity error on TVT entry
      */
     (rNPU1FIR, bit(31)) ? defaultMaskedError;
 
     /** NPU1FIR[32]
-     *  
+     *  ATS Parity err on IODA Address Reg
      */
     (rNPU1FIR, bit(32)) ? defaultMaskedError;
 
     /** NPU1FIR[33]
-     *  
+     *  ATS Parity error on ATS Control Register
      */
     (rNPU1FIR, bit(33)) ? defaultMaskedError;
 
     /** NPU1FIR[34]
-     *  
+     *  ATS Parity error on ATS reg
      */
     (rNPU1FIR, bit(34)) ? defaultMaskedError;
 
     /** NPU1FIR[35]
-     *  
+     *  ATS Invalid IODA Table Select entry
      */
     (rNPU1FIR, bit(35)) ? defaultMaskedError;
 
@@ -5241,7 +5246,7 @@ group gPBCENTFIR filter singlebit
     (rPBCENTFIR, bit(5)) ? threshold_and_mask;
 
     /** PBCENTFIR[6]
-     *  
+     *  pb cresp error
      */
     (rPBCENTFIR, bit(6)) ? defaultMaskedError;
 
@@ -5251,7 +5256,7 @@ group gPBCENTFIR filter singlebit
     (rPBCENTFIR, bit(7)) ? defaultMaskedError;
 
     /** PBCENTFIR[8]
-     *  
+     *  pb data_route_error
      */
     (rPBCENTFIR, bit(8)) ? defaultMaskedError;
 
@@ -5438,7 +5443,7 @@ group gPBPPEFIR filter singlebit
     (rPBPPEFIR, bit(9)) ? threshold_and_mask;
 
     /** PBPPEFIR[10]
-     *  spare
+     *  reserved
      */
     (rPBPPEFIR, bit(10)) ? defaultMaskedError;
 
@@ -5479,7 +5484,7 @@ group gPBAFIR filter singlebit
     (rPBAFIR, bit(0)) ? self_th_1;
 
     /** PBAFIR[1]
-     *  
+     *  PBA CRESP Addr Error
      */
     (rPBAFIR, bit(1)) ? defaultMaskedError;
 
@@ -5735,12 +5740,12 @@ group gPSIHBFIR filter singlebit
     (rPSIHBFIR, bit(4)) ? defaultMaskedError;
 
     /** PSIHBFIR[5]
-     *  
+     *  CE from PSILL data
      */
     (rPSIHBFIR, bit(5)) ? defaultMaskedError;
 
     /** PSIHBFIR[6]
-     *  
+     *  UE from PSILL data
      */
     (rPSIHBFIR, bit(6)) ? defaultMaskedError;
 
@@ -6266,29 +6271,29 @@ rule rNMMUCQFIR
 group gNMMUCQFIR filter singlebit
 {
     /** NMMUCQFIR[0]
-     *  
+     *  PBI_PE_FIR: PBI internal parity error
      */
-    (rNMMUCQFIR, bit(0)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(0)) ? self_th_1;
 
     /** NMMUCQFIR[1]
-     *  
+     *  PowerBus command hang error
      */
-    (rNMMUCQFIR, bit(1)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(1)) ? level2_th_1;
 
     /** NMMUCQFIR[2]
-     *  
+     *  PowerBus read address error
      */
-    (rNMMUCQFIR, bit(2)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(2)) ? level2_th_1;
 
     /** NMMUCQFIR[3]
-     *  
+     *  PowerBus write address error
      */
-    (rNMMUCQFIR, bit(3)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(3)) ? level2_th_1;
 
     /** NMMUCQFIR[4]
-     *  
+     *  PowerBus miscellaneous error
      */
-    (rNMMUCQFIR, bit(4)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(4)) ? self_th_1;
 
     /** NMMUCQFIR[5]
      *  spare
@@ -6296,39 +6301,39 @@ group gNMMUCQFIR filter singlebit
     (rNMMUCQFIR, bit(5)) ? defaultMaskedError;
 
     /** NMMUCQFIR[6]
-     *  
+     *  PowerBus Xlate UE error
      */
-    (rNMMUCQFIR, bit(6)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(6)) ? self_th_1;
 
     /** NMMUCQFIR[7]
-     *  
+     *  PowerBus Xlate SUE error
      */
     (rNMMUCQFIR, bit(7)) ? defaultMaskedError;
 
     /** NMMUCQFIR[8]
-     *  
+     *  PowerBus CE error
      */
-    (rNMMUCQFIR, bit(8)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(8)) ? self_th_32perDay;
 
     /** NMMUCQFIR[9]
-     *  
+     *  PowerBus UE error
      */
-    (rNMMUCQFIR, bit(9)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(9)) ? self_th_1;
 
     /** NMMUCQFIR[10]
-     *  
+     *  PowerBus SUE error
      */
-    (rNMMUCQFIR, bit(10)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(10)) ? self_th_1;
 
     /** NMMUCQFIR[11]
-     *  
+     *  Inbound LCO_ARRAY CE error
      */
-    (rNMMUCQFIR, bit(11)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(11)) ? self_th_32perDay;
 
     /** NMMUCQFIR[12]
-     *  
+     *  Inbound LCO_ARRAY UE error
      */
-    (rNMMUCQFIR, bit(12)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(12)) ? self_th_1;
 
     /** NMMUCQFIR[13]
      *  Inbound LCO_ARRAY SUE error
@@ -6336,19 +6341,19 @@ group gNMMUCQFIR filter singlebit
     (rNMMUCQFIR, bit(13)) ? defaultMaskedError;
 
     /** NMMUCQFIR[14]
-     *  
+     *  Inbound array CE error
      */
-    (rNMMUCQFIR, bit(14)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(14)) ? self_th_32perDay;
 
     /** NMMUCQFIR[15]
-     *  
+     *  Inbound array UE error
      */
-    (rNMMUCQFIR, bit(15)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(15)) ? self_th_1;
 
     /** NMMUCQFIR[16]
-     *  
+     *  internal state error
      */
-    (rNMMUCQFIR, bit(16)) ? defaultMaskedError;
+    (rNMMUCQFIR, bit(16)) ? self_th_1;
 
     /** NMMUCQFIR[17]
      *  ACK_DEAD cresp received by read command
@@ -6394,84 +6399,84 @@ rule rNMMUFIR
 group gNMMUFIR filter singlebit
 {
     /** NMMUFIR[0]
-     *  
+     *  Fabric DIn xlat array CE error detected.
      */
-    (rNMMUFIR, bit(0)) ? defaultMaskedError;
+    (rNMMUFIR, bit(0)) ? self_th_32perDay;
 
     /** NMMUFIR[1]
-     *  
+     *  Fabric DIn xlat array UE error detected.
      */
-    (rNMMUFIR, bit(1)) ? defaultMaskedError;
+    (rNMMUFIR, bit(1)) ? self_th_1;
 
     /** NMMUFIR[2]
-     *  
+     *  Fabric DIn xlat array SUE error
      */
     (rNMMUFIR, bit(2)) ? defaultMaskedError;
 
     /** NMMUFIR[3]
-     *  
+     *  Fabric mst rd array CE error detected.
      */
-    (rNMMUFIR, bit(3)) ? defaultMaskedError;
+    (rNMMUFIR, bit(3)) ? self_th_32perDay;
 
     /** NMMUFIR[4]
-     *  
+     *  Fabric mst rd array UE error detected.
      */
-    (rNMMUFIR, bit(4)) ? defaultMaskedError;
+    (rNMMUFIR, bit(4)) ? self_th_1;
 
     /** NMMUFIR[5]
-     *  
+     *  Fabric mst rd array SUE error detected.
      */
-    (rNMMUFIR, bit(5)) ? defaultMaskedError;
+    (rNMMUFIR, bit(5)) ? self_th_1;
 
     /** NMMUFIR[6]
-     *  
+     *  Fabric xlat protocol error detected.
      */
-    (rNMMUFIR, bit(6)) ? defaultMaskedError;
+    (rNMMUFIR, bit(6)) ? self_th_1;
 
     /** NMMUFIR[7]
-     *  
+     *  Fabric xlat op timeout detected.
      */
-    (rNMMUFIR, bit(7)) ? defaultMaskedError;
+    (rNMMUFIR, bit(7)) ? self_th_1;
 
     /** NMMUFIR[8]
-     *  
+     *  SLB directory parity error detected.
      */
-    (rNMMUFIR, bit(8)) ? defaultMaskedError;
+    (rNMMUFIR, bit(8)) ? self_th_1;
 
     /** NMMUFIR[9]
-     *  
+     *  SLB cache parity error detected.
      */
-    (rNMMUFIR, bit(9)) ? defaultMaskedError;
+    (rNMMUFIR, bit(9)) ? self_th_1;
 
     /** NMMUFIR[10]
-     *  
+     *  SLB lru parity error detected.
      */
-    (rNMMUFIR, bit(10)) ? defaultMaskedError;
+    (rNMMUFIR, bit(10)) ? self_th_1;
 
     /** NMMUFIR[11]
-     *  
+     *  SLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(11)) ? defaultMaskedError;
+    (rNMMUFIR, bit(11)) ? level2_dump_SH;
 
     /** NMMUFIR[12]
-     *  
+     *  TLB directory parity error detected.
      */
-    (rNMMUFIR, bit(12)) ? defaultMaskedError;
+    (rNMMUFIR, bit(12)) ? self_th_1;
 
     /** NMMUFIR[13]
-     *  
+     *  TLB cache parity error detected.
      */
-    (rNMMUFIR, bit(13)) ? defaultMaskedError;
+    (rNMMUFIR, bit(13)) ? self_th_1;
 
     /** NMMUFIR[14]
-     *  
+     *  TLB lru parity error detected.
      */
-    (rNMMUFIR, bit(14)) ? defaultMaskedError;
+    (rNMMUFIR, bit(14)) ? self_th_1;
 
     /** NMMUFIR[15]
-     *  
+     *  TLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(15)) ? defaultMaskedError;
+    (rNMMUFIR, bit(15)) ? level2_dump_SH;
 
     /** NMMUFIR[16]
      *  Segment fault detected .
@@ -6499,9 +6504,9 @@ group gNMMUFIR filter singlebit
     (rNMMUFIR, bit(20)) ? defaultMaskedError;
 
     /** NMMUFIR[21]
-     *  
+     *  Address error cresp detected by twsm
      */
-    (rNMMUFIR, bit(21)) ? defaultMaskedError;
+    (rNMMUFIR, bit(21)) ? level2_th_1;
 
     /** NMMUFIR[22]
      *  PTE update fail due to armwf mismatch.
@@ -6509,9 +6514,9 @@ group gNMMUFIR filter singlebit
     (rNMMUFIR, bit(22)) ? defaultMaskedError;
 
     /** NMMUFIR[23]
-     *  
+     *  Address error cresp detected by twsm
      */
-    (rNMMUFIR, bit(23)) ? defaultMaskedError;
+    (rNMMUFIR, bit(23)) ? level2_th_1;
 
     /** NMMUFIR[24]
      *  Unsupported radix cfg for guest-side .
@@ -6539,59 +6544,59 @@ group gNMMUFIR filter singlebit
     (rNMMUFIR, bit(28)) ? defaultMaskedError;
 
     /** NMMUFIR[29]
-     *  
+     *  Prefetch abort/fail detected .
      */
-    (rNMMUFIR, bit(29)) ? defaultMaskedError;
+    (rNMMUFIR, bit(29)) ? level2_th_1;
 
     /** NMMUFIR[30]
-     *  
+     *  Context cache array parity er
      */
-    (rNMMUFIR, bit(30)) ? defaultMaskedError;
+    (rNMMUFIR, bit(30)) ? self_th_1;
 
     /** NMMUFIR[31]
-     *  
+     *  Radix pwc array parity error detected .
      */
-    (rNMMUFIR, bit(31)) ? defaultMaskedError;
+    (rNMMUFIR, bit(31)) ? self_th_1;
 
     /** NMMUFIR[32]
-     *  
+     *  Tablewalk sm control error detected .
      */
-    (rNMMUFIR, bit(32)) ? defaultMaskedError;
+    (rNMMUFIR, bit(32)) ? self_th_1;
 
     /** NMMUFIR[33]
-     *  
+     *  Castout sm control error detected .
      */
-    (rNMMUFIR, bit(33)) ? defaultMaskedError;
+    (rNMMUFIR, bit(33)) ? self_th_1;
 
     /** NMMUFIR[34]
-     *  
+     *  Check-in sm control error detected .
      */
-    (rNMMUFIR, bit(34)) ? defaultMaskedError;
+    (rNMMUFIR, bit(34)) ? self_th_1;
 
     /** NMMUFIR[35]
-     *  
+     *  Invalidate sm control error detected .
      */
-    (rNMMUFIR, bit(35)) ? defaultMaskedError;
+    (rNMMUFIR, bit(35)) ? self_th_1;
 
     /** NMMUFIR[36]
-     *  
+     *  Tablewalk sm timeout error detected .
      */
-    (rNMMUFIR, bit(36)) ? defaultMaskedError;
+    (rNMMUFIR, bit(36)) ? self_th_1;
 
     /** NMMUFIR[37]
-     *  
+     *  Castout sm timeout error detected .
      */
-    (rNMMUFIR, bit(37)) ? defaultMaskedError;
+    (rNMMUFIR, bit(37)) ? self_th_1;
 
     /** NMMUFIR[38]
-     *  
+     *  Check-in sm timeout error detected .
      */
-    (rNMMUFIR, bit(38)) ? defaultMaskedError;
+    (rNMMUFIR, bit(38)) ? self_th_1;
 
     /** NMMUFIR[39]
-     *  
+     *  Invalidate sm timeout error detected .
      */
-    (rNMMUFIR, bit(39)) ? defaultMaskedError;
+    (rNMMUFIR, bit(39)) ? self_th_1;
 
     /** NMMUFIR[40]
      *  NX local checkstop error detected .
@@ -6882,7 +6887,7 @@ group gINTCQFIR filter singlebit
     /** INTCQFIR[46]
      *  INT_CQ_FIR_FIR_PARITY_ERR:
      */
-    (rINTCQFIR, bit(46)) ? self_th_1;
+    (rINTCQFIR, bit(46)) ? self_th_1; # masked on DD1.0
 
     /** INTCQFIR[47]
      *  INT_CQ_FIR_PGM_DBG_ACCESS:
@@ -6981,9 +6986,9 @@ group gPBIOEFIR filter singlebit
     (rPBIOEFIR, bit(8)) ? self_th_1;
 
     /** PBIOEFIR[9]
-     *  
+     *  d0b01 ce
      */
-    (rPBIOEFIR, bit(9)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(9)) ? self_th_32perDay;
 
     /** PBIOEFIR[10]
      *  dob01 sue
@@ -6996,9 +7001,9 @@ group gPBIOEFIR filter singlebit
     (rPBIOEFIR, bit(11)) ? self_th_1;
 
     /** PBIOEFIR[12]
-     *  
+     *  dob23 ce
      */
-    (rPBIOEFIR, bit(12)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(12)) ? self_th_32perDay;
 
     /** PBIOEFIR[13]
      *  dob23 sue
@@ -7011,9 +7016,9 @@ group gPBIOEFIR filter singlebit
     (rPBIOEFIR, bit(14)) ? self_th_1;
 
     /** PBIOEFIR[15]
-     *  
+     *  dob45 ce
      */
-    (rPBIOEFIR, bit(15)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(15)) ? self_th_32perDay;
 
     /** PBIOEFIR[16]
      *  dob45 sue
@@ -7161,17 +7166,17 @@ group gPBIOEFIR filter singlebit
     (rPBIOEFIR, bit(48|49|50|51)) ? defaultMaskedError;
 
     /** PBIOEFIR[52]
-     *  
+     *  links 01 data outbound switch int. err
      */
     (rPBIOEFIR, bit(52)) ? defaultMaskedError;
 
     /** PBIOEFIR[53]
-     *  
+     *  links 23 data outbound switch int. err
      */
     (rPBIOEFIR, bit(53)) ? defaultMaskedError;
 
     /** PBIOEFIR[54]
-     *  
+     *  links 45 data outbound switch int. err
      */
     (rPBIOEFIR, bit(54)) ? defaultMaskedError;
 
@@ -7181,17 +7186,17 @@ group gPBIOEFIR filter singlebit
     (rPBIOEFIR, bit(55)) ? defaultMaskedError;
 
     /** PBIOEFIR[56]
-     *  
+     *  links 01 data inbound switch int. err
      */
     (rPBIOEFIR, bit(56)) ? defaultMaskedError;
 
     /** PBIOEFIR[57]
-     *  
+     *  links 23 data inbound switch int. err
      */
     (rPBIOEFIR, bit(57)) ? defaultMaskedError;
 
     /** PBIOEFIR[58]
-     *  
+     *  links 45 data inbound switch int. err
      */
     (rPBIOEFIR, bit(58)) ? defaultMaskedError;
 
@@ -7272,7 +7277,7 @@ group gPBIOOFIR filter singlebit
     (rPBIOOFIR, bit(8)) ? self_th_1;
 
     /** PBIOOFIR[9]
-     *  
+     *  dob01 ce
      */
     (rPBIOOFIR, bit(9)) ? defaultMaskedError;
 
@@ -7287,7 +7292,7 @@ group gPBIOOFIR filter singlebit
     (rPBIOOFIR, bit(11)) ? self_th_1;
 
     /** PBIOOFIR[12]
-     *  
+     *  dob23 ce
      */
     (rPBIOOFIR, bit(12)) ? defaultMaskedError;
 
@@ -7302,7 +7307,7 @@ group gPBIOOFIR filter singlebit
     (rPBIOOFIR, bit(14)) ? self_th_1;
 
     /** PBIOOFIR[15]
-     *  
+     *  dob45 ce
      */
     (rPBIOOFIR, bit(15)) ? defaultMaskedError;
 
@@ -7317,7 +7322,7 @@ group gPBIOOFIR filter singlebit
     (rPBIOOFIR, bit(17)) ? self_th_1;
 
     /** PBIOOFIR[18]
-     *  
+     *  dob67 ce
      */
     (rPBIOOFIR, bit(18)) ? defaultMaskedError;
 
@@ -7487,42 +7492,42 @@ group gPBIOOFIR filter singlebit
     (rPBIOOFIR, bit(51)) ? defaultMaskedError;
 
     /** PBIOOFIR[52]
-     *  
+     *  data outbound switch internal-links 01
      */
     (rPBIOOFIR, bit(52)) ? defaultMaskedError;
 
     /** PBIOOFIR[53]
-     *  
+     *  data outbound switch internal - links 23
      */
     (rPBIOOFIR, bit(53)) ? defaultMaskedError;
 
     /** PBIOOFIR[54]
-     *  
+     *  data outbound switch internal-links 45
      */
     (rPBIOOFIR, bit(54)) ? defaultMaskedError;
 
     /** PBIOOFIR[55]
-     *  
+     *  data outbound switch internal-links 67
      */
     (rPBIOOFIR, bit(55)) ? defaultMaskedError;
 
     /** PBIOOFIR[56]
-     *  
+     *  data inbound switch internal-links 01
      */
     (rPBIOOFIR, bit(56)) ? defaultMaskedError;
 
     /** PBIOOFIR[57]
-     *  
+     *  data inbound switch internal-links 23
      */
     (rPBIOOFIR, bit(57)) ? defaultMaskedError;
 
     /** PBIOOFIR[58]
-     *  
+     *  data inbound switch internal-links 45
      */
     (rPBIOOFIR, bit(58)) ? defaultMaskedError;
 
     /** PBIOOFIR[59]
-     *  
+     *  data inbound switch internal-links 67
      */
     (rPBIOOFIR, bit(59)) ? defaultMaskedError;
 

@@ -185,7 +185,7 @@ group gIOXBFIR filter singlebit
     (rIOXBFIR, bit(1)) ? defaultMaskedError;
 
     /** IOXBFIR[2]
-     *  
+     *  GCR_HANG_ERROR
      */
     (rIOXBFIR, bit(2)) ? defaultMaskedError;
 
@@ -200,12 +200,12 @@ group gIOXBFIR filter singlebit
     (rIOXBFIR, bit(8)) ? defaultMaskedError;
 
     /** IOXBFIR[9]
-     *  
+     *  RX_BUS0_SPARE_DEPLOYED
      */
     (rIOXBFIR, bit(9)) ? defaultMaskedError;
 
     /** IOXBFIR[10]
-     *  
+     *  RX_BUS0_MAX_SPARES_EXCEEDED
      */
     (rIOXBFIR, bit(10)) ? defaultMaskedError;
 
@@ -215,7 +215,7 @@ group gIOXBFIR filter singlebit
     (rIOXBFIR, bit(11)) ? defaultMaskedError;
 
     /** IOXBFIR[12]
-     *  
+     *  RX_BUS0_TOO_MANY_BUS_ERRORS
      */
     (rIOXBFIR, bit(12)) ? defaultMaskedError;
 
@@ -478,12 +478,12 @@ group gIOELFIR filter singlebit
     (rIOELFIR, bit(42|43)) ? defaultMaskedError;
 
     /** IOELFIR[44]
-     *  
+     *  link0 spare done
      */
     (rIOELFIR, bit(44)) ? defaultMaskedError;
 
     /** IOELFIR[45]
-     *  
+     *  link1 spare done
      */
     (rIOELFIR, bit(45)) ? defaultMaskedError;
 

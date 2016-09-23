@@ -633,12 +633,12 @@ group gIOOLFIR filter singlebit
     (rIOOLFIR, bit(42|43)) ? defaultMaskedError;
 
     /** IOOLFIR[44]
-     *  
+     *  link0 spare done
      */
     (rIOOLFIR, bit(44)) ? defaultMaskedError;
 
     /** IOOLFIR[45]
-     *  
+     *  link1 spare done
      */
     (rIOOLFIR, bit(45)) ? defaultMaskedError;
 
@@ -688,27 +688,27 @@ group gIOOLFIR filter singlebit
     (rIOOLFIR, bit(54)) ? self_th_32perDay;
 
     /** IOOLFIR[55]
-     *  
+     *  link1 uncorrectable array error
      */
     (rIOOLFIR, bit(55)) ? defaultMaskedError;
 
     /** IOOLFIR[56]
-     *  
+     *  link0 training failed
      */
     (rIOOLFIR, bit(56)) ? defaultMaskedError;
 
     /** IOOLFIR[57]
-     *  
+     *  link1 training failed
      */
     (rIOOLFIR, bit(57)) ? defaultMaskedError;
 
     /** IOOLFIR[58]
-     *  
+     *  link0 unrecoverable error
      */
     (rIOOLFIR, bit(58)) ? defaultMaskedError;
 
     /** IOOLFIR[59]
-     *  
+     *  link1 unrecoverable error
      */
     (rIOOLFIR, bit(59)) ? defaultMaskedError;
 
@@ -761,7 +761,7 @@ group gIOOBFIR filter singlebit
     (rIOOBFIR, bit(1)) ? defaultMaskedError;
 
     /** IOOBFIR[2]
-     *  
+     *  The per-bus GCR ring hang detector error
      */
     (rIOOBFIR, bit(2)) ? defaultMaskedError;
 

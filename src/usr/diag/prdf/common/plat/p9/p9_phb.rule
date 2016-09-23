@@ -213,7 +213,7 @@ group gPHBNFIR filter singlebit
     (rPHBNFIR, bit(0)) ? self_th_1;
 
     /** PHBNFIR[1]
-     *  
+     *  Parity Errors on Registers besides BAR
      */
     (rPHBNFIR, bit(1)) ? defaultMaskedError;
 
@@ -223,12 +223,12 @@ group gPHBNFIR filter singlebit
     (rPHBNFIR, bit(2)) ? self_th_32perDay;
 
     /** PHBNFIR[3]
-     *  
+     *  Power Bus to PEC UE
      */
     (rPHBNFIR, bit(3)) ? defaultMaskedError;
 
     /** PHBNFIR[4]
-     *  
+     *  Power Bus to PEC SUE
      */
     (rPHBNFIR, bit(4)) ? defaultMaskedError;
 
@@ -238,12 +238,12 @@ group gPHBNFIR filter singlebit
     (rPHBNFIR, bit(5)) ? self_th_32perDay;
 
     /** PHBNFIR[6]
-     *  
+     *  Array UE
      */
     (rPHBNFIR, bit(6)) ? defaultMaskedError;
 
     /** PHBNFIR[7]
-     *  
+     *  Array SUE
      */
     (rPHBNFIR, bit(7)) ? defaultMaskedError;
 
@@ -268,27 +268,27 @@ group gPHBNFIR filter singlebit
     (rPHBNFIR, bit(11)) ? defaultMaskedError;
 
     /** PHBNFIR[12]
-     *  
+     *  RD ARE Error
      */
     (rPHBNFIR, bit(12)) ? defaultMaskedError;
 
     /** PHBNFIR[13]
-     *  
+     *  NonRd ARE Error
      */
     (rPHBNFIR, bit(13)) ? defaultMaskedError;
 
     /** PHBNFIR[14]
-     *  
+     *  PCI Hang
      */
     (rPHBNFIR, bit(14)) ? defaultMaskedError;
 
     /** PHBNFIR[15]
-     *  
+     *  PCI Clock Error
      */
     (rPHBNFIR, bit(15)) ? defaultMaskedError;
 
     /** PHBNFIR[16]
-     *  
+     *  AIB Fence
      */
     (rPHBNFIR, bit(16)) ? defaultMaskedError;
 
@@ -308,32 +308,32 @@ group gPHBNFIR filter singlebit
     (rPHBNFIR, bit(19)) ? level2_th_1;
 
     /** PHBNFIR[20]
-     *  
+     *  Invalid Combined Response
      */
     (rPHBNFIR, bit(20)) ? defaultMaskedError;
 
     /** PHBNFIR[21]
-     *  
+     *  Power Bus Unsupported Size
      */
     (rPHBNFIR, bit(21)) ? defaultMaskedError;
 
     /** PHBNFIR[22]
-     *  
+     *  Power Bus Unsupported Command
      */
     (rPHBNFIR, bit(22)) ? defaultMaskedError;
 
     /** PHBNFIR[23]
-     *  
+     *  PBAIB error
      */
     (rPHBNFIR, bit(23)) ? defaultMaskedError;
 
     /** PHBNFIR[24]
-     *  
+     *  CAPP Error
      */
     (rPHBNFIR, bit(24)) ? defaultMaskedError;
 
     /** PHBNFIR[25]
-     *  
+     *  NMMU Error
      */
     (rPHBNFIR, bit(25)) ? defaultMaskedError;
 
@@ -374,289 +374,39 @@ rule rPCIFIR
 group gPCIFIR filter singlebit
 {
     /** PCIFIR[0]
-     *  A0LINK_FMR_ERROR
+     *  PBAIB register parity error
      */
     (rPCIFIR, bit(0)) ? self_th_1;
 
     /** PCIFIR[1]
-     *  A1LINK_FMR_ERROR
+     *  Hardware error
      */
     (rPCIFIR, bit(1)) ? self_th_1;
 
     /** PCIFIR[2]
-     *  A2LINK_FMR_ERROR
+     *  AIB interface error
      */
     (rPCIFIR, bit(2)) ? self_th_1;
 
     /** PCIFIR[3]
-     *  A0LINK_PSR_ERR
+     *  ETU reset error
      */
     (rPCIFIR, bit(3)) ? self_th_1;
 
     /** PCIFIR[4]
-     *  A1LINK_PSR_ERR
+     *  PEC scom error
      */
-    (rPCIFIR, bit(4)) ? self_th_1;
+    (rPCIFIR, bit(4)) ? defaultMaskedError;
 
     /** PCIFIR[5]
-     *  A2LINK_PSR_ERR
+     *  scom error
      */
-    (rPCIFIR, bit(5)) ? self_th_1;
+    (rPCIFIR, bit(5)) ? defaultMaskedError;
 
     /** PCIFIR[6]
-     *  
+     *  scom error
      */
     (rPCIFIR, bit(6)) ? defaultMaskedError;
-
-    /** PCIFIR[7]
-     *  A0LINK_PSR_SUE_ERR
-     */
-    (rPCIFIR, bit(7)) ? defaultMaskedError;
-
-    /** PCIFIR[8]
-     *  A0LINK_PSR_UNC_ERR
-     */
-    (rPCIFIR, bit(8)) ? self_th_1;
-
-    /** PCIFIR[9]
-     *  
-     */
-    (rPCIFIR, bit(9)) ? defaultMaskedError;
-
-    /** PCIFIR[10]
-     *  A1LINK_PSR_SUE_ERR
-     */
-    (rPCIFIR, bit(10)) ? defaultMaskedError;
-
-    /** PCIFIR[11]
-     *  A1LINK_PSR_UNC_ERR
-     */
-    (rPCIFIR, bit(11)) ? self_th_1;
-
-    /** PCIFIR[12]
-     *  
-     */
-    (rPCIFIR, bit(12)) ? defaultMaskedError;
-
-    /** PCIFIR[13]
-     *  A2LINK_PSR_SUE_ERR
-     */
-    (rPCIFIR, bit(13)) ? defaultMaskedError;
-
-    /** PCIFIR[14]
-     *  A2LINK_PSR_UNC_ERR
-     */
-    (rPCIFIR, bit(14)) ? self_th_1;
-
-    /** PCIFIR[15]
-     *  A0LINK_FMR_COR_ERR_HI
-     */
-    (rPCIFIR, bit(15)) ? self_th_32perDay;
-
-    /** PCIFIR[16]
-     *  A0LINK_FMR_COR_ERR_LO
-     */
-    (rPCIFIR, bit(16)) ? self_th_32perDay;
-
-    /** PCIFIR[17]
-     *  A0LINK_FMR_SUE_ERR_HI
-     */
-    (rPCIFIR, bit(17)) ? defaultMaskedError;
-
-    /** PCIFIR[18]
-     *  A0LINK_FMR_SUE_ERR_LO
-     */
-    (rPCIFIR, bit(18)) ? defaultMaskedError;
-
-    /** PCIFIR[19]
-     *  A0LINK_FMR_UNC_ERR_HI
-     */
-    (rPCIFIR, bit(19)) ? self_th_1;
-
-    /** PCIFIR[20]
-     *  A0LINK_FMR_UNC_ERR_LO
-     */
-    (rPCIFIR, bit(20)) ? self_th_1;
-
-    /** PCIFIR[21]
-     *  A1LINK_FMR_COR_ERR_HI
-     */
-    (rPCIFIR, bit(21)) ? self_th_32perDay;
-
-    /** PCIFIR[22]
-     *  A1LINK_FMR_COR_ERR_LO
-     */
-    (rPCIFIR, bit(22)) ? self_th_32perDay;
-
-    /** PCIFIR[23]
-     *  A1LINK_FMR_SUE_ERR_HI
-     */
-    (rPCIFIR, bit(23)) ? defaultMaskedError;
-
-    /** PCIFIR[24]
-     *  A1LINK_FMR_SUE_ERR_LO
-     */
-    (rPCIFIR, bit(24)) ? defaultMaskedError;
-
-    /** PCIFIR[25]
-     *  A1LINK_FMR_UNC_ERR_HI
-     */
-    (rPCIFIR, bit(25)) ? self_th_1;
-
-    /** PCIFIR[26]
-     *  A1LINK_FMR_UNC_ERR_LO
-     */
-    (rPCIFIR, bit(26)) ? self_th_1;
-
-    /** PCIFIR[27]
-     *  A2LINK_FMR_COR_ERR_HI
-     */
-    (rPCIFIR, bit(27)) ? self_th_32perDay;
-
-    /** PCIFIR[28]
-     *  A2LINK_FMR_COR_ERR_LO
-     */
-    (rPCIFIR, bit(28)) ? self_th_32perDay;
-
-    /** PCIFIR[29]
-     *  A2LINK_FMR_SUE_ERR_HI
-     */
-    (rPCIFIR, bit(29)) ? defaultMaskedError;
-
-    /** PCIFIR[30]
-     *  A2LINK_FMR_SUE_ERR_LO
-     */
-    (rPCIFIR, bit(30)) ? defaultMaskedError;
-
-    /** PCIFIR[31]
-     *  A2LINK_FMR_UNC_ERR_HI
-     */
-    (rPCIFIR, bit(31)) ? self_th_1;
-
-    /** PCIFIR[32]
-     *  A2LINK_FMR_UNC_ERR_LO
-     */
-    (rPCIFIR, bit(32)) ? self_th_1;
-
-    /** PCIFIR[33]
-     *  A0_OBS_CR_OVERFLOW_FIR_ERR
-     */
-    (rPCIFIR, bit(33)) ? self_th_1;
-
-    /** PCIFIR[34]
-     *  A1_OBS_CR_OVERFLOW_FIR_ERR
-     */
-    (rPCIFIR, bit(34)) ? self_th_1;
-
-    /** PCIFIR[35]
-     *  A2_OBS_CR_OVERFLOW_FIR_ERR
-     */
-    (rPCIFIR, bit(35)) ? self_th_1;
-
-    /** PCIFIR[36]
-     *  FIR_SCOM_ERR_DUP
-     */
-    (rPCIFIR, bit(36)) ? defaultMaskedError;
-
-    /** PCIFIR[37]
-     *  FIR_SCOM_ERR
-     */
-    (rPCIFIR, bit(37)) ? defaultMaskedError;
-
-    /** PCIFIR[38]
-     *  SPARE
-     */
-    (rPCIFIR, bit(38)) ? defaultMaskedError;
-
-    /** PCIFIR[39]
-     *  MB11_SPATTN
-     */
-    (rPCIFIR, bit(39)) ? defaultMaskedError;
-
-    /** PCIFIR[40]
-     *  MB20_SPATTN
-     */
-    (rPCIFIR, bit(40)) ? defaultMaskedError;
-
-    /** PCIFIR[41]
-     *  MB21_SPATTN
-     */
-    (rPCIFIR, bit(41)) ? defaultMaskedError;
-
-    /** PCIFIR[42]
-     *  MB30_SPATTN
-     */
-    (rPCIFIR, bit(42)) ? defaultMaskedError;
-
-    /** PCIFIR[43]
-     *  MB31_SPATTN
-     */
-    (rPCIFIR, bit(43)) ? defaultMaskedError;
-
-    /** PCIFIR[44]
-     *  MB40_SPATTN
-     */
-    (rPCIFIR, bit(44)) ? defaultMaskedError;
-
-    /** PCIFIR[45]
-     *  MB41_SPATTN
-     */
-    (rPCIFIR, bit(45)) ? defaultMaskedError;
-
-    /** PCIFIR[46]
-     *  MB50_SPATTN
-     */
-    (rPCIFIR, bit(46)) ? defaultMaskedError;
-
-    /** PCIFIR[47]
-     *  MB51_SPATTN
-     */
-    (rPCIFIR, bit(47)) ? defaultMaskedError;
-
-    /** PCIFIR[48:51]
-     *  spare
-     */
-    (rPCIFIR, bit(48|49|50|51)) ? defaultMaskedError;
-
-    /** PCIFIR[52]
-     *  DOB01_ERR
-     */
-    (rPCIFIR, bit(52)) ? self_th_1;
-
-    /** PCIFIR[53]
-     *  DOB23_ERR
-     */
-    (rPCIFIR, bit(53)) ? self_th_1;
-
-    /** PCIFIR[54]
-     *  DOB45_ERR
-     */
-    (rPCIFIR, bit(54)) ? self_th_1;
-
-    /** PCIFIR[55]
-     *  DIB01_ERR
-     */
-    (rPCIFIR, bit(55)) ? self_th_1;
-
-    /** PCIFIR[56]
-     *  DIB23_ERR
-     */
-    (rPCIFIR, bit(56)) ? self_th_1;
-
-    /** PCIFIR[57]
-     *  DIB45_ERR
-     */
-    (rPCIFIR, bit(57)) ? self_th_1;
-
-    /** PCIFIR[58]
-     *  FIR_SCOM_ERR_DUP
-     */
-    (rPCIFIR, bit(58)) ? defaultMaskedError;
-
-    /** PCIFIR[59]
-     *  FIR_SCOM_ERR
-     */
-    (rPCIFIR, bit(59)) ? defaultMaskedError;
 
 };
 
