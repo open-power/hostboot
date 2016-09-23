@@ -159,10 +159,15 @@ namespace TRACEDAEMON
                         g_debugSettings.contTraceOverride =
                             DebugSettings::CONT_TRACE_FORCE_DISABLE;
                     }
-                    else if (msg->data[0] == 1)
+                    else if (msg->data[0] == 1) //enable from FSP
                     {
                         g_debugSettings.contTraceOverride =
                             DebugSettings::CONT_TRACE_FORCE_ENABLE;
+                    }
+                    else if (msg->data[0] == 2) //enable from debugComm
+                    {
+                        g_debugSettings.contTraceOverride =
+                            DebugSettings::CONT_TRACE_FORCE_ENABLE_DEBUG_COMM;
                     }
 
                     msg->data[0] = msg->data[1] = 0;
@@ -448,17 +453,25 @@ namespace TRACEDAEMON
         if (g_debugSettings.contTraceOverride !=
                 DebugSettings::CONT_TRACE_USE_ATTR)
         {
-            contEnabled = (g_debugSettings.contTraceOverride ==
+            contEnabled = (g_debugSettings.contTraceOverride >=
                             DebugSettings::CONT_TRACE_FORCE_ENABLE);
         }
 
-        if (!contEnabled)
+        if(contEnabled)
         {
-            // Trace isn't enabled so just discard the buffer.
-            free(i_buffer);
-        }
-        else
-        {
+            //Only send via debugComm if tool has explicitly enabled
+            //otherwise this will "hang" hostboot while it waits for the tool
+            if(g_debugSettings.contTraceOverride ==
+                            DebugSettings::CONT_TRACE_FORCE_ENABLE_DEBUG_COMM)
+            {
+                // Write scratch register indicating is available.
+                uint64_t l_addr = reinterpret_cast<uint64_t>(i_buffer);
+                Util::writeDebugCommRegs(Util::MSG_TYPE_TRACE,
+                                         l_addr,
+                                         i_size);
+            }
+
+            //Always attempt to send to FSP if enabled
             if (MBOX::mailbox_enabled())
             {
                 msg_t* msg = msg_allocate();
@@ -466,7 +479,6 @@ namespace TRACEDAEMON
                 msg->data[1] = i_size;
                 msg->extra_data = MBOX::allocate(i_size);
                 memcpy(msg->extra_data,i_buffer,i_size);
-                free(i_buffer);
 
                 errlHndl_t l_errl = MBOX::send(MBOX::FSP_TRACE_MSGQ, msg);
                 if (l_errl)
@@ -475,16 +487,10 @@ namespace TRACEDAEMON
                     msg_free(msg);
                 }
             }
-            else
-            {
-                // Write scratch register indicating is available.
-                uint64_t l_addr = reinterpret_cast<uint64_t>(i_buffer);
-                Util::writeDebugCommRegs(Util::MSG_TYPE_TRACE,
-                                         l_addr,
-                                         i_size);
-                free(i_buffer);
-            }
         }
+
+        //Always free the buf
+        free(i_buffer);
     }
 
     void Daemon::sendExtractBuffer(void* i_buffer, size_t i_size)

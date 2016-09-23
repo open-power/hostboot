@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,6 +44,8 @@ namespace TRACE
             CONT_TRACE_FORCE_DISABLE = 1,
             /** Force enable. */
             CONT_TRACE_FORCE_ENABLE = 2,
+            /** Force enable on debugComm. */
+            CONT_TRACE_FORCE_ENABLE_DEBUG_COMM = 3,
         };
 
         // Continuous Trace:

@@ -718,7 +718,7 @@ sub translateHRMOR
     }
     else
     {
-        $addr += ::getHRMOR();
+        $addr |= ::getHRMOR();
     }
 
     return $addr;
