@@ -6513,6 +6513,14 @@ sub addEepromsProc
         {
             $id_name = "EEPROM_VPD_BACKUP_INFO";
         }
+        elsif ( $tmp_ct eq "PRIMARY_SBE_VPD_SPARE")
+        {
+            next; # Skipping these entries
+        }
+        elsif ($tmp_ct eq "REDUNDANT_SBE_VPD_SPARE")
+        {
+            next; # Skipping these entries
+        }
 
         # Skipping these on openpower systems
         # @todo RTC 119830 - some of these might eventually be supported

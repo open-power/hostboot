@@ -75,6 +75,7 @@ namespace SBE
 {
 errlHndl_t resolveProcessorSbeSeeproms()
 {
+    return NULL;//@fixme-Temp hack to fix master
     errlHndl_t err = NULL;
     errlHndl_t err_cleanup = NULL;
     sbeResolveState_t sideState;
