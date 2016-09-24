@@ -570,6 +570,20 @@ def magic_instruction_callback(user_arg, cpu, arg):
         if( os.environ.has_key('HB_BREAK_ON_ERROR') ):
             SIM_break_simulation( "Stopping sim on HB error. (hap 7018)"  )
 
+    if arg == 7019:   # MAGIC_GET_SBE_TRACES
+        # Collect SBE traces out to a file
+        proc_num = cpu.r4
+        rc = cpu.r5
+        # generate the traces
+        cmd1 = "sbe-trace %d"%(proc_num)
+        print "cmd1", cmd1
+        # copy the file somewhere safe
+        cmd2 = "shell \"echo '==HB Collecting Traces (iar=%X,rc=%X,sbe=%d)==' >> sbetrace.hb.txt; cat sbe_%d_tracMERG >> sbetrace.hb.txt\""%(cpu.iar,rc,proc_num,proc_num)
+        print "cmd2", cmd2
+
+        saveCommand = "%s; %s"%(cmd1,cmd2)
+        SIM_run_alone(run_command, saveCommand )
+
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
@@ -659,6 +673,9 @@ rc = os.system( "rm -f hbTracBINARY3" )
 # remove legacy files so as not to confuse
 rc = os.system( "rm -f tracMERG" )
 rc = os.system( "rm -f tracBINARY" )
+
+# SBE traces: Clear these files.
+rc = os.system( "rm -f sbetrace.hb.txt" )
 
 # Register the magic instruction hap handler (a callback).
 SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback, None, 7000, 7999 )

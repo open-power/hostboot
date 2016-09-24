@@ -39,6 +39,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
 #include <sbeio/sbe_psudd.H>
+#include <arch/ppc.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -140,6 +141,9 @@ errlHndl_t performPsuChipOp(psuCommand     * i_pPsuRequest,
                              SBEIO_HWSV_COLLECT_SBE_RC,
                              orig_plid,
                              TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
+        MAGIC_INST_GET_SBE_TRACES(
+              l_target->getAttr<TARGETING::ATTR_POSITION>(),
+              SBEIO_HWSV_COLLECT_SBE_RC);
         INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
     }
 
@@ -203,6 +207,9 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_PSU_NOT_READY);
             break; // return with error
         }
 
@@ -318,6 +325,9 @@ errlHndl_t readResponse(TARGETING::Target  * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_PSU_RESPONSE_ERROR);
             break;
         }
 
@@ -379,6 +389,9 @@ errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_PSU_RESPONSE_TIMEOUT);
             break;
         }
 

@@ -459,9 +459,16 @@ enum
     MAGIC_WAKE_FUSED_THREADS  =  7017, // Wake up fused core threads
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
+    MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
+
+#define MAGIC_INST_GET_SBE_TRACES(_procnum,_rc) \
+    asm volatile("mr 4, %0; mr 5, %1" :: \
+                 "r" (_procnum), "r" (_rc) : "4", "5"); \
+    MAGIC_INSTRUCTION(MAGIC_GET_SBE_TRACES); \
+
 
 
 #endif

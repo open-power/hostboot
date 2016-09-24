@@ -38,6 +38,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include "sbe_fifodd.H"
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
+#include <arch/ppc.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -122,6 +123,9 @@ errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
                              SBEIO_HWSV_COLLECT_SBE_RC,
                              orig_plid,
                              TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
+        MAGIC_INST_GET_SBE_TRACES(
+              i_target->getAttr<TARGETING::ATTR_POSITION>(),
+              SBEIO_HWSV_COLLECT_SBE_RC);
         INITSERVICE::doShutdown( SBEIO_HWSV_COLLECT_SBE_RC );
     }
 
@@ -241,6 +245,9 @@ errlHndl_t waitUpFifoReady(TARGETING::Target * i_target)
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_FIFO_UPSTREAM_TIMEOUT);
             break;
         }
 
@@ -359,6 +366,9 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_FIFO_NO_DOWNSTREAM_EOT);
             break;
         }
 
@@ -415,6 +425,9 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_FIFO_INVALID_STATUS_DISTANCE);
             break;
         }
 
@@ -468,6 +481,9 @@ errlHndl_t readResponse(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_FIFO_RESPONSE_ERROR);
             break;
         }
     }
@@ -542,6 +558,9 @@ errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            MAGIC_INST_GET_SBE_TRACES(
+                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                  SBEIO_FIFO_DOWNSTREAM_TIMEOUT);
             break;
         }
 
