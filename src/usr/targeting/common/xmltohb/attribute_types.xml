@@ -16333,7 +16333,7 @@ Measured in GB</description>
         <name>PD_AND_STR</name>
         <value>3</value>
     </enumerator>
-    <default>NONE</default>
+    <default>OFF</default>
 </enumerationType>
 
 <attribute>

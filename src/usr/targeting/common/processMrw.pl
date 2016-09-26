@@ -107,10 +107,6 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processMembuf($targetObj, $target);
     }
-    elsif ($type eq "FSP")
-    {
-        processBmc($targetObj, $target);
-    }
     elsif ($type eq "APSS")
     {
         processApss($targetObj, $target);
@@ -118,7 +114,6 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
 
     processIpmiSensors($targetObj,$target);
 }
-
 
 ## check topology
 foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
@@ -386,48 +381,29 @@ sub convertNegativeNumbers
     $targetObj->setAttribute($target,$attribute,$new_offset)
 }
 
-sub processBmc
-{
-    my $targetObj = shift;
-    my $target    = shift;
-    my $i2cs=$targetObj->findConnections($target,"I2C","PROC");
-    if ($i2cs ne "")
-    {
-       foreach my $i2c (@{$i2cs->{CONN}})
-       {
-           my $addr=$targetObj->getBusAttribute(
-                $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_ADDRESS");
-           $targetObj->setAttribute(
-                $i2c->{DEST_PARENT},"I2C_SLAVE_ADDRESS",$addr);
-       }
-    }
-    my $lpcs=$targetObj->findConnections($target,"LPC","PROC");
-    if ($lpcs ne "")
-    {
-       my $lpc=$lpcs->{CONN}->[0];
-       $targetObj->setMasterProc($lpc->{DEST_PARENT});
-    }
-}
-
-
 sub parseBitwise
 {
     my $targetObj = shift;
     my $target = shift;
     my $attribute = shift;
-
     my $mask = 0;
-    foreach my $e (keys %{ $targetObj->getEnumHash($attribute) }) {
-        my $field = $targetObj->getAttributeField(
-                    $target,$attribute."_BITMASK",$e);
-        my $val=hex($targetObj->getEnumValue($attribute,$e));
-        if ($field eq "true")
+
+    #if CDM_POLICIES_BITMASK is not a bad attribute, aka if it is defined
+    if (!$targetObj->isBadAttribute($target, $attribute."_BITMASK"))
+    {
+        foreach my $e (keys %{ $targetObj->getEnumHash($attribute)})
         {
-            $mask=$mask | $val;
+            my $field = $targetObj->getAttributeField(
+                        $target,$attribute."_BITMASK",$e);
+            my $val=hex($targetObj->getEnumValue($attribute,$e));
+            if ($field eq "true")
+            {
+                $mask=$mask | $val;
+            }
         }
+        $targetObj->setAttribute($target,$attribute,$mask);
     }
-    $targetObj->setAttribute($target,$attribute,$mask);
- }
+}
 #--------------------------------------------------
 ## Processor
 ##
@@ -455,7 +431,10 @@ sub processProcessor
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($module_target)->{TARGET}->{attribute} }))
     {
-        $targetObj->copyAttribute($module_target,$target,$attr);
+        if (($attr ne "TYPE") && ($attr ne "PHYS_PATH"))
+        {
+            $targetObj->copyAttribute($module_target,$target,$attr);
+        }
     }
 
     ## Copy PCIE attributes from socket
@@ -473,11 +452,22 @@ sub processProcessor
         }
     }
 
+    $targetObj->log($target,"Finding master proc");
+    my $lpcs=$targetObj->findConnections($target,"LPC","FSP");
+    if ($lpcs ne "")
+    {
+       $targetObj->log ($target, "Setting master proc to $target");
+       $targetObj->setMasterProc($target);
+    }
+
     $targetObj->log($target, "Processing PROC");
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
-        $targetObj->log($target, "Processing PROC child: $child");
         my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing PROC child: $child Type: $child_type");
+
         if ($child_type eq "NA" || $child_type eq "FSI")
         {
             $child_type = $targetObj->getMrwType($child);
@@ -498,12 +488,13 @@ sub processProcessor
         {
             foreach my $pci_child (@{ $targetObj->getTargetChildren($child) })
             {
-               processPcie($targetObj, $pci_child, $target);
+                #@TODO RTC:161404
+                #processPcie($targetObj, $pci_child, $target);
             }
         }
-        elsif ($child_type eq "MCS")
+        elsif ($child_type eq "MCBIST")
         {
-            processMcs($targetObj, $child, $target);
+            processMcbist($targetObj, $child, $target);
         }
         elsif ($child_type eq "OCC")
         {
@@ -589,10 +580,14 @@ sub processI2cSpeeds
                            $i2c->{SOURCE},"I2C_ENGINE"));
             my $bus_speed=$targetObj->getBusAttribute(
                   $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
+
+            #@todo RTC:164224 > currently the bus_speed fields are empty in the xml
+=begin
             if ($bus_speed eq "" || $bus_speed==0) {
                 print "ERROR: I2C bus speed not defined for $i2c->{SOURCE}\n";
                 $targetObj->myExit(3);
             }
+=cut
             ## choose lowest bus speed
             if ($bus_speeds[$engine][$port] eq "" ||
                   $bus_speeds[$engine][$port]==0  ||
@@ -640,7 +635,7 @@ sub setupBars
               "NVIDIA_NPU_PRIVILEGED_ADDR","NVIDIA_NPU_USER_REG_ADDR",
               "NVIDIA_PHY0_REG_ADDR","NVIDIA_PHY1_REG_ADDR",
               "XIVE_CONTROLLER_BAR_ADDR","XIVE_PRESENTATION_BAR_ADDR",
-              "PSI_HB_ESP_ADDR","NX_RNG_ADDR");
+              "NX_RNG_ADDR");
 
     # Attribute only valid in naples-based systems
     if (!$targetObj->isBadAttribute($target,"NPU_MMIO_BAR_BASE_ADDR") ) {
@@ -689,26 +684,71 @@ sub processMcs
     my $targetObj    = shift;
     my $target       = shift;
     my $parentTarget = shift;
+    my $group        = shift;
+    my $proc         = shift;
 
-    my $group = $targetObj->getAttribute($parentTarget, "FABRIC_GROUP_ID");
-    my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
+#@TODO RTC:163874 -- maybe needed for centaur support
 
-    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
-               $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
-    my $i_base = Math::BigInt->new($base);
-    my $i_node_offset = Math::BigInt->new($group_offset);
-    my $i_proc_offset = Math::BigInt->new($proc_offset);
-    my $i_offset = Math::BigInt->new($offset);
 
-    my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
-    #Note: Hex convert method avoids overflow on 32bit machines
-    my $mcsStr=sprintf("0x%016s",substr((
-         $i_base+$i_node_offset*$group+
-         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
-    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
+#    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
+#               $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
+#    my $i_base = Math::BigInt->new($base);
+#    my $i_node_offset = Math::BigInt->new($group_offset);
+#    my $i_proc_offset = Math::BigInt->new($proc_offset);
+#    my $i_offset = Math::BigInt->new($offset);
+
+#    my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
+#    #Note: Hex convert method avoids overflow on 32bit machines
+#    my $mcsStr=sprintf("0x%016s",substr((
+#         $i_base+$i_node_offset*$group+
+#         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
+#    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
 
 
+## MCBIST
+sub processMcbist
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+    my $parentTarget = shift;
+
+    my $group = $targetObj->getAttribute($parentTarget, "FABRIC_GROUP_ID");
+    my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
+#@TODO RTC:163874 -- maybe needed for centaur support
+#    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
+#               $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
+#    my $i_base = Math::BigInt->new($base);
+#    my $i_node_offset = Math::BigInt->new($group_offset);
+#    my $i_proc_offset = Math::BigInt->new($proc_offset);
+#    my $i_offset = Math::BigInt->new($offset);
+
+
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing MCBIST child: $child Type: $child_type");
+
+        if ($child_type eq "NA" || $child_type eq "FSI")
+        {
+            $child_type = $targetObj->getMrwType($child);
+        }
+        if ($child_type eq "MCS")
+        {
+            processMcs($targetObj, $child, $target, $group, $proc);
+        }
+    }
+
+#@TODO RTC:163874 -- maybe needed for centaur support
+#    my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
+#    #Note: Hex convert method avoids overflow on 32bit machines
+#    my $mcsStr=sprintf("0x%016s",substr((
+#         $i_base+$i_node_offset*$group+
+#         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
+#    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
+}
 #--------------------------------------------------
 ## XBUS
 ##
@@ -1091,8 +1131,6 @@ sub processMembufVpdAssociation
             foreach my $group_assoc (@{$group_assocs->{CONN}}) {
                 my $mb_target = $group_assoc->{DEST_PARENT};
                 my $group_target = $targetObj->getTargetParent($mb_target);
-                setEepromAttributes($targetObj,
-                       "EEPROM_VPD_PRIMARY_INFO",$group_target,$vpd);
                 $targetObj->setAttribute($group_target,
                             "VPD_REC_NUM",$targetObj->{vpd_num});
             }
@@ -1107,7 +1145,7 @@ sub processMembufVpdAssociation
 ## Finds I2C connections to DIMM and creates EEPROM attributes
 ## FYI:  I had to handle DMI busses in framework because they
 ## define affinity path
-
+#@TODO RTC:163874 -- centaur support
 sub processMembuf
 {
     my $targetObj = shift;
@@ -1188,7 +1226,8 @@ sub processMembuf
             "MRW_MEM_SENSOR_CACHE_ADDR_MAP","0x".join("",@addr_map));
 
     ## Update bus speeds
-    processI2cSpeeds($targetObj,$target);
+    #@TODO RTC:163874 -- centaur support
+    #processI2cSpeeds($targetObj,$target);
 
     ## Do MBA port mapping
     my %mba_port_map;
@@ -1307,11 +1346,9 @@ sub errorCheck
     ## also error checking after processing is complete vs during
     ## processing is easier
     my %attribute_checks = (
-        SYS         => ['SYSTEM_NAME','OPAL_MODEL'],
-        PROC_MASTER => ['I2C_SLAVE_ADDRESS'],
-        PROC        => ['FSI_MASTER_CHIP','I2C_SLAVE_ADDRESS'],
-        MEMBUF => [ 'PHYS_PATH', 'EI_BUS_TX_MSBSWAP', 'FSI_MASTER_PORT|0xFF' ],
-        DIMM   => ['EEPROM_VPD_PRIMARY_INFO/devAddr'],
+        SYS         => ['SYSTEM_NAME'],#'OPAL_MODEL'],
+        PROC        => ['FSI_MASTER_CHIP', 'EEPROM_VPD_PRIMARY_INFO/devAddr'],
+        MEMBUF      => [ 'PHYS_PATH', 'EI_BUS_TX_MSBSWAP', 'FSI_MASTER_PORT|0xFF' ],
     );
     my %error_msg = (
         'EEPROM_VPD_PRIMARY_INFO/devAddr' =>
@@ -1321,14 +1358,9 @@ sub errorCheck
         'EI_BUS_TX_MSBSWAP' =>
           'DMI connection is missing to this membuf from processor',
         'PHYS_PATH' =>'DMI connection is missing to this membuf from processor',
-        'I2C_SLAVE_ADDRESS' =>'I2C connection is missing from BMC to processor',
     );
 
     my @errors;
-    if ($targetObj->getMasterProc() eq $target)
-    {
-        $type = "PROC_MASTER";
-    }
     foreach my $attr (@{ $attribute_checks{$type} })
     {
         my ($a,         $v)     = split(/\|/, $attr);
