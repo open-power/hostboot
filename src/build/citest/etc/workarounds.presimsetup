@@ -34,8 +34,3 @@
 #egrep -v "WSALIAS DEFAULT FIPSLEVEL|WSALIAS DEFAULT SIMICSLEVEL" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
-
-echo "+++ Updating Simics Level for PM CI runs"
-mkdir -p $sb/simu/data
-cp $BACKING_BUILD/src/simu/data/simicsInfo $sb/simu/data/simicsInfo
-patch -p0 $sb/simu/data/simicsInfo $PROJECT_ROOT/src/build/citest/etc/patches/update_simicsInfo_fi160914a900.patch
