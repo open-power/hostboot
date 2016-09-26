@@ -1600,15 +1600,12 @@ my @I2CHotPlug;
 foreach my $i (@{$i2cBus->{'i2c-device'}})
 {
 
-# @TODO RTC:161049 Should be able to get these values from MRW
-    my $dev_addr = $i->{'address'};
     my $max_mem_size = "0x80";
     my $chip_count = "0x02";
 
     if( ($i->{'content-type'} eq 'PRIMARY_SBE_VPD') ||
         ($i->{'content-type'} eq 'REDUNDANT_SBE_VPD') )
     {
-        $dev_addr = "A8";
         $max_mem_size = "0x100";
         $chip_count = "0x04";
     }
@@ -1621,14 +1618,14 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_content_type'=>$i->{'content-type'},
          'i2c_part_id'=>$i->{'part-id'},
          'i2c_port'=>$i->{'i2c-master'}->{'i2c-port'},
-         'i2c_devAddr'=>$dev_addr, # @TODO RTC:161049
+         'i2c_devAddr'=>$i->{'address'},
          'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
          'i2c_speed'=>$i->{'speed'},
          'i2c_size'=>$i->{'size'},
 # @todo RTC 119382 - will eventually read these values from this file
          'i2c_byte_addr_offset'=> "0x02",
-         'i2c_max_mem_size' => $max_mem_size, # @TODO RTC:161049
-         'i2c_chip_count' => $chip_count, # @TODO RTC:161049
+         'i2c_max_mem_size' => $max_mem_size,
+         'i2c_chip_count' => $chip_count,
          'i2c_write_page_size' =>"0x80",
          'i2c_write_cycle_time' => "0x05" };
 
@@ -6543,17 +6540,7 @@ sub addEepromsProc
         {
 
             # Skip I2C devices that we don't care about
-            if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM")
-                  &&
-                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM1")
-                  &&
-                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB0")
-                  &&
-                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB1")
-                  &&
-                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC1")
-                  &&
-                  !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC3")
+            if( ( !($I2Cdevices[$i]{i2cm_uid} =~ /I2CM_PROC_PROMC\d+/)
                 ) ||
                 !($I2Cdevices[$i]{i2cm_node} == $node) )
             {
@@ -6598,8 +6585,7 @@ sub addEepromsProc
         {
             $id_name = "EEPROM_SBE_BACKUP_INFO";
         }
-        elsif ( ($tmp_ct eq "PRIMARY_MODULE_VPD") ||
-                ($tmp_ct eq "PRIMARY_FRU_AND_MODULE_VPD") )
+        elsif ( $tmp_ct eq "PRIMARY_FRU_AND_MODULE_VPD")
         {
             $id_name = "EEPROM_VPD_PRIMARY_INFO";
         }
@@ -6607,11 +6593,10 @@ sub addEepromsProc
         {
             $id_name = "EEPROM_VPD_BACKUP_INFO";
         }
-        elsif ( $tmp_ct eq "PRIMARY_SBE_VPD_SPARE")
-        {
-            next; # Skipping these entries
-        }
-        elsif ($tmp_ct eq "REDUNDANT_SBE_VPD_SPARE")
+        elsif ( ($tmp_ct eq "PRIMARY_SBE_VPD_SPARE") ||
+                ($tmp_ct eq "REDUNDANT_SBE_VPD_SPARE") ||
+                ($tmp_ct eq "PRIMARY_FRU_AND_MODULE_VPD_SPARE") ||
+                ($tmp_ct eq "REDUNDANT_FRU_AND_MODULE_VPD_SPARE") )
         {
             next; # Skipping these entries
         }
@@ -6860,8 +6845,8 @@ sub addI2cBusSpeedArray
     my $tmp_offset = 0x0;
     my $tmp_ct eq "";
 
-    # bus_speed_arry[engine][port] is 4x3 array
-    my @speed_array = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    # bus_speed_array[engine][port] is 4x4 array
+    my @speed_array = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     # Loop through all i2c devices
     for my $i ( 0 .. $#I2Cdevices )
@@ -6875,17 +6860,9 @@ sub addI2cBusSpeedArray
             if ( $haveFSPs == 1 )
             {
                 # Skip I2C devices that we don't care about
-                if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM")
+                if( ( !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_TPM")
                       &&
-                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROM1")
-                      &&
-                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB0")
-                      &&
-                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMB1")
-                      &&
-                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC1")
-                      &&
-                      !($I2Cdevices[$i]{i2cm_uid} eq "I2CM_PROC_PROMC3")
+                      !($I2Cdevices[$i]{i2cm_uid} =~ /I2CM_PROC_PROMC\d+/)
                       &&
                       !( ($I2Cdevices[$i]{i2cm_uid}
                          eq "I2CM_HOTPLUG") &&
@@ -6958,19 +6935,7 @@ sub addI2cBusSpeedArray
         $tmp_speed  = $I2Cdevices[$i]{i2c_speed};
         $tmp_engine = $I2Cdevices[$i]{i2c_engine};
         $tmp_port   = $I2Cdevices[$i]{i2c_port};
-        $tmp_offset = ($tmp_engine * 3) + $tmp_port;
-
-        # @todo RTC 153696 - Default everything off except TPM until MRW is correct and simics model is complete
-        # Also except SBE SEEPROM until MRW is correct and simics model is complete
-        if (($tmp_engine == 2 && $tmp_port == 0) ||
-            ($tmp_engine == 0 && $tmp_port == 0) ||
-            ($tmp_engine == 1 && $tmp_port == 1) ||
-            ($tmp_engine == 1 && $tmp_port == 0) ||
-            ($tmp_engine == 3 && $tmp_port == 1)) {
-            $tmp_speed  = 400;
-        } else {
-            $tmp_speed = 0;
-        }
+        $tmp_offset = ($tmp_engine * 4) + $tmp_port;
 
         # use the slower speed if there is a previous entry
         if ( ($speed_array[$tmp_offset] == 0) ||
@@ -6996,6 +6961,10 @@ sub addI2cBusSpeedArray
     print "            $speed_array[9],\n";
     print "            $speed_array[10],\n";
     print "            $speed_array[11],\n";
+    print "            $speed_array[12],\n";
+    print "            $speed_array[13],\n";
+    print "            $speed_array[14],\n";
+    print "            $speed_array[15],\n";
     print "        </default>\n";
     print "    </attribute>\n";
 

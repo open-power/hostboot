@@ -394,7 +394,7 @@
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
-        <default>400,0,0,0,0,0</default>
+        <default>0,0,0,0,0,400,0,400,400,0,0,0,0,0,0,0</default>
     </attribute>
 
     <attribute><id>MSS_FREQ</id></attribute>

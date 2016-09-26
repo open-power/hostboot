@@ -1007,7 +1007,7 @@ namespace SBE
             // setup loop parameters
             coreCount = __builtin_popcount(coreMask);
 
-            while( coreCount >= 3 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
+            while( coreCount >= 2 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
             {
                 // copy customized SBE image to destination
                 memcpy ( io_imgPtr,
@@ -1120,7 +1120,7 @@ namespace SBE
 
                     // Check if loop will execute again
                     // Clean up some data if it will
-                    if( coreCount >= 3 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
+                    if( coreCount >= 2 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
                     {
                         // Reset size and clear image buffer
                         tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
