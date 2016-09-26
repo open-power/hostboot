@@ -421,8 +421,11 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     }
     else
     {
-      //RTC: 154950 Add MCA_PORT attribute to DIMM target
         uint16_t l_pos = l_pTarget->getAttr<TARGETING::ATTR_FAPI_POS>();
+
+        //@todo-RTC:161594-ATTR_POS is defined as per-drawer, so need to
+        //  mod the value down appropriately
+
         o_pos = l_pos;
     }
 
