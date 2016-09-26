@@ -36,7 +36,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/nest
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${PROCEDURE_PATH}/xml/error_info/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
