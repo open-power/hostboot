@@ -1757,7 +1757,6 @@ foreach my $i (@{$i2cBus->{'i2c-device'}})
          'i2c_engine'=>$i->{'i2c-master'}->{'i2c-engine'},
          'i2c_speed'=>$i->{'speed'},
          'i2c_size'=>$i->{'size'},
-# @todo RTC 119382 - will eventually read these values from this file
          'i2c_byte_addr_offset'=> "0x02",
          'i2c_max_mem_size' => $max_mem_size,
          'i2c_chip_count' => $chip_count,
@@ -3415,9 +3414,6 @@ sub calcAndAddFapiPos
         $typeToLimit{"perv"}   = ARCH_LIMIT_PERV_PER_PROC;
         $typeToLimit{"pec"}    = ARCH_LIMIT_PEC_PER_PROC;
         $typeToLimit{"phb"}    = ARCH_LIMIT_PHB_PER_PEC;
-
-        #TODO RTC 149326 Add calcAndAddFapiPos logic for NV unit
-        # when generate_nv is available
     }
 
     my $parentFapiPos = 0;
@@ -4373,44 +4369,6 @@ sub generate_core
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $core, $ordinalId );
 
-    my $snbase=62;
-
-    my $tempsnbase= 137;
-    my $freqsnbase= 149;
-    # $TODO RTC:110399
-    if( $haveFSPs == 0 )
-    {
-
-     my $procsn = $snbase+$ordinalId;
-     my $tempsn = $tempsnbase+$ordinalId;
-     my $freqsn = $freqsnbase+$ordinalId;
-
-
-      print "\n<!-- IPMI Sensor numbers for Core status -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-         <default>
-             0x0100, $tempsn, <!-- Temperature sensor -->
-             0x0500, $procsn, <!-- State sensor -->
-             0xC100, $freqsn, <!-- Frequency sensor -->
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF,
-             0xFFFF, 0xFF
-         </default>
-     </attribute>\n";
-    }
-
-
     print "
 </targetInstance>
 ";
@@ -4504,14 +4462,6 @@ sub generate_mcs
         }
     }
 
-    #TODO:RTC 139073
-    #IBSCOM address range starts at 0x0003E00000000000 (992 TB)
-    #128GB per MCS/Centaur
-    #Addresses assigned by logical node, not physical node
-    my $mscStr = sprintf("0x%016X", 0x0003E00000000000 +
-                   0x40000000000*$lognode +
-                   0x10000000000*$logid + 0x2000000000*$mcs);
-
     my $lane_swap = 0;
     my $msb_swap = 0;
     my $swizzle = 0;
@@ -4567,10 +4517,6 @@ sub generate_mcs
     <attribute>
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
-        <default>$mscStr</default>
     </attribute>
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
@@ -5882,42 +5828,6 @@ sub generate_centaur
        $scanFspBsize, $relativeCentaurRid, $ordinalId);
 
 
-    # $TODO RTC:110399
-    if( $haveFSPs == 0 )
-    {
-
-    my @CentaurSensors = (
-                    [74,101],[75,102],[76,103],[77,104] );
-
-    my $temp_sensor  = $CentaurSensors[$ordinalId][1];
-    my $state_sensor = $CentaurSensors[$ordinalId][0];
-
-
-      print "<!-- IPMI Sensor numbers for Centaur status -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0100, $temp_sensor,  <!-- Temperature sensor -->
-            0x0500, $state_sensor, <!-- State sensor -->
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF
-        </default>
-    </attribute>\n";
-
-    }
-
     # Centaur is only used as an I2C Master in openpower systems
     if ( $haveFSPs == 0 )
     {
@@ -6103,29 +6013,29 @@ sub generate_is_dimm
 {
     my ($fapiPosHr) = @_;
 
+    #@todo-RTC:160360-Use this i2c info to populate thermal sensors
     # From the i2c busses, grab the information for the DIMMs, if any.
-    my @dimmI2C;
-    my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
-    my $i2cSettings = XMLin($i2c_file);
-
-    foreach my $i (@{$i2cSettings->{'i2c-device'}})
-    {
-        if ( $i->{'part-id'} eq 'DIMM_SPD' )
-        {
-            # Adjust instance path to match Membus DIMM instance path
-            my $tmp_ip = $i->{'instance-path'};
-            $tmp_ip =~ s/\/DIMM_SPD-0$//;
-            $tmp_ip =~ s/ddr._dimm_generic/dimm/;
-
-            push @dimmI2C, {
-                'port'=>$i->{'i2c-master'}->{'i2c-port'},
-                'devAddr'=>$i->{'address'},
-            # @todo RTC 119793 - engine 6 is invalid for hostboot
-            #     'engine'=>$i->{'i2c-master'}->{'i2c-engine'},
-                'engine'=>0,
-                'ipath'=>$tmp_ip  };
-        }
-    }
+#    my @dimmI2C;
+#    my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
+#    my $i2cSettings = XMLin($i2c_file);
+#
+#    foreach my $i (@{$i2cSettings->{'i2c-device'}})
+#    {
+#        if ( $i->{'part-id'} eq 'DIMM_SPD' )
+#        {
+#            # Adjust instance path to match Membus DIMM instance path
+#            my $tmp_ip = $i->{'instance-path'};
+#            $tmp_ip =~ s/\/DIMM_SPD-0$//;
+#            $tmp_ip =~ s/ddr._dimm_generic/dimm/;
+#
+#            push @dimmI2C, {
+#                'port'=>$i->{'i2c-master'}->{'i2c-port'},
+#                'devAddr'=>$i->{'address'},
+#                'engine'=>$i->{'i2c-master'}->{'i2c-engine'},
+#                'engine'=>0,
+#                'ipath'=>$tmp_ip  };
+#        }
+#    }
 
     print "\n<!-- $SYSNAME JEDEC DIMMs -->\n";
     for my $i ( 0 .. $#SMembuses )
@@ -6206,38 +6116,6 @@ sub generate_is_dimm
         # call to do any fsp per-dimm attributes
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
         do_plugin('fsp_dimm', $proc, $dimm, $dimm, $dimmHex );
-
-        # $TODO RTC:110399
-        if( $haveFSPs == 0 )
-        {
-
-     my $status_base = 30+$dimm;
-     my $temp_base = 105+$dimm;
-
-     print "\n<!-- IPMI Sensor numbers for DIMM status -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0100, $temp_base, <!-- Temperature sensor -->
-            0x0500, $status_base, <!-- State sensor -->
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF
-
-        </default>
-    </attribute>\n";
-        }
 
         print "\n</targetInstance>\n";
 
@@ -6394,35 +6272,7 @@ sub generate_dimm
     # call to do any fsp per-dimm attributes
     do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $ordinalId, $dimmHex );
 
-    # $TODO RTC:110399
-    if( $haveFSPs == 0 )
-    {
-        print "\n<!-- IPMI Sensor numbers for DIMM status -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0100, 0x13,  <!-- Temperature sensor -->
-            0x0500, 0x01,  <!-- State sensor -->
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF
-        </default>
-    </attribute>\n";
-
-    }
-
-print "\n</targetInstance>\n";
+    print "\n</targetInstance>\n";
 }
 
 ################################################################################
@@ -6460,8 +6310,6 @@ our @SPIs;
 our $apssInit = 0;
 
 # This routine is common to FSP and HB
-# TODO RTC 116460 Only FSP uses the RID and ordinal numbering.
-# Refactor FSP only elements to genHwsvMrwXml_fsp.pm
 my $getBaseRidApss = 0;
 my $ridApssBase = 0;
 
@@ -6478,7 +6326,7 @@ sub init_apss
         my @rawSPIs;
         foreach my $i (@{$spiBus->{'processor-spi-bus'}})
         {
-            if($getBaseRidApss == 0)  # TODO RTC 116460 FSP only
+            if($getBaseRidApss == 0)
             {
                 if ($i->{endpoint}->{'instance-path'} =~ /.*APSS-[0-9]+$/i)
                 {
@@ -6628,36 +6476,7 @@ sub generate_occ
     </attribute>
     ";
 
-    # $TODO RTC:110399
-    # hardcode for now both palmetto and habenaro are
-    # currently the same - this will change though
-    #
-    if( $haveFSPs == 0 )
-    {
-       print "\n<!-- IPMI sensor numbers -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0a00, 0x08, <!-- Occ_active -->
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF
-       </default>
-    </attribute>\n";
-    }
-print "</targetInstance>\n";
+    print "</targetInstance>\n";
 
 }
 
@@ -6842,19 +6661,6 @@ sub addEepromsProc
                 ($tmp_ct eq "REDUNDANT_FRU_AND_MODULE_VPD_SPARE") )
         {
             next; # Skipping these entries
-        }
-
-        # Skipping these on openpower systems
-        # @todo RTC 119830 - some of these might eventually be supported
-        elsif ( ( ($tmp_ct eq "PLANAR_VPD") ||
-                  ($tmp_ct eq "PRIMARY_FRU_VPD") ||
-                  ($tmp_ct eq "CENTAUR_VPD") ||
-                  ($tmp_ct eq "ALL_CENTAUR_VPD") )
-                &&
-                ( $haveFSPs == 0 )
-              )
-        {
-            next;
         }
 
         else
@@ -7162,7 +6968,7 @@ sub addI2cBusSpeedArray
                 next;
             }
 
-            # @todo RTC 119793 - engine 6 is invalid for hostboot
+            # @todo RTC:160630 - engine 6 is invalid for hostboot
             if ( $I2Cdevices[$i]{i2c_engine} == 6 )
             {
                 $I2Cdevices[$i]{i2c_engine} = 0;
