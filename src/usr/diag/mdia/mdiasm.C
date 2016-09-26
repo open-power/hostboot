@@ -1010,8 +1010,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         stopCond.set_pause_on_nce_hard(mss::ON);
                     }
 
-                    fapirc = memdiags::sf_read(fapiMcbist, stopCond,
-                            mss::mcbist::STOP_AFTER_SLAVE_RANK);
+                    fapirc = memdiags::sf_read(fapiMcbist, stopCond);
                     MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
                             get_huid(target));
                     break;
