@@ -509,6 +509,11 @@
 </targetType>
 
 <targetType>
+    <id>lcard-dimm-ddr4</id>
+    <parent>lcard-dimm</parent>
+</targetType>
+
+<targetType>
     <id>occ</id>
     <parent>unit</parent>
     <attribute>
@@ -914,6 +919,7 @@
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
     <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
     <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
+    <attribute><id>VPD_REC_NUM</id></attribute>
 </targetType>
 
 <!-- chip-tpm-cectpm -->

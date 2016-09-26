@@ -28,6 +28,40 @@ use strict;
 use XML::Simple;
 use XML::Parser;
 use Data::Dumper;
+use feature "state";
+
+use constant
+{
+    MAX_PROC_PER_NODE => 8,
+    MAX_CORE_PER_PROC => 24,
+    MAX_EX_PER_PROC => 12,
+    MAX_EQ_PER_PROC => 6,
+    MAX_ABUS_PER_PROC => 3,
+    MAX_XBUS_PER_PROC => 3,
+    MAX_MCS_PER_PROC => 4,
+    MAX_MCA_PER_PROC => 8,
+    MAX_MCBIST_PER_PROC => 2,
+    MAX_PEC_PER_PROC => 3,    # PEC is same as PBCQ
+    MAX_PHB_PER_PROC => 6,    # PHB is same as PCIE
+    MAX_MBA_PER_MEMBUF => 2,
+    MAX_OBUS_PER_PROC => 4,
+    MAX_PPE_PER_PROC => 51,   #Only 21, but they are sparsely populated
+    MAX_PERV_PER_PROC => 56,  #Only 42, but they are sparsely populated
+    MAX_CAPP_PER_PROC => 2,
+    MAX_SBE_PER_PROC => 1,
+    MAX_NV_PER_PROC => 1,     # FW only for GARD purposes
+    MAX_MI_PER_PROC => 4,
+    PERVASIVE_PARENT_CORE_OFFSET => 32,
+    PERVASIVE_PARENT_EQ_OFFSET => 16,
+    PERVASIVE_PARENT_XBUS_OFFSET => 6,
+    PERVASIVE_PARENT_OBUS_OFFSET => 9,
+    PERVASIVE_PARENT_MCBIST_OFFSET => 7,
+    PERVASIVE_PARENT_MCS_OFFSET => 7,
+    PERVASIVE_PARENT_MCA_OFFSET => 7,
+    PERVASIVE_PARENT_PEC_OFFSET => 13,
+    PERVASIVE_PARENT_PHB_OFFSET => 13,
+    PERVASIVE_PARENT_NV_OFFSET => 5,
+};
 
 sub new
 {
@@ -152,11 +186,19 @@ sub printTarget
     my $target = shift;
 
     my $target_ptr = $self->getTarget($target);
+
+    if ($target eq "")
+    {
+        return;
+    }
+
     print $fh "<targetInstance>\n";
     my $target_id = $self->getAttribute($target, "PHYS_PATH");
     $target_id = substr($target_id, 9);
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
+
+
     print $fh "\t<id>" . $target_id . "</id>\n";
     print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
 
@@ -179,35 +221,142 @@ sub printAttribute
     # TODO RTC: TBD
     # temporary until we converge attribute types
     my %filter;
-    $filter{MRW_TYPE}                       = 1;
-    $filter{INSTANCE_PATH}                  = 1;
-    $filter{SYSTEM_NAME}                    = 1;
-    $filter{BUS_TYPE}                       = 1;
-    $filter{DIRECTION}                      = 1;
-    $filter{ENABLE_CAPI}                    = 1;
-    $filter{PCIE_CONFIG_NUM}                = 1;
-    $filter{PCIE_LANE_MASK}                 = 1;
-    $filter{PCIE_LANE_SET}                  = 1;
-    $filter{PCIE_NUM_LANES}                 = 1;
-    $filter{PHB_NUM}                        = 1;
-    $filter{IOP_NUM}                        = 1;
-    $filter{LOCATION_CODE}                  = 1;
-    $filter{MCS_NUM}                        = 1;
-    $filter{SCHEMATIC_INTERFACE}            = 1;
-    $filter{ENTITY_ID}                      = 1;
-    $filter{CLASS}                          = 1;
-    $filter{MODEL}                          = 1;
-    $filter{TYPE}                           = 1;
-    $filter{CDM_POLICIES}                   = 1;
-    $filter{CDM_POLICIES_BITMASK}           = 1;
-    $filter{ENTITY_ID_LOOKUP}               = 1;
-    $filter{ENTITY_INSTANCE}                = 1;
-    $filter{MBA_NUM}                        = 1;
-    $filter{IPMI_NAME}                      = 1;
-    $filter{INSTANCE_ID}                    = 1;
-    $filter{IO_CONFIG_SELECT}               = 1;
-    $filter{FRU_NAME}                       = 1;
-
+    $filter{MRW_TYPE}                                               = 1;
+    $filter{SYSTEM_NAME}                                            = 1;
+    $filter{BUS_TYPE}                                               = 1;
+    $filter{DIRECTION}                                              = 1;
+    $filter{ENABLE_CAPI}                                            = 1;
+    $filter{PCIE_CONFIG_NUM}                                        = 1;
+    $filter{PCIE_LANE_MASK}                                         = 1;
+    $filter{PCIE_LANE_SET}                                          = 1;
+    $filter{PCIE_NUM_LANES}                                         = 1;
+    $filter{PHB_NUM}                                                = 1;
+    $filter{IOP_NUM}                                                = 1;
+    $filter{LOCATION_CODE}                                          = 1;
+    $filter{LOCATION_CODE_TYPE}                                     = 1;
+    $filter{MCS_NUM}                                                = 1;
+    $filter{SCHEMATIC_INTERFACE}                                    = 1;
+    $filter{ENTITY_ID}                                              = 1;
+    $filter{CLASS}                                                  = 1;
+    $filter{MODEL}                                                  = 1;
+    $filter{TYPE}                                                   = 1;
+    $filter{CDM_POLICIES}                                           = 1;
+    $filter{CDM_POLICIES_BITMASK}                                   = 1;
+    $filter{ENTITY_ID_LOOKUP}                                       = 1;
+    $filter{ENTITY_INSTANCE}                                        = 1;
+    $filter{MBA_NUM}                                                = 1;
+    $filter{IPMI_NAME}                                              = 1;
+    $filter{INSTANCE_ID}                                            = 1;
+    $filter{INSTANCE_PATH}                                          = 1;
+    $filter{IO_CONFIG_SELECT}                                       = 1;
+    $filter{FRU_NAME}                                               = 1;
+    $filter{TPM_BACKUP_INFO}                                        = 1;
+    $filter{TPM_PRIMARY_INFO}                                       = 1;
+    $filter{ALL_MCS_IN_INTERLEAVING_GROUP}                          = 1;
+    $filter{AVERAGE_IPL_TIME}                                       = 1;
+    $filter{CHECK_SCRIPT}                                           = 1;
+    $filter{DMI_DFE_OVERRIDE}                                       = 1;
+    $filter{FREQ_A}                                                 = 1;
+    $filter{FREQ_NEST_HFT}                                          = 1;
+    $filter{FREQ_PB}                                                = 1;
+    $filter{FREQ_PB_HFT}                                            = 1;
+    $filter{FREQ_PCIE}                                              = 1;
+    $filter{FREQ_X}                                                 = 1;
+    $filter{FREQ_X_HFT}                                             = 1;
+    $filter{LED_ON_DEFAULT_GPIO_VALUE}                              = 1;
+    $filter{LED_STRATEGY}                                           = 1;
+    $filter{MSS_MCA_HASH_MODE}                                      = 1;
+    $filter{MRW_ENHANCED_GROUPING_NO_MIRRORING}                     = 1;
+    $filter{MRW_MEM_MIRRORING_ALLOWED}                              = 1;
+    $filter{MRW_MEM_MIRRORING_ENABLE_DEFAULT}                       = 1;
+    $filter{MRW_MEM_POWER_CONTROL_USAGE}                            = 1;
+    $filter{MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM}         = 1;
+    $filter{MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4}    = 1;
+    $filter{MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE}     = 1;
+    $filter{MSS_VOLT_VDDR_OFFSET_DISABLE}                           = 1;
+    $filter{OCC_LOAD_TIMEOUT}                                       = 1;
+    $filter{OCC_RESET_TIMEOUT}                                      = 1;
+    $filter{PCIE_DEFAULT_HDDW_SLOT_COUNT}                           = 1;
+    $filter{PCIE_MIN_HDDW_SLOT_COUNT}                               = 1;
+    $filter{PCIE_MAX_HDDW_SLOT_COUNT}                               = 1;
+    $filter{REDUNDANT_FSPS}                                         = 1;
+    $filter{SYSTEM_MTM}                                             = 1;
+    $filter{PM_EXTERNAL_VRM_STEPSIZE}                               = 1;
+    $filter{PM_EXTERNAL_VRM_STEPDELAY}                              = 1;
+    $filter{PM_SPIPSS_FREQUENCY}                                    = 1;
+    $filter{PM_SYSTEM_IVRMS_ENABLED}                                = 1;
+    $filter{NUMERIC_POD_TYPE_TEST}                                  = 1;
+    $filter{CARD_TYPE}                                              = 1;
+    $filter{PROC_PCIE_DSMP_CAPABLE}                                 = 1;
+    $filter{PROC_PCIE_IOP_CONFIG}                                   = 1;
+    $filter{PROC_PCIE_IOP_G2_PLL_CONTROL0}                          = 1;
+    $filter{PROC_PCIE_IOP_G3_PLL_CONTROL0}                          = 1;
+    $filter{PROC_PCIE_IOP_PCS_CONTROL0}                             = 1;
+    $filter{PROC_PCIE_IOP_PCS_CONTROL1}                             = 1;
+    $filter{PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0}                      = 1;
+    $filter{PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1}                      = 1;
+    $filter{PROC_PCIE_IOP_REVERSAL}                                 = 1;
+    $filter{PROC_PCIE_IOP_REVERSAL_BIFURCATED}                      = 1;
+    $filter{PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED}                  = 1;
+    $filter{PROC_PCIE_IOP_RX_PEAK}                                  = 1;
+    $filter{PROC_PCIE_IOP_RX_SDL}                                   = 1;
+    $filter{PROC_PCIE_IOP_RX_VGA_CONTROL2}                          = 1;
+    $filter{PROC_PCIE_IOP_TX_BWLOSS1}                               = 1;
+    $filter{PROC_PCIE_IOP_TX_FFE_GEN1}                              = 1;
+    $filter{PROC_PCIE_IOP_TX_FFE_GEN2}                              = 1;
+    $filter{PROC_PCIE_IOP_TX_FIFO_OFFSET}                           = 1;
+    $filter{PROC_PCIE_IOP_TX_RCVRDETCNTL}                           = 1;
+    $filter{PROC_PCIE_IOP_ZCAL_CONTROL}                             = 1;
+    $filter{NPU_MMIO_BAR_SIZE}                                      = 1;
+    $filter{NPU_MMIO_BAR_BASE_ADDR}                                 = 1;
+    $filter{PROC_PCIE_REFCLOCK_ENABLE}                              = 1;
+    $filter{PSI_HB_ESP_ADDR}                                        = 1;
+    $filter{TPM_INFO}                                               = 1;
+    $filter{STANDBY_PLUGGABLE}                                      = 1;
+    $filter{CPM_INFLECTION_POINTS}                                  = 1;
+    $filter{PROC_FABRIC_X_ATTACHED_CHIP_CNFG}                       = 1;
+    $filter{PROC_PCIE_HOTPLUG_DISABLE_ACTIONS}                      = 1;
+    $filter{SYSTEM_RESCLK_VALUE}                                    = 1;
+    $filter{HWAS_STATE}                                             = 1;
+    $filter{PROC_MIRROR_SIZES}                                      = 1;
+    $filter{PROC_FABRIC_X_ADDR_DIS}                                 = 1;
+    $filter{PROC_PCIE_HOTPLUG_ENABLE_ACTIONS}                       = 1;
+    $filter{PROC_FABRIC_A_ATTACHED_LINK_ID}                         = 1;
+    $filter{PROC_MEM_BASES}                                         = 1;
+    $filter{UNIT_TEST_MCA_MEMORY_SIZES}                             = 1;
+    $filter{SYSTEM_RESCLK_L3_VALUE}                                 = 1;
+    $filter{PROC_CHTM_BAR_SIZES}                                    = 1;
+    $filter{SYSTEM_RESCLK_FREQ_REGIONS}                             = 1;
+    $filter{PROC_MIRROR_SIZES_ACK}                                  = 1;
+    $filter{PROC_FABRIC_X_ATTACHED_LINK_ID}                         = 1;
+    $filter{PROC_FABRIC_A_ATTACHED_LINK_ID}                         = 1;
+    $filter{PROC_FABRIC_A_ATTACHED_CHIP_ID}                         = 1;
+    $filter{PROC_MEM_SIZES}                                         = 1;
+    $filter{PROC_FABRIC_OPTICS_CONFIG_MODE}                         = 1;
+    $filter{PROC_PCIE_LANE_EQUALIZATION}                            = 1;
+    $filter{HOT_PLUG_POWER_CONTROLLER_INFO}                         = 1;
+    $filter{PROC_MEM_BASES_ACK}                                     = 1;
+    $filter{PROC_FABRIC_A_ATTACHED_CHIP_CNFG}                       = 1;
+    $filter{CHTM_TRACE_TYPE}                                        = 1;
+    $filter{PROC_PCIE_NOT_F_LINK}                                   = 1;
+    $filter{PROC_FABRIC_X_ATTACHED_CHIP_ID}                         = 1;
+    $filter{PROC_FABRIC_A_ADDR_DIS}                                 = 1;
+    $filter{MSS_MCS_GROUP_32}                                       = 1;
+    $filter{PROC_MIRROR_BASES_ACK}                                  = 1;
+    $filter{DELETE_AFFINITY_PATH}                                   = 1;
+    $filter{PROC_MIRROR_BASES}                                      = 1;
+    $filter{PROC_FABRIC_A_LINK_DELAY}                               = 1;
+    $filter{PROC_MEM_SIZES_ACK}                                     = 1;
+    $filter{SYSTEM_RESCLK_FREQ_REGION_INDEX}                        = 1;
+    $filter{PROC_FABRIC_X_LINK_DELAY}                               = 1;
+    $filter{PROC_CHTM_BAR_BASE_ADDR}                                = 1;
+    $filter{TOD_CPU_DATA}                                           = 1;
+    $filter{MSS_VOLT}                                               = 1;
+    $filter{EFF_READ_DBI}                                           = 1;
+    $filter{RU_TYPE}                                                = 1;
+    $filter{STANDBY_PLUGGABLE}                                      = 1;
+    $filter{MANUFACTURER}                                           = 1;
+    $filter{HWAS_STATE_CHANGED_SUBSCRIPTION_MASK}                   = 1;
     if ($filter{$attribute} == 1)
     {
         return;
@@ -313,6 +462,7 @@ sub buildHierarchy
     {
         $baseptr = $self->{xml}->{'targetInstances'}->{'targetInstance'};
     }
+
     if ($target eq "")
     {
         ## find system target
@@ -453,189 +603,441 @@ sub buildHierarchy
 ## HOSTBOOT expected hierarchy: sys/node/proc/<unit>
 ##                              sys/node/proc/mcs/membuf/<unit>
 ##                              sys/node/proc/mcs/membuf/mba/dimm
+## This function also sets the common attributes for all the targets
+## Common attributes include:
+##  - FAPI_NAME
+##  - PHYS_PATH
+##  - AFFINITY_PATH
+##  - ORDINAL_ID
+##  - HUID
 
 sub buildAffinity
 {
     my $self = shift;
-    my $node      = -1;
-    my $tpm       = -1;
-    my $proc      = -1;
-    my $node_phys = "";
-    my $node_aff  = "";
-    my $core_num = 0;
+    my $node            = -1;
+    my $proc            = -1;
+    my $tpm             = -1;
+    my $sys_phys        = "";
+    my $node_phys       = "";
+    my $node_aff        = "";
+    my $sys_pos         = -1;
+    my $mcbist          = -1;
+
     $self->{membuf_inst_num}=0;
+
     foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
     {
         my $target_ptr = $self->{data}->{TARGETS}{$target};
         my $type       = $self->getType($target);
         my $type_id    = $self->getEnumValue("TYPE", $type);
+        my $pos        = $self->{data}->{TARGETS}{$target}{TARGET}{position};
+        $sys_pos       = $pos if ($type eq "SYS");
+
         if ($type_id eq "") { $type_id = 0; }
 
         if ($type eq "SYS")
         {
             $proc = -1;
             $node = -1;
-
             $self->{targeting}{SYS}[0]{KEY} = $target;
-            $self->setAttribute($target, "AFFINITY_PATH",
-                                         "affinity:".$self->{TOP_LEVEL});
-            $self->setAttribute($target, "PHYS_PATH",
-                                         "physical:".$self->{TOP_LEVEL});
-            $self->setAttribute($target, "ENTITY_INSTANCE","0");
+
+            #SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML
+            #Also, there is no HUID for SYS
+            $self->setAttribute($target,"FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target,"FAPI_POS",      $pos);
+            $self->setAttribute($target,"ORDINAL_ID",    $pos);
+            $sys_phys = $self->getAttribute($target, "PHYS_PATH");
+            $sys_phys = substr($sys_phys, 9);
         }
         elsif ($type eq "NODE")
         {
-            $core_num = 0;
-            $proc = -1;
-            $self->{dimm_tpos} = 0;
-            $self->{membuf_inst_num}=0;
+            $proc                    = -1;
+            $self->{membuf_inst_num} = 0;
             $node++;
-            $node_phys = "physical:".$self->{TOP_LEVEL}."/node-$node";
-            $node_aff  = "affinity:".$self->{TOP_LEVEL}."/node-$node";
+
+            $node_phys = "physical:".$sys_phys."/node-$node";
+            $node_aff  = "affinity:".$sys_phys."/node-$node";
+
             $self->{targeting}{SYS}[0]{NODES}[$node]{KEY} = $target;
-            $self->setAttribute($target, "AFFINITY_PATH",
-                "affinity:".$self->{TOP_LEVEL}."/node-$node");
-            $self->setAttribute($target, "PHYS_PATH",
-                "physical:".$self->{TOP_LEVEL}."/node-$node");
-            $self->setHuid($target, 0, $node);
-            $self->setAttribute($target, "ENTITY_INSTANCE",$node);
+
+            $self->setHuid($target, $sys_pos, $node);
+            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target, "FAPI_POS",      $pos);
+            $self->setAttribute($target, "PHYS_PATH",     $node_phys);
+            $self->setAttribute($target, "AFFINITY_PATH", $node_aff);
+            $self->setAttribute($target, "ORDINAL_ID",    $pos);
         }
         elsif ($type eq "TPM")
         {
             $tpm++;
+
             $self->{targeting}{SYS}[0]{NODES}[$node]{TPMS}[$tpm]{KEY} = $target;
-            $self->setAttribute($target, "AFFINITY_PATH",
-                                "affinity:".$self->{TOP_LEVEL}.
-                                "/node-$node/tpm-$tpm");
-            $self->setAttribute($target, "PHYS_PATH",
-                                "physical:".$self->{TOP_LEVEL}.
-                                "/node-$node/tpm-$tpm");
-            $self->setHuid($target, 0, $tpm);
-            $self->setAttribute($target, "ENTITY_INSTANCE",$tpm);
+
+            my $tpm_phys = $node_phys . "/tpm-$tpm";
+            my $tpm_aff  = $node_aff  . "/tpm-$tpm";
+
+
+            $self->setHuid($target, $sys_pos, $tpm);
+            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target, "FAPI_POS",      $pos);
+            $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
+            $self->setAttribute($target, "AFFINITY_PATH", $tpm_aff);
+            $self->setAttribute($target, "ORDINAL_ID",    $pos);
+        }
+        elsif ($type eq "MCS")
+        {
+            $self->setAttribute($target, "VPD_REC_NUM", 0);
+            $self->setAttribute($target, "MEMVPD_POS",
+                $self->getAttribute($target, "CHIP_UNIT"));
+        }
+        elsif ($type eq "MCA")
+        {
+            my $ddrs = $self->findConnections($target,"DDR4","");
+            $self->processDimms($ddrs, $sys_pos, $node_phys, $node, $proc);
         }
         elsif ($type eq "PROC")
         {
             $proc++;
-            my $num_mcs = 0;
-            ### count number of MCSs
-            foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
-            {
-                my $unit_type = $self->getType($unit);
-                if ($unit_type eq "MCS")
-                {
-                    $num_mcs++;
-                }
-            }
-            if ($num_mcs > $self->{MAX_MCS})
-            {
-                $self->{MAX_MCS} = $num_mcs;
-            }
-            $self->{NUM_PROCS_PER_NODE} = $proc + 1;
-            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY} =
-              $target;
 
-            $self->setHuid($target, 0, $node);
-            my $socket = $self->getTargetParent(
-                         $self->getTargetParent($target));
-            my $parent_affinity = "affinity:".$self->{TOP_LEVEL}
-                                  ."/node-$node/proc-$proc";
-            my $parent_physical = "physical:".$self->{TOP_LEVEL}
-                                  ."/node-$node/proc-$proc";
-            $self->setAttribute($target, "AFFINITY_PATH",  $parent_affinity);
-            $self->setAttribute($target, "PHYS_PATH",      $parent_physical);
-            $self->setAttribute($target, "POSITION",       $proc);
-            $self->setAttribute($target, "ENTITY_INSTANCE",$proc);
+            $self->{NUM_PROCS_PER_NODE} = $proc + 1;
+
+            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY} =
+                $target;
+
+            my $socket=$self->getTargetParent($self->getTargetParent($target));
+            my $parent_affinity = $node_aff  . "/proc-$proc";
+            my $parent_physical = $node_phys . "/proc-$proc";
+
+            my $fapi_name = getFapiName($type, $node, $proc);
+
+            $self->setHuid($target, $sys_pos, $node);
+            $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
+            $self->setAttribute($target, "PHYS_PATH",       $parent_physical);
+            $self->setAttribute($target, "AFFINITY_PATH",   $parent_affinity);
+            $self->setAttribute($target, "ORDINAL_ID",      $pos);
+            $self->setAttribute($target, "POSITION",        $pos);
+
             $self->setAttribute($target, "FABRIC_GROUP_ID",
                   $self->getAttribute($socket,"FABRIC_GROUP_ID"));
              $self->setAttribute($target, "FABRIC_CHIP_ID",
                   $self->getAttribute($socket,"FABRIC_CHIP_ID"));
-
             $self->setAttribute($target, "VPD_REC_NUM",    $proc);
 
+            $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
+        }
+    }
+}
 
-            foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
+
+sub iterateOverChiplets
+{
+    my $self     = shift;
+    my $target   = shift;
+    my $sys      = shift;
+    my $node     = shift;
+    my $proc     = shift;
+    my $tgt_ptr        = $self->getTarget($target);
+    my $tgt_type       = $self->getType($target);
+
+    my $target_children  = $self->getTargetChildren($target);
+    my $prev_target = "PROC";
+
+    if ($target_children eq "")
+    {
+        return "";
+    }
+    else
+    {
+        foreach my $child (@{ $self->getTargetChildren($target) })
+        {
+            my $unit_ptr        = $self->getTarget($child);
+            my $unit_type       = $self->getType($child);
+            #System XML has some sensor target as hidden children
+            #of targets. We don't care for sensors in this function
+            #So, we can avoid them with this conditional
+            if ($unit_type ne "NA" && $unit_type ne "FSI" &&
+                $unit_type ne "PCI")
             {
-                my $unit_ptr     = $self->getTarget($unit);
-                my $unit_type    = $self->getType($unit);
-                my $unit_type_id = $self->getEnumValue("TYPE", $unit_type);
-                if (   $unit_type_id eq "" || $unit_type eq "FSI"
-                    || $unit_type eq "MCS")
-                {
-                    $unit_type_id = 0;
-                }
-
-                ## don't want non-hostboot targets
-                if ($unit_type_id > 0)
-                {
-
-                    push(@{$self->{targeting}
-                            ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{$unit_type}},
-                            { 'KEY' => $unit });
-                    my $affinity_path =
-                        $parent_affinity . "/"
-                      . $self->getTarget($unit)->{TARGET}->{instance_name};
-                    my $physical_path =
-                        $parent_physical . "/"
-                      . $self->getTarget($unit)->{TARGET}->{instance_name};
-                    $self->setAttribute($unit, "AFFINITY_PATH",$affinity_path);
-                    $self->setAttribute($unit, "PHYS_PATH", $physical_path);
-                    $self->setHuid($unit, 0, $node);
-                    if ($unit_type eq "OCC")
-                    {
-                        $self->setAttribute($unit, "ENTITY_INSTANCE",$proc);
-                    }
-                    ## export core
-                    if ($unit_type eq "EX")
-                    {
-                        my $core_unit_num = $self->getAttribute($unit,
-                            "CHIP_UNIT");
-
-                        my $core_unit =
-                          $self->{data}->{TARGETS}{$unit}{CHILDREN}[0];
-                        push(
-                            @{
-                                $self->{targeting}
-                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{CORE}
-                              },
-                            { 'KEY' => $core_unit }
-                        );
-                        my $core_affinity_path =
-                            $affinity_path . "/"
-                          . $self->getTarget($core_unit)->{TARGET}
-                          ->{instance_name};
-                        my $core_physical_path =
-                            $physical_path . "/"
-                          . $self->getTarget($core_unit)->{TARGET}
-                          ->{instance_name};
-                        $self->setAttribute($core_unit, "AFFINITY_PATH",
-                            $core_affinity_path);
-                        $self->setAttribute($core_unit, "PHYS_PATH",
-                            $core_physical_path);
-                        $self->setAttribute($core_unit, "CHIP_UNIT",
-                            $core_unit_num);
-                        $self->setHuid($core_unit, 0, $node);
-                        $self->setAttribute($core_unit, "ENTITY_INSTANCE",
-                             $core_num);
-                        $core_num++;
-                    }
-                }
-                elsif ($unit_type eq "MCS")
-                {
-                    $self->processMcs($unit, $node, $proc, $parent_affinity,
-                        $parent_physical, $node_phys);
-
-                }
+                #set common attrs for child
+                $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
+                $self->iterateOverChiplets($child, $sys, $node, $proc);
             }
         }
     }
 }
 
+sub setCommonAttrForChiplet
+{
+    my $self        = shift;
+    my $target      = shift;
+    my $sys         = shift;
+    my $node        = shift;
+    my $proc        = shift;
+
+    my $tgt_ptr        = $self->getTarget($target);
+    my $tgt_type       = $self->getType($target);
+
+    push(@{$self->{targeting}
+            ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{$tgt_type}},
+            { 'KEY' => $target });
+
+    #This is a static variable. Persists over time
+    #everything that is a grand_children of proc
+    state %grand_children;
+    if (not %grand_children)
+    {
+        $grand_children{"EX"}    = 1;
+        $grand_children{"CORE"}  = 1;
+        $grand_children{"MCS"}   = 1;
+        $grand_children{"MCA"}   = 1;
+    }
+
+    my $pos             = $self->getAttribute($target, "CHIP_UNIT");
+    my $unit_pos        = $pos;
+
+    #HB expects chiplets' positions in AFFINITY_PATH to be relative to the
+    #parent, serverwiz outputs it unique/absolute.
+    #Since, in P9, each of the chiplets only have
+    #up to two children (each eq has 2 ex, each ex has 2 cores, each mcbist has
+    #two mcs, etc), we can simply calculate this by (absolute_Pos%2)
+    #CHIP_UNIT is absolute position
+    if ($grand_children{$tgt_type} eq 1)
+    {
+        $unit_pos = $pos%2;
+    }
+
+    my $parent_affinity = $self->getAttribute(
+                          $self->getTargetParent($target),"AFFINITY_PATH");
+    my $parent_physical = $self->getAttribute(
+                          $self->getTargetParent($target),"PHYS_PATH");
+
+    my $affinity_path   = $parent_affinity . "/" . lc $tgt_type ."-". $unit_pos;
+    my $physical_path   = $parent_physical . "/" . lc $tgt_type ."-". $unit_pos;
+
+    my $fapi_name       = getFapiName($tgt_type, $node, $proc, $pos);
+
+    $self->{huid_idx}->{$tgt_type} = $pos;
+    $self->setHuid($target, $sys, $node);
+    $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
+    $self->setAttribute($target, "PHYS_PATH",       $physical_path);
+    $self->setAttribute($target, "AFFINITY_PATH",   $affinity_path);
+    $self->setAttribute($target, "ORDINAL_ID",      $pos);
+    $self->setAttribute($target, "FAPI_POS",        $pos);
+    $self->setAttribute($target, "REL_POS",         $pos);
+
+    my $pervasive_parent= getPervasiveForUnit("$tgt_type$pos");
+    if ($pervasive_parent ne "")
+    {
+        my $perv_parent_val =
+            "physical:sys-$sys/node-$node/proc-$proc/perv-$pervasive_parent";
+        $self->setAttribute($target, "PARENT_PERVASIVE", $perv_parent_val);
+    }
+}
+
+sub getFapiName
+{
+    my $target      = shift;
+    my $node        = shift;
+    my $chipPos     = shift;
+    my $chipletPos  = shift;
+
+    if ($target eq "")
+    {
+        die "getFapiName: ERROR: Please specify a taget name\n";
+    }
+
+    #This is a static variable. Persists over time
+    state %nonFapiTargets;
+    if (not %nonFapiTargets)
+    {
+        $nonFapiTargets{"NODE"}  = "NA";
+        $nonFapiTargets{"TPM"}   = "NA";
+        $nonFapiTargets{"NVBUS"} = "NA";
+        $nonFapiTargets{"OCC"}   = "NA";
+    }
+
+    if ($nonFapiTargets{$target} eq "NA")
+    {
+        return $nonFapiTargets{$target};
+    }
+    elsif ($target eq "SYS")
+    {
+        return "k0";
+    }
+    elsif ($target eq "PROC" || $target eq "DIMM")
+    {
+        if ($node eq "" || $chipPos eq "")
+        {
+            die "getFapiName: ERROR: Must specify node and chipPos for $target
+                 current node: $node, chipPos: $chipPos\n";
+        }
+
+        my $chip_name = ($target eq "PROC") ? "pu" : "dimm";
+
+        my $fapi_name = sprintf("%s:k0:n%d:s0:p%02d",$chip_name,$node,$chipPos);
+        return $fapi_name;
+    }
+    else
+    {
+        if ($node eq "" || $chipPos eq "" || $chipletPos eq "")
+        {
+            die "getFapiName: ERROR: Must specify node, chipPos,
+                 chipletPos for $target. Current node: $node, chipPos: $chipPos
+                 chipletPos: $chipletPos\n";
+        }
+
+        $target = lc $target;
+        my $fapi_name = sprintf("pu.$target:k0:n%d:s0:p%02d:c%d",
+            $node, $chipPos, $chipletPos);
+        return $fapi_name;
+    }
+}
+
+sub getPervasiveForUnit
+{
+    # Input should be of the form <type><chip unit>, example: "core0"
+    my ($unit) = @_;
+
+    # The mapping is a static variable that is preserved across new calls to
+    # the function to speed up the mapping performance
+    state %unitToPervasive;
+
+    if ( not %unitToPervasive )
+    {
+        for my $core (0..MAX_CORE_PER_PROC-1)
+        {
+            $unitToPervasive{"CORE$core"} = PERVASIVE_PARENT_CORE_OFFSET+$core;
+        }
+        for my $eq (0..MAX_EQ_PER_PROC-1)
+        {
+            $unitToPervasive{"EQ$eq"} = PERVASIVE_PARENT_EQ_OFFSET + $eq;
+        }
+        for my $xbus (0..MAX_XBUS_PER_PROC-1)
+        {
+            $unitToPervasive{"XBUS$xbus"} = PERVASIVE_PARENT_XBUS_OFFSET;
+        }
+        for my $obus (0..MAX_OBUS_PER_PROC-1)
+        {
+            $unitToPervasive{"OBUS$obus"} = PERVASIVE_PARENT_OBUS_OFFSET+$obus;
+        }
+        for my $capp (0..MAX_CAPP_PER_PROC-1)
+        {
+            $unitToPervasive{"CAPP$capp"} = 2 * ($capp+1);
+        }
+        for my $mcbist (0..MAX_MCBIST_PER_PROC-1)
+        {
+            $unitToPervasive{"MCBIST$mcbist"} =
+                PERVASIVE_PARENT_MCBIST_OFFSET + $mcbist;
+        }
+        for my $mcs (0..MAX_MCS_PER_PROC-1)
+        {
+            $unitToPervasive{"MCS$mcs"} =
+                PERVASIVE_PARENT_MCS_OFFSET + ($mcs > 1);
+        }
+        for my $mca (0..MAX_MCA_PER_PROC-1)
+        {
+            $unitToPervasive{"MCA$mca"} =
+                PERVASIVE_PARENT_MCA_OFFSET + ($mca > 3);
+        }
+        for my $pec (0..MAX_PEC_PER_PROC-1)
+        {
+            $unitToPervasive{"PEC$pec"} =
+                PERVASIVE_PARENT_PEC_OFFSET + $pec;
+        }
+        for my $phb (0..MAX_PHB_PER_PROC-1)
+        {
+            $unitToPervasive{"PHB$phb"} =
+                PERVASIVE_PARENT_PHB_OFFSET + ($phb>0) + ($phb>2);
+        }
+        for my $nv (0..MAX_NV_PER_PROC-1)
+        {
+            $unitToPervasive{"NV$nv"} = PERVASIVE_PARENT_NV_OFFSET;
+        }
+    }
+
+    my $pervasive = "";
+    if(exists $unitToPervasive{$unit})
+    {
+        $pervasive = $unitToPervasive{$unit};
+    }
+
+    return $pervasive
+}
+sub processDimms
+{
+    my $self        = shift;
+    my $ddrs        = shift;
+    my $sys         = shift;
+    my $node_phys   = shift;
+    my $node        = shift;
+    my $proc        = shift;
+
+    if ($ddrs ne "")
+    {
+        #There should be 2 Connections
+        #Each MCA has 2 ddr channels
+        foreach my $dimms (@{$ddrs->{CONN}})
+        {
+            my $ddr = $dimms->{SOURCE};
+            my $port_num = $self->getAttribute($ddr,"MBA_PORT");
+            my $dimm_num = $self->getAttribute($ddr,"MBA_DIMM");
+            my $dimm=$dimms->{DEST_PARENT};
+
+            #proc->mcbist->mcs->mca->ddr
+            my $mca_target          = $self->getTargetParent($ddr);
+            my $mcs_target          = $self->getTargetParent($mca_target);
+            my $mcbist_target       = $self->getTargetParent($mcs_target);
+            my $proc_target         = $self->getTargetParent($mcbist_target);
+            my $dimm_connector_tgt  = $self->getTargetParent($dimm);
+
+            my $mca     = $self->getAttribute($mca_target,         "CHIP_UNIT");
+            my $mcs     = $self->getAttribute($mcs_target,         "CHIP_UNIT");
+            my $mcbist  = $self->getAttribute($mcbist_target,      "CHIP_UNIT");
+            my $dimm_pos= $self->getAttribute($dimm_connector_tgt, "POSITION");
+
+            $dimm_pos   = ($dimm_pos*2) + $port_num;
+
+            $self->setAttribute($dimm, "AFFINITY_PATH",
+                $self->getAttribute($mcbist_target, "AFFINITY_PATH")
+             . "/mcs-$mcs/mca-$mca/dimm-$port_num"
+            );
+
+            $self->setAttribute($dimm, "PHYS_PATH",
+                $node_phys . "/dimm-" . $dimm_pos);
+
+            my $type       = $self->getType($dimm);
+
+            $self->setAttribute($dimm,"FAPI_NAME",
+                    getFapiName($type, $node, $dimm_pos));
+
+            $self->setAttribute($dimm, "FAPI_POS",  $dimm_pos);
+            $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
+            $self->setAttribute($dimm, "POSITION",  $dimm_pos);
+            $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
+
+            $self->{huid_idx}->{$type} = $dimm_pos;
+            $self->setHuid($dimm, $sys, $node);
+
+            $self->{targeting}
+                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCBISTS}[$mcbist]
+                    {MCSS}[$mcs]{MCAS}[$mca]{DIMMS}[$dimm_pos]{KEY}
+                    = $dimm;
+        }
+
+    }
+
+}
 sub processMcs
 {
+#@TODO RTC:163874
+#Most of the nimmbus functionality is already in incorporated in other
+#functions. Leaving this in as we may need this code for centaur/cumulus.
+=begin
     my $self            = shift;
     my $unit            = shift;
     my $node            = shift;
     my $proc            = shift;
+    my $mcbist          = shift;
     my $parent_affinity = shift;
     my $parent_physical = shift;
     my $node_phys       = shift;
@@ -646,12 +1048,12 @@ sub processMcs
     $self->setAttribute($unit, "PHYS_PATH", $parent_physical . "/mcs-$mcs");
     $self->setAttribute($unit, "MCS_NUM",   $mcs);
     $self->setHuid($unit, 0, $node);
-    $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{KEY} =
-      $unit;
+    $self->{targeting}{SYS}[0]{NODES}[$node]{MCBISTS}{$mcbist}{MCSS}[$mcs]{KEY}
+             = $unit;
 
-        $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT","0");
-        $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP","0");
-        $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE","0");
+#    $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT","0");
+#    $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP","0");
+#    $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE","0");
 
     ## Find connected membufs
     my $membuf_dmi = $self->{data}->{TARGETS}{$unit}{CONNECTION}{DEST}[0];
@@ -719,7 +1121,8 @@ sub processMcs
                 $self->setHuid($child, 0, $node);
             }
 
-            if ($self->getType($child) eq "MBA")
+
+            if ($self->getType($child) eq "MCA")
             {
                 my $mba = $self->getAttribute($child,"MBA_NUM");
                 $self->setAttribute($child, "AFFINITY_PATH",
@@ -732,9 +1135,10 @@ sub processMcs
                   {MBAS}[$mba]{KEY} = $child;
 
                 ## Trace the DDR busses to find connected DIMM
-                my $ddrs = $self->findConnections($child,"DDR3","");
+                my $ddrs = $self->findConnections($child,"DDR4","");
                 if ($ddrs ne "")
                 {
+
                     my $affinitypos=0;
                     foreach my $dimms (@{$ddrs->{CONN}})
                     {
@@ -771,6 +1175,7 @@ sub processMcs
             }
         }
     }
+=cut
 }
 
 sub setFsiAttributes
@@ -808,7 +1213,6 @@ sub setFsiAttributes
         $self->setAttribute($target, "ALTFSI_MASTER_PORT", $fsi_port);
     }
 
-    #my $phys_path = $targetObj->getAttribute($parentTarget, "PHYS_PATH");
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","flipPort",
           $flip_port);
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");
@@ -928,10 +1332,10 @@ sub findConnections
     my $target   = shift;
     my $bus_type = shift;
     my $end_type = shift;
-
     my %connections;
     my $num=0;
     my $target_children = $self->getTargetChildren($target);
+
     if ($target_children eq "")
     {
         return "";
@@ -949,6 +1353,7 @@ sub findConnections
                 my $type        = $self->getMrwType($dest_parent);
                 my $dest_type   = $self->getType($dest_parent);
                 my $dest_class  = $self->getAttribute($dest_parent,"CLASS");
+
                 if ($type eq "NA")
                 {
                     $type = $dest_type;
@@ -1184,6 +1589,8 @@ sub setAttributeField
     my $value     = shift;
     $self->{data}->{TARGETS}->{$target}->{ATTRIBUTES}->{$attribute}->{default}
       ->{field}->{$field}->{value} = $value;
+
+    $self->log($target, "Setting Attribute: $attribute ($field) =$value");
 }
 ## returns complex attribute value
 sub getAttributeField
