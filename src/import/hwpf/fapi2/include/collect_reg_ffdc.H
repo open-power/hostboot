@@ -486,18 +486,22 @@ void collectRegFfdc(const fapi2::ffdc_t i_parent,
     std::vector<uint32_t> l_cfamAddresses;
     std::vector<uint64_t> l_scomAddresses;
 
-    uint32_t l_ffdcSize = 0;
+    uint32_t l_ffdcSize = 0;        // total size needed for all entries
+    uint32_t l_ffdcRegReadSize = 0; // readRegisters size addition
 
     // call generated code to fetch the address vectors
-    getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcSize);
+    getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcRegReadSize);
 
     uint32_t l_position = 0;
+
+    // initialize to single readRegister entry
+    l_ffdcSize = l_ffdcRegReadSize;
 
     // add the position size to the total
     l_ffdcSize += sizeof(l_position);
 
     // update size for each target
-    l_ffdcSize += (l_ffdcSize * l_targets.size());
+    l_ffdcSize = (l_ffdcSize * l_targets.size());
 
     uint8_t  l_pBuf[l_ffdcSize];
 
@@ -534,6 +538,9 @@ void collectRegFfdc(const fapi2::ffdc_t i_parent,
             readRegisters(l_parent, l_pData, l_cfamAddresses,
                           l_scomAddresses, l_offset);
         }
+
+        // advance the pointer past readRegisters data entry
+        l_pData += l_ffdcRegReadSize;
     }
 
     FAPI_INF("collectRegFfdc. SCOM address count: %#lx", l_scomAddresses.size());
