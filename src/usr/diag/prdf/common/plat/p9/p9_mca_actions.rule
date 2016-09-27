@@ -52,3 +52,13 @@ actionclass mainline_ce_ue_handling
     TBDDefaultCallout;
 };
 
+/** Handle RCD parity error. */
+actionclass rcd_parity_error
+{
+    callout(connected(TYPE_DIMM,0), MRU_HIGH); # DIMM 0 HIGH
+    callout(connected(TYPE_DIMM,1), MRU_HIGH); # DIMM 1 HIGH
+    calloutSelfLow;                            # Self LOW
+    threshold32pday;                           # Threshold 32/day
+    funccall("RcdParityError");                # Run TPS on TH for all MCA ranks
+};
+

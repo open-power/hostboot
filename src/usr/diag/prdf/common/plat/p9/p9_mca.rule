@@ -242,7 +242,7 @@ group gMCACALFIR filter singlebit
     /** MCACALFIR[4]
      *  A RCD parity error has been detected
      */
-    (rMCACALFIR, bit(4)) ? defaultMaskedError;
+    (rMCACALFIR, bit(4)) ? rcd_parity_error;
 
     /** MCACALFIR[5]
      *  Calibration complete indication xout
@@ -287,7 +287,7 @@ group gMCACALFIR filter singlebit
     /** MCACALFIR[13]
      *  Persistent RCD error, port failed
      */
-    (rMCACALFIR, bit(13)) ? defaultMaskedError;
+    (rMCACALFIR, bit(13)) ? all_dimm_H_self_L_th_1;
 
     /** MCACALFIR[14]
      *  RCD during periodic cal

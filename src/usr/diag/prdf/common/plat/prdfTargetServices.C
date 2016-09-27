@@ -1410,8 +1410,8 @@ void getMasterRanks<TYPE_MBA>( TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
-                    uint8_t i_ds )
+void __getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
+                      uint8_t i_ds )
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( T == getTargetType(i_trgt) );
@@ -1452,12 +1452,18 @@ void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
 template<>
 void getSlaveRanks<TYPE_MCA>( TargetHandle_t i_trgt,
                               std::vector<MemRank> & o_ranks,
-                              uint8_t i_ds );
+                              uint8_t i_ds )
+{
+    __getSlaveRanks<TYPE_MCA>( i_trgt, o_ranks, i_ds );
+}
 
 template<>
 void getSlaveRanks<TYPE_MBA>( TargetHandle_t i_trgt,
                               std::vector<MemRank> & o_ranks,
-                              uint8_t i_ds );
+                              uint8_t i_ds )
+{
+    __getSlaveRanks<TYPE_MBA>( i_trgt, o_ranks, i_ds );
+}
 
 //------------------------------------------------------------------------------
 

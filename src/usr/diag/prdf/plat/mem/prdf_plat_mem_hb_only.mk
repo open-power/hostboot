@@ -38,6 +38,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem
 ################################################################################
 
 # plat/mem/ (rule plugin related)
+prd_rule_plugin += prdfP9Mca.o
 prd_rule_plugin += prdfP9Mcbist.o
 
 ################################################################################
