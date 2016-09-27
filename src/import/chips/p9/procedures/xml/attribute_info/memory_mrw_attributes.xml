@@ -30,11 +30,14 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
-        Set to below optimum value/ rate. 
+        Set to below optimum value/ rate.
         On a per port (MCA) basis
-        Consumer: thermal_init
+        Also used for emergency mode throttle MBA_FARB4Q_EMERGENCY_N
+        Used to thermally protect the system in all supported environmental conditions when OCC is not functional
+        Consumer: thermal_init, initfile
     </description>
     <valueType>uint32</valueType>
+    <default>32</default>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
@@ -48,15 +51,112 @@
         Machine Readable Workbook Thermal Memory Power Limit
         Used to calculate throttles to be at or under the power limit
         Per DIMM basis
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-9,
+        DIMM_DENSITY = 10-12,
+        DIMM_STACK_TYPE = 13-14,
+        DRAM_MFGID = 15-16,
+        DIMMS_PER_PORT = 17-18,
+        Bits 19-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM+VPP thermal power limit per DIMM = 32-63
         Consumers: eff_config_thermal and bulk_pwr_throttles
     </description>
-    <valueType>uint32</valueType>
+    <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
+    <default>ffffe0001700</default>
+    <array>10</array>
     <platInit/>
-    <default>0x000006A4</default>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PWR_INTERCEPT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Intercept for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-9,
+        DIMM_DENSITY = 10-12,
+        DIMM_STACK_TYPE = 13-14,
+        DRAM_MFGID = 15-16,
+        DIMMS_PER_PORT = 17-18,
+        Bits 19-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <array>100</array>
+    <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_PWR_SLOPE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Power Curve Slope for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-9,
+        DIMM_DENSITY = 10-12,
+        DIMM_STACK_TYPE = 13-14,
+        DRAM_MFGID = 15-16,
+        DIMMS_PER_PORT = 17-18,
+        Bits 19-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <array>100</array>
+    <mssAccessorName>mrw_pwr_slope</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_REFRESH_RATE_REQUEST</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook Refresh Rate
+        Desired refresh interval used in refresh register 0, MBAREF0Q_CFG_REFRESH_INTERVAL
+        7.8 us (SINGLE)
+        3.9 us (DOUBLE)
+        7.02 us (SINGLE_10_PERCENT_FASTER)
+        3.51 us (DOUBLE_10_PERCENT_FASTER)
+   </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        DOUBLE=0,
+        SINGLE=1,
+        SINGLE_10_PERCENT_FASTER=2,
+        DOUBLE_10_PERCENT_FASTER=3
+    </enum>
+    <default>0x0</default>
+    <initToZero/>
+    <mssAccessorName>mrw_refresh_rate_select</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -65,13 +165,12 @@
     <description>
       Machine Readable Workbook DIMM power curve percent uplift
       for this system at max utilization.
-      Value should be 0 for ISDIMMs 
+      Value should be 0 for ISDIMMs
    </description>
     <valueType>uint8</valueType>
     <platInit/>
     <default>0x0</default>
     <initToZero/>
-    <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
   </attribute>
 
