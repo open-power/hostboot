@@ -579,44 +579,23 @@ fapi_try_exit:
 
 }
 
-/// @brief get children for all chiplets : Perv, Nest
+/// @brief get children for all chiplets
 ///
-/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PERV target
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
 /// @param[out]    o_pg_vector     vector of targets
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
-        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip,
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
         fapi2::buffer<uint64_t>& o_pg_vector)
 {
     fapi2::buffer<uint8_t> l_read_attrunitpos;
     FAPI_INF("p9_sbe_common_get_pg_vector: Entering ...");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chip,
-                           l_read_attrunitpos));
-
-    if (    l_read_attrunitpos == 0x01 )
+    for (auto l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV> (fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        o_pg_vector.setBit<0>();
-    }
-
-    if ( l_read_attrunitpos == 0x02 )
-    {
-        o_pg_vector.setBit<1>();
-    }
-
-    if (    l_read_attrunitpos == 0x03 )
-    {
-        o_pg_vector.setBit<2>();
-    }
-
-    if (    l_read_attrunitpos == 0x04 )
-    {
-        o_pg_vector.setBit<3>();
-    }
-
-    if (    l_read_attrunitpos == 0x05 )
-    {
-        o_pg_vector.setBit<4>();
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_target_cplt, l_read_attrunitpos));
+        uint8_t bitPos = l_read_attrunitpos;
+        o_pg_vector.setBit(bitPos);
     }
 
     FAPI_INF("p9_sbe_common_get_pg_vector: Exiting ...");

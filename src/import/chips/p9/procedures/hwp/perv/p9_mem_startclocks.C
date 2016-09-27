@@ -77,13 +77,8 @@ fapi2::ReturnCode p9_mem_startclocks(const
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_sync_mode),
              "Error from FAPI_ATTR_GET (ATTR_MC_SYNC_MODE)");
 
-    for (auto l_target_cplt : i_target_chip.getChildren<fapi2::TARGET_TYPE_PERV>
-         (static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_ALL_NEST |
-                                           fapi2::TARGET_FILTER_TP), fapi2::TARGET_STATE_FUNCTIONAL))
-    {
-        FAPI_TRY(p9_sbe_common_get_pg_vector(l_target_cplt, l_pg_vector));
-        FAPI_DBG("pg targets vector: %#018lX", l_pg_vector);
-    }
+    FAPI_TRY(p9_sbe_common_get_pg_vector(i_target_chip, l_pg_vector));
+    FAPI_DBG("pg targets vector: %#018lX", l_pg_vector);
 
     if (!l_sync_mode)
     {
@@ -134,7 +129,7 @@ static fapi2::ReturnCode p9_mem_startclocks_fence_setup_function(
 
     if ( l_read_attrunitpos == 0x07 )
     {
-        if ( i_pg_vector.getBit<4>() == 1 )
+        if ( i_pg_vector.getBit<5>() == 1 )
         {
             FAPI_DBG("Drop chiplet fence");
             //Setting NET_CTRL0 register value
@@ -146,7 +141,7 @@ static fapi2::ReturnCode p9_mem_startclocks_fence_setup_function(
 
     if ( l_read_attrunitpos == 0x08 )
     {
-        if ( i_pg_vector.getBit<2>() == 1 )
+        if ( i_pg_vector.getBit<3>() == 1 )
         {
             FAPI_DBG("Drop chiplet fence");
             //Setting NET_CTRL0 register value

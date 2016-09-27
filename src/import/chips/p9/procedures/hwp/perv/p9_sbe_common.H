@@ -78,7 +78,7 @@ fapi2::ReturnCode p9_sbe_common_flushmode(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
 
 fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
-        fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip,
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
         fapi2::buffer<uint64_t>& o_pg_vector);
 
 fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
