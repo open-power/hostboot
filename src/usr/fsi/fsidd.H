@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,8 @@
 #include <usr/fsi/fsiif.H>
 #include <usr/fsi/fsi_reasoncodes.H>
 #include <map>
+#include "fsi_common.H"
+
 namespace FSI { class UdPresence; }
 
 /** @file fsidd.H
@@ -190,70 +192,6 @@ class FsiDD
                      size_t  i_buflen = 4);
 
     /**
-     * Common id to identify a FSI position to use in error logs and traces
-     */
-    union FsiLinkId_t
-    {
-        uint32_t id;
-        struct
-        {
-            uint8_t node; ///< Physical Node of FSI Master processor
-            uint8_t proc; ///< Physical Position of FSI Master processor
-            uint8_t type; ///< FSI Master type (FSI_MASTER_TYPE)
-            uint8_t port; ///< Slave link/port number
-        };
-    };
-
-    /**
-     * @brief Structure which defines info necessary to access a chip via FSI
-     */
-    struct FsiChipInfo_t
-    {
-        TARGETING::Target* slave; //< FSI Slave chip
-        TARGETING::Target* master; ///< FSI Master
-        TARGETING::FSI_MASTER_TYPE type; ///< Master or Cascaded Master
-        uint8_t port; ///< Which port is this chip hanging off of
-        uint8_t cascade; ///< Slave cascade position
-        union {
-            TARGETING::FsiOptionFlags flagbits; ///< Special flags
-            uint16_t flags; ///< Special flags
-        }; 
-        FsiLinkId_t linkid; ///< Id for traces and error logs
-
-        FsiChipInfo_t() :
-          slave(NULL), master(NULL),
-        type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
-        port(UINT8_MAX), cascade(0), flags(0)
-        { linkid.id = 0; };
-    };
-
-    /**
-     * @brief Holds a set of addressing information to describe the
-     *   current FSI operation 
-     */
-    struct FsiAddrInfo_t {
-        TARGETING::Target* fsiTarg; ///< Target of FSI operation
-        TARGETING::Target* opbTarg; ///< OPB control reg target
-        uint32_t relAddr; ///< Input FSI address (relative to fsiTarg)
-        uint32_t absAddr; ///< Absolute FSI address (relative to opbTarg)
-        FsiChipInfo_t accessInfo; ///< FSI Access Info
-
-        /** Input Arg Constructor */
-        FsiAddrInfo_t( TARGETING::Target* i_target,
-                       uint64_t i_address ) :
-          fsiTarg(i_target), opbTarg(NULL),
-        relAddr(i_address), absAddr(UINT32_MAX)
-        {};
-
-      private:
-        /** Default Constructor is not allowed */
-        FsiAddrInfo_t() :
-          fsiTarg(NULL), opbTarg(NULL), 
-        relAddr(UINT32_MAX),absAddr(UINT32_MAX)
-        {};        
-    };
-
-    /**
      * @brief Performs an FSI Read Operation
      *
      * @param[in] i_addrInfo  Addressing information
@@ -262,7 +200,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t read(FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t read(FSI::FsiAddrInfo_t& i_addrInfo,
                     uint32_t* o_buffer,
                     size_t  i_buflen = 4);
 
@@ -275,7 +213,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t write(FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t write(FSI::FsiAddrInfo_t& i_addrInfo,
                      uint32_t* i_buffer,
                      size_t  i_buflen = 4);
 
@@ -298,7 +236,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t initPort(FsiChipInfo_t i_fsiInfo,
+    errlHndl_t initPort(FSI::FsiChipInfo_t i_fsiInfo,
                         bool& o_enabled);
 
     /**
@@ -310,7 +248,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t handleOpbErrors(FSI::FsiAddrInfo_t& i_addrInfo,
                                uint32_t i_opbStatAddr,
                                uint32_t i_opbStatData);
 
@@ -323,7 +261,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t pollForComplete(FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t pollForComplete(FSI::FsiAddrInfo_t& i_addrInfo,
                                uint32_t* o_readData);
 
     /**
@@ -336,7 +274,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t genFullFsiAddr(FsiAddrInfo_t& io_addrInfo);
+    errlHndl_t genFullFsiAddr(FSI::FsiAddrInfo_t& io_addrInfo);
 
     /**
      * @brief Generate a valid SCOM address to access the OPB, this will
@@ -349,64 +287,8 @@ class FsiDD
      *
      * @return uint64_t  Fully qualified OPB SCOM address
      */
-    uint64_t genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
+    uint64_t genOpbScomAddr(FSI::FsiAddrInfo_t& i_addrInfo,
                             uint64_t i_opbOffset);
-
-
-    /**
-     * @brief Convert a type/port pair into a FSI address offset
-     *
-     * @param[in] i_type  Type of FSI interface
-     * @param[in] i_port  FSI link number
-     * @return uint64_t  FSI address offset 
-     */
-    uint64_t getPortOffset(TARGETING::FSI_MASTER_TYPE i_type,
-                           uint8_t i_port);
-
-    
-    /**
-     * FSI Address Space
-     */
-    enum FsiAddressSpace {
-        // Master control registers
-        CMFSI_CONTROL_REG = 0x003000, /**< cMFSI Control Register */
-        MFSI_CONTROL_REG  = 0x003400, /**< MFSI Control Register */
-
-        // cMFSI Ports  (32KB each)
-        CMFSI_PORT_0      = 0x040000, /**< cMFSI port 0 */
-        CMFSI_PORT_1      = 0x048000, /**< cMFSI port 1 */
-        CMFSI_PORT_2      = 0x050000, /**< cMFSI port 2 */
-        CMFSI_PORT_3      = 0x058000, /**< cMFSI port 3 */
-        CMFSI_PORT_4      = 0x060000, /**< cMFSI port 4 */
-        CMFSI_PORT_5      = 0x068000, /**< cMFSI port 5 */
-        CMFSI_PORT_6      = 0x070000, /**< cMFSI port 6 */
-        CMFSI_PORT_7      = 0x078000, /**< cMFSI port 7 */
-        CMFSI_PORT_MASK   = 0x078000, /**< Mask to look for a valid cMFSI port */
-
-        // Offsets to cascaded slaves within a cMFSI port
-        CMFSI_SLAVE_0     = 0x000000, /**< cMFSI - Slave 0 */
-        CMFSI_SLAVE_1     = 0x002000, /**< cMFSI - Slave 1 */
-        CMFSI_SLAVE_2     = 0x004000, /**< cMFSI - Slave 2 */
-        CMFSI_SLAVE_3     = 0x006000, /**< cMFSI - Slave 3 */
-
-        // MFSI Ports  (512KB each)
-        MFSI_PORT_LOCAL   = 0x000000, /**< Local master (used for local cMFSI) */
-        MFSI_PORT_0       = 0x080000, /**< MFSI port 0 */
-        MFSI_PORT_1       = 0x100000, /**< MFSI port 1 */
-        MFSI_PORT_2       = 0x180000, /**< MFSI port 2 */
-        MFSI_PORT_3       = 0x200000, /**< MFSI port 3 */
-        MFSI_PORT_4       = 0x280000, /**< MFSI port 4 */
-        MFSI_PORT_5       = 0x300000, /**< MFSI port 5 */
-        MFSI_PORT_6       = 0x380000, /**< MFSI port 6 */
-        MFSI_PORT_7       = 0x400000, /**< MFSI port 7 */
-        MFSI_PORT_MASK    = 0x780000, /**< Mask to look for a valid MFSI port */
-
-        // Offsets to cascaded slaves within a MFSI port
-        MFSI_SLAVE_0      = 0x000000, /**< MFSI - Slave 0 */
-        MFSI_SLAVE_1      = 0x020000, /**< MFSI - Slave 1 */
-        MFSI_SLAVE_2      = 0x040000, /**< MFSI - Slave 2 */
-        MFSI_SLAVE_3      = 0x060000, /**< MFSI - Slave 3 */
-    };
 
 
     /**
@@ -501,10 +383,10 @@ class FsiDD
      */
     uint64_t getControlReg(TARGETING::FSI_MASTER_TYPE i_type)
     {
-        uint64_t ctl_reg = MFSI_CONTROL_REG;
+        uint64_t ctl_reg = FSI::MFSI_CONTROL_REG;
         if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_type )
         {
-            ctl_reg = CMFSI_CONTROL_REG;
+            ctl_reg = FSI::CMFSI_CONTROL_REG;
         }
         return ctl_reg;
     };
@@ -526,7 +408,7 @@ class FsiDD
      *
      * @return FsiChipInfo_t  FSI Chip Information
      */
-    FsiChipInfo_t getFsiInfo( TARGETING::Target* i_target );
+    FSI::FsiChipInfo_t getFsiInfo( TARGETING::Target* i_target );
 
     /**
      * @brief Clear out the error indication so that we can do more FSI ops
@@ -536,7 +418,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t errorCleanup( FsiAddrInfo_t& i_addrInfo,
+    errlHndl_t errorCleanup( FSI::FsiAddrInfo_t& i_addrInfo,
                              FSI::FSIReasonCode i_errType );
 
     /**
@@ -546,7 +428,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t checkForErrors( FsiChipInfo_t& i_chipInfo );
+    errlHndl_t checkForErrors( FSI::FsiChipInfo_t& i_chipInfo );
 
     /**
      * @brief Check for FSI errors anywhere in the system
@@ -555,7 +437,7 @@ class FsiDD
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t checkForErrors( FsiAddrInfo_t& i_addrInfo );
+    errlHndl_t checkForErrors( FSI::FsiAddrInfo_t& i_addrInfo );
 
     /**
      * @brief Verify that the slave target was detected
@@ -574,7 +456,7 @@ class FsiDD
      *
      * @return FsiChipInfo_t  FSI Chip Information
      */
-    FsiChipInfo_t getFsiInfoFromAttr( TARGETING::Target* i_target );
+    FSI::FsiChipInfo_t getFsiInfoFromAttr( TARGETING::Target* i_target );
 
 
     /********************************************
@@ -616,7 +498,7 @@ class FsiDD
      * Cache of FSI connection information gleaned from attributes
      *   Indexed by Target*, returns FsiChipInfo_t
      */
-    std::map<TARGETING::Target*,FsiChipInfo_t> iv_fsiInfoMap;
+    std::map<TARGETING::Target*,FSI::FsiChipInfo_t> iv_fsiInfoMap;
 
     /**
      * Mutex to protect the internal maps

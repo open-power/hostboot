@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -387,7 +387,7 @@ errlHndl_t FsiDD::read(TARGETING::Target* i_target,
         }
 
         // prefix the appropriate MFSI/cMFSI slave port offset
-        FsiAddrInfo_t addr_info( i_target, i_address );
+        FSI::FsiAddrInfo_t addr_info( i_target, i_address );
         l_err = genFullFsiAddr( addr_info );
         if(l_err)
         {
@@ -429,7 +429,7 @@ errlHndl_t FsiDD::write(TARGETING::Target* i_target,
         }
 
         // prefix the appropriate MFSI/cMFSI slave port offset
-        FsiAddrInfo_t addr_info( i_target, i_address );
+        FSI::FsiAddrInfo_t addr_info( i_target, i_address );
         l_err = genFullFsiAddr( addr_info );
         if(l_err)
         {
@@ -503,7 +503,7 @@ errlHndl_t FsiDD::initializeHardware()
 
         typedef struct {
             TARGETING::Target* targ;
-            FsiDD::FsiChipInfo_t info;
+            FSI::FsiChipInfo_t info;
         } target_chipInfo_t ;
 
         // list of ports off of local MFSI
@@ -518,7 +518,7 @@ errlHndl_t FsiDD::initializeHardware()
         target_chipInfo_t remote_cmfsi[MAX_SLAVE_PORTS][MAX_SLAVE_PORTS]; // = {};
         memset(remote_cmfsi, '\0', sizeof(remote_cmfsi)); // TODO: GCC ICE.
 
-        FsiChipInfo_t info;
+        FSI::FsiChipInfo_t info;
 
         // loop through every CHIP target
         TARGETING::PredicateCTM l_chipClass(TARGETING::CLASS_CHIP,
@@ -549,7 +549,7 @@ errlHndl_t FsiDD::initializeHardware()
                     }
                     else
                     {
-                        FsiChipInfo_t info2 = getFsiInfo(info.master);
+                        FSI::FsiChipInfo_t info2 = getFsiInfo(info.master);
                         if( info2.master == NULL )
                         {
                             TRACFCOMP( g_trac_fsi, "Problem with attribute data for master %.8X for slave %.8X", TARGETING::get_huid(info.master), TARGETING::get_huid(*t_itr) );
@@ -771,7 +771,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
         errlHndl_t tmp_err = NULL;
 
         // Use this call to find the OPB Master to read
-        FsiAddrInfo_t addr_info( i_target, 0x12345678 );
+        FSI::FsiAddrInfo_t addr_info( i_target, 0x12345678 );
         tmp_err = genFullFsiAddr( addr_info );
         if( tmp_err )
         {
@@ -835,7 +835,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     else if( FSI::FFDC_PIB_FAIL == i_ffdc_type )
     {
         errlHndl_t tmp_err = NULL;
-        FsiChipInfo_t fsi_info = getFsiInfo( i_target );
+        FSI::FsiChipInfo_t fsi_info = getFsiInfo( i_target );
 
         // Grab the FSI GP regs since they have fencing information
         ERRORLOG::ErrlUserDetailsLogRegister regdata2(i_target);
@@ -912,7 +912,7 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     {
         errlHndl_t tmp_err = NULL;
         // Find the OPB Master and then collect FFDC_OPB_FAIL
-        FsiAddrInfo_t addr_info( i_target, 0x12345678 );
+        FSI::FsiAddrInfo_t addr_info( i_target, 0x12345678 );
         tmp_err = genFullFsiAddr( addr_info );
         if( tmp_err )
         {
@@ -1036,7 +1036,7 @@ FsiDD::FsiDD()
     TRACFCOMP(g_trac_fsi,"Master=%.8X",TARGETING::get_huid(iv_master));
 
     // add a dummy value to catch NULL
-    FsiChipInfo_t info;
+    FSI::FsiChipInfo_t info;
     iv_fsiInfoMap[NULL] = info;
 
     mutex_init(&iv_dataMutex);
@@ -1063,7 +1063,7 @@ errlHndl_t FsiDD::read(uint64_t i_address,
 
     // generate a set of address info for this manual operation
     //  note that relAddr==absAddr in this case
-    FsiAddrInfo_t addr_info( iv_master, i_address );
+    FSI::FsiAddrInfo_t addr_info( iv_master, i_address );
     addr_info.opbTarg = iv_master;
     addr_info.absAddr = i_address;
 
@@ -1086,7 +1086,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
 
     // generate a set of address info for this manual operation
     //  note that relAddr==absAddr in this case
-    FsiAddrInfo_t addr_info( iv_master, i_address );
+    FSI::FsiAddrInfo_t addr_info( iv_master, i_address );
     addr_info.opbTarg = iv_master;
     addr_info.absAddr = i_address;
 
@@ -1100,7 +1100,7 @@ errlHndl_t FsiDD::write(uint64_t i_address,
 /**
  * @brief Performs an FSI Read Operation
  */
-errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::read(FSI::FsiAddrInfo_t& i_addrInfo,
                        uint32_t* o_buffer,
                        uint64_t i_buflen )
 {
@@ -1202,7 +1202,7 @@ errlHndl_t FsiDD::read(FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Write FSI Register
  */
-errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::write(FSI::FsiAddrInfo_t& i_addrInfo,
                         uint32_t* i_buffer,
                         uint64_t i_buflen )
 {
@@ -1308,7 +1308,7 @@ errlHndl_t FsiDD::write(FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Analyze error bits and recover hardware as needed
  */
-errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::handleOpbErrors(FSI::FsiAddrInfo_t& i_addrInfo,
                                   uint32_t i_opbStatAddr,
                                   uint32_t i_opbStatData)
 {
@@ -1385,10 +1385,10 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
         if( (l_opb_stat & OPB_STAT_ERRACK)
             && (
                 ((i_addrInfo.relAddr & ~FSI_CTLREG_MASK)
-                 == MFSI_CONTROL_REG)
+                 == FSI::MFSI_CONTROL_REG)
                 ||
                 ((i_addrInfo.relAddr & ~FSI_CTLREG_MASK)
-                 == CMFSI_CONTROL_REG)
+                 == FSI::CMFSI_CONTROL_REG)
                 )
             )
         {
@@ -1439,7 +1439,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
         if( !root_cause_found )
         {
             // read the Status Bridge0 Register
-            FsiChipInfo_t fsi_info = getFsiInfo( i_addrInfo.fsiTarg );
+            FSI::FsiChipInfo_t fsi_info = getFsiInfo( i_addrInfo.fsiTarg );
             uint64_t ctl_reg = getControlReg(fsi_info.type);
             uint32_t mesrb0_data = 0;
 
@@ -1574,7 +1574,7 @@ errlHndl_t FsiDD::handleOpbErrors(FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief  Poll for completion of a FSI operation, return data on read
  */
-errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::pollForComplete(FSI::FsiAddrInfo_t& i_addrInfo,
                                   uint32_t* o_readData)
 {
     errlHndl_t l_err = NULL;
@@ -1790,7 +1790,7 @@ errlHndl_t FsiDD::pollForComplete(FsiAddrInfo_t& i_addrInfo,
  * @brief Generate a complete FSI address based on the target and the
  *    FSI offset within that target
  */
-errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
+errlHndl_t FsiDD::genFullFsiAddr(FSI::FsiAddrInfo_t& io_addrInfo)
 {
     errlHndl_t l_err = NULL;
 
@@ -1815,7 +1815,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     if( io_addrInfo.accessInfo.master == iv_master )
     {
         //append the appropriate offset
-        io_addrInfo.absAddr += getPortOffset(io_addrInfo.accessInfo.type,
+        io_addrInfo.absAddr += FSI::getPortOffset(io_addrInfo.accessInfo.type,
                                              io_addrInfo.accessInfo.port);
     }
     //verify this target has a valid FSI master
@@ -1848,11 +1848,12 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
     else
     {
         //append the CMFSI portion first
-        io_addrInfo.absAddr += getPortOffset(io_addrInfo.accessInfo.type,
+        io_addrInfo.absAddr += FSI::getPortOffset(io_addrInfo.accessInfo.type,
                                              io_addrInfo.accessInfo.port);
 
         //find this port's master and then get its port information
-        FsiChipInfo_t mfsi_info = getFsiInfo(io_addrInfo.accessInfo.master);
+        FSI::FsiChipInfo_t mfsi_info =
+                getFsiInfo(io_addrInfo.accessInfo.master);
 
         //check for invalid topology
         if( mfsi_info.master != iv_master )
@@ -1937,7 +1938,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
             // a flipped cmfsi port
 
             //using the master chip so we need to append the MFSI port
-            io_addrInfo.absAddr += getPortOffset(mfsi_info.type,mfsi_info.port);
+            io_addrInfo.absAddr += FSI::getPortOffset(mfsi_info.type,
+                                                      mfsi_info.port);
         }
         else if( (io_addrInfo.accessInfo.master)->
                  getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom
@@ -1959,7 +1961,8 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
         else
         {
             //using the master chip so we need to append the MFSI port
-            io_addrInfo.absAddr += getPortOffset(mfsi_info.type,mfsi_info.port);
+            io_addrInfo.absAddr += FSI::getPortOffset(mfsi_info.type,
+                                                      mfsi_info.port);
         }
     }
 
@@ -1970,7 +1973,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FsiAddrInfo_t& io_addrInfo)
  * @brief Generate a valid SCOM address to access the OPB, this will
  *    choose the correct master
  */
-uint64_t FsiDD::genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
+uint64_t FsiDD::genOpbScomAddr(FSI::FsiAddrInfo_t& i_addrInfo,
                                uint64_t i_opbOffset)
 {
     uint64_t opbaddr = FSI2OPB_OFFSET_0;
@@ -1986,7 +1989,7 @@ uint64_t FsiDD::genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
         else if( (TARGETING::FSI_MASTER_TYPE_CMFSI
                   == i_addrInfo.accessInfo.type) )
         {
-            FsiChipInfo_t chipinfo = getFsiInfo(i_addrInfo.opbTarg);
+            FSI::FsiChipInfo_t chipinfo = getFsiInfo(i_addrInfo.opbTarg);
             if( chipinfo.flagbits.flipPort )
             {
                 opbaddr = FSI2OPB_OFFSET_1;
@@ -2001,7 +2004,7 @@ uint64_t FsiDD::genOpbScomAddr(FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Initializes the FSI link to allow slave access
  */
-errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
+errlHndl_t FsiDD::initPort(FSI::FsiChipInfo_t i_fsiInfo,
                            bool& o_enabled)
 {
     errlHndl_t l_err = NULL;
@@ -2019,10 +2022,11 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
             && (i_fsiInfo.master != iv_master) )
         {
             // look up the FSI information for this target's master
-            FsiChipInfo_t mfsi_info = getFsiInfo(i_fsiInfo.master);
+            FSI::FsiChipInfo_t mfsi_info = getFsiInfo(i_fsiInfo.master);
 
             // append the master's port offset to the slave's
-            master_offset = getPortOffset( TARGETING::FSI_MASTER_TYPE_MFSI, mfsi_info.port );
+            master_offset = FSI::getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,
+                                 mfsi_info.port );
         }
 
         // control register is determined by the type of port
@@ -2030,7 +2034,8 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         master_ctl_reg += master_offset;
 
         // slave offset is determined by which port it is on
-        uint64_t slave_offset = getPortOffset( i_fsiInfo.type, i_fsiInfo.port );
+        uint64_t slave_offset = FSI::getPortOffset( i_fsiInfo.type,
+                                                    i_fsiInfo.port );
         slave_offset += master_offset;
 
         // nothing was detected on this port so this is just a NOOP
@@ -2056,7 +2061,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 
             //Reset the port to clear up any previous error state
             //  (using idec reg as arbitrary address for lookups)
-            FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+            FSI::FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
             l_err = genFullFsiAddr( addr_info );
             if( l_err ) { break; }
             l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
@@ -2076,7 +2081,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
 
             //Reset the port to clear up any previous error state
             //  (using idec reg as arbitrary address for lookups)
-            FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+            FSI::FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
             l_err = genFullFsiAddr( addr_info );
             if( l_err ) { break; }
             l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
@@ -2118,11 +2123,11 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         uint32_t tmp_slave_offset = slave_offset;
         if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_fsiInfo.type )
         {
-            slave_offset |= CMFSI_SLAVE_0;
+            slave_offset |= FSI::CMFSI_SLAVE_0;
         }
         else if( TARGETING::FSI_MASTER_TYPE_MFSI == i_fsiInfo.type )
         {
-            slave_offset |= MFSI_SLAVE_0;
+            slave_offset |= FSI::MFSI_SLAVE_0;
         }
 
         //Setup the FSI slave to enable HW recovery, lbus ratio
@@ -2164,7 +2169,7 @@ errlHndl_t FsiDD::initPort(FsiChipInfo_t i_fsiInfo,
         //  (using idec reg as arbitrary address for lookups)
         //Note, initial cfam reset should have cleaned up everything
         // but this makes sure we're in a consistent state
-        FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
+        FSI::FsiAddrInfo_t addr_info( i_fsiInfo.slave, 0x1028 );
         l_err = genFullFsiAddr( addr_info );
         if( l_err ) { break; }
         l_err = errorCleanup( addr_info, FSI::RC_ERROR_IN_MAEB );
@@ -2217,12 +2222,13 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         //  append the master port offset to get to te remote master
         if( i_master != iv_master )
         {
-            FsiChipInfo_t m_info = getFsiInfo(i_master);
-            ctl_reg += getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,m_info.port);
+            FSI::FsiChipInfo_t m_info = getFsiInfo(i_master);
+            ctl_reg += FSI::getPortOffset(TARGETING::FSI_MASTER_TYPE_MFSI,
+                                          m_info.port);
         }
 
         //Always clear out any pending errors before we start anything
-        FsiAddrInfo_t addr_info( i_master, 0 );
+        FSI::FsiAddrInfo_t addr_info( i_master, 0 );
         l_err = genFullFsiAddr(addr_info);
         if( l_err ) { break; }
 
@@ -2325,7 +2331,7 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                 if( i_master != iv_master )
                 {
                     // get the data via FSI (scom engine)
-                    FsiAddrInfo_t addr_info( i_master, 0x1028 );
+                    FSI::FsiAddrInfo_t addr_info( i_master, 0x1028 );
                     l_err = genFullFsiAddr( addr_info );
                     if( l_err ) { break; }
 
@@ -2453,45 +2459,6 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
 
 
 /**
- * @brief Convert a type/port pair into a FSI address offset
- */
-uint64_t FsiDD::getPortOffset(TARGETING::FSI_MASTER_TYPE i_type,
-                              uint8_t i_port)
-{
-    uint64_t offset = 0;
-    if( TARGETING::FSI_MASTER_TYPE_MFSI == i_type )
-    {
-        switch(i_port)
-        {
-            case(0): offset = MFSI_PORT_0; break;
-            case(1): offset = MFSI_PORT_1; break;
-            case(2): offset = MFSI_PORT_2; break;
-            case(3): offset = MFSI_PORT_3; break;
-            case(4): offset = MFSI_PORT_4; break;
-            case(5): offset = MFSI_PORT_5; break;
-            case(6): offset = MFSI_PORT_6; break;
-            case(7): offset = MFSI_PORT_7; break;
-        }
-    }
-    else if( TARGETING::FSI_MASTER_TYPE_CMFSI == i_type )
-    {
-        switch(i_port)
-        {
-            case(0): offset = CMFSI_PORT_0; break;
-            case(1): offset = CMFSI_PORT_1; break;
-            case(2): offset = CMFSI_PORT_2; break;
-            case(3): offset = CMFSI_PORT_3; break;
-            case(4): offset = CMFSI_PORT_4; break;
-            case(5): offset = CMFSI_PORT_5; break;
-            case(6): offset = CMFSI_PORT_6; break;
-            case(7): offset = CMFSI_PORT_7; break;
-        }
-    }
-
-    return offset;
-}
-
-/**
  * @brief Retrieve the slave enable index
  */
 uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
@@ -2506,7 +2473,7 @@ uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
     uint64_t slave_index = MAX_SLAVE_PORTS+i_type;
     if( i_master != iv_master )
     {
-        FsiChipInfo_t m_info = getFsiInfo(i_master);
+        FSI::FsiChipInfo_t m_info = getFsiInfo(i_master);
         if( m_info.type == TARGETING::FSI_MASTER_TYPE_NO_MASTER )
         {
             slave_index = INVALID_SLAVE_INDEX;
@@ -2523,9 +2490,9 @@ uint64_t FsiDD::getSlaveEnableIndex( TARGETING::Target* i_master,
  * @brief Retrieve the connection information needed to access FSI
  *        registers within the given chip target
  */
-FsiDD::FsiChipInfo_t FsiDD::getFsiInfoFromAttr( TARGETING::Target* i_target )
+FSI::FsiChipInfo_t FsiDD::getFsiInfoFromAttr( TARGETING::Target* i_target )
 {
-    FsiChipInfo_t info;
+    FSI::FsiChipInfo_t info;
     info.slave = i_target;
 
     using namespace TARGETING;
@@ -2665,14 +2632,14 @@ bool FsiDD::isSlavePresent( TARGETING::Target* i_target,
                             uint8_t& o_detected )
 {
     // look up the FSI information for this target
-    FsiChipInfo_t info = getFsiInfo(i_target);
+    FSI::FsiChipInfo_t info = getFsiInfo(i_target);
     return isSlavePresent( info.master, info.type, info.port, o_detected );
 }
 
 /**
  * @brief Clear out the error indication so that we can do more FSI ops
  */
-errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
+errlHndl_t FsiDD::errorCleanup( FSI::FsiAddrInfo_t& i_addrInfo,
                                 FSI::FSIReasonCode i_errType )
 {
     errlHndl_t l_err = NULL;
@@ -2736,7 +2703,7 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
             {
                 // 0=Bridge: General reset
                 data = 0x80000000;
-                mesrb0_reg = MFSI_CONTROL_REG | FSI_MESRB0_1D0;
+                mesrb0_reg = FSI::MFSI_CONTROL_REG | FSI_MESRB0_1D0;
                 l_err = write( iv_master, mesrb0_reg, &data );
                 if(l_err) break;
             }
@@ -2761,17 +2728,17 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
             //Trace some values for FFDC in case this cleanup
             // didn't really work
             uint32_t grabregs[] = {
-                MFSI_CONTROL_REG|FSI_MSIEP0_030,
-                CMFSI_CONTROL_REG|FSI_MSIEP0_030,
-                MFSI_CONTROL_REG|FSI_MAEB_070,
-                CMFSI_CONTROL_REG|FSI_MAEB_070
+                FSI::MFSI_CONTROL_REG|FSI_MSIEP0_030,
+                FSI::CMFSI_CONTROL_REG|FSI_MSIEP0_030,
+                FSI::MFSI_CONTROL_REG|FSI_MAEB_070,
+                FSI::CMFSI_CONTROL_REG|FSI_MAEB_070
             };
             for( size_t r = 0;
                  r < (sizeof(grabregs)/sizeof(grabregs[0]));
                  r++ )
             {
                 l_err = read( i_addrInfo.accessInfo.master,
-                              MFSI_CONTROL_REG|FSI_MSIEP0_030, &data );
+                              FSI::MFSI_CONTROL_REG|FSI_MSIEP0_030, &data );
                 if(l_err) break;
                 TRACFCOMP( g_trac_fsi, "errorCleanup> %.8X->%.6X = %.8X", TARGETING::get_huid(i_addrInfo.accessInfo.master), grabregs[r], data );
             }
@@ -2786,9 +2753,9 @@ errlHndl_t FsiDD::errorCleanup( FsiAddrInfo_t& i_addrInfo,
 /**
  * @brief Check for FSI errors anywhere in the system
  */
-errlHndl_t FsiDD::checkForErrors( FsiChipInfo_t& i_chipInfo )
+errlHndl_t FsiDD::checkForErrors( FSI::FsiChipInfo_t& i_chipInfo )
 {
-    FsiAddrInfo_t addr_info( i_chipInfo.slave, 0xFFFFFFFF );
+    FSI::FsiAddrInfo_t addr_info( i_chipInfo.slave, 0xFFFFFFFF );
     errlHndl_t errhdl = genFullFsiAddr( addr_info );
     if( !errhdl )
     {
@@ -2801,7 +2768,7 @@ errlHndl_t FsiDD::checkForErrors( FsiChipInfo_t& i_chipInfo )
 /**
  * @brief Check for FSI errors anywhere in the system
  */
-errlHndl_t FsiDD::checkForErrors( FsiAddrInfo_t& i_addrInfo )
+errlHndl_t FsiDD::checkForErrors( FSI::FsiAddrInfo_t& i_addrInfo )
 {
     errlHndl_t l_err = NULL;
 
@@ -2910,7 +2877,7 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
     {
         TRACFCOMP( g_trac_fsi, "FsiDD::verifyPresent> Requested target was never detected during FSI Init : i_target=%.8X", TARGETING::get_huid(i_target) );
 
-        FsiChipInfo_t chipinfo = getFsiInfo(i_target);
+        FSI::FsiChipInfo_t chipinfo = getFsiInfo(i_target);
 
         /*@
          * @errortype
@@ -2973,14 +2940,14 @@ errlHndl_t FsiDD::verifyPresent( TARGETING::Target* i_target )
  * @brief Retrieve the connection information needed to access FSI
  *        registers within the given chip target
  */
-FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
+FSI::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 {
-    FsiChipInfo_t info;
+    FSI::FsiChipInfo_t info;
 
     mutex_lock(&iv_dataMutex);
 
     // Check if we have a cached version first
-    std::map<TARGETING::Target*,FsiChipInfo_t>::iterator itr
+    std::map<TARGETING::Target*,FSI::FsiChipInfo_t>::iterator itr
       = iv_fsiInfoMap.find(i_target);
     if( itr != iv_fsiInfoMap.end() )
     {
@@ -3005,7 +2972,7 @@ FsiDD::FsiChipInfo_t FsiDD::getFsiInfo( TARGETING::Target* i_target )
 void FsiDD::getFsiLinkInfo( TARGETING::Target* i_slave,
                             FSI::FsiLinkInfo_t& o_info )
 {
-    FsiAddrInfo_t addr_info( i_slave, 0x0 );
+    FSI::FsiAddrInfo_t addr_info( i_slave, 0x0 );
     errlHndl_t tmp_err = genFullFsiAddr( addr_info );
     if( tmp_err )
     {
@@ -3031,8 +2998,8 @@ void FsiDD::getFsiLinkInfo( TARGETING::Target* i_slave,
     o_info.baseAddr = addr_info.absAddr;
     if( addr_info.opbTarg != iv_master )
     {
-        FsiChipInfo_t mfsi_info = getFsiInfo(addr_info.accessInfo.master);
-        o_info.baseAddr |= getPortOffset(mfsi_info.type,mfsi_info.port);
+        FSI::FsiChipInfo_t mfsi_info = getFsiInfo(addr_info.accessInfo.master);
+        o_info.baseAddr |= FSI::getPortOffset(mfsi_info.type,mfsi_info.port);
     }
 }
 

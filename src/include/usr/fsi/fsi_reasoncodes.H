@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@ namespace FSI
 
         MOD_FSIPRES_PROCPRESENCEDETECT  = 0x20, /**< fsipres.C : procPresenceDetect */
         MOD_FSIPRES_MEMBPRESENCEDETECT  = 0x21, /**< fsipres.C : membPresenceDetect */
+
+        MOD_RTFSI_GENFULLFSIADDR    = 0x22, /**< rt_fsi.C : genFullFsiAddr */
     };
 
     enum FSIReasonCode
@@ -69,6 +71,8 @@ namespace FSI
         RC_FSI_CVPD_MISMATCH         = FSI_COMP_ID | 0x10,
         RC_ERROR_IN_MAEB             = FSI_COMP_ID | 0x11,
         RC_BAD_ATTRIBUTES            = FSI_COMP_ID | 0x12,
+
+
     };
 
     enum UserDetailsTypes

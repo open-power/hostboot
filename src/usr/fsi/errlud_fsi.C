@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,6 +31,7 @@
 #include <fsi/fsi_reasoncodes.H>
 #include <string.h>
 #include "fsidd.H"
+#include "fsi_common.H"
 
 namespace FSI
 {
@@ -44,7 +47,7 @@ UdPresence::UdPresence( TARGETING::Target* i_target )
     iv_SubSection = FSI_UDT_PRESENCE;
 
     FsiDD& fsidd = Singleton<FsiDD>::instance();
-    FsiDD::FsiChipInfo_t l_chip_info = fsidd.getFsiInfo(i_target);
+    FSI::FsiChipInfo_t l_chip_info = fsidd.getFsiInfo(i_target);
     uint64_t l_slaveIndex = fsidd.getSlaveEnableIndex(l_chip_info.master,
                                                       l_chip_info.type);
 
