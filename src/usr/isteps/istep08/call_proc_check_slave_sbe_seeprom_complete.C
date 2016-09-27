@@ -60,6 +60,7 @@
 
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
+#include <p9_getecid.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -261,27 +262,25 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                           const_cast<TARGETING::Target*> (l_cpu_target));
 
       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-              "Running proc_getecid HWP"
+              "Running p9_getecid HWP"
               " on processor target %.8X",
               TARGETING::get_huid(l_cpu_target) );
 
-// TODO-RTC:149518
-/*
-      //  proc_getecid should set the fuse string to 112 bits long.
-      ecmdDataBufferBase  l_fuseString;
+      //  p9_getecid should set the fuse string to 112 bytes long.
+      fapi2::variable_buffer  l_fuseString(112);
 
       // Invoke the HWP
       FAPI_INVOKE_HWP(l_errl,
-                      proc_getecid,
+                      p9_getecid,
                       l_fapi2ProcTarget,
                       l_fuseString  );
-*/
+
       if (l_errl)
       {
         if (l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : proc_getecid",
+                    "ERROR : p9_getecid",
                     " failed, returning errorlog" );
 
             // capture the target data in the elog
@@ -297,7 +296,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         else // Not functional, proc deconfigured, don't report error
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : proc_getecid",
+                    "ERROR : p9_getecid",
                     " failed, proc target deconfigured" );
             delete l_errl;
             l_errl = NULL;
@@ -305,10 +304,9 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
       }
       else
       {
-          // TODO-RTC:149518
-          //TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-          //          "SUCCESS : proc_getecid",
-          //          " completed ok");
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS : proc_getecid",
+                    " completed ok");
 
       }
     }  // end of going through all processors
