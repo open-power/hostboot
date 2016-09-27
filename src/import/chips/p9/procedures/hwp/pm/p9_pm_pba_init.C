@@ -381,12 +381,10 @@ fapi2::ReturnCode pba_reset(
 
     std::vector<uint64_t> v_pba_reset_regs =
     {
-        PU_BCDE_STAT_SCOM,
         PU_BCDE_PBADR_SCOM,
         PU_BCDE_OCIBAR_SCOM,
         PU_BCUE_CTL_SCOM,
         PU_BCUE_SET_SCOM,
-        PU_BCUE_STAT_SCOM,
         PU_BCUE_PBADR_SCOM,
         PU_BCUE_OCIBAR_SCOM,
         PU_PBAXSHBR0_SCOM,
