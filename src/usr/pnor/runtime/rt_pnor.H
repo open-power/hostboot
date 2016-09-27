@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,15 @@ class RtPnor
        */
         errlHndl_t getSideInfo( PNOR::SideId i_side,
                                 PNOR::SideInfo_t& o_info);
+
+      /**
+       * @brief  Clears the specified PNOR section with all FF's (w/ good ECC)
+       *
+       * @param[in] i_id  PNOR section to clear
+       *
+       * @return Error if fails
+       */
+        errlHndl_t clearSection(PNOR::SectionId i_section);
 
     protected:
        /**

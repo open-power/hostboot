@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/fsi/makefile $
+# $Source: src/usr/fsi/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = fsi
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+MODULE = fsi_rt
 
-OBJS += fsidd.o
-OBJS += fsipres.o
-OBJS += errlud_fsi.o
+OBJS += rt_fsi.o
 OBJS += fsi_common.o
 
-SUBDIRS += test.d
-SUBDIRS += runtime.d
+EXTRAINCDIR += ${ROOTPATH}/src/usr/fsi
 
-include ${ROOTPATH}/config.mk
+VPATH += ../
+include $(ROOTPATH)/config.mk

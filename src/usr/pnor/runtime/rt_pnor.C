@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,14 @@ errlHndl_t PNOR::getSideInfo( PNOR::SideId i_side,
                               PNOR::SideInfo_t& o_info)
 {
     return Singleton<RtPnor>::instance().getSideInfo(i_side,o_info);
+}
+
+/**
+ * @brief Clear pnor section
+ */
+errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
+{
+    return Singleton<RtPnor>::instance().clearSection(i_section);
 }
 
 /****************Public Methods***************************/
@@ -723,3 +731,104 @@ errlHndl_t RtPnor::getSideInfo( PNOR::SideId i_side,
 
     return l_err;
 }
+
+
+errlHndl_t RtPnor::clearSection(PNOR::SectionId i_section)
+{
+    TRACFCOMP(g_trac_pnor, "RtPnor::clearSection Section id = %d", i_section);
+    errlHndl_t l_errl = NULL;
+    const uint64_t CLEAR_BYTE = 0xFF;
+    uint8_t* l_buf = new uint8_t[PAGESIZE]();
+    uint8_t* l_eccBuf = NULL;
+
+    do
+    {
+        // Flush pages of pnor section we are trying to clear
+        l_errl = flush(i_section);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_pnor, ERR_MRK"RtPnor::clearSection: flush() failed on section",
+                        i_section);
+            break;
+        }
+
+        // Get PNOR section info
+        uint64_t l_address = iv_TOC[i_section].flashAddr;
+        uint64_t l_chipSelect = iv_TOC[i_section].chip;
+        uint32_t l_size = iv_TOC[i_section].size;
+        bool l_ecc = iv_TOC[i_section].integrity & FFS_INTEG_ECC_PROTECT;
+
+        // Number of pages needed to cycle proper ECC
+        // Meaning every 9th page will copy the l_eccBuf at offset 0
+        const uint64_t l_eccCycleNum = 9;
+
+        // Boundaries for properly splitting up an ECC page for 4K writes.
+        // Subtract 1 from l_eccCycleNum because we start writing with offset 0
+        // and add this value 8 times to complete a cycle.
+        const uint64_t l_sizeOfOverlapSection =
+                (PNOR::PAGESIZE_PLUS_ECC - PAGESIZE) /
+                (l_eccCycleNum - 1);
+
+        // Create clear section buffer
+        memset(l_buf, CLEAR_BYTE, PAGESIZE);
+
+        // apply ECC to data if needed
+        if(l_ecc)
+        {
+            l_eccBuf = new uint8_t[PNOR::PAGESIZE_PLUS_ECC]();
+            PNOR::ECC::injectECC( reinterpret_cast<uint8_t*>(l_buf),
+                                  PAGESIZE,
+                                  reinterpret_cast<uint8_t*>(l_eccBuf) );
+            l_size = (l_size*9)/8;
+        }
+
+        //find proc id
+        uint64_t l_procId;
+        TARGETING::Target* l_masterProc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+        l_errl = RT_TARG::getRtTarget (l_masterProc, l_procId);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_pnor, "RtPnor::clearSection: getRtTarget failed");
+            break;
+        }
+
+        // Write clear section page to PNOR
+        for (uint64_t i = 0; i < l_size; i+=PAGESIZE)
+        {
+            if(l_ecc)
+            {
+                // Take (current page) mod (l_eccCycleNum) to get cycle position
+                uint8_t l_bufPos = ( (i/PAGESIZE) % l_eccCycleNum );
+                uint64_t l_bufOffset = l_sizeOfOverlapSection * l_bufPos;
+                memcpy(l_buf, (l_eccBuf + l_bufOffset), PAGESIZE);
+            }
+
+            // Set ecc parameter to false to avoid double writes will only write
+            // 4k at a time, even if the section is ecc protected.
+            l_errl = writeToDevice( l_procId,i_section,
+                                   (l_address + i), l_chipSelect,
+                                   false, l_buf);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_pnor, ERR_MRK"RtPnor::clearSection: writeToDevice fail: eid=0x%X, rc=0x%X",
+                           l_errl->eid(), l_errl->reasonCode());
+                break;
+            }
+        }
+        if (l_errl)
+        {
+            break;
+        }
+    } while(0);
+
+    // Free allocated memory
+    if(l_eccBuf)
+    {
+        delete[] l_eccBuf;
+    }
+    delete [] l_buf;
+
+    return l_errl;
+}
+
