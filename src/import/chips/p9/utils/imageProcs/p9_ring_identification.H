@@ -29,13 +29,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <p9_ring_id.h>
 
 // MVPD Ring ID list structure.
 typedef struct
 {
     const char*  ringName;
-    //@FIXME: CMO: Replace this with RingID asap.
-    uint8_t      ringId;
+    RingID       ringId;
     uint8_t      instanceIdMin;    // the min instanceId
     uint8_t      instanceIdMax;    // the max instanceId
     uint8_t      vpdKeyword;

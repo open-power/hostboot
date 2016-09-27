@@ -57,6 +57,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace N0
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -79,6 +81,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace N1
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -105,6 +109,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace N2
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -127,6 +133,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace N3
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -149,6 +157,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace XB
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -178,6 +188,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace MC
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -207,6 +219,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace OB0
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -224,6 +238,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace OB1
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -241,6 +257,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace OB2
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -258,6 +276,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace OB3
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -275,6 +295,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace PCI0
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -291,6 +313,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace PCI1
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -307,6 +331,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace PCI2
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -323,6 +349,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
 };
+
+
 namespace EQ
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -371,7 +399,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"eq_ana_bndy_bucket_23"     , 0x29, 0x10, 0x10, "eq_ana_bndy_bucket_23_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_24"     , 0x2a, 0x10, 0x10, "eq_ana_bndy_bucket_24_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
     {"eq_ana_bndy_bucket_25"     , 0x2b, 0x10, 0x10, "eq_ana_bndy_bucket_25_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
-    {"eq_ana_bndy_l3dcc_bucket_26"     , 0x2c, 0x10, 0x10, "eq_ana_bndy_l3dcc_bucket_26_ring"    , NON_VPD_RING, 0,  0x0020000000000080},
+    {"eq_ana_bndy_l3dcc_bucket_26", 0x2c, 0x10, 0x10, "eq_ana_bndy_l3dcc_bucket_26_ring", NON_VPD_RING, 0, 0x0020000000000080},
     {"eq_ana_mode"               , 0x2d, 0x10, 0x10, "eq_ana_mode_ring"              , NON_VPD_RING, 0,  0x0020000000004000},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
@@ -384,6 +412,8 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL};
 };
+
+
 namespace EC
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
@@ -400,3 +430,4 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL};
 };
+
