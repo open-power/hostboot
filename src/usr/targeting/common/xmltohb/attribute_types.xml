@@ -12852,9 +12852,10 @@ Measured in GB</description>
     Consumers: eff_config_thermal and bulk_pwr_throttles
     </description>
     <simpleType>
-        <uint32_t>
+        <uint64_t>
         <default>0x000006A4</default>
-        </uint32_t>
+        </uint64_t>
+        <array>10</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
