@@ -163,7 +163,7 @@ void* call_host_activate_master (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Disable special wakeup on master core");
 
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
                         l_fapi2_coreTarget,
                         SPCWKUP_DISABLE,
                         HOST);
@@ -172,7 +172,7 @@ void* call_host_activate_master (void *io_pArgs)
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Disable p9_cpu_special_wakeup ERROR : Returning errorlog,"
+            "Disable p9_cpu_special_wakeup_core ERROR : Returning errorlog,"
             " reason=0x%x",
                 l_errl->reasonCode() );
 
@@ -266,7 +266,7 @@ void* call_host_activate_master (void *io_pArgs)
                    "Enable special wakeup on master core");
 
 
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
                         l_fapi2_coreTarget,
                         SPCWKUP_ENABLE,
                         HOST);
@@ -274,7 +274,7 @@ void* call_host_activate_master (void *io_pArgs)
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Enable p9_cpu_special_wakeup ERROR : Returning errorlog, "
+            "Enable p9_cpu_special_wakeup_core ERROR : Returning errorlog, "
             "reason=0x%x",
                 l_errl->reasonCode() );
 

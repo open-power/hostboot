@@ -185,13 +185,13 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             }
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running p9_cpu_special_wakeup (ENABLE)"
+                    "Running p9_cpu_special_wakeup_core (ENABLE)"
                     " EX target HUID %.8X",
                     TARGETING::get_huid(*l_core));
 
             // Enable special wakeup on core
             FAPI_INVOKE_HWP( l_errl,
-                    p9_cpu_special_wakeup,
+                    p9_cpu_special_wakeup_core,
                     l_fapi2_coreTarget,
                     SPCWKUP_ENABLE,
                     HOST);
@@ -208,13 +208,13 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 errlCommit( l_errl, HWPF_COMP_ID );
 
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : enable p9_cpu_special_wakeup, "
+                        "ERROR : enable p9_cpu_special_wakeup_core, "
                         "PLID=0x%x", l_errl->plid()  );
             }
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS: enable p9_cpu_special_wakeup");
+                        "SUCCESS: enable p9_cpu_special_wakeup_core");
             }
         }
     }

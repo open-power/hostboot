@@ -330,7 +330,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             l_wakeup_lib_loaded = true;
         }
 
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
                         l_fapiCore,
                         p9specialWakeup::SPCWKUP_ENABLE,
                         p9specialWakeup::HOST);
@@ -338,9 +338,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         if(l_errl)
         {
             TRACFCOMP( g_fapiImpTd,
-                       "ERROR: 0x%.8X : p9_cpu_special_wakeup set HWP(cpu %d)",
-                       l_errl->reasonCode(),
-                       l_masterCoreID);
+                "ERROR: 0x%.8X : p9_cpu_special_wakeup_core set HWP(cpu %d)",
+                l_errl->reasonCode(),
+                l_masterCoreID);
             break;
         }
 

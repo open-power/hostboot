@@ -53,10 +53,5 @@ VPATH += ${HWP_PATH}
 include ${ROOTPATH}/procedure.rules.mk
 # p9_thread_control.o brought in by p9_thread_control.mk
 include $(HWP_PATH_1)/p9_thread_control.mk
-#TODO RTC:147383 Need to create a seperate module for cpu_special_wakeup
-include ${HWP_PATH_2}/p9_cpu_special_wakeup.mk
-include ${HWP_PATH_2}/p9_cpu_special_wakeup_core.mk
-include ${HWP_PATH_2}/p9_cpu_special_wakeup_ex.mk
-include ${HWP_PATH_2}/p9_cpu_special_wakeup_lib.mk
 include ${ROOTPATH}/config.mk
 
