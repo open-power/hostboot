@@ -17610,24 +17610,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
-    <description>Machine Readable Workbook VMEM regulator power limit per CDIMM
-    assuming a full configuration. Units in cW.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <enumerationType>
     <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
     <description>Enumeration of MRW_NEST_CAPABLE_FREQUENCIES_SYS</description>
