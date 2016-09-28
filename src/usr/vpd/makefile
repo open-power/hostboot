@@ -50,6 +50,6 @@ BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:9503ceac065b78f93b7ad3d987ff482802c40e8c
 BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
 
 #Direct memory vpd
-BINARY_FILES += $(IMGDIR)/dvpd.dat:4f63863d997257549c0a754fab717b4cb03d779d
+BINARY_FILES += $(IMGDIR)/dvpd.dat:858e524da0da3bde7f802e42eb29218bcf974263
 
 include ${ROOTPATH}/config.mk

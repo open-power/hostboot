@@ -204,7 +204,7 @@ void testDecode_MR(void)
 
         // set up VPDInfo
         fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::MR);
-        l_info.iv_freq_mhz = 1866; // index = 0
+        l_info.iv_freq_mhz = 2133; // index = 0
         l_info.iv_rank_count_dimm_0 = 1;
         l_info.iv_rank_count_dimm_1 = 4;
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -287,7 +287,7 @@ void testDecode_MT(void)
 
         // set up VPDInfo
         fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::MT);
-        l_info.iv_freq_mhz = 2667; //index 3
+        l_info.iv_freq_mhz = 2400; //index 3
         l_info.iv_rank_count_dimm_0 = 4;
         l_info.iv_rank_count_dimm_1 = 1;
 
@@ -302,7 +302,7 @@ void testDecode_MT(void)
                // miss: mcs miss, pair match, freq match
                0xfe,0xff,0xff,0xff,0xff,'2',
                // match:
-               0x01,0x00,0x00,0x04,0x10,'3', // <-- should be this one
+               0x01,0x00,0x00,0x04,0xFF,'3', // <-- should be this one
                // zero out rest
                0};
 
@@ -367,7 +367,7 @@ void testGetVPD_MR(void)
         // set up VPDInfo
         // simics test data will return keyword J0
         fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::MR);
-        l_info.iv_freq_mhz = 1866;
+        l_info.iv_freq_mhz = 2133;
         l_info.iv_rank_count_dimm_0 = 1;
         l_info.iv_rank_count_dimm_1 = 4;
 
@@ -416,16 +416,18 @@ void testGetVPD_MT(void)
         // set up VPDInfo
         // simics test data will return keyword X0
         fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_info(fapi2::MT);
-        l_info.iv_freq_mhz = 2667;
-        l_info.iv_rank_count_dimm_0 = 4;
-        l_info.iv_rank_count_dimm_1 = 1;
+        l_info.iv_freq_mhz = 2400;
+
+        l_info.iv_rank_count_dimm_0 = 2;
+        l_info.iv_rank_count_dimm_1 = 2;
 
         l_rc = testGetVPD(l_fapiTarget,
-                          l_info,
-                          fapi2::MT,
-                          nullptr, //don't test data, just ability to access
-                          numTests,
-                          numFails);
+                            l_info,
+                            fapi2::MT,
+                            nullptr, //don't test data, just ability to access
+                            numTests,
+                            numFails);
+
         if(l_rc)
         {
             TS_FAIL  ("testGetVPD MT:: testGetVPD decode failed");

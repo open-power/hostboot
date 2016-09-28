@@ -353,6 +353,11 @@ sub createCVPDData
         system( "rm -rf $sysMemVPDFile" );
     }
 
+    if( $procChipType eq "p9n")
+    {
+        $maxProcs = 2;
+    }
+
     #Centaurs are populated based on populated Processors and special
     #MCS plugging rules.  We can look at $procConfig and $maxProcs
     #to determine processor config.  Centaur plugging is contained
