@@ -36,13 +36,12 @@
 #include <fapi2.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/utils/dump_regs.H>
+#include <lib/workarounds/mcbist_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
 
 namespace mss
-{
-namespace mcbist
 {
 
 const std::pair<uint64_t, uint64_t> mcbistTraits<fapi2::TARGET_TYPE_MCBIST>::address_pairs[] =
@@ -53,6 +52,8 @@ const std::pair<uint64_t, uint64_t> mcbistTraits<fapi2::TARGET_TYPE_MCBIST>::add
     { START_ADDRESS_3, END_ADDRESS_3 },
 };
 
+namespace mcbist
+{
 
 ///
 /// @brief Load a set of MCBIST subtests in to the MCBIST registers
@@ -224,6 +225,13 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     FAPI_ASSERT(0 != i_program.iv_subtests.size(),
                 fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_TARGET(i_target),
                 "Attempt to run an MCBIST program with no subtests on %s", mss::c_str(i_target));
+
+    // Implement any mcbist work-arounds.
+    // I'm going to do the unthinkable here - and cast away the const of the mcbist program input.
+    // The work arounds need to change this, and so it needs to not be const. However, I don't want
+    // to risk general const-correctness by changing the input parameter to non-const. So, I use
+    // const_cast<> (ducks out of the way of the flying adjectives.) These are work-arounds ...
+    FAPI_TRY( workarounds::mcbist::end_of_rank(i_target, const_cast<program<TARGET_TYPE_MCBIST>&>(i_program)) );
 
     FAPI_TRY( clear_errors(i_target) );
 
