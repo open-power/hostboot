@@ -305,8 +305,7 @@ uint32_t startBgScrub<TYPE_MCA>( TargetHandle_t i_trgt, const MemRank & i_rank )
     TargetHandle_t mcbTrgt = getConnectedParent( i_trgt, TYPE_MCBIST );
     PRDF_ASSERT( nullptr != mcbTrgt );
 
-    uint32_t port = getTargetPosition( i_trgt );
-    PRDF_ASSERT( port < MAX_PORT_PER_MCBIST );
+    uint32_t port = getTargetPosition(i_trgt) % MAX_MCA_PER_MCBIST;
 
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( mcbTrgt );
 

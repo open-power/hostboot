@@ -22,6 +22,24 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+/** Callout all connected DIMMs HIGH on first occurence. */
+actionclass all_dimm_H_th_1
+{
+    callout(connected(TYPE_DIMM,0), MRU_HIGH);
+    callout(connected(TYPE_DIMM,1), MRU_HIGH);
+    threshold1;
+};
+
+/** Callout all connected DIMMs HIGH and self LOW on first occurence. */
+actionclass all_dimm_H_self_L_th_1
+{
+    callout(connected(TYPE_DIMM,0), MRU_HIGH);
+    callout(connected(TYPE_DIMM,1), MRU_HIGH);
+    calloutSelfLow;
+    threshold1;
+};
+
 /** Verify Chip Mark...TBD */
 actionclass verify_chip_mark
 {

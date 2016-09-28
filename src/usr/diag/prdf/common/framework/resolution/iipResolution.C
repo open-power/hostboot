@@ -252,7 +252,7 @@ int32_t CalloutConnectedGard::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
         }
         else
         {
-            PRDF_ERR( "[CalloutConnected::Resolve] No connected chip found:"
+            PRDF_ERR( "[CalloutConnectedGard::Resolve] No connected chip found:"
                       " sourceTrgt=0x%08x, iv_peerConnType=0x%x",
                         getHuid(sourceTrgt), iv_peerConnType );
 

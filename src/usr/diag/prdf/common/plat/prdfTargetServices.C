@@ -431,7 +431,10 @@ struct conn_t
             case TYPE_MCBIST:       order = 14; break;
             case TYPE_MCS:          order = 15; break;
             case TYPE_MCA:          order = 16; break;
-            case TYPE_DIMM:         order = 17; break;
+            case TYPE_MEMBUF:       order = 17; break;
+            case TYPE_L4:           order = 18; break;
+            case TYPE_MBA:          order = 19; break;
+            case TYPE_DIMM:         order = 20; break;
             default: ;
         }
 
@@ -817,6 +820,17 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                                 [&](const TargetHandle_t & t)
                                 { return trgtPos == getTargetPosition(t); } );
         }
+        else if ( TYPE_MCA == trgtType && TYPE_DIMM == i_connType )
+        {
+            // i_connPos is the DIMM select (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t dimmPos = getTargetPosition(t);
+                        return (trgtPos   == (dimmPos / MAX_DIMM_PER_PORT)) &&
+                               (i_connPos == (dimmPos % MAX_DIMM_PER_PORT));
+                    } );
+        }
         else
         {
             // default, i_connPos should match the unit position within the chip
@@ -1120,6 +1134,10 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             }
             break;
         }
+
+        case CLASS_LOGICAL_CARD: // DIMMs
+            o_pos = i_target->getAttr<ATTR_FAPI_POS>();
+            break;
 
         default:
             PRDF_ERR( PRDF_FUNC "Unsupported class: %d", l_class );

@@ -357,7 +357,7 @@ group gMCAECCFIR filter singlebit
     /** MCAECCFIR[13]
      *  Mainline read AUE
      */
-    (rMCAECCFIR, bit(13)) ? mainline_ce_ue_handling;
+    (rMCAECCFIR, bit(13)) ? all_dimm_H_th_1;
 
     /** MCAECCFIR[14]
      *  Mainline read UE
@@ -372,7 +372,7 @@ group gMCAECCFIR filter singlebit
     /** MCAECCFIR[16]
      *  Mainline read IAUE
      */
-    (rMCAECCFIR, bit(16)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(16)) ? all_dimm_H_th_1;
 
     /** MCAECCFIR[17]
      *  Mainline read IUE
@@ -422,7 +422,7 @@ group gMCAECCFIR filter singlebit
     /** MCAECCFIR[33]
      *  Maintenance AUE
      */
-    (rMCAECCFIR, bit(33)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(33)) ? all_dimm_H_th_1;
 
     /** MCAECCFIR[34]
      *  Maintenance UE
@@ -437,7 +437,7 @@ group gMCAECCFIR filter singlebit
     /** MCAECCFIR[36]
      *  Maintenance IAUE
      */
-    (rMCAECCFIR, bit(36)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(36)) ? all_dimm_H_th_1;
 
     /** MCAECCFIR[37]
      *  Maintenance IUE
