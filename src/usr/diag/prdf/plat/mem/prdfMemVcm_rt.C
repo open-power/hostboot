@@ -36,10 +36,10 @@ namespace PRDF
 //------------------------------------------------------------------------------
 
 // TODO: RTC 136126 Actual implementation of this procedure will be done later.
-uint32_t VcmEvent<TYPE_MCBIST>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                          bool & o_done )
+uint32_t VcmEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
+                                       bool & o_done )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MCBIST>::nextStep] "
+    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::nextStep] "
 
     uint32_t o_rc = SUCCESS;
 

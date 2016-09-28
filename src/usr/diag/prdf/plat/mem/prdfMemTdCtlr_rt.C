@@ -109,7 +109,7 @@ uint32_t MemTdCtlr<T,D>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
 template <TYPE T, typename D>
 uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
-                                        TdEntry<T> * i_entry )
+                                        TdEntry * i_entry )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
 
@@ -121,7 +121,8 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = initialize();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "initialize() failed on 0x%08x",
+                      iv_chip->getHuid() );
             break;
         }
 
@@ -144,7 +145,8 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = nextStep( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "nextStep() failed" );
+            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
+                      iv_chip->getHuid() );
             break;
         }
 
