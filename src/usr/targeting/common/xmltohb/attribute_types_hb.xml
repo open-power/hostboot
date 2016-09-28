@@ -1217,6 +1217,10 @@
         <name>REDUNDANT_PS_POLICY</name>
         <value>0xCA22</value>
     </enumerator>
+    <enumerator>
+        <name>TPM_REQUIRED</name>
+        <value>0xFFFF</value>
+    </enumerator>
 </enumerationType>
 
 <enumerationType>

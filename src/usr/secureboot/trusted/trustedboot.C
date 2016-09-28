@@ -38,6 +38,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
+#include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
@@ -45,6 +46,8 @@
 #include <sys/mmio.h>
 #include <sys/task.h>
 #include <initservice/initserviceif.H>
+#include <ipmi/ipmisensor.H>
+#include <config.h>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
@@ -698,7 +701,8 @@ void tpmVerifyFunctionalTpmExists()
                    "NO FUNCTIONAL TPM FOUND");
 
         // Check to ensure jumper indicates we are running secure
-        if (SECUREBOOT::getJumperState())
+        if (false) /// @todo Story 161916 Change to call getJumperState
+        //        if (SECUREBOOT::getJumperState())
         {
             /*@
              * @errortype
@@ -720,18 +724,8 @@ void tpmVerifyFunctionalTpmExists()
 
             // Log this failure here
             errlCommit(err, SECURE_COMP_ID);
-#if 0
-            // Code for early release
-            // Only terminate in manufacturing mode
-            // Get manufacturing mode flags
-            TARGETING::Target* pTopLevel = NULL;
-            TARGETING::targetService().getTopLevelTarget(pTopLevel);
-            TARGETING::ATTR_MNFG_FLAGS_type mnfgFlags =
-                pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-            if (mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM)
-#else
+
             if (isTpmRequired())
-#endif
 
             {
                 // terminating the IPL with this fail
@@ -889,7 +883,53 @@ bool isTpmRequired()
 
     TARGETING::ATTR_TPM_REQUIRED_type tpmRequired =
         pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
-    retVal = tpmRequired;
+
+    // TPM Required is on in the attributes, now let's check the BMC sensor
+    if (tpmRequired)
+    {
+#ifdef CONFIG_BMC_IPMI
+        uint32_t sensorNum = TARGETING::UTIL::getSensorNumber(pTopLevel,
+                                        TARGETING::SENSOR_NAME_TPM_REQUIRED);
+        // VALID IPMI sensors are 0-0xFE
+        if (TARGETING::UTIL::INVALID_IPMI_SENSOR != sensorNum)
+        {
+            // Check if TPM is required by BMC
+            SENSOR::getSensorReadingData tpmRequiredData;
+            SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
+                                           pTopLevel);
+            errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
+            if (NULL == err)
+            {
+                // 0x02 == Asserted bit (TPM is required)
+                if ((tpmRequiredData.event_status &
+                     (1 << SENSOR::ASSERTED)) ==
+                    (1 << SENSOR::ASSERTED))
+                {
+                    retVal = true;
+                }
+            }
+            else
+            {
+                // error reading sensor, assume TPM is required
+                TRACFCOMP( g_trac_trustedboot,
+                           "Unable to read Tpm Required Sensor : rc = 0x%04X",
+                           err->reasonCode());
+                delete err;
+                err = NULL;
+                retVal = true;
+            }
+        }
+        else
+        {
+            // Sensor not supported so assume TPM required
+            retVal = true;
+        }
+#else
+        // IPMI support not there, assume true
+        retVal = true;
+#endif
+    }
+
 
     TRACFCOMP( g_trac_trustedboot,
                "Tpm Required: %s",(retVal ? "Yes" : "No"));
