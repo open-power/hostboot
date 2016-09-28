@@ -269,7 +269,7 @@ fapi2::ReturnCode reset_imp_cmd_addr( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Reads the command/address output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Command/Address lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -292,7 +292,7 @@ fapi_try_exit:
 
 ///
 /// @brief Writes the command/address output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Command/Address lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -324,7 +324,7 @@ fapi2::ReturnCode reset_imp_cntl( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Reads the control output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Control lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -347,7 +347,7 @@ fapi_try_exit:
 
 ///
 /// @brief Writes the control output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Control lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -379,7 +379,7 @@ fapi2::ReturnCode reset_imp_cscid( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Reads the chip select/chip id output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Chip Select/Chip ID lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -402,7 +402,7 @@ fapi_try_exit:
 
 ///
 /// @brief Writes the chip select/chip id output impedance register
-/// @tparam I Clock lane instance
+/// @tparam I Chip Select/Chip ID lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_target the fapi2 target of the port
@@ -428,7 +428,7 @@ fapi_try_exit:
 //////////////////////////////////////////
 ///
 /// @brief Writes the chip select's/chip id's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Chip Select/Chip ID lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in,out] io_data register data to modify
@@ -447,7 +447,7 @@ inline void set_imp_cscid( fapi2::buffer<uint64_t>& io_data,
 
 ///
 /// @brief Reads the chip select's/chip id's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Chip Select/Chip ID lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_data the field data
@@ -490,7 +490,7 @@ inline void set_imp_clk( fapi2::buffer<uint64_t>& io_data,
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< uint64_t I, fapi2::TargetType T, typename TT = adrTraits<T> >
-inline fapi2::ReturnCode get_imp_clk( const fapi2::buffer<uint64_t>& i_data )
+inline const bool get_imp_clk( const fapi2::buffer<uint64_t>& i_data )
 {
     static_assert( I < TT::NUM_CLK_LANES, "lane instance out of range");
 
@@ -500,7 +500,7 @@ inline fapi2::ReturnCode get_imp_clk( const fapi2::buffer<uint64_t>& i_data )
 
 ///
 /// @brief Writes the command/address's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Command/Address lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in,out] io_data register data to modify
@@ -519,7 +519,7 @@ inline void set_imp_cmd_addr( fapi2::buffer<uint64_t>& io_data,
 
 ///
 /// @brief Reads the command/addresses's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Command/Address lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_data the field data
@@ -536,7 +536,7 @@ inline const bool get_imp_cmd_addr( const fapi2::buffer<uint64_t>& i_data )
 
 ///
 /// @brief Writes the control signal's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Control lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in,out] io_data register data to modify
@@ -555,7 +555,7 @@ inline void set_imp_cntl( fapi2::buffer<uint64_t>& io_data,
 
 ///
 /// @brief Reads the control signal's output impedance field
-/// @tparam I Clock lane instance
+/// @tparam I Control lane instance
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to adrTraits<T>
 /// @param[in] i_data the field data
