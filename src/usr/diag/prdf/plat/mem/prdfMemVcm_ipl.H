@@ -38,16 +38,15 @@ namespace PRDF
 template<TARGETING::TYPE T> class VcmEvent;
 
 // TODO: RTC 157608 Actual implementation of this procedure will be done later.
-/** @brief Verify chip mark procedure for MCBIST (IPL only). */
+/** @brief Verify chip mark procedure for MCA (IPL only). */
 template <>
-class VcmEvent<TARGETING::TYPE_MCBIST> : public TdEntry<TARGETING::TYPE_MCBIST>
+class VcmEvent<TARGETING::TYPE_MCA> : public TdEntry
 {
   public: // functions
 
     /** @brief Constructor */
-    VcmEvent<TARGETING::TYPE_MCBIST>( ExtensibleChip * i_chip,
-                                      MemRank i_rank, uint8_t i_port ) :
-        TdEntry<TARGETING::TYPE_MCBIST>(VCM_EVENT, i_chip, i_rank, i_port)
+    VcmEvent<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank ) :
+        TdEntry(VCM_EVENT, i_chip, i_rank)
     {}
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
@@ -57,13 +56,13 @@ class VcmEvent<TARGETING::TYPE_MCBIST> : public TdEntry<TARGETING::TYPE_MCBIST>
 // TODO: RTC 157888 Actual implementation of this procedure will be done later.
 /** @brief Verify chip mark procedure for MBA (IPL only). */
 template <>
-class VcmEvent<TARGETING::TYPE_MBA> : public TdEntry<TARGETING::TYPE_MBA>
+class VcmEvent<TARGETING::TYPE_MBA> : public TdEntry
 {
   public: // functions
 
     /** @brief Constructor */
     VcmEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry<TARGETING::TYPE_MBA>(VCM_EVENT, i_chip, i_rank)
+        TdEntry(VCM_EVENT, i_chip, i_rank)
     {}
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );

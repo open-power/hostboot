@@ -94,7 +94,7 @@ class MemTdCtlr
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     uint32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
-                            TdEntry<T> * i_entry );
+                            TdEntry * i_entry );
 
     #endif
 
@@ -188,10 +188,10 @@ class MemTdCtlr
     ExtensibleChip * const iv_chip;
 
     /** The TD queue that contains all of the pending TD procedures. */
-    TdQueue<T> iv_queue;
+    TdQueue iv_queue;
 
     /** The procedure that is currently in progress. */
-    TdEntry<T> * iv_curProcedure = nullptr;
+    TdEntry * iv_curProcedure = nullptr;
 
     #ifdef __HOSTBOOT_RUNTIME
 

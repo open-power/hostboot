@@ -44,11 +44,11 @@ namespace PRDF
 {
 
 //------------------------------------------------------------------------------
-//                               TdEntry classes
+//                               TdEntry class
 //------------------------------------------------------------------------------
 
 /** @brief Abstract class for a Targeted Diagnostics event. */
-class TdEntryBase
+class TdEntry
 {
   public: // enums, constants
 
@@ -67,7 +67,7 @@ class TdEntryBase
   public: // functions
 
     /** @brief Default destructor */
-    virtual ~TdEntryBase() = default;
+    virtual ~TdEntry() = default;
 
     /**
      * @brief  Each entry will have a set of steps that need to be performed.
@@ -80,96 +80,11 @@ class TdEntryBase
     virtual uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                bool & o_done ) = 0;
 
-  protected: // functions
-
-    /** @brief Constructor */
-    TdEntryBase( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :
-        iv_tdType(i_tdType), iv_rank(i_rank), iv_chip(i_chip)
-    {}
-
-  protected: // instance variables
-
-    const TdType  iv_tdType; ///< The event type (see enum TdType).
-    const MemRank iv_rank;   ///< The rank in which this event occurred.
-
-    /** The chip associated with this entry. This isn't used for any
-     *  comparisons, but is needed for every TD procedure. */
-    ExtensibleChip * const iv_chip;
-};
-
-// Only implement specializations of TdEntry.
-template<TARGETING::TYPE T> class TdEntry;
-
-/** @brief TdEntry specialization for MCBIST. */
-template<>
-class TdEntry<TARGETING::TYPE_MCBIST> : public TdEntryBase
-{
-  public: // enums, constants
-
-    enum
-    {
-        PORTS_PER_MCBIST = 4,
-    };
-
-  public: // functions
-
-    /** @brief Default destructor */
-    virtual ~TdEntry<TARGETING::TYPE_MCBIST>() = default;
-
-    // Overloaded functions
-    virtual uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                               bool & o_done ) = 0;
-
     /** @brief '==' operator */
-    bool operator==( const TdEntry<TARGETING::TYPE_MCBIST> & i_e ) const
+    bool operator==( const TdEntry & i_e ) const
     {
-        return ( this->iv_tdType == i_e.iv_tdType &&
-                 this->iv_rank   == i_e.iv_rank   &&
-                 this->iv_port   == i_e.iv_port      );
-    }
-
-    /**
-     * @brief '<' operator
-     * @note This only compares iv_tdType because the TdQueue only sorts by type
-     */
-    bool operator<( const TdEntry<TARGETING::TYPE_MCBIST> & i_e ) const
-    {
-        return this->iv_tdType < i_e.iv_tdType;
-    }
-
-  protected: // functions
-
-    /** @brief Constructor */
-    TdEntry<TARGETING::TYPE_MCBIST>( TdType i_tdType, ExtensibleChip * i_chip,
-                                     MemRank i_rank, uint8_t i_port ) :
-        TdEntryBase(i_tdType, i_chip, i_rank), iv_port(i_port)
-    {
-        PRDF_ASSERT( TARGETING::TYPE_MCBIST == iv_chip->getTrgtType() );
-        PRDF_ASSERT( iv_port < PORTS_PER_MCBIST );
-    }
-
-  protected: // Instance variables
-
-    const uint32_t iv_port; ///< MCBIST memory port.
-};
-
-/** @brief TdEntry specialization for MBA. */
-template<>
-class TdEntry<TARGETING::TYPE_MBA> : public TdEntryBase
-{
-  public: // functions
-
-    /** @brief Default destructor */
-    virtual ~TdEntry<TARGETING::TYPE_MBA>() = default;
-
-    // Overloaded functions
-    virtual uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                               bool & o_done ) = 0;
-
-    /** @brief '==' operator */
-    bool operator==( const TdEntry<TARGETING::TYPE_MBA> & i_e ) const
-    {
-        return ( this->iv_tdType == i_e.iv_tdType &&
+        return ( this->iv_chip   == i_e.iv_chip   &&
+                 this->iv_tdType == i_e.iv_tdType &&
                  this->iv_rank   == i_e.iv_rank      );
     }
 
@@ -177,20 +92,34 @@ class TdEntry<TARGETING::TYPE_MBA> : public TdEntryBase
      * @brief '<' operator
      * @note This only compares iv_tdType because the TdQueue only sorts by type
      */
-    bool operator<( const TdEntry<TARGETING::TYPE_MBA> & i_e ) const
+    bool operator<( const TdEntry & i_e ) const
     {
         return this->iv_tdType < i_e.iv_tdType;
     }
 
   protected: // functions
 
-    /** @brief Constructor */
-    TdEntry<TARGETING::TYPE_MBA>( TdType i_tdType, ExtensibleChip * i_chip,
-                                  MemRank i_rank ) :
-        TdEntryBase(i_tdType, i_chip, i_rank)
+    /**
+     * @brief Constructor
+     * @param i_tdType  See TdType enum
+     * @param i_chip    MCA or MBA chip
+     * @param i_rank    Target rank
+     */
+    TdEntry( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :
+        iv_chip(i_chip), iv_tdType(i_tdType), iv_rank(i_rank)
     {
-        PRDF_ASSERT( TARGETING::TYPE_MBA == iv_chip->getTrgtType() );
+        PRDF_ASSERT( (TARGETING::TYPE_MCA == iv_chip->getTrgtType()) ||
+                     (TARGETING::TYPE_MBA == iv_chip->getTrgtType())    );
     }
+
+  protected: // instance variables
+
+    /** The chip associated with this entry. This isn't used for any
+     *  comparisons, but is needed for every TD procedure. */
+    ExtensibleChip * const iv_chip;
+
+    const TdType  iv_tdType; ///< The event type (see enum TdType).
+    const MemRank iv_rank;   ///< The rank in which this event occurred.
 };
 
 //------------------------------------------------------------------------------
@@ -202,13 +131,12 @@ class TdEntry<TARGETING::TYPE_MBA> : public TdEntryBase
  * @note  Events with a higher priority will be moved ahead of lower priority
  *        events.
  */
-template <TARGETING::TYPE T>
 class TdQueue
 {
   public: // typedefs
 
-    typedef          std::vector< TdEntry<T> * >           Queue;
-    typedef typename std::vector< TdEntry<T> * >::iterator QueueItr;
+    typedef          std::vector< TdEntry * >           Queue;
+    typedef typename std::vector< TdEntry * >::iterator QueueItr;
 
   public: // functions
 
@@ -228,7 +156,7 @@ class TdQueue
      *         mistakenly removed via pop() before the TD controller is able to
      *         execute the request.
      */
-    TdEntry<T> * getNextEntry()
+    TdEntry * getNextEntry()
     {
         PRDF_ASSERT( !iv_queue.empty() );
 
@@ -239,7 +167,7 @@ class TdQueue
         //       while a TD procedure is in progress, which is undesirable.
 
         std::sort( iv_queue.begin(), iv_queue.end(),
-                   [](TdEntry<T> * a, TdEntry<T> * b) { return *a < *b; } );
+                   [](TdEntry * a, TdEntry * b) { return *a < *b; } );
 
         return iv_queue.front();
     }
@@ -250,10 +178,10 @@ class TdQueue
      * @note  Only adds the entry to the queue if the entry does not already
      *        exist in the queue.
      */
-    void push( TdEntry<T> * i_e )
+    void push( TdEntry * i_e )
     {
         QueueItr it = std::find_if( iv_queue.begin(), iv_queue.end(),
-                                    [=](TdEntry<T> * a){return *i_e == *a;} );
+                                    [=](TdEntry * a){return *i_e == *a;} );
         if ( iv_queue.end() == it )
         {
             iv_queue.push_back( i_e );
