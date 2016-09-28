@@ -1195,6 +1195,10 @@
         <name>TURBO_ALLOWED</name>
         <value>0xCB03</value>
     </enumerator>
+    <enumerator>
+        <name>TPM_REQUIRED</name>
+        <value>0xFFFF</value>
+    </enumerator>
 </enumerationType>
 
 <enumerationType>
