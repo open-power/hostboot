@@ -65,7 +65,7 @@ template<>
 fapi2::ReturnCode stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     // Too long, make shorter
-    using TT = mss::mcbist::mcbistTraits<TARGET_TYPE_MCBIST>;
+    using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
 
     // Poll parameters are defined as TK so that we wait a nice time for operations
     // For now use the defaults
@@ -576,7 +576,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
                                 const speed i_speed )
 {
     // Too long, make shorter
-    using TT = mss::mcbist::mcbistTraits<TARGET_TYPE_MCBIST>;
+    using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
 
     // We can use a local mcbist::program to help with the bit processing, and then write just the registers we touch.
     mss::mcbist::program<TARGET_TYPE_MCBIST> l_program;
