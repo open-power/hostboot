@@ -881,6 +881,8 @@
     <attribute><id>STOP8_DISABLE</id></attribute>
     <attribute><id>STOP4_DISABLE</id></attribute>
     <attribute><id>SUPPORTED_STOP_STATES</id></attribute>
+    <attribute><id>SYSTEM_FAMILY</id></attribute>
+    <attribute><id>SYSTEM_TYPE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

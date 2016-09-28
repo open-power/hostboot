@@ -346,6 +346,29 @@ namespace IPMI
     size_t max_buffer(void);
 
 
+    /**
+     * Structure to return BMC/IPMI information in
+     */
+    struct BmcInfo_t
+    {
+        //@TODO-RTC:161648-Add more details/comments
+        uint64_t bulkTransferLpcBaseAddr;
+        uint32_t bulkTransferSize;
+        uint8_t chipVersion;
+        uint8_t smsAttnInterrupt;
+        uint8_t bmcToHostInterrupt;
+        char bmcVendor[32];
+    };
+
+    /**
+     * Retrieve some information about the BMC and the connection
+     * we have to it.
+     *
+     * @return Structure of BMC data
+     */
+    BmcInfo_t getBmcInfo(void);
+
+
 }; // end namespace IPMI
 
 #endif

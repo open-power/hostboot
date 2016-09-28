@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -202,6 +202,71 @@ errlHndl_t i2cDisableSensorCache( TARGETING::Target * i_target,
  */
 errlHndl_t i2cEnableSensorCache( TARGETING::Target * i_target );
 #endif //__HOSTBOOT_RUNTIME
+
+
+/**
+ * Enumeration that defines possible I2C device types
+ */
+enum DeviceType_t
+{
+    //@TODO-RTC:161649-Map these directly to some HDAT constants?
+    //  Or something from MRW?
+    DEVTYPE_955x            = 0x01,
+    DEVTYPE_SEEPROM         = 0x02,
+    DEVTYPE_NUVOTON_TPM     = 0x03,
+    DEVTYPE_MEX_FPGA        = 0x04,
+    DEVTYPE_UCX90XX         = 0x05,
+    DEVTYPE_UNKNOWN         = 0xFF,
+};
+
+/**
+ * Enumeration that defines possible I2C device purposes
+ */
+enum DevicePurpose_t
+{
+    //@TODO-RTC:161649-Map these directly to some HDAT constants?
+    //  Or something from MRW?
+    PURPOSE_CABLE_CARD_PRES            = 0x01,
+    PURPOSE_CABLE_CARD_POWER_SENSE     = 0x02,
+    PURPOSE_CABLE_CARD_POWER_CONTROL   = 0x03,
+    PURPOSE_TPM                        = 0x04,
+    PURPOSE_MODULE_VPD                 = 0x05,
+    PURPOSE_DOMM_SPD                   = 0x06,
+    PURPOSE_PROC_MODULE_VPD            = 0x07,
+    PURPOSE_SBE_SEEPROM                = 0x08,
+    PURPOSE_PLANAR_VPD                 = 0x09,
+    PURPOSE_PCI_HOTPLUG                = 0x0A,
+    PURPOSE_UNKNOWN                    = 0xFF,
+};
+
+/**
+ * Structure to return I2C information in
+ */
+struct DeviceInfo_t
+{
+    //@TODO-RTC:161649-Add more details/comments
+    TARGETING::Target* masterChip;
+    uint8_t engine;
+    uint8_t masterPort;
+    DeviceType_t deviceType;
+    uint8_t addr; //Is this left-shifted or not?
+    uint8_t slavePort;
+    uint8_t busFreqKhz;
+    DevicePurpose_t devicePurpose;
+};
+
+/**
+ * Retrieve some information about I2C devices that the Host
+ * needs to know about.
+ *
+ * @param[in]   i_i2cMaster  I2C master to query, pass in NULL
+ *                           to get a system-wide list
+ * @param[out]  o_deviceInfo  list of I2C device structures
+ *
+ * @return <none>
+ */
+void getDeviceInfo( TARGETING::Target* i_i2cMaster,
+                    std::vector<DeviceInfo_t>& o_deviceInfo );
 
 };  // end namespace I2C
 
