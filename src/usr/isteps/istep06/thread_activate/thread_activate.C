@@ -431,8 +431,18 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             break;
         }
 
+        //Check if we are in MPIPL
+        uint8_t is_mpipl = 0;
+        sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl);
+
+        if(is_mpipl)
+        {
+            TRACFCOMP( g_fapiTd,
+                    "activate_threads: We are in MPIPL, extending cache to be real memory" );
+                    mm_extend(MM_EXTEND_REAL_MEMORY);
+        }
         // Reclaim remainder of L3 cache if available.
-        if ((!PNOR::usingL3Cache()) &&
+        else if ((!PNOR::usingL3Cache()) &&
             (!getCacheDeconfig(l_masterCoreID)))
         {
             // Get EX
@@ -459,6 +469,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                            TARGETING::get_huid(l_ex) );
                 break;
             }
+
 
             if(l_reducedCacheMode)
             {
