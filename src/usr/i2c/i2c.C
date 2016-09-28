@@ -3723,6 +3723,18 @@ void getMasterInfo( const TARGETING::Target* i_chip,
 }
 
 /**
+ * Retrieve some information about all I2C devices that the Host
+ * needs to know about
+ */
+void getDeviceInfo( TARGETING::Target* i_i2cMaster,
+                    std::vector<DeviceInfo_t>& o_deviceInfo )
+{
+    //@TODO-RTC:161649-Fill in information for HDAT
+    return;
+};
+
+
+/**
  * @brief Utility Function to capture error log user data consisting of
  *        the I2C Master Status Register and the I2C Master Target HUID
  */

@@ -31915,6 +31915,50 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SYSTEM_FAMILY</id>
+    <description>
+        This field is of the form "vendor,name" where the name indicates
+        the family of the systems.  The textual portion of the string has
+        a maximum length of 63 characters to accommodate a terminating NULL.
+        Both vendor and name fields are lower case US ASCII. No special
+        characters other than ",", "-", and "+" as described below should
+        be used in the string.
+    </description>
+    <simpleType>
+        <string>
+            <default>ibm,p9</default>
+            <sizeInclNull>64</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_TYPE</id>
+    <description>
+        This field is of the form ?vendor,type? where the type indicates
+        a type of system within the System Family. The textual portion of
+        the string has a maximum length of 63 characters to accommodate a
+        terminating NULL. Both vendor and name fields are lower case US
+        ASCII. No special characters other than ",", "-", and "+" as described
+        below should be used in the string.  If identification of specific
+        models within a system type is desired, "-model" should be appended
+        to the end of the name. The "-model" portion is optional and could be
+        used to identify the packaging, specific model numbers, etc.
+        NOTE: No Hostboot code should ever key off of this value.
+    </description>
+    <simpleType>
+        <string>
+            <default>ibm,miscopenpower</default>
+            <sizeInclNull>64</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>TOD_CPU_DATA</id>
     <description>TOD CHIP DATA for each CHIP
         The size of the TOD CHIP DATA must be equal to the sizeof(TodChipData)

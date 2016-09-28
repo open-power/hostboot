@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <errl/errlmanager.H>
 #include <hwas/common/hwasCallout.H>
 #include <console/console_reasoncodes.H>
+#include <console/uartif.H>
 
 namespace CONSOLE
 {
@@ -219,4 +220,14 @@ namespace CONSOLE
 
     Uart* Uart::g_device = NULL;
 
+    /**
+     * Retrieve some information about the UART and the connection
+     * we have to it.
+     */
+    UartInfo_t getUartInfo(void)
+    {
+        //@TODO-RTC:161647-Fill in information for HDAT
+        UartInfo_t l_info;
+        return l_info;
+    };
 }

@@ -1097,4 +1097,15 @@ namespace IPMI
         return err;
     }
 
+    /**
+     * Retrieve some information about the BMC and the connection
+     * we have to it.
+     */
+    BmcInfo_t getBmcInfo(void)
+    {
+        //@TODO-RTC:161648-Fill in data
+        BmcInfo_t l_info;
+        return l_info;
+    }
+
 };
