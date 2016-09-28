@@ -155,8 +155,10 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/workarounds/
 
 prd_obj_no_sim += mcbist.o
+prd_obj_no_sim += mcbist_workarounds.o
 prd_obj_no_sim += sim.o
 prd_obj_no_sim += rank.o
 prd_obj_no_sim += c_str.o
