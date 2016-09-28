@@ -36,7 +36,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
 include ${ROOTPATH}/procedure.rules.mk
-include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_eq.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_ex.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_core.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_cpu_special_wakeup_lib.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

@@ -1244,6 +1244,7 @@
     <attribute><id>PROC_PERV_BNDY_PLL_DATA</id></attribute>
     <attribute><id>DEVICE_ID</id></attribute>
     <attribute><id>TOD_CPU_DATA</id></attribute>
+    <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
 </targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->
