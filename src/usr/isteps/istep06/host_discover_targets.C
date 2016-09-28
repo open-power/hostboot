@@ -166,8 +166,17 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "host_discover_targets: MPIPL mode");
 
-        // Sync attributes from Fsp
-        l_err = TARGETING::syncAllAttributesFromFsp();
+        if(INITSERVICE::spBaseServicesEnabled())
+        {
+            // Sync attributes from Fsp
+            l_err = TARGETING::syncAllAttributesFromFsp();
+        }
+        else
+        {
+            //TODO RTC:157651 we need this to be reading from the FSP
+            // For now just discover targets the normal way
+            l_err = HWAS::discoverTargets();
+        }
     }
     else
     {
