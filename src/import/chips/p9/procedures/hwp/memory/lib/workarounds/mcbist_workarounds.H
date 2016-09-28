@@ -22,3 +22,58 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file mcbist_workarounds.H
+/// @brief Workarounds for the MCBISt engine
+/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// this code in any way.
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_WORKAROUNDS_MCBIST_H_
+#define _MSS_WORKAROUNDS_MCBIST_H_
+
+#include <fapi2.H>
+#include <lib/mcbist/mcbist.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+namespace mcbist
+{
+
+///
+/// @brief Replace reads with displays in the passed in MCBIST program
+/// @param[in] the MCBIST program to check for read/display replacement
+/// @note Useful for testing
+///
+void replace_read_helper(mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_program);
+
+///
+/// @brief End of rank work around
+/// For Nimbus DD1 the MCBIST engine doesn't detect the end of rank properly
+/// for a 1R DIMM during a super-fast read. To work around this, we check the
+/// MCBIST to see if any port has a 1R DIMM on it and if so we change our stop
+/// conditions to immediate. However, because that doesn't work (by design) with
+/// read, we also must change all reads to displays (slow read.)
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @param[in] i_program the mcbist program to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode end_of_rank( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                               mss::mcbist::program<fapi2::TARGET_TYPE_MCBIST>& i_program );
+
+} // close namespace mcbist
+} // close namespace workarounds
+} // close namespace mss
+
+#endif
+
