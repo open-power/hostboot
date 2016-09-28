@@ -281,8 +281,8 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > find_targets( con
 /// @tparam OT the output type to be returned
 /// @param[in] i_vector_of_pairs the input vector of pairs
 /// @param[in] i_key the "map" key
-/// @param[in] o_value the value found from given key
-/// @return the value corresponding to the key
+/// @param[out] o_value the value found from given key
+/// @return true if value is found, false otherwise
 /// @note VECTOR NEEDS TO BE IN SORTED ORDER
 ///
 template<typename T, typename OT>
@@ -321,7 +321,7 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
 /// @param[in] i_vector_of_pairs the input vector of pairs
 /// @param[in] i_value the "map" value, the second entry in the pairs
 /// @param[out] o_key the first entry in the pair
-/// @return FAPI2_RC_SUCCESS
+/// @return fapi2 ReturnCode fapi2::RC_SUCCESS if value found
 ///
 template<typename T, typename OT>
 fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
@@ -361,7 +361,7 @@ fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_ve
 /// @param[in] i_array the input array of pairs
 /// @param[in] i_key the "map" key
 /// @param[in] o_value the value found from given key
-/// @return the value corresponding to the key
+/// @return fapi2 ReturnCode fapi2::RC_SUCCESS if key found
 /// @note To use on short arrays. O(N), simple search
 ///
 template<typename T, typename OT, size_t N>
