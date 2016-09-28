@@ -50,8 +50,6 @@
 
 namespace mss
 {
-namespace mcbist
-{
 
 // I have a dream that the MCBIST engine code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
@@ -290,6 +288,9 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         };
 
 };
+
+namespace mcbist
+{
 
 ///
 /// @class subtest_t
@@ -615,6 +616,39 @@ inline subtest_t<T> read_subtest()
 
     // 0:3   = 0001 - we want subtest type to be a Read (R)
     l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a display subtest - configured simply
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> display_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 1100 - we want subtest type to be a DISPLAY (R, slow)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::DISPLAY);
 
     // - Not a special subtest, so no other configs associated
     // 4     = 0    - we don't want to complement data for our Writes
@@ -1406,10 +1440,10 @@ class program
             // asked for a master rank detect.
             iv_config.insertFromRight<TT::CFG_PAUSE_ON_ERROR_MODE, TT::CFG_PAUSE_ON_ERROR_MODE_LEN>(i_end);
 
-            FAPI_INF("i_end 0x%016lx", i_end);
             uint64_t l_detect_slave = fapi2::buffer<uint64_t>(i_end).getBit<SLAVE_RANK_INDICATED_BIT>();
             iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>( l_detect_slave );
-            FAPI_INF("load MCBIST end boundaries: detect slave?  %s", (l_detect_slave == 1 ? "yes" : "no") );
+            FAPI_INF("load MCBIST end boundaries 0x%016lx detect slave? %s",
+                     i_end, (l_detect_slave == 1 ? "yes" : "no") );
         }
 
         ///
