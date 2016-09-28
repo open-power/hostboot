@@ -5999,9 +5999,10 @@ sub generate_is_dimm
         $mcs = (($mca - ($mca%2))/2)%2;
         my $mcbist = ($mca - ($mca%4))/4;
         $mca = $mca % 2;
+        my $dimm_rel_mca = $dimm % 2;
 
         my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc"
-            . "/mcbist-$mcbist/mcs-$mcs/mca-$mca/dimm-$dimm";
+            . "/mcbist-$mcbist/mcs-$mcs/mca-$mca/dimm-$dimm_rel_mca";
 
         # add dimm to mcbist array
         push(@{$mcbist_dimms{$node . $proc."_".$mcbist}}, "n${node}:p${pos}");
