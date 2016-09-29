@@ -33415,4 +33415,25 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+
+
+<attribute>
+    <id>SYSTEM_DISABLE_QUEUED_SCAN</id>
+    <description>
+    Queued scan mode disable status. This attribute eventually decides if queued
+    scan is to be supported by CME Hcode.
+
+    Consumers: p9_hcode_image_build
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_DISABLE_QUEUED_SCAN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

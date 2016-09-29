@@ -914,6 +914,7 @@
     <attribute><id>NEST_LEAKAGE_PERCENT</id></attribute>
     <attribute><id>MSS_MRW_DRAM_WRITE_CRC</id></attribute>
     <attribute><id>PGPE_HCODE_FUNCTION_ENABLE</id></attribute>
+    <attribute><id>SYSTEM_DISABLE_QUEUED_SCAN</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
