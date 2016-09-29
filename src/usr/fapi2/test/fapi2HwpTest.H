@@ -151,6 +151,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_proc, fapi2_procTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_proc !!");
@@ -159,6 +160,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_eq, fapi2_eqTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_eq !!");
@@ -167,6 +169,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_ex, fapi2_exTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_ex !!");
@@ -175,6 +178,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_core, fapi2_coreTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_core !!");
@@ -183,6 +187,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mcs, fapi2_mcsTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_mcs !!");
@@ -191,6 +196,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mca, fapi2_mcaTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_mca !!");
@@ -199,6 +205,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mcbist, fapi2_mcbistTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_mcbist !!");
@@ -207,6 +214,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_pec, fapi2_pecTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_pec !!");
@@ -215,6 +223,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_phb, fapi2_phbTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_phb !!");
@@ -223,6 +232,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_xbus, fapi2_xbusTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_xbus !!");
@@ -231,6 +241,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_obus, fapi2_obusTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_obus !!");
@@ -239,6 +250,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_nv, fapi2_nvTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_nv !!");
@@ -247,6 +259,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_ppe, fapi2_ppeTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_ppe !!");
@@ -255,6 +268,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_perv, fapi2_pervTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_perv !!");
@@ -263,6 +277,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_sbe, fapi2_sbeTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_sbe !!");
@@ -271,6 +286,7 @@ void test_fapi2Hwp()
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_capp, fapi2_cappTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
+          delete l_errl;
           l_errl = NULL;
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_capp !!");

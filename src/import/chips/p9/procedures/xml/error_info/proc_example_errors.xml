@@ -113,6 +113,15 @@
     </collectRegisterFfdc>
 </hwpError>
 
+<hwpError>
+    <rc>RC_TEST_PROC_ERROR</rc>
+    <description>
+        Example error that calls a procedure with a parameter.
+        parm1 = uint32_t
+    </description>
+    <collectFfdc>p9_collect_some_ffdc,parm1</collectFfdc>
+</hwpError>
+
 </hwpErrors>
 
 

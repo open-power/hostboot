@@ -54,13 +54,54 @@ public:
         }
     }
 
+    /**
+     * @brief Test FAPI2 return codes #2
+     */
+    void testFapi2ReturnCode2(void)
+    {
+        uint32_t l_res = rcTestReturnCodeCreator();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode2. Fail l_res=%d", l_res);
+        }
+    }
+
+
+    /**
+     * @brief Test FAPI2 return codes #3
+     */
+    void testFapi2ReturnCode3()
+    {
+        uint32_t l_res = rcTestComparisonOperatorWithRCValue();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode3. Fail l_res=%d", l_res);
+        }
+        return;
+    }
+
+    /**
+     * @brief Test FAPI2 return codes #4
+     */
+    void testFapi2ReturnCode4()
+    {
+        uint32_t l_res = rcTestComparisonOperator();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode4. Fail l_res=%d", l_res);
+        }
+        return;
+    }
 
     /**
      * @brief Test FAPI2 return codes #5
      */
     void testFapi2ReturnCode5()
     {
-        uint32_t l_res = rcTestComparisonOperatorWithRCValue();
+        uint32_t l_res = rcTestCopyConstructor();
 
         if (l_res != 0)
         {
@@ -70,30 +111,100 @@ public:
     }
 
     /**
-     * @brief Test FAPI2 return codes #11
+     * @brief Test FAPI2 return codes #6
      */
-    void testFapi2ReturnCode11(void)
+    void testFapi2ReturnCode6()
+    {
+        uint32_t l_res = rcTestReturnCodeConstructor();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode6. Fail l_res=%d", l_res);
+        }
+        return;
+    }
+
+    /**
+     * @brief Test FAPI2 return codes #7
+     */
+    void testFapi2ReturnCode7(void)
     {
         uint32_t l_res = rcTestGetErrorInfo();
 
         if (l_res != 0)
         {
-            TS_FAIL("testFapi2ReturnCode11. Fail l_res=%d", l_res);
+            TS_FAIL("testFapi2ReturnCode7. Fail l_res=%d", l_res);
         }
     }
 
+
+    /**
+     * @brief Test FAPI2 return codes #8
+     */
+    void testFapi2ReturnCode8()
+    {
+        uint32_t l_res = rcTestErrorInfo();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode8. Fail l_res=%d", l_res);
+        }
+    }
+
+    /**
+     * @brief Test FAPI2 return codes #9
+     */
+    void testFapi2ReturnCode9()
+    {
+        uint32_t l_res = rcTestCopyConstructorwithErrorInfo();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode9. Fail l_res=%d", l_res);
+        }
+        return;
+    }
+
+    /**
+     * @brief Test FAPI2 return codes #10
+     */
+    void testFapi2ReturnCode10()
+    {
+        uint32_t l_res = rcTestAssignmentOperatorwithErrorInfo();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode10. Fail l_res=%d", l_res);
+        }
+        return;
+    }
+
+    /**
+     * @brief Test FAPI2 return codes #11
+     */
+    void testFapi2ReturnCode11()
+    {
+        uint32_t l_res = rcTestClearErrorInfo();
+
+        if (l_res != 0)
+        {
+            TS_FAIL("testFapi2ReturnCode11. Fail l_res=%d", l_res);
+        }
+        return;
+    }
 
     /**
      * @brief Test FAPI2 return codes #12
      */
     void testFapi2ReturnCode12()
     {
-        uint32_t l_res = rcTestErrorInfo();
+        uint32_t l_res = rcTestAddErrorInfo();
 
         if (l_res != 0)
         {
             TS_FAIL("testFapi2ReturnCode12. Fail l_res=%d", l_res);
         }
+        return;
     }
 
     /**
@@ -101,7 +212,7 @@ public:
      */
     void testFapi2ReturnCode13()
     {
-        uint32_t l_res = rcTestCopyConstructorwithErrorInfo();
+        uint32_t l_res = rcTestStaticCast();
 
         if (l_res != 0)
         {
@@ -110,60 +221,15 @@ public:
         return;
     }
 
-    /**
-     * @brief Test FAPI2 return codes #14
-     */
-    void testFapi2ReturnCode14()
+
+    void testFapi2ReturnCodeAttrErrls(void)
     {
-        uint32_t l_res = rcTestAssignmentOperatorwithErrorInfo();
+        uint32_t l_res = rcTestReturnCodeAttrErrls();
 
         if (l_res != 0)
         {
-            TS_FAIL("testFapi2ReturnCode14. Fail l_res=%d", l_res);
+            TS_FAIL("rcTestReturnCodeAttrErrls. Fail l_res=%d", l_res);
         }
-        return;
-    }
-
-    /**
-     * @brief Test FAPI2 return codes #15
-     */
-    void testFapi2ReturnCode15()
-    {
-        uint32_t l_res = rcTestClearErrorInfo();
-
-        if (l_res != 0)
-        {
-            TS_FAIL("testFapi2ReturnCode15. Fail l_res=%d", l_res);
-        }
-        return;
-    }
-
-    /**
-     * @brief Test FAPI2 return codes #16
-     */
-    void testFapi2ReturnCode16()
-    {
-        uint32_t l_res = rcTestAddErrorInfo();
-
-        if (l_res != 0)
-        {
-            TS_FAIL("testFapi2ReturnCode16. Fail l_res=%d", l_res);
-        }
-        return;
-    }
-
-    /**
-     * @brief Test FAPI2 return codes #17
-     */
-    void testFapi2ReturnCode17()
-    {
-        uint32_t l_res = rcTestStaticCast();
-
-        if (l_res != 0)
-        {
-            TS_FAIL("testFapi2ReturnCode17. Fail l_res=%d", l_res);
-        }
-        return;
     }
 };
 
