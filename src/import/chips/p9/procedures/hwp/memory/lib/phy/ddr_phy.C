@@ -47,6 +47,7 @@
 #include <lib/phy/adr.H>
 #include <lib/phy/seq.H>
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/workarounds/wr_vref_workarounds.H>
 
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
@@ -758,7 +759,10 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         if (i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
         {
             l_vref_config.clearBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
-            // TK: Other 2D config information
+
+            // Runs WR VREF workarounds if needed
+            // it will check and see if it needs to run, if not it will return success
+            FAPI_TRY( mss::workarounds::wr_vref::execute(i_target) );
         }
 
         FAPI_INF("wr_vref_config: 0x%016lu", l_vref_config);
