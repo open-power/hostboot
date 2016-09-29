@@ -1548,6 +1548,21 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_DISABLE_QUEUED_SCAN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Queued scan mode disable status. This attribute eventually decides if queued
+    scan is to be supported by CME Hcode.
+
+    Consumers: p9_hcode_image_build
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <platInit/>
+    <initToZero/>
+   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
      <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
      <description>
      Time between invocations of the 24x7 performance collection function on
