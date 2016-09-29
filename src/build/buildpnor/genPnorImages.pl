@@ -177,10 +177,15 @@ my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
             . "-skp ${DEV_KEY_DIR}/sw_key_a";
 
 # Key prefix used for secureboot key transition partition.
-# Note: simply reordered the keys to create a psuedo production key.
-my $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
+# Default key transition to same keys.
+my $SIGN_SBKT_PREFIX_PARAMS =  $SIGN_PREFIX_PARAMS;
+if ( $testRun )
+{
+    # Note: simply reordered the keys to create a pseudo production key.
+    $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
             . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
             . "-skp ${DEV_KEY_DIR}/sw_key_a";
+}
 
 # Secureboot headers
 # Contains the appropriate flags, prefix, and file names.
@@ -213,6 +218,17 @@ my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
     . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
     . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
     . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key ";
+
+# Key prefix used for secureboot key transition partition.
+# Default key transition to same keys.
+my $OPEN_SIGN_KEY_TRANS_REQUEST =  $OPEN_SIGN_REQUEST;
+if ( $testRun )
+{
+    # Note: simply reordered the keys to create a pseudo production key.
+    $OPEN_SIGN_KEY_TRANS_REQUEST =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
+            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
+            . "-skp ${DEV_KEY_DIR}/sw_key_a";
+}
 
 if ($secureboot)
 {
@@ -609,7 +625,8 @@ sub manipulateImages
             elsif ($eyeCatch eq "SBKT" && $secureboot && $key_transition)
             {
                 $callerHwHdrFields{configure} = 1;
-                create_sb_key_transition_container($tempImages{PAD_PHASE});
+                create_sb_key_transition_container($openSigningFlags,
+                                                   $tempImages{PAD_PHASE});
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
             }
             # Other partitions fill with FF's if no empty bin file provided
@@ -888,7 +905,7 @@ sub gen_test_containers
 ################################################################################
 sub create_sb_key_transition_container
 {
-    my ($o_file) = @_;
+    my ($i_opSigningFlags, $o_file) = @_;
 
     my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
     my %tempImages = (
@@ -899,11 +916,28 @@ sub create_sb_key_transition_container
     # Gen 4K blob of random data
     run_command("dd if=/dev/urandom of=$tempImages{RAND_BLOB} count=1 bs=4k");
 
-    # Create a signed container with new production keys
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
+    if($openSigningTool)
+    {
+        # Create a signed container with new production keys
+        run_command("$OPEN_SIGN_KEY_TRANS_REQUEST "
+            . "$i_opSigningFlags "
+            . "-protectedPayload $tempImages{RAND_BLOB} "
+            . "-out $tempImages{PRD_KEY_FILE}");
+        # Sign new production key container with imprint keys
+        run_command("$OPEN_SIGN_REQUEST "
+            . "$i_opSigningFlags "
+            . "-protectedPayload $tempImages{PRD_KEY_FILE} "
+            . "-out $o_file");
+    }
+    else
+    {
+        # Create a signed container with new production keys
+        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
+        # Sign new production key container with imprint keys
+        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
+    }
 
-    # Sign new production key container with imprint keys
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
+
 
     # Clean up temp images
     foreach my $image (keys %tempImages)
@@ -976,6 +1010,9 @@ print <<"ENDUSAGE";
                         Multiple '--corrupt' options are allowed, but note the system will checkstop on the
                             first bad partition so multiple may not be that useful.
                         Example: --corrupt HBI --corrupt HBD=unpro
+    --key-transition    Creates secureboot key transition container.
+                        Default transitions to same keys
+                        Default with [--test] is to transition to test production keys.
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This
