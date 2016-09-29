@@ -3428,10 +3428,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_FSP_BAR_SIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -29314,6 +29310,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29332,6 +29329,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29582,6 +29580,28 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+
+<attribute>
+  <id>PROC_FSP_BAR_SIZE</id>
+  <description>
+    FSP BAR size value
+    creator: platform
+    consumer: p9_setup_bars
+    firmware notes: none
+  </description>
+  <simpleType>
+    <uint64_t>
+        <default>0xFFFFFC00FFFFFFFF</default>
+    </uint64_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FSP_BAR_SIZE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 <attribute>
   <id>PROC_FSP_BAR_BASE_ADDR_OFFSET</id>
   <description>
@@ -29592,6 +29612,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0000030100000000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29616,6 +29637,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0010000000000000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29637,6 +29659,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0000030203000000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29655,6 +29678,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29676,6 +29700,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0000030201200000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29694,6 +29719,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29715,6 +29741,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0000030201400000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29733,6 +29760,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29754,6 +29782,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x0000030200000000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29772,6 +29801,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint8_t>
+        <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29793,6 +29823,7 @@ Measured in GB</description>
   </description>
   <simpleType>
     <uint64_t>
+        <default>0x00000302031D0000</default>
     </uint64_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -29805,6 +29836,8 @@ Measured in GB</description>
 
 <!-- p9_setup_bars - End -->
 
+<!--The following two NX_RING_FAILED attributes are essentially overrides
+    so we will init them to zero -->
 <attribute>
   <id>PROC_NX_RNG_FAILED_INT_ENABLE</id>
   <description>
@@ -29816,7 +29849,7 @@ Measured in GB</description>
     <uint8_t>
     </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_NX_RNG_FAILED_INT_ENABLE</id>
@@ -29838,7 +29871,7 @@ Measured in GB</description>
     <uint64_t>
     </uint64_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_NX_RNG_FAILED_INT_ADDR</id>
