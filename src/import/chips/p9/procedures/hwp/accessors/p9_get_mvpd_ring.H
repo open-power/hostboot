@@ -39,10 +39,15 @@ namespace fapi2
 {
 
 // function pointer typedef definition for HWP call support
-typedef ReturnCode (*getMvpdRing_FP_t)
-(MvpdRecord, MvpdKeyword,
- const Target<TARGET_TYPE_PROC_CHIP>&,
- const uint8_t, const uint8_t, uint8_t*, uint32_t&);
+typedef ReturnCode (*getMvpdRing_FP_t) (
+    MvpdRecord,
+    MvpdKeyword,
+    const Target<TARGET_TYPE_PROC_CHIP>&,
+    const uint8_t,
+    const uint64_t,
+    const uint8_t,
+    uint8_t*,
+    uint32_t& );
 
 extern "C"
 {
@@ -60,6 +65,7 @@ extern "C"
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
      * @param i_fapiTarget      -   cpu target
      * @param i_chipletId       -   Chiplet ID
+     * @param i_evenOddMask     -   Mask to choose even or odd EX. O for all other chiplets
      * @param i_ringId          -   Ring ID
      * @param i_pRingBuf        -   pointer to a buffer allocated by the caller
      *                              to receive the ring header and data.
@@ -91,6 +97,7 @@ extern "C"
                             const Target<TARGET_TYPE_PROC_CHIP>&
                             i_fapiTarget,
                             const uint8_t  i_chipletId,
+                            const uint64_t i_evenOddMask,
                             const uint8_t  i_ringId,
                             uint8_t*       io_pRingBuf,
                             uint32_t&      io_rRingBufsize );

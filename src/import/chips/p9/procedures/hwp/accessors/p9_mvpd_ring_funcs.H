@@ -46,10 +46,16 @@ enum mvpdRingFuncOp
     MVPD_RING_SET,
 };
 
-typedef ReturnCode (*mvpdRingFuncs_FP_t)
-(mvpdRingFuncOp, MvpdRecord, MvpdKeyword,
- const Target<TARGET_TYPE_PROC_CHIP>&,
- const uint8_t, const uint8_t, uint8_t*, uint32_t&);
+typedef ReturnCode (*mvpdRingFuncs_FP_t) (
+    mvpdRingFuncOp,
+    MvpdRecord,
+    MvpdKeyword,
+    const Target<TARGET_TYPE_PROC_CHIP>&,
+    const uint8_t,
+    const uint64_t,
+    const uint8_t,
+    uint8_t*,
+    uint32_t& );
 
 extern "C"
 {
@@ -66,6 +72,7 @@ extern "C"
      * @param i_keyword        - Keyword enumerator
      * @param i_fapiTarget     - cpu target
      * @param i_chipletId      - Chiplet ID
+     * @param i_evenOddMask    - Mask to choose even or odd EX. O for all other chiplets
      * @param i_ringId         - Ring ID
      * @param i_pRingBuf       - The buffer to receive or send the ring
      * @param io_rRingBufsize  - Size of ring / ring buffer
@@ -73,15 +80,16 @@ extern "C"
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
      *                              relevant error code for failure.
      */
-    ReturnCode mvpdRingFunc(mvpdRingFuncOp       i_mvpdRingFuncOp,
-                            MvpdRecord           i_record,
-                            MvpdKeyword          i_keyword,
-                            const Target<TARGET_TYPE_PROC_CHIP>&
-                            i_fapiTarget,
-                            const uint8_t        i_chipletId,
-                            const uint8_t        i_ringId,
-                            uint8_t*             i_pRingBuf,
-                            uint32_t&            io_rRingBufsize);
+    ReturnCode mvpdRingFunc( mvpdRingFuncOp       i_mvpdRingFuncOp,
+                             MvpdRecord           i_record,
+                             MvpdKeyword          i_keyword,
+                             const Target<TARGET_TYPE_PROC_CHIP>&
+                             i_fapiTarget,
+                             const uint8_t        i_chipletId,
+                             const uint64_t       i_evenOddMask,
+                             const uint8_t        i_ringId,
+                             uint8_t*             i_pRingBuf,
+                             uint32_t&            io_rRingBufsize );
 
 } // extern "C"
 } // namespace fapi

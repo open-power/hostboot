@@ -42,32 +42,35 @@ extern "C"
 {
     using   namespace   fapi2;
 
-// getMvpdRing: Wrapper to call common function mvpdRingFunc
+    // getMvpdRing: Wrapper to call common function mvpdRingFunc
     fapi2::ReturnCode getMvpdRing( fapi2::MvpdRecord   i_record,
                                    fapi2::MvpdKeyword  i_keyword,
                                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                    & i_fapiTarget,
                                    const uint8_t       i_chipletId,
+                                   const uint64_t      i_evenOddMask,
                                    const uint8_t       i_ringId,
-                                   uint8_t*             i_pRingBuf,
-                                   uint32_t&            io_rRingBufsize)
+                                   uint8_t*            i_pRingBuf,
+                                   uint32_t&           io_rRingBufsize )
     {
         fapi2::ReturnCode        l_fapirc;
 
-        FAPI_DBG("getMvpdRing: entry ringId=0x%x, chipletId=0x%x, size=0x%x ",
+        FAPI_DBG("getMvpdRing: Called w/ringId=0x%x, chipletId=0x%x, evenOddMask=0x%016llx, size=0x%x",
                  i_ringId,
                  i_chipletId,
+                 i_evenOddMask,
                  io_rRingBufsize  );
 
         // common get and set processing
-        l_fapirc = mvpdRingFunc(MVPD_RING_GET,
-                                i_record,
-                                i_keyword,
-                                i_fapiTarget,
-                                i_chipletId,
-                                i_ringId,
-                                i_pRingBuf,
-                                io_rRingBufsize);
+        l_fapirc = mvpdRingFunc( MVPD_RING_GET,
+                                 i_record,
+                                 i_keyword,
+                                 i_fapiTarget,
+                                 i_chipletId,
+                                 i_evenOddMask,
+                                 i_ringId,
+                                 i_pRingBuf,
+                                 io_rRingBufsize );
 
 
         FAPI_DBG("getMvpdRing: exit rc=0x%x",

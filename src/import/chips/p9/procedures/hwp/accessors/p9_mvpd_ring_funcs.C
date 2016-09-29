@@ -59,6 +59,7 @@ extern "C"
                                         fapi2::MvpdRecord    i_record,
                                         fapi2::MvpdKeyword   i_keyword,
                                         const uint8_t   i_chipletId,
+                                        const uint64_t  i_evenOddMask,
                                         const uint8_t   i_ringId,
                                         uint8_t*        i_pRecordBuf,
                                         uint32_t        i_recordBufLenfapi,
@@ -163,6 +164,9 @@ extern "C"
      *  @param[in]  i_chipletId
      *                   Chiplet ID for the op
      *
+     *  @param[in]  i_evenOddMask
+     *                   Mask to choose even or odd EX. O for all other chiplets
+     *
      *  @param[in]  i_ringId
      *                   Ring ID for the op
      *
@@ -176,15 +180,16 @@ extern "C"
      *
      *  @return     fapi2::ReturnCode
      */
-    fapi2::ReturnCode mvpdRingFunc(const mvpdRingFuncOp i_mvpdRingFuncOp,
-                                   fapi2::MvpdRecord    i_record,
-                                   fapi2::MvpdKeyword   i_keyword,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                   & i_fapiTarget,
-                                   const uint8_t        i_chipletId,
-                                   const uint8_t        i_ringId,
-                                   uint8_t*             i_pRingBuf,
-                                   uint32_t&            io_rRingBufsize)
+    fapi2::ReturnCode mvpdRingFunc( const mvpdRingFuncOp i_mvpdRingFuncOp,
+                                    fapi2::MvpdRecord    i_record,
+                                    fapi2::MvpdKeyword   i_keyword,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                    & i_fapiTarget,
+                                    const uint8_t        i_chipletId,
+                                    const uint64_t       i_evenOddMask,
+                                    const uint8_t        i_ringId,
+                                    uint8_t*             i_pRingBuf,
+                                    uint32_t&            io_rRingBufsize )
     {
         fapi2::ReturnCode       l_fapirc = fapi2::FAPI2_RC_SUCCESS;
         uint32_t                l_recordLen  = 0;
@@ -192,11 +197,12 @@ extern "C"
         uint8_t*                l_pRing      = NULL;
         uint32_t                l_ringLen    = 0;
 
-        FAPI_DBG("mvpdRingFunc:entry op=0x%x ringId=0x%x chipletId=0x%x "
-                 "size=0x%x",
+        FAPI_DBG("mvpdRingFunc: Called w/op=0x%x, ringId=0x%x, chipletId=0x%x, "
+                 "evenOddMask=0x%016llx, size=0x%x",
                  i_mvpdRingFuncOp,
                  i_ringId,
                  i_chipletId,
+                 i_evenOddMask,
                  io_rRingBufsize  );
 
         // do common get and set input parameter error checks
@@ -256,8 +262,9 @@ extern "C"
                               l_recordBuf,
                               l_recordLen ),
                  "mvpdRingFunc: getMvpdField failed "
-                 "chipletId=0x%x, ringId=0x%x",
+                 "chipletId=0x%x, evenOddMask=0x%016llx, ringId=0x%x",
                  i_chipletId,
+                 i_evenOddMask,
                  i_ringId);
 
         // find ring in the record. It is an error if not there for a "get".
@@ -267,14 +274,16 @@ extern "C"
                                   i_record,
                                   i_keyword,
                                   i_chipletId,
+                                  i_evenOddMask,
                                   i_ringId,
                                   l_recordBuf,
                                   l_recordLen,
                                   l_pRing,
                                   l_ringLen),
                  "mvpdRingFunc: mvpdRingFuncFind failed "
-                 "chipletId=0x%x, ringId=0x%x",
+                 "chipletId=0x%x, evenOddMask=0x%016llx, ringId=0x%x",
                  i_chipletId,
+                 i_evenOddMask,
                  i_ringId);
 
         // do the get or set specific operations
@@ -306,8 +315,9 @@ extern "C"
                                      i_pRingBuf,
                                      io_rRingBufsize),
                      "mvpdRingFunc: mvpdRingFuncGet failed "
-                     "chipletId=0x%x, ringId=0x%x",
+                     "chipletId=0x%x, evenOddMask=0x%016llx, ringId=0x%x",
                      i_chipletId,
+                     i_evenOddMask,
                      i_ringId);
         }
         else         // set operation
@@ -371,6 +381,9 @@ extern "C"
      *  @param[in]  i_chipletId
      *                   Chiplet ID for the op
      *
+     *  @param[in]  i_evenOddMask
+     *                   Mask to choose even or odd EX. O for all other chiplets
+     *
      *  @param[in]  i_ringId
      *                   Ring ID for the op
      *
@@ -391,16 +404,17 @@ extern "C"
      *
      *  @return     fapi2::ReturnCode
      */
-    fapi2::ReturnCode mvpdRingFuncFind(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                       & i_fapiTarget,
-                                       fapi2::MvpdRecord    i_record,
-                                       fapi2::MvpdKeyword   i_keyword,
-                                       const uint8_t    i_chipletId,
-                                       const uint8_t    i_ringId,
-                                       uint8_t*         i_pRecordBuf,
-                                       uint32_t         i_recordBufLen,
-                                       uint8_t*&        o_rpRing,
-                                       uint32_t&        o_rRingLen)
+    fapi2::ReturnCode mvpdRingFuncFind( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                        & i_fapiTarget,
+                                        fapi2::MvpdRecord   i_record,
+                                        fapi2::MvpdKeyword  i_keyword,
+                                        const uint8_t       i_chipletId,
+                                        const uint64_t      i_evenOddMask,
+                                        const uint8_t       i_ringId,
+                                        uint8_t*            i_pRecordBuf,
+                                        uint32_t            i_recordBufLen,
+                                        uint8_t*&           o_rpRing,
+                                        uint32_t&           o_rRingLen )
     {
         fapi2::ReturnCode       l_fapirc;
         uint8_t*                l_pRing         =   NULL;
@@ -412,9 +426,10 @@ extern "C"
         o_rpRing = NULL;
         o_rRingLen = 0;
 
-        FAPI_DBG("mvpdRingFuncFind: entry chipletId=0x%x, ringId=0x%x ",
+        FAPI_DBG("mvpdRingFuncFind: Called w/chipletId=0x%x, evenOddMask=0x%016llx, ringId=0x%x ",
                  i_chipletId,
-                 i_ringId  );
+                 i_evenOddMask,
+                 i_ringId);
 
         do
         {
@@ -483,13 +498,15 @@ extern "C"
                          be32toh(l_pScanData->iv_size) );
 
 
-                if ( (l_pScanData->iv_ringId == i_ringId)
-                     && (l_pScanData->iv_chipletId == i_chipletId) )
+                if ( l_pScanData->iv_ringId == i_ringId       &&
+                     l_pScanData->iv_chipletId == i_chipletId &&
+                     ( i_evenOddMask == 0 || (be64toh(l_pScanData->iv_scanSelect) & i_evenOddMask) ) )
                 {
                     FAPI_DBG( "mvpdRingFuncFind: Found it: ringId=0x%x, "
-                              "chiplet=0x%x, ringlen=0x%x",
+                              "chipletId=0x%x, evenOddMask=0x%016llx, ringlen=0x%x",
                               i_ringId,
                               i_chipletId,
+                              i_evenOddMask,
                               be32toh(l_pScanData->iv_length) );
 
                     // shouldn't happen, but does not all fit
@@ -757,6 +774,7 @@ extern "C"
             FAPI_TRY(mvpdRingFuncFind(i_fapiTarget,
                                       i_record,
                                       i_keyword,
+                                      0x00,
                                       0x00,
                                       0x00,
                                       i_pRecordBuf,
