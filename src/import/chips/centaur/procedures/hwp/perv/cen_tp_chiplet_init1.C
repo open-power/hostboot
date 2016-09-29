@@ -44,32 +44,12 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <cen_tp_chiplet_init1.H>
+#include <centaur_misc_scom_addresses.H>
+#include <centaur_misc_constants.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
 //------------------------------------------------------------------------------
-
-// CFAM register addresses
-const uint32_t FSI2PIB_STATUS = 0x1007;
-const uint32_t FSI2PIB_RESET  = 0x1006;
-const uint32_t CFAM_FSI_GP3   = 0x1012;
-const uint32_t CFAM_FSI_GP4   = 0x1013;
-const uint32_t CFAM_FSI_GP5   = 0x1014;
-const uint32_t CFAM_FSI_GP6   = 0x1015;
-const uint32_t CFAM_FSI_GP7   = 0x1016;
-const uint32_t PERV_GP3       = 0x101B;
-
-// Reset values for FSI GP Registers
-constexpr uint32_t CFAM_STATUS_RESET_DATA  = 0xFFFFFFFF;
-constexpr uint32_t CFAM_FSI_GP3_RESET_DATA = 0x00000FFB;
-constexpr uint32_t CFAM_FSI_GP4_RESET_DATA = 0x0000C280;
-constexpr uint32_t CFAM_FSI_GP5_RESET_DATA = 0x00000100;
-constexpr uint32_t CFAM_FSI_GP6_RESET_DATA = 0x00000000;
-constexpr uint32_t CFAM_FSI_GP7_RESET_DATA = 0x00000000;
-
-// Reset value for Pervasive Gp3 Register
-constexpr uint32_t PERV_GP3_RESET_DATA = 0x44166000;
-
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -78,7 +58,7 @@ constexpr uint32_t PERV_GP3_RESET_DATA = 0x44166000;
 fapi2::ReturnCode
 cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 {
-    FAPI_INF("Start");
+    FAPI_DBG("Start");
     fapi2::buffer<uint32_t> l_cfam_status_data = CFAM_STATUS_RESET_DATA;
     fapi2::buffer<uint32_t> l_fsi_gp3_data = CFAM_FSI_GP3_RESET_DATA;
     fapi2::buffer<uint32_t> l_fsi_gp4_data = CFAM_FSI_GP4_RESET_DATA;
@@ -207,6 +187,6 @@ cen_tp_chiplet_init1(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_targ
              "Error from putCfamRegister (CFAM_FSI_GP3, drop FSI Fence3)");
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
