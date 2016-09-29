@@ -30,7 +30,7 @@
 /// this code in any way.
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
@@ -42,6 +42,7 @@
 #include <lib/utils/scom.H>
 #include <lib/utils/pos.H>
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/phy/dp16.H>
 
 namespace mss
 {
@@ -145,6 +146,43 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace wr_vref
+{
+
+///
+/// @brief DP16 WR VREF error latching workaround
+/// In DD1 Nimbus in the WR VREF algorithm, DRAM's 2/3 latch over error information from DRAM's 0/1.
+/// The workaround is to set the error mask for DRAM's 2/3 to be 0xFFFF (informational but not errors)
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode error_dram23( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // constants to pretty up code
+    constexpr uint64_t DP0 = 0;
+    constexpr uint64_t DP1 = 1;
+    constexpr uint64_t DP2 = 2;
+    constexpr uint64_t DP3 = 3;
+    constexpr uint64_t DP4 = 4;
+    constexpr uint64_t DRAM23 = 2;
+    // disable errors in the reg
+    constexpr uint64_t DISABLE_ERRORS = 0xffff;
+
+    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+
+    // note DRAM's 2/3 use the same scom register, so only one scom is needed per DP
+    // extra paretheses keep FAPI_TRY happy for two parameter template functions
+    FAPI_TRY((mss::dp16::write_wr_vref_error_mask<DP0, DRAM23>(i_target, DISABLE_ERRORS)));
+    FAPI_TRY((mss::dp16::write_wr_vref_error_mask<DP1, DRAM23>(i_target, DISABLE_ERRORS)));
+    FAPI_TRY((mss::dp16::write_wr_vref_error_mask<DP2, DRAM23>(i_target, DISABLE_ERRORS)));
+    FAPI_TRY((mss::dp16::write_wr_vref_error_mask<DP3, DRAM23>(i_target, DISABLE_ERRORS)));
+    FAPI_TRY((mss::dp16::write_wr_vref_error_mask<DP4, DRAM23>(i_target, DISABLE_ERRORS)));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace wr_vref
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss

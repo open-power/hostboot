@@ -35,3 +35,33 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#include <fapi2.H>
+#include <lib/workarounds/dp16_workarounds.H>
+#include <lib/workarounds/wr_vref_workarounds.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+namespace wr_vref
+{
+
+///
+/// @brief Executes WR VREF workarounds
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // TODO RTC:160353 - Need module/chip rev EC support for workarounds
+    FAPI_TRY(mss::workarounds::dp16::wr_vref::error_dram23(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace wr_vref
+} // close namespace workarounds
+} // close namespace mss

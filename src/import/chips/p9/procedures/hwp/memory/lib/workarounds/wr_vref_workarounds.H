@@ -35,3 +35,29 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
+#ifndef _MSS_WORKAROUNDS_WR_VREF_H_
+#define _MSS_WORKAROUNDS_WR_VREF_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+namespace wr_vref
+{
+
+///
+/// @brief Executes WR VREF workarounds
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+} // close namespace wr_vref
+} // close namespace workarounds
+} // close namespace mss
+
+#endif

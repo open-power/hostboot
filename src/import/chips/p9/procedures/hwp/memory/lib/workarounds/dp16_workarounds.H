@@ -30,7 +30,7 @@
 /// this code in any way.
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
@@ -78,6 +78,19 @@ fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 ///
 fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
+namespace wr_vref
+{
+
+///
+/// @brief DP16 WR VREF error latching workaround
+/// In DD1 Nimbus in the WR VREF algorithm ,DRAM's 2/3 latch over error information from DRAM's 0/1.
+/// The workaround is to set the error mask for DRAM's 2/3 to be 0xFFFF (informational but not errors)
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode error_dram23( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+
+} // close namespace wr_vref
 } // close namespace dp16
 } // close namespace workarounds
 } // close namespace mss
