@@ -139,6 +139,10 @@
         0
       </default>
     </attribute>
+    <attribute>
+    <id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <default>10000</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

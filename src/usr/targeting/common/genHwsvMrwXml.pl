@@ -322,6 +322,21 @@ push @systemAttr,
     "MNFG_TH_CEN_L4_CACHE_CES", $reqPol->{'mnfg_th_cen_l4_cache_ces'},
     "BRAZOS_RX_FIFO_OVERRIDE", $reqPol->{'rx_fifo_final_l2u_dly_override'},
     "MAX_ALLOWED_DIMM_FREQ",  $reqPol->{'max_allowed_dimm_freq'},
+    "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3", $reqPol->{'vmem_regulator_memory_power_limit_per_dimm'},
+    "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4", $reqPol->{'vmem_regulator_memory_power_limit_per_dimm_ddr4'},
+    "MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE", $reqPol->{'vmem_regulator_memory_power_limit_per_dimm_adjustment_enable'},
+    "MSS_MRW_PREFETCH_ENABLE", $reqPol->{'mss_prefetch_enable'},
+    "MSS_MRW_CLEANER_ENABLE", $reqPol->{'mss_cleaner_enable'},
+    #TODO RTC:161768 these need to come from MRW
+    "MSS_MRW_MEM_M_DRAM_CLOCKS", 512,
+    "MSS_MRW_FINE_REFRESH_MODE", 0,
+    "MSS_MRW_TEMP_REFRESH_RANGE", 1,
+    "MSS_MRW_RESET_DELAY_BEFORE_CAL", 0,
+    "MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD", 0,
+    "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS", 0xD90C,
+    "MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS", 0x8000,
+    "MSS_MRW_DRAM_2N_MODE", 0,
+    "MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT", 32,
 ];
 
 if ($reqPol->{'required_synch_mode'} eq 'never')
