@@ -525,7 +525,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                         }
                         else
                         {
-                            MY_INF(" SBE ring instance ID %d is invalid, Valid ID is from %d  to %d  \n",
+                            MY_ERR(" SBE ring instance ID %d is invalid, Valid ID is from %d  to %d  \n",
                                    io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
                                    (ring_id_list_instance + 0)->instanceIdMax);
                             return IMGBUILD_INVALID_INSTANCEID;
@@ -535,7 +535,6 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                     local++;
                 }
 
-                //MY_INF("\n");
             }
 
         }
