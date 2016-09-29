@@ -453,56 +453,24 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     }
 
                     // Don't skip header if verification is needed.
-                    bool isSecure = PNOR::isSecureSection(secId);
-                    if (o_TOC[secId].version == FFS_VERS_SHA512 || isSecure)
+                    if (o_TOC[secId].version == FFS_VERS_SHA512
+                        && !PNOR::isSecureSection(secId))
                     {
-                        uint32_t l_addr = o_TOC[secId].flashAddr;
+                        TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
+                                            " Flash Address for SHA Header");
 
-                        size_t l_headerSize = 0;
-                        if(!isSecure) // if not a secure section skip header
+                        if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
                         {
-                            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
-                                                " Flash Address for SHA Header");
-
-                            if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
-                            {
-                                o_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
-                                l_headerSize = PAGESIZE_PLUS_ECC;
-                            }
-                            else
-                            {
-                                o_TOC[secId].flashAddr += PAGESIZE;
-                                l_headerSize = PAGESIZE;
-                            }
-
-                            // now that we've skipped the header
-                            // adjust the size to reflect that
-                            o_TOC[secId].size -= PAGESIZE;
+                            o_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
+                        }
+                        else
+                        {
+                            o_TOC[secId].flashAddr += PAGESIZE;
                         }
 
-                        bool extend = true;
-                        // If secureboot is compiled out, then we extend HBB
-                        // the traditional way.  Otherwise, we defer to the
-                        // caller
-                        #ifdef CONFIG_SECUREBOOT
-                        if(secId == PNOR::HB_BASE_CODE || isSecure)
-                        {
-                            extend = false;
-                        }
-                        #endif
-
-                        if(extend)
-                        {
-                            // CONFIG_SECUREBOOT:
-                            // true - Extend all PNOR hashes
-                            // false - Do not extend sections with secureboot support
-                            l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
-                                                        cv_EYECATCHER[secId]);
-                            if (l_errhdl)
-                            {
-                                break;
-                            }
-                        }
+                        // now that we've skipped the header
+                        // adjust the size to reflect that
+                        o_TOC[secId].size -= PAGESIZE;
                     }
 
                     if((o_TOC[secId].flashAddr + o_TOC[secId].size) >
@@ -647,38 +615,6 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
     }
 
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
-    return l_errhdl;
-}
-
-errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
-{
-    errlHndl_t l_errhdl = NULL;
-
-    do {
-        #ifndef __HOSTBOOT_RUNTIME
-        // Read data from the PNOR DD
-        uint8_t* l_buf = new uint8_t[i_size]();
-        TARGETING::Target* l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        l_errhdl = DeviceFW::deviceRead(l_target, l_buf, i_size,
-                                        DEVICE_PNOR_ADDRESS(0,i_addr));
-        if (l_errhdl)
-        {
-            break;
-        }
-
-        SHA512_t l_hash = {0};
-        SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
-        l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
-                                          sizeof(SHA512_t), i_name);
-        delete[] l_buf;
-
-        if (l_errhdl)
-        {
-            break;
-        }
-        #endif
-    } while(0);
-
     return l_errhdl;
 }
 
