@@ -376,11 +376,11 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"eq_repr"          , 0x2e, 0x10, 0x15, "eq_repr_ring"              , NON_VPD_RING, 0,  0x0C10000000000200},
-    {"ex_l3_repr"       , 0x2f, 0x10, 0x15, "ex_l3_repr_ring"           , NON_VPD_RING, 0,  0x0200000000000200},
-    {"ex_l2_repr"       , 0x30, 0x10, 0x15, "ex_l2_repr_ring"           , NON_VPD_RING, 0,  0x0080000000000200},
-    {"ex_l3_refr_repr"  , 0x31, 0x10, 0x15, "ex_l3_refr_repr_ring"      , NON_VPD_RING, 0,  0x0008000000000200},
-    {"ex_l3_refr_time"  , 0x32, 0x10, 0x15, "ex_l3_refr_time_ring"      , NON_VPD_RING, 0,  0x0008000000000100},
+    {"eq_repr"          , 0x2e, 0x10, 0x1b, "eq_repr_ring"              , NON_VPD_RING, 0,  0x0C10000000000200},
+    {"ex_l3_repr"       , 0x2f, 0x10, 0x1b, "ex_l3_repr_ring"           , NON_VPD_RING, 0,  0x0200000000000200},
+    {"ex_l2_repr"       , 0x30, 0x10, 0x1b, "ex_l2_repr_ring"           , NON_VPD_RING, 0,  0x0080000000000200},
+    {"ex_l3_refr_repr"  , 0x31, 0x10, 0x1b, "ex_l3_refr_repr_ring"      , NON_VPD_RING, 0,  0x0008000000000200},
+    {"ex_l3_refr_time"  , 0x32, 0x10, 0x1b, "ex_l3_refr_time_ring"      , NON_VPD_RING, 0,  0x0008000000000100},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL};
 };
