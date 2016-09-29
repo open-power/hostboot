@@ -42,4 +42,22 @@
     </chipEcFeature>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CENTAUR_EC_FEATURE_SWITCH_REPAIR_COMMAND_VALIDATION_ENTRIES</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        Control switch to repair command validation entries.
+        True for DD2+, else false
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CENTAUR</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
