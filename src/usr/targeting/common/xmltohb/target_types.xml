@@ -832,6 +832,7 @@
     <attribute><id>PROC_LPC_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PROC_PCIE_BAR_SIZE</id></attribute>
     <attribute><id>PROC_FSP_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_FSP_BAR_SIZE</id></attribute>
     <attribute><id>PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET</id></attribute>
