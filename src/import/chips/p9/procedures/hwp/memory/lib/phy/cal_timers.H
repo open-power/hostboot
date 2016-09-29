@@ -215,14 +215,22 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     // of a choice. If we abort on error then we want to have a small initial delay, and poll more
     // times with longer durations between the polling.
 
-#define THRASH_CCS_IP_IN_SIM 1
+    // Sometimes when running in sim, particularly Mesa, it is helpful to not delay a bunch
+    // when training starts - makes it simpler to get an AET for, say, write leveling. So
+    // this is here to allow the simple removal of the initial delay for those situations.
 #ifdef THRASH_CCS_IP_IN_SIM
-
     i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, 1);
     i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(1);
+#else
+    // We don't want to wait too long for the initial check, just some hueristics here
+    i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, l_total_cycles / 8);
+    i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(l_total_cycles / 8);
+#endif
 
-    i_poll.iv_delay = DELAY_1US;
-    i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
+    // Delay 10us between polls, and setup the poll count so
+    // iv_initial_delay + (iv_delay * iv_poll_count) == l_total_cycles + some fudge;
+    i_poll.iv_delay = 10 * DELAY_1US;
+    i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, i_poll.iv_delay));
 
     // Round up to the cycles left after the initial delay
     l_ns_left = std::max(0L, (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
@@ -231,34 +239,10 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
 
     // Don't let the poll count be 0 - that just makes for a bad day.
     i_poll.iv_poll_count = (i_poll.iv_poll_count == 0) ? 1 : i_poll.iv_poll_count;
-#else
 
-    if (CAL_ABORT_ON_ERROR)
-    {
-        // We don't want to wait too long for the initial check, just some hueristics here
-        i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, l_total_cycles / 8);
-        i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(l_total_cycles / 8);
-
-        // Delay 1us between polls, and setup the poll count so
-        // iv_initial_delay + (iv_delay * iv_poll_count) == l_total_cycles;
-        i_poll.iv_delay = DELAY_1US;
-        i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
-
-        // Round up to the cycles left after the initial delay
-        l_ns_left = std::max(0L, (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
-        i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
-        i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
-
-        // Don't let the poll count be 0 - that just makes for a bad day.
-        i_poll.iv_poll_count = (i_poll.iv_poll_count == 0) ? 1 : i_poll.iv_poll_count;
-    }
-    else
-    {
-        i_poll.iv_initial_delay = mss::cycles_to_ns(i_target, l_total_cycles);
-        i_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(l_total_cycles);
-    }
-
-#endif
+    // Fudge some for sim irregularities. This will increase time to a complete timeout but won't
+    // really effect valid training unless these cycles are needed. So this isn't a bad thing ...
+    i_poll.iv_poll_count *= 2;
 
     FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
              (CAL_ABORT_ON_ERROR ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
