@@ -142,6 +142,10 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
 {
     #define PRDF_FUNC "[p9_mcbist::CmdCompleteDd1Workaround] "
 
+    int32_t o_rc = SUCCESS; // Returned to rule code.
+
+    #ifndef __HOSTBOOT_RUNTIME
+
     TARGETING::TargetHandle_t mcbTrgt = i_mcbChip->getTrgt();
 
     // This workaround should only be seen during super fast MCBIST commands,
@@ -151,7 +155,6 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
     PRDF_ASSERT( (TARGETING::MODEL_NIMBUS == getChipModel(mcbTrgt)) &&
                  (0x10                    == getChipLevel(mcbTrgt)) );
 
-    int32_t o_rc = SUCCESS; // Returned to rule code.
     int32_t l_rc = SUCCESS; // For local rc handling.
 
     SCAN_COMM_REGISTER_CLASS * mcbmcat = i_mcbChip->getRegister("MCBMCAT");
@@ -235,6 +238,8 @@ int32_t CmdCompleteDd1Workaround( ExtensibleChip * i_mcbChip,
         if ( SUCCESS != l_rc )
             PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
     }
+
+    #endif // not __HOSTBOOT_RUNTIME
 
     return o_rc;
 

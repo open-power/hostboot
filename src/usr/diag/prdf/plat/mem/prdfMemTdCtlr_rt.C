@@ -132,7 +132,7 @@ uint32_t MemTdCtlr<T,D>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         if ( nullptr != iv_curProcedure ) break;
 
         // Stop background scrubbing.
-        o_rc = stopBgScrub<T>( iv_chip->getTrgt() );
+        o_rc = PlatServices::stopBgScrub<T>( iv_chip->getTrgt() );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
