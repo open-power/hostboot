@@ -65,6 +65,13 @@ constexpr auto literal_12 = 12;
 constexpr auto literal_267 = 267;
 constexpr auto literal_1866 = 1866;
 constexpr auto literal_0b011000 = 0b011000;
+constexpr auto literal_0b000 = 0b000;
+constexpr auto literal_0b100 = 0b100;
+constexpr auto literal_0b010 = 0b010;
+constexpr auto literal_0b001 = 0b001;
+constexpr auto literal_0b101 = 0b101;
+constexpr auto literal_0b011 = 0b011;
+constexpr auto literal_0b111 = 0b111;
 constexpr auto literal_597 = 597;
 constexpr auto literal_768 = 768;
 constexpr auto literal_939 = 939;
@@ -837,6 +844,15 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             }
         }
 
+        fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM)");
+            break;
+        }
+
         fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM);
 
@@ -844,6 +860,247 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         {
             FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_EFF_NUM_RANKS_PER_DIMM)");
             break;
+        }
+
+        auto l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] /
+                                              l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0]);
+        auto l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] /
+                                              l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1]);
+        {
+            l_rc = fapi2::getScom( TGT0, 0x7010914ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x7010914ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b000, 0, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b100, 3, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b010, 6, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b110, 9, 3, 61 );
+            }
+
+            {
+                if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b001, 12, 3, 61 );
+                }
+                else if ((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b000, 12, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b101, 15, 3, 61 );
+                }
+                else if ((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b100, 15, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b011, 18, 3, 61 );
+                }
+                else if ((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b010, 18, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT0_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b111, 21, 3, 61 );
+                }
+                else if ((l_def_SLOT0_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b110, 21, 3, 61 );
+                }
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b000, 24, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b100, 27, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b010, 30, 3, 61 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b110, 33, 3, 61 );
+            }
+
+            {
+                if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b001, 36, 3, 61 );
+                }
+                else if ((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b000, 36, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b101, 39, 3, 61 );
+                }
+                else if ((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b100, 39, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b011, 42, 3, 61 );
+                }
+                else if ((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b010, 42, 3, 61 );
+                }
+            }
+
+            {
+                if ((l_def_SLOT1_DRAM_STACK_HEIGHT == literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b111, 45, 3, 61 );
+                }
+                else if ((l_def_SLOT1_DRAM_STACK_HEIGHT != literal_8))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0b110, 45, 3, 61 );
+                }
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x7010914ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x7010914ull)");
+                break;
+            }
+        }
+        fapi2::ATTR_MSS_VPD_MT_ODT_RD_Type l_TGT2_ATTR_MSS_VPD_MT_ODT_RD;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_RD, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_RD);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_MSS_VPD_MT_ODT_RD)");
+            break;
+        }
+
+        fapi2::ATTR_MSS_VPD_MT_ODT_WR_Type l_TGT2_ATTR_MSS_VPD_MT_ODT_WR;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MSS_VPD_MT_ODT_WR, TGT2, l_TGT2_ATTR_MSS_VPD_MT_ODT_WR);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_MSS_VPD_MT_ODT_WR)");
+            break;
+        }
+
+        {
+            l_rc = fapi2::getScom( TGT0, 0x7010915ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x7010915ull)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_0], 0, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_1], 4, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_2], 8, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_0][literal_3], 12, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_0], 16, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_1], 20, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_2], 24, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_RD[l_def_PORT_INDEX][literal_1][literal_3], 28, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_0], 32, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_1], 36, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_2], 40, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_0][literal_3], 44, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_0], 48, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_1], 52, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_2], 56, 4, 60 );
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (l_TGT2_ATTR_MSS_VPD_MT_ODT_WR[l_def_PORT_INDEX][literal_1][literal_3], 60, 4, 60 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x7010915ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x7010915ull)");
+                break;
+            }
         }
 
         auto l_def_NUM_RANKS = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] +
