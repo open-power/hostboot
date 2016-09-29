@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 # Procedures
 OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
+OBJS += rcSupport.o
 OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
 

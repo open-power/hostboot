@@ -35,12 +35,65 @@
 #include <error_info.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <rcSupport.H>
+
+fapi2::ReturnCode get_fapi2_error(void)
+{
+    FAPI_INF("Enter get_fapi2_error...");
+    // You can assign directly to the buffer:
+    const uint32_t buf[] = {0x01, 0x02, 0x03, 0xDEADBEEF};
+    fapi2::variable_buffer other_bits(buf, 4, 128);
+    uint32_t val;
+
+    FAPI_TRY( other_bits.extract(val, 0, 130) );
+
+fapi_try_exit:
+    FAPI_INF("Exiting get_fapi2_error...");
+
+    // should return FAPI2_RC_INVALID_PARAMETER
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode get_plat_error(void)
+{
+    FAPI_INF("Entering get_plat_error...");
+
+    fapi2::buffer<uint64_t> l_scomdata = 0;
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get a list of all of the proc chips
+    TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+    TARGETING::Target * l_Proc = NULL;
+
+    if (l_chipList.size() > 0)
+    {
+        l_Proc = l_chipList[0];
+    }
+
+    if (l_Proc != NULL)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_Proc);
+
+        FAPI_INF("Do an invalid address getscom on proc target");
+        FAPI_TRY(fapi2::getScom(fapi2_procTarget,
+                                0x11223344,
+                                l_scomdata));
+    }
+ fapi_try_exit:
+
+    FAPI_INF("Exiting get_plat_error...");
+    return fapi2::current_err;
+}
+
 
 namespace fapi2
 {
 
 //******************************************************************************
-// rcTestDefaultConstructor. Ensures that the ReturnCode default 
+// rcTestDefaultConstructor. Ensures that the ReturnCode default
 // constructor works
 //******************************************************************************
 uint32_t rcTestDefaultConstructor()
@@ -73,10 +126,9 @@ uint32_t rcTestDefaultConstructor()
     return l_result;
 }
 
-//TODO RTC 143127:fapi2 ReturnCode support in hostboot
-#if 0
+
 //******************************************************************************
-// rcTestReturnCodeCreator. Ensures that the ReturnCode creator reflects 
+// rcTestReturnCodeCreator. Ensures that the ReturnCode creator reflects
 // the return code
 //******************************************************************************
 uint32_t rcTestReturnCodeCreator()
@@ -87,28 +139,28 @@ uint32_t rcTestReturnCodeCreator()
     ReturnCode l_rc;
 
     // Set the return code to a FAPI code
-    l_rc.setFapiError(FAPI2_RC_INVALID_ATTR_GET);
+    l_rc = get_fapi2_error();
 
     // Ensure that the creator is FAPI
     ReturnCode::returnCodeCreator l_creator = l_rc.getCreator();
 
     if (l_creator != ReturnCode::CREATOR_FAPI)
     {
-        FAPI_ERR("rcTestReturnCodeCreator. Creator is 0x%x, expected FAPI", 
+        FAPI_ERR("rcTestReturnCodeCreator. Creator is 0x%x, expected FAPI",
                  l_creator);
         l_result = 1;
     }
     else
     {
         // Set the return code to a PLAT code
-        l_rc.setPlatError(NULL);
+        l_rc = get_plat_error(); //.setPlatError(NULL);
 
         // Ensure that the creator is PLAT
         l_creator = l_rc.getCreator();
 
         if (l_creator != ReturnCode::CREATOR_PLAT)
         {
-            FAPI_ERR("rcTestReturnCodeCreator. Creator is 0x%x, expected PLAT", 
+            FAPI_ERR("rcTestReturnCodeCreator. Creator is 0x%x, expected PLAT",
                      l_creator);
             l_result = 2;
         }
@@ -136,10 +188,10 @@ uint32_t rcTestReturnCodeCreator()
 
     return l_result;
 }
-#endif
+
 
 //******************************************************************************
-// rcTestReturnCodeConstructor. Ensures that the ReturnCode constructor works 
+// rcTestReturnCodeConstructor. Ensures that the ReturnCode constructor works
 // when specifying a return code
 //******************************************************************************
 uint32_t rcTestReturnCodeConstructor()
@@ -175,10 +227,8 @@ uint32_t rcTestReturnCodeConstructor()
     return l_result;
 }
 
-//TODO RTC 143127:fapi2 ReturnCode support in hostboot
-#if 0
 //******************************************************************************
-// rcTestComparisonOperator . Ensures that the comparison operators work 
+// rcTestComparisonOperator . Ensures that the comparison operators work
 // (comparing with another ReturnCode)
 //******************************************************************************
 uint32_t rcTestComparisonOperator()
@@ -206,7 +256,7 @@ uint32_t rcTestComparisonOperator()
         else
         {
             // Change the code of l_rc2
-            l_rc2.setFapiError(FAPI2_RC_PLAT_ERR_SEE_DATA);
+            l_rc2 = get_fapi2_error();
 
             // Ensure that the equality comparison returns false
             if (l_rc == l_rc2)
@@ -225,7 +275,7 @@ uint32_t rcTestComparisonOperator()
                 }
                 else
                 {
-                    FAPI_INF("rcTest4. Success!");
+                    FAPI_INF("rcTestComparisonOperator() Success!");
                 }
             }
         }
@@ -233,10 +283,10 @@ uint32_t rcTestComparisonOperator()
 
     return l_result;
 }
-#endif
+
 
 //******************************************************************************
-// rcTestComparisonOperatorWithRCValue. Ensures that the comparison operators 
+// rcTestComparisonOperatorWithRCValue. Ensures that the comparison operators
 // work (comparing with a return code value)
 //******************************************************************************
 uint32_t rcTestComparisonOperatorWithRCValue()
@@ -295,154 +345,9 @@ uint32_t rcTestComparisonOperatorWithRCValue()
     return l_result;
 }
 
-//TODO RTC 143127:fapi2 ReturnCode support in hostboot
-#if 0
-//******************************************************************************
-// rcTestGetAndReleasePlatData. Ensures that the getPlatData and releasePlatData
-//  functions work when there is no attached data
-//******************************************************************************
-uint32_t rcTestGetAndReleasePlatData()
-{
-    uint32_t l_result = 0;
-
-    // Create a ReturnCode
-    ReturnCode l_rc(FAPI2_RC_INVALID_ATTR_GET);
-
-    // Ensure that the getPlatData function returns NULL
-    void * l_pData = reinterpret_cast<void *> (0x12345678);
-
-    l_pData = l_rc.getPlatData();
-
-    if (l_pData != NULL)
-    {
-        FAPI_ERR("rcTestGetAndReleasePlatData.getPlatData did not return NULL");
-        l_result = 1;
-    }
-    else
-    {
-        // Ensure that the releasePlatData function returns NULL
-        l_pData = reinterpret_cast<void *> (0x12345678);
-
-        l_pData = l_rc.releasePlatData();
-
-        if (l_pData != NULL)
-        {
-            FAPI_ERR("rcTestGetAndReleasePlatData. releasePlatData did "
-                    " not return NULL");
-            l_result = 2;
-        }
-        else
-        {
-            FAPI_INF("rcTestGetAndReleasePlatData. Success!");
-        }
-    }
-
-    return l_result;
-}
 
 //******************************************************************************
-// rcTestGetPlatData. Ensures that the getPlatData function works when there is 
-// attached data
-//******************************************************************************
-uint32_t rcTestGetPlatData()
-{
-    uint32_t l_result = 0;
-
-    // Create a ReturnCode
-    ReturnCode l_rc;
-
-    // Assign PlatData. Note that this should really be an errlHndl_t, because
-    // the FSP deleteData function will attempt to delete an error log, but this
-    // is just for test, the data will be released before the ReturnCode is
-    // destructed.
-    uint32_t l_myData = 6;
-    void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatError(l_pMyData);
-
-    // Ensure that getPlatData retrieves the PlatData
-    void * l_pMyDataCheck = l_rc.getPlatData();
-
-    if (l_pMyDataCheck != l_pMyData)
-    {
-        FAPI_ERR("rcTestGetPlatData. 1. getPlatData returned unexpected "
-                  "data ptr");
-        l_result = 1;
-    }
-    else
-    {
-        // Ensure that getPlatData retrieves the PlatData again
-        l_pMyDataCheck = NULL;
-        l_pMyDataCheck = l_rc.getPlatData();
-
-        if (l_pMyDataCheck != l_pMyData)
-        {
-            FAPI_ERR("rcTestGetPlatData. 2. getPlatData returned unexpected "
-                     " data ptr");
-            l_result = 2;
-        }
-        else
-        {
-            FAPI_INF("rcTestGetPlatData. Success!");
-        }
-    }
-
-    // Release the data to avoid ReturnCode from deleting in on destruction
-    l_pMyDataCheck = l_rc.releasePlatData();
-
-    return l_result;
-}
-
-//******************************************************************************
-// rcTestReleasePlatData. Ensures that the releasePlatData function works when 
-// there is attached data
-//******************************************************************************
-uint32_t rcTestReleasePlatData()
-{
-    uint32_t l_result = 0;
-
-    // Create a ReturnCode
-    ReturnCode l_rc;
-
-    // Assign PlatData. Note that this should really be an errlHndl_t, because
-    // the FSP deleteData function will attempt to delete an error log, but this
-    // is just for test, the data will be released before the ReturnCode is
-    // destructed.
-    uint32_t l_myData = 6;
-    void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatError(l_pMyData);
-
-    // Ensure that releasePlatData retrieves the PlatData
-    void * l_pMyDataCheck = l_rc.releasePlatData();
-
-    if (l_pMyDataCheck != l_pMyData)
-    {
-        FAPI_ERR("rcTestReleasePlatData. releasePlatDatareturned unexpected "
-                  " data ptr");
-        l_result = 1;
-    }
-    else
-    {
-        // Ensure that releasePlatData now returns NULL
-        l_pMyDataCheck = NULL;
-        l_pMyDataCheck = l_rc.releasePlatData();
-
-        if (l_pMyDataCheck != NULL)
-        {
-            FAPI_ERR("rcTestReleasePlatData. 2. releasePlatData returned non "
-                     " NULL ptr");
-            l_result = 2;
-        }
-        else
-        {
-            FAPI_INF("rcTestReleasePlatData. Success!");
-        }
-    }
-
-    return l_result;
-}
-
-//******************************************************************************
-// rcTestCopyConstructor. Ensures that the copy constructor works when there is 
+// rcTestCopyConstructor. Ensures that the copy constructor works when there is
 // attached PlatData and that the getPlatData function works
 //******************************************************************************
 uint32_t rcTestCopyConstructor()
@@ -458,7 +363,7 @@ uint32_t rcTestCopyConstructor()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatError(l_pMyData);
+    (void) l_rc.setPlatDataPtr(l_pMyData);
 
     // Create a ReturnCode using the copy constructor
     ReturnCode l_rc2(l_rc);
@@ -472,7 +377,7 @@ uint32_t rcTestCopyConstructor()
     else
     {
         // Ensure that getPlatData retrieves the PlatData from l_rc
-        void * l_pMyDataCheck = l_rc.getPlatData();
+        void * l_pMyDataCheck = l_rc.getPlatDataPtr();
 
         if (l_pMyDataCheck != l_pMyData)
         {
@@ -484,7 +389,7 @@ uint32_t rcTestCopyConstructor()
         {
             // Ensure that getPlatData retrieves the PlatData from l_rc2
             l_pMyDataCheck = NULL;
-            l_pMyDataCheck = l_rc2.getPlatData();
+            l_pMyDataCheck = l_rc2.getPlatDataPtr();
 
             if (l_pMyDataCheck != l_pMyData)
             {
@@ -499,15 +404,11 @@ uint32_t rcTestCopyConstructor()
         }
     }
 
-    // Release the data to avoid ReturnCode from deleting in on destruction.
-    // This will release the data from both copies of the ReturnCode.
-    (void) l_rc.releasePlatData();
-
     return l_result;
 }
 
 //******************************************************************************
-// rcTestAssignmentOperator. Ensures that the assignment operator works when 
+// rcTestAssignmentOperator. Ensures that the assignment operator works when
 // there is attached PlatData and that the releasePlatData function works
 //******************************************************************************
 uint32_t rcTestAssignmentOperator()
@@ -523,7 +424,7 @@ uint32_t rcTestAssignmentOperator()
     // destructed.
     uint32_t l_myData = 6;
     void * l_pMyData = reinterpret_cast<void *> (&l_myData);
-    (void) l_rc.setPlatError(l_pMyData);
+    (void) l_rc.setPlatDataPtr(l_pMyData);
 
     // Create a ReturnCode using the assignment operator
     ReturnCode l_rc2;
@@ -538,39 +439,25 @@ uint32_t rcTestAssignmentOperator()
     else
     {
         // Ensure that releasePlatData retrieves the PlatData from l_rc
-        void * l_pMyDataCheck = l_rc.releasePlatData();
+        void * l_pMyDataCheck = l_rc.getPlatDataPtr();
 
         if (l_pMyDataCheck != l_pMyData)
         {
-            FAPI_ERR("rcTestAssignmentOperator. releasePlatData returned "
+            FAPI_ERR("rcTestAssignmentOperator. getPlatDataPtr returned "
                       "unexpected data ptr");
             l_result = 2;
         }
         else
         {
-            // Ensure that releasePlatData retrieves NULL from l_rc2
-            l_pMyDataCheck = NULL;
-            l_pMyDataCheck = l_rc2.releasePlatData();
-
-            if (l_pMyDataCheck != NULL)
-            {
-                FAPI_ERR("rcTestAssignmentOperator. releasePlatData returned "
-                        " non NULL ptr");
-                l_result = 3;
-            }
-            else
-            {
-                FAPI_INF("rcTestAssignmentOperator. Success!");
-            }
+            FAPI_INF("rcTestAssignmentOperator. Success!");
         }
     }
 
     return l_result;
 }
-#endif
 
 //******************************************************************************
-// rcTestGetErrorInfo . Ensures that the getErrorInfo function works when there 
+// rcTestGetErrorInfo . Ensures that the getErrorInfo function works when there
 // is no ErrorInfo
 //******************************************************************************
 uint32_t rcTestGetErrorInfo()
@@ -623,7 +510,7 @@ uint32_t rcTestErrorInfo()
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
     fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_target2(l_masterProc);
-    
+
     // Create some FFDC
     uint8_t l_ffdc = 0x12;
 
@@ -920,7 +807,7 @@ uint32_t rcTestErrorInfo()
 }
 
 //******************************************************************************
-// rcTestCopyConstructorwithErrorInfo. Ensures that the copy constructor works 
+// rcTestCopyConstructorwithErrorInfo. Ensures that the copy constructor works
 // when there is ErrorInfo
 //******************************************************************************
 uint32_t rcTestCopyConstructorwithErrorInfo()
@@ -975,10 +862,10 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
             l_result = 2;
             break;
         }
-       
+
         if (l_pErrInfo->iv_CDGs.size() != 1)
         {
-            FAPI_ERR("rcTestCopyConstructorwithErrorInfo. %d CDGs", 
+            FAPI_ERR("rcTestCopyConstructorwithErrorInfo. %d CDGs",
                     l_pErrInfo->iv_CDGs.size());
             l_result = 3;
             break;
@@ -1016,7 +903,7 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
 }
 
 //******************************************************************************
-// rcTestAssignmentOperatorwithErrorInfo. Ensures that the assignment operator 
+// rcTestAssignmentOperatorwithErrorInfo. Ensures that the assignment operator
 // works when there ErrorInfo
 //******************************************************************************
 uint32_t rcTestAssignmentOperatorwithErrorInfo()
@@ -1076,7 +963,7 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
 
         if (l_pErrInfo->iv_CDGs.size() != 1)
         {
-            FAPI_ERR("rcTestAssignmentOperatorwithErrorInfo. %d CDGs", 
+            FAPI_ERR("rcTestAssignmentOperatorwithErrorInfo. %d CDGs",
                     l_pErrInfo->iv_CDGs.size());
             l_result = 3;
             break;
@@ -1116,7 +1003,7 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
 }
 
 //******************************************************************************
-// rcTestClearErrorInfo. Ensures that setting the ReturnCode to success clears 
+// rcTestClearErrorInfo. Ensures that setting the ReturnCode to success clears
 // ErrorInfo
 //******************************************************************************
 uint32_t rcTestClearErrorInfo()
@@ -1176,8 +1063,6 @@ uint32_t rcTestAddErrorInfo()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(NULL, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
     TARGETING::Target * l_pTarget = NULL;
@@ -1189,7 +1074,6 @@ uint32_t rcTestAddErrorInfo()
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
     fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_target2(l_masterProc);
-
 
     // Create 2 FFDCs
     uint8_t l_ffdc = 0x12;
@@ -1220,16 +1104,16 @@ uint32_t rcTestAddErrorInfo()
     l_entries[3].target_cdg.iv_callout = 0;
     l_entries[3].target_cdg.iv_deconfigure = 0;
     l_entries[3].target_cdg.iv_gard = 1;
-    l_entries[3].target_cdg.iv_calloutPriority = 
+    l_entries[3].target_cdg.iv_calloutPriority =
                             fapi2::CalloutPriorities::MEDIUM;
     l_entries[4].iv_type = fapi2::EI_TYPE_PROCEDURE_CALLOUT;
-    l_entries[4].proc_callout.iv_procedure = fapi2::ProcedureCallouts::CODE; 
-    l_entries[4].proc_callout.iv_calloutPriority = 
+    l_entries[4].proc_callout.iv_procedure = fapi2::ProcedureCallouts::CODE;
+    l_entries[4].proc_callout.iv_calloutPriority =
                 fapi2::CalloutPriorities::MEDIUM;
     l_entries[5].iv_type = fapi2::EI_TYPE_PROCEDURE_CALLOUT;
-    l_entries[5].proc_callout.iv_procedure = 
+    l_entries[5].proc_callout.iv_procedure =
                 fapi2::ProcedureCallouts::LVL_SUPPORT;
-    l_entries[5].proc_callout.iv_calloutPriority = 
+    l_entries[5].proc_callout.iv_calloutPriority =
                 fapi2::CalloutPriorities::LOW;
     l_entries[6].iv_type = fapi2::EI_TYPE_BUS_CALLOUT;
     l_entries[6].bus_callout.iv_endpoint1ObjIndex = 2;
@@ -1238,7 +1122,7 @@ uint32_t rcTestAddErrorInfo()
     l_entries[7].iv_type = fapi2::EI_TYPE_BUS_CALLOUT;
     l_entries[7].bus_callout.iv_endpoint1ObjIndex = 2;
     l_entries[7].bus_callout.iv_endpoint2ObjIndex = 3;
-    l_entries[7].bus_callout.iv_calloutPriority = 
+    l_entries[7].bus_callout.iv_calloutPriority =
                     fapi2::CalloutPriorities::HIGH;
     l_entries[8].iv_type = fapi2::EI_TYPE_CHILDREN_CDG;
     l_entries[8].children_cdg.iv_parentObjIndex = 2;
@@ -1788,5 +1672,90 @@ uint32_t rcTestRcToErrl()
     return l_result;
 }
 #endif //fips
+
+
+uint32_t rcTestReturnCodeAttrErrls()
+{
+    uint32_t numTests = 0;
+    uint32_t numFails = 0;
+    errlHndl_t l_errl = NULL;
+    FAPI_INF("rcTestReturnCodeAttrErrls() running");
+    do
+    {
+        // Create a vector of TARGETING::Target pointers
+        TARGETING::TargetHandleList l_chipList;
+
+        // Get a list of all of the proc chips
+        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+        TARGETING::Target * l_Proc = NULL;
+
+        //Take the first proc and use it
+        if (l_chipList.size() > 0)
+        {
+            l_Proc = l_chipList[0];
+        }
+
+        numTests++;
+        if(l_Proc == NULL)
+        {
+            // Send an errorlog because we cannot find any procs.
+            TS_FAIL("getAllChips: could not find proc, skipping tests");
+            numFails++;
+            break;
+        }
+
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_ffdc_fail);
+        if(l_errl != NULL)
+        {
+            FAPI_INF("p9_ffdc_fail returned errl");
+            errlCommit(l_errl,CXXTEST_COMP_ID);
+            l_errl = NULL;
+        }
+        else
+        {
+            TS_FAIL("No error from p9_ffdc_fail !!");
+            numFails++;
+        }
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_procedureFfdc_fail);
+        if(l_errl != NULL)
+        {
+            FAPI_INF("p9_procedureFfdc_fail returned errl");
+            errlCommit(l_errl,CXXTEST_COMP_ID);
+            l_errl = NULL;
+        }
+        else
+        {
+            TS_FAIL("No error from p9_procedureFfdc_fail !!");
+            numFails++;
+        }
+
+        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
+                l_Proc);
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_registerFfdc_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            FAPI_INF("p9_registerFfdc_fail returned errl");
+            errlCommit(l_errl,CXXTEST_COMP_ID);
+            l_errl = NULL;
+        }
+        else
+        {
+            TS_FAIL("No error from p9_registerFfdc_fail !!");
+            numFails++;
+        }
+    } while (0);
+
+    FAPI_INF("rcTestReturnCodeAttrErrls Test Complete. %d/%d fails",
+        numFails , numTests);
+
+    return numFails;
+}
 
 }
