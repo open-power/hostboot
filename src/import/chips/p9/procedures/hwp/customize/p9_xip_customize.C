@@ -155,9 +155,13 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     int        l_rc = 0;
 
-    uint8_t     iRingsPerChipletId, l_ringsPerChipletId = 0;
-    uint16_t    l_instanceIdMax;
-    uint8_t     bSkipRing = 0;
+    uint8_t    l_chipletId;
+    uint8_t    l_ringsPerChipletId = 0;
+    uint8_t    l_instanceIdMax;
+    uint8_t    l_evenOdd;
+    uint64_t   l_evenOddMaskStart;
+    uint64_t   l_evenOddMask;
+    uint8_t    bSkipRing = 0;
 
 
     FAPI_DBG("Entering _fetch_and_insert_vpd_rings");
@@ -170,19 +174,20 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         goto fapi_try_exit;
     }
 
-    // For EX rings, there's two [identical] rings listed in Mvpd per [EQ] chipletId
-    //  listed in ring_identification.C: One for each of the two cores, even and odd.
+    // For EX rings, there's two rings listed in the Mvpd per [EQ] chipletId
+    //  listed in ring_identification.C: One for each of the two EX, even and odd.
     //  Each of these two rings have the same [EQ] chipletId encoded in their
     //  iv_chipletId (current RS4 header) or iv_scanAddress (next gen RS4 header).
-    //  So for each chipletId listed in ring_identification.C we need to fetch and
-    //  append two Mvpd rings.
-    if (i_ring.vpdRingClass == VPD_RING_CLASS_EX)
+    //  They are distinguished by their even-odd bits 12-13 in iv_scanSelect.
+    if (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS)
     {
-        l_ringsPerChipletId = 1;    // Will be =2 when we start RS4v2 header support.
+        l_ringsPerChipletId = 2;
+        l_evenOddMaskStart = ((uint64_t)0x00080000) << 32;
     }
     else
     {
         l_ringsPerChipletId = 1;
+        l_evenOddMaskStart = 0;
     }
 
 
@@ -199,258 +204,272 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         l_instanceIdMax = i_ring.instanceIdMax;
     }
 
-    for (auto l_chipletId = i_ring.instanceIdMin; l_chipletId <= l_instanceIdMax; l_chipletId++)
+    for (l_chipletId = i_ring.instanceIdMin; l_chipletId <= l_instanceIdMax; l_chipletId++)
     {
 
-        FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02X,0x%02x)",
-                 i_ring.ringId, l_chipletId);
-
-        auto l_vpdRingSize = i_vpdRingSize;
-        MvpdKeyword l_mvpdKeyword;
-
-        switch (i_ring.vpdKeyword)
-        {
-            case VPD_KEYWORD_PDG:  // #G Time rings
-                l_mvpdKeyword = fapi2::MVPD_KEYWORD_PDG;
-                break;
-
-            case VPD_KEYWORD_PDR:  // #R Repair rings
-                l_mvpdKeyword = fapi2::MVPD_KEYWORD_PDR;
-                break;
-
-            default:
-                FAPI_ASSERT( false,
-                             fapi2::XIPC_INVALID_VPD_KEYWORD().
-                             set_CHIP_TARGET(i_proc_target).
-                             set_VPD_KEYWORD(i_ring.vpdKeyword),
-                             "Code bug: Unsupported value of vpdKeyword (=%d)",
-                             i_ring.vpdKeyword );
-                break;
-        }
-
-
-        /////////////////////////////////////////////////////////////////////
-        // Fetch rings from the MVPD:
-        /////////////////////////////////////////////////////////////////////
-
-        // If an EC ring is an instance ring, then check if EC chipletId is represented in bootCoreMask,
-        //   and only fetch if it is.
-        // If an EX/EQ ring is an instance ring, then check if the associated EC chipletId range in
-        //   in bootCoreMask is represented by at least one EC chipletId, and fetch it if it is.
-        // Otherwise the ring is a common ring which we always must fetch.
-
-        bSkipRing = 0;
-
-        if ( i_ring.vpdRingClass == VPD_RING_CLASS_EQ_INS &&
-             (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
-        {
-            // Fetch EQ instance ring
-            // - Fetch for SBE and SGPE only.
-
-            if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
-                 io_bootCoreMask )
-            {
-                l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
-                                        l_mvpdKeyword,
-                                        i_proc_target,
-                                        l_chipletId,
-                                        i_ring.ringId,
-                                        (uint8_t*)i_vpdRing,
-                                        l_vpdRingSize );
-            }
-            else
-            {
-                bSkipRing = 1;
-            }
-
-        }
-        else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS &&
-                  (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
-        {
-            // Fetch EX instance ring
-            // - Fetch for SBE and SGPE only.
-
-            if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
-                 io_bootCoreMask )
-            {
-                l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
-                                        l_mvpdKeyword,
-                                        i_proc_target,
-                                        l_chipletId,
-                                        i_ring.ringId,
-                                        (uint8_t*)i_vpdRing,
-                                        l_vpdRingSize );
-            }
-            else
-            {
-                bSkipRing = 1;
-            }
-
-        }
-        else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EC_INS &&
-                  (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_CME) )
-        {
-            // Fetch EC instance ring
-            // - Fetch for SBE and CME only.
-
-            if ( ((0x00000001 << (NUM_OF_CORES - 1)) >> (l_chipletId - i_ring.instanceIdMin)) & io_bootCoreMask )
-            {
-                l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
-                                        l_mvpdKeyword,
-                                        i_proc_target,
-                                        l_chipletId,
-                                        i_ring.ringId,
-                                        (uint8_t*)i_vpdRing,
-                                        l_vpdRingSize );
-            }
-            else
-            {
-                bSkipRing = 1;
-            }
-
-        }
-        else if ( i_sysPhase == SYSPHASE_HB_SBE ||
-                  (i_sysPhase == SYSPHASE_RT_CME  && i_ring.vpdRingClass == VPD_RING_CLASS_EC) ||
-                  (i_sysPhase == SYSPHASE_RT_SGPE && (i_ring.vpdRingClass == VPD_RING_CLASS_EX ||
-                          i_ring.vpdRingClass == VPD_RING_CLASS_EQ)) )
-        {
-            // Fetch common ring
-            // - Fetch all VPD rings for SBE.
-            // - Fetch only EC VPD rings for CME.
-            // - Fetch only EX+EQ VPD rings for SGPE.
-
-            l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
-                                    l_mvpdKeyword,
-                                    i_proc_target,
-                                    l_chipletId,
-                                    i_ring.ringId,
-                                    (uint8_t*)i_vpdRing,
-                                    l_vpdRingSize );
-        }
-        else
-        {
-            bSkipRing = 1;
-        }
-
-
-        ///////////////////////////////////////////////////////////////////////
-        //Append VPD ring to the ring section
-        ///////////////////////////////////////////////////////////////////////
-
-        if (bSkipRing)
-        {
-            continue;
-        }
-        else if (l_fapiRc == fapi2::FAPI2_RC_SUCCESS)
+        for (l_evenOdd = 0; l_evenOdd < l_ringsPerChipletId; l_evenOdd++)
         {
 
-            auto l_vpdChipletId = ((CompressedScanData*)i_vpdRing)->iv_chipletId;
+            l_evenOddMask = l_evenOddMaskStart >> l_evenOdd;
 
-            // Even though success, checking that chipletId didn't somehow get
-            //   messed up (code bug).
-            //@TODO: Modify this when chipletId becomes part of iv_scanAddress
-            //       as part of RS4 shrinkage (RTC158101).
-            FAPI_ASSERT( l_vpdChipletId == l_chipletId,
-                         fapi2::XIPC_MVPD_CHIPLET_ID_MESS().
-                         set_CHIP_TARGET(i_proc_target).
-                         set_CHIPLET_ID(l_chipletId).
-                         set_MVPD_CHIPLET_ID(l_vpdChipletId).
-                         set_RING_ID(i_ring.ringId),
-                         "_fetch_and_insert_vpd_rings: Code bug: VPD ring's chipletId"
-                         " in scan container (=0x%X) doesn't match the requested"
-                         " chipletId (=0x%X)",
-                         l_vpdChipletId, l_chipletId );
 
-            // Even though success, checking for accidental buffer overflow (code bug).
-            FAPI_ASSERT( l_vpdRingSize <= i_vpdRingSize,
-                         fapi2::XIPC_MVPD_RING_SIZE_MESS().
-                         set_CHIP_TARGET(i_proc_target).
-                         set_RING_ID(i_ring.ringId).
-                         set_CHIPLET_ID(l_chipletId).
-                         set_RING_BUFFER_SIZE(i_vpdRingSize).
-                         set_MVPD_RING_SIZE(l_vpdRingSize),
-                         "_fetch_and_insert_vpd_rings: Code bug: VPD ring size (=0x%X) exceeds"
-                         " allowed ring buffer size (=0x%X)",
-                         l_vpdRingSize, i_vpdRingSize );
+            FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02X,0x%02x)",
+                     i_ring.ringId, l_chipletId);
 
-            //@TODO: Remove following line asap. Temporary fix until Sgro starts using
-            //       latest p9_scan_compression.H.
-            //       Also fix p9_mvpd_ring_funcs.C to look for entire RS4_MAGIC string.
-            //       Actually, do all the above in connection with RS4 header
-            //       shrinkage (RTC158101 and RTC159801).
-            ((CompressedScanData*)i_vpdRing)->iv_magic = htobe32(RS4_MAGIC);
+            auto l_vpdRingSize = i_vpdRingSize;
+            MvpdKeyword l_mvpdKeyword;
 
-            // Check if ring is a flush ring, i.e. if it is redundant, meaning that it will
-            //   result in no change.
-            int redundant = 0;
-            l_rc = rs4_redundant((CompressedScanData*)i_vpdRing, &redundant);
-            FAPI_ASSERT( l_rc == 0,
-                         fapi2::XIPC_RS4_REDUNDANT_ERROR().
-                         set_CHIP_TARGET(i_proc_target).
-                         set_RING_ID(i_ring.ringId).
-                         set_CHIPLET_ID(l_chipletId),
-                         "rs4_redundant: Failed w/rc=%i for "
-                         "ringId=0x%02X, chipletId=0x%02X ",
-                         l_rc, i_ring.ringId, l_chipletId );
-
-            if (redundant)
+            switch (i_ring.vpdKeyword)
             {
-                FAPI_DBG("Skipping redundant VPD ring: ringId=0x%02X, chipletId=0x%02X ", i_ring.ringId, l_chipletId);
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-                // Note that we do not want to exit here. There could be content in the next
-                //  instance. We're just not appending the current redundant one.
-            }
-            else
-            {
+                case VPD_KEYWORD_PDG:  // #G Time rings
+                    l_mvpdKeyword = fapi2::MVPD_KEYWORD_PDG;
+                    break;
 
-                //@TODO: Temporary fix to convert VPD RS4 container format to
-                //       to RingLayout format. Remove/replace in connection
-                //       with RS4 header shrinkage (RTC158101)
-                uint32_t i;
+                case VPD_KEYWORD_PDR:  // #R Repair rings
+                    l_mvpdKeyword = fapi2::MVPD_KEYWORD_PDR;
+                    break;
 
-                for (i = 0; i < l_vpdRingSize; i++)
-                {
-                    *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 + sizeof(P9_TOR::RingLayout_t) - i) =
-                        *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 - i);
-                }
-
-                uint32_t l_sizeOfThisRing = l_vpdRingSize + sizeof(P9_TOR::RingLayout_t);
-                ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfThis = htobe32(l_sizeOfThisRing);
-                ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfCmsk = 0;
-                ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfMeta = 0;
-
-                // Checking for potential image overflow BEFORE appending the ring.
-                if ( (io_ringSectionSize + l_sizeOfThisRing) > i_maxRingSectionSize )
-                {
-                    //@TODO: We can't update bootCoreMask until RTC158106. So for now
-                    //       we're simply returning the requested bootCoreMask. Thus,
-                    //       should there be an overflow condition before RTC158106
-                    //       gets implemented (i.e., inserting VPD rings in EC order),
-                    //       we would manually have to scale back on the requested
-                    //       cores in the initialled supplied io_bootCoreMask arg to
-                    //       xip_customize.
+                default:
                     FAPI_ASSERT( false,
-                                 fapi2::XIPC_IMAGE_WOULD_OVERFLOW().
+                                 fapi2::XIPC_INVALID_VPD_KEYWORD().
                                  set_CHIP_TARGET(i_proc_target).
-                                 set_CURRENT_RING_SECTION_SIZE(io_ringSectionSize).
-                                 set_SIZE_OF_THIS_RING(l_sizeOfThisRing).
-                                 set_MAX_RING_SECTION_SIZE(i_maxRingSectionSize).
-                                 set_RING_ID(i_ring.ringId).
-                                 set_CHIPLET_ID(l_chipletId).
-                                 set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
-                                 "Ran out of image buffer space trying to append a ring"
-                                 " to the .rings section" );
+                                 set_VPD_KEYWORD(i_ring.vpdKeyword),
+                                 "Code bug: Unsupported value of vpdKeyword (=%d)",
+                                 i_ring.vpdKeyword );
+                    break;
+            }
+
+
+            /////////////////////////////////////////////////////////////////////
+            // Fetch rings from the MVPD:
+            /////////////////////////////////////////////////////////////////////
+
+            // If an EC ring is an instance ring, then check if EC chipletId is represented in bootCoreMask,
+            //   and only fetch if it is.
+            // If an EX/EQ ring is an instance ring, then check if the associated EC chipletId range in
+            //   in bootCoreMask is represented by at least one EC chipletId, and fetch it if it is.
+            // Otherwise the ring is a common ring which we always must fetch.
+
+            bSkipRing = 0;
+
+            if ( i_ring.vpdRingClass == VPD_RING_CLASS_EQ_INS &&
+                 (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
+            {
+                // Fetch EQ instance ring
+                // - Fetch for SBE and SGPE only.
+
+                if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
+                     io_bootCoreMask )
+                {
+                    l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
+                                            l_mvpdKeyword,
+                                            i_proc_target,
+                                            l_chipletId,
+                                            l_evenOddMask,
+                                            i_ring.ringId,
+                                            (uint8_t*)i_vpdRing,
+                                            l_vpdRingSize );
+                }
+                else
+                {
+                    bSkipRing = 1;
                 }
 
-                //------------------------------------------
-                // Now, append the ring to the ring section
-                //------------------------------------------
-                switch (i_sysPhase)
+            }
+            else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS &&
+                      (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
+            {
+                // Fetch EX instance ring
+                // - Fetch for SBE and SGPE only.
+
+                if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >> ((l_chipletId - i_ring.instanceIdMin)*CORES_PER_QUAD)) &
+                     io_bootCoreMask )
+                {
+                    l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
+                                            l_mvpdKeyword,
+                                            i_proc_target,
+                                            l_chipletId,
+                                            l_evenOddMask,
+                                            i_ring.ringId,
+                                            (uint8_t*)i_vpdRing,
+                                            l_vpdRingSize );
+                }
+                else
+                {
+                    bSkipRing = 1;
+                }
+
+            }
+            else if ( i_ring.vpdRingClass == VPD_RING_CLASS_EC_INS &&
+                      (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_CME) )
+            {
+                // Fetch EC instance ring
+                // - Fetch for SBE and CME only.
+
+                if ( ((0x00000001 << (NUM_OF_CORES - 1)) >> (l_chipletId - i_ring.instanceIdMin)) & io_bootCoreMask )
+                {
+                    l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
+                                            l_mvpdKeyword,
+                                            i_proc_target,
+                                            l_chipletId,
+                                            l_evenOddMask,
+                                            i_ring.ringId,
+                                            (uint8_t*)i_vpdRing,
+                                            l_vpdRingSize );
+                }
+                else
+                {
+                    bSkipRing = 1;
+                }
+
+            }
+            else if ( i_sysPhase == SYSPHASE_HB_SBE ||
+                      (i_sysPhase == SYSPHASE_RT_CME  && i_ring.vpdRingClass == VPD_RING_CLASS_EC) ||
+                      (i_sysPhase == SYSPHASE_RT_SGPE && (i_ring.vpdRingClass == VPD_RING_CLASS_EX ||
+                              i_ring.vpdRingClass == VPD_RING_CLASS_EQ)) )
+            {
+                // Fetch common ring
+                // - Fetch all VPD rings for SBE.
+                // - Fetch only EC VPD rings for CME.
+                // - Fetch only EX+EQ VPD rings for SGPE.
+
+                l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
+                                        l_mvpdKeyword,
+                                        i_proc_target,
+                                        l_chipletId,
+                                        l_evenOddMask,
+                                        i_ring.ringId,
+                                        (uint8_t*)i_vpdRing,
+                                        l_vpdRingSize );
+            }
+            else
+            {
+                bSkipRing = 1;
+            }
+
+
+            ///////////////////////////////////////////////////////////////////////
+            //Append VPD ring to the ring section
+            ///////////////////////////////////////////////////////////////////////
+
+            if (bSkipRing)
+            {
+                continue;
+            }
+            else if (l_fapiRc == fapi2::FAPI2_RC_SUCCESS)
+            {
+
+                auto l_vpdChipletId = ((CompressedScanData*)i_vpdRing)->iv_chipletId;
+
+                // Even though success, checking that chipletId didn't somehow get
+                //   messed up (code bug).
+                //@TODO: Modify this when chipletId becomes part of iv_scanAddress
+                //       as part of RS4 shrinkage (RTC158101).
+                FAPI_ASSERT( l_vpdChipletId == l_chipletId,
+                             fapi2::XIPC_MVPD_CHIPLET_ID_MESS().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_CHIPLET_ID(l_chipletId).
+                             set_MVPD_CHIPLET_ID(l_vpdChipletId).
+                             set_RING_ID(i_ring.ringId),
+                             "_fetch_and_insert_vpd_rings: Code bug: VPD ring's chipletId"
+                             " in scan container (=0x%X) doesn't match the requested"
+                             " chipletId (=0x%X)",
+                             l_vpdChipletId, l_chipletId );
+
+                // Even though success, checking for accidental buffer overflow (code bug).
+                FAPI_ASSERT( l_vpdRingSize <= i_vpdRingSize,
+                             fapi2::XIPC_MVPD_RING_SIZE_MESS().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_RING_ID(i_ring.ringId).
+                             set_CHIPLET_ID(l_chipletId).
+                             set_RING_BUFFER_SIZE(i_vpdRingSize).
+                             set_MVPD_RING_SIZE(l_vpdRingSize),
+                             "_fetch_and_insert_vpd_rings: Code bug: VPD ring size (=0x%X) exceeds"
+                             " allowed ring buffer size (=0x%X)",
+                             l_vpdRingSize, i_vpdRingSize );
+
+                //@TODO: Remove following line asap. Temporary fix until Sgro starts using
+                //       latest p9_scan_compression.H.
+                //       Also fix p9_mvpd_ring_funcs.C to look for entire RS4_MAGIC string.
+                //       Actually, do all the above in connection with RS4 header
+                //       shrinkage (RTC158101 and RTC159801).
+                ((CompressedScanData*)i_vpdRing)->iv_magic = htobe32(RS4_MAGIC);
+
+                // Check if ring is a flush ring, i.e. if it is redundant, meaning that it will
+                //   result in no change.
+                int redundant = 0;
+                l_rc = rs4_redundant((CompressedScanData*)i_vpdRing, &redundant);
+                FAPI_ASSERT( l_rc == 0,
+                             fapi2::XIPC_RS4_REDUNDANT_ERROR().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_RING_ID(i_ring.ringId).
+                             set_CHIPLET_ID(l_chipletId),
+                             "rs4_redundant: Failed w/rc=%i for "
+                             "ringId=0x%02X, chipletId=0x%02X ",
+                             l_rc, i_ring.ringId, l_chipletId );
+
+                if (redundant)
+                {
+                    FAPI_DBG("Skipping redundant VPD ring: ringId=0x%02X, chipletId=0x%02X ", i_ring.ringId, l_chipletId);
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    // Note that we do not want to exit here. There could be content in the next
+                    //  instance. We're just not appending the current redundant one.
+                }
+                else
                 {
 
-                    case SYSPHASE_HB_SBE:
-                        for (iRingsPerChipletId = 0; iRingsPerChipletId < l_ringsPerChipletId; iRingsPerChipletId++)
-                        {
+                    //@TODO: Temporary fix to convert VPD RS4 container format to
+                    //       to RingLayout format. Remove/replace in connection
+                    //       with RS4 header shrinkage (RTC158101)
+                    uint32_t i;
+
+                    for (i = 0; i < l_vpdRingSize; i++)
+                    {
+                        *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 + sizeof(P9_TOR::RingLayout_t) - i) =
+                            *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 - i);
+                    }
+
+                    uint32_t l_sizeOfThisRing = l_vpdRingSize + sizeof(P9_TOR::RingLayout_t);
+                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfThis = htobe32(l_sizeOfThisRing);
+                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfCmsk = 0;
+                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfMeta = 0;
+
+                    // Checking for potential image overflow BEFORE appending the ring.
+                    if ( (io_ringSectionSize + l_sizeOfThisRing) > i_maxRingSectionSize )
+                    {
+                        //@TODO: We can't update bootCoreMask until RTC158106. So for now
+                        //       we're simply returning the requested bootCoreMask. Thus,
+                        //       should there be an overflow condition before RTC158106
+                        //       gets implemented (i.e., inserting VPD rings in EC order),
+                        //       we would manually have to scale back on the requested
+                        //       cores in the initialled supplied io_bootCoreMask arg to
+                        //       xip_customize.
+                        FAPI_ASSERT( false,
+                                     fapi2::XIPC_IMAGE_WOULD_OVERFLOW().
+                                     set_CHIP_TARGET(i_proc_target).
+                                     set_CURRENT_RING_SECTION_SIZE(io_ringSectionSize).
+                                     set_SIZE_OF_THIS_RING(l_sizeOfThisRing).
+                                     set_MAX_RING_SECTION_SIZE(i_maxRingSectionSize).
+                                     set_RING_ID(i_ring.ringId).
+                                     set_CHIPLET_ID(l_chipletId).
+                                     set_CURRENT_BOOT_CORE_MASK(io_bootCoreMask),
+                                     "Ran out of image buffer space trying to append a ring"
+                                     " to the .rings section" );
+                    }
+
+                    //------------------------------------------
+                    // Now, append the ring to the ring section
+                    //------------------------------------------
+
+                    // Calculate the chiplet TOR index
+                    uint8_t l_chipletTorId = l_chipletId +
+                                             (l_chipletId - i_ring.instanceIdMin ) * (l_ringsPerChipletId - 1) +
+                                             l_evenOdd;
+
+                    switch (i_sysPhase)
+                    {
+
+                        case SYSPHASE_HB_SBE:
                             l_rc = tor_append_ring(
                                        i_ringSection,
                                        io_ringSectionSize, // In: Exact size. Out: Updated size.
@@ -460,13 +479,13 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        P9_TOR::SBE,     // We're working on the SBE image
                                        P9_TOR::ALLRING, // No-care
                                        BASE,            // All VPD rings are Base ringVariant
-                                       l_chipletId,     // Chiplet instance ID
+                                       l_chipletTorId,  // Chiplet instance TOR Index
                                        i_vpdRing );     // The VPD RS4 ring container
 
                             if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
                             {
-                                FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
-                                         i_ring.ringId, l_chipletId);
+                                FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
+                                         i_ring.ringId, l_evenOdd, l_chipletId);
                             }
                             else
                             {
@@ -477,13 +496,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                              "tor_append_ring() failed w/l_rc=%d",
                                              l_rc );
                             }
-                        }
 
-                        break;
+                            break;
 
-                    case SYSPHASE_RT_CME:
-                        for (iRingsPerChipletId = 0; iRingsPerChipletId < l_ringsPerChipletId; iRingsPerChipletId++)
-                        {
+                        case SYSPHASE_RT_CME:
                             l_rc = tor_append_ring(
                                        i_ringSection,
                                        io_ringSectionSize, // In: Exact size. Out: Updated size.
@@ -493,13 +509,13 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        P9_TOR::CME,     // We're working on the SBE image
                                        P9_TOR::ALLRING, // No-care
                                        BASE,            // All VPD rings are Base ringVariant
-                                       l_chipletId,     // Chiplet instance ID
+                                       l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
                             if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
                             {
-                                FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
-                                         i_ring.ringId, l_chipletId);
+                                FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
+                                         i_ring.ringId, l_evenOdd, l_chipletId);
                             }
                             else
                             {
@@ -512,13 +528,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             }
 
                             FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
-                        }
 
-                        break;
+                            break;
 
-                    case SYSPHASE_RT_SGPE:
-                        for (iRingsPerChipletId = 0; iRingsPerChipletId < l_ringsPerChipletId; iRingsPerChipletId++)
-                        {
+                        case SYSPHASE_RT_SGPE:
                             l_rc = tor_append_ring(
                                        i_ringSection,
                                        io_ringSectionSize, // In: Exact size. Out: Updated size.
@@ -528,13 +541,13 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        P9_TOR::SGPE,    // We're working on the SGPE image
                                        P9_TOR::ALLRING, // No-care
                                        BASE,            // All VPD rings are Base ringVariant
-                                       l_chipletId,     // Chiplet instance ID
+                                       l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
                             if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
                             {
-                                FAPI_INF("Successfully added VPD ring: (ringId,chipletId)=(0x%02X,0x%02X)",
-                                         i_ring.ringId, l_chipletId);
+                                FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
+                                         i_ring.ringId, l_evenOdd, l_chipletId);
                             }
                             else
                             {
@@ -547,77 +560,78 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                             }
 
                             FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
-                        }
 
-                        break;
+                            break;
 
-                    default:
-                        FAPI_ASSERT( false,
-                                     fapi2::XIPC_INVALID_SYSPHASE_PARM().
-                                     set_CHIP_TARGET(i_proc_target).
-                                     set_SYSPHASE(i_sysPhase).
-                                     set_OCCURRENCE(2),
-                                     "Code bug: Unsupported value of sysPhase (=%d)",
-                                     i_sysPhase );
-                        break;
-                } // End switch(sysPhase)
+                        default:
+                            FAPI_ASSERT( false,
+                                         fapi2::XIPC_INVALID_SYSPHASE_PARM().
+                                         set_CHIP_TARGET(i_proc_target).
+                                         set_SYSPHASE(i_sysPhase).
+                                         set_OCCURRENCE(2),
+                                         "Code bug: Unsupported value of sysPhase (=%d)",
+                                         i_sysPhase );
+                            break;
+                    } // End switch(sysPhase)
 
-            } // End if(redundant)
+                } // End if(redundant)
 
-        }
-        else if (l_fapiRc.isRC(RC_MVPD_RING_NOT_FOUND))
-        {
-
-            // No match, do nothing. Next chipletId.
-            //@TODO: Uncomment the following after PowerOn. Also, need to come
-            //       to agreement whether this should be fatal error or not.
-            //       For now, for PO, it's considered benigh and noise and is
-            //       being commented out.
-            //FAPI_INF("_fetch_and_insert_vpd_rings():"
-            //         "(ringId,chipletId)=(0x%X,0x%X) not found.",
-            //         i_ring.ringId, l_chipletId);
-
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-        }
-        else
-        {
-            //--------------------------
-            // Handle other error cases
-            //--------------------------
-
-            // getMvpdRing failed due to insufficient ring buffer space.
-            // Assumption here is that getMvpdRing returns required buffer size
-            //   in l_vpdRingSize (and which it does!).
-            FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
-                         fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
-                         set_CHIP_TARGET(i_proc_target).
-                         set_RING_ID(i_ring.ringId).
-                         set_CHIPLET_ID(l_chipletId).
-                         set_RING_BUFFER_SIZE(i_vpdRingSize).
-                         set_MVPD_RING_SIZE(l_vpdRingSize),
-                         "_fetch_and_insert_vpd_rings(): VPD ring size (=0x%X) exceeds"
-                         " allowed ring buffer size (=0x%X)",
-                         l_vpdRingSize, i_vpdRingSize );
-
-            // getMvpdRing failed due to invalid record data magic word.
-            FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
-                         fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
-                         set_CHIP_TARGET(i_proc_target).
-                         set_RING_ID(i_ring.ringId).
-                         set_CHIPLET_ID(l_chipletId),
-                         "_fetch_and_insert_vpd_rings(): MVPD has invalid record data" );
-
-            // getMvpdRing failed for some other reason aside from above handled cases.
-            if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                FAPI_ERR("_fetch_and_insert_vpd_rings(): getMvpdRing failed "
-                         " w/rc=0x%08X", (uint64_t)l_fapiRc);
-                fapi2::current_err = l_fapiRc;
-                goto fapi_try_exit;
             }
+            else if (l_fapiRc.isRC(RC_MVPD_RING_NOT_FOUND))
+            {
 
-        } // End if(bSkipRing)
+                // No match, do nothing. Next chipletId.
+                //@TODO: Uncomment the following after PowerOn. Also, need to come
+                //       to agreement whether this should be fatal error or not.
+                //       For now, for PO, it's considered benigh and noise and is
+                //       being commented out.
+                //FAPI_INF("_fetch_and_insert_vpd_rings():"
+                //         "(ringId,chipletId)=(0x%X,0x%X) not found.",
+                //         i_ring.ringId, l_chipletId);
+
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+            }
+            else
+            {
+                //--------------------------
+                // Handle other error cases
+                //--------------------------
+
+                // getMvpdRing failed due to insufficient ring buffer space.
+                // Assumption here is that getMvpdRing returns required buffer size
+                //   in l_vpdRingSize (and which it does!).
+                FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_RING_BUFFER_TOO_SMALL),
+                             fapi2::XIPC_MVPD_RING_SIZE_TOO_BIG().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_RING_ID(i_ring.ringId).
+                             set_CHIPLET_ID(l_chipletId).
+                             set_RING_BUFFER_SIZE(i_vpdRingSize).
+                             set_MVPD_RING_SIZE(l_vpdRingSize),
+                             "_fetch_and_insert_vpd_rings(): VPD ring size (=0x%X) exceeds"
+                             " allowed ring buffer size (=0x%X)",
+                             l_vpdRingSize, i_vpdRingSize );
+
+                // getMvpdRing failed due to invalid record data magic word.
+                FAPI_ASSERT( !l_fapiRc.isRC(RC_MVPD_INVALID_RS4_HEADER),
+                             fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_RING_ID(i_ring.ringId).
+                             set_CHIPLET_ID(l_chipletId),
+                             "_fetch_and_insert_vpd_rings(): MVPD has invalid record data" );
+
+                // getMvpdRing failed for some other reason aside from above handled cases.
+                if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    FAPI_ERR("_fetch_and_insert_vpd_rings(): getMvpdRing failed "
+                             " w/rc=0x%08X", (uint64_t)l_fapiRc);
+                    fapi2::current_err = l_fapiRc;
+                    goto fapi_try_exit;
+                }
+
+            } // End if(bSkipRing)
+
+        } // Loop on evenOdd
 
     } //Loop on chipletId
 
