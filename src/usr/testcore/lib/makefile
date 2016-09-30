@@ -25,7 +25,9 @@
 ROOTPATH = ../../../..
 
 MODULE = testsyslib
-TESTS = *.H
+//  @TODO-RTC:151185-Turn enable all test cases
+// TESTS = *.H
+TESTS = stltest.H
 
 
 SUBDIRS += runtime.d
