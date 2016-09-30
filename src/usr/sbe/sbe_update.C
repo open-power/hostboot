@@ -93,7 +93,6 @@ namespace SBE
 {
     errlHndl_t updateProcessorSbeSeeproms(sbeUpdateCheckType i_check_type)
     {
-        return NULL;//@fixme-Temp hack to fix master
         errlHndl_t err = NULL;
         errlHndl_t err_cleanup = NULL;
         sbeTargetState_t sbeState;
@@ -860,7 +859,7 @@ namespace SBE
                              i_image,
                              io_image_size );
 
-            // Check the return code
+            // Check for error
             if(err)
             {
                 TRACUCOMP( g_trac_sbe, "appendHbblToSbe(): "
@@ -924,8 +923,6 @@ namespace SBE
             TRACFCOMP( g_trac_sbe,
                        INFO_MRK"ringOvd():Valid overrides, applying them");
 
-            fapi2::ReturnCode rc_fapi = fapi2::FAPI2_RC_SUCCESS;
-
             // Hard coded value, pass in 2KB max
             uint32_t RING_OVD_SIZE = 0x800;
             FAPI_INVOKE_HWP(l_err,p9_xip_section_append,
@@ -962,7 +959,6 @@ namespace SBE
     {
         errlHndl_t err = NULL;
         uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
-        fapi2::ReturnCode rc_fapi = fapi2::FAPI2_RC_SUCCESS;
         uint32_t coreMask = 0x00FFFFFF; // Bits(8:31) = EC00:EC23
         size_t maxCores = P9_MAX_EC_PER_PROC;
         int coreCount = 0;
@@ -1016,28 +1012,25 @@ namespace SBE
 
                 procIOMask = coreMask;
 
-                if( !INITSERVICE::spBaseServicesEnabled() )  // FSP not present ==> ok to call @TODO RTC:160466
-                {
-                    uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
-                    uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
-                    FAPI_EXEC_HWP( rc_fapi,
-                                   p9_xip_customize,
-                                   l_fapiTarg,
-                                   io_imgPtr, //image in/out
-                                   tmpImgSize,
-                                   (void*)l_ringSectionBuf,
-                                   l_ringSectionBufSize,
-                                   SYSPHASE_HB_SBE,
-                                   MODEBUILD_IPL,
-                                   (void*)RING_BUF1_VADDR,
-                                   (uint32_t)MAX_RING_BUF_SIZE,
-                                   (void*)RING_BUF2_VADDR,
-                                   (uint32_t)MAX_RING_BUF_SIZE,
-                                   procIOMask ); // Bits(8:31) = EC00:EC23
-                } // @TODO RTC:160466 remove conditional wrapping this call
+                uint8_t l_ringSectionBuf[MAX_SEEPROM_IMAGE_SIZE];
+                uint32_t l_ringSectionBufSize = MAX_SEEPROM_IMAGE_SIZE;
+                FAPI_INVOKE_HWP( err,
+                                 p9_xip_customize,
+                                 l_fapiTarg,
+                                 io_imgPtr, //image in/out
+                                 tmpImgSize,
+                                 (void*)l_ringSectionBuf,
+                                 l_ringSectionBufSize,
+                                 SYSPHASE_HB_SBE,
+                                 MODEBUILD_IPL,
+                                 (void*)RING_BUF1_VADDR,
+                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 (void*)RING_BUF2_VADDR,
+                                 (uint32_t)MAX_RING_BUF_SIZE,
+                                 procIOMask ); // Bits(8:31) = EC00:EC23
 
-                // Check the return code
-                if ( !rc_fapi )
+                // Check for no error
+                if ( NULL == err )
                 {
                     // Check if we have a valid ring override section and
                     // append it in if so
@@ -1071,9 +1064,8 @@ namespace SBE
 
                     TRACUCOMP( g_trac_sbe, "procCustomizeSbeImg(): "
                                "p9_xip_customize success=%d, procIOMask=0x%X "
-                               "o_actImgSize=0x%X, rc_fapi=0x%X",
-                               procedure_success, procIOMask, o_actImgSize,
-                               uint32_t(rc_fapi));
+                               "o_actImgSize=0x%X",
+                               procedure_success, procIOMask, o_actImgSize);
 
                     // exit inner loop
                     break;
@@ -1091,7 +1083,7 @@ namespace SBE
                                "XIPC_IMAGE_WOULD_OVERFLOW-Retry "
                                "MaxCores=0x%.8X. HUID=0x%X. coreMask=0x%.8X, "
                                "procIOMask=0x%.8X. coreCount=%d",
-                               uint32_t(rc_fapi), maxCores,
+                               ERRL_GETRC_SAFE(err), maxCores,
                                TARGETING::get_huid(i_target),
                                coreMask, procIOMask, coreCount);
 
@@ -1140,11 +1132,9 @@ namespace SBE
                                "MaxCores=0x%X. HUID=0x%X. coreMask=0x%.8X, "
                                "procIOMask=0x%.8X. coreCount=%d. Create "
                                "err and break loop",
-                               uint32_t(rc_fapi), maxCores,
+                               ERRL_GETRC_SAFE(err), maxCores,
                                TARGETING::get_huid(i_target),
                                coreMask, procIOMask, coreCount);
-
-                    err = rcToErrl(rc_fapi);
 
                     ERRORLOG::ErrlUserDetailsTarget(i_target,
                                                     "Proc Target")
