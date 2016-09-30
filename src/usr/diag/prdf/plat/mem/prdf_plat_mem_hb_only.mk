@@ -49,6 +49,7 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr_ipl.o
+prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
 prd_obj += prdfP9McbistDomain.o
 
@@ -62,6 +63,7 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_rt.o
+prd_obj += prdfMemTps_rt.o
 prd_obj += prdfMemVcm_rt.o
 
 endif
