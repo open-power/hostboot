@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -324,6 +324,11 @@ void*    call_proc_build_smp( void    *io_pArgs )
             ++curproc;
         }
 
+        // Enable the trusted scan path
+        TARGETING::TargetHandle_t pSys=NULL;
+        TARGETING::targetService().getTopLevelTarget(pSys);
+        assert(pSys!=NULL,"System target must not be NULL");
+        pSys->setAttr<TARGETING::ATTR_TRUSTED_SLAVE_SCAN_PATH_ACTIVE>(true);
 
     } while (0);
 
