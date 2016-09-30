@@ -494,7 +494,8 @@ fapi_try_exit:
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the port, dimm, rank
 /// @return FAPI2_RC_SUCCESS iff everything ok
-/// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @warning The function is asynchronous, and the caller should be looking for a done attention
+/// @note The operation will fail immediately when a stop condition is encountered
 ///
 template<>
 fapi2::ReturnCode background_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
@@ -505,7 +506,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_t
     FAPI_INF("continuous (background) scrub");
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, i_speed, end_boundary::NONE, i_address);
+    constraints l_const(i_stop, i_speed, end_boundary::STOP_AFTER_ADDRESS, i_address);
     continuous_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
