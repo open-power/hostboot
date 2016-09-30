@@ -160,7 +160,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     uint8_t    l_instanceIdMax;
     uint8_t    l_evenOdd;
     uint64_t   l_evenOddMaskStart;
-    uint64_t   l_evenOddMask;
+    uint64_t   l_evenOddMask;    // 0:even, 1:odd
     uint8_t    bSkipRing = 0;
 
 
@@ -178,11 +178,36 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     //  listed in ring_identification.C: One for each of the two EX, even and odd.
     //  Each of these two rings have the same [EQ] chipletId encoded in their
     //  iv_chipletId (current RS4 header) or iv_scanAddress (next gen RS4 header).
-    //  They are distinguished by their even-odd bits 12-13 in iv_scanSelect.
+    //  They are distinguished by their even-odd bits in iv_scanSelect as follows:
     if (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS)
     {
         l_ringsPerChipletId = 2;
-        l_evenOddMaskStart = ((uint64_t)0x00080000) << 32;
+
+        switch (i_ring.ringId)
+        {
+            case ex_l3_refr_time:
+            case ex_l3_refr_repr:
+                l_evenOddMaskStart = ((uint64_t)0x00080000) << 32;
+                break;
+
+            case ex_l2_repr:
+                l_evenOddMaskStart = ((uint64_t)0x00800000) << 32;
+                break;
+
+            case ex_l3_repr:
+                l_evenOddMaskStart = ((uint64_t)0x02000000) << 32;
+                break;
+
+            default:
+                FAPI_ASSERT( false,
+                             fapi2::XIPC_MVPD_RING_ID_MESS().
+                             set_CHIP_TARGET(i_proc_target).
+                             set_RING_ID(i_ring.ringId),
+                             "Code bug: Wrong assumption about supported ringIds in this context. "
+                             "ringId=%d(=0x%x)(=ringId.ringName) is not allowed here. ",
+                             i_ring.ringId, i_ring.ringId, i_ring.ringName );
+                break;
+        }
     }
     else
     {
@@ -211,7 +236,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         {
 
             l_evenOddMask = l_evenOddMaskStart >> l_evenOdd;
-
 
             FAPI_INF("_fetch_and_insert_vpd_rings: (ringId,chipletId) = (0x%02X,0x%02x)",
                      i_ring.ringId, l_chipletId);
