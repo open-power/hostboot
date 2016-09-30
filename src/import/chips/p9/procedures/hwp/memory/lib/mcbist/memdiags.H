@@ -322,14 +322,14 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
 /// @note Uses broadcast mode if possible
 /// @param[in] i_target the target behind which all memory should be read
 /// @param[in] i_stop stop conditions
-/// @param[in] i_end whether to end, and where - defaults to immediate (stop after failed address)
+/// @param[in] i_end whether to end, and where - defaults to stop after slave rank
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions& i_stop,
-                           const end_boundary i_end = end_boundary::STOP_AFTER_ADDRESS );
+                           const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK );
 
 ///
 /// @brief Super Fast Read to End of Port - used to run superfast read on all memory behind the target
