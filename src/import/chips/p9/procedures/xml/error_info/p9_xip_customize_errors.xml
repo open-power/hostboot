@@ -90,6 +90,17 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_MVPD_RING_ID_MESS</rc>
+    <description>Code bug: Wrong assumption about ringId</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_MVPD_CHIPLET_ID_MESS</rc>
     <description>VPD ring's chipletId doesn't match requested chipletId</description>
     <callout>
