@@ -439,6 +439,10 @@ if(defined $optPol->{'loadline-overrides'})
     }
 }
 
+my $xbusFfePrecursor = $reqPol->{'io_xbus_tx_ffe_precursor'};
+
+
+
 if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
 {
    push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 1];
@@ -2145,7 +2149,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
            print "\n<!-- $SYSNAME n${node}p$proc XBUS units -->\n";
         }
         generate_xbus($proc,$xbus,$STargets[$i][ORDINAL_FIELD],$ipath,
-            \%fapiPosH);
+            \%fapiPosH, $xbusFfePrecursor );
         $xbus_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -4947,7 +4951,7 @@ sub generate_obus
 
 sub generate_xbus
 {
-    my ($proc, $xbus, $ordinalId, $ipath,$fapiPosHr) = @_;
+    my ($proc, $xbus, $ordinalId, $ipath,$fapiPosHr, $ffePrecursor) = @_;
     my $mruData = get_mruid($ipath);
     my $uidstr = sprintf("0x%02X0E%04X",${node},$proc*MAX_XBUS_PER_PROC + $xbus);
 
@@ -5033,6 +5037,10 @@ sub generate_xbus
     <attribute>
         <id>REL_POS</id>
         <default>$xbus</default>
+    </attribute>
+    <attribute>
+        <id>IO_XBUS_TX_FFE_PRECURSOR</id>
+        <default>$ffePrecursor</default>
     </attribute>
     ";
 
