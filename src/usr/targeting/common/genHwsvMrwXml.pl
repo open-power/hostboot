@@ -731,62 +731,14 @@ sub pcie_init ($)
 }
 
 # Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
-my @procPcie;
+my @pecPcie;
 foreach my $proc (@{$ProcPcie->{'processor-settings'}})
 {
     # determine values of proc pcie attributes
     pcie_init($proc);
 
-    push @procPcie, [$proc->{target}->{node},
-                     $proc->{target}->{position},
-                     "PROC_PCIE_IOP_G2_PLL_CONTROL0",
-                     $proc->{proc_pcie_iop_g2_pll_control0_iop0},
-                     $proc->{proc_pcie_iop_g2_pll_control0_iop1},
-                     "PROC_PCIE_IOP_G3_PLL_CONTROL0",
-                     $proc->{proc_pcie_iop_g3_pll_control0_iop0},
-                     $proc->{proc_pcie_iop_g3_pll_control0_iop1},
-                     "PROC_PCIE_IOP_PCS_CONTROL0",
-                     $proc->{proc_pcie_iop_pcs_control0_iop0},
-                     $proc->{proc_pcie_iop_pcs_control0_iop1},
-                     "PROC_PCIE_IOP_PCS_CONTROL1",
-                     $proc->{proc_pcie_iop_pcs_control1_iop0},
-                     $proc->{proc_pcie_iop_pcs_control1_iop1},
-                     "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0",
-                     $proc->{proc_pcie_iop_pll_global_control0_iop0},
-                     $proc->{proc_pcie_iop_pll_global_control0_iop1},
-                     "PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1",
-                     $proc->{proc_pcie_iop_pll_global_control1_iop0},
-                     $proc->{proc_pcie_iop_pll_global_control1_iop1},
-                     "PROC_PCIE_IOP_RX_PEAK",
-                     $proc->{proc_pcie_iop_rx_peak_iop0},
-                     $proc->{proc_pcie_iop_rx_peak_iop1},
-                     "PROC_PCIE_IOP_RX_SDL",
-                     $proc->{proc_pcie_iop_rx_sdl_iop0},
-                     $proc->{proc_pcie_iop_rx_sdl_iop1},
-                     "PROC_PCIE_IOP_RX_VGA_CONTROL2",
-                     $proc->{proc_pcie_iop_rx_vga_control2_iop0},
-                     $proc->{proc_pcie_iop_rx_vga_control2_iop1},
-                     "PROC_PCIE_IOP_TX_BWLOSS1",
-                     $proc->{proc_pcie_iop_tx_bwloss1_iop0},
-                     $proc->{proc_pcie_iop_tx_bwloss1_iop1},
-                     "PROC_PCIE_IOP_TX_FIFO_OFFSET",
-                     $proc->{proc_pcie_iop_tx_fifo_offset_iop0},
-                     $proc->{proc_pcie_iop_tx_fifo_offset_iop1},
-                     "PROC_PCIE_IOP_TX_RCVRDETCNTL",
-                     $proc->{proc_pcie_iop_tx_rcvrdetcntl_iop0},
-                     $proc->{proc_pcie_iop_tx_rcvrdetcntl_iop1},
-                     "PROC_PCIE_IOP_ZCAL_CONTROL",
-                     $proc->{proc_pcie_iop_zcal_control_iop0},
-                     $proc->{proc_pcie_iop_zcal_control_iop1},
-                     "PROC_PCIE_IOP_TX_FFE_GEN1",
-                     $proc->{proc_pcie_iop_tx_ffe_gen1_iop0},
-                     $proc->{proc_pcie_iop_tx_ffe_gen1_iop1},
-                     "PROC_PCIE_IOP_TX_FFE_GEN2",
-                     $proc->{proc_pcie_iop_tx_ffe_gen2_iop0},
-                     $proc->{proc_pcie_iop_tx_ffe_gen2_iop1}];
 }
 
-my @SortedPcie = sort byNodePos @procPcie;
 
 #------------------------------------------------------------------------------
 # Process the chip-ids MRW file
@@ -4683,6 +4635,55 @@ sub generate_pec
     addPervasiveParentLink($sys,$node,$proc,$pec,"pec");
 
     calcAndAddFapiPos("pec",$affinityPath,$pec,$fapiPosHr);
+
+    # fill in the PCIE attributes
+    my %pciAttr;
+    $pciAttr{"PROC_PCIE_PCS_RX_CDR_GAIN"} = 'proc_pcie_pcs_rx_cdr_gain';
+    $pciAttr{"PROC_PCIE_PCS_RX_LOFF_CONTROL"} = 'proc_pcie_pcs_rx_loff_control';
+    $pciAttr{"PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3"} = 'proc_pcie_pcs_rx_vga_control_register3';
+    $pciAttr{"PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD"} = 'proc_pcie_pcs_rx_rot_cdr_lookahead';
+    $pciAttr{"PROC_PCIE_PCS_PCLCK_CNTL_PLLA"} = 'proc_pcie_pcs_pclck_cntl_plla';
+    $pciAttr{"PROC_PCIE_PCS_PCLCK_CNTL_PLLB"} = 'proc_pcie_pcs_pclck_cntl_pllb';
+    $pciAttr{"PROC_PCIE_PCS_TX_DCLCK_ROT"} = 'proc_pcie_pcs_tx_dclck_rot_ovr';
+    $pciAttr{"PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET"} = 'proc_pcie_pcs_tx_fifo_config_offset';
+    $pciAttr{"PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE"} = 'proc_pcie_pcs_tx_power_seq_enable';
+    $pciAttr{"PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL"} = 'proc_pcie_pcs_rx_phase_rot_cntl';
+    $pciAttr{"PROC_PCIE_PCS_RX_VGA_CNTL_REG1"} = 'proc_pcie_pcs_rx_vga_cntl_reg1';
+    $pciAttr{"PROC_PCIE_PCS_RX_VGA_CNTL_REG2"} = 'proc_pcie_pcs_rx_vga_cntl_reg2';
+    $pciAttr{"PROC_PCIE_PCS_RX_SIGDET_CNTL"} = 'proc_pcie_pcs_rx_sigdet_cntl';
+    $pciAttr{"PROC_PCIE_PCS_RX_ROT_CDR_SSC"} = 'proc_pcie_pcs_rx_rot_cdr_ssc';
+    $pciAttr{"PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2"} = 'proc_pcie_pcs_tx_pcie_recv_detect_cntl_reg2';
+    #Below are broken in current fips build-@fixme-RTC:161897
+    #$pciAttr{"PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1"} = 'proc_pcie_pcs_tx_pcie_recv_detect_cntl_reg1';
+    #$pciAttr{"PROC_PCIE_PCS_SYSTEM_CNTL"} = 'proc_pcie_pcs_system_cntl';
+    #$pciAttr{"PROC_PCIE_PCS_M_CNTL"} = 'proc_pcie_pcs_m_cntl';
+
+
+    # XML has this structure (iop==pec):
+    #   <processor-settings>
+    #     <target><name>pu</name><node>0</node><position>0</position></target>
+    #       <attributename_iop0>data,data,data</attributename_iop0>
+    #       <attributename_iop1>data,data,data</attributename_iop1>
+    #       <attributename_iop2>data,data,data</attributename_iop2>
+    foreach my $procsetting (@{$ProcPcie->{'processor-settings'}})
+    {
+        # only look at the values for my proc
+        if( !(($procsetting->{'target'}->{'node'} == $node)
+              && ($procsetting->{'target'}->{'position'} == $proc)) )
+        {
+            next;
+        }
+
+        foreach my $attr ( keys %pciAttr)
+        {
+            my $mrwname = $pciAttr{$attr}."_iop$pec";
+            print "
+    <attribute>
+        <id>$attr</id>
+        <default>$procsetting->{$mrwname}</default>
+    </attribute>\n";
+        }
+    }
 
     # call to do any fsp per-pec attributes
     do_plugin('fsp_pec', $proc, $pec, $ordinalId );

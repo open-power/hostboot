@@ -12644,19 +12644,17 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PROC_PCIE_REFCLOCK_ENABLE</id>
+    <id>PROC_PCIE_REFCLOCK_ENABLE</id><!-- @deprecated -->
     <description>PCIE refclock enable valid mask
+      PCIE refclock enable valid mask
       creator: platform
-      consumer: proc_pcie_scominit
-      firmware notes:
-        Bit mask defining state of refclock drive enables
-        bit0=PCI0, bit1=PCI1, bit2=PCI2, bit3=PCI3
+      consumer: p9_pcie_scominit
     </description>
     <simpleType>
        <uint8_t>
        </uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PCIE_REFCLOCK_ENABLE</id>
@@ -22333,7 +22331,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22344,7 +22342,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
@@ -22353,7 +22351,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22364,7 +22362,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
@@ -22373,7 +22371,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22384,7 +22382,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
@@ -22393,7 +22391,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22404,7 +22402,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
@@ -22413,7 +22411,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
+  <id>PROC_PCIE_IOP_PCS_CONTROL0</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22425,7 +22423,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
@@ -22434,7 +22432,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
+  <id>PROC_PCIE_IOP_PCS_CONTROL1</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22446,7 +22444,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
@@ -22455,7 +22453,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22468,7 +22466,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
@@ -22477,7 +22475,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22490,7 +22488,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
@@ -22499,7 +22497,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
+  <id>PROC_PCIE_IOP_TX_BWLOSS1</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22512,7 +22510,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
@@ -22521,7 +22519,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22534,7 +22532,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
@@ -22543,7 +22541,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_PEAK</id>
+  <id>PROC_PCIE_IOP_RX_PEAK</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22556,7 +22554,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
@@ -22565,7 +22563,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_RX_SDL</id>
+  <id>PROC_PCIE_IOP_RX_SDL</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22578,7 +22576,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
@@ -22587,7 +22585,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
+  <id>PROC_PCIE_IOP_ZCAL_CONTROL</id><!-- @deprecated -->
   <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22598,7 +22596,7 @@ Measured in GB</description>
   <simpleType>
       <uint32_t></uint32_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
@@ -22607,7 +22605,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN1</id>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN1</id><!-- @deprecated -->
     <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22619,7 +22617,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN1</id>
@@ -22628,7 +22626,7 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-  <id>PROC_PCIE_IOP_TX_FFE_GEN2</id>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN2</id><!-- @deprecated -->
     <description>
       creator: platform (MRW)
       consumer: p9_pcie_scominit
@@ -22640,7 +22638,7 @@ Measured in GB</description>
       <uint32_t></uint32_t>
       <array>16</array>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <hwpfToHbAttrMap>
       <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN2</id>

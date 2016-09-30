@@ -970,26 +970,20 @@
 
     <attribute><id>ECID</id></attribute>
     <attribute><id>I2C_SLAVE_ADDRESS</id></attribute>
-    <attribute><id>PROC_PCIE_NUM_PHB</id></attribute>
-    <attribute><id>PROC_PCIE_NUM_IOP</id></attribute>
-    <attribute><id>PROC_PCIE_NUM_LANES</id></attribute>
-    <attribute><id>PROC_DCM_INSTALLED</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL0</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL1</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_PEAK</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_SDL</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_BWLOSS1</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
-    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_PHB</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_IOP</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_NUM_LANES</id>
+        <default>24</default>
+    </attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
+    <attribute><id>PROC_DCM_INSTALLED</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
     <attribute><id>PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
     <attribute><id>STOPGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
@@ -1251,7 +1245,7 @@
     <attribute><id>PROC_PERV_BNDY_PLL_DATA</id></attribute>
     <attribute><id>DEVICE_ID</id></attribute>
     <attribute><id>TOD_CPU_DATA</id></attribute>
-</targetType>
+</targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->
 <targetType>
@@ -1261,23 +1255,7 @@
         <id>MODEL</id>
         <default>NIMBUS</default>
     </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_PHB</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_IOP</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
-        <default>0xE0</default>
-    </attribute>
-</targetType>
+</targetType><!-- chip-processor-nimbus -->
 
 <!-- chip-processor-cumulus -->
 <targetType>
@@ -1286,22 +1264,6 @@
     <attribute>
         <id>MODEL</id>
         <default>CUMULUS</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_PHB</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_IOP</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
-        <default>0xE0</default>
     </attribute>
 </targetType>
 
@@ -1966,10 +1928,6 @@
         <id>TYPE</id>
         <default>PEC</default>
     </attribute>
-    <attribute>
-        <id>PROC_PCIE_REFCLOCK_ENABLE</id>
-        <default>0xE0</default>
-    </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
@@ -1993,8 +1951,10 @@
     <attribute><id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id></attribute>
     <attribute><id>PROC_PCIE_PCS_SYSTEM_CNTL</id></attribute>
     <attribute><id>PROC_PCIE_PCS_M_CNTL</id></attribute>
-
     <attribute><id>PROC_PCIE_IOP_SWAP</id></attribute>
+
+    <!-- @deprecated - Remove when EKB is updated -->
+    <attribute><id>PROC_PCIE_REFCLOCK_ENABLE</id></attribute>
     <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id></attribute>
     <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id></attribute>
     <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id></attribute>
@@ -2011,8 +1971,10 @@
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1</id></attribute>
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
+    <!-- end @deprecated -->
+
     <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
-</targetType>
+</targetType><!-- unit-pec-power9 -->
 
 <!-- PHB
      Nimbus : 6 per PEC (total of 18 per chip)
@@ -2042,7 +2004,7 @@
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id></attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id></attribute>
 
-</targetType>
+</targetType><!-- unit-phb-power9 -->
 
 <targetType>
     <id>unit-phb-nimbus</id>
