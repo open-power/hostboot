@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -82,8 +84,14 @@ void FakeCommandMonitor::threadMain(StateMachine & i_sm)
                 else
                 {
                     monitorsTimedout.push_back(it->first);
+                    MDIA_FAST( "Monitor timed out, ID: %d. Number of monitors "
+                               "currently timed out: %d. ", it->first,
+                               monitorsTimedout.size() );
+
                     //remove the monitor
                     iv_monitors.erase(it++);
+                    MDIA_FAST( "Number of monitors left in iv_monitors: %d",
+                               iv_monitors.size() );
                 }
             }
         }
