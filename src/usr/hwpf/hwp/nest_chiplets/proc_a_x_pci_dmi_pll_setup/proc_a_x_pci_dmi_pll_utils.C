@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.9 2015/08/14 16:31:17 thi Exp $
+// $Id: proc_a_x_pci_dmi_pll_utils.C,v 1.10 2016-10-04 19:53:36 dcrowell Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -835,7 +835,7 @@ fapi::ReturnCode p8_pll_utils_scan_bndy_sbe(
 
         // submit request to SBE
         FAPI_DBG("Submitting scan request to SBE");
-        rc = fapiPutScom(i_target, MBOX_SCRATCH_REG0_0x00050038, mbox_data);
+        rc = fapiPutCfamRegister(i_target, MBOX_SCRATCH_REG0_0x00002838, mbox_data);
         if (!rc.ok())
         {
             FAPI_ERR("Error writing SBE MBOX0 Register");
