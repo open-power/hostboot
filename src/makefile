@@ -220,7 +220,7 @@ TESTCASE_MODULES += testpirformat
 TESTCASE_MODULES += testerrl
 TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
-#TESTCASE_MODULES += testsyslib   @TODO-RTC:151185-Turn this back on
+TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testscom
 
 #Requires main store memory @TODO RTC: 132577

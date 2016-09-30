@@ -29,6 +29,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <array>
 #include <algorithm>
 #include <iterator>
 #include <functional>
@@ -480,6 +481,14 @@ class STLTest : public CxxTest::TestSuite
             // Code wont compile if this doesn't work
             std::vector< std::vector<int> > v = { {},{1},{1,2,3} };
             std::list< std::list<int> > l = { {},{1},{1,2,3} };
+            std::array<int, 5> a1 { {1,2,3,4,5} };
+            std::array<int, 5> a2 = {1,2,3,4,5};
+            // Compiler warns that std::arrays are unused, so compare their
+            // sizes
+            if (a1.size() != a2.size())
+            {
+                TS_FAIL("testInitListCompile(): std::array sizes do not match");
+            }
         }
 
         void testEmplace()
@@ -554,6 +563,180 @@ class STLTest : public CxxTest::TestSuite
             if (mi.emplace(5,100).second)
             {
                 TS_FAIL("Emplace did an insert of an already existing key");
+            }
+        }
+
+        void testCstyleArraySwap()
+        {
+            size_t m[5] = {1,2,3,4,5};
+            size_t n[5] = {6,7,8,9,10};
+            std::swap(m,n);
+            for (size_t i = 0; i < 5; ++i)
+            {
+                if( m[i] != i+6 || n[i] != i+1)
+                {
+                    TS_FAIL("testCstyleArraySwap: swap failed");
+                }
+            }
+        }
+
+        /**
+         * Modifies each index of std::array to be (i_curVal + i_inc*i)
+         * @param[in] container to update
+         * @param[in] value to start setting container to [default 1]
+         * @param[in] increment amount [default 1]
+         */
+        template <class T, size_t N>
+        void sequentialArrayReset(std::array<T, N> &i_arr,
+                                  int i_curVal = 1, int i_inc = 1)
+        {
+            for (size_t i = 0; i < i_arr.size(); ++i)
+            {
+                i_arr.at(i) = i_curVal;
+                i_curVal += i_inc;
+            }
+        }
+
+        void testArray ()
+        {
+            const size_t N = 5;
+
+            // Arrays to manipulate, swap, and test with
+            std::array<int, N> a { {1,2,3,4,5} };
+            std::array<int, N> b { {1,2,3,4,5} };
+            std::array<int, 0> c;
+            // Const arrays to check if a and b were manipulated correctly
+            const std::array<int, 5> d = { {1,2,3,4,5} };
+            const std::array<int, 5> e = { {6,7,8,9,10} };
+
+            // Test empty operator
+            if (a.empty())
+            {
+                TS_FAIL("testArray(): std::array did not initialize properly size = 0");
+            }
+            // Test size operator
+            if (a.size() != N)
+            {
+                TS_FAIL("testArray(): std::array.size() failed");
+            }
+            // Test max size operator
+            if (a.max_size() != N)
+            {
+                TS_FAIL("testArray(): std::array.max_size() failed");
+            }
+            // Test [] operator
+            if (a[0] != 1
+                || a[1] != 2
+                || a[2] != 3
+                || a[3] != 4
+                || a[4] != 5)
+            {
+                TS_FAIL("testArray(): std::array [] operator failed");
+            }
+            // Test at() operator
+            if (a.at(0) != 1
+                || a.at(1) != 2
+                || a.at(2) != 3
+                || a.at(3) != 4
+                || a.at(4) != 5)
+            {
+                TS_FAIL("testArray(): std::array.at() failed");
+            }
+            // Test front()
+            if (a.front() != 1 || a.front() != a.at(0))
+            {
+                TS_FAIL("testArray(): std::array.front() failed");
+            }
+            // Test back()
+            if (a.back() != 5 || a.back() != a.at(4))
+            {
+                TS_FAIL("testArray(): std::array.back() failed");
+            }
+            // Test data()
+            if (a.data() != &a.elems[0])
+            {
+                TS_FAIL("testArray(): std::array.data() failed");
+            }
+
+            // Test helper functions - Change b to have values 6-10
+            sequentialArrayReset(b, 6);
+            if ( b != e )
+            {
+                 TS_FAIL("testArray(): test helper sequentialArrayReset() failed");
+            }
+
+            // Test Swap
+            std::swap(a,b);
+            if ( a!=e || b!=d )
+            {
+                TS_FAIL("testArray(): swap(std::array,std::array) failed");
+            }
+
+            // Test begin/end iterators and fill()
+            if ( (a.end() - a.begin()) != a.size())
+            {
+                TS_FAIL("testArray(): std::array.begin()/end() not correct");
+            }
+            a.fill(9);
+            for (auto it = a.begin(); it < a.end(); ++it)
+            {
+                if(*it != 9)
+                {
+                    TS_FAIL("testArray(): std::array.fill() failed");
+                }
+            }
+
+            // Test overload operators
+            if (a <= b )
+            {
+                TS_FAIL("testArray(): std::array overload <= failed");
+            }
+            if (b > a )
+            {
+                TS_FAIL("testArray(): std::array overload > failed");
+            }
+            b.fill(9);
+            if ( a != b )
+            {
+                TS_FAIL("testArray(): std::array overload != failed");
+            }
+
+            // Test 0 size array
+            if (c.begin() != c.end())
+            {
+                TS_FAIL("testArray(): 0 sized std::array bad begin()/end() ptrs");
+            }
+            if (!c.empty())
+            {
+                TS_FAIL("testArray(): 0 sized std::array not empty");
+            }
+
+            // Test get functions
+            // Force a to not match then ensure std::get works to modify correctly
+            sequentialArrayReset(a, 6);
+            if (a != e)
+            {
+                TS_FAIL("testArray(): test std::get() helper sequentialArrayReset(a,6) failed");
+            }
+            std::get<0>(a) = 1;
+            std::get<1>(a) = 2;
+            std::get<2>(a) = 3;
+            std::get<3>(a) = 4;
+            std::get<4>(a) = 5;
+            // Force b to match then ensure std::get works to modify correctly
+            sequentialArrayReset(b);
+            if (b != d)
+            {
+                TS_FAIL("testArray(): test std::get() helper sequentialArrayReset(b) failed");
+            }
+            std::get<0>(b) = 6;
+            std::get<1>(b) = 7;
+            std::get<2>(b) = 8;
+            std::get<3>(b) = 9;
+            std::get<4>(b) = 10;
+            if ( a != d || b != e )
+            {
+                TS_FAIL("testArray(): arrays not equal after using std::get to set arrays to be equal");
             }
         }
 
