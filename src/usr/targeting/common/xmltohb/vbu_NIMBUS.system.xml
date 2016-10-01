@@ -5161,7 +5161,7 @@
         <default>0x0</default>
     </attribute>
     <attribute>
-        <id>PM_APSS_CHIP_SELECT</id>
+        <id>APSS_CHIP_SELECT</id>
         <default>0xff</default>
     </attribute>
     <attribute>
@@ -5169,11 +5169,11 @@
         <default>0x0</default>
     </attribute>
     <attribute>
-        <id>PM_PBAX_CHIPID</id>
+        <id>PBAX_CHIPID</id>
         <default>0x1</default>
     </attribute>
     <attribute>
-        <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+        <id>PBAX_BRDCST_ID_VECTOR</id>
         <default>0x0</default>
     </attribute>
     <attribute>

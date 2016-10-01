@@ -155,12 +155,12 @@
     <attribute><id>PM_UNDERVOLTING_FRQ_MINIMUM</id></attribute>
     <attribute><id>PM_UNDERVOLTING_FREQ_MAXIMUM</id></attribute>
     <attribute><id>PM_SPIVID_PORT_ENABLE</id></attribute>
+    <!-- remove duplicate when fixed in HWP -->
+    <attribute><id>APSS_CHIP_SELECT</id></attribute>
     <attribute><id>PM_APSS_CHIP_SELECT</id></attribute>
     <attribute><id>PM_PBAX_NODEID</id></attribute>
     <attribute><id>PBAX_GROUPID</id></attribute>
-    <attribute><id>PM_PBAX_CHIPID</id></attribute>
     <attribute><id>PBAX_CHIPID</id></attribute>
-    <attribute><id>PM_PBAX_BRDCST_ID_VECTOR</id></attribute>
     <attribute><id>PBAX_BRDCST_ID_VECTOR</id></attribute>
     <attribute><id>PM_SLEEP_ENTRY</id></attribute>
     <attribute><id>PM_SLEEP_EXIT</id></attribute>
@@ -283,6 +283,17 @@
     <attribute><id>PROC_R_LOADLINE_VCS_UOHM</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS_UOHM</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS_UV</id></attribute>
+<!-- Remove when fixed in hwsv -->
+    <attribute><id>PROC_R_LOADLINE_VDD</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDD</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDD</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VDN</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VDN</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VDN</id></attribute>
+    <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
+    <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
+    <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
+<!-- End remove -->
     <attribute><id>ICACHE_LINE_SIZE</id></attribute>
     <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
     <attribute><id>ICACHE_SIZE</id></attribute>
@@ -627,8 +638,8 @@
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id></attribute>
     <attribute><id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id></attribute>
     <attribute><id>MSS_MRW_THERMAL_MEMORY_POWER_LIMIT</id></attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
-    <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPSIZE</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPDELAY</id></attribute>
     <attribute><id>PM_SPIVID_FREQUENCY</id></attribute>
     <attribute><id>PM_SAFE_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id></attribute>
@@ -636,7 +647,7 @@
     <attribute><id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id></attribute>
     <attribute><id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id></attribute>
-    <attribute><id>PM_SPIPSS_FREQUENCY</id></attribute>
+    <attribute><id>SPIPSS_FREQUENCY</id></attribute>
     <attribute><id>MEM_MIRROR_PLACEMENT_POLICY</id></attribute>
     <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id></attribute>
     <attribute><id>MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id></attribute>
@@ -648,7 +659,7 @@
     <attribute><id>MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
     <attribute><id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
     <attribute><id>MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
-    <attribute><id>PM_SYSTEM_IVRMS_ENABLED</id></attribute>
+    <attribute><id>SYSTEM_IVRMS_ENABLED</id></attribute>
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
     <attribute><id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id></attribute>
     <attribute><id>MNFG_DMI_MIN_EYE_WIDTH</id></attribute>
@@ -846,8 +857,6 @@
     <attribute><id>FSP_BAR_SIZE</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id></attribute>
-    <attribute><id>SYSTEM_IVRMS_ENABLED</id></attribute>
-    <attribute><id>SPIPSS_FREQUENCY</id></attribute>
     <attribute><id>STOP11_DISABLE</id></attribute>
     <attribute><id>SYSTEM_RESCLK_STEP_DELAY</id></attribute>
     <attribute><id>DPLL_DROOP_PROTECT_ENABLE</id></attribute>
@@ -855,10 +864,7 @@
     <attribute><id>DPLL_DYNAMIC_FMAX_ENABLE</id></attribute>
     <attribute><id>DPLL_VDM_RESPONSE</id></attribute>
     <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
-    <attribute><id>EXTERNAL_VRM_STEPDELAY</id></attribute>
     <attribute><id>SYSTEM_WOF_ENABLED</id></attribute>
-    <attribute><id>EXTERNAL_VRM_STEPSIZE</id></attribute>
-    <attribute><id>VCS_I2C_BUSNUM</id></attribute>
     <attribute><id>AVSBUS_FREQUENCY</id></attribute>
     <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
     <attribute><id>VDM_ENABLE</id></attribute>
@@ -1026,6 +1032,9 @@
     <attribute><id>SCRATCH7_VALID</id></attribute>
     <attribute><id>OCC_LFIR</id></attribute>
     <attribute><id>PBA_LFIR</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPSIZE</id></attribute>
+    <attribute><id>EXTERNAL_VRM_STEPDELAY</id></attribute>
+    <attribute><id>AVSBUS_FREQUENCY</id></attribute>
     <!-- proc_fbc_eff_config_links -->
     <attribute><id>PROC_FABRIC_X_ATTACHED_LINK_ID</id></attribute>
     <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
@@ -1227,7 +1236,6 @@
     <attribute><id>WAIT_N1</id></attribute>
     <attribute><id>WAIT_N0</id></attribute>
     <attribute><id>START_SEEPROM_ADDR</id></attribute>
-    <attribute><id>APSS_CHIP_SELECT</id></attribute>
     <attribute><id>MASTER_CORE</id></attribute>
     <attribute><id>MASTER_EX</id></attribute>
     <attribute><id>CHIP_REGIONS_TO_ENABLE</id></attribute>

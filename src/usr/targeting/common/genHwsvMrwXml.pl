@@ -227,8 +227,8 @@ my $mruAttr = parse_xml_file($mru_ids_file);
 my $system_policy_file = open_mrw_file($mrwdir, "${sysname}-system-policy.xml");
 my $sysPolicy = parse_xml_file($system_policy_file,
         forcearray=>['proc_r_loadline_vdd','proc_r_distloss_vdd',
-        'proc_vrm_voffset_vdd','proc_r_loadline_vcs','proc_r_distloss_vcs',
-        'proc_vrm_voffset_vcs']);
+        'proc_vrm_voffset_vdd','proc_r_loadline_vcs',
+        'proc_r_distloss_vcs','proc_vrm_voffset_vcs']);
 
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
@@ -265,8 +265,8 @@ push @systemAttr,
     "DMI_EREPAIR_THRESHOLD_MNFG", $reqPol->{'dmi-erepair-threshold-mnfg'},
     "MSS_MRW_THERMAL_MEMORY_POWER_LIMIT", $reqPol->{'thermal_memory_power_limit'},
     "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
-    "PM_EXTERNAL_VRM_STEPSIZE", $reqPol->{'pm_external_vrm_stepsize'},
-    "PM_EXTERNAL_VRM_STEPDELAY", $reqPol->{'pm_external_vrm_stepdelay'},
+    "EXTERNAL_VRM_STEPSIZE", $reqPol->{'pm_external_vrm_stepsize'},
+    "EXTERNAL_VRM_STEPDELAY", $reqPol->{'pm_external_vrm_stepdelay'},
     "PM_SPIVID_FREQUENCY", $reqPol->{'pm_spivid_frequency'}->{content},
     "PM_SAFE_FREQUENCY", $reqPol->{'pm_safe_frequency'}->{content},
     "PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY",
@@ -280,7 +280,7 @@ push @systemAttr,
         $reqPol->{'pm_resonant_clock_high_band_lower_frequency'}->{content},
     "PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY",
         $reqPol->{'pm_resonant_clock_high_band_upper_frequency'}->{content},
-    "PM_SPIPSS_FREQUENCY", $reqPol->{'pm_spipss_frequency'}->{content},
+    "SPIPSS_FREQUENCY", $reqPol->{'pm_spipss_frequency'}->{content},
     "MEM_MIRROR_PLACEMENT_POLICY", $placement,
     "MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT",
         $reqPol->{'dimm_power_curve_percent_uplift'},
@@ -292,7 +292,7 @@ push @systemAttr,
         $reqPol->{'max_dram_databus_util'},
     "MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR",
         $reqPol->{'max_number_dimms_possible_per_vmem_regulator'},
-    "PM_SYSTEM_IVRMS_ENABLED", $reqPol->{'pm_system_ivrms_enabled'},
+    "SYSTEM_IVRMS_ENABLED", $reqPol->{'pm_system_ivrms_enabled'},
     "PM_SYSTEM_IVRM_VPD_MIN_LEVEL", $reqPol->{'pm_system_ivrm_vpd_min_level'},
     "MNFG_DMI_MIN_EYE_WIDTH", $reqPol->{'mnfg-dmi-min-eye-width'},
     "MNFG_DMI_MIN_EYE_HEIGHT", $reqPol->{'mnfg-dmi-min-eye-height'},
@@ -425,12 +425,18 @@ for my $domain (keys %domainProgram)
 
 
 my %procLoadline = ();
-$procLoadline{PROC_R_LOADLINE_VDD}{sys}  = $reqPol->{'proc_r_loadline_vdd' }[0];
-$procLoadline{PROC_R_DISTLOSS_VDD}{sys}  = $reqPol->{'proc_r_distloss_vdd' }[0];
-$procLoadline{PROC_VRM_VOFFSET_VDD}{sys} = $reqPol->{'proc_vrm_voffset_vdd'}[0];
-$procLoadline{PROC_R_LOADLINE_VCS}{sys}  = $reqPol->{'proc_r_loadline_vcs' }[0];
-$procLoadline{PROC_R_DISTLOSS_VCS}{sys}  = $reqPol->{'proc_r_distloss_vcs' }[0];
-$procLoadline{PROC_VRM_VOFFSET_VCS}{sys} = $reqPol->{'proc_vrm_voffset_vcs'}[0];
+$procLoadline{PROC_R_LOADLINE_VDD_UOHM}{sys}
+    = $reqPol->{'proc_r_loadline_vdd' }[0];
+$procLoadline{PROC_R_DISTLOSS_VDD_UOHM}{sys}
+    = $reqPol->{'proc_r_distloss_vdd' }[0];
+$procLoadline{PROC_VRM_VOFFSET_VDD_UV}{sys}
+    = $reqPol->{'proc_vrm_voffset_vdd'}[0];
+$procLoadline{PROC_R_LOADLINE_VCS_UOHM}{sys}
+    = $reqPol->{'proc_r_loadline_vcs' }[0];
+$procLoadline{PROC_R_DISTLOSS_VCS_UOHM}{sys}
+    = $reqPol->{'proc_r_distloss_vcs' }[0];
+$procLoadline{PROC_VRM_VOFFSET_VCS_UV}{sys}
+    = $reqPol->{'proc_vrm_voffset_vcs'}[0];
 
 #Save avsbus data to add to proc target type later
 our %voltageRails = (
@@ -579,9 +585,22 @@ my $pmSettings = parse_xml_file($pm_settings_file,
                        forcearray=>['processor-settings']);
 
 my @pmChipAttr; # Repeated [NODE, POS, ATTR, VAL, ATTR, VAL, ATTR, VAL...]
+my $pbaxAttr;
+my $pbaxId;
 
 foreach my $i (@{$pmSettings->{'processor-settings'}})
 {
+    if(exists $i->{pm_pbax_groupid})
+    {
+        $pbaxAttr = "PBAX_GROUPID";
+        $pbaxId = $i->{pm_pbax_groupid};
+    }
+    else
+    {
+        $pbaxAttr = "PBAX_GROUPID";
+        $pbaxId = $i->{pm_pbax_nodeid};
+    }
+
     push @pmChipAttr,
     [
         $i->{target}->{node}, $i->{target}->{position},
@@ -590,17 +609,17 @@ foreach my $i (@{$pmSettings->{'processor-settings'}})
         "PM_UNDERVOLTING_FREQ_MAXIMUM",
             $i->{pm_undervolting_frq_maximum}->{content},
         "PM_SPIVID_PORT_ENABLE", $i->{pm_spivid_port_enable},
-        "PM_APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
-        "PM_PBAX_NODEID", $i->{pm_pbax_nodeid},
-        "PM_PBAX_CHIPID", $i->{pm_pbax_chipid},
-        "PM_PBAX_BRDCST_ID_VECTOR", $i->{pm_pbax_brdcst_id_vector},
+        "APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
+        $pbaxAttr, $pbaxId,
+        "PBAX_CHIPID", $i->{pm_pbax_chipid},
+        "PBAX_BRDCST_ID_VECTOR", $i->{pm_pbax_brdcst_id_vector},
         "PM_SLEEP_ENTRY", $i->{pm_sleep_entry},
         "PM_SLEEP_EXIT", $i->{pm_sleep_exit},
         "PM_SLEEP_TYPE", $i->{pm_sleep_type},
         "PM_WINKLE_ENTRY", $i->{pm_winkle_entry},
         "PM_WINKLE_EXIT", $i->{pm_winkle_exit},
-        "PM_WINKLE_TYPE", $i->{pm_winkle_type},
-    ]
+        "PM_WINKLE_TYPE", $i->{pm_winkle_type}
+    ];
 }
 
 my @SortedPmChipAttr = sort byNodePos @pmChipAttr;
@@ -3905,6 +3924,8 @@ sub generate_proc
         }
         print "    </attribute>\n";
         print "    <attribute>\n";
+        # Remove duplicate when fixed in HWP
+        print "        <id>APSS_CHIP_SELECT</id>\n";
         print "        <id>PM_APSS_CHIP_SELECT</id>\n";
         if( $proc % 2 == 0 ) # proc0 of DCM
         {
@@ -3920,11 +3941,11 @@ sub generate_proc
         print "        <default>0</default>\n";
         print "    </attribute>\n";
         print "    <attribute>\n";
-        print "        <id>PM_PBAX_CHIPID</id>\n";
+        print "        <id>PBAX_CHIPID</id>\n";
         print "        <default>$logid</default>\n";
         print "    </attribute>\n";
         print "    <attribute>\n";
-        print "        <id>PM_PBAX_BRDCST_ID_VECTOR</id>\n";
+        print "        <id>PBAX_BRDCST_ID_VECTOR</id>\n";
         print "        <default>$lognode</default>\n";
         print "    </attribute>\n";
         print "    <attribute>\n";
@@ -4006,7 +4027,7 @@ sub generate_proc
         if(index($attr, "VRM_VOFFSET" ) != -1)
         {
             print "    <attribute>\n";
-            print "        <id>".$attr."_UV</id>\n";
+            print "        <id>".$attr."</id>\n";
             print "        <default>$val</default>\n";
             print "    </attribute>\n";
         }
@@ -4014,7 +4035,7 @@ sub generate_proc
         else
         {
             print "    <attribute>\n";
-            print "        <id>".$attr."_UOHM</id>\n";
+            print "        <id>".$attr."</id>\n";
             print "        <default>$val</default>\n";
             print "    </attribute>\n";
         }
