@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -219,6 +219,7 @@ my $resident_modules = {
     "libipmi.so"           => '1',
     "libvpd.so"            => '1',
     "libsecureboot_trusted.so" => '1',
+    "libsecureboot_base.so" => '1',
 };
 
 # has with library to istep list file were the DepMod array is kept

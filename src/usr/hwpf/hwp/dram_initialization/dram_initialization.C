@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+#include    <config.h>
 #include    <stdint.h>
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -84,6 +85,10 @@
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     #include    <occ/occ_common.H>
+#endif
+
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
 #endif
 
 namespace   DRAM_INITIALIZATION
@@ -892,6 +897,99 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
         }
     }
 
+    #ifdef CONFIG_SECUREBOOT
+    // Enable membuf protections to prevent future clock starts if
+    // security enabled
+    if(!l_errl && SECUREBOOT::enabled())
+    {
+        uint64_t scomData = 0;
+        size_t size = sizeof(scomData);
+        const size_t expSize = size;
+        const uint64_t SYNC_CONFIG_CHIP_PROTECTION_ENABLE_BIT =
+            0x0002000000000000ull;
+        const uint64_t CENT_TP_SYNC_CONFIG_REG_0x01030000   = 0x01030000;
+        const uint64_t CENT_NEST_SYNC_CONFIG_REG_0x02030000 = 0x02030000;
+        const uint64_t CENT_MEM_SYNC_CONFIG_REG_0x03030000  = 0x03030000;
+
+        const uint64_t centSyncConfigReg[] =
+        {
+            CENT_TP_SYNC_CONFIG_REG_0x01030000,
+            CENT_NEST_SYNC_CONFIG_REG_0x02030000,
+            CENT_MEM_SYNC_CONFIG_REG_0x03030000
+        };
+
+        TARGETING::TargetHandleList membufList;
+        getAllChips(membufList, TYPE_MEMBUF, true);
+
+        for (  TargetHandleList::const_iterator pMembuf
+             = membufList.begin();
+             pMembuf != membufList.end();
+             ++pMembuf)
+        {
+            for(size_t i=0;
+                i<sizeof(centSyncConfigReg)/sizeof(centSyncConfigReg[0]);
+                ++i)
+            {
+                uint64_t scomAddr = centSyncConfigReg[i];
+                scomData = 0;
+
+                l_errl = DeviceFW::deviceRead(
+                    *pMembuf,
+                    &scomData,
+                    size,
+                    DEVICE_SCOM_ADDRESS(scomAddr));
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK "Failed to read 0x%08X SCOM register for "
+                        "target 0x%08X. Cannot enable chip protection.",
+                        scomAddr,
+                        TARGETING::get_huid(*pMembuf));
+                    break;
+                }
+
+                assert(size == expSize,
+                    "SCOM deviceRead returned size of %d, expected %d",
+                    size,expSize);
+
+                scomData |= SYNC_CONFIG_CHIP_PROTECTION_ENABLE_BIT;
+
+                l_errl = DeviceFW::deviceWrite(
+                    *pMembuf,
+                    &scomData,
+                    size,
+                    DEVICE_SCOM_ADDRESS(scomAddr));
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK "Failed to write 0x%08X SCOM register for "
+                        "target 0x%08X.  Cannot enable chip protection.",
+                        scomAddr,
+                        TARGETING::get_huid(*pMembuf));
+                    break;
+                }
+
+                assert(size == expSize,
+                    "SCOM deviceWrite returned size of %d, expected %d",
+                    size,expSize);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK "SECUREBOOT: Enabled Centaur chip protection "
+                    "for target 0x%08X, register 0x%08X "
+                    "(set to 0x%016llX)",
+                    TARGETING::get_huid(*pMembuf),
+                    scomAddr,
+                    scomData);
+            }
+
+            if(l_errl)
+            {
+                break;
+            }
+        }
+    }
+    #endif
+
     if(!l_errl)
     {
         if(!l_mpipl)
@@ -902,6 +1000,8 @@ void*    call_proc_exit_cache_contained( void    *io_pArgs )
 
             l_sys->setAttr<ATTR_PAYLOAD_BASE>(payloadBase);
         }
+
+
 
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP( l_errl,
