@@ -5333,7 +5333,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 <!-- Support for pm_plat_attributes.xml -->
 
 <attribute>
-    <id>PM_EXTERNAL_VRM_STEPSIZE</id>
+    <id>EXTERNAL_VRM_STEPSIZE</id>
     <description>
       SYSTEM Attribute
       Step size (binary in microvolts) to take upon external VRM voltage
@@ -5351,13 +5351,13 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_PM_EXTERNAL_VRM_STEPSIZE</id>
+        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>PM_EXTERNAL_VRM_STEPDELAY</id>
+    <id>EXTERNAL_VRM_STEPDELAY</id>
     <description>
       SYSTEM Attribute
       Step delay (binary in microseconds) after a voltage change
@@ -5372,7 +5372,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_PM_EXTERNAL_VRM_STEPDELAY</id>
+        <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -5554,48 +5554,6 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 </attribute>
 
 <attribute>
-    <id>PM_SPIPSS_FREQUENCY</id>
-    <description>
-      SYSTEM Attribute
-      SPIPSS Clock Frequency (binary in MHz)
-
-      Valid range: 0.5MHz to 25MHz
-
-      Consumer: proc_pmc_init
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_SPIPSS_FREQUENCY</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>PM_APSS_CHIP_SELECT</id>
-    <description>
-      PROC_CHIP Attribute
-      Defines which of the PSS chip selects that the APSS is connected
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_APSS_CHIP_SELECT</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>PM_PBAX_NODEID</id>
     <description>
       DEPRECATED!!!  Use PBAX_GROUPID instead
@@ -5626,7 +5584,10 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
       Provided by the Machine Readable Workbook.
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -5637,7 +5598,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 </attribute>
 
 <attribute>
-    <id>PM_PBAX_CHIPID</id>
+    <id>PBAX_CHIPID</id>
     <description>
       PROC_CHIP Attribute
       Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within
@@ -5652,13 +5613,13 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_PM_PBAX_CHIPID</id>
+        <id>ATTR_PBAX_CHIPID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>PM_PBAX_BRDCST_ID_VECTOR</id>
+    <id>PBAX_BRDCST_ID_VECTOR</id>
     <description>
       PROC_CHIP Attribute
       Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC
@@ -5674,7 +5635,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_PM_PBAX_BRDCST_ID_VECTOR</id>
+        <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -14953,119 +14914,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!--TODO RTC:160430 Remove these attributes when hwsv updates their xml-->
-
-<attribute>
-    <id>PROC_VRM_VOFFSET_VDD</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_VRM_VOFFSET_VCS</id>
-    <description>
-      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
-      the processor module.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_R_LOADLINE_VDD</id>
-    <description>
-      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-
-      Consumers: p8_build_gpstate_table.C
-
-      Provided by the Machine Readable Workbook (via the power subsystem design
-      per system)
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_R_LOADLINE_VCS</id>
-    <description>
-      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
-      Processor Module pins.  This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_R_DISTLOSS_VDD</id>
-    <description>
-      Impedance (binary in microOhms) of the VDD distribution loss sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PROC_R_DISTLOSS_VCS</id>
-    <description>
-      Impedance (binary in microOhms) of the VCS distribution loss sense point
-      to the circuit. This value is applied to each processor instance.
-
-      Producer:  Machine Readable Workbook (via the power subsystem design per system)
-
-      Consumer: p8_build_gpstate_table.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<!--TODO RTC:160430 END -->
-
 <attribute>
     <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
     <description>
@@ -15503,23 +15351,6 @@ Measured in GB</description>
         <value>0x02</value>
     </enumerator>
 </enumerationType>
-
-<attribute>
-    <id>PM_SYSTEM_IVRMS_ENABLED</id>
-    <description>System control to allow (if all other attribute tests yield true values) or categorically disallow IVRM enablement
-     Producer: MRWB
-     Consumer:  p8_build_pstate_datablock.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_SYSTEM_IVRMS_ENABLED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
 
 <attribute>
     <id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
@@ -19011,6 +18842,7 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<!-- Will eventually be hardcoded -->
 <attribute>
     <id>PFET_POWERUP_DELAY_NS</id>
     <description>
@@ -19019,6 +18851,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint32_t>
     </simpleType>
     <readable/>
@@ -19175,28 +19009,6 @@ Measured in GB</description>
     <readable/>
     <writeable/>
 </attribute>-->
-
-<attribute>
-    <id>EXTERNAL_VRM_STEPSIZE</id>
-    <description>
-      Step delay (binary in microseconds) after a voltage change
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE
-
-      Provided by the Machine Readable Workbook after system characterization.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-</attribute>
 
 <attribute>
     <id>AVSBUS_FREQUENCY</id>
@@ -19373,6 +19185,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -19391,9 +19205,9 @@ Measured in GB</description>
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <simpleType>
         <uint32_t>
@@ -19416,9 +19230,9 @@ Measured in GB</description>
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <simpleType>
         <uint32_t>
@@ -19458,6 +19272,7 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<!-- removed duplicate when fixed in HWP -->
 <attribute>
     <id>APSS_CHIP_SELECT</id>
     <description>
@@ -19472,6 +19287,25 @@ Measured in GB</description>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_APSS_CHIP_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+<attribute>
+    <id>PM_APSS_CHIP_SELECT</id>
+    <description>
+      Defines which of the PSS chip selects (0 or 1) that the APSS is connected
+
+      Provided by the Machine Readable Workbook.
+      Consumer: p8_pss_init
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_APSS_CHIP_SELECT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
     <persistency>non-volatile</persistency>
@@ -19913,6 +19747,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -19938,6 +19774,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0x32</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -19973,6 +19811,7 @@ Measured in GB</description>
     <writeable/>
 </attribute>-->
 
+<!-- Will eventually be hardcoded -->
 <attribute>
     <id>PFET_POWERDOWN_DELAY_NS</id>
     <description>
@@ -19987,6 +19826,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint32_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -19997,6 +19838,7 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<!-- Will eventually be hardcoded -->
 <attribute>
     <id>PFET_VDD_VOFF_SEL</id>
     <description>
@@ -20010,6 +19852,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -20064,6 +19908,7 @@ Measured in GB</description>
     </enumerator>
 </enumerationType>
 
+<!-- Will eventually be hardcoded -->
 <attribute>
     <id>PFET_VCS_VOFF_SEL</id>
     <description>
@@ -20077,6 +19922,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -20141,6 +19988,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -20150,71 +19999,6 @@ Measured in GB</description>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
-
-<attribute>
-    <id>PBAX_CHIPID</id>
-    <description>
-      Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within
-      the PBAX node.  Is matched to pbax_chipid of the Address phase if
-      pbax_type=unicast.
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PBAX_CHIPID</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>PBAX_BRDCST_ID_VECTOR</id>
-    <description>
-      Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC
-      pbax_type=broadcast with the decoded PMISC pbax_chipid value.  If the
-      bit in this vector at the decoded bit location is a 1, then this receive
-      engine will participate in the broadcast operation.
-
-      Provided by the Machine Readable Workbook.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>EXTERNAL_VRM_STEPDELAY</id>
-    <description>
-      Step delay (binary in microseconds) after a voltage change
-
-      Consumer: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE
-
-      Provided by the Machine Readable Workbook after system characterization.
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>non-volatile</persistency>
-    <readable/>
 </attribute>
 
 <attribute>
@@ -20229,6 +20013,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
@@ -20247,9 +20033,9 @@ Measured in GB</description>
       Data (VPD) (typically the PowerSave value) and the minimum allowed for
       correct operation of the fabric bus.
 
-      Producer: Machine Readable Workbook
+      Producer: p9_setup_evid (first pass)
 
-      Consumer: p9_setup_evid
+      Consumer: p9_setup_evid (second pass)
     </description>
     <simpleType>
         <uint32_t>
@@ -22832,9 +22618,11 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_DUMP_STOP_INFO_SUPPRESS_ERROR_TRACE</id>
@@ -22849,9 +22637,11 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>1</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_DUMP_STOP_INFO_ENABLE_ERRORLOG</id>
@@ -29541,6 +29331,8 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
         </uint8_t>
     </simpleType>
     <readable/>
@@ -29564,6 +29356,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
+<!-- TODO RTC:162011 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
@@ -29584,6 +29377,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
+<!-- TODO RTC:162011 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
@@ -29606,6 +29400,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
+<!-- TODO RTC:162011 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
@@ -29627,6 +29422,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
+<!-- TODO RTC:162011 VPD -->
     <persistency>volatile-zeroed</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_VDM_RESPONSE</id>
@@ -30410,7 +30206,10 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -30433,7 +30232,10 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0x28</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -30456,7 +30258,10 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -30540,6 +30345,269 @@ Measured in GB</description>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<!-- RTC:162051 Remove when fixed in hwsv  -->
+<attribute>
+    <id>PROC_R_LOADLINE_VDD</id>
+    <description>
+
+      Impedance (binary microOhms) of the load
+      line from a processor VDD VRM to the
+      Processor Module pins.  This value is
+      applied to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDD</id>
+    <description>
+
+      Impedance (binary in microOhms) of the
+      VDD distribution loss sense point
+      to the circuit. This value is applied
+      to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDD</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to
+      apply to the VDD VRM distribution
+      to the processor module.  This value is
+      applied to each processor instance.
+
+      Note:  no loadline may be present in the
+      system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VDN</id>
+    <description>
+
+      Impedance (binary microOhms) of the load
+      line from a processor VDN VRM to
+      the Processor Module pins.  This value is
+      applied to each processor
+      instance.
+
+      Note:  no loadline may be present in
+      the system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDN</id>
+    <description>
+
+      Impedance (binary in microOhms) of the VDN
+      distribution loss sense point
+      to the circuit. This value is applied to
+      each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0x28</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDN</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to apply
+      to the VDN VRM distribution
+      to the processor module.  This value is applied
+      to each processor instance.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_LOADLINE_VCS</id>
+    <description>
+
+      Impedance (binary microOhms) of the load
+      line from a processor VCS VRM to
+      the Processor Module pins.  This value is
+      applied to each processor
+      instance.
+
+      Note:  no loadline may be present in the
+      system; thus, a value of 0 is
+      legal.
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+
+      Consumers: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VCS</id>
+    <description>
+
+      Impedance (binary in microOhms) of the
+      VCS distribution loss sense point
+      to the circuit. This value is applied
+      to each processor instance.
+
+      Producer:  Machine Readable Workbook
+      (via the power subsystem design per
+      system)
+
+      Consumer: p9_pstate_parameter_block
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VCS</id>
+    <description>
+
+      Offset voltage (binary in microvolts) to apply
+      to the VCS VRM distribution
+      to the processor module.  This value is applied
+      to each processor instance.
+
+      Producer:  Machine Readable Workbook
+      (via the power subsystem design per
+      system)
+
+      Consumer: FSP
+
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<!-- End RTC:162051 remove -->
 
 <attribute>
     <id>FREQ_BIAS_ULTRATURBO</id>
@@ -31097,7 +31165,10 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0x32</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -31115,7 +31186,10 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint32_t>
+<!-- TODO RTC:161900 Temporary default -->
+            <default>0</default>
+        </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
