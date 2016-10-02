@@ -630,5 +630,28 @@
   <platInit/>
 </attribute>
 
+<attribute>
+  <id>ATTR_CP_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Defines system specific value of processor refclock receiver termination
+  </description>
+  <enum>NONE = 0, FIFTY_OHM = 1</enum>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IO_REFCLOCK_RCVR_TERM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+      Defines system specific value of PCI refclock receiver termination
+  </description>
+  <enum>NONE = 0, FIFTY_OHM = 1, ONE_HUNDRED_OHM = 3</enum>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
 
 </attributes>

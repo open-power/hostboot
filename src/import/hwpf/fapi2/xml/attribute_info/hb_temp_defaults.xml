@@ -82,6 +82,15 @@
           <id>ATTR_SBE_SYS_CONFIG</id>
      </attribute>
 
+     <attribute>
+          <id>ATTR_CP_REFCLOCK_RCVR_TERM</id>
+          <default>0</default>
+     </attribute>
+     <attribute>
+          <id>ATTR_IO_REFCLOCK_RCVR_TERM</id>
+          <default>0</default>
+     </attribute>
+
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
