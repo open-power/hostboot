@@ -278,13 +278,13 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_APSS_CHIP_SELECT</id>
+    <id>ATTR_PM_APSS_CHIP_SELECT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Defines which of the PSS chip selects (0 or 1) that the APSS is connected
 
       Provided by the Machine Readable Workbook.
-      Consumer: p8_pss_init
+      Consumer: p9_pm_pss_init
     </description>
     <valueType>uint8</valueType>
     <enum>NONE = 0xFF, CS0 = 0x00, CS1 = 0x01</enum>
