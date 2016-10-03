@@ -1018,7 +1018,6 @@
     <attribute><id>SBE_FFDC_ENABLE</id></attribute>
     <attribute><id>SBE_INTERNAL_FFDC_ENABLE</id></attribute>
     <attribute><id>BOOT_FREQUENCY_VALID</id></attribute>
-    <attribute><id>BOOT_FREQ_MULT</id></attribute>
     <attribute><id>HWP_CONTROL_FLAGS_VALID</id></attribute>
     <attribute><id>CHIP_SELECTION_VALID</id></attribute>
     <attribute><id>CHIP_SELECTION</id></attribute>
@@ -2138,7 +2137,6 @@
         <default>PERV</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
-    <attribute><id>PG</id></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PG</id><default>5</default></attribute>
     <attribute><id>TARGET_HAS_POWER</id></attribute>
