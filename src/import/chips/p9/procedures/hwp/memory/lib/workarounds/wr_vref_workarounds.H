@@ -52,9 +52,15 @@ namespace wr_vref
 ///
 /// @brief Executes WR VREF workarounds
 /// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to execute the override on
+/// @param[out] o_vrefdq_train_range - training range value
+/// @param[out] o_vrefdq_train_value - training value value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                           const uint64_t& i_rp,
+                           uint8_t& o_vrefdq_train_range,
+                           uint8_t& o_vrefdq_train_value );
 
 } // close namespace wr_vref
 } // close namespace workarounds

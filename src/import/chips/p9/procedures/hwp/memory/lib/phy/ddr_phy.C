@@ -48,6 +48,7 @@
 #include <lib/phy/seq.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
 
 #include <lib/utils/bit_count.H>
 #include <lib/utils/find.H>
@@ -865,8 +866,10 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     {
         static const std::vector<uint64_t> l_vref_regs =
         {
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0, MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1,
-            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2, MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3,
             MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4
         };
 
@@ -875,13 +878,31 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
             l_vref_config.setBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
         }
 
-        if (i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
+        // loops through all RP's running workarounds and latching the VREF's as need be
+        for(const auto& l_rp : i_rank_pairs)
         {
-            l_vref_config.clearBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+            // Overrides will be set by mss::workarounds::wr_vref::execute.
+            // If the execute code is skipped, then it will read from the attributes
+            uint8_t l_vrefdq_train_range_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
+            uint8_t l_vrefdq_train_value_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
 
-            // Runs WR VREF workarounds if needed
-            // it will check and see if it needs to run, if not it will return success
-            FAPI_TRY( mss::workarounds::wr_vref::execute(i_target) );
+            // Runs the workaround
+            if (i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
+            {
+                l_vref_config.clearBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+
+                // Runs WR VREF workarounds if needed
+                // it will check and see if it needs to run, if not it will return success - needs 0th rankpair to hit
+
+                FAPI_TRY( mss::workarounds::wr_vref::execute(i_target, l_rp, l_vrefdq_train_range_override,
+                          l_vrefdq_train_value_override) );
+            }
+
+            // Latches the VREF's
+            FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair( i_target,
+                      l_rp,
+                      l_vrefdq_train_range_override,
+                      l_vrefdq_train_value_override ) );
         }
 
         FAPI_INF("wr_vref_config: 0x%016lu", l_vref_config);
