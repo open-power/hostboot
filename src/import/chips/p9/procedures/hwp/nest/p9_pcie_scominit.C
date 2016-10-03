@@ -95,6 +95,7 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     uint8_t l_attr_proc_pcie_iop_config = 0;
     uint8_t l_attr_proc_pcie_iop_swap = 0;
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
+    uint8_t l_attr_proc_pcie_refclock_enable = 0;
     fapi2::buffer<uint64_t> l_buf = 0;
     unsigned char l_pec_id = 0;
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>();
@@ -156,8 +157,10 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
 
         // Phase1 init step 3b (enable clock)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_REFCLOCK_ENABLE, l_pec_chiplets, l_attr_proc_pcie_refclock_enable));
+        FAPI_DBG("l_attr_proc_pcie_refclock_enable: %#x", l_attr_proc_pcie_refclock_enable);
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_CPLT_CTRL0_TC_REFCLK_DRVR_EN_DC, 1));
+        FAPI_TRY(l_buf.insertFromRight(l_attr_proc_pcie_refclock_enable, PEC_IOP_REFCLOCK_ENABLE_START_BIT, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CTRL0_OR, l_buf));
 
