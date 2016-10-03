@@ -31,7 +31,6 @@ WRAPPER=p9_mss_ut
 OBJS += $(patsubst %.C,%.o,$(MSS_UT_SOURCE))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CATCH_UNIT_TESTS_INCLUDES))
-$(call ADD_EXE_INCDIR,$(WRAPPER),$(SQLITE3_INCLUDE_DIR))
 
 $(WRAPPER)_DEPLIBS+=mss
 $(WRAPPER)_DEPLIBS+=p9_mss_ddr_phy_reset
@@ -50,5 +49,5 @@ $(WRAPPER)_DEPLIBS+=p9_mss_thermal_init
 
 $(WRAPPER)_COMMONFLAGS+=-fno-var-tracking-assignments
 
-$(WRAPPER)_LDFLAGS+= -Wl,-rpath=$(SQLITE3_LIB_DIR) -L$(SQLITE3_LIB_DIR) -lsqlite3 -lrt
+$(WRAPPER)_LDFLAGS+= -Wl,-lrt
 $(call BUILD_WRAPPER)
