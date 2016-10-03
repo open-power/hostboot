@@ -81,18 +81,16 @@ enum WinkleScope
 
 
 
-//TODO RTC:147693
-//Need to determine what HOMER layout offsets should be
 /**
  * HOMER layout offsets
  * see: HOMER_Image_Layout.odt
  */
-/** OCC image is at the start of the HOMER layout */
-#define HOMER_OFFSET_TO_OCC_IMG (1*MEGABYTE)
+/** Offset from HOMER to OCC Image */
+#define HOMER_OFFSET_TO_OCC_IMG (0*KILOBYTE)
 /** Offset from HOMER to OCC Host Data Area */
-#define HOMER_OFFSET_TO_OCC_HOST_DATA (MEGABYTE)
-/** SLW image is 2MB into the HOMER layout */
-#define HOMER_HCODE_IMG_OFFSET (2*MEGABYTE)
+#define HOMER_OFFSET_TO_OCC_HOST_DATA (768*KILOBYTE)
+/** Offset from HOMER to HCODE Image */
+#define HOMER_HCODE_IMG_OFFSET (1*MEGABYTE)
 /** STOP Image Max ouput size */
 #define HOMER_MAX_HCODE_IMG_SIZE_IN_MB 1
 
