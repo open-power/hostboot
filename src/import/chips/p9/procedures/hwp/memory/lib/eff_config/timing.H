@@ -1299,5 +1299,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief VREF DQ Enter time *in clocks*
+/// @tparam T the fapi2::TargetType of i_target
+/// @param[in] i_target a target for attributes
+/// @return VREF DQ Enter time *in clocks*
+///
+template< fapi2::TargetType T >
+inline uint64_t tvrefdqe( const fapi2::Target<T>& i_target )
+{
+    // JEDEC tVREFDQE in ns
+    constexpr uint64_t tVREFDQE = 150;
+    return ns_to_cycles(i_target, tVREFDQE);
+}
+
+///
+/// @brief VREF DQ Exit time *in clocks*
+/// @tparam T the fapi2::TargetType of i_target
+/// @param[in] i_target a target for attributes
+/// @return VREF DQ Exit time *in clocks*
+///
+template< fapi2::TargetType T >
+inline uint64_t tvrefdqx( const fapi2::Target<T>& i_target )
+{
+    // JEDEC tVREFDQX in ns
+    constexpr uint64_t tVREFDQX = 150;
+    return ns_to_cycles(i_target, tVREFDQX);
+}
+
 } // mss
 #endif
