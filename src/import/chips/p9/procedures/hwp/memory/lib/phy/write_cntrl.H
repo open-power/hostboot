@@ -470,11 +470,9 @@ inline fapi2::ReturnCode reset_rtt_wr_swap_enable( const fapi2::Target<T>& i_tar
     l_data.clearBit<TT::RTT_WR_SWAP_ENABLE_P0_WL>();
     l_data.clearBit<TT::RTT_WR_SWAP_ENABLE_P0_CTR>();
 
-    // taken from JEDEC DDR4 SPEC 2015 specification
-    // specific value is for tVREFDQE/tVREFDQX - both are 150 ns
+    // gets and sets the VREF counter reset value, max of vrefdq enter or exit time
     {
-        constexpr uint64_t VREFDQ_LATCH_TIME_NS = 150;
-        const uint64_t l_vref_counter_reset = ns_to_cycles(i_target, VREFDQ_LATCH_TIME_NS);
+        const uint64_t l_vref_counter_reset = std::max(mss::tvrefdqe(i_target), mss::tvrefdqx(i_target));
         l_data.insertFromRight<TT::VREF_COUNTER_RESET_VAL, TT::VREF_COUNTER_RESET_VAL_LEN>(l_vref_counter_reset);
     }
 
