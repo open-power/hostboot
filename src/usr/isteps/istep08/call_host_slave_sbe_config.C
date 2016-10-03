@@ -45,6 +45,7 @@
 #include <devicefw/userif.H>
 #include <i2c/i2cif.H>
 #include <sbe/sbeif.H>
+#include <hwas/common/hwas.H>
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -131,6 +132,9 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
+        //Setup EC_GARD and EQ_GARD attrs on the proc before setting up sbe_config
+        HWAS::setChipletGardsOnProc(l_cpu_target);
+
         // do not call HWP on master processor
         if (l_cpu_target != l_pMasterProcTarget)
         {
