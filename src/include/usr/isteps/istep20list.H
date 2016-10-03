@@ -42,6 +42,12 @@
 #include    <initservice/initsvcreasoncodes.H>
 #include    <config.h>
 
+
+#if CONFIG_ENABLE_HDAT_IN_HOSTBOOT
+#include    <hdat/hdatnaca.H>
+#endif
+
+
 namespace   ISTEP_20
 {
 
@@ -71,6 +77,13 @@ namespace   INITSERVICE
                 ISTEP_20::call_host_load_payload,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
+#if CONFIG_ENABLE_HDAT_IN_HOSTBOOT
+        {
+                ISTEPNAME(20,02,"host_load_hdat"),
+                HDAT::call_hdat_steps,
+                { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
+        },
+#endif
 
 };
 

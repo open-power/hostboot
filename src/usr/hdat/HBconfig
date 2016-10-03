@@ -1,0 +1,5 @@
+
+config ENABLE_HDAT_IN_HOSTBOOT
+    default y
+    help
+        Enable Initialization of Hypervisor Memory Space

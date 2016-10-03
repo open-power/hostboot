@@ -67,5 +67,6 @@ SUBDIRS += ipmi.d
 #SUBDIRS += htmgt.d
 SUBDIRS += diag.d
 SUBDIRS += xz.d
+SUBDIRS += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat.d,)
 
 include ${ROOTPATH}/config.mk

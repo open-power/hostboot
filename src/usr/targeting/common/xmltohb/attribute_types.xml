@@ -375,6 +375,9 @@
     <enumerator>
         <name>CECTPM</name>
     </enumerator>
+    <enumerator>
+        <name>BMC</name>
+    </enumerator>
     <default>NA</default>
 </enumerationType>
 
@@ -1115,6 +1118,17 @@
             <default>0</default>
         </field>
         </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>CPU_ATTR</id>
+    <description>CPU Attribute</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
@@ -18630,19 +18644,8 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>CPU_ATTR</id>
-    <description>CPU Attribute</description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
     <id>ICACHE_LINE_SIZE</id>
-    <description>ICache Line Size in bytes</description>
+    <description>Icache Line Size in bytes</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -18856,18 +18859,6 @@ Measured in GB</description>
     <simpleType>
         <uint32_t>
             <default>0x4</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>ORDINAL_ID</id>
-    <description>Ordinal ID of a target</description>
-    <simpleType>
-        <uint32_t>
-            <default>0xFFFFFFFF</default>
         </uint32_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -32284,6 +32275,34 @@ Measured in GB</description>
         <id>ATTR_MSS_VCCD_OVERRIDE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>ORDINAL_ID</id>
+    <description>Ordinal ID of a target</description>
+    <simpleType>
+        <uint32_t>
+            <default>0xFFFFFFFF</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>RAW_MTM</id>
+    <description>
+       Raw value of system MTM
+    </description>
+    <simpleType>
+    <string>
+      <sizeInclNull>64</sizeInclNull>
+    </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 </attributes>

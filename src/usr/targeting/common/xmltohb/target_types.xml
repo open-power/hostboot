@@ -281,9 +281,10 @@
     <attribute><id>PROC_R_LOADLINE_VCS_UOHM</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS_UOHM</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS_UV</id></attribute>
-    <attribute><id>ICACHE_LINE_SIZE</id></attribute>
+    <attribute><id>TOD_CPU_DATA</id></attribute>
     <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
     <attribute><id>ICACHE_SIZE</id></attribute>
+    <attribute><id>ICACHE_LINE_SIZE</id></attribute>
     <attribute><id>ICACHE_BLOCK_SIZE</id></attribute>
     <attribute><id>DCACHE_LINE_SIZE</id></attribute>
     <attribute><id>DCACHE_ASSOC_SETS</id></attribute>
@@ -884,6 +885,7 @@
     <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
     <attribute><id>MSS_VREF_DAC_NIBBLE</id></attribute>
     <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>
+    <attribute><id>RAW_MTM</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
