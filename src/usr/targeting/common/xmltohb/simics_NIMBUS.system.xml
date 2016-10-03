@@ -11803,6 +11803,188 @@
     </attribute>
 </targetInstance>
 
+<targetInstance>
+    <id>sys0bmcserialport0</id>
+    <type>uart</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/uart-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/uart-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmcserialport1</id>
+    <type>uart</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/uart-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/uart-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc</id>
+    <type>bmc</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/sp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/sp-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0powersupply0</id>
+    <type>power-supply</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/ps-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/ps-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0powersupply1</id>
+    <type>power-supply</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/ps-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/ps-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0fan0</id>
+    <type>fan</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/fan-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/fan-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0fan1</id>
+    <type>fan</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/fan-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/fan-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0vrm0</id>
+    <type>vrm</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/vrm-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/vrm-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0vrm1</id>
+    <type>vrm</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/vrm-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/vrm-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc0usb0</id>
+    <type>usb</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/usb-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/usb-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc0usb1</id>
+    <type>usb</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/usb-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/usb-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc0eth0</id>
+    <type>eth</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/eth-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/eth-0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc0eth1</id>
+    <type>eth</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/node-0/eth-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/fsp-0/eth-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0bmc0panel</id>
+    <type>panel</type>
+    <attribute>
+    <id>PHYS_PATH</id>
+    <default>physical:sys-0/panel-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/panel-0</default>
+    </attribute>
+</targetInstance>
+
 
 </attributes>
 

@@ -38,8 +38,7 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>sys-sys-power8</id>
-    <attribute><id>THREAD_COUNT</id></attribute>
+    <id>sys-sys-power9</id>
     <attribute><id>SERIAL_NUMBER</id></attribute>
     <attribute><id>PHYP_SYSTEM_TYPE</id></attribute>
     <attribute><id>ASCII_VPD_LX_KEYWORD</id></attribute>
@@ -56,33 +55,12 @@
     <attribute><id>HYP_DISPATCH_WHEEL</id></attribute>
     <attribute><id>SYSTEM_BRAND_NAME</id></attribute>
     <attribute><id>HYPERVISOR_IPL_DESTINATION</id></attribute>
-    <attribute><id>RAW_MTM</id></attribute>
     <attribute><id>SLCA_INDEX</id></attribute>
     <attribute><id>SLCA_RID</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
     <id>chip-processor</id>
-    <attribute><id>ICACHE_LINE_SIZE</id></attribute>
-    <attribute><id>ICACHE_BLOCK_SIZE</id></attribute>
-    <attribute><id>ICACHE_SIZE</id></attribute>
-    <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
-    <attribute><id>DCACHE_LINE_SIZE</id></attribute>
-    <attribute><id>DCACHE_ASSOC_SETS</id></attribute>
-    <attribute><id>DATA_CACHE_SIZE</id></attribute>
-    <attribute><id>DATA_CACHE_LINE_SIZE</id></attribute>
-    <attribute><id>L2_CACHE_LINE_SIZE</id></attribute>
-    <attribute><id>L2_CACHE_SIZE</id></attribute>
-    <attribute><id>L2_CACHE_ASSOC_SETS</id></attribute>
-    <attribute><id>L3_CACHE_LINE_SIZE</id></attribute>
-    <attribute><id>L3_CACHE_SIZE</id></attribute>
-    <attribute><id>TIME_BASE</id></attribute>
-    <attribute><id>TLB_DATA_ENTRIES</id></attribute>
-    <attribute><id>TLB_INSTR_ENTRIES</id></attribute>
-    <attribute><id>TLB_DATA_ASSOC_SETS</id></attribute>
-    <attribute><id>TLB_INSTR_ASSOC_SETS</id></attribute>
-    <attribute><id>TLB_RESERVE_SIZE</id></attribute>
-    <attribute><id>CPU_ATTR</id></attribute>
     <attribute>
         <id>PROC_HW_TOPOLOGY</id>
         <default>0x00000000</default>
@@ -124,13 +102,13 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>unit-pci-power8</id>
+    <id>unit-pci-power9</id>
     <attribute><id>SLCA_INDEX</id></attribute>
     <attribute><id>SLCA_RID</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>enc-node-power8</id>
+    <id>enc-node-power9</id>
     <attribute><id>ENLARGED_IO_SLOT_COUNT</id></attribute>
     <attribute><id>SLCA_INDEX</id></attribute>
     <attribute><id>SLCA_RID</id></attribute>

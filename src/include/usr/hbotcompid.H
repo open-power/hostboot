@@ -405,6 +405,16 @@ const char SIO_COMP_NAME[] = "sio";
 const compId_t FAPI2_COMP_ID = 0x3300;
 const char FAPI2_COMP_NAME[] = "fapi2";
 
+/** @name HDAT
+ *  HDAT component
+ *  @Note HDAT_COMP_ID=0x9000 matches with what
+ *  defined in fips_comp_id.H
+ */
+//@{
+const compId_t HDAT_COMP_ID = 0x9000;
+const char HDAT_COMP_NAME[] = "hdat";
+
+
 
 /** @name PRDF
  *  PRDF component
