@@ -129,7 +129,7 @@ errlHndl_t restrictECunits(
  * @param[out] o_bootable Indicate whether the system is
  *             is bootable with current configuration.
  *             if o_bootable is not NULL an error for
- *             system unavailability will not be logged 
+ *             system unavailability will not be logged
  *
  * @return error log handle
  */
@@ -185,6 +185,14 @@ void invokePresentByAssoc();
  */
 void presentByAssoc(TargetInfoVector& io_funcTargets,
                     TargetInfoVector& o_targToDeconfig);
+
+/**
+* @brief Algorithm to set up the EQ_GARD and EC_GARD attributes on the proc
+*
+* @param[in] i_procTarget    Proccesor target to set attributes on
+*/
+void setChipletGardsOnProc(TARGETING::Target * i_procTarget);
+
 
 /**
  * @brief Find the ATTR_EC for all processors and calculate the EFFECTIVE_EC
