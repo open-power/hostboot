@@ -51,12 +51,19 @@ namespace wr_vref
 ///
 /// @brief Executes WR VREF workarounds
 /// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_rp - the rank pair to execute the override on
+/// @param[out] o_vrefdq_train_range - training range value
+/// @param[out] o_vrefdq_train_value - training value value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                           const uint64_t& i_rp,
+                           uint8_t& o_vrefdq_train_range,
+                           uint8_t& o_vrefdq_train_value )
 {
     // TODO RTC:160353 - Need module/chip rev EC support for workarounds
     FAPI_TRY(mss::workarounds::dp16::wr_vref::error_dram23(i_target));
+    FAPI_TRY(mss::workarounds::dp16::wr_vref::setup_values(i_target, i_rp, o_vrefdq_train_range, o_vrefdq_train_value));
 
 fapi_try_exit:
     return fapi2::current_err;
