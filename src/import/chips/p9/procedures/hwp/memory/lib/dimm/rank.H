@@ -865,6 +865,47 @@ fapi2::ReturnCode is_mirrored( const fapi2::Target<T>& i_target,
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief get_ranks_in_pair
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @param[in] i_target the fapi2 target of the mc
+/// @param[in] RP rank pair gets ranks in pairs
+/// @param[out] o_ranks vector of rank numbers (primary, secondary, tertiary, quaternary)
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
+        const uint64_t& i_rp,
+        std::vector<uint64_t>& o_ranks )
+{
+    // Switches based upon the number of rank pairs
+    switch(i_rp)
+    {
+        case 0:
+            FAPI_TRY((get_ranks_in_pair<0, T>(i_target, o_ranks)));
+            break;
+
+        case 1:
+            FAPI_TRY((get_ranks_in_pair<1, T>(i_target, o_ranks)));
+            break;
+
+        case 2:
+            FAPI_TRY((get_ranks_in_pair<2, T>(i_target, o_ranks)));
+            break;
+
+        case 3:
+            FAPI_TRY((get_ranks_in_pair<3, T>(i_target, o_ranks)));
+            break;
+
+        // Error case
+        default:
+            FAPI_ERR("Invalid number of rankpairs entered. num: %lu max: %lu", i_rp, MAX_PRIMARY_RANKS_PER_PORT);
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER);
+            break;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
