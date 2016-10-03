@@ -20375,7 +20375,7 @@ Measured in GB</description>
       <uint8_t>
       </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
@@ -20391,7 +20391,7 @@ Measured in GB</description>
       <uint8_t>
       </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
@@ -28005,11 +28005,12 @@ Measured in GB</description>
     <id>PFET_OFF_CONTROLS</id>
     <description>
         To disable force pfet off control from fuse status
+        Override attribute
     </description>
     <simpleType>
         <uint32_t></uint32_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PFET_OFF_CONTROLS</id>
@@ -28025,7 +28026,7 @@ Measured in GB</description>
     <simpleType>
         <uint64_t></uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -28042,7 +28043,7 @@ Measured in GB</description>
     <simpleType>
         <uint64_t></uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -28059,7 +28060,7 @@ Measured in GB</description>
     <simpleType>
         <uint64_t></uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -29338,13 +29339,13 @@ Measured in GB</description>
   <id>CP_FILTER_BYPASS</id>
   <description>
     To skip the locking sequence and check for lock of CP PLL
+    Override attribute
   </description>
   <simpleType>
     <uint8_t>
-    <default>0</default>
     </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
@@ -29357,13 +29358,13 @@ Measured in GB</description>
   <id>SS_FILTER_BYPASS</id>
   <description>
     To skip the locking sequence and check for lock of SS PLL
+    Override attribute
   </description>
   <simpleType>
     <uint8_t>
-    <default>0</default>
     </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
@@ -29376,13 +29377,13 @@ Measured in GB</description>
   <id>IO_FILTER_BYPASS</id>
   <description>
     To skip the locking sequence and check for lock of IO PLL
+    Override attribute
   </description>
   <simpleType>
     <uint8_t>
-    <default>0</default>
     </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
   <hwpfToHbAttrMap>
@@ -29395,13 +29396,13 @@ Measured in GB</description>
     <id>DPLL_BYPASS</id>
     <description>
         Skip locking sequence and check for lock of DPLL
+        Override attribute
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -29414,13 +29415,13 @@ Measured in GB</description>
     <id>NEST_MEM_X_O_PCI_BYPASS</id>
     <description>
         Skip the locking sequence and check for lock of NEST/MEM/XBUS/OBUS/PCI PLLs
+        Override attr
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
