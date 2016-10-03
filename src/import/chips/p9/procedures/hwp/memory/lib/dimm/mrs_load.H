@@ -41,6 +41,7 @@
 
 #include <lib/utils/c_str.H>
 #include <lib/shared/mss_kind.H>
+#include <lib/ccs/ccs.H>
 
 namespace mss
 {
