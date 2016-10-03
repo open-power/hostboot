@@ -62,6 +62,8 @@ enum sbeModuleId
     SBE_GET_SBE_IMAGE_SIZE              = 0x11,
     SBE_FIXUP_GOLDEN_HBB                = 0x12,
     SBE_GET_HW_KEYS_HASH_PTR            = 0x13,
+    SBE_RETRIEVE_HW_KEYS_HASH           = 0x14,
+    SBE_READ_SBE_IMAGE_SECTION          = 0x15,
 };
 
 /**

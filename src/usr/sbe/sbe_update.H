@@ -88,6 +88,7 @@ namespace SBE
     // Array that holds 64 bytes of HW KEY HASH
     const size_t SBE_HW_KEY_HASH_SIZE = 64;  // in bytes
     typedef uint8_t SBE_HW_KEY_HASH_t[SBE_HW_KEY_HASH_SIZE];
+    const int SBE_SIMICS_HW_KEY_HASH_PATTERN = 0x44;
 
     // Offset of the HW Keys' Hash in the PIBMEM0 section of a
     // customized SBE Image
@@ -617,21 +618,30 @@ namespace SBE
      *                        i_actImgSize is expected to be pre-allocated
      *                        Assert if i_imgPtr is NULL
      *
+     * @param[in] i_target    Target processor to read HW Keys' Hash from,
+     *                        if necessary
+     *                        Will assert if i_target is NULL
+     *
+     * @param[in] i_side      SBE Seeprom to read HW Keys' Hash from,
+     *                        if necessary
+     *
      * @param[io/out] io_sbe_ver_info  Struct containing state of SBE SEEPROM
      *                                 that is updated based on the situation
      *
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t determineHwKeysHash(const void* i_imgPtr,
+                                   TARGETING::Target* i_target,
+                                   sbeSeepromSide_t i_side,
                                    sbeSeepromVersionInfo_t& io_sbe_ver_info);
 
     /**
-     * @brief Gets the Memory location of HW Keys Hash from a given
-     *        Processor customized SBE Image.
+     * @brief Gets the Memory location of HW Keys' Hash from a given
+     *        Processor SBE Image.
      *
      * @param[in]  i_imgPtr   Pointer to SBE image in memory (already loaded)
-     *                        Memory from this pointer through
-     *                        i_actImgSize is expected to be pre-alloacted
+     *                        NOTE:  Only needs SbeXipHeader portion of
+     *                        SBE Image to be loaded into Memory, not full image
      *                        Assert if i_imgPtr is NULL
      *
      * @param[out] o_HwKeysHashPtr  Pointer to HW Keys Hash in Image
@@ -641,6 +651,7 @@ namespace SBE
      */
     errlHndl_t getHwKeysHashPtrFromSbeImage(const void*  i_imgPtr,
                                             void*& o_HwKeysHashPtr);
+
 
     /**
      * @brief Checks if a secure key transition is needed and if so verifies
@@ -657,6 +668,23 @@ namespace SBE
      */
     errlHndl_t secureKeyTransition(std::vector<uint8_t> &o_transHwKeyHash);
 
+    /**
+     * @brief Retrieves the HW Keys' Hash from a given Processor SBE Seeprom
+     *
+     * @param[in] i_target Target processor to read HW Keys' Hash from
+     *                     Will assert if i_target is NULL
+     *
+     * @param[in] i_side   SBE Seeeprom to read HW Keys' Hash from
+     *                     Will assert if i_side is invalid
+     *
+     * @param[out] o_hw_keys_hash  Struct containing the HW Keys' Hash
+     *                             retrieved from the SBE Seeprom
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t retrieveHwKeysHash(TARGETING::Target* i_target,
+                                  sbeSeepromSide_t i_side,
+                                  SBE_HW_KEY_HASH_t& o_hw_keys_hash);
 
 } //end namespace SBE
 #endif

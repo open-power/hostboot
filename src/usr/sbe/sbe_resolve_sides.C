@@ -625,7 +625,7 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
         {
             // Copy current SBE Seeprom Image to Memory
             // NOTE: Seprate section from above because of possible future
-            // improvement to use MBPD SB Keyword bit to keep track of HBB
+            // improvement to use MVPD SB Keyword bit to keep track of HBB
 
             err = readSbeImage(io_sideState.tgt,
                                  reinterpret_cast<void*>(SBE_IMG_VADDR),
@@ -1567,6 +1567,137 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
 
     return err;
 }
+
+/////////////////////////////////////////////////////////////////////
+errlHndl_t readSbeImageSection(TARGETING::Target* i_target,
+                               sbeSeepromSide_t i_side,
+                               const uint64_t i_offset,
+                               size_t i_size,
+                               uint8_t* io_data_ptr)
+{
+    TRACUCOMP( g_trac_sbe,
+               ENTER_MRK"readSbeImageSection(): tgt=0x%X, i_side=%d "
+               "i_offset=0x%.16llX, i_size=0x%X,  io_data_ptr=%p",
+               TARGETING::get_huid(i_target), i_side, i_offset,
+               i_size, io_data_ptr);
+
+    errlHndl_t err = NULL;
+    PNOR::ECC::eccStatus eccStatus = PNOR::ECC::CLEAN;
+    EEPROM::eeprom_chip_types_t l_seeprom = sbe_side_sync[i_side];
+
+    // Ensure that i_size is a multiple of 8 bytes
+    assert ( (i_size % 8) == 0, "readSbeImageSection - i_size is not a multiple of 8 bytes");
+    assert(i_target!=NULL, "readSbeImageSection - i_target was NULL");
+    assert(io_data_ptr!=NULL, "readSbeImageSection - io_data_ptr was NULL");
+
+
+    size_t section_size_ECC = (i_size * 9)/8;
+
+    uint8_t * section_data_ptr_ECC = static_cast<uint8_t*>
+                                                (malloc(section_size_ECC));
+
+    do{
+
+        // Clear out temporary space
+        memset( section_data_ptr_ECC, 0, section_size_ECC );
+
+        TRACUCOMP( g_trac_sbe, INFO_MRK"readSbeImageSection() Reading "
+                   "Data from Target 0x%X, Seeprom %d (side=%d), "
+                   "offset=%.16llX, size_ECC=0x%X (size=0x%X)",
+                   TARGETING::get_huid(i_target), l_seeprom, i_side,
+                   i_offset, section_size_ECC, i_size);
+
+        err = DeviceFW::deviceOp( DeviceFW::READ,
+                                  i_target,
+                                  section_data_ptr_ECC,
+                                  section_size_ECC,
+                                  DEVICE_EEPROM_ADDRESS(
+                                     l_seeprom,
+                                     i_offset));
+
+        if(err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"readSbeImageSection: - Error "
+                       "Reading data rc=0x%.4X, seeprom=%d (side=%d). "
+                       "HUID=0x%.8X. size=0x%.8X, EEPROM offset=0x%.16llX",
+                       err->reasonCode(), l_seeprom, i_side,
+                       TARGETING::get_huid(i_target), section_size_ECC,
+                       i_offset);
+            break;
+        }
+
+        TRACDBIN( g_trac_sbe,
+                 "readSbeImageSection: Data with ECC read from Seeprom",
+                 section_data_ptr_ECC,
+                 section_size_ECC );
+
+
+        // Remove ECC
+        eccStatus = PNOR::ECC::removeECC(
+                                     section_data_ptr_ECC,
+                                     io_data_ptr,
+                                     i_size);
+
+        // Fail if uncorrectable ECC
+        if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
+        {
+            TRACFCOMP( g_trac_sbe,ERR_MRK"readSbeImageSection: ECC Error "
+                       "On SBE Image Read eccStatus=%d sI=%d, sI_ECC="
+                       "%d, HUID=0x%.8X, Seeprom %d (side=%d)",
+                       eccStatus, i_size, section_size_ECC,
+                       TARGETING::get_huid(i_target),
+                       l_seeprom, i_side );
+            /*@
+             * @errortype
+             * @moduleid     SBE_READ_SBE_IMAGE_SECTION
+             * @reasoncode   SBE_ECC_FAIL
+             * @userdata1[0:15]     ECC Status
+             * @userdata1[16:31]    SEEPROM Side
+             * @userdata1[32:63]    Target HUID
+             * @userdata2[0:31]     Size - No Ecc
+             * @userdata2[32:63]    Size - ECC
+             * @devdesc      ECC Fail Reading SBE Image
+             * @custdesc     A problem occurred while updating processor
+             */
+            err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                SBE_READ_SBE_IMAGE_SECTION,
+                                SBE_ECC_FAIL,
+                                TWO_UINT16_ONE_UINT32_TO_UINT64(
+                                              eccStatus,
+                                              l_seeprom,
+                                              TARGETING::get_huid(i_target)),
+                                TWO_UINT32_TO_UINT64(i_size,
+                                                     section_size_ECC));
+            err->collectTrace(SBE_COMP_NAME);
+            err->addPartCallout(
+                                i_target,
+                                HWAS::SBE_SEEPROM_PART_TYPE,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL );
+
+            ErrlUserDetailsTarget(i_target).addToLog(err);
+
+            break;
+        }
+
+        TRACDBIN( g_trac_sbe,
+                  "readSbeImageSection: Data without ECC read from Seeprom",
+                  io_data_ptr,
+                  i_size );
+
+    }while(0);
+
+    free(section_data_ptr_ECC);
+    section_data_ptr_ECC=NULL;
+
+    TRACUCOMP( g_trac_sbe,
+               EXIT_MRK"readSbeImageSection: rc = 0x%X",
+               ERRL_GETRC_SAFE(err));
+
+    return err;
+}
+
 
 #ifdef CONFIG_BMC_IPMI
 /////////////////////////////////////////////////////////////////////

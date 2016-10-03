@@ -285,6 +285,38 @@ namespace SBE
                                    PNOR::SideId i_pnorSideId,
                                    bool& o_imageWasUpdated);
 
+    /**
+     * @brief Reads a limited Section of SBE Image from SBE Seeprom
+     *
+     * @param[in] i_target   Target processor
+     *                       Must not be NULL (will assert if NULL)
+     *
+     * @param[in] i_side     Seeprom Side to access (Must not be invalid)
+     *
+     * @param[in] i_offset   The Section Offset on the SBE Seeprom
+     *                       NOTE:  When calculating the address, consider
+     *                       that the SBE Seeprom contains data+ECC
+     *
+     * @param[in] i_size     The size of the section (non-ECC)
+     *                       NOTE: i_size must be a multiple of 8 bytes or
+     *                             the function will assert
+     *
+     * @param[in] io_data_ptr  Pointer to where (non-ECC) Section of SBE Image
+     *                         should be copied to in memory
+     *                         Memory associatd with this pointer is expected
+     *                         to be pre-alloacted
+     *                         NOTE: ECC is handled internally in this function
+     *                               io_data_ptr points to non-ECC data
+     *                         Must not be NULL (will assert if NULL)
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t readSbeImageSection(TARGETING::Target* i_target,
+                                   sbeSeepromSide_t i_side,
+                                   const uint64_t i_offset,
+                                   size_t i_size,
+                                   uint8_t* io_data_ptr);
+
 #ifdef CONFIG_BMC_IPMI
     /**
      * @brief Performs any necessary IPMI calls before shutdown/reboot

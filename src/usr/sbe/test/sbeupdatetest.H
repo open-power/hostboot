@@ -535,6 +535,43 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 break;
             }
 
+            /******************************************************************/
+            /* After SBE Update to Backup SBE SEEPROM, read back HW Keys Hash */
+            /******************************************************************/
+            SBE_HW_KEY_HASH_t retrieved_hash, expected_hash;
+            memset(&retrieved_hash, 0, SBE_HW_KEY_HASH_SIZE); // set to 0x0
+            memset(&expected_hash,
+                   SBE_SIMICS_HW_KEY_HASH_PATTERN,
+                   SBE_HW_KEY_HASH_SIZE); // set to 0x4's
+
+            total++;
+            err = retrieveHwKeysHash(sbeState.target,
+                                     SBE_SEEPROM1,
+                                     retrieved_hash);
+            if(err)
+            {
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - retrieveHwKeysHash() failed.");
+                break;
+            }
+
+            // Compare Hashes - Simics Version triggers setting the
+            //                  HW Keys Hash to all 0x4's during customization
+            total++;
+            if ( memcmp(&retrieved_hash,
+                        &expected_hash,
+                        SBE_HW_KEY_HASH_SIZE) != 0 )
+            {
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - retrieveHwKeysHash returned "
+                        "incorrect HW Keys Hash - see trace for more details");
+                TRACFBIN(g_trac_sbe, "testSbeUpdateTarget() retrieved_hash",
+                         &retrieved_hash, SBE_HW_KEY_HASH_SIZE);
+                TRACFBIN(g_trac_sbe, "testSbeUpdateTarget() expected_hash",
+                         &expected_hash, SBE_HW_KEY_HASH_SIZE);
+                break;
+            }
+
 
         }while(0);
 

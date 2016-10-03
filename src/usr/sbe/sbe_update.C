@@ -1549,6 +1549,8 @@ namespace SBE
             // Determine HW Keys' Hash for Seeprom0
             err = determineHwKeysHash(reinterpret_cast<void*>
                                        (SBE_IMG_VADDR),
+                                      io_sbeState.target,
+                                      SBE_SEEPROM0,
                                       io_sbeState.seeprom_0_ver);
 
             if(err)
@@ -1567,6 +1569,8 @@ namespace SBE
             // Determine HW Keys' Hash for Seeprom1
             err = determineHwKeysHash(reinterpret_cast<void*>
                                        (SBE_IMG_VADDR),
+                                      io_sbeState.target,
+                                      SBE_SEEPROM1,
                                       io_sbeState.seeprom_1_ver);
 
             if(err)
@@ -4681,6 +4685,8 @@ namespace SBE
 
 /////////////////////////////////////////////////////////////////////
 errlHndl_t determineHwKeysHash(const void* i_imgPtr,
+                               TARGETING::Target* i_target,
+                               sbeSeepromSide_t i_side,
                                sbeSeepromVersionInfo_t& io_sbe_ver_info)
 {
     errlHndl_t err = NULL;
@@ -4688,10 +4694,14 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
     uint32_t  struct_version = io_sbe_ver_info.struct_version;
     void * hw_keys_hash_ptr = NULL;
 
+    assert(i_target!=NULL, "determineHwKeysHash: i_target is NULL");
+
     TRACUCOMP(g_trac_sbe,
               ENTER_MRK"determineHwKeysHash: "
-              "seeprom_hw_keys_hash_ptr=%p, struct_version=0x%.8X, imgPtr=%p",
-              seeprom_hw_keys_hash_ptr, struct_version, i_imgPtr);
+              "seeprom_hw_keys_hash_ptr=%p, struct_version=0x%.8X, imgPtr=%p, "
+              "if necessary: tgt=0x%08X, side=%d",
+              seeprom_hw_keys_hash_ptr, struct_version, i_imgPtr,
+              TARGETING::get_huid(i_target), i_side);
 
 
 
@@ -4699,9 +4709,8 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
         // Determine which HW Keys' Hash to use based on this order of possible
         // sources of this hash:
         // 1) Key Transition Hash (from "SBKT" PNOR Section)
-        // 2) Seeprom SBE Version Info Struct (ie, it was saved on the Seeprom)
-        // 3) Customized SBE Image in Memory (which got the hash from "SBE" PNOR
-        //    section)
+        // 2) Seeprom SBE Version Info Struct
+        // 3) From the SBE Image on the Seeprom itself
         // The if/else{} blocks below handle these cases and make sure that the
         // Seeprom SBE Version Info Struct and the Customized SBE Image in
         // Memory are both using the same HW Keys' Hash.
@@ -4728,29 +4737,27 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
                       g_hw_keys_hash_transition_data,
                       hw_keys_hash_ptr);
 
-            // Write new HW Keys Hash to SBE Image in Memory
-            memcpy(hw_keys_hash_ptr,
-                   g_hw_keys_hash_transition_data,
-                   SBE_HW_KEY_HASH_SIZE);
-
             // Write new HW Keys Hash to SBE Version Info Struct
             memcpy(seeprom_hw_keys_hash_ptr,
                    g_hw_keys_hash_transition_data,
                    SBE_HW_KEY_HASH_SIZE);
+
+            // Copy from Struct to customized image below 
 
         #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(SBE_COMP_NAME, "Performing Secureboot Key Transition\n");
             CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
             CONSOLE::flush();
         #endif
+
         }
 
         // Normal Preservation of HW Keys Hash
         else
         {
             // Use the existing Version Information Struct from the SEEPROM
-            if ((struct_version != STRUCT_VERSION_SIMICS ) &&
-                (struct_version >= STRUCT_VERSION_PRESERVE_HW_KEYS_HASH ))
+            if ((struct_version >= STRUCT_VERSION_PRESERVE_HW_KEYS_HASH ) &&
+                (struct_version <= STRUCT_VERSION_LATEST ))
             {
                 // The HW Keys Hash in the struct should be used
                 // So copy the hash from the struct to customized Image
@@ -4759,32 +4766,56 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
                           hw_keys_hash_ptr,
                           SBE_HW_KEY_HASH_SIZE);
 
-                // Copy HW Keys Hash from SBE Version Info Struct to
-                // Customized Image Memory
-                memcpy(hw_keys_hash_ptr,
-                       seeprom_hw_keys_hash_ptr,
-                       SBE_HW_KEY_HASH_SIZE);
+                // Copy from Struct to customized image below
 
             }
+            else if (struct_version == STRUCT_VERSION_SIMICS)
+            {
+                // In Simics Can't Trust Verion Struct or Image to already
+                // be written to SBE Seeprom, so use a pattern of 0x4's
+                TRACUCOMP(g_trac_sbe,"determineHwKeysHash: "
+                          "STRUCT_VERSION_SIMICS: Use Pattern of 0x%2X",
+                          SBE_SIMICS_HW_KEY_HASH_PATTERN);
 
-            // else branch covers STRUCT_VERSION_SIMICS and any version that
-            //      was not preserving the HW Keys Hash
+                // Set a pattern of 0x4 into the SBE Version Struct's HW Keys Hash
+                memset(seeprom_hw_keys_hash_ptr,
+                       SBE_SIMICS_HW_KEY_HASH_PATTERN,
+                       SBE_HW_KEY_HASH_SIZE);
+
+                // Copy from Struct to customized image below
+
+            }
+            // Unsupported struct version (or recover from possible corruption)
             else
             {
-                // The HW Keys Hash needs to be saved in the Struct
-                TRACFCOMP(g_trac_sbe,"determineHwKeysHash: Copy From "
-                          "Image to Struct: hw_keys_hash_ptr=%p, size=%d",
-                          hw_keys_hash_ptr,
-                          SBE_HW_KEY_HASH_SIZE);
+                // The HW Keys Hash needs to be read from the Seeprom itself
+                TRACFCOMP(g_trac_sbe,"determineHwKeysHash: Unsupported Struct "
+                          "Version (0x%.08X): Read HW Keys Hash From Seeprom "
+                          "and copy to Struct",
+                          struct_version);
 
-                // Copy HW Keys Hash from Customized Image Memory to
-                // SBE SEEPROM Version Info Struct
-                memcpy(seeprom_hw_keys_hash_ptr,
-                       hw_keys_hash_ptr,
-                       SBE_HW_KEY_HASH_SIZE);
+                err = retrieveHwKeysHash(i_target,
+                                         i_side,
+                                         *seeprom_hw_keys_hash_ptr);
+
+                if (err)
+                {
+                    TRACFCOMP(g_trac_sbe, ERR_MRK"determineHwKeysHash: - Error "
+                              "From retrieveHwKeysHash()" );
+                    break;
+                }
+
+                // Copy from Struct to customized image below
 
             }
+
         }
+
+        // Copy HW Keys Hash from SBE Version Info Struct to
+        // Customized Image Memory
+        memcpy(hw_keys_hash_ptr,
+               seeprom_hw_keys_hash_ptr,
+               SBE_HW_KEY_HASH_SIZE);
 
     }while(0);
 
@@ -4875,10 +4906,9 @@ errlHndl_t getHwKeysHashPtrFromSbeImage(const void*   i_imgPtr,
                                        "o_HwKeysHashPtr==NULL")
 
         TRACUCOMP(g_trac_sbe, INFO_MRK"getHwKeysHashPtrFromSbeImage: "
-                 "o_HwKeysHashPtr=%p (hash-start=0x%.8X) "
+                 "o_HwKeysHashPtr=%p, "
                   "pibmem0_Section: iv_offset=0x%.8X, iv_size=0x%.8X,",
                   o_HwKeysHashPtr,
-                  *(reinterpret_cast<uint32_t*>(o_HwKeysHashPtr)),
                   pibmem0_Section.iv_offset,
                   pibmem0_Section.iv_size);
 
@@ -4889,9 +4919,8 @@ errlHndl_t getHwKeysHashPtrFromSbeImage(const void*   i_imgPtr,
 
 
     TRACFCOMP(g_trac_sbe,EXIT_MRK"getHwKeysHashPtrFromSbeImage: "
-                         "o_HwKeysHashPtr = %p (hash-start=0x%.8X)",
-                         o_HwKeysHashPtr,
-                         *(reinterpret_cast<uint32_t*>(o_HwKeysHashPtr)));
+                         "o_HwKeysHashPtr = %p",
+                         o_HwKeysHashPtr);
     return err;
 }
 
@@ -4963,6 +4992,101 @@ errlHndl_t secureKeyTransition(std::vector<uint8_t> &o_transHwKeyHash)
 #endif
 
     return l_errl;
+}
+
+/////////////////////////////////////////////////////////////////////
+errlHndl_t retrieveHwKeysHash(TARGETING::Target* i_target,
+                              sbeSeepromSide_t i_side,
+                              SBE_HW_KEY_HASH_t& o_hw_keys_hash)
+{
+    TRACUCOMP( g_trac_sbe,
+               ENTER_MRK"retrieveHwKeysHash from tgt=0x%08X side=%d",
+               TARGETING::get_huid(i_target), i_side);
+
+    errlHndl_t err = NULL;
+    uint8_t * hdr_data_ptr = NULL;
+    void * hw_keys_hash_ptr = NULL;
+    uint64_t hw_keys_hash_seeprom_offset = 0;
+
+    assert (i_target!=NULL, "retrieveHwKeysHash: i_target is NULL");
+    assert (i_side!=SBE_SEEPROM_INVALID,
+            "retrieveHwKeysHash: i_side is invalid");
+
+    do{
+
+        // Read SBE Image Header from Seeprom (at the start of the image)
+        size_t hdr_size = ALIGN_8(sizeof(SbeXipHeader));
+
+        hdr_data_ptr = static_cast<uint8_t*>(malloc(hdr_size));
+
+        err = readSbeImageSection(i_target,
+                                  i_side,
+                                  SBE_IMAGE_SEEPROM_ADDRESS,
+                                  hdr_size,
+                                  hdr_data_ptr);
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_sbe, ERR_MRK"retrieveKeysHash: - Error "
+                      "From readSbeImageSection reading SbeXipHeader" );
+            break;
+        }
+
+        // Find pointer to HW Keys Hash from image header image
+        err = getHwKeysHashPtrFromSbeImage(reinterpret_cast<void*>
+                                             (hdr_data_ptr),
+                                           hw_keys_hash_ptr);
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_sbe, ERR_MRK"retrieveKeysHash: - Error "
+                      "From getHwKeysHashPtrFromSbeImage()" );
+            break;
+        }
+
+        // The calculation of HW Keys Hash offset on the SBE Seeprom is:
+        // Start of Image On the SBE Seeprom (aka SBE_IMAGE_SEEPROM_ADDRESS)
+        // + ((hw_keys_hash_ptr - hdr_data_ptr ) + ECC)
+        hw_keys_hash_seeprom_offset =
+                     reinterpret_cast<uint64_t>(hw_keys_hash_ptr);
+        hw_keys_hash_seeprom_offset -=
+                     reinterpret_cast<uint64_t>(hdr_data_ptr);
+        hw_keys_hash_seeprom_offset =
+                     ((hw_keys_hash_seeprom_offset * 9)/8)
+                     + SBE_IMAGE_SEEPROM_ADDRESS;
+
+        assert(hw_keys_hash_seeprom_offset  != 0,
+               "retrieveKeysHash: hw_keys_hash_seeprom_offset==NULL")
+
+        TRACUCOMP(g_trac_sbe, INFO_MRK"retrieveKeysHash: "
+                 "SBE Seeprom Offset = 0x%.16llX",
+                  hw_keys_hash_seeprom_offset);
+
+
+        // Read HW Keys Hash from SBE Seeprom
+        err = readSbeImageSection(i_target,
+                                  i_side,
+                                  hw_keys_hash_seeprom_offset,
+                                  SBE_HW_KEY_HASH_SIZE,
+                                  reinterpret_cast<uint8_t*>(o_hw_keys_hash));
+
+        if (err)
+        {
+            TRACFCOMP(g_trac_sbe, ERR_MRK"retrieveKeysHash: - Error "
+                      "From readSbeImageSection reading HW Keys HASH" );
+            break;
+        }
+
+    }while(0);
+
+    free(hdr_data_ptr);
+    hdr_data_ptr=NULL;
+
+    TRACFCOMP(g_trac_sbe,EXIT_MRK"retrieveHwKeysHash from tgt=0x%.08X side=%d: "
+                         "Seeprom hw_keys_hash_ptr = %p (hash-start=0x%.8X)",
+                         TARGETING::get_huid(i_target), i_side, hw_keys_hash_ptr,
+                         *(reinterpret_cast<uint32_t*>(o_hw_keys_hash)));
+    return err;
 }
 
 } //end SBE Namespace
