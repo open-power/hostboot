@@ -174,7 +174,7 @@ extern "C"
                     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
                 }
 
-                FAPI_DBG("exeecuting training CCS instruction: 0x%llx, 0x%llx", l_inst.arr0, l_inst.arr1);
+                FAPI_DBG("executing training CCS instruction: 0x%llx, 0x%llx", l_inst.arr0, l_inst.arr1);
                 l_program.iv_instructions.push_back(l_inst);
 
                 // We need to figure out how long to wait before we start polling. Each cal step has an expected
