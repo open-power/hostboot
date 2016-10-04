@@ -10365,9 +10365,10 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint8_t>
+        <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
