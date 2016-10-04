@@ -133,4 +133,10 @@
       <ffdc>UNIT_FFDC_DATA_OPCG2</ffdc>
     </hwpError>
   <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_MUX_SEQ_HW_ERROR</rc>
+      <description>Collect hw access errors during p9_pib2pcb_mux_seq</description>
+      <ffdc>UNIT_FFDC_MUX_SEQ_HW_ERROR</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
