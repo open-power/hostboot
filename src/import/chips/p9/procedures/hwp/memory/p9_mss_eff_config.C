@@ -213,7 +213,9 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
     }
 
     {
-        uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] = {0x01, 0x01};
+        // TODO RTC:162080 Logically link ATTR_MSS_MRW_TEMP_REFRESH_RANGE and MODE
+        uint8_t l_temp_refresh_mode[mss::PORTS_PER_MCS] =
+        {fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE, fapi2::ENUM_ATTR_EFF_TEMP_REFRESH_MODE_DISABLE};
         FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_EFF_TEMP_REFRESH_MODE, i_target, l_temp_refresh_mode ) );
     }
 
