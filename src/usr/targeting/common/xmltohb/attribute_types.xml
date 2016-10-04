@@ -16980,7 +16980,7 @@ Measured in GB</description>
         <array>4,32</array>
     </simpleType>
     <persistency>non-volatile</persistency>
-    <readable/>    
+    <readable/>
 </attribute>
 
 <attribute>
@@ -20596,9 +20596,10 @@ Measured in GB</description>
   <description>EQ boot frequency multiplier</description>
   <simpleType>
     <uint16_t>
+      <default>150</default>
     </uint16_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>non-volatile</persistency>
   <readable/>
   <writeable/>
   <readable/>
@@ -20863,9 +20864,10 @@ Measured in GB</description>
   <description>MB_BIT_RATE_DIVISOR_REFCLK</description>
   <simpleType>
     <uint8_t>
+        <default>133</default>
     </uint8_t>
   </simpleType>
-  <persistency>volatile-zeroed</persistency>
+  <persistency>non-volatile</persistency>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_MB_BIT_RATE_DIVISOR_REFCLK</id>

@@ -3934,11 +3934,34 @@ sub generate_proc
         print "    <!-- End PM_ attributes -->\n";
     }
 
+    my $bootFreq = $reqPol->{'boot-frequency'}->{content};
+    #TODO RTC:162075 need to update this with real MRW value
+    my $divisorRefclk = 133;
+
+    #Assume this will be the default, 8
+    my $dpllDivider = 8;
     # Pull the value from the system policy we grabbed earlier
     print "    <attribute>\n";
     print "        <id>BOOT_FREQ_MHZ</id>\n";
     print "        <default>$reqPol->{'boot-frequency'}->{content}</default>\n";
     print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>MB_BIT_RATE_DIVISOR_REFCLK</id>\n";
+    print "        <default>$divisorRefclk</default>\n";
+    print "    </attribute>\n";
+
+    my $bootFreqMult;
+    {
+        use integer;
+        $bootFreqMult = $bootFreq / ($divisorRefclk / $dpllDivider);
+    }
+
+    print "    <attribute>\n";
+    print "        <id>BOOT_FREQ_MULT</id>\n";
+    print "        <default>$bootFreqMult</default>\n";
+    print "    </attribute>\n";
+
 
 
     my $nXpY = "n" . $node . "p" . $proc;
