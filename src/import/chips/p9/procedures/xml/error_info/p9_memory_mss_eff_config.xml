@@ -130,4 +130,19 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
+    <description>
+      There was no match or value found in decoding the power thermal attributes
+    </description>
+    <ffdc>GENERATED_KEY</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

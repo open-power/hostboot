@@ -283,6 +283,7 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > find_targets( con
 /// @param[in] i_key the "map" key
 /// @param[in] o_value the value found from given key
 /// @return the value corresponding to the key
+/// @note VECTOR NEEDS TO BE IN SORTED ORDER
 ///
 template<typename T, typename OT>
 bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
@@ -290,9 +291,9 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
                          OT& o_value)
 {
     // Comparator lambda expression
-    const auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_value)
+    const auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_key)
     {
-        return (i_lhs.first < i_value);
+        return (i_lhs.first < i_key);
     };
 
     // Find iterator to matching key (if it exists)
@@ -312,6 +313,45 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     return true;
 
 }// find_value_from_key
+
+///
+/// @brief find a key value from a vector of STL pairs
+/// @tparam T  input type
+/// @tparam OT the output type to be returned
+/// @param[in] i_vector_of_pairs the input vector of pairs
+/// @param[in] i_value the "map" value, the second entry in the pairs
+/// @param[out] o_key the first entry in the pair
+/// @return FAPI2_RC_SUCCESS
+///
+template<typename T, typename OT>
+fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
+                                      const OT& i_value,
+                                      T& o_key)
+{
+    // Comparator lambda expression
+    const auto compare = [&i_value](const std::pair<T, OT>& i_lhs)
+    {
+        return (i_lhs.second == i_value);
+    };
+
+    // Find iterator to matching key (if it exists)
+    const auto l_value_iterator  =  std::find_if(i_vector_of_pairs.begin(),
+                                    i_vector_of_pairs.end(),
+                                    compare);
+
+    // Did you find it? Let me know.
+    if( (l_value_iterator == i_vector_of_pairs.end()) || (i_value != l_value_iterator->second) )
+    {
+        FAPI_ERR("Did not find a mapping key to value: %d", i_value);
+        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+
+    o_key = l_value_iterator->first;
+    return fapi2::FAPI2_RC_SUCCESS;
+
+}// find_value_from_key
+
+
 
 ///
 /// @brief find a key value from a C-style array of STL pairs
