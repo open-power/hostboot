@@ -13931,8 +13931,12 @@ Measured in GB</description>
     <description>
         HWP/Init "risk level" enabled. Used by HB to pass to HB driven HWPs.
         FALSE = 0x0,TRUE = 0x1
+        Override Attribute
     </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
@@ -20366,7 +20370,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-
+<!-- Deprecated -->
 <attribute>
   <id>NODE_POS</id>
   <description>Indicate the node position in FSP based systems
@@ -20384,6 +20388,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>CHIP_POS</id>
   <description>Indicate the chip position</description>
@@ -20400,7 +20405,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-
+<!--Deprecated-->
 <attribute>
   <id>FUNCTIONAL_EQ_EC_VALID</id>
   <description>
@@ -20455,6 +20460,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>I2C_BUS_DIV_REF_VALID</id>
   <description>Indicates the validity of ref clock I2C bus divider consumed by
@@ -20473,6 +20479,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>FW_MODE_FLAGS_VALID</id>
   <description>Indicates the validity of FW flags. Ex: ISTEP_MODE,
@@ -20492,7 +20499,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
-
+<!-- Deprecated -->
 <attribute>
   <id>SBE_RUNTIME_MODE</id>
   <description>Indicates that SBE should go directly to runtime functionality
@@ -20510,6 +20517,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>IS_SP_MODE</id>
   <description>Indicates whether we are connected to FSP or not
@@ -20528,6 +20536,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>SBE_FFDC_ENABLE</id>
   <description>Indicates whether SBE should collect FFDC
@@ -20546,6 +20555,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>SBE_INTERNAL_FFDC_ENABLE</id>
   <description>Indicates that the SBE should send back internal FFDC on any
@@ -20564,6 +20574,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>BOOT_FREQUENCY_VALID</id>
   <description>Indicates if BOOT_FREQ_MULT and NEST_PLL_BUCKET are valid
@@ -20597,6 +20608,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>HWP_CONTROL_FLAGS_VALID</id>
   <description>
@@ -20617,8 +20629,10 @@ Measured in GB</description>
 
 <attribute>
   <id>SYS_FORCE_ALL_CORES</id>
-  <description>Indicates that SBE should init all cores
+  <description>
+  Indicates that SBE should init all cores
   FALSE = 0x0,TRUE = 0x1
+  Override Attribute
   </description>
   <simpleType>
     <uint8_t>
@@ -20635,9 +20649,11 @@ Measured in GB</description>
 
 <attribute>
   <id>DISABLE_HBBL_VECTORS</id>
-  <description>BootLoader HWP flag to not place 12K exception vectors.
+  <description>
+  BootLoader HWP flag to not place 12K exception vectors.
   This flag is only applicable when security is disabled.
   FALSE = 0x0,TRUE = 0x1
+  Override Attribute
   </description>
   <simpleType>
     <uint8_t>
@@ -20652,6 +20668,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>CHIP_SELECTION_VALID</id>
   <description>Indicates that master/slave, node/chip selection attributes
@@ -20670,6 +20687,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>CHIP_SELECTION</id>
   <description>master/slave bit
@@ -20687,6 +20705,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>SCRATCH6_VALID</id>
   <description>Indicate if scratch reg6 bits are valid
@@ -20706,6 +20725,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--Deprecated-->
 <attribute>
   <id>SCRATCH7_VALID</id>
   <description>Indicate if scratch reg7 bits are valid
@@ -20758,6 +20778,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>BRANCH_PIBMEM_ADDR</id>
   <description>Bransh Pibmem address</description>
@@ -20788,6 +20809,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>I2C_BUS_DIV_NEST</id>
   <description>I2C Bus speed based on nest freq, ref clock</description>
@@ -20803,6 +20825,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>LEN_OF_SEEPROM_DATA</id>
   <description>Length of Seeprom data</description>
@@ -20818,6 +20841,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>MB_BIT_RATE_DIVISOR_PLL</id>
   <description>MN Bitrate divisor pll</description>
@@ -20833,6 +20857,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>MB_BIT_RATE_DIVISOR_REFCLK</id>
   <description>MB_BIT_RATE_DIVISOR_REFCLK</description>
@@ -20882,6 +20907,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>PROC_PB_BNDY_DMIPLL_DATA</id>
   <description>Ring image for pb_bndy_dmipll ring creator:
@@ -20898,6 +20924,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
   <description>Ring image for pb_bndy_dmipll ring for DC cal creator:
@@ -20914,6 +20941,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>PROC_PERV_BNDY_PLL_DATA</id>
   <description>Ring image for perv_bndy_pll ring containing filter plls
@@ -20930,6 +20958,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>PROC_SBE_MASTER_CHIP</id>
   <description>
@@ -20949,6 +20978,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>START_PIBMEM_ADDR</id>
   <description>Start of PIBMEM address</description>
@@ -20964,6 +20994,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>START_SEEPROM_ADDR</id>
   <description>Start of seeprom address</description>
@@ -20979,6 +21010,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>WAIT_N0</id>
   <description>Wait N0</description>
@@ -20994,6 +21026,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>WAIT_N1</id>
   <description>WAIT_N1</description>
@@ -21009,6 +21042,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>WAIT_N2</id>
   <description>WAIT_N2</description>
@@ -21024,6 +21058,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!-- Deprecated -->
 <attribute>
   <id>WAIT_N3</id>
   <description>WAIT_N3</description>
@@ -21087,6 +21122,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>MASTER_CORE</id>
   <description>Indicates the master boot core chiplet selected by p9_sbe_select_ex.
@@ -21104,6 +21140,7 @@ Measured in GB</description>
   </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
   <id>MASTER_EX</id>
   <description>Indicates the EX targert associated with the master boot core selected
@@ -28018,6 +28055,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
    <id>PIBMEM_REPAIR0</id>
     <description>
@@ -28035,6 +28073,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
     <id>PIBMEM_REPAIR1</id>
     <description>
@@ -28052,6 +28091,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--SBE ONLY-->
 <attribute>
     <id>PIBMEM_REPAIR2</id>
     <description>
@@ -29415,7 +29455,7 @@ Measured in GB</description>
     <id>NEST_MEM_X_O_PCI_BYPASS</id>
     <description>
         Skip the locking sequence and check for lock of NEST/MEM/XBUS/OBUS/PCI PLLs
-        Override attr
+        Override attribute
     </description>
     <simpleType>
         <uint8_t>
