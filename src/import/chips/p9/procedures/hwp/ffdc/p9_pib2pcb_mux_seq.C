@@ -43,10 +43,16 @@
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
 
+#define RC_CONDITIONAL_SET_BIT(RC, BUFFER, BIT) \
+    if (RC) \
+    { \
+        BUFFER.setBit<BIT>(); \
+    }
 
 fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
                                      fapi2::ReturnCode& o_rc)
 {
+    fapi2::ReturnCode l_rc;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target_chip =
         *(reinterpret_cast<const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> *>(i_chip.ptr()));
 
@@ -58,6 +64,7 @@ fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
     fapi2::buffer<uint64_t>l_opcg_0;
     fapi2::buffer<uint64_t>l_opcg_1;
     fapi2::buffer<uint64_t>l_opcg_2;
+    fapi2::buffer<uint64_t>l_hw_access_errors;
 
     fapi2::ffdc_t UNIT_FFDC_DATA_SL;
     fapi2::ffdc_t UNIT_FFDC_DATA_NSL;
@@ -67,66 +74,81 @@ fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
     fapi2::ffdc_t UNIT_FFDC_DATA_OPCG0;
     fapi2::ffdc_t UNIT_FFDC_DATA_OPCG1;
     fapi2::ffdc_t UNIT_FFDC_DATA_OPCG2;
+    // FFDC to keep track of scom fails in pib2pcb_mux_seq
+    fapi2::ffdc_t UNIT_FFDC_MUX_SEQ_HW_ERROR;
 
     fapi2::buffer<uint32_t> l_data32_root_ctrl0;
     fapi2::buffer<uint32_t> l_data32;
     FAPI_INF("p9_pib2pcb_mux_seq: Entering ...");
 
     //Setting ROOT_CTRL0 register value
-    fapi2::getCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::getCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 0)
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_VDD2VIO_LVL_FENCE_DC>();  //CFAM.ROOT_CTRL0.VDD2VIO_LVL_FENCE_DC = 0
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 1)
 
     //Setting PERV_CTRL0 register value
-    fapi2::getCfamRegister(l_target_chip, PERV_PERV_CTRL0_FSI, l_data32);
+    l_rc = fapi2::getCfamRegister(l_target_chip, PERV_PERV_CTRL0_FSI, l_data32);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 2)
     l_data32.setBit<31>();  //CFAM.PERV_CTRL0.TP_PLLCHIPLET_FORCE_OUT_EN_DC = 1
-    fapi2::putCfamRegister(l_target_chip, PERV_PERV_CTRL0_FSI, l_data32);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_PERV_CTRL0_FSI, l_data32);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 3)
 
     //Setting ROOT_CTRL0 register value
     //CFAM.ROOT_CTRL0.TPFSI_TP_FENCE_VTLIO_DC = 0
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_TPFSI_TP_FENCE_VTLIO_DC>();
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 4)
 
     //Setting ROOT_CTRL0 register value
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_FENCE0_DC>();  //CFAM.ROOT_CTRL0.FENCE0_DC = 0
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_FENCE1_DC>();  //CFAM.ROOT_CTRL0.FENCE1_DC = 0
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_FENCE2_DC>();  //CFAM.ROOT_CTRL0.FENCE2_DC = 0
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 5)
 
     //Setting ROOT_CTRL0 register value
     l_data32_root_ctrl0.setBit<PERV_ROOT_CTRL0_SET_OOB_MUX>();  //CFAM.ROOT_CTRL0.OOB_MUX = 1
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 6)
 
     //Setting ROOT_CTRL0 register value
     l_data32_root_ctrl0.setBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>();  //CFAM.ROOT_CTRL0.PCB_RESET_DC = 1
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 7)
 
     //Setting ROOT_CTRL0 register value
     l_data32_root_ctrl0.setBit<PERV_ROOT_CTRL0_SET_PIB2PCB_DC>();  //CFAM.ROOT_CTRL0.PIB2PCB_DC = 1
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 8)
 
     //Setting ROOT_CTRL0 register value
     l_data32_root_ctrl0.clearBit<PERV_ROOT_CTRL0_SET_PCB_RESET_DC>();  //CFAM.ROOT_CTRL0.PCB_RESET_DC = 0
-    fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    l_rc = fapi2::putCfamRegister(l_target_chip, PERV_ROOT_CTRL0_FSI, l_data32_root_ctrl0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 9)
 
     FAPI_INF("p9_pib2pcb_mux_seq: Check for Clocks running SL");
     //Getting CLOCK_STAT_SL register value
-    fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_SL,
-                   l_sl_clock_status); //l_sl_clock_status = PERV.CLOCK_STAT_SL
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_SL,
+                          l_sl_clock_status); //l_sl_clock_status = PERV.CLOCK_STAT_SL
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 10)
 
     UNIT_FFDC_DATA_SL.ptr() = l_sl_clock_status.pointer();
     UNIT_FFDC_DATA_SL.size() = l_sl_clock_status.template getLength<uint8_t>();
 
     //Getting CLOCK_STAT_NSL register value
-    fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_NSL,
-                   l_nsl_clock_status); //l_nsl_clock_status = PERV.CLOCK_STAT_NSL
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_NSL,
+                          l_nsl_clock_status); //l_nsl_clock_status = PERV.CLOCK_STAT_NSL
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 11)
 
     UNIT_FFDC_DATA_NSL.ptr() =  l_nsl_clock_status.pointer();
     UNIT_FFDC_DATA_NSL.size() = l_nsl_clock_status.template getLength<uint8_t>();
 
     //Getting CLOCK_STAT_ARY register value
-    fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_ARY,
-                   l_ary_clock_status); //l_ary_clock_status = PERV.CLOCK_STAT_ARY
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_CLOCK_STAT_ARY,
+                          l_ary_clock_status); //l_ary_clock_status = PERV.CLOCK_STAT_ARY
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 12)
 
     UNIT_FFDC_DATA_ARY.ptr()  = l_ary_clock_status.pointer();
     UNIT_FFDC_DATA_ARY.size() = l_ary_clock_status.template getLength<uint8_t>();
@@ -134,13 +156,19 @@ fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
     FAPI_INF("p9_pib2pcb_mux_seq: SL Clock status register is %#018lX, %#018lX, %#018lX,", l_sl_clock_status,
              l_nsl_clock_status, l_ary_clock_status);
 
-    fapi2::getScom(l_target_chip, PERV_TP_SCAN_REGION_TYPE, l_scan_region);
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_SCAN_REGION_TYPE, l_scan_region);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 13)
 
     UNIT_FFDC_DATA_SCAN_REGION.ptr()  = l_scan_region.pointer();
     UNIT_FFDC_DATA_SCAN_REGION.size() = l_scan_region.template getLength<uint8_t>();
     FAPI_INF("p9_pib2pcb_mux_seq: Scan region and type is %#018lX", l_scan_region);
 
-    fapi2::getScom(l_target_chip, PERV_TP_CLK_REGION, l_clk_region);
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_CLK_REGION, l_clk_region);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 14)
+
+    UNIT_FFDC_DATA_CLK_REGION.ptr()  = l_clk_region.pointer();
+    UNIT_FFDC_DATA_CLK_REGION.size() = l_clk_region.template getLength<uint8_t>();
+    FAPI_INF("p9_pib2pcb_mux_seq: Clk region and type is %#018lX", l_clk_region);
 
     UNIT_FFDC_DATA_CLK_REGION.ptr()  = l_clk_region.pointer();
     UNIT_FFDC_DATA_CLK_REGION.size() = l_clk_region.template getLength<uint8_t>();
@@ -149,23 +177,32 @@ fapi2::ReturnCode p9_pib2pcb_mux_seq(const fapi2::ffdc_t& i_chip,
     // Add FFDC specified by RC_RC_COLLECT_CC_STATUS_REGISTERS
     FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_COLLECT_CC_STATUS_REGISTERS);
 
-    fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG0, l_opcg_0);
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG0, l_opcg_0);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 15)
 
     UNIT_FFDC_DATA_OPCG0.ptr()  = l_opcg_0.pointer();
     UNIT_FFDC_DATA_OPCG0.size() = l_opcg_0.template getLength<uint8_t>();
 
-    fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG1, l_opcg_1);
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG1, l_opcg_1);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 16)
 
     UNIT_FFDC_DATA_OPCG1.ptr()  = l_opcg_1.pointer();
     UNIT_FFDC_DATA_OPCG1.size() = l_opcg_1.template getLength<uint8_t>();
 
-    fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG2, l_opcg_2);
+    l_rc = fapi2::getScom(l_target_chip, PERV_TP_OPCG_REG2, l_opcg_2);
+    RC_CONDITIONAL_SET_BIT(l_rc, l_hw_access_errors, 17)
 
     UNIT_FFDC_DATA_OPCG2.ptr()  = l_opcg_2.pointer();
     UNIT_FFDC_DATA_OPCG2.size() = l_opcg_2.template getLength<uint8_t>();
 
     // Add FFDC specified by RC_OPCG_REGISTERS
     FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_OPCG_REGISTERS);
+
+    UNIT_FFDC_MUX_SEQ_HW_ERROR.ptr()  = l_hw_access_errors.pointer();
+    UNIT_FFDC_MUX_SEQ_HW_ERROR.size() = l_hw_access_errors.template getLength<uint8_t>();
+
+    // Add FFDC specified by RC_MUX_SEQ_HW_ERROR
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_MUX_SEQ_HW_ERROR);
 
     FAPI_INF("p9_pib2pcb_mux_seq: Exiting ...");
 
