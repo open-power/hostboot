@@ -88,6 +88,8 @@ class kind
             iv_dimm_type = i_rhs.iv_dimm_type;
             iv_rows = i_rhs.iv_rows;
             iv_size = i_rhs.iv_size;
+            iv_mfgid = i_rhs.iv_mfgid;
+            iv_stack_type = i_rhs.iv_stack_type;
             return *this;
         }
 
@@ -124,7 +126,8 @@ class kind
             FAPI_TRY( mss::eff_num_ranks_per_dimm(i_target, iv_total_ranks) );
             FAPI_TRY( mss::eff_dram_row_bits(i_target, iv_rows) );
             FAPI_TRY( mss::eff_dimm_size(i_target, iv_size) );
-
+            FAPI_TRY( mss::eff_dram_mfg_id(i_target, iv_mfgid) );
+            FAPI_TRY( mss::eff_prim_stack_type( i_target, iv_stack_type) );
             return;
 
         fapi_try_exit:
@@ -143,6 +146,8 @@ class kind
         /// @param[in] i_dimm_type DIMM type (e.g. RDIMM)
         /// @param[in] i_rows number of rows in the DRAM
         /// @param[in] i_size the overal size of the DIMM in GB
+        /// @param[in] i_mfgid the dram manufacturer id of the dimm, defaulted to 0
+        /// @param[in] i_stack_type dram die type, single die package or 3DS
         /// @note can't be constexpr as fapi2::Target doesn't have a constexpr ctor.
         ///
         kind( const uint8_t i_master_ranks,
@@ -152,7 +157,9 @@ class kind
               const uint8_t i_dram_generation,
               const uint8_t i_dimm_type,
               const uint8_t i_rows,
-              const uint32_t i_size ):
+              const uint32_t i_size,
+              const uint16_t i_mfgid = 0,
+              const uint8_t i_stack_type = fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP):
             iv_target(0),
             iv_master_ranks(i_master_ranks),
             iv_total_ranks(i_total_ranks),
@@ -162,7 +169,9 @@ class kind
             iv_dimm_type(i_dimm_type),
             iv_rows(i_rows),
             // TK consider calculating size rather than requiring it be set.
-            iv_size(i_size)
+            iv_size(i_size),
+            iv_mfgid(i_mfgid),
+            iv_stack_type(i_stack_type)
         {
             // Bit of an idiot-check to be sure a hand-crafted dimm::kind make sense wrt slaves, masters, packages, etc.
             if (iv_master_ranks > iv_total_ranks)
@@ -187,6 +196,8 @@ class kind
         uint8_t iv_dimm_type;
         uint8_t iv_rows;
         uint32_t iv_size;
+        uint16_t iv_mfgid;
+        uint8_t iv_stack_type;
 };
 
 }
