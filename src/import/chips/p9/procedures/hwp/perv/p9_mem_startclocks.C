@@ -45,7 +45,6 @@
 #include "p9_quad_scom_addresses_fld.H"
 #include "p9_sbe_common.H"
 
-
 enum P9_MEM_STARTCLOCKS_Private_Constants
 {
     CLOCK_CMD = 0x1,
@@ -102,6 +101,9 @@ fapi2::ReturnCode p9_mem_startclocks(const
 
             FAPI_INF("Call p9_mem_startclocks_flushmode for Mc chiplets");
             FAPI_TRY(p9_mem_startclocks_flushmode(l_trgt_chplt));
+
+            FAPI_INF("Call p9_sbe_common_configure_chiplet_FIR for MC chiplets");
+            FAPI_TRY(p9_sbe_common_configure_chiplet_FIR(l_trgt_chplt));
 
         }
     }
