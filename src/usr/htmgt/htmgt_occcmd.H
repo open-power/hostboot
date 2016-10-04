@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,10 +36,10 @@
 namespace HTMGT
 {
 
-    const uint32_t OCC_CMD_ADDR        = 0x001EE000;
-    const uint32_t OCC_RSP_ADDR        = 0x001EF000;
+    const uint32_t OCC_CMD_ADDR        = 0x000E0000;
+    const uint32_t OCC_RSP_ADDR        = 0x000E1000;
     const uint32_t OCC_MAX_DATA_LENGTH = 0x00001000;
-    const uint32_t OCC_RSP_SRAM_ADDR   = 0xFFFF7000;
+    const uint32_t OCC_RSP_SRAM_ADDR   = 0xFFFBF000;
 
     // The following header lengths include the 2 byte checksum
     const uint16_t OCC_CMD_HDR_LENGTH = 6;

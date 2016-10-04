@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -452,30 +452,6 @@ public:
 
     }
 
-    void testReadPstateTable( void )
-    {
-        TS_TRACE(ENTER_MRK"HTMGT::testReadPstateTable");
-
-        TargetHandleList occs;
-        TargetHandleList::iterator occ;
-        size_t size = sizeof(ATTR_PSTATE_TABLE_type) + 4;
-        uint8_t data[size];
-
-        getAllChiplets(occs, TYPE_OCC, true);
-
-        for(occ=occs.begin(); occ !=occs.end(); ++occ)
-        {
-            size = sizeof(ATTR_PSTATE_TABLE_type) + 4;
-            memset(data, 0, size);
-            getPstateTableMessageData(*occ, data, size);
-
-            if(size != sizeof(ATTR_PSTATE_TABLE_type) + 4)
-            {
-                TS_FAIL("Wrong pstate table size. %d",
-                        size);
-            }
-        }
-    }
 
     void testApssConfigData()
     {

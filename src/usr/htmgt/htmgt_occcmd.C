@@ -262,15 +262,7 @@ namespace HTMGT
                     break;
 
                 default:
-                    if ((OCC_CMD_SETUP_CFG_DATA==iv_OccCmd.cmdType) &&
-                        (iv_OccCmd.dataLength > 0) &&
-                        ((iv_OccCmd.cmdData[0] ==
-                          OCC_CFGDATA_PSTATE_SSTRUCT)))
-                    {
-                        // Dont trace Pstate data (unless full tracing)
-                        o_cmdWasTraced = (G_debug_trace &
-                                          DEBUG_TRACE_OCCCMD_FULL);
-                    }
+                    // Do nothing
                     break;
             }
         }
@@ -626,19 +618,20 @@ namespace HTMGT
                 const occPollRspStruct_t poll_rsp_data = {
                     // Status 0x8B = Master, AttnEnabled, ObsReady, ActReady
                     0x8B,
-                    0, // extStatus;
-                    0x01, // occsPresent;
-                    0, // requestedCfg;
-                    0, // state;
-                    0x0000, // reserved;
-                    0, // errorId;
+                    0,          // extStatus;
+                    0x01,       // occsPresent;
+                    0,          // requestedCfg;
+                    0,          // state;
+                    0,          // mode
+                    0,          // IPSStatus
+                    0,          // errorId;
                     0x00000000, // errorAddress;
-                    0x0000, // errorLength;
-                    0x0000, // reserved2;
+                    0x0000,     // errorLength;
+                    0x0000,     // reserved2;
                     { "occ825_simicsFF" }, // codeLevel[16];
                     { 'S', 'E', 'N', 'S', 'O', 'R' }, // sensor[6];
-                    0, // numBlocks;
-                    0x01 // version;
+                    0,          // numBlocks;
+                    0x01        // version;
                     //uint8_t   sensorData[4049];
                 };
                 UINT16_PUT(&rspBuffer[3], dataLength);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,18 +46,15 @@ namespace HTMGT
     errlHndl_t OccManager::_sendOccPoll(const bool i_flushAllErrors,
                                         TARGETING::Target * i_occTarget)
     {
-        errlHndl_t err = NULL;
+        errlHndl_t l_err = NULL;
 
         TMGT_INF("sendOccPoll(flush=%c)", i_flushAllErrors?'y':'n');
 
-        for(occList_t::const_iterator occ_itr = iv_occArray.begin();
-            (occ_itr != iv_occArray.end()) && (NULL == err);
-            ++occ_itr)
+        for( const auto & l_occ : iv_occArray )
         {
-            Occ * occ = *occ_itr;
-            if(NULL == i_occTarget || occ->iv_target == i_occTarget)
+            if(NULL == i_occTarget || l_occ->iv_target == i_occTarget)
             {
-                err = occ->pollForErrors(i_flushAllErrors);
+                l_err = l_occ->pollForErrors(i_flushAllErrors);
             }
         }
 
@@ -66,7 +63,7 @@ namespace HTMGT
             TMGT_ERR("_sendOccPoll(): OCCs need to be reset");
         }
 
-        return err;
+        return l_err;
     }
 
 
@@ -94,7 +91,7 @@ namespace HTMGT
             do
             {
                 // create 1 byte buffer for poll command data
-                const uint8_t l_cmdData[1] = { 0x10 /*version*/ };
+                const uint8_t l_cmdData[1] = { 0x20 /*version*/ };
 
                 OccCmd cmd(this,
                            OCC_CMD_POLL,

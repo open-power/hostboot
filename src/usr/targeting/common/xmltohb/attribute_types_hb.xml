@@ -629,10 +629,11 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
     <description>
-        Minimum power cap in Watts
+        Minimum hard power cap in Watts
     </description>
     <simpleType>
         <uint64_t></uint64_t>
@@ -640,6 +641,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
     <description>
@@ -652,6 +654,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
     <description>
@@ -701,16 +704,18 @@
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
     <description>ADC Channel IPMI sensor numbers. 16 channels.</description>
     <simpleType>
-        <uint16_t></uint16_t>
+        <uint32_t></uint32_t>
         <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
 <attribute>
     <id>ADC_CHANNEL_GNDS</id>
     <description>ADC Channel ground. 16 channels.</description>

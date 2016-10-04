@@ -1156,7 +1156,7 @@ namespace SENSOR
 
     // interface to retrieve the APSS channel sensor numbers.
     errlHndl_t getAPSSChannelSensorNumbers(
-            const uint16_t (* &o_sensor_numbers)[16])
+            const uint32_t (* &o_sensor_numbers)[16])
     {
 
         TARGETING::TargetHandle_t l_sys;

@@ -28,7 +28,6 @@
 #include <config.h>
 #include <errl/errlentry.H>
 #include <targeting/common/commontargeting.H>
-#include <fapi.H>
 
 namespace HBOCC
 {

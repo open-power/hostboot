@@ -112,6 +112,7 @@ namespace HTMGT
              * @param[in] i_masterCapable  Is OCC capable of being master
              * @param[in] i_homer          Virtual address of HOMER
              * @param[in] i_target         OCC target pointer
+             * @param[in] i_role           The role of this OCC
              */
             Occ(const uint8_t   i_instance,
                 const bool      i_masterCapable,
