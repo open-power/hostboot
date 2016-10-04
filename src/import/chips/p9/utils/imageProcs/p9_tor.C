@@ -1517,6 +1517,12 @@ int tor_access_ring(  void*
                 case 19:
                 case 20:
                 case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
                     l_sbeTorId = EQ_CPLT;
                     break;
 
