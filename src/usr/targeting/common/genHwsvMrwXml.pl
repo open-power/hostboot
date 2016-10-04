@@ -3994,6 +3994,22 @@ sub generate_proc
         }
     }
 
+    #TODO RTC:162090 Get real values from MRW when they are available
+    print "    <attribute>\n";
+    print "        <id>CLOCK_PLL_MUX</id>\n";
+    print "        <default>0x8c010000</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>CLOCK_PLL_MUX0</id>\n";
+    print "        <default>0x03</default>\n";
+    print "    </attribute>\n";
+
+    print "    <attribute>\n";
+    print "        <id>OBUS_RATIO_VALUE</id>\n";
+    print "        <default>0x0</default>\n";
+    print "    </attribute>\n";
+
     print "</targetInstance>\n";
 
 }
