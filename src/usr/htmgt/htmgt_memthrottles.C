@@ -30,10 +30,8 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
-#include <fapi.H>
-#include <fapiPlatHwpInvoker.H>
-#include <mss_bulk_pwr_throttles.H>
-#include <mss_util_to_throttle.H>
+#include <fapi2.H>
+
 
 
 using namespace TARGETING;
@@ -60,7 +58,6 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
                         const uint32_t i_nSafeModeMBA,
                         const uint8_t i_utilization)
 {
-    TargetHandleList::iterator mba;
     bool useSafeMode = false;
     bool throttleError = false;
     uint32_t nUtilBased = 0;
@@ -72,9 +69,9 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
     targetService().getTopLevelTarget(sys);
     assert(sys != NULL);
 
-    for (mba=i_mbas.begin(); mba!=i_mbas.end(); ++mba)
+    for( const auto & mba : i_mbas )
     {
-        mbaHuid = (*mba)->getAttr<ATTR_HUID>();
+        mbaHuid = mba->getAttr<ATTR_HUID>();
         useSafeMode = true;
         nUtilBased = 0;
 
@@ -84,14 +81,14 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
             //possible throttle setting based on the minimum
             //utilization percentage.
             errlHndl_t err = NULL;
-            const fapi::Target fapiTarget(fapi::TARGET_TYPE_MBA_CHIPLET,
-                                          const_cast<Target*>(*mba));
+            const fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTarget(mba);
 
             //Set this so the procedure can use it
-            (*mba)->setAttr<ATTR_MSS_DATABUS_UTIL_PER_MBA>(i_utilization);
+            mba->setAttr<ATTR_MSS_DATABUS_UTIL_PER_MBA>(i_utilization);
 
+/*          TODO: RTC 155033 - Memory Throttle Settings
             FAPI_INVOKE_HWP(err, mss_util_to_throttle, fapiTarget);
-
+*/
             if (err)
             {
                 //Ignore the error and just use safe
@@ -106,7 +103,7 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
             else
             {
                 //get the procedure output
-                nUtilBased = (*mba)->getAttr<ATTR_MSS_UTIL_N_PER_MBA>();
+                nUtilBased = mba->getAttr<ATTR_MSS_UTIL_N_PER_MBA>();
 
                 if (0 != nUtilBased)
                 {
@@ -156,7 +153,7 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
         TMGT_INF("memPowerThrottleOT: MBA 0x%X: N Util OT = 0x%X",
                  mbaHuid, nUtilBased);
 
-        (*mba)->setAttr<ATTR_OT_MIN_N_PER_MBA>(nUtilBased);
+        mba->setAttr<ATTR_OT_MIN_N_PER_MBA>(nUtilBased);
     }
 
 
@@ -181,7 +178,7 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
  * @param[out] o_nChip - set to the N_PER_CHIP numerator value
  *                  (don't use if safemode=true)
  */
-void doMBAThrottleCalc(TargetHandle_t i_mba,
+void doMBAThrottleCalc(TARGETING::Target * i_mba,
                        const uint32_t i_wattTarget,
                        const uint8_t i_utilization,
                        bool & o_useSafeMode,
@@ -194,15 +191,19 @@ void doMBAThrottleCalc(TargetHandle_t i_mba,
     o_nMBA = 0;
     o_nChip = 0;
 
+    TARGETING::ATTR_MSS_MEM_WATT_TARGET_type l_wattArray = {{i_wattTarget,
+                                                             i_wattTarget},
+                                                            {i_wattTarget,
+                                                             i_wattTarget}};
     //Set the values the procedures need
-    i_mba->setAttr<ATTR_MSS_MEM_WATT_TARGET>(i_wattTarget);
+    i_mba->setAttr<ATTR_MSS_MEM_WATT_TARGET>(l_wattArray);
     i_mba->setAttr<ATTR_MSS_DATABUS_UTIL_PER_MBA>(i_utilization);
 
-    const fapi::Target fapiTarget(fapi::TARGET_TYPE_MBA_CHIPLET,
-                                  i_mba);
+    const fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTarget(i_mba);
 
+/*  TODO This hwp is changing for p9
     FAPI_INVOKE_HWP(err, mss_bulk_pwr_throttles, fapiTarget);
-
+*/
     if (err)
     {
         TMGT_ERR("doMBAThrottleCalc: Failed call to mss_bulk_pwr_throttles"
@@ -245,8 +246,9 @@ void doMBAThrottleCalc(TargetHandle_t i_mba,
             //Make sure the calculated throttles meet the min
             //utilization, if provided.
 
-            FAPI_INVOKE_HWP(err, mss_util_to_throttle, fapiTarget);
-
+/*           TODO this hwp is changing for p9
+             FAPI_INVOKE_HWP(err, mss_util_to_throttle, fapiTarget);
+*/
             if (err)
             {
                 TMGT_ERR("doMBAThrottleCalc: Failed call to "
@@ -323,7 +325,6 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
                               const uint8_t i_efficiency)
 {
     Target* sys = NULL;
-    TargetHandleList::iterator mba;
     uint32_t power = 0;
     uint32_t wattTarget = 0;
     uint32_t nChip = 0;
@@ -352,13 +353,13 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
     TMGT_INF("memPowerThrottleRedPower: power = %d, wattTarget = %d",
              power, wattTarget);
 
-    for (mba=i_mbas.begin(); mba!=i_mbas.end(); ++mba)
+    for( const auto & mba : i_mbas )
     {
         useSafeMode = false;
         nMBA = nChip = 0;
 
         //Run the calculations
-        doMBAThrottleCalc(*mba, wattTarget, i_utilization,
+        doMBAThrottleCalc(mba, wattTarget, i_utilization,
                           useSafeMode, nMBA, nChip);
 
         if (useSafeMode)
@@ -367,16 +368,16 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
             nChip  = i_nSafeModeChip;
             TMGT_INF("memPowerThrottleRedPower: MBA 0x%X using safemode "
                      "numerator",
-                     (*mba)->getAttr<ATTR_HUID>());
+                     mba->getAttr<ATTR_HUID>());
         }
 
         //Set the attributes we'll send to OCC later
         TMGT_INF("memPowerThrottleRedPower: MBA 0x%X:  N_PER_MBA = 0x%X, "
                  "N_PER_CHIP = 0x%X",
-                 (*mba)->getAttr<ATTR_HUID>(), nMBA, nChip);
+                 mba->getAttr<ATTR_HUID>(), nMBA, nChip);
 
-        (*mba)->setAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(nMBA);
-        (*mba)->setAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(nChip);
+        mba->setAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(nMBA);
+        mba->setAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(nChip);
 
     }
 
@@ -403,7 +404,6 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
                              const uint8_t i_efficiency)
 {
     Target* sys = NULL;
-    TargetHandleList::iterator mba;
     uint32_t power = 0;
     uint32_t wattTarget = 0;
     uint32_t nChip = 0;
@@ -432,13 +432,13 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
     TMGT_INF("memPowerThrottleOverSub: power = %d, wattTarget = %d",
              power, wattTarget);
 
-    for (mba=i_mbas.begin(); mba!=i_mbas.end(); ++mba)
+    for ( const auto & mba : i_mbas )
     {
         useSafeMode = false;
         nMBA = nChip = 0;
 
         //Run the calculations
-        doMBAThrottleCalc(*mba, wattTarget, i_utilization,
+        doMBAThrottleCalc(mba, wattTarget, i_utilization,
                           useSafeMode, nMBA, nChip);
 
         if (useSafeMode)
@@ -447,16 +447,16 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
             nChip  = i_nSafeModeChip;
             TMGT_INF("memPowerThrottleOverSub: MBA 0x%X using safemode "
                      "numerator",
-                     (*mba)->getAttr<ATTR_HUID>());
+                     mba->getAttr<ATTR_HUID>());
         }
 
         //Set the attributes we'll send to OCC later
         TMGT_INF("memPowerThrottleOverSub: MBA 0x%X:  N_PER_MBA = 0x%X, "
                  "N_PER_CHIP = 0x%X",
-                 (*mba)->getAttr<ATTR_HUID>(), nMBA, nChip);
+                 mba->getAttr<ATTR_HUID>(), nMBA, nChip);
 
-        (*mba)->setAttr<ATTR_OVERSUB_N_PER_MBA>(nMBA);
-        (*mba)->setAttr<ATTR_OVERSUB_N_PER_CHIP>(nChip);
+        mba->setAttr<ATTR_OVERSUB_N_PER_MBA>(nMBA);
+        mba->setAttr<ATTR_OVERSUB_N_PER_CHIP>(nChip);
 
     }
 

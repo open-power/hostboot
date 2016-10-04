@@ -28,7 +28,6 @@
 #include "htmgt_activate.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
-#include "genPstate.H"
 #include "htmgt_memthrottles.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
@@ -78,13 +77,6 @@ namespace HTMGT
                         do
                         {
 #ifndef __HOSTBOOT_RUNTIME
-                            // Build normal pstate tables (once per IPL)
-                            l_err = genPstateTables(true);
-                            if(l_err)
-                            {
-                                break;
-                            }
-
                             // Calc memory throttles (once per IPL)
                             calcMemThrottles();
 #endif
@@ -506,16 +498,6 @@ namespace HTMGT
             //    }
             //}
         }
-        else if ((i_data[0] == ATTR_PSTATE) || (i_data[0] == ATTR_PSTATE_MFG))
-        {
-            uint8_t selectedOcc = 0;
-            if (i_length >= 2)
-            {
-                selectedOcc = i_data[1];
-            }
-            getPstateTable((i_data[0] == ATTR_PSTATE),
-                           selectedOcc, o_attrLength, o_attrData);
-        }
         else
         {
             TMGT_ERR("dumpAttribute: Invalid attribute specified 0x%02X "
@@ -542,223 +524,171 @@ namespace HTMGT
         htmgtReasonCode failingSrc = HTMGT_RC_NO_ERROR;
         o_rspLength = 0;
 
-        if ((i_cmdLength > 0) && (NULL != i_cmdData))
+        err = OccManager::buildOccs();
+        if (NULL == err)
         {
-            switch (i_cmdData[0])
+            if ((i_cmdLength > 0) && (NULL != i_cmdData))
             {
-                case PASSTHRU_OCC_STATUS:
-                    TMGT_INF("passThruCommand: OCC Status");
-                    OccManager::getOccData(o_rspLength, o_rspData);
-                    break;
+                switch (i_cmdData[0])
+                {
+                    case PASSTHRU_OCC_STATUS:
+                        TMGT_INF("passThruCommand: OCC Status");
+                        OccManager::getOccData(o_rspLength, o_rspData);
+                        break;
 
-                case PASSTHRU_GENERATE_MFG_PSTATE:
-                    if (i_cmdLength == 1)
-                    {
-                        TMGT_INF("passThruCommand: Generate MFG pstate tables",
-                                 i_cmdData[1]);
-                        err = genPstateTables(false);
-                    }
-                    else
-                    {
-                        TMGT_ERR("passThruCommand: invalid generate pstate "
-                                 "command length %d", i_cmdLength);
-                        /*@
-                         * @errortype
-                         * @reasoncode   HTMGT_RC_INVALID_LENGTH
-                         * @moduleid     HTMGT_MOD_PASS_THRU
-                         * @userdata1    command data[0-7]
-                         * @userdata2    command data length
-                         * @devdesc      Invalid pass thru command data length
-                         */
-                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                    }
-                    break;
 
-                case PASSTHRU_LOAD_PSTATE:
-                    if (i_cmdLength == 2)
-                    {
-                        const uint8_t pstateType = i_cmdData[1];
-                        if ((0 == pstateType) || (1 == pstateType))
+                    case PASSTHRU_INTERNAL_FLAG:
+                        if (i_cmdLength == 1)
                         {
-                            TMGT_INF("passThruCommand: Load pstate tables "
-                                     "(type: %d)", pstateType);
-                            // 0 = Normal Pstate Tables
-                            err = OccManager::loadPstates(0 == pstateType);
+                            // get internal flag value
+                            o_rspLength = 4;
+                            UINT32_PUT(o_rspData, get_int_flags());
+                        }
+                        else if (i_cmdLength == 5)
+                        {
+                            // set internal flag value
+                            TMGT_INF("passThruCommand: Updating internal flags "
+                                     "from 0x%08X to 0x%08X",
+                                     get_int_flags(), UINT32_GET(&i_cmdData[1]));
+                            set_int_flags(UINT32_GET(&i_cmdData[1]));
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: invalid pstate type "
-                                     "specified: %d", pstateType);
-                            /*@
-                             * @errortype
-                             * @reasoncode   HTMGT_RC_INVALID_PARAMETER
-                             * @moduleid     HTMGT_MOD_PASS_THRU
-                             * @userdata1    command data[0-7]
-                             * @userdata2    command data length
-                             * @devdesc      Invalid load pstate table type
-                             */
-                            failingSrc = HTMGT_RC_INVALID_PARAMETER;
+                            TMGT_ERR("passThruCommand: invalid internal flag "
+                                     "length %d", i_cmdLength);
+                            failingSrc = HTMGT_RC_INVALID_LENGTH;
                         }
-                    }
-                    else
-                    {
-                        TMGT_ERR("passThruCommand: invalid load pstate "
-                                 "command length %d", i_cmdLength);
-                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                    }
-                    break;
+                        break;
 
-                case PASSTHRU_INTERNAL_FLAG:
-                    if (i_cmdLength == 1)
-                    {
-                        // get internal flag value
-                        o_rspLength = 4;
-                        UINT32_PUT(o_rspData, get_int_flags());
-                    }
-                    else if (i_cmdLength == 5)
-                    {
-                        // set internal flag value
-                        TMGT_INF("passThruCommand: Updating internal flags "
-                                 "from 0x%08X to 0x%08X",
-                                 get_int_flags(), UINT32_GET(&i_cmdData[1]));
-                        set_int_flags(UINT32_GET(&i_cmdData[1]));
-                    }
-                    else
-                    {
-                        TMGT_ERR("passThruCommand: invalid internal flag "
-                                 "length %d", i_cmdLength);
-                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                    }
-                    break;
-
-                case PASSTHRU_SEND_OCC_COMMAND:
-                    if (i_cmdLength >= 3)
-                    {
-                        const uint8_t occInstance = i_cmdData[1];
-                        const occCommandType occCmd =
-                            (occCommandType)i_cmdData[2];
-                        const uint16_t dataLen = i_cmdLength-3;
-                        Occ *occPtr = OccManager::getOcc(occInstance);
-                        if (occPtr)
+                    case PASSTHRU_SEND_OCC_COMMAND:
+                        if (i_cmdLength >= 3)
                         {
-                            TMGT_INF("passThruCommand: Send OCC%d command "
-                                     "0x%02X (%d bytes)",
-                                     occInstance, occCmd, dataLen);
-                            OccCmd cmd(occPtr, occCmd, dataLen, &i_cmdData[3]);
-                            err = cmd.sendOccCmd();
-                            if (err != NULL)
+                            const uint8_t occInstance = i_cmdData[1];
+                            const occCommandType occCmd =
+                                (occCommandType)i_cmdData[2];
+                            const uint16_t dataLen = i_cmdLength-3;
+                            Occ *occPtr = OccManager::getOcc(occInstance);
+                            if (occPtr)
                             {
-                                TMGT_ERR("passThruCommand: OCC%d cmd 0x%02X "
-                                         "failed with rc 0x%04X",
-                                         occInstance, occCmd,
-                                         err->reasonCode());
+                                TMGT_INF("passThruCommand: Send OCC%d command "
+                                         "0x%02X (%d bytes)",
+                                         occInstance, occCmd, dataLen);
+                                OccCmd cmd(occPtr, occCmd, dataLen, &i_cmdData[3]);
+                                err = cmd.sendOccCmd();
+                                if (err != NULL)
+                                {
+                                    TMGT_ERR("passThruCommand: OCC%d cmd 0x%02X "
+                                             "failed with rc 0x%04X",
+                                             occInstance, occCmd,
+                                             err->reasonCode());
+                                }
+                                else
+                                {
+                                    uint8_t *rspPtr = NULL;
+                                    o_rspLength = cmd.getResponseData(rspPtr);
+                                    memcpy(o_rspData, rspPtr, o_rspLength);
+                                    TMGT_INF("passThruCommand: OCC%d rsp status "
+                                             "0x%02X (%d bytes)", occInstance,
+                                             o_rspData[2], o_rspLength);
+                                }
                             }
                             else
                             {
-                                uint8_t *rspPtr = NULL;
-                                o_rspLength = cmd.getResponseData(rspPtr);
-                                memcpy(o_rspData, rspPtr, o_rspLength);
-                                TMGT_INF("passThruCommand: OCC%d rsp status "
-                                         "0x%02X (%d bytes)", occInstance,
-                                         o_rspData[2], o_rspLength);
+                                TMGT_ERR("passThruCommand: Unable to find OCC%d",
+                                         occInstance);
+                                /*@
+                                 * @errortype
+                                 * @reasoncode   HTMGT_RC_OCC_UNAVAILABLE
+                                 * @moduleid     HTMGT_MOD_PASS_THRU
+                                 * @userdata1    command data[0-7]
+                                 * @userdata2    command data length
+                                 * @devdesc      Specified OCC not available
+                                 */
+                                failingSrc = HTMGT_RC_OCC_UNAVAILABLE;
                             }
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: Unable to find OCC%d",
-                                     occInstance);
-                            /*@
-                             * @errortype
-                             * @reasoncode   HTMGT_RC_OCC_UNAVAILABLE
-                             * @moduleid     HTMGT_MOD_PASS_THRU
-                             * @userdata1    command data[0-7]
-                             * @userdata2    command data length
-                             * @devdesc      Specified OCC not available
-                             */
-                            failingSrc = HTMGT_RC_OCC_UNAVAILABLE;
+                            TMGT_ERR("passThruCommand: invalid OCC command "
+                                     "length %d", i_cmdLength);
+                            failingSrc = HTMGT_RC_INVALID_LENGTH;
                         }
-                    }
-                    else
-                    {
-                        TMGT_ERR("passThruCommand: invalid OCC command "
-                                 "length %d", i_cmdLength);
-                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                    }
-                    break;
+                        break;
 
-                case PASSTHRU_CLEAR_RESET_COUNTS:
-                    TMGT_INF("passThruCommand: Clear all OCC reset counts");
-                    OccManager::clearResetCounts();
-                    break;
-
-                case PASSTHRU_EXIT_SAFE_MODE:
-                    {
-                        TMGT_INF("passThruCommand: Clear Safe Mode");
-                        // Clear OCC reset counts and failed flags
+                    case PASSTHRU_CLEAR_RESET_COUNTS:
+                        TMGT_INF("passThruCommand: Clear all OCC reset counts");
                         OccManager::clearResetCounts();
-                        // Clear safe mode reason
-                        OccManager::updateSafeModeReason(0, 0);
-                        // Clear system safe mode flag/attribute
-                        TARGETING::Target* sys = NULL;
-                        TARGETING::targetService().getTopLevelTarget(sys);
-                        const uint8_t safeMode = 0;
-                        // Mark system as NOT being in safe mode
-                        if(sys)
+                        break;
+
+                    case PASSTHRU_EXIT_SAFE_MODE:
                         {
-                            sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>
-                                (safeMode);
+                            TMGT_INF("passThruCommand: Clear Safe Mode");
+                            // Clear OCC reset counts and failed flags
+                            OccManager::clearResetCounts();
+                            // Clear safe mode reason
+                            OccManager::updateSafeModeReason(0, 0);
+                            // Clear system safe mode flag/attribute
+                            TARGETING::Target* sys = NULL;
+                            TARGETING::targetService().getTopLevelTarget(sys);
+                            const uint8_t safeMode = 0;
+                            // Mark system as NOT being in safe mode
+                            if(sys)
+                            {
+                                sys->setAttr<TARGETING::ATTR_HTMGT_SAFEMODE>
+                                    (safeMode);
+                            }
+                            // Reset the OCCs (do not increment reset count
+                            // or attempt comm with OCC since they are in reset)
+                            TMGT_INF("passThruCommand: Calling resetOccs");
+                            err = OccManager::resetOccs(NULL, true, true);
+                            if (err != NULL)
+                            {
+                                TMGT_ERR("passThruCommand: resetOccs failed "
+                                         "with rc 0x%04X", err->reasonCode());
+                            }
                         }
-                        // Reset the OCCs (do not increment reset count
-                        // or attempt comm with OCC since they are in reset)
-                        TMGT_INF("passThruCommand: Calling resetOccs");
-                        err = OccManager::resetOccs(NULL, true, true);
-                        if (err != NULL)
+                        break;
+
+                    case PASSTHRU_DUMP_ATTRIBUTE:
+                        if (i_cmdLength >= 2)
                         {
-                            TMGT_ERR("passThruCommand: resetOccs failed "
-                                     "with rc 0x%04X", err->reasonCode());
+                            TMGT_INF("passThruCommand: Dump Attribute 0x%02X",
+                                     i_cmdData[1]);
+                            err = dumpAttribute(i_cmdLength-1, &i_cmdData[1],
+                                                o_rspLength, o_rspData);
                         }
-                    }
-                    break;
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: invalid dump attribute "
+                                     "command length %d", i_cmdLength);
+                            failingSrc = HTMGT_RC_INVALID_LENGTH;
+                        }
+                        break;
 
-                case PASSTHRU_DUMP_ATTRIBUTE:
-                    if (i_cmdLength >= 2)
-                    {
-                        TMGT_INF("passThruCommand: Dump Attribute 0x%02X",
-                                 i_cmdData[1]);
-                        err = dumpAttribute(i_cmdLength-1, &i_cmdData[1],
-                                            o_rspLength, o_rspData);
-                    }
-                    else
-                    {
-                        TMGT_ERR("passThruCommand: invalid dump attribute "
-                                 "command length %d", i_cmdLength);
-                        failingSrc = HTMGT_RC_INVALID_LENGTH;
-                    }
-                    break;
+                    default:
+                        TMGT_ERR("passThruCommand: Invalid command 0x%08X "
+                                 "(%d bytes)", UINT32_GET(i_cmdData), i_cmdLength);
+                        /*@
+                         * @errortype
+                         * @reasoncode   HTMGT_RC_INVALID_DATA
+                         * @moduleid     HTMGT_MOD_PASS_THRU
+                         * @userdata1    command data[0-7]
+                         * @userdata2    command data length
+                         * @devdesc      Invalid pass thru command
+                         */
+                        failingSrc = HTMGT_RC_INVALID_DATA;
+                        break;
+                }
 
-                default:
-                    TMGT_ERR("passThruCommand: Invalid command 0x%08X "
-                             "(%d bytes)", UINT32_GET(i_cmdData), i_cmdLength);
-                    /*@
-                     * @errortype
-                     * @reasoncode   HTMGT_RC_INVALID_DATA
-                     * @moduleid     HTMGT_MOD_PASS_THRU
-                     * @userdata1    command data[0-7]
-                     * @userdata2    command data length
-                     * @devdesc      Invalid pass thru command
-                     */
-                    failingSrc = HTMGT_RC_INVALID_DATA;
-                    break;
-            }
-
-            if ((HTMGT_RC_NO_ERROR != failingSrc) && (NULL == err))
-            {
-                bldErrLog(err, HTMGT_MOD_PASS_THRU,
-                          failingSrc,
-                          UINT32_GET(i_cmdData),
-                          UINT32_GET(&i_cmdData[4]),
-                          0, i_cmdLength,
-                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                if ((HTMGT_RC_NO_ERROR != failingSrc) && (NULL == err))
+                {
+                    bldErrLog(err, HTMGT_MOD_PASS_THRU,
+                              failingSrc,
+                              UINT32_GET(i_cmdData),
+                              UINT32_GET(&i_cmdData[4]),
+                              0, i_cmdLength,
+                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                }
             }
         }
 

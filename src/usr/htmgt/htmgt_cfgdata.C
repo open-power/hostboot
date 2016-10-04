@@ -29,10 +29,8 @@
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"
 #include "ipmi/ipmisensor.H"
-#include "fapiPlatAttributeService.H"
 #include <htmgt/htmgt_reasoncodes.H>
-
-
+#include <fapi2_attribute_service.H>
 
 using namespace TARGETING;
 
@@ -43,11 +41,6 @@ using namespace TARGETING;
 
 namespace HTMGT
 {
-    void getWofCoreFrequencyData(const TargetHandle_t i_occ,
-                                 uint8_t* o_data,
-                                 uint64_t & o_size);
-    void getWofVrmEfficiencyData(uint8_t* o_data,
-                                 uint64_t & o_size);
 
     bool G_wofSupported = true;
 
@@ -134,12 +127,6 @@ namespace HTMGT
                         cmdDataLen = OCC_MAX_DATA_LENGTH;
                         switch(format)
                         {
-                            case OCC_CFGDATA_PSTATE_SSTRUCT:
-                                getPstateTableMessageData(occ->getTarget(),
-                                                          cmdData,
-                                                          cmdDataLen);
-                                break;
-
                             case OCC_CFGDATA_FREQ_POINT:
                                 getFrequencyPointMessageData(cmdData,
                                                              cmdDataLen);
@@ -162,11 +149,6 @@ namespace HTMGT
                                                         cmdData, cmdDataLen);
                                 break;
 
-                            case OCC_CFGDATA_FIR_SCOMS:
-                                TMGT_ERR("NO FIR SCOMS AVAILABLE YET");
-                                cmdDataLen = 0;
-                                break;
-
                             case OCC_CFGDATA_PCAP_CONFIG:
                                 getPowerCapMessageData(cmdData, cmdDataLen);
                                 break;
@@ -186,15 +168,14 @@ namespace HTMGT
                                                              cmdDataLen);
                                 break;
 
-                            case OCC_CFGDATA_WOF_CORE_FREQ:
-                                getWofCoreFrequencyData(occ->getTarget(),
-                                                        cmdData, cmdDataLen);
+                            /* @TODO Uncomment once OCC support is there
+                             * AVSBus Support RTC: 137620
+                            case OCC_CFGDATA_AVSBUS_CONFIG:
+                                getAVSBusConfigMessageData( occ->getTarget(),
+                                                            cmdData,
+                                                            cmdDataLen );
                                 break;
-
-                            case OCC_CFGDATA_WOF_VRM_EFF:
-                                getWofVrmEfficiencyData(cmdData, cmdDataLen);
-                                break;
-
+                            */
                             default:
                                 TMGT_ERR("sendOccConfigData: Unsupported"
                                          " format type 0x%02X",
@@ -210,7 +191,7 @@ namespace HTMGT
                             OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
                                        cmdDataLen, cmdData);
                             errlHndl_t l_err = cmd.sendOccCmd();
-                            if (l_err != NULL)
+                            if (l_err != nullptr)
                             {
                                 TMGT_ERR("sendOccConfigData: OCC%d cfg "
                                          "format 0x%02X failed with rc=0x%04X",
@@ -255,17 +236,61 @@ namespace HTMGT
 /** OCC configuration data message versions */
 enum occCfgDataVersion
 {
-    OCC_CFGDATA_PSTATE_VERSION       = 0x10,
-    OCC_CFGDATA_FREQ_POINT_VERSION   = 0x11,
-    OCC_CFGDATA_APSS_VERSION         = 0x10,
-    OCC_CFGDATA_MEM_CONFIG_VERSION   = 0x10,
-    OCC_CFGDATA_PCAP_CONFIG_VERSION  = 0x10,
-    OCC_CFGDATA_SYS_CONFIG_VERSION   = 0x10,
-    OCC_CFGDATA_MEM_THROTTLE_VERSION = 0x10,
-    OCC_CFGDATA_TCT_CONFIG_VERSION   = 0x10,
-    OCC_CFGDATA_WOF_CORE_FREQ_VERSION = 0x10,
-    OCC_CFGDATA_WOF_VRM_EFF_VERSION  = 0x10
+    OCC_CFGDATA_FREQ_POINT_VERSION    = 0x20,
+    OCC_CFGDATA_APSS_VERSION          = 0x20,
+    OCC_CFGDATA_MEM_CONFIG_VERSION    = 0x20,
+    OCC_CFGDATA_PCAP_CONFIG_VERSION   = 0x20,
+    OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x20,
+    OCC_CFGDATA_MEM_THROTTLE_VERSION  = 0x20,
+    OCC_CFGDATA_TCT_CONFIG_VERSION    = 0x20,
+    OCC_CFGDATA_AVSBUS_CONFIG_VERSION = 0X01,
 };
+
+
+// Utility function for writing Memory Config data
+void writeMemConfigData( uint8_t *& o_data,
+                         TARGETING::Target * i_target,
+                         TARGETING::SENSOR_NAME i_sensorState,
+                         TARGETING::SENSOR_NAME i_sensorTemp,
+                         uint8_t i_centPos,
+                         uint8_t i_dimmPos,
+                         uint8_t i_i2cPort,
+                         uint8_t i_i2cDevAddr,
+                         uint64_t & io_index )
+{
+
+    // Hardware Sensor ID
+    uint32_t l_sensor = UTIL::getSensorNumber( i_target,
+                                               i_sensorState );
+    size_t l_dataSize = sizeof(l_sensor);
+
+    memcpy(&o_data[io_index],
+           reinterpret_cast<uint8_t*>(&l_sensor),
+           l_dataSize);
+    io_index += l_dataSize;
+
+    // Temperature Sensor ID
+    l_sensor = UTIL::getSensorNumber( i_target,
+                                      i_sensorTemp );
+    memcpy(&o_data[io_index],
+           reinterpret_cast<uint8_t*>(&l_sensor),
+           l_dataSize);
+    io_index += l_dataSize;
+
+    // Centaur #
+    o_data[io_index++] = i_centPos;
+
+    // DIMM # (0xFF if i_target is centaur)
+    o_data[io_index++] = i_dimmPos;
+
+    // DIMM i2c port (0 or 1) - Reserved for Cumulus
+    o_data[io_index++] = i_i2cPort;
+
+    // DIMM Temp i2c address - Reserved for Cumulus
+    o_data[io_index++] = i_i2cDevAddr;
+
+}
+
 
 void getMemConfigMessageData(const TargetHandle_t i_occ,
                              bool i_monitoringEnabled,
@@ -273,7 +298,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
 {
     uint64_t index = 0;
 
-    assert(o_data != NULL);
+    assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG_VERSION;
@@ -292,107 +317,151 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
         TargetHandleList centaurs;
         TargetHandleList mbas;
         TargetHandleList dimms;
-        TargetHandleList::const_iterator centaur;
-        TargetHandleList::const_iterator mba;
-        TargetHandleList::const_iterator dimm;
         uint8_t centPos = 0;
         uint8_t dimmPos = 0;
         uint8_t numSets = 0;
-        uint16_t sensor = 0;
+
 
 
         ConstTargetHandle_t proc = getParentChip(i_occ);
-        assert(proc != NULL);
+        assert(proc != nullptr);
 
-        getChildAffinityTargets(centaurs, proc, CLASS_CHIP, TYPE_MEMBUF);
+        // Save Processor Model for later
+        ATTR_MODEL_type l_procModel = proc->getAttr<ATTR_MODEL>();
 
-        TRACUCOMP("Proc 0x%X has %d centaurs",
-                  proc->getAttr<ATTR_HUID>(),
-                  centaurs.size());
-
-        for (centaur=centaurs.begin(); centaur!=centaurs.end(); ++centaur)
+        if( l_procModel == MODEL_CUMULUS )
         {
-            numSets++;
+            getChildAffinityTargets(centaurs, proc, CLASS_CHIP, TYPE_MEMBUF);
 
-            //Do the entry for the Centaur itself
-
-            //Reserved
-            memset(&o_data[index], 0, 4);
-            index += 4;
-
-            //Hardware Sensor ID
-            sensor = UTIL::getSensorNumber(*centaur,
-                                           SENSOR_NAME_MEMBUF_STATE);
-            memcpy(&o_data[index], &sensor, 2);
-            index += 2;
-
-            //Temperature Sensor ID
-            sensor = UTIL::getSensorNumber(*centaur,
-                                           SENSOR_NAME_MEMBUF_TEMP);
-            memcpy(&o_data[index], &sensor, 2);
-            index += 2;
-
-            //Centaur #
-            centPos = (*centaur)->getAttr<ATTR_POSITION>();
-            // ATTR_POSITION is system wide. Must be 0-7 on each OCC
-            centPos = centPos % 8;
-            o_data[index++] = centPos;
-
-            //Dimm # (0xFF since a centaur)
-            o_data[index++] = 0xFF;
-
-            //Reserved
-            memset(&o_data[index], 0, 2);
-            index += 2;
+            TRACUCOMP("Proc 0x%X has %d centaurs",
+                      proc->getAttr<ATTR_HUID>(),
+                      centaurs.size());
 
 
-            mbas.clear();
-            getChildAffinityTargets(mbas, *centaur,
-                                    CLASS_UNIT, TYPE_MBA);
-
-            for (mba=mbas.begin(); mba!=mbas.end(); ++mba)
+            for ( const auto & centaur : centaurs )
             {
-                dimms.clear();
-                getChildAffinityTargets(dimms, *mba,
-                                        CLASS_LOGICAL_CARD, TYPE_DIMM);
+                numSets++;
 
-                TRACUCOMP("MBA 0x%X has %d DIMMs",
-                          (*mba)->getAttr<ATTR_HUID>(), dimms.size());
+                // TODO: RTC 163359 - OCC centaur support
+                // Get the Centaur position
+                centPos = centaur->getAttr<ATTR_POSITION>();
+                // ATTR_POSISTION is system wide. Must be 0-7 on each OCC
+                centPos = centPos%8;
 
-                for (dimm=dimms.begin(); dimm!=dimms.end(); ++dimm)
+                //Do the entry for the Centaur itself
+                writeMemConfigData( o_data,
+                                    centaur,
+                                    SENSOR_NAME_MEMBUF_STATE,
+                                    SENSOR_NAME_MEMBUF_TEMP,
+                                    centPos,
+                                    0xFF, //0xFF since a centaur
+                                    0,    //Reserved for CUMULUS
+                                    0,    //" "
+                                    index );
+
+
+                mbas.clear();
+                getChildAffinityTargets(mbas, centaur,
+                                        CLASS_UNIT, TYPE_MBA);
+
+                for ( const auto & mba : mbas )
                 {
-                    //Fill in the DIMM entry
-                    numSets++;
+                    dimms.clear();
+                    getChildAffinityTargets(dimms, mba,
+                                            CLASS_LOGICAL_CARD, TYPE_DIMM);
 
-                    //Reserved
-                    memset(&o_data[index], 0, 4);
-                    index += 4;
+                    TRACUCOMP("MBA 0x%X has %d DIMMs",
+                              mba->getAttr<ATTR_HUID>(), dimms.size());
 
-                    //Hardware Sensor ID
-                    sensor = UTIL::getSensorNumber(*dimm,
-                                                   SENSOR_NAME_DIMM_STATE);
-                    memcpy(&o_data[index], &sensor, 2);
-                    index += 2;
+                    for ( const auto & dimm : dimms )
+                    {
+                        numSets++;
 
-                    //Temperature Sensor ID
-                    sensor = UTIL::getSensorNumber(*dimm,
-                                                   SENSOR_NAME_DIMM_TEMP);
-                    memcpy(&o_data[index], &sensor, 2);
-                    index += 2;
+                        // get the DIMM #
+                        dimmPos = getOCCDIMMPos( mba, dimm );
 
-                    //Centaur #
-                    o_data[index++] = centPos;
+                        // Fill in the DIMM entry
+                        writeMemConfigData( o_data,
+                                        dimm,
+                                        SENSOR_NAME_DIMM_STATE,
+                                        SENSOR_NAME_DIMM_TEMP,
+                                        centPos,
+                                        dimmPos,
+                                        0,      //Reserved for CUMULUS
+                                        0,      //"  "
+                                        index );
 
-                    //DIMM #
-                    dimmPos = getOCCDIMMPos(*mba, *dimm);
-                    o_data[index++] = dimmPos;
-
-                    //Reserved
-                    memset(&o_data[index], 0, 2);
-                    index += 2;
-
+                    }
                 }
             }
+        }
+        else if( l_procModel == MODEL_NIMBUS )
+        {
+            //TODO Sending hard coded data for now until
+            //ATTR_TEMP_I2C_CONFIG is populated
+
+            //TEMP push in 00dd0002 dddd0002 ff 03 00 34 Data. !!!!
+            o_data[index++] = 0x00; //Hardware Sensor ID
+            o_data[index++] = 0xdd;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0x02;
+            o_data[index++] = 0xdd; //Temperature Sensor ID
+            o_data[index++] = 0xdd;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0x02;
+            o_data[index++] = 0xff; //Nimbus
+            o_data[index++] = 0x03; //Nimbus PIB I2C Master Engine
+            o_data[index++] = 0x01; //Nimbus DIMM I2C port
+            o_data[index++] = 0x34; //Nimbus DIMM Temperature I2C Address
+            ++numSets ;
+            //TEMP push in 00dd0000 dddd0000 ff 03 00 30 Data. !!!!
+            o_data[index++] = 0x00; //Hardware Sensor ID
+            o_data[index++] = 0xdd;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0xdd; //Temperature Sensor ID
+            o_data[index++] = 0xdd;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0x00;
+            o_data[index++] = 0xff; //Nimbus
+            o_data[index++] = 0x03; //Nimbus PIB I2C Master Engine
+            o_data[index++] = 0x01; //Nimbus DIMM I2C port
+            o_data[index++] = 0x30; //Nimbus DIMM Temperature I2C Address
+            ++numSets ;
+
+/*
+            // DIMMs are wired directly to the proc in Nimbus
+            dimms.clear();
+            getChildAffinityTargets( dimms,
+                                     proc,
+                                     CLASS_LOGICAL_CARD,
+                                     TYPE_DIMM );
+
+            for( const auto & dimm : dimms )
+            {
+                numSets++;
+
+                // Get PIB I2C Master engine for this dimm
+                ATTR_TEMP_I2C_CONFIG_type tempI2cCfgData =
+                    dimm->getAttr<ATTR_TEMP_I2C_CONFIG>();
+
+
+                uint8_t pibI2cMasterEngine = 0x03;
+
+                // Fill in the DIMM entry
+                writeMemConfigData( o_data,
+                                dimm,
+                                SENSOR_NAME_DIMM_STATE,
+                                SENSOR_NAME_DIMM_TEMP,
+                                0xFF, // No centaurs in Nimbus
+                                tempI2cCfgData.engine,
+                                tempI2cCfgData.port,
+                                tempI2cCfgData.devAddr,
+                                index );
+
+
+            }
+*/
         }
 
         TMGT_INF("getMemConfigMessageData: returning %d"
@@ -419,80 +488,73 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
 void getMemThrottleMessageData(const TargetHandle_t i_occ,
                                uint8_t* o_data, uint64_t & o_size)
 {
-    uint8_t centPos = 0;
-    uint8_t mbaPos = 0;
     uint8_t numSets = 0;
     uint64_t index = 0;
-    uint16_t numerator = 0;
 
     ConstTargetHandle_t proc = getParentChip(i_occ);
-    assert(proc != NULL);
-    assert(o_data != NULL);
+    assert(proc != nullptr);
+    assert(o_data != nullptr);
+
+    TargetHandleList centaurs;
 
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE;
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE_VERSION;
     index++; //Will fill in numSets at the end
 
-
-    TargetHandleList centaurs;
-    TargetHandleList mbas;
-    TargetHandleList::const_iterator centaur;
-    TargetHandleList::const_iterator mba;
-
     getChildAffinityTargets(centaurs, proc, CLASS_CHIP, TYPE_MEMBUF);
 
     //Next, the following format repeats per set/MBA:
-    //Byte 0:       Centaur position 0-7
-    //Byte 1:       MBA Position 0-1
-    //Bytes 2-3:    min OT N_PER_MBA
-    //bytes 4-5:    redundant power N_PER_MBA
-    //bytes 6-7:    redundant power N_PER_CHIP
-    //bytes 8-9:    oversubscription N_PER_MBA
-    //bytes 10-11:  oversubscription N_PER_CHIP
+    //Byte 0:       Cumulus: Centaur position 0-7
+    //              Nimbus : Memory Controller
+    //Byte 1:       Cumulus: MBA Position 0-1
+    //              Nimbus : Memory Controller's physical Port # 0-3
+    //Bytes 2-3:    min N_PER_MBA
+    //Bytes 4-5:    Max mem power with throttle @Min
+    //Bytes 6-7:    Turbo N_PER_MBA
+    //Bytes 8-9:    Turbo N_PER_CHIP
+    //Bytes 10-11:  Max mem power with throttle @Turbo
+    //Bytes 12-13:  Power Capping N_PER_MBA
+    //Bytes 14-15:  Power Capping N_PER_MBA
+    //Bytes 16-17:  Max mem power with throttle @PowerCapping
+    //Bytes 18-19:  Nominal Power N_PER_MBA
+    //Bytes 20-21:  Nominal Power N_PER_CHIP
+    //Bytes 22-23:  Max mem power with throttle @Nominal
+    //Bytes 24-29:  Reserved
 
-
-    for (centaur=centaurs.begin(); centaur!=centaurs.end(); ++centaur)
+    // Hard coding until we can get mem throttle cfg data
+    for (uint8_t entry = 0; entry < 2; ++entry)
     {
-        centPos = (*centaur)->getAttr<ATTR_POSITION>();
-        // ATTR_POSITION is system wide. Must 0-7 on each OCC
-        centPos = centPos % 8;
-
-        mbas.clear();
-        getChildAffinityTargets(mbas, *centaur,
-                                CLASS_UNIT, TYPE_MBA);
-
-        for (mba=mbas.begin(); mba!=mbas.end(); ++mba)
-        {
-            numSets++;
-            mbaPos = (*mba)->getAttr<ATTR_CHIP_UNIT>();
-
-            TRACUCOMP("centPos = %d, mbaPos = %d",
-                      centPos, mbaPos);
-
-            o_data[index++] = centPos;
-            o_data[index++] = mbaPos;
-
-            numerator = (*mba)->getAttr<ATTR_OT_MIN_N_PER_MBA>();
-            memcpy(&o_data[index], &numerator, 2);
-            index += 2;
-
-            numerator = (*mba)->getAttr<ATTR_N_PLUS_ONE_N_PER_MBA>();
-            memcpy(&o_data[index], &numerator, 2);
-            index += 2;
-
-            numerator = (*mba)->getAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>();
-            memcpy(&o_data[index], &numerator, 2);
-            index += 2;
-
-            numerator = (*mba)->getAttr<ATTR_OVERSUB_N_PER_MBA>();
-            memcpy(&o_data[index], &numerator, 2);
-            index += 2;
-
-            numerator = (*mba)->getAttr<ATTR_OVERSUB_N_PER_CHIP>();
-            memcpy(&o_data[index], &numerator, 2);
-            index += 2;
-        }
-
+        o_data[index++] = 0x00; //MC01
+        o_data[index++] = entry; // Port
+        o_data[index++] = 0x44; // Min N Per MBA
+        o_data[index++] = 0x44;
+        o_data[index++] = 0x01; // Max mem pwr at min throttle
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x45; // Turbo N per MBA
+        o_data[index++] = 0x56;
+        o_data[index++] = 0x55; // Turbo N per chip
+        o_data[index++] = 0x5F;
+        o_data[index++] = 0x01; // Max mem pwr at turbo
+        o_data[index++] = 0x10;
+        o_data[index++] = 0x45; // Power capping N per MBA
+        o_data[index++] = 0x56;
+        o_data[index++] = 0x55; // Power capping N per chip
+        o_data[index++] = 0x5F;
+        o_data[index++] = 0x01; // Max mem pwr at power capping
+        o_data[index++] = 0x20;
+        o_data[index++] = 0x45; // Nominal N per MBA
+        o_data[index++] = 0x56;
+        o_data[index++] = 0x55; // Nominal N per chip
+        o_data[index++] = 0x5F;
+        o_data[index++] = 0x01; // Max mem pwr at Nominal
+        o_data[index++] = 0x30;
+        o_data[index++] = 0x00; // reserved - must be non-zero until OCC code updated
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x00;
+        ++numSets ;
     }
 
 
@@ -511,7 +573,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
 void getOCCRoleMessageData(bool i_master, bool i_firMaster,
                            uint8_t* o_data, uint64_t & o_size)
 {
-    assert(o_data != NULL);
+    assert(o_data != nullptr);
 
     o_data[0] = OCC_CFGDATA_OCC_ROLE;
 
@@ -550,7 +612,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
                 redPolicySensor(TARGETING::SENSOR_NAME_REDUNDANT_PS_POLICY,
                                 i_sys);
             errlHndl_t err = redPolicySensor.readSensorData(redPolicyData);
-            if (NULL == err)
+            if (nullptr == err)
             {
                 // 0x02 == Asserted bit (redundant policy is enabled)
                 if ((redPolicyData.event_status & 0x02) == 0x00)
@@ -598,28 +660,36 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 {
     uint64_t index = 0;
     uint16_t pcap = 0;
-    Target* sys = NULL;
+    Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
 
-    assert(sys != NULL);
-    assert(o_data != NULL);
+    assert(sys != nullptr);
+    assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG;
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG_VERSION;
 
-    //Minimum Power Cap
+
+    // Minimum Soft Power Cap
+    // Note: BMC does not currently support soft power capping.
+    //       Sending hard power cap instead
     pcap = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-    TMGT_INF("getPowerCapMessageData: minimum power cap = %dW",
+    TMGT_INF("getPowerCapMessageData: minimum soft power cap =%dW",
+             pcap);
+
+    // Minimum Hard Power Cap
+    pcap = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
+    TMGT_INF("getPowerCapMessageData: minimum hard power cap = %dW",
              pcap);
     memcpy(&o_data[index], &pcap, 2);
     index += 2;
 
-    //System Maximum Power Cap
+    // System Maximum Power Cap
     pcap = getMaxPowerCap(sys);
     memcpy(&o_data[index], &pcap, 2);
     index += 2;
 
-    //Oversubscription Power Cap
+    // Quick Power Drop Power Cap
     pcap = sys->getAttr<ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>();
     TMGT_INF("getPowerCapMessageData: oversubscription power cap = %dW",
              pcap);
@@ -636,7 +706,7 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
 {
     uint64_t index = 0;
     uint16_t sensor = 0;
-    assert(o_data != NULL);
+    assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG;
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
@@ -647,8 +717,8 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     //processor sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);
     sensor = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
-    memcpy(&o_data[index], &sensor, 2);
-    index += 2;
+    memcpy(&o_data[index], &sensor, 4);
+    index += 4;
 
     //Next 12*4 bytes are for core sensors.
     //If a new processor with more cores comes along,
@@ -657,14 +727,14 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     TargetHandleList::iterator coreIt;
     getChildChiplets(cores, proc, TYPE_CORE, false);
 
-    uint16_t tempSensor = 0;
-    uint16_t freqSensor = 0;
+    uint32_t tempSensor = 0;
+    uint32_t freqSensor = 0;
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
         tempSensor = 0;
         freqSensor = 0;
 
-        if (core < cores.size())
+        if ( core < cores.size() )
         {
             tempSensor = UTIL::getSensorNumber(cores[core],
                                                SENSOR_NAME_CORE_TEMP);
@@ -674,18 +744,18 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
         }
 
         //Core Temp Sensor ID
-        memcpy(&o_data[index], &tempSensor, 2);
-        index += 2;
+        memcpy(&o_data[index], &tempSensor, 4);
+        index += 4;
 
         //Core Frequency Sensor ID
-        memcpy(&o_data[index], &freqSensor, 2);
-        index += 2;
+        memcpy(&o_data[index], &freqSensor, 4);
+        index += 4;
     }
 
-    TargetHandle_t sys = NULL;
+    TargetHandle_t sys = nullptr;
     TargetHandleList nodes;
     targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
+    assert(sys != nullptr);
     getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
     assert(!nodes.empty());
     TargetHandle_t node = nodes[0];
@@ -693,13 +763,13 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
 
     //Backplane sensor ID
     sensor = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
-    memcpy(&o_data[index], &sensor, 2);
-    index += 2;
+    memcpy(&o_data[index], &sensor, 4);
+    index += 4;
 
     //APSS sensor ID
     sensor = UTIL::getSensorNumber(sys, SENSOR_NAME_APSS_FAULT);
-    memcpy(&o_data[index], &sensor, 2);
-    index += 2;
+    memcpy(&o_data[index], &sensor, 4);
+    index += 4;
 
     o_size = index;
 }
@@ -709,39 +779,110 @@ void getThermalControlMessageData(uint8_t* o_data,
                                   uint64_t & o_size)
 {
     uint64_t index = 0;
-    Target* sys = NULL;
-    targetService().getTopLevelTarget(sys);
+    uint8_t l_numSets = 0;
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget(l_sys);
 
-    assert(sys != NULL);
-    assert(o_data != NULL);
+    assert(l_sys != nullptr);
+    assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_TCT_CONFIG;
     o_data[index++] = OCC_CFGDATA_TCT_CONFIG_VERSION;
 
-    //3 data sets following (proc, Centaur, DIMM), and
-    //each will get a FRU type, DVS temp, error temp,
-    //and max read timeout
-    o_data[index++] = 3;
+    // Get the master processor target to get the system type
+    Target* l_masterProc = nullptr;
+    targetService().masterProcChipTargetHandle( l_masterProc );
+    ATTR_MODEL_type l_systemType = l_masterProc->getAttr<ATTR_MODEL>();
 
+
+    // Processor Core Weight
+    o_data[index++] = 14;
+
+    // Processor Quad Weight
+    // TODO: Writing 10 for now
+    o_data[index++] = 10;
+
+
+    // data sets following (proc, Centaur(Cumulus only), DIMM), and
+    // each will get a FRU type, DVS temp, error temp,
+    // and max read timeout
+    size_t l_numSetsOffset = index++;
+
+    // Note: Bytes 4 and 5 of each data set represent the PowerVM DVFS and ERROR
+    // Resending the regular DVFS and ERROR for now
+
+    // Processor
     o_data[index++] = CFGDATA_FRU_TYPE_PROC;
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_DVFS_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_ERROR_TEMP_DEG_C>();
 
-    o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
-    o_data[index++] = sys->
-                        getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_PROC_READ_TIMEOUT_SEC>();
+    l_numSets++;
 
+    // If Nimbus, skip non-existent Centaurs
+    if( l_systemType != MODEL_NIMBUS )
+    {
+        // Centaur
+        o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
+        o_data[index++] = l_sys->
+                            getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
+        o_data[index++] = l_sys->
+                            getAttr<ATTR_OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C>();
+        o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC>();
+        l_numSets++;
+    }
+
+    // Dimm
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
-    o_data[index++] = sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
+    o_data[index++] = l_sys->getAttr<ATTR_OPEN_POWER_DIMM_READ_TIMEOUT_SEC>();
+    l_numSets++;
 
+    o_data[l_numSetsOffset] = l_numSets;
     o_size = index;
 
+
 }
+
+
+void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
+                                 uint8_t * o_data,
+                                 uint64_t & o_size )
+{
+    uint8_t l_vddBusNum = 0;
+    uint8_t l_vddRail   = 0;
+    uint8_t l_vdnBusNum = 0;
+    uint8_t l_vdnRail   = 0;
+    uint64_t index      = 0;
+
+    assert( o_data != nullptr );
+
+    // Get the parent processor
+    ConstTargetHandle_t l_proc = getParentChip( i_occ );
+
+    l_vddBusNum = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();
+    l_vddRail   = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();
+    l_vdnBusNum = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();
+    l_vdnRail   = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();
+
+    // Populate the data
+    o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG;
+    o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG_VERSION;
+    o_data[index++] = l_vddBusNum;
+    o_data[index++] = l_vddRail;
+    o_data[index++] = l_vdnBusNum;
+    o_data[index++] = l_vdnRail;
+
+    o_size = index;
+}
+
 
 
 void getFrequencyPointMessageData(uint8_t* o_data,
@@ -752,92 +893,18 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     uint16_t turbo   = 0;
     uint16_t ultra   = 0;
     uint16_t nominal = 0;
-    Target* sys = NULL;
+    Target* sys = nullptr;
 
     targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
-    assert(o_data != NULL);
+    assert(sys != nullptr);
+    assert(o_data != nullptr);
 
-    int32_t biasFactor = 0;
-    if (false == OccManager::isNormalPstate())
-    {
-        // Only apply bias if using mfg pstate tables
-        Occ *master = OccManager::getMasterOcc();
-        if (NULL != master)
-        {
-            errlHndl_t err = NULL;
-            TARGETING::TargetHandle_t occTarget = master->getTarget();
-            ConstTargetHandle_t procTarget = getParentChip(occTarget);
-            assert(procTarget != NULL);
-            const fapi::Target fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
-                               (const_cast<TARGETING::Target*>(procTarget)));
-            uint32_t biasUp   = 0;
-            uint32_t biasDown = 0;
-            int rc = FAPI_ATTR_GET(ATTR_FREQ_EXT_BIAS_UP,&fapiTarget,biasUp);
-            rc |= FAPI_ATTR_GET(ATTR_FREQ_EXT_BIAS_DOWN,&fapiTarget,biasDown);
-            if (0 == rc)
-            {
-                if ((biasDown > 0) && (biasUp == 0))
-                {
-                    TMGT_INF("FREQ_EXT_BIAS_DOWN=%d (in 0.5%% units)",biasDown);
-                    biasFactor = -(biasDown);
-                }
-                else if ((biasUp > 0) && (biasDown == 0))
-                {
-                    biasFactor = biasUp;
-                    TMGT_INF("FREQ_EXT_BIAS_UP=%d (in 0.5%% units)", biasUp);
-                }
-                else if ((biasUp > 0) && (biasDown > 0))
-                {
-                    TMGT_ERR("Invalid bias values: BIAS_UP=%d and BIAS_DOWN=%d",
-                             biasUp, biasDown);
-                    /*@
-                     * @errortype
-                     * @reasoncode  HTMGT_RC_INVALID_PARAMETER
-                     * @moduleid    HTMGT_MOD_CFG_FREQ_POINTS
-                     * @userdata1   ATTR_FREQ_EXT_BIAS_UP
-                     * @userdata2   ATTR_FREQ_EXT_BIAS_DOWN
-                     * @devdesc     Invalid ATTR_FREQ_EXT_BIAS attribute values
-                     */
-                    bldErrLog(err, HTMGT_MOD_CFG_FREQ_POINTS,
-                              HTMGT_RC_INVALID_PARAMETER,
-                              0, biasUp, 0, biasDown,
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-                }
-            }
-            else
-            {
-                TMGT_ERR("Unable to read ATTR_FREQ_EXT_BIAS values rc=%d", rc);
-                /*@
-                 * @errortype
-                 * @reasoncode       HTMGT_RC_ATTRIBUTE_ERROR
-                 * @moduleid         HTMGT_MOD_CFG_FREQ_POINTS
-                 * @userdata1[0-31]  rc
-                 * @userdata1[32-63] ATTR_FREQ_EXT_BIAS_UP
-                 * @userdata2        ATTR_FREQ_EXT_BIAS_DOWN
-                 * @devdesc          Unable to read FREQ_EXT_BIAS attributes
-                 */
-                bldErrLog(err, HTMGT_MOD_CFG_FREQ_POINTS,
-                          HTMGT_RC_ATTRIBUTE_ERROR,
-                          rc, biasUp, 0, biasDown,
-                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-        }
-    }
 
     o_data[index++] = OCC_CFGDATA_FREQ_POINT;
     o_data[index++] = OCC_CFGDATA_FREQ_POINT_VERSION;
 
     //Nominal Frequency in MHz
     nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
-    if (biasFactor)
-    {
-        TMGT_INF("Pre-biased Nominal=%dMhz", nominal);
-        // % change = (biasFactor/2) / 100
-        nominal += ((nominal * biasFactor) / 200);
-    }
     memcpy(&o_data[index], &nominal, 2);
     index += 2;
 
@@ -852,20 +919,6 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         if (0 != wofSupported)
         {
             ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
-            if (0 != ultra)
-            {
-                if (biasFactor)
-                {
-                    TMGT_INF("Pre-biased Ultra=%dMhz", ultra);
-                    // % change = (biasFactor/2) / 100
-                    ultra += ((ultra * biasFactor) / 200);
-                }
-            }
-            else
-            {
-                TMGT_INF("getFrequencyPoint: WOF enabled, but freq is 0");
-                G_wofSupported = false;
-            }
         }
         else
         {
@@ -881,12 +934,6 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         turbo = nominal;
         G_wofSupported = false;
     }
-    if (biasFactor)
-    {
-        TMGT_INF("Pre-biased Turbo=%dMhz", turbo);
-        // % change = (biasFactor/2) / 100
-        turbo += ((turbo * biasFactor) / 200);
-    }
 
     //Turbo Frequency in MHz
     memcpy(&o_data[index], &turbo, 2);
@@ -894,17 +941,20 @@ void getFrequencyPointMessageData(uint8_t* o_data,
 
     //Minimum Frequency in MHz
     min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
-    if (biasFactor)
-    {
-        TMGT_INF("Pre-biased Min=%dMhz", min);
-        // % change = (biasFactor/2) / 100
-        min += ((min * biasFactor) / 200);
-    }
+
     memcpy(&o_data[index], &min, 2);
     index += 2;
 
     //Ultra Turbo Frequency in MHz
     memcpy(&o_data[index], &ultra, 2);
+    index += 2;
+
+    // Reserved (Static Power Save in PowerVM)
+    memset(&o_data[index], 0, 2);
+    index += 2;
+
+    // Reserved (FFO in PowerVM)
+    memset(&o_data[index], 0, 2);
     index += 2;
 
     TMGT_INF("Frequency Points: Min %d, Nominal %d, Turbo %d, Ultra %d MHz",
@@ -914,49 +964,11 @@ void getFrequencyPointMessageData(uint8_t* o_data,
 }
 
 
-void getPstateTableMessageData(const TargetHandle_t i_occTarget,
-                               uint8_t* o_data,
-                               uint64_t & io_size)
-{
-    // normal and mfg pstate tables are the same size: see genPstateTables()
-    uint64_t msg_size = sizeof(ATTR_PSTATE_TABLE_type) + 4;
-    assert(io_size >= msg_size);
-
-    if(io_size > msg_size)
-    {
-        io_size = msg_size;
-    }
-
-    o_data[0] = OCC_CFGDATA_PSTATE_SSTRUCT;
-    o_data[1] = 0;  // reserved
-    o_data[2] = 0;  // reserved
-    o_data[3] = 0;  // reserved
-
-    if (OccManager::isNormalPstate())
-    {
-        TMGT_INF("getPstateTableMessageData: Sending normal tables");
-        // Read data from attribute for specified occ
-        ATTR_PSTATE_TABLE_type * pstateDataPtr =
-            reinterpret_cast<ATTR_PSTATE_TABLE_type*>(o_data + 4);
-
-        i_occTarget->tryGetAttr<ATTR_PSTATE_TABLE>(*pstateDataPtr);
-    }
-    else
-    {
-        TMGT_INF("getPstateTableMessageData: Sending MFG tables");
-        ATTR_PSTATE_TABLE_MFG_type * pstateDataPtr =
-            reinterpret_cast<ATTR_PSTATE_TABLE_MFG_type*>(o_data + 4);
-
-        i_occTarget->tryGetAttr<ATTR_PSTATE_TABLE_MFG>(*pstateDataPtr);
-    }
-}
-
-
 
 void getApssMessageData(uint8_t* o_data,
                         uint64_t & o_size)
 {
-    Target* sys = NULL;
+    Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
 
     ATTR_ADC_CHANNEL_FUNC_IDS_type function;
@@ -978,7 +990,7 @@ void getApssMessageData(uint8_t* o_data,
     //The APSS function below hardcodes 16 channels,
     //so everything better agree.
     CPPASSERT(sizeof(function) == 16);
-    const uint16_t (*sensors)[16] = NULL;
+    const uint32_t (*sensors)[16] = nullptr;
 
 #ifdef CONFIG_BMC_IPMI
     errlHndl_t err = SENSOR::getAPSSChannelSensorNumbers(sensors);
@@ -987,7 +999,7 @@ void getApssMessageData(uint8_t* o_data,
         TMGT_ERR("getApssMessageData: Call to getAPSSChannelSensorNumbers "
                  "failed.");
         ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-        sensors = NULL;
+        sensors = nullptr;
     }
 #endif
 
@@ -996,7 +1008,7 @@ void getApssMessageData(uint8_t* o_data,
     o_data[2] = 0;
     o_data[3] = 0;
     uint64_t idx = 4;
-    uint16_t sensorId = 0;
+    uint32_t sensorId = 0;
 
     for(uint64_t channel = 0; channel < sizeof(function); ++channel)
     {
@@ -1004,12 +1016,12 @@ void getApssMessageData(uint8_t* o_data,
         idx += sizeof(uint8_t);
 
         sensorId = 0;
-        if (sensors != NULL)
+        if (sensors != nullptr)
         {
             sensorId = (*sensors)[channel];
         }
-        memcpy(o_data+idx,&sensorId,sizeof(uint16_t)); // Sensor ID
-        idx += sizeof(uint16_t);
+        memcpy(o_data+idx,&sensorId,sizeof(uint32_t)); // Sensor ID
+        idx += sizeof(uint32_t);
 
         o_data[idx] = ground[channel];   // Ground Select
         idx += sizeof(uint8_t);
@@ -1044,121 +1056,6 @@ void getApssMessageData(uint8_t* o_data,
 
     o_size = idx;
 }
-
-void getWofCoreFrequencyData(const TargetHandle_t i_occ,
-                             uint8_t * o_data,
-                             uint64_t & o_size)
-{
-    assert(o_data != NULL);
-    uint64_t index = 0;
-    Target* sys = NULL;
-    targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
-    ConstTargetHandle_t proc = getParentChip(i_occ);
-    assert(proc != NULL);
-
-    // Count the number of cores that are good on each chip without
-    // regard to being GARDED.  Cores that are deconfigured do not
-    // affect this number. This is the number of present cores
-    // (max - partial bad).
-    TARGETING::TargetHandleList l_presCoreList;
-    getChildAffinityTargetsByState(l_presCoreList,
-                                   proc,
-                                   TARGETING::CLASS_UNIT,
-                                   TARGETING::TYPE_CORE,
-                                   TARGETING::UTIL_FILTER_PRESENT);
-    const uint8_t maxCoresPerChip = l_presCoreList.size();
-
-    o_data[index++] = OCC_CFGDATA_WOF_CORE_FREQ;
-    o_data[index++] = OCC_CFGDATA_WOF_CORE_FREQ_VERSION;
-    o_data[index++] = maxCoresPerChip;
-    memset(&o_data[index], 0, 3); // reserved
-    index += 3;
-
-    uint8_t numRows = 0;
-    uint8_t numColumns = 0;
-    const uint16_t tablesize=sizeof(ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type);
-    if (G_wofSupported)
-    {
-        numRows = 22;
-        numColumns = 13;
-        TMGT_INF("getWofCoreFrequencyData: %d rows, %d cols (0x%04X bytes)",
-                 numRows, numColumns, tablesize);
-        assert(tablesize == numRows * numColumns * 2);
-    }
-    o_data[index++] = numRows;
-    o_data[index++] = numColumns;
-
-    if (G_wofSupported)
-    {
-        // Host Boot will determine correct chip sort and pick correct
-        // frequncy uplift table
-        ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type * upliftTable =
-            reinterpret_cast<ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type*>
-            (&o_data[index]);
-
-        proc->tryGetAttr<ATTR_WOF_FREQUENCY_UPLIFT_SELECTED>(*upliftTable);
-        TMGT_BIN("WOF CoreFrequency Data", upliftTable, tablesize);
-
-        // first table entry must be 0s
-        memset(&o_data[index], 0, 2);
-
-        index += tablesize;
-    }
-
-    o_size = index;
-
-} // end getWofCoreFrequencyData()
-
-
-void getWofVrmEfficiencyData(uint8_t* o_data,
-                             uint64_t & o_size)
-{
-    assert(o_data != NULL);
-    uint64_t index = 0;
-    Target* sys = NULL;
-    targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
-
-    o_data[index++] = OCC_CFGDATA_WOF_VRM_EFF;
-    o_data[index++] = OCC_CFGDATA_WOF_VRM_EFF_VERSION;
-    memset(&o_data[index], 0, 4); // reserved
-    index += 4;
-
-    uint8_t numRows = 0;
-    uint8_t numColumns = 0;
-    const uint16_t tablesize = sizeof(ATTR_WOF_REGULATOR_EFFICIENCIES_type);
-    if (G_wofSupported)
-    {
-        numRows = 3;
-        numColumns = 14;
-        TMGT_INF("getWofVrmEfficiencyData: %d rows, %d cols (0x%04X bytes)",
-                 numRows, numColumns, tablesize);
-        assert(tablesize == numRows * numColumns * 2);
-    }
-    o_data[index++] = numRows;
-    o_data[index++] = numColumns;
-
-    if (G_wofSupported)
-    {
-        // VRM efficiency table is unique per system
-
-        ATTR_WOF_REGULATOR_EFFICIENCIES_type * regEffDataPtr =
-            reinterpret_cast<ATTR_WOF_REGULATOR_EFFICIENCIES_type*>
-            (&o_data[index]);
-
-        sys->tryGetAttr<ATTR_WOF_REGULATOR_EFFICIENCIES>(*regEffDataPtr);
-        TMGT_BIN("WOF VRM Efficiency Data", regEffDataPtr, tablesize);
-
-        // first table entry must be 0s
-        memset(&o_data[index], 0, 2);
-
-        index += tablesize;
-    }
-
-    o_size = index;
-
-} // end getWofVrmEfficiencyData()
 
 
 

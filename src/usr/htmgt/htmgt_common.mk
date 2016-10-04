@@ -24,6 +24,10 @@
 # IBM_PROLOG_END_TAG
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 
 # common objects between hostboot and hbrt
 OBJS += htmgt.o
@@ -34,4 +38,3 @@ OBJS += htmgt_poll.o
 OBJS += htmgt_utility.o
 OBJS += htmgt_cfgdata.o
 OBJS += occError.o
-OBJS += genPstate.o

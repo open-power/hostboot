@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,8 @@ namespace HTMGT
         uint8_t   occsPresent;
         uint8_t   requestedCfg;
         uint8_t   state;
-        uint16_t  reserved;
+        uint8_t   mode;
+        uint8_t   IPSStatus;
         uint8_t   errorId;
         uint32_t  errorAddress;
         uint16_t  errorLength;

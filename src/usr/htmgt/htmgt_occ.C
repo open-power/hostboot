@@ -302,13 +302,11 @@ namespace HTMGT
         iv_occMaster = NULL;
         if (iv_occArray.size() > 0)
         {
-            for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-                 pOcc < iv_occArray.end();
-                 pOcc++)
+            for( const auto & occ : iv_occArray )
             {
                 TMGT_INF("removeAllOccs: Removing OCC%d",
-                         (*pOcc)->getInstance());
-                delete (*pOcc);
+                         occ->getInstance());
+                delete occ;
             }
             iv_occArray.clear();
         }
@@ -341,21 +339,20 @@ namespace HTMGT
         if (pProcs.size() > 0)
         {
             // for each functional processor
-            for(TARGETING::TargetHandleList::iterator proc = pProcs.begin();
-                proc != pProcs.end();
-                ++proc)
+            for(const auto & proc : pProcs )
             {
                 // Instance number for this Processor/OCC
                 const uint8_t instance =
-                    (*proc)->getAttr<TARGETING::ATTR_POSITION>();
+                    proc->getAttr<TARGETING::ATTR_POSITION>();
                 TMGT_INF("_buildOccs: PROC%d is functional", instance);
                 // Get HOMER virtual address
                 uint8_t * homer = (uint8_t*)
-                    ((*proc)->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
+                    (proc->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
                 const uint8_t * homerPhys = (uint8_t*)
-                    ((*proc)->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
+                    (proc->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
                 TMGT_INF("_buildOccs: homer = 0x%08llX (virt) / 0x%08llX (phys)"
                          " for Proc%d", homer, homerPhys, instance);
+//TODO: Remove once Boston Simics Model works with OCC
 #ifdef SIMICS_TESTING
                 // Starting of OCCs is not supported in SIMICS, so fake out
                 // HOMER memory area for testing
@@ -378,20 +375,20 @@ namespace HTMGT
                 if ((NULL != homer) && (NULL != homerPhys))
                 {
                     // Get functional OCC (one per proc)
-                    TARGETING::TargetHandleList pOccs;
-                    getChildChiplets(pOccs, *proc, TARGETING::TYPE_OCC);
-                    if (pOccs.size() > 0)
+                    TARGETING::TargetHandleList occs;
+                    getChildChiplets(occs, proc, TARGETING::TYPE_OCC);
+                    if (occs.size() > 0)
                     {
                         const unsigned long huid =
-                            pOccs[0]->getAttr<TARGETING::ATTR_HUID>();
+                            occs[0]->getAttr<TARGETING::ATTR_HUID>();
                         const bool masterCapable =
-                            pOccs[0]->
+                            occs[0]->
                             getAttr<TARGETING::ATTR_OCC_MASTER_CAPABLE>();
 
                         TMGT_INF("_buildOccs: Found OCC%d - HUID: 0x%0lX, "
                                  "masterCapable: %c, homer: 0x%0lX",
                                  instance, huid, masterCapable?'Y':'N', homer);
-                        _addOcc(instance, masterCapable, homer, pOccs[0]);
+                        _addOcc(instance, masterCapable, homer, occs[0]);
                     }
                     else
                     {
@@ -429,14 +426,12 @@ namespace HTMGT
                 if (NULL != iv_occMaster)
                 {
                     // update master occsPresent bit for each slave OCC
-                    for(occList_t::const_iterator occ = iv_occArray.begin();
-                        occ != iv_occArray.end();
-                        ++occ)
+                    for( const auto & occ : iv_occArray )
                     {
-                        if((*occ) != iv_occMaster)
+                        if(occ != iv_occMaster)
                         {
                             iv_occMaster->
-                                updateOccPresentBits((*occ)->getPresentBits());
+                                updateOccPresentBits(occ->getPresentBits());
                         }
                     }
                 }
@@ -544,13 +539,11 @@ namespace HTMGT
     Occ * OccManager::_getOcc(const uint8_t i_instance)
     {
         Occ *targetOcc = NULL;
-        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-             pOcc < iv_occArray.end();
-             pOcc++)
+        for( const auto & occ : iv_occArray )
         {
-            if ((*pOcc)->getInstance() == i_instance)
+            if (occ->getInstance() == i_instance)
             {
-                targetOcc = (*pOcc);
+                targetOcc = occ;
                 break;
             }
         }
@@ -650,15 +643,13 @@ namespace HTMGT
                     }
 
                     // Make sure all OCCs went to active state
-                    for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-                         pOcc < iv_occArray.end();
-                         pOcc++)
+                    for( const auto & occ : iv_occArray )
                     {
-                        if (requestedState != (*pOcc)->getState())
+                        if (requestedState != occ->getState())
                         {
                             TMGT_ERR("_setOccState: OCC%d is not in 0x%02X "
                                      "state",
-                                     (*pOcc)->getInstance(), requestedState);
+                                     occ->getInstance(), requestedState);
                             /*@
                              * @errortype
                              * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
@@ -670,8 +661,8 @@ namespace HTMGT
                              */
                             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                                       HTMGT_RC_OCC_UNEXPECTED_STATE,
-                                      requestedState, (*pOcc)->getState(),
-                                      0, (*pOcc)->getInstance(),
+                                      requestedState, occ->getState(),
+                                      0, occ->getInstance(),
                                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
                             break;
                         }
@@ -752,19 +743,17 @@ namespace HTMGT
                     }
                 }
 
-                for(occList_t::const_iterator occ = iv_occArray.begin();
-                    occ != iv_occArray.end();
-                    ++occ)
+                for(const auto & occ : iv_occArray )
                 {
-                    if((*occ)->getTarget() == i_failedOccTarget)
+                    if(occ->getTarget() == i_failedOccTarget)
                     {
-                        (*occ)->failed(true);
+                        occ->failed(true);
                     }
 
                     if (false == i_skipComm)
                     {
                         // Send reset prep cmd to all OCCs
-                        if((*occ)->resetPrep())
+                        if(occ->resetPrep())
                         {
                             atThreshold = true;
                         }
@@ -787,11 +776,9 @@ namespace HTMGT
                 // else failed OCC reset count will be incremented automatically
 
                 // Update OCC states to RESET
-                for(occList_t::const_iterator occ = iv_occArray.begin();
-                    occ != iv_occArray.end();
-                    ++occ)
+                for( const auto & occ : iv_occArray )
                 {
-                    (*occ)->iv_state = OCC_STATE_RESET;
+                    occ->iv_state = OCC_STATE_RESET;
                 }
 
                 uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
@@ -831,12 +818,10 @@ namespace HTMGT
 
                 if(!atThreshold && !err)
                 {
-                    for(occList_t::const_iterator occ = iv_occArray.begin();
-                        occ != iv_occArray.end();
-                        ++occ)
+                    for( const auto & occ : iv_occArray )
                     {
                         // After OCCs have been reset, clear flags
-                        (*occ)->postResetClear();
+                        occ->postResetClear();
                     }
 
                     TMGT_INF("_resetOccs: Calling HBOCC::activateOCCs");
@@ -935,9 +920,7 @@ namespace HTMGT
             uint8_t retryCount = 0;
             bool throttleErrors = false;
 
-            for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-                 pOcc < iv_occArray.end();
-                 pOcc++)
+            for( const auto & occ : iv_occArray )
             {
                 bool occReady = false;
                 uint16_t lastCheckpoint = 0x0000;
@@ -950,7 +933,7 @@ namespace HTMGT
                      errlHndl_t l_err = NULL;
                     const uint16_t l_length = 8;
                     ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
-                    l_err = HBOCC::readSRAM((*pOcc)->getTarget(),
+                    l_err = HBOCC::readSRAM(occ->getTarget(),
                                             OCC_RSP_SRAM_ADDR,
                                             l_buffer);
                     if (NULL == l_err)
@@ -961,13 +944,13 @@ namespace HTMGT
                         {
                             TMGT_INF("_waitForOccCheckpoint: OCC%d Checkpoint "
                                      "0x%04X",
-                                     (*pOcc)->getInstance(), checkpoint);
+                                     occ->getInstance(), checkpoint);
                             lastCheckpoint = checkpoint;
                         }
                         if (0x0EFF == checkpoint)
                         {
                             TMGT_INF("_waitForOccCheckpoint OCC%d ready!",
-                                     (*pOcc)->getInstance());
+                                     occ->getInstance());
 
                             occReady = true;
                             break;
@@ -980,7 +963,7 @@ namespace HTMGT
                             throttleErrors = true;
                             TMGT_ERR("_waitForOccCheckpoint: error trying to "
                                      "read OCC%d SRAM (rc=0x%04X)",
-                                     (*pOcc)->getInstance(),
+                                     occ->getInstance(),
                                      l_err->reasonCode());
                             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                         }
@@ -995,10 +978,10 @@ namespace HTMGT
                 if (!occReady)
                 {
                     TMGT_CONSOLE("Final OCC%d Checkpoint NOT reached (0x%04X)",
-                                 (*pOcc)->getInstance(), lastCheckpoint);
+                                 occ->getInstance(), lastCheckpoint);
                     TMGT_ERR("_waitForOccCheckpoint OCC%d still NOT ready! "
                              "(last checkpoint=0x%04X)",
-                             (*pOcc)->getInstance(), lastCheckpoint);
+                             occ->getInstance(), lastCheckpoint);
                     errlHndl_t l_err = NULL;
                     /*@
                      * @errortype
@@ -1010,10 +993,10 @@ namespace HTMGT
                      */
                     bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_CHECKPOINT,
                               HTMGT_RC_OCC_NOT_READY,
-                              0, (*pOcc)->getInstance(), 0, lastCheckpoint,
+                              0, occ->getInstance(), 0, lastCheckpoint,
                               ERRORLOG::ERRL_SEV_PREDICTIVE);
 
-                    (*pOcc)->collectCheckpointScomData(l_err);
+                    occ->collectCheckpointScomData(l_err);
                     if (NULL == checkpointElog)
                     {
                         // return the first elog
@@ -1025,7 +1008,7 @@ namespace HTMGT
                         ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                     }
                     TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
-                             (*pOcc)->getInstance());
+                             occ->getInstance());
                 }
             }
         }
@@ -1059,11 +1042,9 @@ namespace HTMGT
     {
         bool needsReset = false;
 
-        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-             pOcc < iv_occArray.end();
-             pOcc++)
+        for( const auto & occ : iv_occArray )
         {
-            if ((*pOcc)->needsReset())
+            if (occ->needsReset())
             {
                 needsReset = true;
                 break;
@@ -1079,11 +1060,9 @@ namespace HTMGT
     {
         bool failed = false;
 
-        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-             pOcc < iv_occArray.end();
-             pOcc++)
+        for( const auto & occ : iv_occArray )
         {
-            if ((*pOcc)->iv_failed)
+            if (occ->iv_failed)
             {
                 failed = true;
                 break;
@@ -1140,23 +1119,21 @@ namespace HTMGT
         index += 4;
 
         // Now add OCC specific data (for each OCC)
-        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-             (pOcc < iv_occArray.end()) && (index+16 < 4096);
-             pOcc++)
+        for( const auto & occ : iv_occArray )
         {
-            o_data[index++] = (*pOcc)->getInstance();
-            o_data[index++] = (*pOcc)->getState();
-            o_data[index++] = (*pOcc)->getRole();
-            o_data[index++] = (*pOcc)->iv_masterCapable;
-            o_data[index++] = (*pOcc)->iv_commEstablished;
+            o_data[index++] = occ->getInstance();
+            o_data[index++] = occ->getState();
+            o_data[index++] = occ->getRole();
+            o_data[index++] = occ->iv_masterCapable;
+            o_data[index++] = occ->iv_commEstablished;
             index += 3; // reserved for expansion
-            o_data[index++] = (*pOcc)->iv_failed;
-            o_data[index++] = (*pOcc)->needsReset();
-            o_data[index++] = (*pOcc)->iv_resetReason;
-            o_data[index++] = (*pOcc)->iv_resetCount;
-            if ((*pOcc)->iv_lastPollValid)
+            o_data[index++] = occ->iv_failed;
+            o_data[index++] = occ->needsReset();
+            o_data[index++] = occ->iv_resetReason;
+            o_data[index++] = occ->iv_resetCount;
+            if (occ->iv_lastPollValid)
             {
-                memcpy(&o_data[index], (*pOcc)->iv_lastPollResponse, 4);
+                memcpy(&o_data[index], occ->iv_lastPollResponse, 4);
             }
             else
             {
@@ -1190,11 +1167,8 @@ namespace HTMGT
     {
         occStateId currentState = OCC_STATE_NO_CHANGE;
 
-        for(occList_t::const_iterator occ_itr = iv_occArray.begin();
-            (occ_itr != iv_occArray.end());
-            ++occ_itr)
+        for(const auto & occ : iv_occArray )
         {
-            Occ * occ = *occ_itr;
             if (OCC_STATE_NO_CHANGE == currentState)
             {
                 currentState = occ->getState();
@@ -1230,20 +1204,19 @@ namespace HTMGT
         {
             sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
         }
-        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
-             pOcc < iv_occArray.end();
-             pOcc++)
+
+        for( const auto & occ : iv_occArray )
         {
-            if ((*pOcc)->iv_resetCount != 0)
+            if (occ->iv_resetCount != 0)
             {
                 TMGT_INF("_clearResetCounts: Clearing OCC%d reset count "
                          "(was %d)",
-                         (*pOcc)->getInstance(), (*pOcc)->iv_resetCount);
-                (*pOcc)->iv_resetCount = 0;
+                         occ->getInstance(), occ->iv_resetCount);
+                occ->iv_resetCount = 0;
                 if (safeMode)
                 {
                     // Clear OCC flags (failed, commEstablished, etc)
-                    (*pOcc)->postResetClear();
+                    occ->postResetClear();
                 }
             }
         }
