@@ -54,6 +54,84 @@ enum P9_SBE_COMMON_Private_Constants
     CPLT_OPCG_DONE_DC_POLL_COUNT = 10 // count to wait for chiplet opcg done
 };
 
+// chiplet pervasive FIR constants
+const uint64_t PERV_LFIR_ACTION0[15] =
+{
+    0x0000000000000000ULL, // TP
+    0x0000000000000000ULL, // N0
+    0x0000000000000000ULL, // N1
+    0x0000000000000000ULL, // N2
+    0x0000000000000000ULL, // N3
+    0x0000000000000000ULL, // X
+    0x0000000000000000ULL, // MC0
+    0x0000000000000000ULL, // MC1
+    0x0000000000000000ULL, // OB0
+    0x0000000000000000ULL, // OB1
+    0x0000000000000000ULL, // OB2
+    0x0000000000000000ULL, // OB3
+    0x0000000000000000ULL, // PCI0
+    0x0000000000000000ULL, // PCI1
+    0x0000000000000000ULL  // PCI2
+};
+
+const uint64_t PERV_LFIR_ACTION1[15] =
+{
+    0x8000000000000000ULL, // TP
+    0x8000000000000000ULL, // N0
+    0x8000000000000000ULL, // N1
+    0x8000000000000000ULL, // N2
+    0x8000000000000000ULL, // N3
+    0x8000000000000000ULL, // X
+    0x8000000000000000ULL, // MC0
+    0x8000000000000000ULL, // MC1
+    0x8000000000000000ULL, // OB0
+    0x8000000000000000ULL, // OB1
+    0x8000000000000000ULL, // OB2
+    0x8000000000000000ULL, // OB3
+    0x8000000000000000ULL, // PCI0
+    0x8000000000000000ULL, // PCI1
+    0x8000000000000000ULL  // PCI2
+};
+
+const uint64_t PERV_LFIR_MASK[15] =
+{
+    0xFFFFFFFFFFC00000ULL, // TP
+    0xFFFFFFFFFFC00000ULL, // N0
+    0xFFFFFFFFFFC00000ULL, // N1
+    0xFFFFFFFFFFC00000ULL, // N2
+    0xFFFFFFFFFFC00000ULL, // N3
+    0xFFFFFFFFFFC00000ULL, // X
+    0xFFFFFFFFFFC00000ULL, // MC0
+    0xFFFFFFFFFFC00000ULL, // MC1
+    0xFFFFFFFFFFC00000ULL, // OB0
+    0xFFFFFFFFFFC00000ULL, // OB1
+    0xFFFFFFFFFFC00000ULL, // OB2
+    0xFFFFFFFFFFC00000ULL, // OB3
+    0xFFFFFFFFFFC00000ULL, // PCI0
+    0xFFFFFFFFFFC00000ULL, // PCI1
+    0xFFFFFFFFFFC00000ULL  // PCI2
+};
+
+// chiplet XIR constants
+const uint64_t PERV_XFIR_MASK[15] =
+{
+    0x9FFFFFE000000000ULL, // TP
+    0x2007FFE000000000ULL, // N0
+    0x201FFFE000000000ULL, // N1
+    0x200FFFE000000000ULL, // N2
+    0x000007E000000000ULL, // N3
+    0x210FFFE000000000ULL, // X
+    0x20007FE000000000ULL, // MC0
+    0x20007FE000000000ULL, // MC1
+    0x29FFFFE000000000ULL, // OB0
+    0x29FFFFE000000000ULL, // OB1
+    0x29FFFFE000000000ULL, // OB2
+    0x29FFFFE000000000ULL, // OB3
+    0x21FFFFE000000000ULL, // PCI0
+    0x207FFFE000000000ULL, // PCI1
+    0x201FFFE000000000ULL  // PCI2
+};
+
 /// @brief --For all chiplets exit flush
 /// --For all chiplets enable alignment
 /// --For all chiplets disable alignemnt
@@ -622,6 +700,61 @@ fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_OPCG_ALIGN, l_data64));
 
     FAPI_INF("p9_sbe_common_set_scan_ratio: Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+/// @brief configure chiplet pervasive FIRs / XFIRs
+///
+/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PERV target
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_sbe_common_configure_chiplet_FIR(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet)
+{
+    uint8_t l_unit_idx;
+    fapi2::buffer<uint64_t> l_scom_data;
+    FAPI_INF("p9_sbe_common_configure_chiplet_FIR: Entering ...");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chiplet, l_unit_idx),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    l_unit_idx--;
+
+    // PERV LFIR
+    FAPI_DBG("Configuring PERV LFIR (chiplet ID: %02X)", l_unit_idx + 1);
+
+    // reset pervasive FIR
+    l_scom_data = 0;
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_LOCAL_FIR, l_scom_data),
+             "Error from putScom (PERV_LOCAL_FIR)");
+
+    // configure pervasive FIR action/mask
+    l_scom_data = PERV_LFIR_ACTION0[l_unit_idx];
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_LOCAL_FIR_ACTION0, l_scom_data),
+             "Error from putScom (PERV_LOCAL_FIR_ACTION0)");
+
+    l_scom_data = PERV_LFIR_ACTION1[l_unit_idx];
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_LOCAL_FIR_ACTION1, l_scom_data),
+             "Error from putScom (PERV_LOCAL_FIR_ACTION1)");
+
+    l_scom_data = PERV_LFIR_MASK[l_unit_idx];
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_LOCAL_FIR_MASK, l_scom_data),
+             "Error from putScom (PERV_LOCAL_FIR_MASK)");
+
+    // XFIR
+    FAPI_DBG("Configuring chiplet XFIR (chiplet ID: %02X)", l_unit_idx + 1);
+    // reset XFIR
+    l_scom_data = 0;
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_XFIR, l_scom_data),
+             "Error from putScom (PERV_XFIR)");
+
+    // configure XFIR mask
+    l_scom_data = PERV_XFIR_MASK[l_unit_idx];
+    FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_FIR_MASK, l_scom_data),
+             "Error from putScom (PERV_FIR_MASK");
+
+    FAPI_INF("p9_sbe_common_configure_chiplet_FIR: Exiting ...");
 
 fapi_try_exit:
     return fapi2::current_err;
