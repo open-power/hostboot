@@ -84,4 +84,7 @@ fapi2::ReturnCode p9_sbe_common_get_pg_vector(const
 fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets);
 
+fapi2::ReturnCode p9_sbe_common_configure_chiplet_FIR(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplet);
+
 #endif
