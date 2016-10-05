@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_fab_iovalid.C,v 1.15 2014/02/12 18:55:11 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
+// $Id: proc_fab_iovalid.C,v 1.16 2016/10/05 15:45:38 jmcgill Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_fab_iovalid.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 #include <p8_scom_addresses.H>
 #include <proc_fab_iovalid.H>
+#include <proc_check_security.H>
 
 extern "C"
 {
@@ -215,6 +216,7 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
     fapi::ReturnCode rc;
 
     // secure iovalid attribute
+    bool is_secure = false;
     uint8_t secure_iovalid_present_attr = 1;
 
     // mark function entry
@@ -231,7 +233,15 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
             FAPI_ERR("proc_fab_iovalid_manage_a_links: Error querying ATTR_CHIP_EC_FEATURE_SECURE_IOVALID_PRESENT");
             break;
         }
-            
+
+        // query security state
+        FAPI_EXEC_HWP(rc, proc_check_security, i_proc_chip.this_chip, is_secure);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from proc_check_security");
+            break;
+        }
+
         if (i_proc_chip.a0)
         {
             FAPI_DBG("proc_fab_iovalid_manage_a_links: Adding link A0 to active link mask");
@@ -274,7 +284,7 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
                 rc_ecmd |= secure_iovalid_mask.setBit(ADU_IOS_LINK_EN_A2_IOVALID_BIT);
             }
         }
-        
+
         // check aggregate return code from buffer manipulation operations
         if (rc_ecmd)
         {
@@ -296,11 +306,11 @@ fapi::ReturnCode proc_fab_iovalid_manage_a_links(
             break;
         }
 
-        // manage secure iovalids if present
+        // manage secure iovalids if present, and security is not enabled (handled by SBE otherwise)
         // do not attempt to drop secure iovalid
         // running on FSP (stopclocks), this code will be unable to adjust this register
         // clearing the GP0 settings should be sufficient to drop the downstream iovalids
-        if (secure_iovalid_present_attr && i_set_not_clear)
+        if (secure_iovalid_present_attr && i_set_not_clear && !is_secure)
         {
             rc = fapiPutScomUnderMask(i_proc_chip.this_chip,
                                       ADU_IOS_LINK_EN_0x02020019,
