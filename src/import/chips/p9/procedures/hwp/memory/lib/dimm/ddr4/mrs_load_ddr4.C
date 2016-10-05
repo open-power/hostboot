@@ -37,6 +37,7 @@
 
 #include <mss.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/bcw_load.H>
 #include <lib/eff_config/timing.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
@@ -63,6 +64,7 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 
     fapi2::buffer<uint16_t> l_cal_steps;
     uint64_t tDLLK = 0;
+    uint8_t l_dimm_type = 0;
 
     static std::vector< mrs_data<TARGET_TYPE_MCBIST> > l_mrs_data =
     {
@@ -151,6 +153,25 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
             io_inst.push_back(l_inst_a_side);
             io_inst.push_back(l_inst_b_side);
         }
+    }
+
+    // For LRDIMMs, program BCW to send ZQCal Long command to all databuffers
+    // in broadcast mode
+    FAPI_TRY( eff_dimm_type(i_target, l_dimm_type) );
+
+    if( l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+    {
+        constexpr uint8_t FSPACE = 0;
+        constexpr uint8_t WORD = 6;
+
+        // From the DDR4DB02 Spec: BC06 - Command Space Control Word
+        // After issuing a data buffer command via writes to BC06 waiting for tMRC(16 tCK)
+        // is required before the next DRAM command or BCW write can be issued.
+        FAPI_TRY( function_space_select<0>(i_target, io_inst) );
+
+        FAPI_TRY( bcw_engine<BCW_8BIT>(i_target,
+                                       bcw_data(FSPACE, WORD, eff_dimm_ddr4_bc06, mss::tmrc()),
+                                       io_inst) );
     }
 
 fapi_try_exit:

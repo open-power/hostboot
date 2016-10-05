@@ -275,7 +275,7 @@ class instruction_t
                     return;
                 }
 
-                // Deselect ranks on DIMM0
+                // Deselect ranks on DIMM1
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_0_1,
                                      TT::ARR0_DDR_CSN_0_1_LEN>(CS_N[l_effective_rank].second);
                 arr0.insertFromRight<TT::ARR0_DDR_CSN_2_3,
@@ -356,7 +356,8 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     //
     // RCD setup
     //
-    // DDR4: Set BG1 to 0. BG0, BA1:BA0 to 0b111
+    // DDR4: Set BG1 to 0 during an MRS.
+    // BG0, BA1:BA0 to 0b111 selects RCW (aka MR7).
     rcd_boilerplate_arr0.clearBit<TT::ARR0_DDR_BANK_GROUP_1>();
     rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(0b11);
     rcd_boilerplate_arr0.setBit<TT::ARR0_DDR_BANK_GROUP_0>();

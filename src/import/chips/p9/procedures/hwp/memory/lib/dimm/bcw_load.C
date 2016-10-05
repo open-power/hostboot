@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/dimm/mrs_load.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/dimm/bcw_load.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,37 +24,38 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mrs_load.C
-/// @brief Run and manage the MRS_LOAD engine
+/// @file rcd_load.C
+/// @brief Run and manage the RCD_LOAD engine
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
 
 #include <mss.H>
-#include <lib/dimm/mrs_load.H>
-#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/bcw_load.H>
+#include <lib/dimm/bcw_load_ddr4.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
-using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
+using fapi2::TARGET_TYPE_DIMM;
 
 using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
+
 ///
-/// @brief Perform the mrs_load operations - TARGET_TYPE_MCBIST specialization
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @brief Perform the bcw_load operations - TARGET_TYPE_MCBIST specialization
+/// @param[in] i_target the controller target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode bcw_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
     ccs::program<TARGET_TYPE_MCBIST> l_program;
@@ -64,12 +65,12 @@ fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
 
-    for ( const auto& p : find_targets<TARGET_TYPE_MCA>(i_target) )
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        for ( const auto& d : find_targets<TARGET_TYPE_DIMM>(p) )
+        for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
         {
-            FAPI_DBG("mrs load for %s", mss::c_str(d));
-            FAPI_TRY( perform_mrs_load(d, l_program.iv_instructions) );
+            FAPI_DBG("bcw load for %s", mss::c_str(d));
+            FAPI_TRY( perform_bcw_load(d, l_program.iv_instructions) );
         }
 
         // We have to configure the CCS engine to let it know which port these instructions are
@@ -83,13 +84,13 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Perform the mrs_load operations - unknown DIMM case
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @brief Perform the bcw_load operations - unknown DIMM case
+/// @param[in] i_target the DIMM target
 /// @param[in] io_inst a vector of CCS instructions we should add to (unused)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     uint8_t l_type = 0;
@@ -98,14 +99,14 @@ fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYP
     FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
     FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
 
-    // If we're here, we have a problem. The DIMM kind (type and/or generation) wasn't know
+    // If we're here, we have a problem. The DIMM kind (type and/or generation) wasn't known
     // to our dispatcher. We have a DIMM plugged in we don't know how to deal with.
     FAPI_ASSERT(false,
                 fapi2::MSS_UNKNOWN_DIMM()
                 .set_DIMM_TYPE(l_type)
                 .set_DRAM_GEN(l_gen)
                 .set_DIMM_IN_ERROR(i_target),
-                "Unable to perform mrs load on %s: unknown type (%d) or generation (%d)",
+                "Unable to perform bcw load on %s: unknown type (%d) or generation (%d)",
                 mss::c_str(i_target), l_type, l_gen);
 
 fapi_try_exit:
@@ -113,48 +114,44 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Perform the mrs_load operations - RDIMM DDR4
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] io_inst a vector of CCS instructions we should add to
+/// @brief Perform the bcw_load operations - LRDIMM DDR4
+/// @param[in] i_target the DIMM target
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode perform_mrs_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode perform_bcw_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
-    FAPI_DBG("perform mrs_load for %s [expecting rdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
+    FAPI_DBG("perform bcw_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
+    FAPI_TRY( bcw_load_ddr4(i_target, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Perform the mrs_load operations - LRDIMM DDR4
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] io_inst a vector of CCS instructions we should add to
+/// @brief Perform the bcw_load operations - RDIMM DDR4
+/// @param[in] i_target the DIMM target
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode perform_mrs_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode perform_bcw_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
-    FAPI_DBG("perform mrs_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( ddr4::mrs_load(i_target, io_inst) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    FAPI_INF("Skipping BCW loading for %s since this is valid only for LRDIMMs", mss::c_str(i_target));
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
-
 ///
-/// @brief Perform the mrs_load operations - start the dispatcher
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @brief Perform the bcw_load operations - start the dispatcher
+/// @param[in] i_target the DIMM target
 /// @param[in] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+fapi2::ReturnCode perform_bcw_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     uint8_t l_type = 0;
@@ -163,10 +160,10 @@ fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_T
     FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
     FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
 
-    return perform_mrs_load_dispatch<FORCE_DISPATCH>(dimm_kind( l_type, l_gen ), i_target, io_inst);
+    return perform_bcw_load_dispatch<FORCE_DISPATCH>(dimm_kind( l_type, l_gen ), i_target, io_inst);
 
 fapi_try_exit:
-    FAPI_ERR("couldn't get dimm type, dram gen: %s", mss::c_str(i_target));
+    FAPI_ERR("Couldn't get DIMM type, DRAM gen: %s", mss::c_str(i_target));
     return fapi2::current_err;
 }
 

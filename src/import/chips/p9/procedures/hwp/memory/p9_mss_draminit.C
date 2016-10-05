@@ -39,6 +39,8 @@
 #include <p9_mss_draminit.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/fir/training_fir.H>
+#include <lib/utils/conversions.H>
+#include <lib/dimm/bcw_load.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -123,10 +125,22 @@ extern "C"
             FAPI_TRY( mss::drive_mem_clks(p, PCLK_INITIAL_VALUE, NCLK_INITIAL_VALUE) );
         }
 
-        // Clocks need to be started and stable for 10ns before CKE goes active.
-        // Not 100% clear what cycle count to use here. We'll assume 2400 for now. 10ns is 13 cycles freq 2400.
-        FAPI_TRY( fapi2::delay(mss::DELAY_10NS, mss::cycles_to_simcycles(13)) );
+        // From the DDR4 JEDEC Spec (79-A): Power-up Initialization Sequence
+        // Lets find our max delay in ns
+        {
+            // Clocks (CK_t,CK_c) need to be started and stable for 10ns or 5tCK
+            // (whichever is greater) before CKE goes active.
+            constexpr uint64_t DELAY_5TCK = 5;
+            uint64_t l_delay_in_ns = std::max( static_cast<uint64_t>(mss::DELAY_10NS),
+                                               mss::cycles_to_ns(i_target, DELAY_5TCK) );
 
+            uint64_t l_delay_in_cycles = mss::ns_to_cycles(i_target, l_delay_in_ns);
+
+            // Set our delay (for HW and SIM)
+            FAPI_TRY( fapi2::delay(l_delay_in_ns, mss::cycles_to_simcycles(l_delay_in_cycles)) );
+        }
+
+        // Also a Deselect command must be registered as required from the Spec.
         // Register DES instruction, which pulls CKE high. Idle 400 cycles, and then begin RCD loading
         // Note: This only is sent to one of the MCA as we still have the mux_addr_sel bit set, meaning
         // we'll PDE/DES all DIMM at the same time.
@@ -143,6 +157,9 @@ extern "C"
 
         // Load RCD control words
         FAPI_TRY( mss::rcd_load(i_target) );
+
+        // Load data buffer control words (BCW)
+        FAPI_TRY( mss::bcw_load(i_target) );
 
         // Register has been configured, so we can unmask 'training' errors which includes parity
         // which we want to see during MRS load
