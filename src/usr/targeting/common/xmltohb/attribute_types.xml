@@ -16340,7 +16340,7 @@ Measured in GB</description>
         Enumeration defining the type of power control requested
     </description>
     <enumerator>
-        <name>NONE</name>
+        <name>OFF</name>
         <value>0</value>
     </enumerator>
     <enumerator>
@@ -16365,7 +16365,7 @@ Measured in GB</description>
 
         Producer: MRW
 
-        0x00 = NONE
+        0x00 = OFF
         0x01 = POWER_DOWN
         0x02 = STR
         0x03 = PD_AND_STR
@@ -16373,6 +16373,7 @@ Measured in GB</description>
     <simpleType>
         <enumeration>
             <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
+            <default>OFF</default>
         </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
