@@ -171,18 +171,21 @@ inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
 
 ///
 /// @brief Return the number of cycles contained in a count of picoseconds
+/// @tparam T the target type from which to get the mt/s
+/// @tparam OT the output type, derrived from the parameters
 /// @param[in] i_target target for the frequency attribute
 /// @param[in] i_ps the number of picoseconds to convert
 /// @return uint64_t, the number of cycles
 ///
-template< fapi2::TargetType T >
-inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_ps)
+template< fapi2::TargetType T, typename OT >
+inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
 {
-    // The frequency in mHZ
+    // The frequency in MT/s
     uint64_t l_freq = 0;
-    uint64_t l_divisor = 0;
-    uint64_t l_quotient = 0;
-    uint64_t l_remainder = 0;
+    OT l_divisor = 0;
+    OT l_quotient = 0;
+    OT l_remainder = 0;
+    OT l_rounder = (i_ps < 0) ? -1 : 1;
 
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
@@ -194,13 +197,13 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 
     // Hoping the compiler figures out how to do these together.
     FAPI_TRY( freq_to_ps(l_freq, l_divisor) );
-    l_quotient = i_ps / ((l_divisor == 0) ? 1 : l_divisor);
+    l_quotient = i_ps / ((l_divisor == 0) ? l_rounder : l_divisor);
     l_remainder = i_ps % l_divisor;
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
-    FAPI_INF("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : 1));
+    FAPI_INF("converting %dps to %d cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
 
-    return l_quotient + (l_remainder == 0 ? 0 : 1);
+    return l_quotient + (l_remainder == 0 ? 0 : l_rounder);
 
 fapi_try_exit:
     // We simply can't work if we can't get the frequency or
