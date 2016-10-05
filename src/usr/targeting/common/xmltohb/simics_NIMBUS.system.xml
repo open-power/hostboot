@@ -99,10 +99,6 @@
     </attribute>
     <attribute>
         <id>REQUIRED_SYNCH_MODE</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>REQUIRED_SYNCH_MODE</id>
         <default>2</default><!-- NEVER -->
     </attribute>
      <attribute>
