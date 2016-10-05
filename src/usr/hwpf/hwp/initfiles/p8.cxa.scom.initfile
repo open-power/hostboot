@@ -1,4 +1,4 @@
-#-- $Id: p8.cxa.scom.initfile,v 1.6 2015/05/20 18:55:23 jmcgill Exp $
+#-- $Id: p8.cxa.scom.initfile,v 1.7 2016/10/05 16:19:55 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -65,27 +65,6 @@ scom 0x0201319C {
     15:18 ,  0b1000,             (capp_dual);
 }
 
-#-- CAPP Flush uOP1 Configuration Register
-scom 0x02013803 {
-    bits  ,  scom_data;
-    0:63  ,  0xB188280728000000;
-}
-
-scom 0x02013983 {
-    bits  ,  scom_data,          expr;
-    0:63  ,  0xB188280728000000, (capp_dual);
-}
-
-#-- CAPP Flush uOP2 Configuration Register
-scom 0x02013804 {
-    bits  ,  scom_data;
-    0:63  ,  0xB188400F00000000;
-}
-
-scom 0x02013984 {
-    bits  ,  scom_data,          expr;
-    0:63  ,  0xB188400F00000000, (capp_dual);
-}
 
 #-- CXA FIR Action0/1 Registers
 #--   action0,1 = 00 : checkstop

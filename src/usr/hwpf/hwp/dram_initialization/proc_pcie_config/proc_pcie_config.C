@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.11 2015/06/29 01:47:49 jmcgill Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
+// $Id: proc_pcie_config.C,v 1.12 2016/10/05 16:45:45 jmcgill Exp $
+// $Source: /archive/shadow/ekb/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,15 @@
 #include <fapiHwpExecInitFile.H>
 #include <proc_pcie_config.H>
 #include <proc_a_x_pci_dmi_pll_setup.H>
+
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+const uint64_t NX_CAPP_FLUSH_UOP1_DEFAULT = 0xB188280728000000ULL;
+const uint64_t NX_CAPP_FLUSH_UOP2_DEFAULT = 0xB188400F00000000ULL;
+
 
 extern "C" {
 
@@ -250,6 +259,7 @@ fapi::ReturnCode proc_pcie_config(
 {
     fapi::ReturnCode rc;
     uint8_t pcie_enabled;
+    uint8_t nx_enabled;
     uint8_t num_phb;
 
     // mark HWP entry
@@ -316,6 +326,87 @@ fapi::ReturnCode proc_pcie_config(
         else
         {
             FAPI_DBG("proc_pcie_config: Skipping initialization (partial good)");
+        }
+
+        // SW368027
+        // query NX partial good attribute
+        rc = FAPI_ATTR_GET(ATTR_PROC_NX_ENABLE,
+                           &i_target,
+                           nx_enabled);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_pcie_config: Error querying ATTR_PROC_NX_ENABLE");
+            break;
+        }
+
+        if (nx_enabled == fapi::ENUM_ATTR_PROC_NX_ENABLE_ENABLE)
+        {
+            uint32_t rc_ecmd = 0;
+            uint8_t dual_capp_present = 0;
+            ecmdDataBufferBase capp_flush_uop1(64);
+            ecmdDataBufferBase capp_flush_uop2(64);
+
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT,
+                               &i_target,
+                               dual_capp_present);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: Error querying ATTR_CHIP_EC_FEATURE_DUAL_CAPP_PRESENT");
+                break;
+            }
+
+            rc_ecmd |= capp_flush_uop1.setDoubleWord(0, NX_CAPP_FLUSH_UOP1_DEFAULT);
+            rc_ecmd |= capp_flush_uop2.setDoubleWord(0, NX_CAPP_FLUSH_UOP2_DEFAULT);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_pcie_config: Error 0x%x setting up CAPP Flush uOP register data buffers",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_target,
+                             NX_CAPP_FLUSH_SUE_UOP1_0x02013803,
+                             capp_flush_uop1);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: fapiPutScom error (NX_CAPP_FLUSH_SUE_UOP1_0x02013803) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
+            rc = fapiPutScom(i_target,
+                             NX_CAPP_FLUSH_SUE_UOP2_0x02013804,
+                             capp_flush_uop2);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config: fapiPutScom error (NX_CAPP_FLUSH_SUE_UOP2_0x02013804) on %s",
+                         i_target.toEcmdString());
+                break;
+            }
+
+            if (dual_capp_present)
+            {
+                rc = fapiPutScom(i_target,
+                                 NX_CAPP1_FLUSH_SUE_UOP1_0x02013983,
+                                 capp_flush_uop1);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_pcie_config: fapiPutScom error (NX_CAPP1_FLUSH_SUE_UOP1_0x02013983) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+
+                rc = fapiPutScom(i_target,
+                                 NX_CAPP1_FLUSH_SUE_UOP2_0x02013984,
+                                 capp_flush_uop2);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_pcie_config: fapiPutScom error (NX_CAPP1_FLUSH_SUE_UOP2_0x02013984) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+            }
         }
 
     } while(0);
