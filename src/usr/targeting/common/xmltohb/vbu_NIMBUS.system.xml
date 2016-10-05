@@ -93,16 +93,15 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
-    <!-- TODO RTC: 161596 Remove references to deprecated NEST_FREQ_MHZ -->
     <attribute>
-        <id>NEST_FREQ_MHZ</id>
-        <default>0x960</default>
+        <id>ASYNC_NEST_FREQ_MHZ</id>
+        <default>0x7D0</default>
     </attribute>
     <attribute>
-        <id>FREQ_PB_MHZ</id>
-        <default>0x960</default>
+        <id>REQUIRED_SYNCH_MODE</id>
+        <default>1</default><!-- ALWAYS, req for VPO @2.4 -->
     </attribute>
-    <attribute>
+     <attribute>
         <id>PAYLOAD_BASE</id>
         <!-- Value of 0x0 for standalone systems, no payload to start -->
         <default>0x0</default>
@@ -138,11 +137,15 @@
     <attribute>
       <id>MSS_MRW_SUPPORTED_FREQ</id>
       <default>
-        1866,
         2133,
         2400,
-        2667,
+        0,
+        0
       </default>
+    </attribute>
+    <attribute>
+    <id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
+    <default>10000</default>
     </attribute>
 </targetInstance>
 
@@ -373,10 +376,10 @@
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>
-            400, 0, 0,
-            0, 0, 0,
-            400, 0, 0,
-            0, 0, 0
+            400, 0, 0, 0,
+            0, 400, 0, 400,
+            400, 0, 0, 0,
+            0, 0, 0, 0
         </default>
     </attribute>
     <attribute>
@@ -2547,7 +2550,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0D</default>
+        <default>0xD</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2636,7 +2639,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0E</default>
+        <default>0xE</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2725,7 +2728,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0F</default>
+        <default>0xF</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2815,7 +2818,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0D</default>
+        <default>0xD</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2853,7 +2856,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0E</default>
+        <default>0xE</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2890,7 +2893,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0E</default>
+        <default>0xE</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2928,7 +2931,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0F</default>
+        <default>0xF</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2965,7 +2968,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0F</default>
+        <default>0xF</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3002,7 +3005,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x0F</default>
+        <default>0xF</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3108,6 +3111,39 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0nv1</id>
+    <type>unit-nv-nimbus</type>
+    <attribute><id>HUID</id><default>0x00290001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
@@ -4886,7 +4922,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x2</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -4923,7 +4959,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x4</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -7789,6 +7825,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xD</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7825,6 +7865,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xE</default>
     </attribute>
 </targetInstance>
 
@@ -7863,6 +7907,10 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xF</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7899,6 +7947,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xD</default>
     </attribute>
 </targetInstance>
 
@@ -7937,6 +7989,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xE</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -7973,6 +8029,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xE</default>
     </attribute>
 </targetInstance>
 
@@ -8011,6 +8071,10 @@
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xF</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8048,6 +8112,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xF</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -8084,6 +8152,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0xF</default>
     </attribute>
 </targetInstance>
 
@@ -8263,7 +8335,7 @@
 <targetInstance>
     <id>sys0node0proc1nv0</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x00290001</default></attribute>
+    <attribute><id>HUID</id><default>0x00290002</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>NA</default>
     </attribute>
@@ -8277,11 +8349,48 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>1</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1nv1</id>
+    <type>unit-nv-nimbus</type>
+    <attribute><id>HUID</id><default>0x00290003</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -10524,6 +10633,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -10560,6 +10673,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>4</default>
     </attribute>
 </targetInstance>
 
