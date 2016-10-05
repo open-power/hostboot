@@ -573,6 +573,230 @@ fapi_try_exit:
 }
 
 
+/// @brief Configure INT MMIO access
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_int(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                  const p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+
+    ////////////////////
+    // INT_CQ_PC_BAR  //
+    ////////////////////
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_INT_CQ_PC_BAR_ENABLE_Type l_pc_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_PC_BAR_ENABLE, i_target, l_pc_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_PC_BAR_ENABLE)");
+
+    if (l_pc_bar_enable == fapi2::ENUM_ATTR_PROC_INT_CQ_PC_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK_Type l_bar_mask;
+        fapi2::buffer<uint64_t> l_bar = i_chip_info.base_address_mmio;
+        fapi2::buffer<uint64_t> l_bar_mask_inverted;
+        fapi2::buffer<uint64_t> l_bar_offset_26_38;
+
+        // retrieve BAR offset
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET)");
+
+        // retrieve BAR offset mask
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK, i_target_sys, l_bar_mask),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK)");
+
+        l_bar_offset_26_38 = l_bar_offset;
+        l_bar_offset_26_38.clearBit(PU_INT_CQ_PC_BAR_ADDR_8_38, PU_INT_CQ_PC_BARM_ADDR_26_38 - PU_INT_CQ_PC_BAR_ADDR_8_38);
+
+        l_bar_mask_inverted = l_bar_mask;
+        l_bar_mask_inverted.invert();
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset_26_38 & l_bar_mask_inverted) == 0,
+                    fapi2::P9_SETUP_BARS_INT_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(l_bar_mask_inverted)
+                    .set_BAR_OVERLAP(l_bar_offset & l_bar_mask_inverted),
+                    "INT_CQ_PC_BAR attributes are not aligned to HW implementation");
+
+        // form INT CQ PC BAR scom register format
+        l_bar += l_bar_offset;
+        l_bar.setBit<PU_INT_CQ_PC_BAR_VALID>();
+
+        // write to bar register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_PC_BAR, l_bar),
+                 "Error from putScom (PU_INT_CQ_PC_BAR)");
+
+        // write to bar mask register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_PC_BARM, l_bar_mask),
+                 "Error from putScom (PU_INT_CQ_PC_BARM)");
+    }
+
+    ////////////////////
+    // INT_CQ_VC_BAR  //
+    ////////////////////
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_INT_CQ_VC_BAR_ENABLE_Type l_vc_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_VC_BAR_ENABLE, i_target, l_vc_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_VC_BAR_ENABLE)");
+
+    if (l_vc_bar_enable == fapi2::ENUM_ATTR_PROC_INT_CQ_VC_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK_Type l_bar_mask;
+        fapi2::buffer<uint64_t> l_bar = i_chip_info.base_address_mmio;
+        fapi2::buffer<uint64_t> l_bar_mask_inverted;
+        fapi2::buffer<uint64_t> l_bar_offset_26_37;
+
+        // retrieve BAR offset
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET)");
+
+        // retrieve BAR offset mask
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK, i_target_sys, l_bar_mask),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK)");
+
+        l_bar_offset_26_37 = l_bar_offset;
+        l_bar_offset_26_37.clearBit(PU_INT_CQ_VC_BAR_ADDR_8_37, PU_INT_CQ_VC_BARM_ADDR_21_37 - PU_INT_CQ_VC_BAR_ADDR_8_37);
+
+        l_bar_mask_inverted = l_bar_mask;
+        l_bar_mask_inverted.invert();
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset_26_37 & l_bar_mask_inverted) == 0,
+                    fapi2::P9_SETUP_BARS_INT_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(l_bar_mask_inverted)
+                    .set_BAR_OVERLAP(l_bar_offset & l_bar_mask_inverted),
+                    "INT_CQ_VC_BAR attributes are not aligned to HW implementation");
+
+        // form INT CQ PC BAR scom register format
+        l_bar += l_bar_offset;
+        l_bar.setBit<PU_INT_CQ_VC_BAR_VALID>();
+
+        // write to bar register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_VC_BAR, l_bar),
+                 "Error from putScom (PU_INT_CQ_VC_BAR)");
+
+        // write to bar mask register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_VC_BARM, l_bar_mask),
+                 "Error from putScom (PU_INT_CQ_VC_BARM)");
+    }
+
+    ////////////////////
+    // INT_CQ_TM1_BAR //
+    ////////////////////
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_INT_CQ_TM1_BAR_ENABLE_Type l_tm1_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_TM1_BAR_ENABLE, i_target, l_tm1_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_TM1_BAR_ENABLE)");
+
+    if (l_tm1_bar_enable == fapi2::ENUM_ATTR_PROC_INT_CQ_TM1_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE_Type l_bar_page_size;
+        fapi2::buffer<uint64_t> l_bar = i_chip_info.base_address_mmio;
+        fapi2::buffer<uint64_t> l_bar_offset_mask;
+
+        // retrieve BAR offset
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET)");
+
+        // retrieve BAR page size
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE, i_target_sys, l_bar_page_size),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE)");
+
+        l_bar_offset_mask = l_bar_page_size ? (P9_SETUP_BARS_OFFSET_MASK_64_KB) : (P9_SETUP_BARS_OFFSET_MASK_4_KB);
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset & l_bar_offset_mask) == 0,
+                    fapi2::P9_SETUP_BARS_INT_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(l_bar_offset_mask)
+                    .set_BAR_OVERLAP(l_bar_offset & l_bar_offset_mask),
+                    "INT_CQ_TM1_BAR attributes are not aligned to HW implementation");
+
+        // form INT CQ TM1 BAR scom register format
+        l_bar += l_bar_offset;
+        l_bar.setBit<PU_INT_CQ_TM1_BAR_VALID>();
+
+        if(l_bar_page_size == fapi2::ENUM_ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE_64K)
+        {
+            l_bar.setBit(PU_INT_CQ_TM1_BAR_PAGE_SIZE_64K);
+        }
+
+        // write to bar register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_TM1_BAR, l_bar),
+                 "Error from putScom (PU_INT_CQ_TM1_BAR)");
+    }
+
+    ////////////////////
+    // INT_CQ_IC_BAR  //
+    ////////////////////
+
+    // retrieve BAR enable
+    fapi2::ATTR_PROC_INT_CQ_IC_BAR_ENABLE_Type l_ic_bar_enable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_IC_BAR_ENABLE, i_target, l_ic_bar_enable),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_IC_BAR_ENABLE)");
+
+    if (l_ic_bar_enable == fapi2::ENUM_ATTR_PROC_INT_CQ_IC_BAR_ENABLE_ENABLE)
+    {
+        fapi2::ATTR_PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET_Type l_bar_offset;
+        fapi2::ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE_Type l_bar_page_size;
+        fapi2::buffer<uint64_t> l_bar = i_chip_info.base_address_mmio;
+        fapi2::buffer<uint64_t> l_bar_offset_mask;
+
+        // retrieve BAR offset
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET, i_target_sys, l_bar_offset),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET)");
+
+        // retrieve BAR page size
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE, i_target_sys, l_bar_page_size),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE)");
+
+        l_bar_offset_mask = l_bar_page_size ? (P9_SETUP_BARS_OFFSET_MASK_64_KB) : (P9_SETUP_BARS_OFFSET_MASK_4_KB);
+
+        // check that BAR offset attribute is properly aligned
+        FAPI_ASSERT((l_bar_offset & l_bar_offset_mask) == 0,
+                    fapi2::P9_SETUP_BARS_INT_BAR_ATTR_ERR()
+                    .set_TARGET(i_target)
+                    .set_BAR_OFFSET(l_bar_offset)
+                    .set_BAR_OFFSET_MASK(l_bar_offset_mask)
+                    .set_BAR_OVERLAP(l_bar_offset & l_bar_offset_mask),
+                    "INT_CQ_IC_BAR attributes are not aligned to HW implementation");
+
+        // form INT CQ IC BAR scom register format
+        l_bar += l_bar_offset;
+        l_bar.setBit<PU_INT_CQ_IC_BAR_VALID>();
+
+        if(l_bar_page_size == fapi2::ENUM_ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE_64K)
+        {
+            l_bar.setBit(PU_INT_CQ_IC_BAR_PAGE_SIZE_64K);
+        }
+
+        // write to bar register
+        FAPI_TRY(fapi2::putScom(i_target, PU_INT_CQ_IC_BAR, l_bar),
+                 "Error from putScom (PU_INT_CQ_IC_BAR)");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 // description in header
 fapi2::ReturnCode
 p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
@@ -596,10 +820,12 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     // NPU
     FAPI_TRY(p9_setup_bars_npu(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_npu");
-
     // MCD
     FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_mcd");
+    // INT
+    FAPI_TRY(p9_setup_bars_int(i_target, FAPI_SYSTEM, l_chip_info),
+             "Error from p9_setup_bars_int");
 
 fapi_try_exit:
     FAPI_INF("End");
