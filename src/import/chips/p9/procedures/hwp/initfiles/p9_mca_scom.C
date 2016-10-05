@@ -68,6 +68,7 @@ constexpr auto literal_0b011000 = 0b011000;
 constexpr auto literal_0b000 = 0b000;
 constexpr auto literal_0b100 = 0b100;
 constexpr auto literal_0b010 = 0b010;
+constexpr auto literal_0x0 = 0x0;
 constexpr auto literal_0b001 = 0b001;
 constexpr auto literal_0b101 = 0b101;
 constexpr auto literal_0b011 = 0b011;
@@ -853,6 +854,8 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
             break;
         }
 
+        auto l_def_SLOT0_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] == literal_0x0)
+                                        | l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0]);
         fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM_Type l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, TGT2, l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM);
 
@@ -863,9 +866,11 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         }
 
         auto l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] /
-                                              l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0]);
+                                              l_def_SLOT0_DENOMINATOR);
+        auto l_def_SLOT1_DENOMINATOR = ((l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] == literal_0x0)
+                                        | l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1]);
         auto l_def_SLOT1_DRAM_STACK_HEIGHT = (l_TGT2_ATTR_EFF_NUM_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1] /
-                                              l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_1]);
+                                              l_def_SLOT1_DENOMINATOR);
         {
             l_rc = fapi2::getScom( TGT0, 0x7010914ull, l_scom_buffer );
 
