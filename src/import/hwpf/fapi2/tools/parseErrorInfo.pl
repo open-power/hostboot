@@ -1352,7 +1352,8 @@ foreach my $argnum (0 .. $#ARGV)
         # hwsv/hb and create a target in that context
         if( exists $errors->{sbeTarget} && ( $arg_local_ffdc eq undef) )
         {
-            $objectStr .= "        fapi2::Target<TARGET_TYPE_PROC_CHIP>$errors->{sbeTarget} = getTarget<TARGET_TYPE_PROC_CHIP>(SBE_INSTANCE); \\\n";
+            $objectStr .= "        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>$errors->{sbeTarget}" .
+                          " = fapi2::getTarget<fapi2::TARGET_TYPE_PROC_CHIP>(SBE_INSTANCE); \\\n";
             $objectStr .= "        l_obj.$errors->{sbeTarget}.ptr() = &$errors->{sbeTarget}; \\\n";
             $objectStr .= "        l_obj.$errors->{sbeTarget}.size() = fapi2::getErrorInfoFfdcSize($errors->{sbeTarget}); \\\n";
         }
@@ -1515,7 +1516,7 @@ foreach my $argnum (0 .. $#ARGV)
         if (exists $err->{sbeError})
         {
             print SBFILE "    case fapi2::$err->{rc}: \\\n";
-            print SBFILE "    { \\\n        $class_name l_obj(";
+            print SBFILE "    { \\\n        fapi2::$class_name l_obj(";
             print SBFILE "fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC);\\\n";
 
             if(!($objectStr eq undef ))
