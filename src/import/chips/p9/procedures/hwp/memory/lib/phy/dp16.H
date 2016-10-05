@@ -156,6 +156,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
         static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
         static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
+        static const std::vector< uint64_t > READ_DELAY_OFFSET_REG;
 
         //WR VREF registers
         static const std::vector< uint64_t > WR_VREF_CONFIG0_REG;
@@ -291,6 +292,12 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             WR_VREF_VALUE_RANGE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_RANGE_DRAM1 ,
             WR_VREF_VALUE_VALUE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1 ,
             WR_VREF_VALUE_VALUE_DRAM_ODD_LEN  = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1_LEN ,
+
+            // Read Delay fields.
+            READ_OFFSET_LOWER = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01,
+            READ_OFFSET_LOWER_LEN = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_LEN,
+            READ_OFFSET_UPPER = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_OFFSET1,
+            READ_OFFSET_UPPER_LEN = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01_OFFSET1_LEN,
         };
 };
 
@@ -1665,6 +1672,17 @@ fapi2::ReturnCode reset_wr_vref_value_rp3( const fapi2::Target<T>& i_target );
 ///
 template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode reset_wr_vref_registers( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Resets all read delay offset registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+// TODO RTC:162136 implement read, write, set and get for the read delay offset registers
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_read_delay_offset_registers( const fapi2::Target<T>& i_target );
 
 } // close namespace dp16
 } // close namespace mss
