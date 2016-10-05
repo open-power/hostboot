@@ -1724,6 +1724,22 @@ void invokePresentByAssoc()
     // make one list
     TargetHandleList l_funcTargetList;
 
+    // get the functional MCBISTs
+    TargetHandleList l_funcMCBISTTargetList;
+    getAllChiplets(l_funcMCBISTTargetList, TYPE_MCBIST, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                            l_funcMCBISTTargetList.begin(),
+                            l_funcMCBISTTargetList.end());
+
+    // If VPO, dump targets (MCBIST) for verification & debug purposes
+    #ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssoc(): MCBIST targets:");
+    for (auto l_MCBIST : l_funcMCBISTTargetList)
+    {
+        HWAS_INF("   MCBIST: HUID %.8x", TARGETING::get_huid(l_MCBIST));
+    }
+    #endif
+
     // get the functional MCSs
     TargetHandleList l_funcMCSTargetList;
     getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
@@ -1734,12 +1750,9 @@ void invokePresentByAssoc()
 // If VPO, dump targets (MCS) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssoc(): MCS targets:");
-    for (TargetHandleList::const_iterator
-            l_MCS_Itr = l_funcMCSTargetList.begin();
-            l_MCS_Itr != l_funcMCSTargetList.end();
-            l_MCS_Itr++)
+    for (auto l_MCS : l_funcMCSTargetList)
     {
-        HWAS_INF("   MCS: HUID %.8x", TARGETING::get_huid(*l_MCS_Itr));
+        HWAS_INF("   MCS: HUID %.8x", TARGETING::get_huid(l_MCS));
     }
 #endif
 
@@ -1754,12 +1767,9 @@ void invokePresentByAssoc()
 // If VPO, dump targets (MEMBUF) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssoc(): MEMBUF targets:");
-    for (TargetHandleList::const_iterator
-            l_MEMBUF_Itr = l_funcMembufTargetList.begin();
-            l_MEMBUF_Itr != l_funcMembufTargetList.end();
-            l_MEMBUF_Itr++)
+    for (auto l_MEMBUF : l_funcMembufTargetList)
     {
-        HWAS_INF("   MEMBUF: HUID %.8x", TARGETING::get_huid(*l_MEMBUF_Itr));
+        HWAS_INF("   MEMBUF: HUID %.8x", TARGETING::get_huid(l_MEMBUF));
     }
 #endif
 
@@ -1774,12 +1784,9 @@ void invokePresentByAssoc()
 // If VPO, dump targets (MBA) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssoc(): MBA targets:");
-    for (TargetHandleList::const_iterator
-            l_MBA_Itr = l_funcMBATargetList.begin();
-            l_MBA_Itr != l_funcMBATargetList.end();
-            l_MBA_Itr++)
+    for (auto l_MBA : l_funcMBATargetList)
     {
-        HWAS_INF("   MBA: HUID %.8x", TARGETING::get_huid(*l_MBA_Itr));
+        HWAS_INF("   MBA: HUID %.8x", TARGETING::get_huid(l_MBA));
     }
 #endif
 
@@ -1794,12 +1801,9 @@ void invokePresentByAssoc()
 // If VPO, dump targets (MCA) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssocDA(): MCA targets:");
-    for (TargetHandleList::const_iterator
-            l_MCA_Itr = l_funcMcaTargetList.begin();
-            l_MCA_Itr != l_funcMcaTargetList.end();
-            l_MCA_Itr++)
+    for (auto l_MCA : l_funcMcaTargetList)
     {
-        HWAS_INF("   MCA: HUID %.8x", TARGETING::get_huid(*l_MCA_Itr));
+        HWAS_INF("   MCA: HUID %.8x", TARGETING::get_huid(l_MCA));
     }
 #endif
     // get the functional dimms
@@ -1813,12 +1817,9 @@ void invokePresentByAssoc()
 // If VPO, dump targets (DIMM) for verification & debug purposes
 #ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssoc(): DIMM targets:");
-    for (TargetHandleList::const_iterator
-            l_DIMM_Itr = l_funcDIMMTargetList.begin();
-            l_DIMM_Itr != l_funcDIMMTargetList.end();
-            l_DIMM_Itr++)
+    for (auto l_DIMM : l_funcDIMMTargetList)
     {
-        HWAS_INF("   DIMM: HUID %.8x", TARGETING::get_huid(*l_DIMM_Itr));
+        HWAS_INF("   DIMM: HUID %.8x", TARGETING::get_huid(l_DIMM));
     }
 #endif
 
@@ -1873,9 +1874,11 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
     std::sort(io_funcTargets.begin(), io_funcTargets.end(),
               compareAffinity);
 
+
     // Keep track of the most recently seen MCS MEMBUF and MBA. This allows the
     // algorithm to quickly check if targets share a MCS or MEMBUF and used
     // for backtracking after deleting a target from the vector
+    size_t l_MCBISTIndex = __INT_MAX__;
     size_t l_MCSIndex = __INT_MAX__;
     size_t l_MEMBUFIndex = __INT_MAX__;
     size_t l_MBAIndex = __INT_MAX__;
@@ -1905,6 +1908,31 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         switch (l_curTargetInfo.type)
         {
+        case TYPE_MCBIST:
+        {
+            // No Child MCSs
+            // If next is not a MCS sharing the same MCAs, deconfig MCBIST
+            if ( (l_nextTargetInfo == NULL) ||
+                (l_nextTargetInfo->type != TYPE_MCS) ||
+                !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MCBIST - NO_CHILD_MCS
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_CHILD_MCS;
+                // Add target to Deconfig vector to be deconfigured later
+                o_targToDeconfig.push_back(l_curTargetInfo);
+                // Remove target from funcTargets
+                io_funcTargets.erase(it);
+            }
+            // Update MCBIST Index
+            else
+            {
+                l_MCBISTIndex = i;
+                i++;
+                continue;
+            }
+            break;
+        }// MCBIST
         case TYPE_MCS:
         {
             // No Child MEMBUFs or MCAs
@@ -1917,16 +1945,38 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 // Disable MCS - NO_CHILD_MEMBUF_OR_MCA
                 l_curTargetInfo.reason =
                         DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA;
-                // Add target to Deconfig vector to be deconfigured later
-                o_targToDeconfig.push_back(l_curTargetInfo);
-                // Remove target from funcTargets
-                io_funcTargets.erase(it);
+
+            }
+            // No Parent MCBIST
+            // If MCS doesn't share the same MCBIST as MCSIndex, deconfig MCS
+            else if ( (l_MCBISTIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCBISTIndex]))
+            {
+                // Disable MCS - NO_PARENT_MCBIST
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCBIST;
             }
             // Update MCS Index
             else
             {
                 l_MCSIndex = i;
                 i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MCBIST
+            if ( l_MCBISTIndex != __INT_MAX__ )
+            {
+                i = l_MCBISTIndex;
+            }
+            // Backtrack to beginning if no MCS has been seen yet
+            else
+            {
+                i = 0;
             }
             break;
         } // MCS
@@ -2064,7 +2114,6 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             o_targToDeconfig.push_back(l_curTargetInfo);
             // Remove target from funcTargets
             io_funcTargets.erase(it);
-
             // Backtrack to last MCS
             if ( l_MCSIndex != __INT_MAX__ )
             {
@@ -2097,7 +2146,6 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 o_targToDeconfig.push_back(l_curTargetInfo);
                 // Remove target from funcTargets
                 io_funcTargets.erase(it);
-
                 // Backtrack to last MBA
                 if ( l_MBAIndex != __INT_MAX__ )
                 {
@@ -2106,7 +2154,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 // Backtrack to last MCA
                 else if ( l_MCAIndex != __INT_MAX__)
                 {
-                    i = l_MCSIndex;
+                    i = l_MCAIndex;
                 }
                 // Backtrack to last MEMBUF if no MBA has been seen yet
                 else if ( l_MEMBUFIndex != __INT_MAX__)
@@ -2117,6 +2165,11 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 else if ( l_MCSIndex != __INT_MAX__)
                 {
                     i = l_MCSIndex;
+                }
+                // Backtrack to last MCS if no MEMBUF has been seen yet
+                else if ( l_MCBISTIndex != __INT_MAX__)
+                {
+                    i = l_MCBISTIndex;
                 }
                 // Backtrack to beginning if no MCS has been seen yet
                 else

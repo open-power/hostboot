@@ -4449,7 +4449,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4465,7 +4465,7 @@ public:
         // MCS Group 1 is fully populated
 
         // User-defined number of targets
-        size_t NUM_TARGS = 5;
+        size_t NUM_TARGS = 6;
 
         // Input target vector
         TargetInfoVector l_targets;
@@ -4479,12 +4479,14 @@ public:
 
         // Add MCS Group 0
         //l_targets[0].pThisTarget = NULL;
+        l_targets[0].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
         l_ep[0] = l_targets[0].affinityPath; // SHOULD GET DECONFIGURED
         l_targets[0].type = TYPE_MCS;
 
         // Add MEMBUF Group 1
         //l_targets[1].pThisTarget = NULL;
+        l_targets[1].affinityPath.addLast(TYPE_MCBIST,0);
         l_targets[1].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[1] = l_targets[1].affinityPath;
@@ -4492,6 +4494,7 @@ public:
 
         // Add MBA Group 1
         //l_targets[2].pThisTarget = NULL;
+        l_targets[2].affinityPath.addLast(TYPE_MCBIST,0);
         l_targets[2].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
@@ -4500,6 +4503,7 @@ public:
 
         // Add DIMM Group 1
         //l_targets[3].pThisTarget = NULL;
+        l_targets[3].affinityPath.addLast(TYPE_MCBIST,0);
         l_targets[3].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
@@ -4509,9 +4513,15 @@ public:
 
         // Add MCS Group 1
         //l_targets[4].pThisTarget = NULL;
+        l_targets[4].affinityPath.addLast(TYPE_MCBIST,0);
         l_targets[4].affinityPath.addLast(TYPE_MCS, 1);
         l_ep[4] = l_targets[4].affinityPath;
         l_targets[4].type = TYPE_MCS;
+
+        // Add MCBIST Top Target
+        l_targets[5].affinityPath.addLast(TYPE_MCBIST,0);
+        l_ep[5] = l_targets[5].affinityPath;
+        l_targets[5].type = TYPE_MCBIST;
 
         presentByAssoc(l_targets, l_targToDeconfig);
 
@@ -4529,7 +4539,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4546,7 +4556,7 @@ public:
         // deconfigure
 
         // User-defined number of targets
-        size_t NUM_TARGS = 7;
+        size_t NUM_TARGS = 8;
 
         // Input target vector
         TargetInfoVector l_targets;
@@ -4559,12 +4569,14 @@ public:
 
         // Add MCS Group 0
         l_targets[0].pThisTarget = NULL;
+        l_targets[0].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
         l_ep[0] = l_targets[0].affinityPath;
         l_targets[0].type = TYPE_MCS;
 
         // Add MEMBUF Group 0
         l_targets[1].pThisTarget = NULL;
+        l_targets[1].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[1] = l_targets[1].affinityPath;
@@ -4572,6 +4584,7 @@ public:
 
         // Add MBA Group 0
         l_targets[2].pThisTarget = NULL;
+        l_targets[2].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[2].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
@@ -4580,6 +4593,7 @@ public:
 
         // Add MBA Group 1
         l_targets[3].pThisTarget = NULL;
+        l_targets[3].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[3].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
@@ -4588,6 +4602,7 @@ public:
 
         // Add MEMBUF Group 1
         l_targets[4].pThisTarget = NULL;
+        l_targets[4].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[4].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[4] = l_targets[4].affinityPath; // SHOULD GET DECONFIGURED
@@ -4595,6 +4610,7 @@ public:
 
         // Add DIMM Group 0
         l_targets[5].pThisTarget = NULL;
+        l_targets[5].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[5].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[5].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[5].affinityPath.addLast(TYPE_MBA, 0);
@@ -4604,12 +4620,19 @@ public:
 
         // Add DIMM Group 1
         l_targets[6].pThisTarget = NULL;
+        l_targets[6].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[6].affinityPath.addLast(TYPE_MCS, 1);
         l_targets[6].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[6].affinityPath.addLast(TYPE_MBA, 0);
         l_targets[6].affinityPath.addLast(TYPE_DIMM, 0);
         l_ep[6] = l_targets[6].affinityPath; // SHOULD GET DECONFIGURED
         l_targets[6].type = TYPE_DIMM;
+
+        // Add MCBIST
+        l_targets[7].pThisTarget = NULL;
+        l_targets[7].affinityPath.addLast(TYPE_MCBIST, 0);
+        l_ep[7] = l_targets[0].affinityPath;
+        l_targets[7].type = TYPE_MCBIST;
 
         presentByAssoc(l_targets, l_targToDeconfig);
 
@@ -4629,7 +4652,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4686,7 +4709,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4745,7 +4768,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4806,7 +4829,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4821,7 +4844,7 @@ public:
         // This test the scenario where MBA Group 1 has no DIMMS
 
         // User-defined number of targets
-        size_t NUM_TARGS = 5;
+        size_t NUM_TARGS = 6;
 
         // Input target vector
         TargetInfoVector l_targets;
@@ -4834,12 +4857,14 @@ public:
 
         // Add MCS Group 0
         l_targets[0].pThisTarget = NULL;
+        l_targets[0].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
         l_ep[0] = l_targets[0].affinityPath;
         l_targets[0].type = TYPE_MCS;
 
         // Add MEMBUF Group 0
         l_targets[1].pThisTarget = NULL;
+        l_targets[1].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[1] = l_targets[1].affinityPath;
@@ -4847,6 +4872,7 @@ public:
 
         // Add MBA Group 0
         l_targets[2].pThisTarget = NULL;
+        l_targets[2].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[2].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
@@ -4855,6 +4881,7 @@ public:
 
         // Add DIMM Group 0
         l_targets[3].pThisTarget = NULL;
+        l_targets[3].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[3].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[3].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[3].affinityPath.addLast(TYPE_MBA, 0);
@@ -4864,11 +4891,18 @@ public:
 
         // Add MBA Group 1
         l_targets[4].pThisTarget = NULL;
+        l_targets[4].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[4].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[4].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[4].affinityPath.addLast(TYPE_MBA, 1);
         l_ep[4] = l_targets[4].affinityPath; // SHOULD BE DECONFIGURED
         l_targets[4].type = TYPE_MBA;
+
+        // Add MCBIST
+        l_targets[5].pThisTarget = NULL;
+        l_targets[5].affinityPath.addLast(TYPE_MCBIST, 0);
+        l_ep[5] = l_targets[0].affinityPath;
+        l_targets[5].type = TYPE_MCBIST;
 
         presentByAssoc(l_targets, l_targToDeconfig);
 
@@ -4886,7 +4920,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
@@ -4902,7 +4936,7 @@ public:
         //  and the cascade
 
         // User-defined number of targets
-        size_t NUM_TARGS = 10;
+        size_t NUM_TARGS = 12;
 
         // Input target vector
         TargetInfoVector l_targets;
@@ -4915,12 +4949,14 @@ public:
 
         // Add MCS Group 0
         l_targets[0].pThisTarget = NULL;
+        l_targets[0].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[0].affinityPath.addLast(TYPE_MCS, 0);
         l_ep[0] = l_targets[0].affinityPath;
         l_targets[0].type = TYPE_MCS; // SHOULD BE DECONFIGURED
 
         // Add MEMBUF Group 0
         l_targets[1].pThisTarget = NULL;
+        l_targets[1].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[1].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[1].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[1] = l_targets[1].affinityPath;
@@ -4928,6 +4964,7 @@ public:
 
         // Add MBA Group 0
         l_targets[2].pThisTarget = NULL;
+        l_targets[2].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[2].affinityPath.addLast(TYPE_MCS, 0);
         l_targets[2].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_targets[2].affinityPath.addLast(TYPE_MBA, 0);
@@ -4937,6 +4974,7 @@ public:
 
         // Add MCS Group 1
         l_targets[3].pThisTarget = NULL;
+        l_targets[3].affinityPath.addLast(TYPE_MCBIST, 0);
         l_targets[3].affinityPath.addLast(TYPE_MCS, 1);
         l_ep[3] = l_targets[3].affinityPath;
         l_targets[3].type = TYPE_MCS; // SHOULD BE DECONFIGURED
@@ -4944,12 +4982,14 @@ public:
 
         // Add MCS Group 2
         l_targets[4].pThisTarget = NULL;
+        l_targets[4].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[4].affinityPath.addLast(TYPE_MCS, 2);
         l_ep[4] = l_targets[4].affinityPath;
         l_targets[4].type = TYPE_MCS;
 
         // Add MEMBUF Group 0
         l_targets[5].pThisTarget = NULL;
+        l_targets[5].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[5].affinityPath.addLast(TYPE_MCS, 2);
         l_targets[5].affinityPath.addLast(TYPE_MEMBUF, 0);
         l_ep[5] = l_targets[5].affinityPath;
@@ -4957,6 +4997,7 @@ public:
 
         // Add MEMBUF Group 1
         l_targets[6].pThisTarget = NULL;
+        l_targets[6].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[6].affinityPath.addLast(TYPE_MCS, 2);
         l_targets[6].affinityPath.addLast(TYPE_MEMBUF, 1);
         l_ep[6] = l_targets[6].affinityPath;
@@ -4964,6 +5005,7 @@ public:
 
         // Add MBA Group 0
         l_targets[7].pThisTarget = NULL;
+        l_targets[7].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[7].affinityPath.addLast(TYPE_MCS, 2);
         l_targets[7].affinityPath.addLast(TYPE_MEMBUF, 1);
         l_targets[7].affinityPath.addLast(TYPE_MBA, 0);
@@ -4972,6 +5014,7 @@ public:
 
         // Add MBA Group 1
         l_targets[8].pThisTarget = NULL;
+        l_targets[8].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[8].affinityPath.addLast(TYPE_MCS, 2);
         l_targets[8].affinityPath.addLast(TYPE_MEMBUF, 1);
         l_targets[8].affinityPath.addLast(TYPE_MBA, 1);
@@ -4980,6 +5023,7 @@ public:
 
         // Add DIMM Group 1
         l_targets[9].pThisTarget = NULL;
+        l_targets[9].affinityPath.addLast(TYPE_MCBIST, 1);
         l_targets[9].affinityPath.addLast(TYPE_MCS, 2);
         l_targets[9].affinityPath.addLast(TYPE_MEMBUF, 1);
         l_targets[9].affinityPath.addLast(TYPE_MBA, 1);
@@ -4987,18 +5031,31 @@ public:
         l_ep[9] = l_targets[9].affinityPath;
         l_targets[9].type = TYPE_DIMM;
 
+        // Add MCBIST 0
+        l_targets[10].pThisTarget = NULL;
+        l_targets[10].affinityPath.addLast(TYPE_MCBIST, 0);
+        l_ep[10] = l_targets[10].affinityPath;
+        l_targets[10].type = TYPE_MCBIST;
+
+        // Add MCBIST 1
+        l_targets[11].pThisTarget = NULL;
+        l_targets[11].affinityPath.addLast(TYPE_MCBIST, 1);
+        l_ep[11] = l_targets[11].affinityPath;
+        l_targets[11].type = TYPE_MCBIST;
+
         presentByAssoc(l_targets, l_targToDeconfig);
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
               compareAffinityCXX);
-        if ((l_targToDeconfig.size() == 6) &&
-            (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 0 MCS
-            (l_targToDeconfig[1].affinityPath == l_ep[1]) && // 00 MEMBUF
-            (l_targToDeconfig[2].affinityPath == l_ep[2]) && // 000 MBA
-            (l_targToDeconfig[3].affinityPath == l_ep[3]) && // 1 MCS
-            (l_targToDeconfig[4].affinityPath == l_ep[5]) && // 20 MEMBUF
-            (l_targToDeconfig[5].affinityPath == l_ep[7]) )  // 210 MBA
+        if ((l_targToDeconfig.size() == 7) &&
+            (l_targToDeconfig[0].affinityPath == l_ep[10]) && // 0 MCBIST
+            (l_targToDeconfig[1].affinityPath == l_ep[0]) &&  // 0 MCS
+            (l_targToDeconfig[2].affinityPath == l_ep[1]) &&  // 00 MEMBUF
+            (l_targToDeconfig[3].affinityPath == l_ep[2]) &&  // 000 MBA
+            (l_targToDeconfig[4].affinityPath == l_ep[3]) &&  // 1 MCS
+            (l_targToDeconfig[5].affinityPath == l_ep[5]) &&  // 20 MEMBUF
+            (l_targToDeconfig[6].affinityPath == l_ep[7])  )  // 210 MBA
         {
             TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Success");
         }
@@ -5008,7 +5065,7 @@ public:
             for (uint8_t i=0;i<l_targToDeconfig.size();i++)
             {
                 char *s = l_targToDeconfig[i].affinityPath.toString();
-                TS_TRACE("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
+                TS_WARN("deconfig %s reason %x",s, l_targToDeconfig[i].reason);
                 free(s);
             }
         }
