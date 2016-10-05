@@ -658,11 +658,11 @@ my $ProcPcie = parse_xml_file($proc_pcie_settings_file,
 my %procPcieTargetList = ();
 my $pcieInit = 0;
 
-# MAX Phb values Per PROC is 4 and is hard coded here
-use constant MAX_NUM_PHB_PER_PROC => 4;
+# MAX Phb values Per PROC is 6 in P9 and is hard coded here
+use constant MAX_NUM_PHB_PER_PROC => 6;
 
-# MAX lane settings value is 32 bytes per phb and is hard coded here
-use constant MAX_LANE_SETTINGS_PER_PHB => 32;
+# MAX lane settings value is 16 lanes per phb and is hard coded here
+use constant MAX_LANE_SETTINGS_PER_PHB => 16;
 
 ################################################################################
 # If value is hex, convert to regular number
@@ -689,7 +689,8 @@ sub pcie_init ($)
     use bigint;
 
     my $procPcieKey = "";
-    my @phb_value = ();
+    my @gen3_phb_values = ();  # [PHB#][lane#] = uint16 value
+    my @gen4_phb_values = ();  # [PHB#][lane#] = uint16 value
     my $procPcieIopConfig = 0;
     my $procPciePhbActive = 0;
     $procPcieKey = sprintf("n%dp%d\,", $proc->{'target'}->{'node'},
@@ -697,93 +698,119 @@ sub pcie_init ($)
 
     if(!(exists($procPcieTargetList{$procPcieKey})))
     {
-        # Loop through each PHB which each contain 32 Bytes of EQ
+        # Loop through each PHB which each contain 32 bytes (2 bytes * 16) of EQ
         foreach my $Phb (@{$proc->{'phb-settings'}})
         {
             my $phb_number = 0;
+            if(exists($Phb->{'phb-number'}))
+            {
+                $phb_number = $Phb->{'phb-number'};
+            }
+            else
+            {
+                die "ERROR: phb-number does not exist for
+                      proc:$procPcieKey\n";
+            }
+
             # Each PHB has 16 lanes (Each lane containing 2 total bytes of EQ)
             foreach my $Lane (@{$Phb->{'lane-settings'}})
             {
                 my $lane_number = 0;
-                foreach my $Equ (@{$Lane->{'equalization-setting'}})
+                if(exists($Lane->{'lane-number'}))
                 {
-                    if(exists($Phb->{'phb-number'}))
-                    {
-                        $phb_number = $Phb->{'phb-number'};
-                    }
-                    else
-                    {
-                        die "ERROR: phb-number does not exist for
-                              proc:$procPcieKey\n";
-                    }
-                    if(exists($Lane->{'lane-number'}))
-                    {
-                        $lane_number = $Lane->{'lane-number'};
-                    }
-                    else
-                    {
-                        die "ERROR: lane-number does not exist for
-                              proc:$procPcieKey\n";
-                    }
-
-                    # Accumulate all values for each of the lanes from the MRW
-                    # (2 Bytes)
-                    # First Byte:
-                    #       - Nibble 1: up_rx_hint (bit 0 reserved)
-                    #       - Nibble 2: up_tx_preset
-                    # Second Byte:
-                    #       - Nibble 1: dn_rx_hint (bit 0 reserved)
-                    #       - Nibble 2: dn_tx_preset
-                    if($Equ->{'type'} eq 'up_rx_hint')
-                    {
-                        $phb_value[$phb_number][$lane_number*2] =
-                                   $phb_value[$phb_number][$lane_number*2] |
-                                    (($Equ->{value} & 0x07) << 4);
-                        if($Equ->{value} > 0x7)
-                        {
-                            die "ERROR: Attempting to modify the
-                                 reserved bit\n";
-                        }
-                    }
-                    if($Equ->{'type'} eq 'up_tx_preset')
-                    {
-                        $phb_value[$phb_number][$lane_number*2] =
-                                   $phb_value[$phb_number][$lane_number*2] |
-                                    ($Equ->{value} & 0x0F);
-                    }
-                    if($Equ->{'type'} eq 'dn_rx_hint')
-                    {
-                        $phb_value[$phb_number][($lane_number*2)+1] =
-                               $phb_value[$phb_number][($lane_number*2)+1] |
-                               (($Equ->{value} & 0x07) << 4);
-                        if($Equ->{value} > 0x7)
-                        {
-                            die "ERROR: Attempting to modify the
-                                 reserved bit\n";
-                        }
-                    }
-                    if($Equ->{'type'} eq 'dn_tx_preset')
-                    {
-                        $phb_value[$phb_number][($lane_number*2)+1] =
-                               $phb_value[$phb_number][($lane_number*2)+1] |
-                                ($Equ->{value} & 0x0F);
-                    }
+                    $lane_number = $Lane->{'lane-number'};
                 }
-            }
-        }
+                else
+                {
+                    die "ERROR: lane-number does not exist for
+                          proc:$procPcieKey\n";
+                }
 
-        # Produce a 32 byte output hex value per PHB
-        my $phbvalue = "";
+                my $gen = 3;
+                my $pPhb_value = \@gen3_phb_values;
+                while ($gen < 5) # go through gen3 and gen4
+                {
+                    if ($gen == 4)
+                    {
+                        $pPhb_value = \@gen4_phb_values
+                    }
+                    my $genKey = "gen".$gen;
+                    foreach my $Equ (@{$Lane->{$genKey}{'equalization-setting'}})
+                    {
+                        my $eq_value = hex($Equ->{value});
+
+                        # Accumulate all values for each of the lanes from the MRW
+                        # (2 Bytes)
+                        # First Byte:
+                        #       - Nibble 1: up_rx_hint (bit 0 reserved)
+                        #       - Nibble 2: up_tx_preset
+                        # Second Byte:
+                        #       - Nibble 1: dn_rx_hint (bit 0 reserved)
+                        #       - Nibble 2: dn_tx_preset
+
+                        if($Equ->{'type'} eq 'up_rx_hint')
+                        {
+                            $pPhb_value->[$phb_number][$lane_number] =
+                                $pPhb_value->[$phb_number][$lane_number] |
+                                (($eq_value & 0x0007) << 12);
+                            if($eq_value > 0x7)
+                            {
+                                die "ERROR: Attempting to modify the
+                                     reserved bit in $genKey PHB$phb_number
+                                     (up_rx_hint value: ". $Equ->{value} . ")\n";
+                            }
+                        }
+                        if($Equ->{'type'} eq 'up_tx_preset')
+                        {
+                            $pPhb_value->[$phb_number][$lane_number] =
+                                $pPhb_value->[$phb_number][$lane_number] |
+                                (($eq_value & 0x000F) << 8);
+                        }
+                        if($Equ->{'type'} eq 'dn_rx_hint')
+                        {
+                            $pPhb_value->[$phb_number][$lane_number] =
+                                $pPhb_value->[$phb_number][$lane_number] |
+                                (($eq_value & 0x0007) << 4);
+                            if($eq_value > 0x7)
+                            {
+                                die "ERROR: Attempting to modify the
+                                     reserved bit in $genKey PHB$phb_number
+                                     (dn_rx_hint value: ". $Equ->{value} . ")\n";
+                            }
+                        }
+                        if($Equ->{'type'} eq 'dn_tx_preset')
+                        {
+                            $pPhb_value->[$phb_number][$lane_number] =
+                                $pPhb_value->[$phb_number][$lane_number] |
+                                ($eq_value & 0x000F);
+                        }
+                    } # end of equalization-setting
+                    $gen++;
+                } # end of gen
+            } # end of lane-number
+        } # end of phb
+
+        my @gen3PhbValues; # gen3 PHB values for this processor
+        my @gen4PhbValues; # gen4 PHB values for this processor
+
         for (my $phbnumber = 0; $phbnumber < MAX_NUM_PHB_PER_PROC;
              ++$phbnumber)
         {
+            my $gen3PhbValue;
+            my $gen4PhbValue;
+
             for(my $lane_settings_count = 0;
                 $lane_settings_count < MAX_LANE_SETTINGS_PER_PHB;
                 ++$lane_settings_count)
             {
-                $phbvalue = sprintf("%s0x%02X\,", $phbvalue,
-                              $phb_value[$phbnumber][$lane_settings_count]);
+                $gen3PhbValue = sprintf("%s0x%04X\,", $gen3PhbValue,
+                    $gen3_phb_values[$phbnumber][$lane_settings_count]);
+                $gen4PhbValue = sprintf("%s0x%04X\,", $gen4PhbValue,
+                    $gen4_phb_values[$phbnumber][$lane_settings_count]);
             }
+
+            $gen3PhbValues[$phbnumber] = substr($gen3PhbValue, 0, -1);
+            $gen4PhbValues[$phbnumber] = substr($gen4PhbValue, 0, -1);
         }
 
         if ( exists($proc->{proc_pcie_iop_config}) )
@@ -796,14 +823,15 @@ sub pcie_init ($)
         }
 
         $procPcieTargetList{$procPcieKey} = {
-            'procName' => $proc->{'target'}->{'name'},
-            'procPosition' => $proc->{'target'}->{'position'},
-            'nodePosition' => $proc->{'target'}->{'node'},
-            'phbValue'  => substr($phbvalue, 0, -1),
-            'phbActive' => $procPciePhbActive,
-            'iopConfig' => $procPcieIopConfig,
+            'procName'      => $proc->{'target'}->{'name'},
+            'procPosition'  => $proc->{'target'}->{'position'},
+            'nodePosition'  => $proc->{'target'}->{'node'},
+            'gen3phbValues' => \@gen3PhbValues,
+            'gen4phbValues' => \@gen4PhbValues,
+            'phbActive'     => $procPciePhbActive,
+            'iopConfig'     => $procPcieIopConfig,
         };
-    }
+    } # end of processor loop
 }
 
 # Repeated [NODE, POS, ATTR, IOP0-VAL, IOP1-VAL, ATTR, IOP0-VAL, IOP1-VAL]
@@ -3907,11 +3935,6 @@ sub generate_proc
     print "    <!-- End PHYP Memory Map -->\n\n";
     # end PHYP Memory Map
 
-    print "    <!-- PROC_PCIE_ attributes -->\n";
-    addProcPcieAttrs( $proc, $node );
-
-    print "    <!-- End PROC_PCIE_ attributes -->\n";
-
     if ((scalar @SortedPmChipAttr) == 0)
     {
         # Default the values.
@@ -4890,6 +4913,8 @@ sub generate_phb_chiplet
         <default>$phb</default>
     </attribute>
     ";
+
+    addProcPcieAttrs( $proc, $node, $phb_orig );
 
     addPervasiveParentLink($sys,$node,$proc,$phbChipUnit,"phb");
 
@@ -6641,7 +6666,7 @@ sub addProcPmAttrs
 
 sub addProcPcieAttrs
 {
-    my ($position,$nodeId) = @_;
+    my ($position, $nodeId, $phbNum) = @_;
 
     foreach my $pcie ( keys %procPcieTargetList )
     {
@@ -6649,9 +6674,16 @@ sub addProcPcieAttrs
             $procPcieTargetList{$pcie}{procPosition} eq $position)
         {
             my $procPcieRef = (\%procPcieTargetList)->{$pcie};
+            my @gen3PhbValues = @{ $procPcieRef->{'gen3phbValues'}};
+            my @gen4PhbValues = @{ $procPcieRef->{'gen4phbValues'}};
             print "    <attribute>\n";
-            print "        <id>PROC_PCIE_LANE_EQUALIZATION</id>\n";
-            print "        <default>$procPcieRef->{phbValue}\n";
+            print "        <id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id>\n";
+            print "        <default>$gen3PhbValues[$phbNum]\n";
+            print "        </default>\n";
+            print "    </attribute>\n";
+            print "    <attribute>\n";
+            print "        <id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id>\n";
+            print "        <default>$gen4PhbValues[$phbNum]\n";
             print "        </default>\n";
             print "    </attribute>\n";
             last;
