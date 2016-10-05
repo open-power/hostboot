@@ -650,6 +650,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Resets all WR VREF related registers
         FAPI_TRY( mss::dp16::reset_wr_vref_registers(p));
 
+        // Reset the windage registers
+        FAPI_TRY( mss::dp16::reset_read_delay_offset_registers(p) );
+
         //
         // Workarounds
         //
