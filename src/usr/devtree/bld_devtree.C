@@ -58,7 +58,7 @@
 #include <vpd/mvpdenums.H>
 #include <vpd/cvpdenums.H>
 #include <vpd/spdenums.H>
-
+#include <xz/xz.h>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -1494,6 +1494,14 @@ void load_hbrt_image(uint64_t& io_address)
             //     for now that is hidden by the PNOR-RP.
         uint64_t image_start = l_pnorInfo.vaddr;
 
+	// XZ repository: http://git.tukaani.org/xz.git
+	// Header specifics can be found in xz/doc/xz-file-format.txt
+	const uint8_t HEADER_MAGIC[]= { 0xFD, '7', 'z', 'X', 'Z', 0x00 };
+	uint8_t* l_pnor_header = reinterpret_cast<uint8_t *>(image_start);
+
+	bool l_pnor_is_XZ_compressed = (0 == memcmp(l_pnor_header,
+					HEADER_MAGIC, sizeof(HEADER_MAGIC)));
+
             // The "VFS_LAST_ADDRESS" variable is 2 pages in.
         uint64_t vfs_last_address =
                 *reinterpret_cast<uint64_t*>(image_start + 2*PAGE_SIZE);
@@ -1515,7 +1523,45 @@ void load_hbrt_image(uint64_t& io_address)
             // Copy image.
         void* memArea = mm_block_map(reinterpret_cast<void*>(io_address),
                                      ALIGN_PAGE(image_size));
-        memcpy(memArea, reinterpret_cast<void*>(image_start), image_size);
+
+
+	if (!l_pnor_is_XZ_compressed)
+	{
+	    memcpy(memArea, reinterpret_cast<void*>(image_start), image_size);
+	}else
+	{
+	    struct xz_buf b;
+	    uint32_t uncompressedSize = l_pnor_is_XZ_compressed ?
+		(l_pnorInfo.size * 16) : l_pnorInfo.size;
+
+	    b.in = reinterpret_cast<uint8_t *>(image_start);
+	    b.in_pos = 0;
+	    b.in_size = l_pnorInfo.size;
+	    b.out = reinterpret_cast<uint8_t *>(memArea);
+	    b.out_pos = 0;
+	    b.out_size = uncompressedSize;
+
+	    struct xz_dec *s;
+	    enum xz_ret ret;
+
+	    xz_crc32_init();
+
+	    s = xz_dec_init(XZ_SINGLE, 0);
+	    if(s == NULL)
+	    {
+		//FIXME return err;
+	    }
+
+	    ret = xz_dec_run(s, &b);
+
+	    if(ret == XZ_STREAM_END)
+	    {
+		// FIXME: success!
+	    }
+	    //Clean up memory
+	    xz_dec_end(s);
+	}
+
         mm_block_unmap(memArea);
 
     } while (0);
