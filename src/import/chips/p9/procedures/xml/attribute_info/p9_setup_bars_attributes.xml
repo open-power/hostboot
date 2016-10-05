@@ -291,5 +291,193 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_PC_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>INT CQ PC BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ PC BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR (excludes system/memsel/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ PC BAR base address offset mask
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset mask (relative to chip MMIO origin) to program into
+        chip address range field of BAR mask (excludes system/memsel/group/chip fields)
+        Value defines which bits of VC_BAR are used during address compares
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_VC_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>INT CQ VC BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ VC BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR (excludes system/memsel/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ VC BAR base address offset mask
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset mask (relative to chip MMIO origin) to program into
+        chip address range field of BAR mask (excludes system/memsel/group/chip fields)
+        Value defines which bits of VC_BAR are used during address compares
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_TM1_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>INT CQ TM1 BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ TM1 BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR (excludes system/memsel/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ TM1 BAR page size
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>4K = 0x0, 64K = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_IC_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>INT CQ IC BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ IC BAR base address offset
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Attribute holds offset (relative to chip MMIO origin) to program into
+        chip address range field of BAR (excludes system/memsel/group/chip fields)
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>INT CQ IC (Interrupt Controller) BAR page size
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>4K = 0x0, 64K = 0x1</enum>
+    <platInit/>
+    <initToZero/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
 

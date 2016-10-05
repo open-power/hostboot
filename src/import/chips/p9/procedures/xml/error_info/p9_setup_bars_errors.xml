@@ -121,4 +121,15 @@
     <ffdc>RANGE_SIZE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SETUP_BARS_INT_BAR_ATTR_ERR</rc>
+    <description>
+      Procedure: p9_setup_bars
+      INT BAR attributes are not aligned to HW implementation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BAR_OFFSET</ffdc>
+    <ffdc>BAR_OFFSET_MASK</ffdc>
+    <ffdc>BAR_OVERLAP</ffdc>
+  </hwpError>
 </hwpErrors>
