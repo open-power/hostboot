@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfMemoryMru.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemoryMru.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,10 +28,10 @@
 #ifndef __prdfMemoryMru_H
 #define __prdfMemoryMru_H
 
-#include <prdfCenAddress.H>
+#include <prdfMemAddress.H>
 #include <prdfMemoryMruData.H>
 #include <prdfPlatServices.H>
-#include <prdfCenSymbol.H>
+#include <prdfMemSymbol.H>
 #include <prdfParserEnums.H>
 
 namespace PRDF
@@ -58,20 +58,20 @@ class MemoryMru
 
     /**
      * @brief Constructor for single DIMM callouts.
-     * @param i_mbaTarget The MBA in which the error occurred.
+     * @param i_target    The MBA or MCA in which the error occurred.
      * @param i_rank      The rank in which the error occurred.
      * @param i_symbol    The symbol in which the error occurred.
      */
-    MemoryMru( TARGETING::TargetHandle_t i_mbaTarget, const CenRank & i_rank,
-               const CenSymbol & i_symbol );
+    MemoryMru( TARGETING::TargetHandle_t i_target, const MemRank & i_rank,
+               const MemSymbol & i_symbol );
 
     /**
      * @brief Constructor for special callouts.
-     * @param i_mbaTarget      The MBA in which error has occurred
+     * @param i_target         The MBA or MCA in which error has occurred
      * @param i_rank           The rank in which the error occurred.
      * @param i_specialCallout See enum MemoryMruData::Callout.
      */
-    MemoryMru( TARGETING::TargetHandle_t i_mbaTarget, const CenRank & i_rank,
+    MemoryMru( TARGETING::TargetHandle_t i_target, const MemRank & i_rank,
                MemoryMruData::Callout i_specialCallout );
 
   public: // functions
@@ -82,23 +82,28 @@ class MemoryMru
     /** @return A list of targets that are represented by this MemoryMru. */
     TARGETING::TargetHandleList getCalloutList() const;
 
-    /** @return The MBA target associated with this MemoryMru. */
-    TARGETING::TargetHandle_t getMbaTrgt() const { return iv_mbaTarget; }
+    /** @return The target associated with this MemoryMru. */
+    TARGETING::TargetHandle_t getTrgt() const { return iv_target; }
 
     /** @return The rank associated with this MemoryMru. */
-    CenRank getRank() const { return iv_rank; }
+    MemRank getRank() const { return iv_rank; }
 
     /** @return The symbol associated with this MemoryMru. */
-    CenSymbol getSymbol() const { return iv_symbol; }
+    MemSymbol getSymbol() const { return iv_symbol; }
 
   private: // instance variables
 
     MemoryMruData::MemMruMeld iv_memMruMeld;
 
-    TARGETING::TargetHandle_t iv_mbaTarget; ///< Target MBA.
-    CenRank iv_rank;                        ///< Target rank
-    MemoryMruData::Callout iv_special;      ///< See enum MemoryMruData::Callout
-    CenSymbol iv_symbol; ///< Target symbol
+    TARGETING::TargetHandle_t iv_target; ///< Target
+    MemRank iv_rank;                     ///< Target rank
+    MemoryMruData::Callout iv_special;   ///< See enum MemoryMruData::Callout
+    MemSymbol iv_symbol; ///< Target symbol
+
+  private: // local helper functions
+
+    /** @brief Gets the instance variable values common between constructors */
+    void getCommonVars();
 };
 
 } // end namespace PRDF
