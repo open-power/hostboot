@@ -72,6 +72,22 @@ namespace SPLESS
         } PACKED;
     };
 
+    // Mailbox Scratch Register 5
+    union MboxScratch5_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t cacheContained      :1;    //0
+            uint32_t initAllCores        :1;    //1
+            uint32_t riskLevel           :1;    //2
+            uint32_t noBLVectors         :1;    //3
+            uint32_t mcSyncMode          :1;    //4
+            uint32_t reserved            :7;    //5:11
+            uint32_t clockPllMux         :20;   //12:31
+        } PACKED;
+    };
+
     // Mailbox Scratch Register 8
     union MboxScratch8_t
     {

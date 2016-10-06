@@ -132,6 +132,15 @@ namespace SBE
     */
     errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq );
 
+   /**
+    * @brief Determines if we booted in synchronous memory mode or not
+    *
+    * @param[out] o_mcSyncMode - The MC sync mode the system last booted with.
+    *
+    * @return errlHndl_t Error log handle on error.
+    */
+    errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
+
 } //end namespace SBE
 
 #endif /* _SBEIF_H */

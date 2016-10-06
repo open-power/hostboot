@@ -95,6 +95,7 @@ void* call_host_voltage_config( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_host_voltage_config.C::"
                     "Failed getting the boot nest frequency from the SBE");
+            break;
         }
 
         l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>( l_nestFreq );
@@ -284,7 +285,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
         l_sys->setAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>(l_ultraTurboFreq);
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Setting System Frequency Attributes: "
                 "Nominal = %d, Floor = %d, Ceiling = %d, "
                 "Turbo = %d, UltraTurbo = %d",
