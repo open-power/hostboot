@@ -832,7 +832,7 @@ struct ringProperties_t
 #endif
 
 #ifndef __PPE__
-static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
+static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { PERV::perv_fure                    , "perv_fure"                   , PERV_TYPE  }, // 0
     { PERV::perv_gptr                    , "perv_gptr"                   , PERV_TYPE  }, // 1
@@ -1066,7 +1066,7 @@ static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
 };
 #endif
 #ifdef __PPE__
-static const ringProperties_t RING_PROPERTIES[P9_NUM_RINGS] =
+static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
 {
     { PERV::perv_fure                    , PERV_TYPE  }, // 0
     { PERV::perv_gptr                    , PERV_TYPE  }, // 1
