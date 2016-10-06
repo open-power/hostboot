@@ -31,7 +31,8 @@
 namespace P9_TOR
 {
 
-#define NUM_RING_IDS              P9_NUM_RINGS
+extern const char* ppeTypeName[];
+extern const char* ringVariantName[];
 
 typedef struct
 {
@@ -59,30 +60,29 @@ typedef struct
 } TorPpeBlock_t;
 
 
-#define IMGBUILD_TGR_RING_FOUND                        0
-#define IMGBUILD_TGR_RING_BLOCKS_FOUND                 0
-#define IMGBUILD_TGR_TOR_PUT_RING_DONE                 0
-#define IMGBUILD_TGR_RING_NOT_FOUND                    1  // Ring is not found in HW image
-#define IMGBUILD_TGR_INVALID_RING_ID                   2  // Ring is invalid or mismatch
-#define IMGBUILD_TGR_AMBIGUOUS_API_PARMS               3  // Ring search in HW iamge got ambiguous condition
-#define IMGBUILD_TGR_SECTION_NOT_FOUND                 4
-#define IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND             5
-#define IMGBUILD_TGR_OP_BUFFER_INVALID                 6
-#define IMGBUILD_TGR_OP_BUFFER_SIZE_EXCEEDED           7
-#define IMGBUILD_INVALID_INSTANCEID                    8
-#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_CME       10
-#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_SGPE      11
-#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
-#define IMGBUILD_TGR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
-#define IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION    14  // Ring container is already available in ring section
-#define IMGBUILD_TGR_BUFFER_TOO_SMALL                 15
+#define TOR_RING_FOUND                        0
+#define TOR_RING_BLOCKS_FOUND                 0
+#define TOR_APPEND_RING_DONE                  0
+#define TOR_RING_NOT_FOUND                    1
+#define TOR_INVALID_RING_ID                   2
+#define TOR_AMBIGUOUS_API_PARMS               3
+#define TOR_SECTION_NOT_FOUND                 4
+#define TOR_DD_LEVEL_NOT_FOUND                5
+#define TOR_OP_BUFFER_INVALID                 6
+#define TOR_OP_BUFFER_SIZE_EXCEEDED           7
+#define TOR_INVALID_INSTANCE_ID               8
+#define TOR_INVALID_CHIPLET                   9
+#define TOR_IMAGE_DOES_NOT_SUPPORT_CME       10
+#define TOR_IMAGE_DOES_NOT_SUPPORT_SGPE      11
+#define TOR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL  12
+#define TOR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL 13
+#define TOR_RING_AVAILABLE_IN_RINGSECTION    14  // Ring is already present
+#define TOR_BUFFER_TOO_SMALL                 15
+#define TOR_TOO_MANY_DD_LEVELS               16
 
 
-extern const char* ringVariantName[];
-extern const char* ppeTypeName[];
-
-
-typedef enum RingBlockType   // Different options to extract data using tor_access_ring API
+// Different options to extract data using tor_access_ring API
+typedef enum RingBlockType
 {
     GET_SINGLE_RING      = 0x00,
     GET_DD_LEVEL_RINGS   = 0x01,
@@ -91,35 +91,20 @@ typedef enum RingBlockType   // Different options to extract data using tor_acce
     PUT_SINGLE_RING      = 0x04
 } RingBlockType_t;
 
-
-typedef enum RingType      // Different type of Rings
+typedef enum RingType
 {
     COMMON   = 0x00,
     INSTANCE = 0x01,
     ALLRING  = 0x02
 } RingType_t;
 
-
-
-//
-// PPE types
-//
 typedef enum PpeType
 {
-    SBE           = 0x00,     // Ppe type partition in Ringsection
+    SBE           = 0x00,
     CME           = 0x01,
     SGPE          = 0x02,
     NUM_PPE_TYPES = 0x03
 } PpeType_t;
-
-
-
-typedef enum RingSectionId
-{
-    SECTION_RING    = 0x00,    //.ring section ID
-    SECTION_OVRD    = 0x01,    //.Override section ID
-    SECTION_OVRL    = 0x02     //.Overlay section ID
-} RingSectionId_t;
 
 typedef enum SbeTorId
 {
@@ -141,6 +126,7 @@ typedef enum SbeTorId
     EC_CPLT   = 15,
     SBE_NOOF_CHIPLETS =   16
 } SbeTorId_t;
+
 typedef enum CmeTorId
 {
     CME0_CPLT    = 0,

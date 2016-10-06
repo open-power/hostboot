@@ -23,8 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <endian.h>
-
 // IMPORTANT notice on usage of io_RingType and io_instanceId arguments
 //
 // io_RingTyp
@@ -37,6 +35,7 @@
 // While using tor_tor_get_block_of_rings and tor_get_single_ring API,
 // it is used pass by value
 //
+#include <endian.h>
 #include "p9_ringId.H"
 #include "p9_tor.H"
 #include "p9_xip_image.h"
@@ -45,47 +44,39 @@
 namespace P9_TOR
 {
 
-//
-// PPE type names:
 // These strings must adhere precisely to the enum of PpeType.
-//
 const char* ppeTypeName[] = { "SBE",
                               "CME",
-                              "SGPE",
-                              "DEADBEAF"
+                              "SGPE"
                             };
 
-//
-// Ring variant names:
 // These strings must adhere precisely to the enum of RingVariant.
-//
-const char* ringVariantName[] = { "Base",
-                                  "CacheContained",
-                                  "RiskLevel",
-                                  "Override",
-                                  "Overlay",
-                                  "DEADBEAF"
+const char* ringVariantName[] = { "BASE",
+                                  "CC",
+                                  "RL",
+                                  "OVRD",
+                                  "OVLY"
                                 };
 
 
-
 ///////////////////////////////////////////////////////////////////////////////////
-///
-///          extract RS4 extract from HW image
-///
+//
+//                          GET RING FROM SBE IMAGE   FUNCTION
+//
 //////////////////////////////////////////////////////////////////////////////////
-int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
-                              uint64_t        i_magic,          // Image Magic Number
-                              RingID          i_ringId,         // Unique ring I
-                              uint16_t        i_ddLevel,        // DD level details
-                              RingType_t&     io_RingType,      // 0: Common 1: Instance
-                              RingVariant_t   i_RingVariant,    // Base, cache contained, Risk level, Override and Overlay
-                              uint8_t&        io_instanceId,    // chiplet Instance id indo
-                              RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ddLevel block
-                              void**          io_ringBlockPtr,  // RS4 Container data or block data
-                              uint32_t&       io_ringBlockSize, // size of data copied into ring block pointer
-                              char*           o_ringName,       // Name of ring
-                              uint32_t        i_dbgl)             // Debug option
+static
+int get_ring_from_sbe_image ( void*           i_ringSection,     // Ring section ptr
+                              uint64_t        i_magic,           // Image Magic Number
+                              RingID          i_ringId,          // Ring ID
+                              uint16_t        i_ddLevel,         // DD level
+                              RingType_t&     io_RingType,       // Common, Instance
+                              RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                              uint8_t&        io_instanceId,     // Instance ID
+                              RingBlockType_t i_RingBlockType,   // Single ring, Block
+                              void**          io_ringBlockPtr,   // Output ring buffer
+                              uint32_t&       io_ringBlockSize,  // Size of ring data
+                              char*           o_ringName,        // Name of ring
+                              uint32_t        i_dbgl )           // Debug option
 {
 
     uint32_t ring_offset = 0;
@@ -249,12 +240,13 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                 break;
 
             default :
-                MY_INF("Not valid selection\n");
+                MY_ERR("Chiplet=%d is not valid. \n", l);
+                return TOR_INVALID_CHIPLET;
         }
 
         iv_num_variant = (i_RingVariant == OVERRIDE) ? 1 : iv_num_variant;
 
-        if(i_dbgl > 1)
+        if (i_dbgl > 1)
         {
             MY_INF(" No of CommonRing %d, No of InstanceRing %d, No of Variants %d \n",
                    l_cpltData.iv_num_common_rings, l_cpltData.iv_num_instance_rings,
@@ -267,16 +259,16 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
         {
             for (uint8_t j = 0; j < iv_num_variant ; j++)
             {
-                if(i_dbgl > 2)
+                if (i_dbgl > 2)
                 {
                     MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
                            (ring_id_list_common + i)->ringName, i, j);
                 }
 
-                if((strcmp( (ring_id_list_common + i)->ringName,
-                            RING_PROPERTIES[i_ringId].iv_name) == 0)
-                   && ( i_RingVariant == ring_variant_order->variant[j]
-                        || (i_RingVariant == OVERRIDE && i_magic == P9_XIP_MAGIC_SEEPROM)))
+                if ((strcmp( (ring_id_list_common + i)->ringName,
+                             RING_PROPERTIES[i_ringId].iv_name) == 0)
+                    && ( i_RingVariant == ring_variant_order->variant[j]
+                         || (i_RingVariant == OVERRIDE && i_magic == P9_XIP_MAGIC_SEEPROM)))
                 {
                     strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                     int var = l * sizeof(TorPpeBlock_t) + i_ddLevel + temp;
@@ -288,7 +280,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                     chiplet_offset  = *((uint16_t*)i_ringSection + temp1);
                     chiplet_offset = htobe16(chiplet_offset);
 
-                    if(i_RingBlockType == GET_SINGLE_RING)
+                    if (i_RingBlockType == GET_SINGLE_RING)
                     {
                         var = ring_offset + (chiplet_offset - sizeof(TorPpeBlock_t)) + i_ddLevel + temp;
                         temp1 = var / sizeof(uint32_t);
@@ -301,7 +293,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                         {
                             if (io_ringBlockSize == 0)
                             {
-                                if(i_dbgl > 0)
+                                if (i_dbgl > 0)
                                 {
                                     MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                                 }
@@ -313,38 +305,37 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                             if (io_ringBlockSize < ringSize)
                             {
                                 MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                                return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                                return TOR_BUFFER_TOO_SMALL;
                             }
 
-                            if(i_dbgl > 0)
+                            if (i_dbgl > 0)
                             {
                                 MY_INF("   ring container of %s is found in the SBE image container \n",
                                        o_ringName);
                             }
 
-                            // Copying single ring into ring block pointer
                             memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                     (size_t)ringSize);
+
                             io_ringBlockSize = ringSize;
                             io_instanceId = (ring_id_list_common + i)->instanceIdMin;
 
 
-                            if(i_dbgl > 0)
+                            if (i_dbgl > 0)
                             {
                                 MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
                             }
 
-                            // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                            if(i_dbgl > 1)
+                            if (i_dbgl > 1)
                             {
-                                MY_INF("Hexdetalis Chiplet offset 0x%08x local offset 0x%08x " \
+                                MY_INF("Hex details Chiplet offset 0x%08x local offset 0x%08x " \
                                        "ring offset 0x%08x start adr 0x%08x  size 0x%08x size 0x%08x \n",
                                        var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
                                 MY_INF("Chiplet %d   ChipletRing TOR offset  %d  %d   %d  Size %d %d \t\n",
                                        i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                             }
 
-                            if(i_dbgl > 2)
+                            if (i_dbgl > 2)
                             {
                                 deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -356,35 +347,31 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                 MY_INF("\n");
                             }
 
-                            return IMGBUILD_TGR_RING_FOUND;
+                            return TOR_RING_FOUND;
                         }
                         else
                         {
-                            if(i_dbgl > 0)
+                            if (i_dbgl > 0)
                             {
                                 MY_INF("   ring container of %s is not found in the SBE image container \n",
                                        o_ringName);
                             }
 
-                            return IMGBUILD_TGR_RING_NOT_FOUND;
+                            return TOR_RING_NOT_FOUND;
                         }
                     }
-                    else if(i_RingBlockType == PUT_SINGLE_RING)
+                    else if (i_RingBlockType == PUT_SINGLE_RING)
                     {
-                        if(chiplet_offset)
+                        if (chiplet_offset)
                         {
-                            if(i_dbgl > 0)
-                            {
-                                MY_INF("Ring container is already present in the ring section \n");
-                            }
-
-                            return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                            MY_ERR("Ring container is already present in the SBE section \n");
+                            return TOR_RING_AVAILABLE_IN_RINGSECTION;
                         }
 
                         io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                         memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                                 sizeof(uint16_t));
-                        return IMGBUILD_TGR_RING_FOUND;
+                        return TOR_RING_FOUND;
                     }
                 }
 
@@ -401,7 +388,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
             {
                 for(uint8_t k = 0; k < iv_num_variant ; k++)
                 {
-                    if(i_dbgl > 2)
+                    if (i_dbgl > 2)
                     {
                         MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d Instance id %d\n",
                                (ring_id_list_instance + j)->ringName, j, k, i);
@@ -410,10 +397,10 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                     if  (strcmp( (ring_id_list_instance + j)->ringName,
                                  RING_PROPERTIES[i_ringId].iv_name) == 0)
                     {
-                        if(  io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
+                        if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
                              &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax)
                         {
-                            if( i == io_instanceId && i_RingVariant == ring_variant_order->variant[k] )
+                            if ( i == io_instanceId && i_RingVariant == ring_variant_order->variant[k] )
                             {
                                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                                 uint32_t var = l * sizeof(TorPpeBlock_t) + i_ddLevel + temp + CPLT_OFFSET_SIZE;
@@ -425,7 +412,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                 chiplet_offset  = *((uint16_t*)i_ringSection + temp1);
                                 chiplet_offset = htobe16(chiplet_offset);
 
-                                if(i_RingBlockType == GET_SINGLE_RING)
+                                if (i_RingBlockType == GET_SINGLE_RING)
                                 {
                                     var = ring_offset + (chiplet_offset - sizeof(TorPpeBlock_t)) + i_ddLevel + temp;
                                     temp1 = var / sizeof(uint32_t);
@@ -438,7 +425,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                     {
                                         if (io_ringBlockSize == 0)
                                         {
-                                            if(i_dbgl > 0)
+                                            if (i_dbgl > 0)
                                             {
                                                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                                             }
@@ -450,10 +437,10 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                         if (io_ringBlockSize < ringSize)
                                         {
                                             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                                            return TOR_BUFFER_TOO_SMALL;
                                         }
 
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF("   ring container of %s is found in the SBE image container \n",
                                                    o_ringName);
@@ -461,15 +448,15 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
 
                                         memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                                 (size_t)ringSize);
+
                                         io_ringBlockSize = ringSize;
 
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
                                         }
 
-                                        // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                                        if(i_dbgl > 1)
+                                        if (i_dbgl > 1)
                                         {
                                             MY_INF(" 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x \n",
                                                    var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
@@ -477,7 +464,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                                    i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                                         }
 
-                                        if(i_dbgl > 2)
+                                        if (i_dbgl > 2)
                                         {
                                             deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -490,35 +477,31 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                                             MY_INF("\n");
                                         }
 
-                                        return IMGBUILD_TGR_RING_FOUND;
+                                        return TOR_RING_FOUND;
                                     }
                                     else
                                     {
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF("   ring container of %s is not found in the SBE image container \n",
                                                    o_ringName);
                                         }
 
-                                        return IMGBUILD_TGR_RING_NOT_FOUND;
+                                        return TOR_RING_NOT_FOUND;
                                     }
                                 }
-                                else if(i_RingBlockType == PUT_SINGLE_RING)
+                                else if (i_RingBlockType == PUT_SINGLE_RING)
                                 {
-                                    if(chiplet_offset)
+                                    if (chiplet_offset)
                                     {
-                                        if(i_dbgl > 0)
-                                        {
-                                            MY_INF("Ring container is already present in the ring section \n");
-                                        }
-
-                                        return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                                        MY_ERR("Ring container is already present in the SBE section \n");
+                                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
                                     io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                                     memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                                             sizeof(uint16_t));
-                                    return IMGBUILD_TGR_RING_FOUND;
+                                    return TOR_RING_FOUND;
                                 }
                             }
 
@@ -528,7 +511,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                             MY_ERR(" SBE ring instance ID %d is invalid, Valid ID is from %d  to %d  \n",
                                    io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
                                    (ring_id_list_instance + 0)->instanceIdMax);
-                            return IMGBUILD_INVALID_INSTANCEID;
+                            return TOR_INVALID_INSTANCE_ID;
                         }
                     }
 
@@ -541,24 +524,30 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
 
     }
 
-    return IMGBUILD_TGR_INVALID_RING_ID;
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    return TOR_INVALID_RING_ID;
 
-int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
+} // End of get_ring_from_sbe_image()
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//                                     GET RING FROM SGPE IMAGE   FUNCTION
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static
+int get_ring_from_sgpe_image ( void*           i_ringSection,     // Ring section ptr
                                uint64_t        i_magic,           // Image Magic Number
-                               RingID          i_ringId,          // Unique ring I
+                               RingID          i_ringId,          // Ring ID
                                uint16_t        i_ddLevel,         // DD level details
-                               RingType_t&     io_RingType,       // 0: Common 1: Instance
-                               RingVariant_t   i_RingVariant,     // Variant -> Base, cache contained, Risk level,
-                               // Override and Overlay
-                               uint8_t&        io_instanceId,     // required Instance
-                               RingBlockType_t i_RingBlockType,   // 0: single ring,  1: ddLevel block
-                               void**          io_ringBlockPtr,   // RS4 Container data or block data
-                               uint32_t&       io_ringBlockSize,  // size of data copied into ring block pointer
+                               RingType_t&     io_RingType,       // Common, Instance
+                               RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                               uint8_t&        io_instanceId,     // Instance ID
+                               RingBlockType_t i_RingBlockType,   // Single ring, Block
+                               void**          io_ringBlockPtr,   // Output ring data buffer
+                               uint32_t&       io_ringBlockSize,  // Size of ring data
                                char*           o_ringName,        // Name of ring
-                               uint32_t        i_dbgl)              // Debug option
+                               uint32_t        i_dbgl )           // Debug option
 {
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
@@ -592,14 +581,14 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
     {
         for (uint8_t j = 0; j < iv_num_variant ; j++)
         {
-            if(i_dbgl > 2)
+            if (i_dbgl > 2)
             {
                 MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
                        (ring_id_list_common + i)->ringName, i, j);
             }
 
-            if((strcmp( (ring_id_list_common + i)->ringName,
-                        RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
+            if ((strcmp( (ring_id_list_common + i)->ringName,
+                         RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                 int var = 0 + i_ddLevel + temp;
@@ -624,7 +613,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                     {
                         if (io_ringBlockSize == 0)
                         {
-                            if(i_dbgl > 0)
+                            if (i_dbgl > 0)
                             {
                                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                             }
@@ -636,37 +625,36 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                         if (io_ringBlockSize < ringSize)
                         {
                             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                            return TOR_BUFFER_TOO_SMALL;
                         }
 
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
                             MY_INF("   ring container of %s is found in the SGPE image container && ring offset %d \n",
                                    o_ringName, chiplet_offset);
                         }
 
-                        // Copying ring data into io buffer
                         memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                 (size_t)ringSize);
+
                         io_ringBlockSize = ringSize;
                         io_instanceId = (ring_id_list_common + i)->instanceIdMin;
 
-                        // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
-                            MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
+                            MY_INF(" After get_ring_from_sgpe_image Size %d \n", io_ringBlockSize);
                         }
 
-                        if(i_dbgl > 1)
+                        if (i_dbgl > 1)
                         {
-                            MY_INF("Hexdetalis Chiplet offset 0x%08x local offset 0x%08x " \
+                            MY_INF("Hex details Chiplet offset 0x%08x local offset 0x%08x " \
                                    "ring offset 0x%08x start adr 0x%08x  size 0x%08x size 0x%08x \n",
                                    var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
                             MY_INF("Chiplet %d   ChipletRing TOR offset  %d  %d   %d  Size %d %d \t\n",
                                    i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                         }
 
-                        if(i_dbgl > 2)
+                        if (i_dbgl > 2)
                         {
                             deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -678,35 +666,31 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                             MY_INF("\n");
                         }
 
-                        return IMGBUILD_TGR_RING_FOUND;
+                        return TOR_RING_FOUND;
                     }
                     else
                     {
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
                             MY_INF("   ring container of %s is  not found in the SGPE image container \n",
                                    o_ringName);
                         }
 
-                        return IMGBUILD_TGR_RING_NOT_FOUND;
+                        return TOR_RING_NOT_FOUND;
                     }
                 }
-                else if(i_RingBlockType == PUT_SINGLE_RING)
+                else if (i_RingBlockType == PUT_SINGLE_RING)
                 {
-                    if(chiplet_offset)
+                    if (chiplet_offset)
                     {
-                        if(i_dbgl > 0)
-                        {
-                            MY_INF("Ring container is already present in the ring section \n");
-                        }
-
-                        return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                        MY_ERR("Ring container is already present in the SGPE section \n");
+                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
                     io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                     memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                             sizeof(uint16_t));
-                    return IMGBUILD_TGR_RING_FOUND;
+                    return TOR_RING_FOUND;
                 }
             }
 
@@ -726,7 +710,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
         {
             for(uint8_t k = 0; k < iv_num_variant ; k++)
             {
-                if(i_dbgl > 2)
+                if (i_dbgl > 2)
                 {
                     MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
                            (ring_id_list_instance + j)->ringName, j, k);
@@ -735,10 +719,10 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                 if  (strcmp( (ring_id_list_instance + j)->ringName,
                              RING_PROPERTIES[i_ringId].iv_name) == 0)
                 {
-                    if(  io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
-                         &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax)
+                    if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
+                         &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                     {
-                        if( i == io_instanceId && k == i_RingVariant )
+                        if ( i == io_instanceId && k == i_RingVariant )
                         {
                             strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                             uint32_t var = CPLT_OFFSET_SIZE + i_ddLevel + temp;
@@ -763,7 +747,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                                 {
                                     if (io_ringBlockSize == 0)
                                     {
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                                         }
@@ -775,27 +759,26 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                                     if (io_ringBlockSize < ringSize)
                                     {
                                         MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                                        return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                                        return TOR_BUFFER_TOO_SMALL;
                                     }
 
-                                    if(i_dbgl > 0)
+                                    if (i_dbgl > 0)
                                     {
                                         MY_INF("   ring container of %s is found in the SGPE image container \n",
                                                o_ringName);
                                     }
 
-                                    // Copying ring data into io_buffer
                                     memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                             (size_t)ringSize);
+
                                     io_ringBlockSize = ringSize;
 
-                                    if(i_dbgl > 0)
+                                    if (i_dbgl > 0)
                                     {
-                                        MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
+                                        MY_INF(" After get_ring_from_sgpe_image Size %d \n", io_ringBlockSize);
                                     }
 
-                                    // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                                    if(i_dbgl > 1)
+                                    if (i_dbgl > 1)
                                     {
                                         MY_INF(" 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x \n",
                                                var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
@@ -803,7 +786,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                                                i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                                     }
 
-                                    if(i_dbgl > 2)
+                                    if (i_dbgl > 2)
                                     {
                                         deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -815,44 +798,40 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                                         MY_INF("\n");
                                     }
 
-                                    return IMGBUILD_TGR_RING_FOUND;
+                                    return TOR_RING_FOUND;
                                 }
                                 else
                                 {
-                                    if(i_dbgl > 0)
+                                    if (i_dbgl > 0)
                                     {
                                         MY_INF("   ring container of %s is not found in the SGPE image container \n",
                                                o_ringName);
                                     }
 
-                                    return IMGBUILD_TGR_RING_NOT_FOUND;
+                                    return TOR_RING_NOT_FOUND;
                                 }
                             }
-                            else if(i_RingBlockType == PUT_SINGLE_RING)
+                            else if (i_RingBlockType == PUT_SINGLE_RING)
                             {
-                                if(chiplet_offset)
+                                if (chiplet_offset)
                                 {
-                                    if(i_dbgl > 0)
-                                    {
-                                        MY_INF("Ring container is already present in the ring section \n");
-                                    }
-
-                                    return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                                    MY_ERR("Ring container is already present in the SGPE section \n");
+                                    return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                 }
 
                                 io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                                 memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                                         sizeof(uint16_t));
-                                return IMGBUILD_TGR_RING_FOUND;
+                                return TOR_RING_FOUND;
                             }
                         }
                     }
                     else
                     {
-                        MY_INF(" SGPE ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
+                        MY_INF("SGPE ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
                                io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
                                (ring_id_list_instance + 0)->instanceIdMax);
-                        return IMGBUILD_INVALID_INSTANCEID;
+                        return TOR_INVALID_INSTANCE_ID;
                     }
                 }
 
@@ -861,29 +840,30 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
         }
     }
 
-    return IMGBUILD_TGR_INVALID_RING_ID;
-}
+    return TOR_INVALID_RING_ID;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//                             Get ring container from CME ring section
-//
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+} // End of get_ring_from_sgpe_image()
 
-int get_ring_from_cme_image ( void*
-                              i_ringSection,                     // Image pointer
-                              uint64_t        i_magic,              // Image Magic Number
-                              RingID          i_ringId,             // Unique ring I
-                              uint16_t        i_ddLevel,            // DD level details
-                              RingType_t&     io_RingType,          // 0: Common 1: Instance
-                              RingVariant_t   i_RingVariant,        // Variant -> Base, cache contained, Risk level,
-                              // Override and Overlay
-                              uint8_t&        io_instanceId,        // required Instance
-                              RingBlockType_t i_RingBlockType,      // 0: single ring,  1: ddLevel block
-                              void**          io_ringBlockPtr,      // RS4 Container data or block data
-                              uint32_t&       io_ringBlockSize,     // size of data copied into ring block pointer
-                              char*           o_ringName,           // Name of ring
-                              uint32_t        i_dbgl)                 // Debug option
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//                                 GET RING FROM CME IMAGE   FUNCTION
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static
+int get_ring_from_cme_image ( void*           i_ringSection,     // Ring section ptr
+                              uint64_t        i_magic,           // Image Magic Number
+                              RingID          i_ringId,          // Ring ID
+                              uint16_t        i_ddLevel,         // DD level
+                              RingType_t&     io_RingType,       // Common, Instance
+                              RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                              uint8_t&        io_instanceId,     // instance ID
+                              RingBlockType_t i_RingBlockType,   // Single ring, Block
+                              void**          io_ringBlockPtr,   // Output ring data buffer
+                              uint32_t&       io_ringBlockSize,  // Size of ring data
+                              char*           o_ringName,        // Name of ring
+                              uint32_t        i_dbgl )           // Debug option
 {
     uint32_t ring_offset = 0;
     uint16_t chiplet_offset = 0;
@@ -910,21 +890,21 @@ int get_ring_from_cme_image ( void*
     uint8_t iv_num_variant  = (uint8_t)sizeof(EC::RingVariants) / sizeof(uint16_t);
     ring_id_list_common = (GenRingIdList*) EC::RING_ID_LIST_COMMON;
     ring_id_list_instance = (GenRingIdList*) EC::RING_ID_LIST_INSTANCE;
-    //MY_INF(" C %d I %d V %d \n",l_cpltData.iv_num_common_rings,l_cpltData.iv_num_instance_rings,iv_num_variant);
+
     uint32_t local = 0;
 
     for (uint8_t i = 0; i < EC::g_ecData.iv_num_common_rings ; i++)
     {
         for (uint8_t j = 0; j < iv_num_variant ; j++)
         {
-            if(i_dbgl > 2)
+            if (i_dbgl > 2)
             {
                 MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
                        (ring_id_list_common + i)->ringName, i, j);
             }
 
-            if((strcmp( (ring_id_list_common + i)->ringName,
-                        RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
+            if ((strcmp( (ring_id_list_common + i)->ringName,
+                         RING_PROPERTIES[i_ringId].iv_name) == 0) && ( i_RingVariant == j ))
             {
                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                 int var = 0 + i_ddLevel + temp;
@@ -949,7 +929,7 @@ int get_ring_from_cme_image ( void*
                     {
                         if (io_ringBlockSize == 0)
                         {
-                            if(i_dbgl > 0)
+                            if (i_dbgl > 0)
                             {
                                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                             }
@@ -961,37 +941,36 @@ int get_ring_from_cme_image ( void*
                         if (io_ringBlockSize < ringSize)
                         {
                             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                            return TOR_BUFFER_TOO_SMALL;
                         }
 
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
                             MY_INF("   ring container of %s is found in the CME image container \n",
                                    o_ringName);
                         }
 
-                        // Copying ring data into io_buffer
                         memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                 (size_t)ringSize);
+
                         io_ringBlockSize = ringSize;
                         io_instanceId = (ring_id_list_common + i)->instanceIdMin;
 
-                        // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
-                            MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
+                            MY_INF(" After get_ring_from_cme_image Size %d \n", io_ringBlockSize);
                         }
 
-                        if(i_dbgl > 1)
+                        if (i_dbgl > 1)
                         {
-                            MY_INF("Hexdetalis Chiplet offset 0x%08x local offset 0x%08x " \
+                            MY_INF("Hex details Chiplet offset 0x%08x local offset 0x%08x " \
                                    "ring offset 0x%08x start adr 0x%08x  size 0x%08x size 0x%08x \n",
                                    var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
                             MY_INF("Chiplet %d   ChipletRing TOR offset  %d  %d   %d  Size %d %d \t\n",
                                    i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                         }
 
-                        if(i_dbgl > 2)
+                        if (i_dbgl > 2)
                         {
                             deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -1003,35 +982,31 @@ int get_ring_from_cme_image ( void*
                             MY_INF("\n");
                         }
 
-                        return IMGBUILD_TGR_RING_FOUND;
+                        return TOR_RING_FOUND;
                     }
                     else
                     {
-                        if(i_dbgl > 0)
+                        if (i_dbgl > 0)
                         {
                             MY_INF("   ring container of %s is not found in the CME image container \n",
                                    o_ringName);
                         }
 
-                        return IMGBUILD_TGR_RING_NOT_FOUND;
+                        return TOR_RING_NOT_FOUND;
                     }
                 }
-                else if(i_RingBlockType == PUT_SINGLE_RING)
+                else if (i_RingBlockType == PUT_SINGLE_RING)
                 {
-                    if(chiplet_offset)
+                    if (chiplet_offset)
                     {
-                        if(i_dbgl > 0)
-                        {
-                            MY_INF("Ring container is already present in the ring section \n");
-                        }
-
-                        return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                        MY_ERR("Ring container is already present in the CME section \n");
+                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
                     }
 
                     io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                     memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                             sizeof(uint16_t));
-                    return IMGBUILD_TGR_RING_FOUND;
+                    return TOR_RING_FOUND;
                 }
             }
 
@@ -1042,30 +1017,30 @@ int get_ring_from_cme_image ( void*
     // Instance specific single ring extract loop
     local = 0;
 
-    for(uint8_t z = 0; z < 12; z++)
+    for (uint8_t z = 0; z < 12; z++)
     {
         local = 0;
 
-        for(uint8_t i = z * 2 + (ring_id_list_instance + 0)->instanceIdMin;
-            i < z * 2 + 2 + (ring_id_list_instance + 0)->instanceIdMin ; i++)
+        for (uint8_t i = z * 2 + (ring_id_list_instance + 0)->instanceIdMin;
+             i < z * 2 + 2 + (ring_id_list_instance + 0)->instanceIdMin ; i++)
         {
             for (uint8_t j = 0; j < EC::g_ecData.iv_num_instance_rings; j++)
             {
-                for(uint8_t k = 0; k < iv_num_variant ; k++)
+                for (uint8_t k = 0; k < iv_num_variant ; k++)
                 {
-                    if(i_dbgl > 2)
+                    if (i_dbgl > 2)
                     {
                         MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
                                (ring_id_list_instance + j)->ringName, j, k);
                     }
 
-                    if  (strcmp( (ring_id_list_instance + j)->ringName,
-                                 RING_PROPERTIES[i_ringId].iv_name) == 0)
+                    if (strcmp( (ring_id_list_instance + j)->ringName,
+                                RING_PROPERTIES[i_ringId].iv_name) == 0)
                     {
-                        if(  io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
-                             &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax)
+                        if ( io_instanceId >=  (ring_id_list_instance + 0)->instanceIdMin
+                             &&  io_instanceId  <= (ring_id_list_instance + 0)->instanceIdMax )
                         {
-                            if( i == io_instanceId && k == i_RingVariant )
+                            if ( i == io_instanceId && k == i_RingVariant )
                             {
                                 strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
                                 uint32_t var = z * CPLT_OFFSET_SIZE + i_ddLevel + temp + CPLT_OFFSET_SIZE;
@@ -1090,7 +1065,7 @@ int get_ring_from_cme_image ( void*
                                     {
                                         if (io_ringBlockSize == 0)
                                         {
-                                            if(i_dbgl > 0)
+                                            if (i_dbgl > 0)
                                             {
                                                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
                                             }
@@ -1102,10 +1077,10 @@ int get_ring_from_cme_image ( void*
                                         if (io_ringBlockSize < ringSize)
                                         {
                                             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-                                            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+                                            return TOR_BUFFER_TOO_SMALL;
                                         }
 
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF(" ring container of %s is found in the CME image container  %d %d \n",
                                                    o_ringName, chiplet_offset, ringSize);
@@ -1113,18 +1088,17 @@ int get_ring_from_cme_image ( void*
                                                    var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
                                         }
 
-                                        // Copying ring data into io_buffer
                                         memcpy( (uint8_t*)(*io_ringBlockPtr), (uint8_t*)i_ringSection + var,
                                                 (size_t)ringSize);
+
                                         io_ringBlockSize = ringSize;
 
-                                        // Debug details for each offset address in DD TOR, DD TOR, SBE TOP TOR, SBE common/instance TOR, ring size
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
-                                            MY_INF(" After get_ring_from_sbe_image Size %d \n", io_ringBlockSize);
+                                            MY_INF(" After get_ring_from_cme_image Size %d \n", io_ringBlockSize);
                                         }
 
-                                        if(i_dbgl > 1)
+                                        if (i_dbgl > 1)
                                         {
                                             MY_INF("  0x%08x 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x \n",
                                                    var, temp, ring_offset, chiplet_offset, next_ring_offset, ringSize);
@@ -1132,7 +1106,7 @@ int get_ring_from_cme_image ( void*
                                                    i,  ring_offset, chiplet_offset, next_ring_offset, ringSize, temp);
                                         }
 
-                                        if(i_dbgl > 2)
+                                        if (i_dbgl > 2)
                                         {
                                             deltaRingRS4_4B = (uint32_t*)(*io_ringBlockPtr);
 
@@ -1144,35 +1118,31 @@ int get_ring_from_cme_image ( void*
                                             MY_INF("\n");
                                         }
 
-                                        return IMGBUILD_TGR_RING_FOUND;
+                                        return TOR_RING_FOUND;
                                     }
                                     else
                                     {
-                                        if(i_dbgl > 0)
+                                        if (i_dbgl > 0)
                                         {
                                             MY_INF("   ring container of %s is not found in the CME image container \n",
                                                    o_ringName);
                                         }
 
-                                        return IMGBUILD_TGR_RING_NOT_FOUND;
+                                        return TOR_RING_NOT_FOUND;
                                     }
                                 }
-                                else if(i_RingBlockType == PUT_SINGLE_RING)
+                                else if (i_RingBlockType == PUT_SINGLE_RING)
                                 {
-                                    if(chiplet_offset)
+                                    if (chiplet_offset)
                                     {
-                                        if(i_dbgl > 0)
-                                        {
-                                            MY_INF("Ring container is already present in the ring section \n");
-                                        }
-
-                                        return IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION;
+                                        MY_ERR("Ring container is already present in the CME section \n");
+                                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
                                     io_ringBlockSize = var + (local * RING_OFFSET_SIZE);
                                     memcpy( (uint8_t*)(*io_ringBlockPtr), &var,
                                             sizeof(uint16_t));
-                                    return IMGBUILD_TGR_RING_FOUND;
+                                    return TOR_RING_FOUND;
                                 }
                             }
                         }
@@ -1181,7 +1151,7 @@ int get_ring_from_cme_image ( void*
                             MY_INF(" CME ring instance ID %d is invalid, Valid ID is from %d  to %d \n",
                                    io_instanceId, (ring_id_list_instance + 0)->instanceIdMin,
                                    (ring_id_list_instance + 0)->instanceIdMax);
-                            return IMGBUILD_INVALID_INSTANCEID;
+                            return TOR_INVALID_INSTANCE_ID;
                         }
                     }
 
@@ -1191,57 +1161,63 @@ int get_ring_from_cme_image ( void*
         }
     }
 
-    return IMGBUILD_TGR_INVALID_RING_ID;
-}
+    return TOR_INVALID_RING_ID;
+
+} // End of get_ring_from_cme_image()
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 ///
-///                            TOR ACCESS RING API
+///                            TOR ACCESS RING   API
+///
 //////////////////////////////////////////////////////////////////////////////////////////
-
-int tor_access_ring(  void*
-                      i_ringSection,  // Ring address Ptr any of .rings, .overrides and .overlays.
+int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                       uint64_t        i_magic,           // Image Magic Number
-                      RingID          i_ringId,          // Unique ring ID
-                      uint16_t        i_ddLevel,         // DD level info
-                      PpeType_t       i_PpeType,         // PPE type : SBE, CME, etc
-                      RingType_t&      io_RingType,      // 0: Common 1: Instance
-                      RingVariant_t   i_RingVariant,     // Base, Cache etc
-                      uint8_t&        io_instanceId,     // chiplet instance ID
-                      RingBlockType_t i_RingBlockType,   // 0: single ring,  1: ring block
-                      void**          io_ringBlockPtr,   // Addr of ring buffer
-                      uint32_t&       io_ringBlockSize,  // size of ring data
+                      RingID          i_ringId,          // Ring ID
+                      uint16_t        i_ddLevel,         // DD level
+                      PpeType_t       i_PpeType,         // SBE, CME, SGPE
+                      RingType_t&     io_RingType,       // Common, Instance
+                      RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                      uint8_t&        io_instanceId,     // Instance ID
+                      RingBlockType_t i_RingBlockType,   // Single ring, Block
+                      void**          io_ringBlockPtr,   // Ring data buffer
+                      uint32_t&       io_ringBlockSize,  // Size of ring data
                       char*           o_ringName,        // Ring name
-                      uint32_t        i_dbgl)              // Debug option
+                      uint32_t        i_dbgl )           // Debug option
 {
     int rc = 0;
     TorPpeBlock_t l_TorPpeBlock;
-
-    if(i_dbgl > 1)
-    {
-        MY_INF( "TOR_ACCESS_RING(1): function call \n");
-    }
-
+    uint8_t  bDdCheck = 0;
     uint32_t ddLevelOffset = 0;
     uint32_t ddLevelCount = 0;
     uint32_t ddLevel = 0;
     uint32_t ddBlockSize = 0;
     uint32_t temp = 0, temp1 = 0, local = 0;
 
-    if(i_dbgl > 1)
+
+    if (i_dbgl > 1)
     {
-        MY_INF( "TOR_ACCESS_RING(2):DD Level info extracting from TOR \n");
+        MY_INF("Entering tor_access_ring()... \n");
     }
 
     if (i_magic == P9_XIP_MAGIC_HW)
     {
-        uint8_t dd_check = 0;
         ddLevelCount =  *((uint32_t*)i_ringSection + 0);
         ddLevelCount = htobe32(ddLevelCount);
 
-        if(i_dbgl > 1)
+        if (ddLevelCount > MAX_NOOF_DD_LEVELS_IN_IMAGE)
         {
-            MY_INF("TOR_ACCESS_RING(3): No of DD levels in the TOR is %d \n", ddLevelCount);
+            MY_ERR("Too many DD levels in image:\n"
+                   "  ddLevelCount = %d\n"
+                   "  Max no of DD levels = %d\n",
+                   ddLevelCount, MAX_NOOF_DD_LEVELS_IN_IMAGE);
+
+            return TOR_TOO_MANY_DD_LEVELS;
+        }
+        else if (i_dbgl > 1)
+        {
+            MY_INF("tor_access_ring(): No of DD levels: %d \n", ddLevelCount);
         }
 
         for (uint8_t i = 0; i < ddLevelCount; i++)
@@ -1251,9 +1227,9 @@ int tor_access_ring(  void*
             ddLevel = htobe32(ddLevelOffset) >> 24 & 0x000000FF;
             ddLevelOffset = htobe32(ddLevelOffset) & 0x00FFFFFF;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
-                MY_INF( "TOR_ACCESS_RING(4): DD level offset %d DD %d level Copy  \n",
+                MY_INF( "tor_access_ring(): DD level offset: 0x%08x   DD level: 0x%x \n",
                         ddLevelOffset, ddLevel );
             }
 
@@ -1265,25 +1241,29 @@ int tor_access_ring(  void*
                 local = local + 1;
                 ddBlockSize = *((uint32_t*)i_ringSection + local);
                 ddBlockSize = htobe32(ddBlockSize);
-                dd_check = 1;
+                bDdCheck = 1;
                 break;
             }
         }
 
-        if(!dd_check)
+        if (!bDdCheck)
         {
-            MY_INF(" invalid DD level input \n");
-            return IMGBUILD_TGR_DD_LVL_INFO_NOT_FOUND;
+            MY_ERR("Input DD level not found and/or image indicates zero no of DD levels\n"
+                   "  i_ddLevel = 0x%x\n"
+                   "  ddLevelCount = %d\n",
+                   i_ddLevel, ddLevelCount);
+
+            return TOR_DD_LEVEL_NOT_FOUND;
         }
     }
-    else if( i_magic ==  P9_XIP_MAGIC_SEEPROM)
+    else if ( i_magic ==  P9_XIP_MAGIC_SEEPROM)
     {
         if ( i_PpeType == CME || i_PpeType == SGPE
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
-            MY_INF("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n");
-            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+            MY_ERR("Ambiguity on input PARMS for calling SEEPROM Ring copy API. \n");
+            return TOR_AMBIGUOUS_API_PARMS;
         }
         else
         {
@@ -1291,14 +1271,14 @@ int tor_access_ring(  void*
             ddBlockSize = 0;
         }
     }
-    else if( i_magic ==  P9_XIP_MAGIC_CME)
+    else if ( i_magic ==  P9_XIP_MAGIC_CME)
     {
         if ( i_PpeType == SBE || i_PpeType == SGPE
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
-            MY_INF("Ambiguity on input PARMS for calling CME Ring copy API. \n");
-            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+            MY_ERR("Ambiguity on input PARMS for calling CME Ring copy API. \n");
+            return TOR_AMBIGUOUS_API_PARMS;
         }
         else
         {
@@ -1306,14 +1286,14 @@ int tor_access_ring(  void*
             ddBlockSize = 0;
         }
     }
-    else if( i_magic ==  P9_XIP_MAGIC_SGPE)
+    else if ( i_magic ==  P9_XIP_MAGIC_SGPE)
     {
         if ( i_PpeType == SBE || i_PpeType == CME
              || i_RingBlockType == GET_DD_LEVEL_RINGS
              || i_RingBlockType == GET_PPE_LEVEL_RINGS )
         {
-            MY_INF("Ambiguity on input PARMS for calling SGPE Ring copy API. \n");
-            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+            MY_ERR("Ambiguity on input PARMS for calling SGPE Ring copy API. \n");
+            return TOR_AMBIGUOUS_API_PARMS;
         }
         else
         {
@@ -1323,15 +1303,16 @@ int tor_access_ring(  void*
     }
     else
     {
-        MY_INF("Ambiguity on input PARMS are not supported   \n");
-        return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+        MY_ERR("Magic number i_magic=0x%016lX\n is not valid.\n", (uintptr_t)i_magic);
+
+        return TOR_AMBIGUOUS_API_PARMS;
     }
 
-    if(i_RingBlockType == GET_DD_LEVEL_RINGS)  // DD_LEVEL_COPY
+    if (i_RingBlockType == GET_DD_LEVEL_RINGS)
     {
         if (io_ringBlockSize == 0)
         {
-            if(i_dbgl > 0)
+            if (i_dbgl > 0)
             {
                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
             }
@@ -1343,32 +1324,32 @@ int tor_access_ring(  void*
         if (io_ringBlockSize < ddBlockSize)
         {
             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+            return TOR_BUFFER_TOO_SMALL;
         }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
                 (uint8_t*)i_ringSection + ddLevelOffset, (size_t)ddBlockSize);
 
-        if(i_dbgl > 1)
+        if (i_dbgl > 1)
         {
             MY_INF( "TOR_ACCESS_RING(5): DD offset = %d  DD level = %d  DD block size = %d \n",
                     ddLevelOffset, ddLevel, ddBlockSize);
         }
 
         io_ringBlockSize =  ddBlockSize;
-        return IMGBUILD_TGR_RING_BLOCKS_FOUND;
 
+        return TOR_RING_BLOCKS_FOUND;
     }
     else if (i_RingBlockType == GET_PPE_LEVEL_RINGS)
     {
         uint32_t l_ppe_offset = 0;
         uint32_t l_ppe_size   = 0;
 
-        if(i_PpeType == SBE)
+        if (i_PpeType == SBE)
         {
             temp = ddLevelOffset >> 2;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF( "TOR_ACCESS_RING(6): SBE PPE_LEVEL_RING COPY called ... \n");
             }
@@ -1382,7 +1363,7 @@ int tor_access_ring(  void*
         {
             temp = (ddLevelOffset >> 2) + 2;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF( "TOR_ACCESS_RING(7): CME PPE_LEVEL_RING COPY called... \n");
             }
@@ -1397,7 +1378,7 @@ int tor_access_ring(  void*
 
             temp = (ddLevelOffset >> 2) + sizeof(uint32_t);
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF( "TOR_ACCESS_RING(8): SPGE PPE_LEVEL_RING COPY called... \n");
             }
@@ -1410,7 +1391,7 @@ int tor_access_ring(  void*
 
         if (io_ringBlockSize == 0)
         {
-            if(i_dbgl > 0)
+            if (i_dbgl > 0)
             {
                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
             }
@@ -1422,26 +1403,27 @@ int tor_access_ring(  void*
         if (io_ringBlockSize < l_ppe_size)
         {
             MY_ERR("\tio_ringBlockSize is less than required size.\n");
-            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
+            return TOR_BUFFER_TOO_SMALL;
         }
 
         memcpy( (uint8_t*)(*io_ringBlockPtr),
                 (uint8_t*)i_ringSection + l_ppe_offset + ddLevelOffset,
                 (size_t)l_ppe_size);
         io_ringBlockSize = l_ppe_size;
-        return IMGBUILD_TGR_RING_BLOCKS_FOUND;
+
+        return TOR_RING_BLOCKS_FOUND;
     }
     else if (i_RingBlockType == GET_CPLT_LEVEL_RINGS)
     {
-        if(i_dbgl > 1)
+        if (i_dbgl > 1)
         {
             MY_INF( "TOR_ACCESS_RING(9): CPLT_LEVEL_RING COPY called... \n");
         }
 
-        if(io_RingType == ALLRING)
+        if (io_RingType == ALLRING)
         {
             MY_INF("Ambiguity on input PARMS. ALLRING RingType is invalid for CPLT level ring copy  \n");
-            return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+            return TOR_AMBIGUOUS_API_PARMS;
 
         }
 
@@ -1449,7 +1431,7 @@ int tor_access_ring(  void*
         uint32_t l_ppe_offset  = 0;
         uint32_t l_cplt_size   = 0;
 
-        if(i_PpeType == SBE)
+        if (i_PpeType == SBE)
         {
             SbeTorId_t l_sbeTorId = SBE_NOOF_CHIPLETS;
 
@@ -1554,7 +1536,8 @@ int tor_access_ring(  void*
                     break;
 
                 default :
-                    MY_INF("Not valid chiplet ID\n");
+                    MY_ERR("io_instanceId=0x%x is not a valid chiplet ID (for SBE)\n", io_instanceId);
+                    return TOR_INVALID_INSTANCE_ID;
             }
 
             temp = (ddLevelOffset >> 2);
@@ -1569,7 +1552,7 @@ int tor_access_ring(  void*
                 l_cplt_offset = 0;
             }
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SBE(1):Offset 0x%08x \n", l_cplt_offset);
             }
@@ -1581,7 +1564,7 @@ int tor_access_ring(  void*
             l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SBE(2):Offset 0x%08x  0x%08x 0x%08x 0x%08x\n", l_cplt_offset,
                        l_ppe_offset, temp, ddLevelOffset);
@@ -1593,7 +1576,7 @@ int tor_access_ring(  void*
                 l_word = temp >> 2;
                 temp  = l_cplt_offset + ddLevelOffset;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("SBE(3):COMMON Offset 0x%08x  0x%08x 0x%08x  \n", l_cplt_offset,
                            l_ppe_offset, temp);
@@ -1607,7 +1590,7 @@ int tor_access_ring(  void*
                 l_word = temp >> 2;
                 temp  = l_cplt_offset + ddLevelOffset;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("SBE(4):INSTANCE Offset 0x%08x  0x%08x 0x%08x  \n", l_cplt_offset,
                            l_ppe_offset, temp);
@@ -1618,7 +1601,7 @@ int tor_access_ring(  void*
             l_cplt_offset = htobe32(l_cplt_offset);
             l_word++;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SBE(5):Offset 0x%08x size 0x%08x \n", l_cplt_offset, l_ppe_offset);
             }
@@ -1626,9 +1609,9 @@ int tor_access_ring(  void*
             l_cplt_size = *((uint32_t*)i_ringSection + l_word );
             l_cplt_size = htobe32(l_cplt_size);
 
-            if(l_sbeTorId == EC_CPLT && io_RingType == INSTANCE)
+            if (l_sbeTorId == EC_CPLT && io_RingType == INSTANCE)
             {
-                if(i_magic == P9_XIP_MAGIC_SEEPROM)
+                if (i_magic == P9_XIP_MAGIC_SEEPROM)
                 {
                     l_cplt_size =  io_ringBlockSize -  (l_cplt_offset + l_ppe_cplt_offset);
                 }
@@ -1644,7 +1627,7 @@ int tor_access_ring(  void*
 
             l_cplt_offset = l_cplt_offset + ddLevelOffset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SBE(6): Ring pointer Offset 0x%08x size 0x%08x \n", l_cplt_offset,
                        l_cplt_size);
@@ -1717,14 +1700,15 @@ int tor_access_ring(  void*
                     break;
 
                 default :
-                    MY_INF("Not valid chiplet ID\n");
+                    MY_ERR("io_instanceId=0x%x is not a valid chiplet ID (for CME)\n", io_instanceId);
+                    return TOR_INVALID_INSTANCE_ID;
             }
 
             temp = (ddLevelOffset >> 2) + (sizeof(TorPpeBlock_t) >> 2);
             int l_word;
             l_cplt_offset = *((uint32_t*)i_ringSection + temp);
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("CME(1):ppe type Offset 0x%08x \n", l_cplt_offset);
             }
@@ -1736,7 +1720,7 @@ int tor_access_ring(  void*
             l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("CME(2): Offsets 0x%08x  0x%08x 0x%08x \n", l_cplt_offset, l_ppe_offset,
                        temp);
@@ -1747,7 +1731,7 @@ int tor_access_ring(  void*
                 temp  = l_cplt_offset + ddLevelOffset;
                 l_word = temp >> 2;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("CME(3):COMMON Offsets 0x%08x  0x%08x 0x%08x  \n", l_cplt_offset,
                            l_ppe_offset, temp);
@@ -1761,7 +1745,7 @@ int tor_access_ring(  void*
                 l_word = temp >> 2;
                 temp  = l_cplt_offset + ddLevelOffset;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("CME(4):INSTANCE Offset 0x%08x  0x%08x 0x%08x 0x%08x \n", l_cplt_offset,
                            l_ppe_offset, l_ppe_cplt_offset, temp);
@@ -1772,7 +1756,7 @@ int tor_access_ring(  void*
             l_cplt_offset = htobe32(l_cplt_offset);
             l_word++;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("CME(5):Offset 0x%08x size 0x%08x \n", l_cplt_offset, l_ppe_offset);
             }
@@ -1780,7 +1764,7 @@ int tor_access_ring(  void*
             l_cplt_size = *((uint32_t*)i_ringSection + l_word );
             l_cplt_size = htobe32(l_cplt_size);
 
-            if(l_cmeTorId == CME11_CPLT && io_RingType == INSTANCE)
+            if (l_cmeTorId == CME11_CPLT && io_RingType == INSTANCE)
             {
                 l_cplt_size =  l_ppe_offset -  (l_cplt_offset + l_ppe_cplt_offset);
             }
@@ -1791,7 +1775,7 @@ int tor_access_ring(  void*
 
             l_cplt_offset = l_cplt_offset + ddLevelOffset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("CME(6): Ring pointer Offset 0x%08x size 0x%08x \n", l_cplt_offset,
                        l_cplt_size);
@@ -1804,7 +1788,7 @@ int tor_access_ring(  void*
             int l_word;
             l_cplt_offset = *((uint32_t*)i_ringSection + temp);
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SGPE(1):Offset 0x%08x \n", l_cplt_offset);
             }
@@ -1816,7 +1800,7 @@ int tor_access_ring(  void*
             l_ppe_offset  = htobe32(l_ppe_offset);
             temp1 = l_cplt_offset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SGPE(2):Offset 0x%08x  0x%08x 0x%08x \n", l_cplt_offset, l_ppe_offset,
                        temp);
@@ -1827,7 +1811,7 @@ int tor_access_ring(  void*
                 temp  = l_cplt_offset + ddLevelOffset;
                 l_word = temp >> 2;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("SGPE(3):COMMON Offset 0x%08x  0x%08x 0x%08x  \n", l_cplt_offset,
                            l_ppe_offset, temp);
@@ -1840,7 +1824,7 @@ int tor_access_ring(  void*
                 l_word = temp >> 2;
                 temp  = l_cplt_offset + ddLevelOffset;
 
-                if(i_dbgl > 1)
+                if (i_dbgl > 1)
                 {
                     MY_INF("SGPE(4):INSTANCE Offset 0x%08x  0x%08x 0x%08x  \n", l_cplt_offset,
                            l_ppe_offset, temp);
@@ -1853,7 +1837,7 @@ int tor_access_ring(  void*
             l_cplt_size = *((uint32_t*)i_ringSection + l_word );
             l_cplt_size = htobe32(l_cplt_size);
 
-            if( io_RingType == INSTANCE)
+            if ( io_RingType == INSTANCE)
             {
                 l_cplt_size =  l_ppe_offset -  l_cplt_offset;
             }
@@ -1864,41 +1848,52 @@ int tor_access_ring(  void*
 
             l_cplt_offset = l_cplt_offset + ddLevelOffset;
 
-            if(i_dbgl > 1)
+            if (i_dbgl > 1)
             {
                 MY_INF("SGPE(5): Ring pointer Offset 0x%08x size 0x%08x \n", l_cplt_offset,
                        l_cplt_size);
             }
         }
-
-        if (io_ringBlockSize == 0)
+        else
         {
-            if(i_dbgl > 0)
+            MY_ERR("\t i_PpeType=%d is not supported\n", i_PpeType);
+
+            return TOR_AMBIGUOUS_API_PARMS;
+        }
+
+        if (io_ringBlockSize >= l_cplt_size)
+        {
+            memcpy( (uint8_t*)(*io_ringBlockPtr),
+                    (uint8_t*)i_ringSection + l_cplt_offset + temp1,
+                    (size_t)l_cplt_size);
+
+            io_ringBlockSize = l_cplt_size;
+
+            return TOR_RING_BLOCKS_FOUND;
+        }
+        else if (io_ringBlockSize == 0)
+        {
+            if (i_dbgl > 0)
             {
                 MY_INF("\tio_ringBlockSize is zero. Returning required size.\n");
             }
 
             io_ringBlockSize =  l_cplt_size;
+
             return 0;
         }
-
-        if (io_ringBlockSize < l_cplt_size)
+        else
         {
-            MY_ERR("\tio_ringBlockSize is less than required size.\n");
-            return IMGBUILD_TGR_BUFFER_TOO_SMALL;
-        }
+            MY_ERR("\tio_ringBlockSize is less than required size, but not zero.\n");
 
-        memcpy( (uint8_t*)(*io_ringBlockPtr),
-                (uint8_t*)i_ringSection + l_cplt_offset + temp1,
-                (size_t)l_cplt_size);
-        io_ringBlockSize = l_cplt_size;
-        return IMGBUILD_TGR_RING_BLOCKS_FOUND;
+            return TOR_BUFFER_TOO_SMALL;
+        }
     }
     else
     {
-        if(i_PpeType == SBE &&
-           ( i_magic == P9_XIP_MAGIC_HW ||
-             i_magic == P9_XIP_MAGIC_SEEPROM))
+        if (i_PpeType == SBE &&
+            ( i_magic == P9_XIP_MAGIC_HW ||
+              i_magic == P9_XIP_MAGIC_SEEPROM))
         {
             rc = get_ring_from_sbe_image ( i_ringSection,
                                            i_magic,
@@ -1913,9 +1908,9 @@ int tor_access_ring(  void*
                                            o_ringName,
                                            i_dbgl);
 
-            if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
+            if (rc == TOR_RING_NOT_FOUND)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SBE single ring call, %s ring container is not found \n",
                            RING_PROPERTIES[i_ringId].iv_name);
@@ -1923,9 +1918,9 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_INVALID_INSTANCEID)
+            else if (rc == TOR_INVALID_INSTANCE_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SBE single ring call, Instance %d is invalid \n",
                            io_instanceId );
@@ -1933,18 +1928,18 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
+            else if (rc == TOR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SBE single ring call, Ring container is available in the image \n");
                 }
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            else if (rc == TOR_INVALID_RING_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SBE single ring call, There is no TOR slot for %s %d\n",
                            RING_PROPERTIES[i_ringId].iv_name, i_ringId);
@@ -1952,12 +1947,15 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-
-
-            if(i_dbgl > 1)
+            else
             {
-                MY_INF(" TOR_ACCESS_RING(10): After get_ring_from_sbe_image Size %d \n",
-                       io_ringBlockSize );
+                if (i_dbgl > 1)
+                {
+                    MY_INF(" TOR_ACCESS_RING(10): After get_ring_from_sbe_image Size %d \n",
+                           io_ringBlockSize );
+                }
+
+                return TOR_RING_BLOCKS_FOUND;
             }
         }
         else if (i_PpeType == CME &&
@@ -1977,9 +1975,9 @@ int tor_access_ring(  void*
                                             o_ringName,
                                             i_dbgl);
 
-            if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
+            if (rc == TOR_RING_NOT_FOUND)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, %s ring container is not found \n",
                            RING_PROPERTIES[i_ringId].iv_name);
@@ -1987,9 +1985,9 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_INVALID_INSTANCEID)
+            else if (rc == TOR_INVALID_INSTANCE_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, Instance %d is invalid \n",
                            io_instanceId );
@@ -1997,18 +1995,18 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
+            else if (rc == TOR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, Ring container is available in the image \n");
                 }
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            else if (rc == TOR_INVALID_RING_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After CME single ring call, There is no TOR slot for %s %d\n",
                            RING_PROPERTIES[i_ringId].iv_name, i_ringId);
@@ -2016,11 +2014,15 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-
-            if(i_dbgl > 1)
+            else
             {
-                MY_INF("TOR_ACCESS_RING(11): After get_ring_from_cme_image Size %d \n",
-                       io_ringBlockSize );
+                if (i_dbgl > 1)
+                {
+                    MY_INF("TOR_ACCESS_RING(11): After get_ring_from_cme_image Size %d \n",
+                           io_ringBlockSize );
+                }
+
+                return TOR_RING_BLOCKS_FOUND;
             }
         }
         else if (i_PpeType == SGPE &&
@@ -2040,9 +2042,9 @@ int tor_access_ring(  void*
                                              o_ringName,
                                              i_dbgl);
 
-            if (rc == IMGBUILD_TGR_RING_NOT_FOUND)
+            if (rc == TOR_RING_NOT_FOUND)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, %s ring container is not found \n",
                            RING_PROPERTIES[i_ringId].iv_name);
@@ -2050,9 +2052,9 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_INVALID_INSTANCEID)
+            else if (rc == TOR_INVALID_INSTANCE_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, Instance %d is invalid \n",
                            io_instanceId );
@@ -2060,18 +2062,18 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_RING_AVAILABLE_IN_RINGSECTION)
+            else if (rc == TOR_RING_AVAILABLE_IN_RINGSECTION)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, Ring container is available in the image \n");
                 }
 
                 return rc;
             }
-            else if ( rc == IMGBUILD_TGR_INVALID_RING_ID)
+            else if (rc == TOR_INVALID_RING_ID)
             {
-                if(i_dbgl > 0)
+                if (i_dbgl > 0)
                 {
                     MY_INF("\t After SGPE single ring call, There is no TOR slot for %s %d\n",
                            RING_PROPERTIES[i_ringId].iv_name, i_ringId);
@@ -2079,34 +2081,49 @@ int tor_access_ring(  void*
 
                 return rc;
             }
-
-            if(i_dbgl > 1)
+            else
             {
-                MY_INF("TOR_ACCESS_RING(12): After get_ring_from_sgpe_image Size %d \n",
-                       io_ringBlockSize );
+                if (i_dbgl > 1)
+                {
+                    MY_INF("TOR_ACCESS_RING(12): After get_ring_from_sgpe_image Size %d \n",
+                           io_ringBlockSize );
+                }
+
+                return TOR_RING_BLOCKS_FOUND;
             }
         }
+        else
+        {
+            MY_ERR("\t Code bug: We are unpreparred for this input parm combination: \n"
+                   "\t i_PpeType=%d\n"
+                   "\t i_magic=0x%016lX\n",
+                   i_PpeType, (uintptr_t)i_magic);
 
-        return IMGBUILD_TGR_RING_BLOCKS_FOUND;
+            return TOR_AMBIGUOUS_API_PARMS;
+        }
+
     }
 
-    return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+    return TOR_AMBIGUOUS_API_PARMS;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-//          Pulling single ring from ring section of HW image
-/////////////////////////////////////////////////////////////////////////////////////
 
-int tor_get_single_ring ( void*         i_ringSection,  // ring section pointer
-                          uint64_t      i_magic,          // Image Magic Number
-                          uint16_t      i_ddLevel,        // DD level info
-                          RingID        i_ringId,         // Ring ID info
-                          PpeType_t     i_PpeType,        // ppe Type info
-                          RingVariant_t i_RingVariant,    // ring variant info -Base, CC, RL,OR,OL
-                          uint8_t       i_instanceId,     // chiplet Instance Id
-                          void**        io_ringBlockPtr,  // Output void pointer
-                          uint32_t&     io_ringBlockSize, //  size of ring
-                          uint32_t      i_dbgl )
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+//                             TOR GET SINGLE RING   API
+//
+/////////////////////////////////////////////////////////////////////////////////////
+int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
+                          uint64_t      i_magic,           // Image Magic Number
+                          uint16_t      i_ddLevel,         // DD level
+                          RingID        i_ringId,          // Ring ID
+                          PpeType_t     i_PpeType,         // SBE, CME, SGPE
+                          RingVariant_t i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                          uint8_t       i_instanceId,      // Instance ID
+                          void**        io_ringBlockPtr,   // Output ring buffer
+                          uint32_t&     io_ringBlockSize,  // Size of ring data
+                          uint32_t      i_dbgl )           // Debug option
 {
 
     uint32_t rc;
@@ -2115,28 +2132,26 @@ int tor_get_single_ring ( void*         i_ringSection,  // ring section pointer
     RingType_t l_ringType;
     l_ringType = COMMON;
 
-
-    if(i_dbgl > 1)
+    if (i_dbgl > 1)
     {
         MY_INF(" TOR_GET_SINGLE_RING1: function call \n");
     }
 
-    rc = tor_access_ring(
-             i_ringSection,
-             i_magic,
-             i_ringId,
-             i_ddLevel,
-             i_PpeType,
-             l_ringType,
-             i_RingVariant,
-             l_instanceId,
-             GET_SINGLE_RING,
-             io_ringBlockPtr,
-             io_ringBlockSize,
-             i_ringName,
-             i_dbgl );
+    rc = tor_access_ring( i_ringSection,
+                          i_magic,
+                          i_ringId,
+                          i_ddLevel,
+                          i_PpeType,
+                          l_ringType,
+                          i_RingVariant,
+                          l_instanceId,
+                          GET_SINGLE_RING,
+                          io_ringBlockPtr,
+                          io_ringBlockSize,
+                          i_ringName,
+                          i_dbgl );
 
-    if(i_dbgl > 1)
+    if (i_dbgl > 1)
     {
         MY_INF(" TOR_GET_SINGLE_RING(2): after tor_access_ring function, Size %d \n",
                io_ringBlockSize );
@@ -2144,22 +2159,25 @@ int tor_get_single_ring ( void*         i_ringSection,  // ring section pointer
 
     return rc;
 }
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////
-//          Extract block of rings from ring section of HW image
+//
+//                            TOR GET BLOCK OF RINGS   API
+//
 ///////////////////////////////////////////////////////////////////////////////////////
-
-
-int tor_get_block_of_rings ( void*           i_ringSection,
-                             uint16_t        i_ddLevel,
-                             PpeType_t       i_PpeType,
-                             RingType_t      i_RingType,
-                             RingVariant_t   i_RingVariant,
-                             uint8_t         i_instanceId,
-                             void**          io_ringBlockPtr,
-                             uint32_t&       io_ringBlockSize,
-                             uint32_t        i_dbgl )
+int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section ptr
+                             uint16_t        i_ddLevel,         // DD level
+                             PpeType_t       i_PpeType,         // SBE,CME,SGPE
+                             RingType_t      i_RingType,        // Common, Instance
+                             RingVariant_t   i_RingVariant,     // Base,CC, RL, Ovrd, Ovly
+                             uint8_t         i_instanceId,      // Instance ID
+                             void**          io_ringBlockPtr,   // Output ring buffer
+                             uint32_t&       io_ringBlockSize,  // Size of ring data
+                             uint32_t        i_dbgl )           // Debug option
 {
-    if(i_dbgl > 1)
+    if (i_dbgl > 1)
     {
         MY_INF(" TOR_GET_BLOCK_OF_RINGS(1): function call \n");
     }
@@ -2169,12 +2187,12 @@ int tor_get_block_of_rings ( void*           i_ringSection,
     uint8_t l_instanceId  = i_instanceId;
     RingType_t l_ringType = i_RingType;
 
-    if(l_ringType == ALLRING && i_PpeType != NUM_PPE_TYPES)
+    if (l_ringType == ALLRING && i_PpeType != NUM_PPE_TYPES)
     {
-        //ppe level copy
+        // Get block of rings specific to a PPE type
         rc = tor_access_ring( i_ringSection,
                               P9_XIP_MAGIC_HW,
-                              P9_NUM_RINGS,
+                              NUM_RING_IDS,
                               i_ddLevel,
                               i_PpeType,
                               l_ringType,
@@ -2189,10 +2207,10 @@ int tor_get_block_of_rings ( void*           i_ringSection,
     }
     else if (l_ringType == ALLRING && i_PpeType == NUM_PPE_TYPES)
     {
-        //dd level Copy
+        // Get DD level block of rings
         rc = tor_access_ring( i_ringSection,
                               P9_XIP_MAGIC_HW,
-                              P9_NUM_RINGS,
+                              NUM_RING_IDS,
                               i_ddLevel,
                               i_PpeType,
                               l_ringType,
@@ -2204,12 +2222,14 @@ int tor_get_block_of_rings ( void*           i_ringSection,
                               i_ringName,
                               i_dbgl );
     }
-    else if(l_ringType == COMMON || l_ringType == INSTANCE)
+    else if (l_ringType == COMMON || l_ringType == INSTANCE)
     {
-        // Chiplet level copy
+        // Get Chiplet level block of ringscopy
+        // CMO-20161004: This won't work w/VPD rings since they are appended to the end
+        //               of the section, i.e. not immediately after the TOR offset section.
         rc = tor_access_ring( i_ringSection,
                               P9_XIP_MAGIC_HW,
-                              P9_NUM_RINGS,
+                              NUM_RING_IDS,
                               i_ddLevel,
                               i_PpeType,
                               l_ringType,
@@ -2223,11 +2243,11 @@ int tor_get_block_of_rings ( void*           i_ringSection,
     }
     else
     {
-        MY_INF("TOR_GET_BLOCK_OF_RINGS(2): Wrong input params. Please check passing params\n");
-        return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+        MY_ERR("TOR_GET_BLOCK_OF_RINGS(2): Wrong input params. Please check passing params\n");
+        return TOR_AMBIGUOUS_API_PARMS;
     }
 
-    if(i_dbgl > 1)
+    if (i_dbgl > 1)
     {
         MY_INF(" TOR_GET_SINGLE_RING(2): after tor_access_ring function, Size %d \n",
                io_ringBlockSize );
@@ -2236,21 +2256,24 @@ int tor_get_block_of_rings ( void*           i_ringSection,
     return rc;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//          TOR_APPEND_RING api appends ring into ring section
-///////////////////////////////////////////////////////////////////////////////////////
 
-int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr any of .rings and .overrides
+
+////////////////////////////////////////////////////////////////////////////////////////
+//
+//                             TOR APPEND RING   API
+//
+///////////////////////////////////////////////////////////////////////////////////////
+int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
                       uint32_t&       io_ringSectionSize, // Max size of ring section buffer
                       void*           i_ringBuffer,       // Ring work buffer
                       const uint32_t  i_ringBufferSize,   // Max size of ring work buffer
-                      RingID          i_ringId,           // Unique ring ID
-                      PpeType_t       i_PpeType,          // PPE type - SBE, CME or SGPE
-                      RingType_t      i_RingType,         // 0: Common 1: Instance
-                      RingVariant_t   i_RingVariant,      // Base, Cache etc
-                      uint8_t         i_instanceId,       // chiplet instance ID
-                      void*           i_rs4Container,     // Addr of rs4 ring container data
-                      uint32_t        i_dbgl        )
+                      RingID          i_ringId,           // Ring ID
+                      PpeType_t       i_PpeType,          // SBE, CME, SGPE
+                      RingType_t      i_RingType,         // Common, Instance
+                      RingVariant_t   i_RingVariant,      // Base,CC, RL, Ovrd, Ovly
+                      uint8_t         i_instanceId,       // Instance ID
+                      void*           i_rs4Container,     // RS4 ring container
+                      uint32_t        i_dbgl )            // Debug option
 {
     uint32_t   rc = 0;
     char       i_ringName[25];
@@ -2263,7 +2286,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
     uint64_t   l_magic;
     uint32_t   l_torOffsetSlot;
 
-    if(i_PpeType  == SBE)  // Assign i_magic variant as SBE image
+    if (i_PpeType  == SBE)  // Assign i_magic variant as SBE image
     {
         l_magic = P9_XIP_MAGIC_SEEPROM;
     }
@@ -2271,14 +2294,14 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
     {
         l_magic = P9_XIP_MAGIC_CME;
     }
-    else if(i_PpeType == SGPE ) // Assign i_magic variant as SGPE image
+    else if (i_PpeType == SGPE ) // Assign i_magic variant as SGPE image
     {
         l_magic = P9_XIP_MAGIC_SGPE;
     }
     else
     {
-        MY_ERR("TOR_APPEND_RING(2): Unsupported ppe type \n");
-        return IMGBUILD_TGR_AMBIGUOUS_API_PARMS;
+        MY_ERR("TOR_APPEND_RING(2): i_PpeType=%d is an unsupported PPE type\n", i_PpeType);
+        return TOR_AMBIGUOUS_API_PARMS;
     }
 
     rc = tor_access_ring( i_ringSection,
@@ -2301,7 +2324,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
         return rc;
     }
 
-    if(i_dbgl > 1)
+    if (i_dbgl > 1)
     {
         MY_INF(" TOR_APPEND_RING(4):  Ring offset  address %d \n",
                l_torOffsetSlot );
@@ -2324,6 +2347,9 @@ int tor_append_ring(  void*           i_ringSection,      // Ring address Ptr an
     memcpy( (uint8_t*)i_ringSection +  io_ringSectionSize, (uint8_t*)i_rs4Container,
             (size_t)l_ringBlockSize);
     io_ringSectionSize += l_ringBlockSize;
-    return IMGBUILD_TGR_TOR_PUT_RING_DONE;
+
+    return TOR_APPEND_RING_DONE;
 }
+
+
 };

@@ -506,7 +506,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance TOR Index
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
+                            if (l_rc == TOR_APPEND_RING_DONE)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);
@@ -536,7 +536,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
+                            if (l_rc == TOR_APPEND_RING_DONE)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);
@@ -568,7 +568,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == IMGBUILD_TGR_TOR_PUT_RING_DONE)
+                            if (l_rc == TOR_APPEND_RING_DONE)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);

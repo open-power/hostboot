@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>     //memcpy()
+#include <string.h>
 #include <errno.h>
 
 //
@@ -39,6 +39,8 @@ const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size.
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides section size.
 const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section size.
+
+const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 
 //@FIXME: CMO: Aren't these defined somewhere else?
 #define NUM_OF_CORES    24

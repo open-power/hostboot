@@ -325,7 +325,7 @@ enum RingID
     // Rings needed for SBE - End
     //***************************
 
-    P9_NUM_RINGS // This shoud always be the last constant
+    NUM_RING_IDS // This shoud always be the last constant
 }; // end of enum RingID
 
 #endif  // _P9_RINGID_ENUM_H_
