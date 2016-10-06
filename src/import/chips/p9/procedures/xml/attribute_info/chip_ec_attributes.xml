@@ -181,4 +181,22 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** --> 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_VCS_POWER_ON_IN_CHIPLET_RESET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      DD1 only: enable VCS workaround in istep4 cache hwp. This is used by 
+      the procedure for p9_hcd_cache_poweron and p9_hcd_cache_chiplet_reset.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 </attributes>
