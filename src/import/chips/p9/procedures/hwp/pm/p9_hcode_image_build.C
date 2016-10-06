@@ -927,7 +927,7 @@ extern "C"
                                          &i_pTempBuf,
                                          io_bufLength );
 
-            if( IMGBUILD_TGR_AMBIGUOUS_API_PARMS == rc )
+            if( TOR_AMBIGUOUS_API_PARMS == rc )
             {
                 FAPI_ERR("Invalid parameter, Overrides for %s ,rc 0x%08x",
                          ((PLAT_CME == i_platId) ? "CME" : "SGPE" ), rc );
