@@ -4548,16 +4548,6 @@ namespace SBE
             size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
                                sizeof(NEST_PLL_FREQ_LIST[0]);
 
-            // Put in an override if 0 is received -- @TODO RTC:161398 to remove
-            if (0 == l_scratch4.nestPllBucket)
-            {
-                // ID of 0 is invalid, so default ID to 3 instead
-                l_scratch4.nestPllBucket = 3;
-                TRACFCOMP(g_trac_sbe,
-                          "Nest PLL bucket id is invalid, changed id to %d",
-                          l_scratch4.nestPllBucket );
-            }
-
             assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
 
             // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
