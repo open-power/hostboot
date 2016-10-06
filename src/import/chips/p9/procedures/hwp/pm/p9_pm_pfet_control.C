@@ -139,13 +139,13 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
-    uint8_t l_unit_pos     = 0;
+    uint32_t l_unit_pos     = 0;
     bool core_target_found = false;
 
     FAPI_INF("p9_pm_pfet_control_eq: Entering...");
 
     // Get chiplet position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    l_unit_pos = i_target.getChipletNumber();
     FAPI_INF("pfet control for EQ chiplet %d", l_unit_pos);
 
     // When i_op == OFF all functional cores first followed by EQ
@@ -160,7 +160,7 @@ fapi2::ReturnCode p9_pm_pfet_control_eq(
     for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_target, l_unit_pos));
+        l_unit_pos = l_core_target.getChipletNumber();
         FAPI_INF("Core chiplet %d in EQ", l_unit_pos);
         FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
                  i_rail, i_op), "Error: pfet_ctrl for core!!");
@@ -193,20 +193,20 @@ fapi2::ReturnCode p9_pm_pfet_control_ex(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err     = fapi2::FAPI2_RC_SUCCESS;
-    uint8_t l_unit_pos     = 0;
+    uint32_t l_unit_pos     = 0;
     bool core_target_found = false;
 
     FAPI_INF("p9_pm_pfet_control_ex: Entering...");
 
     // Get chiplet position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    l_unit_pos = i_target.getChipletNumber();
     FAPI_INF("pfet control for EX chiplet %d", l_unit_pos);
 
     // Check for all core chiplets in EX and power on/off targets accordingly
     for (auto l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>
          (fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_core_target, l_unit_pos));
+        l_unit_pos = l_core_target.getChipletNumber();
         FAPI_INF("Core chiplet %d in EX", l_unit_pos);
         FAPI_TRY(pfet_ctrl<fapi2::TargetType::TARGET_TYPE_CORE>(l_core_target,
                  i_rail, i_op), "Error: pfet_ctrl for core!!");
@@ -257,12 +257,12 @@ fapi2::ReturnCode pfet_ctrl(
     const PM_PFET_TYPE_C::pfet_force_t i_op)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    uint8_t l_unit_pos     = 0;
+    uint32_t l_unit_pos     = 0;
 
     FAPI_INF("pfet_ctrl: Entering...");
 
     // Get chiplet position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_unit_pos));
+    l_unit_pos = i_target.getChipletNumber();
 
     // Check for target passed
     if(i_target.getType() & fapi2::TARGET_TYPE_CORE)
@@ -279,7 +279,7 @@ fapi2::ReturnCode pfet_ctrl(
         FAPI_ASSERT(false,
                     fapi2::PFET_CTRL_INVALID_CHIPLET_ERROR()
                     .set_TARGET(i_target),
-                    "ERROR: Invalid chiplet selected. Target:%x", i_target);
+                    "ERROR: Invalid chiplet selected");
     }
 
     switch(i_op)
