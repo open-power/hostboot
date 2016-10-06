@@ -46,7 +46,9 @@ enum powerOperation_t
     POWER_ON      = 0x0,
     POWER_OFF     = 0xFF,
     POWER_ON_VDD  = 0x1,
-    POWER_OFF_VDD = 0xFE
+    POWER_OFF_VDD = 0xFE,
+    POWER_ON_VCS  = 0x2,
+    POWER_OFF_VCS = 0xFD
 };
 
 

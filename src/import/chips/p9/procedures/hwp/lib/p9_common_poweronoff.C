@@ -446,6 +446,7 @@ p9_common_poweronoff(
     {
         case p9power::POWER_ON:
         case p9power::POWER_ON_VDD:
+        case p9power::POWER_ON_VCS:
             {
                 // 4.3.8.1 Power-on via Hardware FSM
 
@@ -471,14 +472,17 @@ p9_common_poweronoff(
 
                 // 2) Set bits to program HW to enable VDD PFET, and
                 // 3) Poll state bit until Pfet sequence is complete
-                FAPI_TRY(powerOnVdd());
+                if (i_operation != p9power::POWER_ON_VCS)
+                {
+                    FAPI_TRY(powerOnVdd());
+                }
 
                 // 4) Set bits to program HW to enable VCS PFET, and
                 // 5) Poll state bit until Pfet sequence is complete
 
                 // Note: if (i_target.getType() & fapi2::TARGET_TYPE_EQ) doesn't work.
                 //   Created a  POWER_*_VDD label to delineate Vcs and Vdd
-                if (i_operation == p9power::POWER_ON)
+                if (i_operation != p9power::POWER_ON_VDD)
                 {
                     FAPI_TRY(powerOnVcs());
                 }
@@ -488,6 +492,7 @@ p9_common_poweronoff(
 
         case p9power::POWER_OFF:
         case p9power::POWER_OFF_VDD:
+        case p9power::POWER_OFF_VCS:
             {
                 // 4.3.8.2 Power-off via Hardware FSM
                 // 1)  Read  PFETCNTLSTAT_REG:  check for bits 0:3 being 0b0000
@@ -508,15 +513,17 @@ p9_common_poweronoff(
 
                 // Note: if (i_target.getType() & fapi2::TARGET_TYPE_EQ) doesn't work.
                 //   Created a  POWER_*_VDD label to delineate Vcs and Vdd
-                if (i_operation == p9power::POWER_OFF)
+                if (i_operation != p9power::POWER_OFF_VDD)
                 {
                     FAPI_TRY(powerOffVcs());
                 }
 
                 // 4) Set bits to program HW to turn off VDD PFET, and
                 // 5) Poll state bit until Pfet sequence is complete
-                FAPI_TRY(powerOffVdd());
-
+                if (i_operation != p9power::POWER_OFF_VCS)
+                {
+                    FAPI_TRY(powerOffVdd());
+                }
             }
             break;
     }
