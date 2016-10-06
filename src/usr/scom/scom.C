@@ -707,37 +707,6 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do{
-        //@FIXME-RTC:158483-Get rid of this hack when Simics fix goes in
-        bool skipit = false;
-        switch( i_addr )
-        {
-            case 0x02011103:
-            case 0x02011106:
-            case 0x02011107:
-            case 0x05012c03:
-            case 0x05012c06:
-            case 0x05012c07:
-            case 0x05012c15:
-            case 0x05012c43:                
-            case 0x05012c46:                
-            case 0x05012c47:                
-            case 0x05012c48:                
-            case 0x05012c49:                
-            case 0x05013148:                
-            case 0x05013149:
-            case 0x03011803:
-            case 0x03011806:
-            case 0x03011807:
-            case 0x0301184e:
-            case 0x0301184f:
-                TRACFCOMP( g_trac_scom, "Skipping scom to %.8X!", i_addr );
-                skipit = true;
-            default:                
-                //nothing to do
-                break;
-        }
-        if( skipit ) { break; }
-
         TARGETING::ScomSwitches scomSetting;
         scomSetting.useXscom = true;  //Default to Xscom supported.
         if(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL != i_target)
