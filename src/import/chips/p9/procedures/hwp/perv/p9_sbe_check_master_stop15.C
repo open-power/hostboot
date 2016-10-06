@@ -36,15 +36,18 @@
 /// @verbatim
 ///    - Read the STOP History Register from the target core
 ///    - Return SUCCESS if::
-///        - STOP_GATED is set (indicating it is stopped)
-///        - STOP_TRANSITION is clear (indicating it is stable)
-///        - ACT_STOP_LEVEL is at the appropriate value (either 11 (0xB) or 15 (0x15)
+///        - STOP_GATED is set (indicating it is not running)
+///        - STOP_TRANSITION is COMPLETE (indicating it is stable)
+///        - ACT_STOP_LEVEL is at the appropriate value (either 11 (0xB) or
+///          15 (0xF)
 ///    - Return PENDING if
-///        - STOP_TRANSITION is set (indicating transtion is progress)
+///        - STOP_GATED is RUNNING
+///         or
+///        - STOP_GATED is GATED  (indicating it is not running)
+///        - STOP_TRANSITION is not COMPLETE (indicating transtion is progress)
 ///    - Return ERROR if
-///        - STOP_GATED is set, STOP_TRANSITION is clear and ACT_STOP_LEVEL is not
-///          appropriate
-///        - STOP_TRANSITION is clear but STOP_GATED is clear
+///        - STOP_GATED is set, STOP_TRANSITION is COMPLETE and ACT_STOP_LEVEL
+///          is not appropriate
 ///        - Hardware access errors
 /// @endverbatim
 
@@ -97,34 +100,53 @@ fapi2::ReturnCode p9_sbe_check_master_stop15(
              l_stop_transition, l_stop_transition,
              l_stop_requested_level,
              l_stop_actual_level);
+
+    FAPI_DBG("SSH_RUNNING = %d; SSH_GATED = %d; SSH_COMPLETE = %d",
+             p9ssh::SSH_RUNNING,
+             p9ssh::SSH_GATED,
+             p9ssh::SSH_COMPLETE);
 #endif
 
-    // Check for valide reguest level
-    FAPI_ASSERT((l_stop_requested_level == 11 || l_stop_requested_level == 15),
-                fapi2::CHECK_MASTER_STOP15_INVALID_REQUEST_LEVEL()
-                .set_REQUESTED_LEVEL(l_stop_requested_level),
-                "Invalid requested STOP Level");
+    if (l_stop_gated == p9ssh::SSH_RUNNING ||
+        (l_stop_gated ==  p9ssh::SSH_GATED &&
+         l_stop_transition != p9ssh::SSH_COMPLETE))
+    {
+        FAPI_ASSERT(false,
+                    fapi2::CHECK_MASTER_STOP15_PENDING(),
+                    "STOP 15 is still pending")
+    }
 
-    // Check for valid pending condition
-    FAPI_ASSERT(!(l_stop_transition == p9ssh::SSH_CORE_COMPLETE ||
-                  l_stop_transition == p9ssh::SSH_ENTERING        ),
-                fapi2::CHECK_MASTER_STOP15_PENDING(),
-                "STOP 15 is still pending");
+    if (l_stop_gated == p9ssh::SSH_GATED &&
+        l_stop_transition == p9ssh::SSH_COMPLETE &&
+        (l_stop_actual_level == 11 || l_stop_actual_level == 15))
+    {
+        FAPI_INF("SUCCESS!!  Valid STOP entry state has been achieved.");
+    }
+    else
+    {
+        FAPI_ASSERT(false,
+                    fapi2::CHECK_MASTER_STOP15_INVALID_STATE()
+                    .set_STOP_HISTORY(l_data64),
+                    "STOP 15 error");
+    }
 
-    // Assert completion and the core gated condition.  If not, something is off.
-    FAPI_ASSERT((l_stop_transition == p9ssh::SSH_COMPLETE &&
-                 l_stop_gated == p9ssh::SSH_GATED         ),
-                fapi2::CHECK_MASTER_STOP15_INVALID_STATE()
-                .set_STOP_HISTORY(l_data64),
-                "STOP 15 error");
+// @todo RTC 162331 These should work but don't..... follow-up later
+//     // Check for valid pending condition (which includes running)
+//     FAPI_ASSERT((l_stop_gated == p9ssh::SSH_RUNNING ||
+//                   (l_stop_gated ==  p9ssh::SSH_GATED &&
+//                    l_stop_transition != p9ssh::SSH_COMPLETE)),
+//                 fapi2::CHECK_MASTER_STOP15_PENDING(),
+//                 "STOP 15 is still pending");
 
-    // Check for valid actual level
-    FAPI_ASSERT((l_stop_actual_level == 11 || l_stop_actual_level == 15),
-                fapi2::CHECK_MASTER_STOP15_INVALID_ACTUAL_LEVEL()
-                .set_ACTUAL_LEVEL(l_stop_actual_level),
-                "Invalid actual STOP Level");
+//     // Assert gated, completion and the proper STOP actual level.  If not, something is off.
+//     FAPI_ASSERT((l_stop_gated == p9ssh::SSH_GATED &&
+//                  l_stop_transition == p9ssh::SSH_COMPLETE &&
+//                  (l_stop_actual_level == 11 || l_stop_actual_level == 15)),
+//                 fapi2::CHECK_MASTER_STOP15_INVALID_STATE()
+//                 .set_STOP_HISTORY(l_data64),
+//     }            "STOP 15 error");
 
-    FAPI_INF("SUCCESS!!  Valid STOP entry state has been achieved.")
+
 
 fapi_try_exit:
     FAPI_INF("< p9_sbe_check_master_stop15");
