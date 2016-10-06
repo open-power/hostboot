@@ -56,7 +56,7 @@
 // HWP
 #include    <p9_mss_freq.H>
 #include    <p9_mss_freq_system.H>
-// #include <p9_xip_customize.H> // RTC:138226
+
 namespace   ISTEP_07
 {
 
@@ -103,7 +103,7 @@ void*    call_mss_freq( void *io_pArgs )
             l_StepError.addErrorDetails( l_err );
 
             // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID );
 
         }
         else
@@ -123,12 +123,25 @@ void*    call_mss_freq( void *io_pArgs )
 
     l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(l_asyncFreq);
 
-    // Save MC_SYNC_MODE
+    // Read MC_SYNC_MODE from SBE itself and set the attribute
+    uint8_t l_bootSyncMode = 0;
+    l_err = SBE::getBootMcSyncMode( l_bootSyncMode );
+    if( l_err )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Failed getting the boot mc sync mode from the SBE");
+
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
+
+        // Commit Error
+        errlCommit( l_err, ISTEP_COMP_ID );
+    }
+
     TARGETING::Target * l_masterProc = nullptr;
     TARGETING::targetService()
             .masterProcChipTargetHandle( l_masterProc );
-    uint8_t l_prevSyncMode =
-          l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+    l_masterProc->setAttr<TARGETING::ATTR_MC_SYNC_MODE>(l_bootSyncMode);
 
 
     if(l_StepError.getErrorHandle() == NULL)
@@ -158,7 +171,7 @@ void*    call_mss_freq( void *io_pArgs )
             l_StepError.addErrorDetails( l_err );
 
             // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+            errlCommit( l_err, ISTEP_COMP_ID );
 
         }
         else
@@ -194,27 +207,35 @@ void*    call_mss_freq( void *io_pArgs )
     // TODO RTC: 161596 - Set ATTR_NEST_FREQ_MHZ as well until we know it is not being used anymore
     l_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>( l_newNest );
 
-    //Trigger sbe update if the nest frequency changed.
-    if( (l_newNest != l_originalNest) || (l_mcSyncMode != l_prevSyncMode) )
+    if(l_StepError.getErrorHandle() == NULL)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "The nest frequency or sync mode changed!"
-               " Original Nest: %d New Nest: %d"
-               " Original syncMode: %d New syncMode: %d",
-                l_originalNest, l_newNest, l_prevSyncMode, l_mcSyncMode );
-        l_err = SBE::updateProcessorSbeSeeproms();
-
-        if( l_err )
+        //Trigger sbe update if the nest frequency changed.
+        if( (l_newNest != l_originalNest) || (l_mcSyncMode != l_bootSyncMode) )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
+                      "The nest frequency or sync mode changed!"
+                      " Original Nest: %d New Nest: %d"
+                      " Original syncMode: %d New syncMode: %d",
+                      l_originalNest, l_newNest, l_bootSyncMode, l_mcSyncMode );
+            l_err = SBE::updateProcessorSbeSeeproms();
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
+            if( l_err )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
 
-            // Commit Error
-            errlCommit( l_err, HWPF_COMP_ID );
+                // Create IStep error log and cross reference to error
+                // that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
         }
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "WARNING skipping SBE update checks due to previous errors" );
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );

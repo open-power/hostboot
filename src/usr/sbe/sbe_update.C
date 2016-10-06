@@ -4871,5 +4871,49 @@ namespace SBE
         return l_status;
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode )
+    {
+        errlHndl_t l_err = nullptr;
+        uint64_t l_mboxScratchReg5 = 0;
 
+        INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
+        size_t l_indexSize = sizeof(l_mboxScratchReg5);
+
+        TARGETING::Target * l_masterProcTarget = NULL;
+        TARGETING::targetService()
+          .masterProcChipTargetHandle( l_masterProcTarget );
+
+        TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootMcSyncMode()");
+        do
+        {
+            l_err = deviceRead( l_masterProcTarget,
+                                &l_mboxScratchReg5,
+                                l_indexSize,
+                                DEVICE_SCOM_ADDRESS(
+                                   INITSERVICE::SPLESS::MBOX_SCRATCH_REG5) );
+
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_sbe,
+                          "getBootMcSyncMode::"
+                          "Failed to get the bucket index from scom address");
+                errlCommit(l_err, SBE_COMP_ID);
+                break;
+            }
+
+            l_scratch5.data32 = static_cast<uint32_t>(l_mboxScratchReg5 >> 32);
+
+
+            TRACFCOMP(g_trac_sbe,
+                      "The MC Sync Bit is %d",
+                      l_scratch5.mcSyncMode );
+
+            o_mcSyncMode = l_scratch5.mcSyncMode;
+
+        } while( 0 );
+        TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootMcSyncMode()");
+
+        return l_err;
+    }
 } //end SBE Namespace
