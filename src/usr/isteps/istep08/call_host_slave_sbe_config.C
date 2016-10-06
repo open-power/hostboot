@@ -90,38 +90,15 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     // Setup the boot flags attribute for the slaves based on the data
     //  from the master proc
     INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-    uint64_t l_scratch3scom = 0;
-    size_t scomsize = sizeof(l_scratch3scom);
-    l_errl = deviceRead( l_pMasterProcTarget,
-                         &l_scratch3scom,
-                         scomsize,
-                         DEVICE_SCOM_ADDRESS(
-                           INITSERVICE::SPLESS::MBOX_SCRATCH_REG3 ) );
-    if( l_errl )
-    {
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
+    TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+    assert(l_sys->tryGetAttr
+             <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+           "call_host_slave_sbe_config() failed to get MASTER_MBOX_SCRATCH");
+    l_scratch3.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_3];
 
-        // Commit Error
-        errlCommit( l_errl, ISTEP_COMP_ID );
+    // turn off the istep bit
+    l_scratch3.istepMode = 0;
 
-        // Just make some reasonable guesses...
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Failed to read MBOX Scratch3" );
-
-        l_scratch3.data32 = 0;
-        l_scratch3.fspAttached = INITSERVICE::spBaseServicesEnabled();
-        l_scratch3.sbeFFDC = 0;
-        l_scratch3.sbeInternalFFDC = 1;
-    }
-    else
-    {
-        // data is in bits 0:31
-        l_scratch3.data32 = static_cast<uint32_t>(l_scratch3scom >> 32);
-
-        // turn off the istep bit
-        l_scratch3.istepMode = 0;
-    }
     // write the attribute
     l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
 

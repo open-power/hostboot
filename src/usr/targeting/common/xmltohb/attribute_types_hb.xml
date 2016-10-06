@@ -1723,4 +1723,21 @@ ID for the sensor number returned with the elog. -->
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>MASTER_MBOX_SCRATCH</id>
+    <description>
+      Value of the master mailbox scratch regs
+      at the beginning of the boot.  Need to save these
+      away since HB uses some of them for communication purposes.
+    </description>
+    <simpleType>
+     <uint32_t></uint32_t>
+     <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>
