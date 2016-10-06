@@ -57,7 +57,7 @@
 #include <config.h>
 
 
-
+using namespace INITSERVICE::SPLESS;
 //******************************************************************************
 // targetService
 //******************************************************************************
@@ -244,11 +244,21 @@ static void initializeAttributes(TargetService& i_targetService)
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
 
+            //Need to stash away the master mbox regs as they will
+            //be overwritten
+            ATTR_MASTER_MBOX_SCRATCH_type l_scratch;
+            for(size_t i=0; i< sizeof(l_scratch)/sizeof(l_scratch[0]); i++)
+            {
+                l_scratch[i] =
+                  Util::readScratchReg(MBOX_SCRATCH_REG1+i);
+            }
+
+            l_pTopLevel->setAttr<ATTR_MASTER_MBOX_SCRATCH>(l_scratch);
+
             // Check mbox scratch reg 3 for IPL boot options
             // Specifically istep mode (bit 0) and MPIPL (bit 2)
             INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
-            l_scratch3.data32 =
-              Util::readScratchReg(INITSERVICE::SPLESS::MBOX_SCRATCH_REG3);
+            l_scratch3.data32 = l_scratch[SCRATCH_3];
 
             // Targeting data defaults to non istep, only turn "on" if bit
             // is set so we don't tromp default setting

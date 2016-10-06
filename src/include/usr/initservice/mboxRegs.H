@@ -38,6 +38,17 @@ namespace SPLESS
     const   uint32_t    MBOX_SCRATCH_REG7 =   0x0005003e; //CFAM 283E
     const   uint32_t    MBOX_SCRATCH_REG8 =   0x0005003f; //CFAM 283F
 
+    enum
+    {
+        SCRATCH_1 =   0x0, //Location in array is reg num -1
+        SCRATCH_2 =   0x1,
+        SCRATCH_3 =   0x2,
+        SCRATCH_4 =   0x3,
+        SCRATCH_5 =   0x4,
+        SCRATCH_6 =   0x5,
+        SCRATCH_7 =   0x6,
+        SCRATCH_8 =   0x7,
+    };
 
     // Mailbox Scratch Register 3
     union MboxScratch3_t

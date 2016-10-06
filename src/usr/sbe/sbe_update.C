@@ -3344,11 +3344,7 @@ namespace SBE
 /////////////////////////////////////////////////////////////////////
     void setNestFreqAttributes(uint32_t i_nestFreq)
     {
-
-        errlHndl_t l_err = nullptr;
-        uint64_t l_mboxScratchReg4 = 0;
         INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
-        size_t l_indexSize = sizeof(l_mboxScratchReg4);
         uint32_t l_i2cBusDiv = 0;
 
         // Call targeting function to update NEST_FREQ
@@ -3364,21 +3360,11 @@ namespace SBE
                 "Master Proc target is NULL");
 
         // Get the i2c bus divisor
-        l_err = deviceRead( l_masterProc,
-                            &l_mboxScratchReg4,
-                            l_indexSize,
-                            DEVICE_SCOM_ADDRESS(
-                            INITSERVICE::SPLESS::MBOX_SCRATCH_REG4) );
-
-        if( l_err )
-        {
-            TRACFCOMP( g_trac_sbe,
-                       "setNestFreqAttributes::"
-                       "Failed to get the bucket index from scom address");
-            errlCommit( l_err, SBE_COMP_ID );
-        }
-
-        l_scratch4.data32 = static_cast<uint32_t>(l_mboxScratchReg4 >> 32);
+        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+        assert(l_sys->tryGetAttr
+                   <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+               "setNestFreqAttributes() failed to get MASTER_MBOX_SCRATCH");
+        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
 
         // The Nest PLL Bucket ID ranges 1-5. Subtract 1 for zero-based indexing
         l_i2cBusDiv = NEST_PLL_FREQ_I2CDIV_LIST[l_scratch4.nestPllBucket-1];
@@ -4534,35 +4520,26 @@ namespace SBE
     errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq )
     {
         errlHndl_t l_err = nullptr;
-        uint64_t l_mboxScratchReg4 = 0;
 
         INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
-        size_t l_indexSize = sizeof(l_mboxScratchReg4);
 
         TARGETING::Target * l_masterProcTarget = NULL;
         TARGETING::targetService()
                     .masterProcChipTargetHandle( l_masterProcTarget );
 
+        TARGETING::Target * l_sys = nullptr;
+        (void) TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert( l_sys, "getBootNestFreq() system target is NULL");
+
+
         TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootNestFreq()");
         do
         {
-            l_err = deviceRead( l_masterProcTarget,
-                                &l_mboxScratchReg4,
-                                l_indexSize,
-                                DEVICE_SCOM_ADDRESS(
-                                INITSERVICE::SPLESS::MBOX_SCRATCH_REG4) );
-
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_sbe,
-                        "getBootNestFreq::"
-                        "Failed to get the bucket index from scom address");
-                errlCommit(l_err, SBE_COMP_ID);
-                break;
-            }
-
-            l_scratch4.data32 = static_cast<uint32_t>(l_mboxScratchReg4 >> 32);
-
+            TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+            assert(l_sys->tryGetAttr
+                         <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+                   "getBootNestFreq() failed to get MASTER_MBOX_SCRATCH");
+            l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
 
             TRACFCOMP(g_trac_sbe,
                     "The nest PLL bucket id is %d",
@@ -4877,35 +4854,21 @@ namespace SBE
     errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode )
     {
         errlHndl_t l_err = nullptr;
-        uint64_t l_mboxScratchReg5 = 0;
 
         INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-        size_t l_indexSize = sizeof(l_mboxScratchReg5);
-
-        TARGETING::Target * l_masterProcTarget = NULL;
-        TARGETING::targetService()
-          .masterProcChipTargetHandle( l_masterProcTarget );
 
         TRACFCOMP( g_trac_sbe, ENTER_MRK"Enter getBootMcSyncMode()");
         do
         {
-            l_err = deviceRead( l_masterProcTarget,
-                                &l_mboxScratchReg5,
-                                l_indexSize,
-                                DEVICE_SCOM_ADDRESS(
-                                   INITSERVICE::SPLESS::MBOX_SCRATCH_REG5) );
+            TARGETING::Target * l_sys = nullptr;
+            (void) TARGETING::targetService().getTopLevelTarget( l_sys );
+            assert( l_sys, "getBootMcSyncMode() system target is NULL");
 
-            if( l_err )
-            {
-                TRACFCOMP(g_trac_sbe,
-                          "getBootMcSyncMode::"
-                          "Failed to get the bucket index from scom address");
-                errlCommit(l_err, SBE_COMP_ID);
-                break;
-            }
-
-            l_scratch5.data32 = static_cast<uint32_t>(l_mboxScratchReg5 >> 32);
-
+            TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+            assert(l_sys->tryGetAttr
+                      <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+                   "getBootMcSyncMode() failed to get MASTER_MBOX_SCRATCH");
+            l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_5];
 
             TRACFCOMP(g_trac_sbe,
                       "The MC Sync Bit is %d",
