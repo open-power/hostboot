@@ -35,7 +35,7 @@
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfCallouts.H>
-//#include <prdfMemoryMru.H> TODO: RTC 149314
+#include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
 //#include <prdfCenMbaCaptureData.H> TODO: RTC 136126
 

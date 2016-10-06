@@ -674,7 +674,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
                 switch ( pfa.mruList[i].type )
                 {
-/* TODO: RTC 149314
+/* TODO: RTC 162065
                     case PRDcalloutData::TYPE_MEMMRU:
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
@@ -773,7 +773,7 @@ bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
-/* TODO: RTC 149314
+/* TODO: RTC 162065
         parseMemMruData( i_parser, memMru );
 */
 
@@ -821,7 +821,7 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
-/* TODO: RTC 149314
+/* TODO: RTC 162065
         parseMemMruData( i_parser, extMemMru );
 */
 

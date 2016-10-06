@@ -33,7 +33,7 @@
 #include <prdfCalloutMap.H>
 #include <prdfCalloutsData.H>
 #include <prdfEnums.H>
-//#include <prdfMemoryMru.H>  TODO: RTC 149314
+#include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
 
 namespace PRDF
@@ -73,11 +73,9 @@ class PRDcallout
     { iv_meldValue.target = i_target; }
 
     /** @brief Constructor from MemoryMru */
-/* TODO: RTC 149314
     PRDcallout( const MemoryMru & i_memmru ) :
         iv_type(PRDcalloutData::TYPE_MEMMRU)
     { iv_meldValue.u32 = i_memmru.toUint32(); }
-*/
 
     /** @brief Constructor from SymbolicFru */
     PRDcallout( SymbolicFru i_symfru ) : iv_type(PRDcalloutData::TYPE_SYMFRU)
@@ -111,14 +109,12 @@ class PRDcallout
     }
 
     /** @brief Assignment from MemoryMru */
-/* TODO: RTC 149314
     PRDcallout & operator=( const MemoryMru & i_memmru )
     {
         iv_type = PRDcalloutData::TYPE_MEMMRU;
         iv_meldValue.u32 = i_memmru.toUint32();
         return *this;
     }
-*/
 
     /** @brief Assignment from SymbolicFru */
     PRDcallout & operator=( SymbolicFru i_symfru )
@@ -165,9 +161,7 @@ class PRDcallout
     TARGETING::TargetHandle_t getTarget() const { return iv_meldValue.target; }
 
     /** @returns Returns the MemoryMru. */
-/* TODO: RTC 149314
     MemoryMru getMemMru() const { return MemoryMru(iv_meldValue.u32); }
-*/
 
     /** @brief Returns a uint32_t representation of the callout */
     uint32_t flatten() const

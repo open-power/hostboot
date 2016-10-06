@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,6 @@ enum Callout
     FIRST_SPECIAL_CALLOUT = 0x70,
 
     CALLOUT_RANK = FIRST_SPECIAL_CALLOUT,
-    CALLOUT_RANK_AND_MBA,
     CALLOUT_ALL_MEM,
 
     LAST_SPECIAL_CALLOUT = CALLOUT_ALL_MEM, // Absolute last value is 0x7f
@@ -96,7 +95,7 @@ union MemMruMeld
         uint32_t valid      : 1; ///< Used to indicate nothing failed while
                                  ///< building the object (1=valid, 0=not valid)
         uint32_t procPos    : 3; ///< Proc position within node (0-7)
-        uint32_t cenPos     : 3; ///< Centaur position within proc (0-7)
+        uint32_t chnlPos    : 3; ///< Centaur or MCA position within proc (0-7)
         uint32_t mbaPos     : 1; ///< MBA position within centaur (0-1)
 
         uint32_t pins       : 2; ///< Even and/or Odd symbol pins
@@ -107,18 +106,17 @@ union MemMruMeld
         uint32_t symbol     : 7; ///< Symbol or SpecialCallout
 
         uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
-        // The wiring type is no longer used in the MemoryMru. However, this
-        // field must remain and be initilized to CEN_SYMBOL::WIRING_INVALID so
-        // that out-of-date error log parsers can handle it appropriately.
-        uint32_t wiringType : 3; ///< Wiring type (deprecated)
-        uint32_t srankValid : 1; ///< TRUE if slave rank is valid
         uint32_t srank      : 3; ///< Slave rank (0-7)
+        // If isMca is specified, then chnlPos above will specify the MCA pos
+        // and the mbaPos field will be unused
+        uint32_t isMca      : 1; ///< True if MCA is used as opposed to MBA
+        uint32_t unused     : 3; ///< 3 Bits currently unused
 #else
         // Need to reverse this to make the uint32_t look right in the
         // simulator.
+        uint32_t unused     : 3;
+        uint32_t isMca      : 1;
         uint32_t srank      : 3;
-        uint32_t srankValid : 1;
-        uint32_t wiringType : 3;
         uint32_t eccSpared  : 1;
         uint32_t symbol     : 7;
         uint32_t dramSpared : 1;
@@ -126,7 +124,7 @@ union MemMruMeld
         uint32_t nodePos    : 3;
         uint32_t pins       : 2;
         uint32_t mbaPos     : 1;
-        uint32_t cenPos     : 3;
+        uint32_t chnlPos    : 3;
         uint32_t procPos    : 3;
         uint32_t valid      : 1;
 #endif
