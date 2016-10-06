@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -616,7 +616,7 @@ group gOccFir filter singlebit,
     /** OCCFIR[50]
      *  OCC initiated attention
      */
-    (OccFir, bit(50)) ? SelfMedThr1NoGard;
+    (OccFir, bit(50)) ? occInitiatedAttn;
 
     /** OCCFIR[51|52|53|54|55|56|57|58|59|60|61]
      *  OCC_SCOM_OCCLFIR_SPARE_FIR
@@ -1316,5 +1316,17 @@ actionclass coolingSystemError
 {
     callout(procedure(CoolingSystemError_ENUM), MRU_MED);
     threshold1;
+};
+
+/** The OCC team wants this error log for FFDC. TMGT will make a callout if the
+ *  OCC is reset more than three times in a week. Adding a threshold to protect
+ *  from flooding. If the threshold is ever hit there is a code bug because the
+ *  OCC should never be reset that many times. So calling out 2nd level support
+ *  MED and the PROC LOW with no gard. */
+actionclass occInitiatedAttn
+{
+    callout2ndLvlMed;
+    calloutSelfLowNoGard;
+    threshold32pday;
 };
 
