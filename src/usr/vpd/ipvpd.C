@@ -1085,37 +1085,49 @@ errlHndl_t IpVpdFacade::findRecordOffsetPnor ( const char * i_record,
                    "No matching Record (%s) found in TOC!",
                    i_record );
 
-        /*@
-         * @errortype
-         * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
-         * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
-         * @userdata1        Requested Record
-         * @userdata2        Requested Keyword
-         * @devdesc          The requested record was not found in the VPD TOC.
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       VPD::VPD_IPVPD_FIND_RECORD_OFFSET,
-                                       VPD::VPD_RECORD_NOT_FOUND,
-                                       i_args.record,
-                                       i_args.keyword );
+       // TODO RTC: 162329 Ignore missing records because some records are
+       //  currently missing the Table of Contents are their start
+       if (!((* i_record      == 'M') &&
+           (*(i_record + 1)   == 'E') &&
+           (*(i_record + 2)   == 'M') &&
+           (*(i_record + 3)   == 'D') ))
+       {
+            /*@
+                * @errortype
+                * @reasoncode       VPD::VPD_RECORD_NOT_FOUND
+                * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid         VPD::VPD_IPVPD_FIND_RECORD_OFFSET
+                * @userdata1        Requested Record
+                * @userdata2        Requested Keyword
+                * @devdesc          The requested record was not found in the VPD TOC.
+                */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            VPD::VPD_IPVPD_FIND_RECORD_OFFSET,
+                                            VPD::VPD_RECORD_NOT_FOUND,
+                                            i_args.record,
+                                            i_args.keyword );
 
-        // Could be the VPD of the target wasn't set up properly
-        // -- DECONFIG so that we can possibly keep booting
-        err->addHwCallout( i_target,
-                           HWAS::SRCI_PRIORITY_HIGH,
-                           HWAS::DECONFIG,
-                           HWAS::GARD_NULL );
-        // Or FSP code didn't set up the VPD properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                 HWAS::SRCI_PRIORITY_MED);
+            // Could be the VPD of the target wasn't set up properly
+            // -- DECONFIG so that we can possibly keep booting
+            err->addHwCallout( i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::DECONFIG,
+                                HWAS::GARD_NULL );
+            // Or FSP code didn't set up the VPD properly
+            err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                        HWAS::SRCI_PRIORITY_MED);
 
-        // Or HB code didn't look for the record properly
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_LOW);
+            // Or HB code didn't look for the record properly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_LOW);
 
-        // Add trace to the log so we know what record was being requested.
-        err->collectTrace( "VPD", 256 );
+            // Add trace to the log so we know what record was being requested.
+            err->collectTrace( "VPD", 256 );
+       }
+       else
+       {
+           TRACFCOMP(g_trac_vpd, ERR_MRK"No TOC on MEMD record, assuming offset to be 0!");
+       }
     }
 
     // Return the offset found, after byte swapping it.
