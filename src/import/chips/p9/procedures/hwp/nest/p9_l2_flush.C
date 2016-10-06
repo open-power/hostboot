@@ -98,7 +98,6 @@ fapi2::ReturnCode l2_flush_start(
 {
     fapi2::buffer<uint64_t> l_cmdReg;
     fapi2::buffer<uint64_t> l_purgeCmd;
-    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
 
     FAPI_INF("l2_flush_start: Enter");
 
@@ -108,14 +107,12 @@ fapi2::ReturnCode l2_flush_start(
     FAPI_TRY(fapi2::getScom(i_target, i_regAddr, l_cmdReg));
 
     // check to see if this reg is idle and ready to accept a new command
-    fapi2::toString(i_target, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
     FAPI_ASSERT(!l_cmdReg.getBit<PURGE_CMD_REG_BUSY>(),
                 fapi2::P9_L2_FLUSH_PURGE_REQ_OUTSTANDING()
                 .set_TARGET(i_target)
                 .set_CMD_REG(l_cmdReg)
                 .set_CMD_REG_ADDR(i_regAddr),
-                "Previous purge request has not completed for target %s",
-                l_targetStr);
+                "Previous purge request has not completed for target");
 
     // write PURGE_CMD_TRIGGER bit in Purge Engine Command Register
     // ensure PURGE_CMD_TYPE/MEM/CGC/BANK are clear to specify flush
@@ -225,33 +222,11 @@ fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_EX >
                               & i_target,
                               const p9core::purgeData_t& i_purgeData)
 {
-    FAPI_DBG("i_purgeData.iv_cmdType: 0x%x", i_purgeData.iv_cmdType);
-    FAPI_DBG("i_purgeData.iv_cmdMem : 0x%x", i_purgeData.iv_cmdMem);
-    FAPI_DBG("i_purgeData.iv_cmdBank: 0x%x", i_purgeData.iv_cmdBank);
-    FAPI_DBG("i_purgeData.iv_cmdCGC : 0x%x", i_purgeData.iv_cmdCGC);
+    FAPI_DBG("i_purgeData [iv_cmdType: 0x%x] [iv_cmdMem : 0x%x] "
+             "[iv_cmdBank: 0x%x] [iv_cmdCGC : 0x%x]", i_purgeData.iv_cmdType,
+             i_purgeData.iv_cmdMem, i_purgeData.iv_cmdBank, i_purgeData.iv_cmdCGC);
 
-    uint32_t l_regAddr = 0;
-    uint8_t l_platform = 0;
-
-    //Get the scom address to use for this platform
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXECUTION_PLATFORM,
-                           FAPI_SYSTEM,
-                           l_platform),
-             "Error from FAPI_ATTR_GET for attribute ATTR_EXECUTION_PLATFORM");
-
-    if( l_platform == fapi2::ENUM_ATTR_EXECUTION_PLATFORM_FSP )
-    {
-        l_regAddr = EX_PRD_PURGE_CMD_REG;
-    }
-    else
-    {
-        FAPI_ASSERT(false,
-                    fapi2::P9_L2_FLUSH_UNKNOWN_PLATFORM()
-                    .set_TARGET(i_target)
-                    .set_PLATFORM(l_platform),
-                    "Unsupported l_platform %d", l_platform);
-    }
+    uint32_t l_regAddr = EX_PRD_PURGE_CMD_REG;
 
     // initiate flush
     FAPI_TRY(l2_flush_start(i_target, l_regAddr, i_purgeData));
