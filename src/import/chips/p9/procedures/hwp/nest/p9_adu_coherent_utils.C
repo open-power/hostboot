@@ -113,6 +113,9 @@ extern "C"
     //I think that the secondary encoding should always be 0 for cl_dma_rd
     const uint32_t ALTD_CMD_DMAR_TSIZE = 0;
 
+    //Value for scope for any DMA write operations
+    const uint32_t ALTD_CMD_SCOPE_GROUP         = 0b00000011;
+
     // Values for PB operations
     const uint32_t ALTD_CMD_PB_OPERATION_TSIZE  = 0b00001000;
     const uint32_t ALTD_CMD_SCOPE_SYSTEM        = 0b00000101;
@@ -423,6 +426,9 @@ extern "C"
                 {
                     altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT,
                                                       ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_DMA_PR_WR);
+
+                    //Set scope to group scope
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_SCOPE_START_BIT, ALTD_CMD_SCOPE_NUM_BITS>(ALTD_CMD_SCOPE_GROUP);
 
                     // Set TSIZE
                     if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
