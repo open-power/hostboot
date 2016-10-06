@@ -63,6 +63,7 @@
 #include <p9_xip_section_append.H>
 #include <p9_xip_image.h>
 
+#include <p9_perv_scom_addresses.H>
 #include <p9_frequency_buckets.H>
 #include <initservice/mboxRegs.H>
 
@@ -1556,17 +1557,18 @@ namespace SBE
 
             }
 #endif
+            // Read PERV_SB_CS_SCOM 0x00050008
             size_t op_size = sizeof(scomData);
             err = deviceRead( l_target,
                               &scomData,
                               op_size,
-                              DEVICE_SCOM_ADDRESS(SBE_VITAL_REG_0x0005001C) );
+                              DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
             if( err )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeBootSeeprom() -Error "
-                           "reading SBE VITAL REG (0x%.8X) from Target :"
+                           "reading SB CS SCOM (0x%.8X) from Target :"
                            "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
-                           SBE_VITAL_REG_0x0005001C,
+                           PERV_SB_CS_SCOM, // 0x00050008
                            TARGETING::get_huid(l_target),
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETPLID_SAFE(err));
