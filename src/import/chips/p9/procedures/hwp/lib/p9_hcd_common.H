@@ -171,6 +171,7 @@ enum P9_HCD_CLK_CTRL_CONSTANTS
 {
     CLK_STOP_CMD                             = BIT64(0),
     CLK_START_CMD                            = BIT64(1),
+    CLK_REGION_PERV                          = BIT64(4),
     CLK_REGION_ANEP                          = BIT64(10),
     CLK_REGION_DPLL                          = BIT64(14),
     CLK_REGION_REFR                          = BITS64(12, 2),
@@ -191,7 +192,27 @@ enum P9_HCD_CLK_CTRL_CONSTANTS
     CLK_REGION_ALL_BUT_PLL                   = BITS64(4, 10),
     CLK_REGION_ALL_BUT_PLL_REFR              = BITS64(4, 8),
     CLK_REGION_ALL                           = BITS64(4, 11),
-    CLK_THOLD_ALL                            = BITS64(48, 3)
+    CLK_THOLD_ALL                            = BITS64(48, 3),
+    CLK_THOLD_SL                             = BIT64(48),
+    CLK_THOLD_NSL                            = BIT64(49),
+    CLK_THOLD_ARY                            = BIT64(50)
+};
+
+// Scan Type Constants
+enum P9_HCD_SCAN_TYPE_CONSTANTS
+{
+    SCAN_TYPE_FUNC                          = BIT64(48),
+    SCAN_TYPE_CFG                           = BIT64(49),
+    SCAN_TYPE_CCFG_GPTR                     = BIT64(50),
+    SCAN_TYPE_REGF                          = BIT64(51),
+    SCAN_TYPE_LBIST                         = BIT64(52),
+    SCAN_TYPE_ABIST                         = BIT64(53),
+    SCAN_TYPE_REPR                          = BIT64(54),
+    SCAN_TYPE_TIME                          = BIT64(55),
+    SCAN_TYPE_BNDY                          = BIT64(56),
+    SCAN_TYPE_FARR                          = BIT64(57),
+    SCAN_TYPE_CMSK                          = BIT64(58),
+    SCAN_TYPE_INEX                          = BIT64(59)
 };
 
 // Scan Flush Constants
