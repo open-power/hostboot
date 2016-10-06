@@ -1213,7 +1213,7 @@ int main(int argc, char *argv[])
                         "\t\tATTR_MSS_CACHE_ENABLE 0x0 CONST\n\n"
                         "\t\ttarget = k0:n0:s0:centaur.mba:p06:c1\n"
                         "\t\tATTR_MSS_FREQ 0x00000640 CONST\n"
-                        "\t\tATTR_MSS_VOLT 0x00000546 CONST\n"
+                        "\t\tATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 CONST\n"
                         "\t\tATTR_EFF_CEN_DRV_IMP_CNTL[0] OHM15 CONST\n"
                         "\t\tATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST\n\n"
                         "\t\ttarget = k0:n0:s0:centaur.mba:pall:call\n"

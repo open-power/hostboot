@@ -43,7 +43,7 @@ the user would like to override along with their new values.
 
        target = k0:n0:s0:centaur.mba:p06:c1
        ATTR_MSS_FREQ 0x00000640 CONST
-       ATTR_MSS_VOLT 0x00000546 CONST
+       ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 CONST
        ATTR_EFF_CEN_DRV_IMP_CNTL[0] OHM15 CONST
        ATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST
 

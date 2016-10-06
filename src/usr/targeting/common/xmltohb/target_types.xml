@@ -1848,8 +1848,6 @@
     <attribute><id>MSS_NEST_CAPABLE_FREQUENCIES</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
 
-    <attribute><id>MSS_VOLT</id></attribute><!-- deprecated -->
-
 <!-- Enable memory voltage attributes -->
 <!-- Static voltages -->
     <attribute><id>MSS_VOLT_VPP_MILLIVOLTS</id></attribute>

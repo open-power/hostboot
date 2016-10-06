@@ -70,7 +70,7 @@ namespace AttrTextToBinaryBlob
      *
      *   target = k0:n0:s0:centaur.mba:p00:c0
      *   ATTR_MSS_FREQ 0x00000640 u32 CONST
-     *   ATTR_MSS_VOLT 0x00000546 u32 CONST
+     *   ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 u32 CONST
      *   ATTR_EFF_CEN_DRV_IMP_CNTL[0] u8[2] OHM15 CONST
      *   ATTR_EFF_CEN_DRV_IMP_CNTL[1] u8[2] OHM15 CONST
      *
