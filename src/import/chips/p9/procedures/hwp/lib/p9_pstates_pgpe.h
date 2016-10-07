@@ -218,6 +218,13 @@ typedef struct
     /// Resonant Clock Grid Management Setup
     ResonantClockingSetup resclk;
 
+    //Voltage change step size
+    uint32_t ext_vdd_step_size_mv;
+
+    uint32_t nest_frequency_mhz;
+
+    uint16_t PsVSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
+    uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 
 } GlobalPstateParmBlock;
