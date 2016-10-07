@@ -566,6 +566,14 @@ namespace INTR
                                 PIR_t& i_pir);
 
             /**
+             * Read External PSIHB Interrupt conditions and handle
+             *    appropriately. Routing interrupts to the registered
+             *    listeners. Also, handles PSU interrupts as INTRP is
+             *    the PSU interrupt listener
+             */
+            void handleExternalInterrupt();
+
+            /**
              * Handle Interrupt from PSU Source
              *   - Acknowledge Interrupt
              *   - Clear Interrupt Condition

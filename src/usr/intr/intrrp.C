@@ -523,82 +523,9 @@ void IntrRp::msgHandler()
                             msg_respond(iv_msgQ, msg);
                         }
 
-                        //Read LSI Interrupt Status register from each enabled
-                        // proc chip to see which caused the interrupt
-                        for(ChipList_t::iterator targ_itr = iv_chipList.begin();
-                             targ_itr != iv_chipList.end(); ++targ_itr)
-                        {
-                            uint64_t lsiIntStatus =
-                                     (*targ_itr)->psiHbBaseAddr->lsiintstatus;
-                            TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() "
-                                         "lsiIntStatus 0x%016lx", lsiIntStatus);
-
-                            //Loop through each bit, and add any pending
-                            // interrupts to list for later handling
-                            for (uint8_t i=0; i < LSI_LAST_SOURCE; i++)
-                            {
-                                uint64_t lsiIntMask = 0x8000000000000000 >> i;
-                                if (lsiIntMask & lsiIntStatus)
-                                {
-                                    TRACDCOMP(g_trac_intr,"IntrRp::msgHandler()"
-                                                " Interrupt Type: %d found", i);
-
-                                    //Get PIR value for the proc with the
-                                    // interrupt condition
-                                    uint64_t l_groupId =
-                                               (*targ_itr)->proc->getAttr
-                                            <TARGETING::ATTR_FABRIC_GROUP_ID>();
-                                    uint64_t l_chipId =
-                                               (*targ_itr)->proc->getAttr
-                                            <TARGETING::ATTR_FABRIC_CHIP_ID>();
-                                    //Core + Thread IDs not important so use 0's
-                                    PIR_t l_pir = PIR_t(l_groupId, l_chipId,
-                                                        0, 0);
-
-                                    //Make object to search pending interrupt
-                                    //   list for
-                                    std::pair<PIR_t, ext_intr_t> l_intr =
-                                         std::make_pair( l_pir,
-                                                    static_cast<ext_intr_t>(i));
-
-                                    //See if an interrupt with from Proc with
-                                    //  the same PIR + interrupt source are
-                                    //  still being processed
-                                    auto l_found = std::find_if(
-                                           iv_pendingIntr.begin(),
-                                           iv_pendingIntr.end(),
-                                           [&l_intr](auto k)->bool
-                                    {
-                                        return ((k.first == l_intr.first) &&
-                                                (k.second == l_intr.second));
-                                    });
-                                    if (l_found != iv_pendingIntr.end())
-                                    {
-                                        TRACFCOMP(g_trac_intr,
-                                            "IntrRp::msgHandler() Pending Interrupt already found for pir: 0x%lx,"
-                                            " interrupt type: %d, Ignoring",
-                                            l_pir, static_cast<ext_intr_t>(i));
-                                    }
-                                    else
-                                    {
-                                        //New pending interrupt for source type
-                                        TRACFCOMP(g_trac_intr,
-                                            "IntrRp::msgHandler() External Interrupt found for pir: 0x%lx,"
-                                            " interrupt type: %d",
-                                            l_pir, static_cast<ext_intr_t>(i));
-
-                                        //Add to list of interrupts in flight
-                                        iv_pendingIntr.push_back(l_intr);
-
-                                        //Call function to route the interrupt
-                                        //to the appropriate handler
-                                        routeInterrupt((*targ_itr),
-                                                     static_cast<ext_intr_t>(i),
-                                                     l_pir);
-                                    }
-                                }
-                            }
-                        }
+                        //Read Interrupt Condition(s) and route to appropriate
+                        //interrupt handlers
+                        handleExternalInterrupt();
                     }
                 }
                 break;
@@ -1095,6 +1022,78 @@ void IntrRp::routeInterrupt(intr_hdlr_t* i_proc,
             (uint32_t)i_type);
     }
     return;
+}
+
+void IntrRp::handleExternalInterrupt()
+{
+    //Read LSI Interrupt Status register from each enabled
+    // proc chip to see which caused the interrupt
+    for(ChipList_t::iterator targ_itr = iv_chipList.begin();
+            targ_itr != iv_chipList.end(); ++targ_itr)
+    {
+        uint64_t lsiIntStatus = (*targ_itr)->psiHbBaseAddr->lsiintstatus;
+        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() lsiIntStatus 0x%016lx",
+                       lsiIntStatus);
+
+        //Loop through each bit, and add any pending
+        // interrupts to list for later handling
+        for (uint8_t i=0; i < LSI_LAST_SOURCE; i++)
+        {
+            uint64_t lsiIntMask = 0x8000000000000000 >> i;
+            if (lsiIntMask & lsiIntStatus)
+            {
+                TRACDCOMP(g_trac_intr,"IntrRp::msgHandler()"
+                                            " Interrupt Type: %d found", i);
+
+                //Get PIR value for the proc with the
+                // interrupt condition
+                uint64_t l_groupId =
+                  (*targ_itr)->proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+                uint64_t l_chipId =
+                  (*targ_itr)->proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                //Core + Thread IDs not important so use 0's
+                PIR_t l_pir = PIR_t(l_groupId, l_chipId, 0, 0);
+
+                //Make object to search pending interrupt
+                //   list for
+                std::pair<PIR_t, ext_intr_t> l_intr =
+                             std::make_pair( l_pir, static_cast<ext_intr_t>(i));
+
+                //See if an interrupt with from Proc with
+                //  the same PIR + interrupt source are
+                //  still being processed
+                auto l_found = std::find_if( iv_pendingIntr.begin(),
+                                             iv_pendingIntr.end(),
+                                             [&l_intr](auto k)->bool
+                    {
+                        return ((k.first == l_intr.first) &&
+                                       (k.second == l_intr.second));
+                    });
+                if (l_found != iv_pendingIntr.end())
+                {
+                    TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() Pending"
+                               " Interrupt already found for pir: 0x%lx,"
+                               " interrupt type: %d, Ignoring",
+                               l_pir, static_cast<ext_intr_t>(i));
+                }
+                else
+                {
+                    //New pending interrupt for source type
+                    TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() External "
+                            "Interrupt found for pir: 0x%lx,interrupt type: %d",
+                            l_pir, static_cast<ext_intr_t>(i));
+
+                    //Add to list of interrupts in flight
+                    iv_pendingIntr.push_back(l_intr);
+
+                    //Call function to route the interrupt
+                    //to the appropriate handler
+                    routeInterrupt((*targ_itr), static_cast<ext_intr_t>(i),
+                                      l_pir);
+                }
+            }
+        }
+    }
 }
 
 errlHndl_t IntrRp::maskAllInterruptSources()
