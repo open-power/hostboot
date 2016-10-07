@@ -64,9 +64,6 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // Initialize via scoms. Could be put in to p9_mss_scominit.C
-        FAPI_TRY( mss::phy_scominit(i_target) );
-
         FAPI_TRY(mss::change_force_mclk_low(i_target, mss::HIGH),
                  "force_mclk_low (set high) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
