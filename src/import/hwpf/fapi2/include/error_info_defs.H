@@ -52,7 +52,7 @@ struct sbeFfdc_t
 {
     uint32_t  size;
     uint64_t  data;
-};
+} __attribute__((packed));
 
 // 10 entries limits the size of SbeFfdcData_t to 128 bytes
 enum
