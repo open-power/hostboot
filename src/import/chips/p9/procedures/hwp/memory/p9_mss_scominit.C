@@ -39,6 +39,7 @@
 #include <p9_mcbist_scom.H>
 #include <p9_ddrphy_scom.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/phy/ddr_phy.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -100,6 +101,8 @@ fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_ta
         goto fapi_try_exit;
     }
 
+    // Initialize via scoms for non-static PHY items.
+    FAPI_TRY( mss::phy_scominit(i_target) );
 
 fapi_try_exit:
     FAPI_INF("End MSS SCOM init");
