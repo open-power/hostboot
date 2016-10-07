@@ -2553,6 +2553,58 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOVALID_ENABLE</id>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_CDR_GAIN</id>
+        <default>0x56,0x47,0x47,0x47</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x8000,0x8000,0x8000,0x8000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+        <default>0xc800</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+        <default>0x008b</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x0064,0x0064,0x0064,0x0064</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+        <default>0x0014</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+        <default>0x0f</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+        <default>0xaa7a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+        <default>0x2000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+        <default>0xff</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2590,6 +2642,58 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOVALID_ENABLE</id>
+        <default>0x3</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_CDR_GAIN</id>
+        <default>0x56,0x47,0x47,0x47</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x8000,0x8000,0x8000,0x8000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+        <default>0xc800</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+        <default>0x008b</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x0064,0x0064,0x0064,0x0064</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+        <default>0x0014</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+        <default>0x0f</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+        <default>0xaa7a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+        <default>0x2000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+        <default>0xff</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2626,6 +2730,58 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_IOVALID_ENABLE</id>
+        <default>0x7</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+        <default>0xf8</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_CDR_GAIN</id>
+        <default>0x56,0x47,0x47,0x47</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x8000,0x8000,0x8000,0x8000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+        <default>0xc800</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+        <default>0x008b</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <default>0x0064,0x0064,0x0064,0x0064</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+        <default>0x0014</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+        <default>0x0f</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+        <default>0xaa7a</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+        <default>0x2000</default>
+    </attribute>
+    <attribute>
+        <id>PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+        <default>0xff</default>
     </attribute>
 </targetInstance>
 
