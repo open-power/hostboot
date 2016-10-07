@@ -190,6 +190,9 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
                     $type =~ s/_ENDPOINT//;
                     $type =~ s/_CHIPLET//;
                     $type =~ s/_CHIP//;
+                    $type =~ s/^SYSTEM$/SYS/;
+
+                    my $msgNotNeeded = 0;
 
                     # Loop through target type info from temp_generic.xml file
                     for my $i ( 0 .. $#TgtTypeInfo)
@@ -211,14 +214,24 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
                                 push @UpdtTgt, [ $TgtTypeInfo[$i][0], $type,
                                                  $generic_id, ""];
                             }
+                            $msgNotNeeded = 1;
                         }
                         elsif($TgtTypeInfo[$i][2] =~ /\s$generic_id\s/)
                         {
                             print STDERR "Target $TgtTypeInfo[$i][0] of type ".
                                   "$type already has attribute $generic_id\n";
+                            $msgNotNeeded = 1;
                         }
                     }
+
+                    print STDERR "Type $type not found in $fapi for attribute ".
+                          "$generic_id\n" if($msgNotNeeded == 0);
                 }
+            }
+            else
+            {
+                 die "FATAL: FAPI attribute $fapi_id is not associated with ".
+                     "any specific target type\n";
             }
 
             # Non-platInit attributes need to be volatile-zeroed
