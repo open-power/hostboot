@@ -320,7 +320,7 @@ enum
     SGPE_IMG_HEADER             = sizeof(sgpeHeader_t),
     SGPE_DBG_PTR_AREA_SIZE      = 64,
     //SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
-    SGPE_HCODE_SIZE             = 42 * ONE_KB,  // @todo RTC 158543 Reallocate space
+    SGPE_HCODE_SIZE             = 45 * ONE_KB,  // @todo RTC 158543 Reallocate space
 
     SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
                                    SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
@@ -371,7 +371,7 @@ enum
     CME_INT_VECTOR_SIZE         = 384,
     CME_IMG_HEADER_SIZE         = 64,
     CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_HCODE_SIZE              = (27 * ONE_KB) + HALF_KB,
+    CME_HCODE_SIZE              = (28 * ONE_KB) + HALF_KB,
 
     //** Scan
     CORE_COMMON_RING_SIZE       = 3  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
