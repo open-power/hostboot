@@ -43,8 +43,13 @@ void* call_mss_memdiag (void* io_pArgs)
 
     IStepError l_stepError;
 
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_mss_memdiag entry");
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "!!!Skipping memdiags until it works!!!");
+    return NULL;
+
 
     TARGETING::Target* masterproc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(masterproc);
@@ -112,7 +117,7 @@ void* call_mss_memdiag (void* io_pArgs)
         errlCommit(l_errl, HWPF_COMP_ID);
     }
 
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_mss_memdiag exit");
 
     // end task, returning any errorlogs to IStepDisp
