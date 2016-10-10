@@ -62,7 +62,7 @@ void StateMachine::running(bool & o_running)
     mutex_unlock(&iv_mutex);
 }
 
-void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
+void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
 {
     const uint64_t mbaRegs[] = {
         MBA01_SPA,
@@ -87,75 +87,121 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
         MCS_MODE4,
     };
 
+    const uint64_t mcbRegs[] = {
+        MCBIST_FIR,
+        MCBIST_FIR_MASK,
+        MCBIST_FIR_ACT0,
+        MCBIST_FIR_ACT1,
+    };
+
     const uint64_t procRegs[] = {
-        HOST_ATTN_PRES,
-        HOST_ATTN_MASK,
-        HOST_ATTN_CFG,
         IPOLL_MASK,
         IPOLL_STATUS,
-        PBUS_GP1,
-        PBUS_GP2,
         GLOBAL_CS_FIR,
         GLOBAL_RE_FIR,
-        GLOBAL_SPA,
+        GLOBAL_UCS_FIR,
+        GLOBAL_HA_FIR,
+        MC0_CHIPLET_HA_FIR,
+        MC0_CHIPLET_HA_FIR_MASK,
+        MC1_CHIPLET_HA_FIR,
+        MC1_CHIPLET_HA_FIR_MASK ,
     };
 
-    // get the parent membuf
-    ConstTargetHandle_t membuf = getParentChip(i_mba);
+    // target type
+    if ( TYPE_MBA == i_target->getAttr<ATTR_TYPE>() )
+    {
+        // get the parent membuf
+        ConstTargetHandle_t membuf = getParentChip(i_target);
 
-    // get the parent mcs
-    TargetHandleList targetList;
-    TargetHandle_t mcs = NULL;
-    if(membuf)
-    {
-        getParentAffinityTargets(
-                targetList,
-                membuf,
-                CLASS_UNIT,
-                TYPE_MCS);
-    }
-    if(targetList.size() == 1)
-    {
-        mcs = targetList[0];
-    }
-
-    // get the parent proc
-    ConstTargetHandle_t proc = NULL;
-    if(mcs)
-    {
-        proc = getParentChip(mcs);
-    }
-
-    const struct Entry
-    {
-        TARGETING::ConstTargetHandle_t target;
-        const uint64_t * begin;
-        const uint64_t * end;
-    } tables[] = {
-        {i_mba, mbaRegs, mbaRegs + sizeof(mbaRegs)/sizeof(*mbaRegs)},
-        {membuf,
-            membufRegs, membufRegs + sizeof(membufRegs)/sizeof(*membufRegs)},
-        {mcs, mcsRegs, mcsRegs + sizeof(mcsRegs)/sizeof(*mcsRegs)},
-        {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
-    };
-
-    for(const Entry * tableIt = tables;
-            tableIt != tables + sizeof(tables)/sizeof(*tables);
-            ++tableIt)
-    {
-        if(!tableIt->target)
+        // get the parent mcs
+        TargetHandleList targetList;
+        TargetHandle_t mcs = NULL;
+        if(membuf)
         {
-            continue;
+            getParentAffinityTargets(
+                    targetList,
+                    membuf,
+                    CLASS_UNIT,
+                    TYPE_MCS);
+        }
+        if(targetList.size() == 1)
+        {
+            mcs = targetList[0];
         }
 
-        for(const uint64_t * regIt = tableIt->begin;
-                regIt != tableIt->end;
-                ++regIt)
+        // get the parent proc
+        ConstTargetHandle_t proc = NULL;
+        if(mcs)
         {
-            ErrlUserDetailsLogRegister udLogRegister(
-                    tableIt->target,
-                    DEVICE_SCOM_ADDRESS(*regIt));
-            udLogRegister.addToLog(io_log);
+            proc = getParentChip(mcs);
+        }
+
+        const struct Entry
+        {
+            TARGETING::ConstTargetHandle_t target;
+            const uint64_t * begin;
+            const uint64_t * end;
+        } tables[] = {
+            {i_target, mbaRegs, mbaRegs + sizeof(mbaRegs)/sizeof(*mbaRegs)},
+            {membuf, membufRegs,
+             membufRegs + sizeof(membufRegs)/sizeof(*membufRegs)},
+            {mcs, mcsRegs, mcsRegs + sizeof(mcsRegs)/sizeof(*mcsRegs)},
+            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+        };
+
+        for(const Entry * tableIt = tables;
+                tableIt != tables + sizeof(tables)/sizeof(*tables);
+                ++tableIt)
+        {
+            if(!tableIt->target)
+            {
+                continue;
+            }
+
+            for(const uint64_t * regIt = tableIt->begin;
+                    regIt != tableIt->end;
+                    ++regIt)
+            {
+                ErrlUserDetailsLogRegister udLogRegister(
+                        tableIt->target,
+                        DEVICE_SCOM_ADDRESS(*regIt));
+                udLogRegister.addToLog(io_log);
+            }
+        }
+    }
+    else if ( TYPE_MCBIST == i_target->getAttr<ATTR_TYPE>() )
+    {
+        // get the parent proc
+        ConstTargetHandle_t proc = getParentChip(i_target);
+
+        const struct Entry
+        {
+            TARGETING::ConstTargetHandle_t target;
+            const uint64_t * begin;
+            const uint64_t * end;
+        } tables[] = {
+            {i_target, mcbRegs, mcbRegs + sizeof(mcbRegs)/sizeof(*mcbRegs)},
+            {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+        };
+
+        for(const Entry * tableIt = tables;
+                tableIt != tables + sizeof(tables)/sizeof(*tables);
+                ++tableIt)
+        {
+            if(!tableIt->target)
+            {
+                continue;
+            }
+
+            for(const uint64_t * regIt = tableIt->begin;
+                    regIt != tableIt->end;
+                    ++regIt)
+            {
+                ErrlUserDetailsLogRegister udLogRegister(
+                        tableIt->target,
+                        DEVICE_SCOM_ADDRESS(*regIt));
+                udLogRegister.addToLog(io_log);
+            }
         }
     }
 
