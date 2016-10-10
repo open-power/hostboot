@@ -352,7 +352,8 @@ void VfsRp::msgHandler()
                             // Failed to pass secureboot verification
                             if(l_errl)
                             {
-                                SECUREBOOT::handleSecurebootFailure(l_errl);
+                                SECUREBOOT::handleSecurebootFailure(
+                                    l_errl,false);
                                 msg->data[1] = -EACCES;
                                 break;
                             }

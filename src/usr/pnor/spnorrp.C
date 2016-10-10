@@ -458,7 +458,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         if (failedVerify)
         {
             TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections failed verify");
-            SECUREBOOT::handleSecurebootFailure(l_errhdl);
+            SECUREBOOT::handleSecurebootFailure(l_errhdl,false);
         }
         else
         {

@@ -56,6 +56,15 @@ namespace SECUREBOOT
              *         secureboot/service.H for more information.
              */
             errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ);
+
+            /**
+             *  @brief Lock down processor's untrusted BAR registers, if
+             *      applicable.  See wrapper in secureboot/service.H for more
+             *      information.
+             */
+            errlHndl_t lockProcUntrustedBars(
+                const TARGETING::Target* const i_pProc);
+
             #endif
 
             /** @brief Get security switch register value */

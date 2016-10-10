@@ -408,12 +408,13 @@ void* host_cancontinue_clear( void *io_pArgs )
 
 #ifdef CONFIG_SECUREBOOT
 //******************************************************************************
-// match_bar_values_for_all_proc helper function
+// enforce_bar_values_for_all_proc helper function
 //******************************************************************************
-void match_bar_values_for_all_proc()
+void enforce_bar_values_for_all_proc()
 {
     // For secureboot, check that the BARs read from the hardware
-    // as set by the SBE match the values customized into the SBE image
+    // as set by the SBE match the values customized into the SBE image, then
+    // lock them down if needed (OPAL case)
     if (SECUREBOOT::enabled())
     {
         errlHndl_t l_errl = NULL;
@@ -429,11 +430,26 @@ void match_bar_values_for_all_proc()
             l_errl = SECUREBOOT::procBarValuesMatch(*l_proc_iter);
             if (l_errl)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "match_bar_values_for_all_proc() System shutting down "
-                    "because the non-secure bar values do not match "
-                    "expected values.");
-                // stop IPL
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                    " enforce_bar_values_for_all_proc(): System shutting down "
+                    "because the non-secure BAR values do not match "
+                    "expected values for PROC 0x%08X.",
+                     TARGETING::get_huid(*l_proc_iter));
+
+                // Commit log and stop IPL (never returns)
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+            }
+
+            l_errl=SECUREBOOT::lockProcUntrustedBars(*l_proc_iter);
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                    " enforce_bar_values_for_all_proc(): System shutting down "
+                    "because untrusted BARs could not be locked for PROC "
+                    "0x%08X.",
+                    TARGETING::get_huid(*l_proc_iter));
+
+                // Commit log and stop IPL (never returns)
                 SECUREBOOT::handleSecurebootFailure(l_errl);
             }
         }
@@ -460,7 +476,7 @@ void* host_prd_hwreconfig( void *io_pArgs )
         // Also will need to remove include <util/misc.H> from top of this file.
         if (!Util::isSimicsRunning())
         {
-            match_bar_values_for_all_proc();
+            enforce_bar_values_for_all_proc();
         }
         #endif
 

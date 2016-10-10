@@ -118,6 +118,23 @@ namespace SECUREBOOT
      *  @return NULL on success, otherwise a pointer to an error log.
      */
     errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ);
+
+    /**
+     *  @brief Lock down processor's untrusted BAR registers, if applicable
+     *
+     *  @par Detailed Description:
+     *      Lock down processor's untrusted BAR registers by setting the logical
+     *      BAR size to 0, if applicable. This is a no-op unless the system is
+     *      booting OPAL.
+     *
+     *  @param[in] i_pProc Handle to processor target.  Assertion will
+     *      fire if NULL or not a processor.
+     *
+     *  @return NULL on success, otherwise a pointer to an error log
+     */
+    errlHndl_t lockProcUntrustedBars(
+        const TARGETING::Target* i_pProc);
+
     #endif
 
     /** @brief Returns the state of the secure jumper as reported by the master
@@ -198,10 +215,15 @@ namespace SECUREBOOT
     /**
      * @brief Common secureboot handler for secureboot failures.
      *        Properly handles callouts etc.
-     *
-     * @return i_err   - Error log to cascade through failure path.
+     * @param[in/out] io_err Reference to error log handle.  Caller's handle
+     *     will be nullified.  Handle must not be NULL, or function asserts.
+     * @param[in] i_waitForShutdown Whether to wait for system to shutdown (and
+     *     never return from this call) or not (and return from this call).
+     *     In general, code should wait for shutdown unless early in boot before
+     *     basic services are up, or in a resource provider path.
      */
-    void handleSecurebootFailure(errlHndl_t &i_err);
+    void handleSecurebootFailure(
+        errlHndl_t &io_err, bool i_waitForShutdown = true);
 
 }
 

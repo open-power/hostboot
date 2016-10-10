@@ -127,6 +127,14 @@ errlHndl_t procBarValuesMatch(TARGETING::Target* i_targ)
 {
     return Singleton<Settings>::instance().procBarValuesMatch(i_targ);
 }
+
+////////////////////////////////////////////////////////////////////
+errlHndl_t lockProcUntrustedBars(
+    const TARGETING::Target* const i_pProc)
+{
+    return Singleton<Settings>::instance().lockProcUntrustedBars(i_pProc);
+}
+
 #endif
 
 /////////////////////////////////////////////////////////////////////
@@ -285,29 +293,29 @@ bool getJumperState()
     return Singleton<Settings>::instance().getJumperState();
 }
 
-void handleSecurebootFailure(errlHndl_t &i_err)
+void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown)
 {
     TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
 
-    assert(i_err != NULL, "Secureboot Failure has a NULL error log")
+    assert(io_err != NULL, "Secureboot Failure has a NULL error log")
 
     // Grab errlog reason code before committing.
-    uint16_t l_rc = i_err->reasonCode();
+    uint16_t l_rc = io_err->reasonCode();
 
 #ifdef CONFIG_CONSOLE
     CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
-                      i_err->plid(), l_rc);
+                      io_err->plid(), l_rc);
 #endif
     printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
-           i_err->plid(),l_rc);
+           io_err->plid(),l_rc);
 
     // Add Verification callout
-    i_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
+    io_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
                                HWAS::SRCI_PRIORITY_HIGH);
-    errlCommit(i_err, SECURE_COMP_ID);
+    errlCommit(io_err, SECURE_COMP_ID);
 
     // Shutdown with Secureboot error status
-    INITSERVICE::doShutdown(l_rc, true);
+    INITSERVICE::doShutdown(l_rc, !i_waitForShutdown);
 }
 
 }  //namespace SECUREBOOT

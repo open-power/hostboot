@@ -31,6 +31,7 @@
 #include <p8_scom_addresses.H>
 #include <errl/errlmanager.H>
 #include <config.h>
+#include <targeting/common/util.H>
 
 // SECUREBOOT : General driver traces
 extern trace_desc_t* g_trac_secure;
@@ -254,6 +255,55 @@ namespace SECUREBOOT
             l_errl->collectTrace(SECURE_COMP_NAME,256);
         }
         return l_errl;
+    }
+
+    errlHndl_t Settings::lockProcUntrustedBars(
+        const TARGETING::Target* const i_pProc)
+    {
+        errlHndl_t pError = NULL;
+
+        assert(i_pProc != NULL,"Requested target handle is NULL");
+        assert((   (i_pProc == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+                || (   i_pProc->getAttr<TARGETING::ATTR_TYPE>()
+                    == TARGETING::TYPE_PROC)),
+              "Requested target handle is of type 0x%08X, not of type PROC",
+              i_pProc->getAttr<TARGETING::ATTR_TYPE>());
+
+        const uint32_t untrustedBarSizeRegs[] =
+        {
+            PBA_BARMSK3_0x02013F07,
+            PSI_NOTRUST_BAR0_MASK_0x02013F42,
+            PSI_NOTRUST_BAR1_MASK_0x02013F43,
+            ADU_UNTRUSTED_BAR_MASK_0x02020016,
+        };
+
+        if( is_sapphire_load())
+        {
+            const uint64_t scomData = 0;
+            const size_t expSize = sizeof(scomData);
+            size_t size = expSize;
+
+            const uint32_t* const begin = untrustedBarSizeRegs;
+            const uint32_t* const end = untrustedBarSizeRegs +
+                (  sizeof(untrustedBarSizeRegs)
+                 / sizeof(untrustedBarSizeRegs[0]));
+
+            for (const uint32_t* pIt=begin; pIt<end; ++pIt)
+            {
+                pError = deviceWrite(const_cast<TARGETING::Target*>(i_pProc),
+                             const_cast<uint64_t*>(&scomData), size,
+                             DEVICE_SCOM_ADDRESS(*pIt));
+                if (pError)
+                {
+                    break;
+                }
+                assert(size == expSize,
+                       "SCOM deviceWrite returned unexpected size of %d",
+                       size);
+            }
+        }
+
+        return pError;
     }
     #endif
 
