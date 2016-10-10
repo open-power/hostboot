@@ -385,12 +385,12 @@ sub manipulateImages
                               || ($eyeCatch eq "HBI")
                               || ($eyeCatch eq "HBD");
 
-        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{HB_FW}{flag};
+        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{HB_FW}{flags};
         my $secureboot_hdr =  $sb_hdrs{HB_FW}{file};
         if ($eyeCatch eq "PAYLOAD")
         {
             $secureboot_hdr = $sb_hdrs{OPAL}{file};
-            $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{OPAL}{flag};
+            $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{OPAL}{flags};
         }
 
         # Used for corrupting partitions. By default all protected offsets start
