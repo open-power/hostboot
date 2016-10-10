@@ -77,12 +77,15 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
         // have a good pattern for verification defined.
         FAPI_INF("running mss sim init in place of scrub");
-        return mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_2);
+        return mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_0);
     }
 
-    // TK do we want these to be arguments to the wrapper?
-    return memdiags::background_scrub(i_target, mss::mcbist::stop_conditions(),
-                                      mss::mcbist::speed::LUDICROUS, mss::mcbist::address());
+    // In Cronus on hardware (which is how we got here - f/w doesn't call this) we want
+    // to call sf_init (0's) and then a sf_read.
+    // TK we need to check FIR given the way this is right now, we should adjust with better stop
+    // conditions when we learn more about what we want to find in the lab
+    FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
+    return memdiags::sf_read(i_target, mss::mcbist::stop_conditions(), mss::mcbist::end_boundary::STOP_AFTER_ADDRESS);
 
 fapi_try_exit:
     return fapi2::current_err;
