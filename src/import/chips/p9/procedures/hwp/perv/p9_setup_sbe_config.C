@@ -32,7 +32,7 @@
 // *HWP FW Owner        : Brian Silver <bsilver@us.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 2
-// *HWP Consumed by     : SBE
+// *HWP Consumed by     : FSP
 //------------------------------------------------------------------------------
 
 
@@ -40,6 +40,7 @@
 #include "p9_setup_sbe_config.H"
 
 #include <p9_perv_scom_addresses.H>
+#include <p9_perv_scom_addresses_fld.H>
 
 enum P9_SETUP_SBE_CONFIG_Private_Constants
 {
@@ -87,6 +88,8 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     fapi2::buffer<uint16_t> l_read_4 = 0;
     fapi2::buffer<uint32_t> l_read_5 = 0;
     fapi2::buffer<uint32_t> l_read_6 = 0;
+    fapi2::buffer<uint32_t> l_data32_cbs_cs;
+    fapi2::buffer<uint8_t> l_attr_read;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     FAPI_INF("p9_setup_sbe_config::  Entering ...");
 
@@ -339,6 +342,22 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     //CFAM.SCRATCH_REGISTER_8 = l_read_scratch8
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
                                     l_read_scratch8));
+
+    //Reading EC attribute to change SECURE system to UNSECURE system
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SECURE2UNSECURE_SETUP, i_target_chip, l_attr_read));
+
+    if(l_attr_read)
+    {
+        FAPI_DBG("Reading CBS Control Status register");
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
+
+        if(!l_data32_cbs_cs.getBit<PERV_CBS_CS_SAMPLED_SMD_PIN>()) //SMD=0 indicate chip is in secure mode
+        {
+            FAPI_DBG("Changing SAB bit to unsecure mode");
+            l_data32_cbs_cs.clearBit<PERV_CBS_CS_SECURE_ACCESS_BIT>();
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
+        }
+    }
 
     FAPI_INF("p9_setup_sbe_config: Exiting ...");
 
