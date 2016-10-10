@@ -32,7 +32,7 @@
 // *HWP FW Owner        : Brian Silver <bsilver@us.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 2
-// *HWP Consumed by     : SBE
+// *HWP Consumed by     : FSP
 //------------------------------------------------------------------------------
 
 
