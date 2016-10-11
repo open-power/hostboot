@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,13 +39,6 @@ namespace CONSOLE
     const uint32_t VUART1_ADDRL     = VUART1_BASE + 0x28;
     const uint32_t VUART1_ADDRH     = VUART1_BASE + 0x2c;
 
-    const uint8_t SERIAL_IRQ        = 4;
-
-    // Host SerlIRQ interrupt type for SUART1
-    const uint8_t RESERVED          = 0x00;
-    const uint8_t LOW_LEVEL_TRIG    = 0x01;
-    const uint8_t RISING_EDGE_TRIG  = 0x02;
-    const uint8_t HIGH_LEVEL_TRIG   = 0x03;
     // used to test config flags related to console output selection
     const uint8_t CONFIG_MASK       = 0xC0;
 
