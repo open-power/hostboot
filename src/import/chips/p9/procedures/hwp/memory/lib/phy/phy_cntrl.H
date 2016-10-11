@@ -316,7 +316,7 @@ inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
 /// @return mss::states; YES == success, NO == fail
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = pcTraits<T> >
-inline mss::states get_zcal_status( fapi2::buffer<uint64_t>& i_data )
+inline mss::states get_zcal_status( const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("zcal_status: 0x%016lx", i_data);
     return (i_data.getBit<TT::ZCAL_CAL_STATUS_DONE>() == true) ? mss::YES : mss::NO;
