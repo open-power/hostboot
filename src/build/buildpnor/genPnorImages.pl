@@ -84,16 +84,22 @@ use constant KEY_TRANSITION_FLAG => 0x00000001;
 my $buildFlag = OP_BUILD_FLAG;
 
 # Corrupt parameter strings
-use constant CORRUPT_PROTECTED => "pro";
-use constant CORRUPT_UNPROTECTED => "unpro";
+my $CORRUPT_PROTECTED = "pro";
+my $CORRUPT_UNPROTECTED = "unpro";
 use constant MAX_PAGES_TO_CORRUPT => 10;
 # rand file prefix string. Note hbDistribute cleans up files with this prefix
 use constant RAND_PREFIX => "rand-";
+
+# Signing modes
+my $DEVELOPMENT = "development";
+my $IMPRINT = "imprint";
+my $PRODUCTION = "production";
 
 ################################################################################
 # I/O parsing
 ################################################################################
 
+my %globals = ();
 my $bin_dir = cwd();
 my $secureboot = 0;
 my $testRun = 0;
@@ -101,9 +107,11 @@ my $pnorLayoutFile = "";
 my $system_target = "";
 my $build_all = 0;
 my $install_all = 0;
-my $key_transition = 0;
+my $key_transition = "";
 my $help = 0;
 my %partitionsToCorrupt = ();
+my $sign_mode = $DEVELOPMENT;
+my $sb_signing_config_file = "";
 
 GetOptions("binDir:s" => \$bin_dir,
            "secureboot" => \$secureboot,
@@ -112,8 +120,10 @@ GetOptions("binDir:s" => \$bin_dir,
            "systemBinFiles:s" => \@systemBinFiles,
            "build-all" => \$build_all,
            "install-all" => \$install_all,
-           "key-transition" => \$key_transition,
+           "key-transition:s" => \$key_transition,
            "corrupt:s" => \%partitionsToCorrupt,
+           "sign-mode:s" => \$sign_mode,
+           "sb-signing-config-file:s" => \$sb_signing_config_file,
            "help" => \$help);
 
 if ($help)
@@ -126,23 +136,61 @@ if ($help)
 # Environment Setup, Checking, and Variable Initialization
 ################################################################################
 
+# Put mode transition input into a hash and ensure a valid signing mode
+my %signMode = ( $DEVELOPMENT => 1,
+                 $PRODUCTION => 0 );
+if ($sign_mode =~ m/^$DEVELOPMENT/i)
+{}
+elsif ($sign_mode =~ m/^$PRODUCTION/i)
+{
+    $signMode{$PRODUCTION} = 1;
+    $signMode{$DEVELOPMENT} = 0;
+}
+else
+{
+    die "Invalid signing mode = $sign_mode";
+}
+
+# Secure boot signing config file only required in production mode.
+if ($signMode{$PRODUCTION})
+{
+    die "SB signing config file path not provided" if ($sb_signing_config_file eq "");
+}
+
+# Put key transition input into a hash and ensure a valid key transition mode
+my %keyTransition = ( enabled => 0,
+                      $IMPRINT => 0,
+                      $PRODUCTION => 0 );
+if ($key_transition =~ m/^$IMPRINT/i)
+{
+    $keyTransition{$IMPRINT} = 1;
+    $keyTransition{enabled} = 1;
+}
+elsif ($key_transition =~ m/^$PRODUCTION/i)
+{
+    $keyTransition{$PRODUCTION} = 1;
+    $keyTransition{enabled} = 1;
+}
+elsif ($key_transition ne "")
+{
+    die "Invalid key transition mode = $key_transition";
+}
+
 if ($secureboot)
 {
     # Ensure all values of partitionsToCorrupt hash are valid.
-    # Allow some flexibiliy for the user and do a regex, case insensitive check
+    # Allow some flexibility for the user and do a regex, case insensitive check
     # to properly clean up the corrupt partition hash.
     foreach my $key (keys %partitionsToCorrupt)
     {
         my $value = $partitionsToCorrupt{$key};
-        # ${\(CONST)} is the syntax to allow mixing other regex options like '^'
-        # and '/i' with a perl constant
-        if ($value eq "" || $value =~ m/^${\(CORRUPT_PROTECTED)}/i)
+        if ($value eq "" || $value =~ m/^$CORRUPT_PROTECTED/i)
         {
-            $partitionsToCorrupt{uc($key)} = CORRUPT_PROTECTED
+            $partitionsToCorrupt{uc($key)} = $CORRUPT_PROTECTED
         }
-        elsif ($value =~ m/^${\(CORRUPT_UNPROTECTED)}/i)
+        elsif ($value =~ m/^$CORRUPT_UNPROTECTED/i)
         {
-            $partitionsToCorrupt{uc($key)} = CORRUPT_UNPROTECTED;
+            $partitionsToCorrupt{uc($key)} = $CORRUPT_UNPROTECTED;
         }
         else
         {
@@ -186,7 +234,7 @@ my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
 # Key prefix used for secureboot key transition partition.
 # Default key transition to same keys.
 my $SIGN_SBKT_PREFIX_PARAMS =  $SIGN_PREFIX_PARAMS;
-if ( $testRun )
+if ($keyTransition{enabled})
 {
     # Note: simply reordered the keys to create a pseudo production key.
     $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
@@ -195,24 +243,48 @@ if ( $testRun )
 }
 
 ### Open POWER signing
-my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
-    . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
+my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl ";
+# By default key transition container is unused
+my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
+
+# Production signing parameters
+my $OPEN_PRD_SIGN_PARAMS = "--mode production "
+    . " --sign-project-config $sb_signing_config_file";
+# Imprint key signing parameters
+my $OPEN_DEV_SIGN_PARAMS = " -hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
     . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
     . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
-    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key ";
+    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key";
 
-# Key prefix used for secureboot key transition partition.
-# Default key transition to same keys.
-my $OPEN_SIGN_KEY_TRANS_REQUEST =  $OPEN_SIGN_REQUEST;
-if ( $testRun )
+# Handle key transition and production signing logic
+# If in production mode, key transition is not supported yet
+# If in developement mode, key transition can move to either imprint or
+#   production keys
+if ($signMode{$PRODUCTION})
 {
-    # Note: simply reordered the keys to create a pseudo production key.
-    $OPEN_SIGN_KEY_TRANS_REQUEST =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
-            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
-            . "-skp ${DEV_KEY_DIR}/sw_key_a";
+    # Production to Production key transition not supported yet
+    $OPEN_SIGN_REQUEST .= $OPEN_PRD_SIGN_PARAMS;
+    $OPEN_SIGN_KEY_TRANS_REQUEST = "";
+}
+elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
+{
+    $OPEN_SIGN_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+    if ($keyTransition{$IMPRINT})
+    {
+        $OPEN_SIGN_KEY_TRANS_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+    }
+    elsif ($keyTransition{$PRODUCTION})
+    {
+        $OPEN_SIGN_KEY_TRANS_REQUEST .= "$OPEN_PRD_SIGN_PARAMS --sign-project-FW-token SBKT";
+    }
+}
+else
+{
+    $OPEN_SIGN_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+    $OPEN_SIGN_KEY_TRANS_REQUEST = "";
 }
 
-# Secureboot headers
+### Secureboot headers
 # Contains the appropriate flags, prefix, and file names.
 my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
 my %sb_hdrs = (
@@ -247,6 +319,8 @@ $SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
 $SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
 $SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
 $SETTINGS .= %partitionsToCorrupt && $secureboot ? "Corrupt Partitions: ".Dumper \%partitionsToCorrupt : "";
+$SETTINGS .= $secureboot ? "Sign Mode = $sign_mode\n" : "Sign Mode = NA\n";
+$SETTINGS .= $key_transition && $secureboot ? "Key Transition Mode = $key_transition\n" : "Key Transition Mode = NA\n";
 $SETTINGS .= "//====================================================//\n\n";
 print $SETTINGS;
 
@@ -340,7 +414,6 @@ foreach my $header (keys %sb_hdrs)
 # Hardcoded defined order that binfiles should be handled.
 my %partitionDeps = ( HBB => 0,
                       HBI => 1);
-
 sub partitionDepSort
 {
     # If $a exists but $b does not, set $a < $b
@@ -438,6 +511,12 @@ sub manipulateImages
         my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
         my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};
 
+        my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
+        if ($signMode{$PRODUCTION})
+        {
+            $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $eyeCatch ";
+        }
+
         # Used for corrupting partitions. By default all protected offsets start
         # immediately after the container header which is size = PAGE_SIZE.
         # *Note: this is before ECC.
@@ -505,8 +584,7 @@ sub manipulateImages
 
                         if($openSigningTool)
                         {
-                            run_command("$OPEN_SIGN_REQUEST "
-                                . "$openSigningFlags "
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "-protectedPayload $tempImages{PAYLOAD_TEXT} "
                                 . "-out $tempImages{PROTECTED_PAYLOAD}");
                         }
@@ -524,8 +602,7 @@ sub manipulateImages
                     {
                         if($openSigningTool)
                         {
-                            run_command("$OPEN_SIGN_REQUEST "
-                                . "$openSigningFlags  "
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "-protectedPayload $bin_file.protected "
                                 . "-out $tempImages{PROTECTED_PAYLOAD}");
                         }
@@ -544,8 +621,8 @@ sub manipulateImages
                         {
                             my $codeStartOffset = ($eyeCatch eq "HBB") ?
                                 "-code-start-offset 0x00000180" : "";
-                            run_command("$OPEN_SIGN_REQUEST "
-                                . "$openSigningFlags $codeStartOffset "
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "$codeStartOffset "
                                 . "-protectedPayload $bin_file "
                                 . "-out $tempImages{HDR_PHASE}");
                         }
@@ -595,8 +672,7 @@ sub manipulateImages
                 $callerHwHdrFields{configure} = 1;
                 if($openSigningTool)
                 {
-                    run_command("$OPEN_SIGN_REQUEST "
-                        . "$openSigningFlags "
+                    run_command("$CUR_OPEN_SIGN_REQUEST "
                         . "-protectedPayload $bin_file "
                         . "-out $tempImages{HDR_PHASE}");
                 }
@@ -667,7 +743,7 @@ sub manipulateImages
             {
                 run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
             }
-            elsif ($eyeCatch eq "SBKT" && $secureboot && $key_transition)
+            elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
                 $callerHwHdrFields{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
@@ -749,11 +825,11 @@ sub corrupt_partition
     my $bin_file_size = -s $bin_file;
     die "size of $bin_file undef" unless(defined $bin_file_size);
 
-    if ($section eq CORRUPT_PROTECTED)
+    if ($section eq $CORRUPT_PROTECTED)
     {
         $offset = $protected_offset;
     }
-    elsif ($section eq CORRUPT_UNPROTECTED)
+    elsif ($section eq $CORRUPT_UNPROTECTED)
     {
         # If no protected_file file exists for this partition, then that means
         # there is no unprotected section. A protected_file is only created
@@ -785,7 +861,7 @@ sub corrupt_partition
     # If corrupting the unprotected HBI section, corrupt multiple pages in
     # attempt to corrupt a page that is actually used to result in a VFS
     # verify page failure.
-    if (($eyeCatch eq "HBI") && ($section eq CORRUPT_UNPROTECTED))
+    if (($eyeCatch eq "HBI") && ($section eq $CORRUPT_UNPROTECTED))
     {
         $num_pages_to_corrupt = MAX_PAGES_TO_CORRUPT;
     }
@@ -962,6 +1038,8 @@ sub create_sb_key_transition_container
 
     if($openSigningTool)
     {
+        die "Key transition not allowed in $sign_mode mode" if ($OPEN_SIGN_KEY_TRANS_REQUEST eq "");
+
         # Create a signed container with new production keys
         run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
             . "$sb_hdrs{SBKT}{inner}{flags} -protectedPayload $tempImages{RAND_BLOB} "
@@ -978,8 +1056,6 @@ sub create_sb_key_transition_container
         # Sign new production key container with imprint keys
         run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{outer}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
     }
-
-
 
     # Clean up temp images
     foreach my $image (keys %tempImages)
@@ -1052,12 +1128,13 @@ print <<"ENDUSAGE";
                         Multiple '--corrupt' options are allowed, but note the system will checkstop on the
                             first bad partition so multiple may not be that useful.
                         Example: --corrupt HBI --corrupt HBD=unpro
-    --key-transition    Creates secureboot key transition container.
-                        Default transitions to same keys
-                        Default with [--test] is to transition to test production keys.
+    --sign-mode <development|production>   Indicates how to sign partitions with either development keys or production keys
+    --key-transition <imprint|production>   Indicates a key transition is needed and creates a secureboot key transition container.
+                                            Note: "--sign-mode production" is not allowed with "--key-transition imprint"
+                                            With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys.
+    --sb-signing-config-file    Path to ini-formatted config file for production signing
 
   Current Limitations:
-    - Issues with dependency on ENGD build for certain files such as SBE. This
-      is why [--build-all | --install-all ] are used.
+    - Issues with dependency on ENGD build for certain files such as SBE. This is why [--build-all | --install-all ] are used.
 ENDUSAGE
 }
