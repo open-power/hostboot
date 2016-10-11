@@ -839,6 +839,14 @@
     <attribute><id>PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id></attribute>
     <attribute><id>PROC_FSP_MMIO_MASK_SIZE</id></attribute>
+    <attribute><id>PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK</id></attribute>
+    <attribute><id>PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK</id></attribute>
+    <attribute><id>PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_INT_CQ_TM1_BAR_PAGE_SIZE</id></attribute>
+    <attribute><id>PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET</id></attribute>
+    <attribute><id>PROC_INT_CQ_IC_BAR_PAGE_SIZE</id></attribute>
 <!-- p9_setup_bars - End -->
 
     <attribute><id>VDM_DROOP_SMALL_OVERRIDE</id></attribute>
@@ -1200,6 +1208,10 @@
     <attribute><id>PROC_NX_RNG_BAR_ENABLE</id></attribute>
     <attribute><id>PROC_FSP_BAR_ENABLE</id></attribute>
     <attribute><id>PROC_PSI_BRIDGE_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_INT_CQ_PC_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_INT_CQ_VC_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_INT_CQ_TM1_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_INT_CQ_IC_BAR_ENABLE</id></attribute>
 <!-- p9_setup_bars - End -->
 
     <attribute><id>PROC_NX_RNG_FAILED_INT_ENABLE</id></attribute>
