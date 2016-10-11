@@ -124,6 +124,7 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g1_scom.mk
 
 # proc_obus_scominit : Apply scom inits to Obus
 include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
 
 # proc_npu_scominit : Apply scom inits to NPU bus
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
