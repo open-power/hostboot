@@ -29306,6 +29306,248 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>PROC_INT_CQ_PC_BAR_ENABLE</id>
+    <description>
+        INT CQ PC BAR enable
+        DISABLE = 0x0, ENABLE = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_PC_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET</id>
+    <description>
+        INT CQ PC BAR base address offset
+        Attribute holds offset (relative to chip MMIO origin)
+          to program into chip address range field of BAR
+          (excludes system/memsel/group/chip fields)
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK</id>
+    <description>
+        INT CQ PC BAR base address offset mask
+        Attribute holds offset mask (relative to chip MMIO origin)
+          to program into chip address range field of BAR mask
+          (excludes system/memsel/group/chip fields)
+        Value defines which bits of VC_BAR are used during address compares
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_PC_BAR_BASE_ADDR_OFFSET_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_VC_BAR_ENABLE</id>
+    <description>
+        INT CQ VC BAR enable
+        DISABLE = 0x0, ENABLE = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_VC_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET</id>
+    <description>
+        INT CQ VC BAR base address offset
+        Attribute holds offset (relative to chip MMIO origin)
+          to program into chip address range field of BAR
+          (excludes system/memsel/group/chip fields)
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK</id>
+    <description>
+        INT CQ VC BAR base address offset mask
+        Attribute holds offset mask (relative to chip MMIO origin)
+          to program into chip address range field of BAR mask
+          (excludes system/memsel/group/chip fields)
+        Value defines which bits of VC_BAR are used during address compares
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_VC_BAR_BASE_ADDR_OFFSET_MASK</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_TM1_BAR_ENABLE</id>
+    <description>
+        INT CQ TM1 BAR enable
+        DISABLE = 0x0, ENABLE = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_TM1_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET</id>
+    <description>
+        INT CQ TM1 BAR base address offset
+        Attribute holds offset (relative to chip MMIO origin)
+          to program into chip address range field of BAR
+          (excludes system/memsel/group/chip fields)
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_TM1_BAR_BASE_ADDR_OFFSET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_TM1_BAR_PAGE_SIZE</id>
+    <description>
+        INT CQ TM1 BAR page size
+        4K = 0x0, 64K = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+     </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_TM1_BAR_PAGE_SIZE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_IC_BAR_ENABLE</id>
+    <description>
+        INT CQ IC BAR enable
+        DISABLE = 0x0, ENABLE = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_IC_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET</id>
+    <description>
+        INT CQ IC BAR base address offset
+        Attribute holds offset (relative to chip MMIO origin)
+          to program into chip address range field of BAR
+          (excludes system/memsel/group/chip fields)
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_IC_BAR_BASE_ADDR_OFFSET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_INT_CQ_IC_BAR_PAGE_SIZE</id>
+    <description>
+        INT CQ IC (Interrupt Controller) BAR page size
+        4K = 0x0, 64K = 0x1
+        creator: platform
+        consumer: p9_setup_bars
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <readable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_INT_CQ_IC_BAR_PAGE_SIZE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>VDM_ENABLE</id>
     <description>
     Controls the enablement of Voltage Droop Monitors (VDM) in the system.
