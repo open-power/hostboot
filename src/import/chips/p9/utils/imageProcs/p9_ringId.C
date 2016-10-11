@@ -139,7 +139,7 @@ namespace N3
 {
 const GenRingIdList RING_ID_LIST_COMMON[] =
 {
-    {"n3_fure"          , 0x00, 0x05, 0x05, "n3_fure_ring"              , NON_VPD_RING, 0,  0x0EC0000000009000},
+    {"n3_fure"          , 0x00, 0x05, 0x05, "n3_fure_ring"              , NON_VPD_RING, 0,  0x0CC0000000009000},
     {"n3_gptr"          , 0x01, 0x05, 0x05, "n3_gptr_ring"              , NON_VPD_RING, 0,  0x0EC0000000002000},
     {"n3_time"          , 0x02, 0x05, 0x05, "n3_time_ring"              , NON_VPD_RING, 0,  0x0EC0000000000100},
     {"n3_mcs01_fure"    , 0x03, 0x05, 0x05, "n3_mcs01_fure_ring"        , NON_VPD_RING, 0,  0x0020000000009000},
