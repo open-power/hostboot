@@ -52,9 +52,10 @@
 #define P9_XBUS_PHY_BASE_0x06010C00      0x06010C00
 #define P9_ABUS0_PHY_BASE_0x09011000     0x09011000
 #define P9_ABUS3_PHY_BASE_0x0C011000     0x0C011000
-#define P9_NVBUS0_PHY_BASE_0x09011000    0x09011000
-#define P9_NVBUS3_PHY_BASE_0x0C011000    0x0C011000
-#define P9_NVBUS1_PHY_BASE_0x08010C40    0x08010C40
+#define P9_OBUS0_PHY_BASE_0x09010C00     0x09011000
+#define P9_OBUS1_PHY_BASE_0x0A010C00     0x0A010C00
+#define P9_OBUS2_PHY_BASE_0x0B010C00     0x0B010C00
+#define P9_OBUS3_PHY_BASE_0x0C010C00     0x0C010C00
 #define P9_DMI0_PHY_BASE_0x02011A00      0x02011A00
 #define P9_DMI1_PHY_BASE_0x02011E00      0x02011E00
 #define CEN_PHY_BASE_0x02010400          0x02010400
@@ -81,10 +82,10 @@ namespace io
  * @return Field Data
  */
 inline uint64_t get(
-    const uint64_t& i_scom_addr,
-    const uint8_t&  i_start,
-    const uint8_t&  i_width,
-    const uint64_t& i_register_data )
+    const uint64_t i_scom_addr,
+    const uint8_t  i_start,
+    const uint8_t  i_width,
+    const uint64_t i_register_data )
 {
     const uint8_t REGISTER_WIDTH = 64;
     const uint8_t SHIFT          = REGISTER_WIDTH - i_start - i_width;
@@ -103,11 +104,11 @@ inline uint64_t get(
  * @return void
  */
 inline void set(
-    const uint64_t&  i_scom_addr,
-    const uint8_t&   i_start,
-    const uint8_t&   i_width,
-    const uint64_t&  i_data,
-    uint64_t&  io_register_data )
+    const uint64_t  i_scom_addr,
+    const uint8_t   i_start,
+    const uint8_t   i_width,
+    const uint64_t  i_data,
+    uint64_t&   io_register_data )
 {
     const uint8_t REGISTER_WIDTH = 64;
     const uint8_t SHIFT          = REGISTER_WIDTH - i_start - i_width;
@@ -123,28 +124,31 @@ inline void set(
  * @return 32bit encoded base scom address
  */
 template < fapi2::TargetType K >
-inline uint32_t get_base_address( const fapi2::Target < K >& i_target )
+inline uint32_t get_base_address( const fapi2::Target < K > i_target, uint32_t& o_base_addr )
 {
     switch( i_target.getType() )
     {
         case fapi2::TargetType::TARGET_TYPE_XBUS:
-            return P9_XBUS_PHY_BASE_0x06010C00;
+            o_base_addr = P9_XBUS_PHY_BASE_0x06010C00;
 
         case fapi2::TargetType::TARGET_TYPE_ABUS:
-            return P9_ABUS0_PHY_BASE_0x09011000;
+            o_base_addr = P9_ABUS0_PHY_BASE_0x09011000;
 
         case fapi2::TargetType::TARGET_TYPE_MCS:
-            return P9_DMI0_PHY_BASE_0x02011A00;
+            o_base_addr = P9_DMI0_PHY_BASE_0x02011A00;
+
+        case fapi2::TargetType::TARGET_TYPE_OBUS:
+            o_base_addr = P9_OBUS0_PHY_BASE_0x09010C00;
 
         case fapi2::TargetType::TARGET_TYPE_MEMBUF_CHIP:
-            return CEN_PHY_BASE_0x02010400;
+            o_base_addr = CEN_PHY_BASE_0x02010400;
 
         default:
             fapi2::IO_GCR_TARGET_TYPE_NOT_FOUND().set_TARGET( i_target ).execute();
             FAPI_ERR("TargetType not found(0x%X)", i_target.getType());
     }
 
-    return 0x0;
+    return fapi2::current_err;
 }
 
 /**
@@ -159,10 +163,11 @@ inline uint32_t get_base_address( const fapi2::Target < K >& i_target )
  */
 template < fapi2::TargetType K >
 inline uint64_t build_address(
-    const fapi2::Target < K >& i_target,
-    const uint64_t&            i_scom_addr,
-    const uint8_t&             i_group,
-    const uint8_t&             i_lane )
+    const fapi2::Target < K > i_target,
+    const uint64_t            i_scom_addr,
+    const uint8_t             i_group,
+    const uint8_t             i_lane,
+    uint64_t& o_addr )
 {
     const uint8_t ADDRESS_SIZE = 64;
     const uint8_t GROUP_START  = 22;
@@ -172,9 +177,13 @@ inline uint64_t build_address(
     const uint8_t GROUP_SHIFT  = ADDRESS_SIZE - GROUP_START - GROUP_WIDTH;
     const uint8_t LANE_SHIFT   = ADDRESS_SIZE - LANE_START  - LANE_WIDTH;
 
-    return ( i_scom_addr | get_base_address( i_target )
-             | ( (uint64_t) i_group << GROUP_SHIFT )
-             | ( (uint64_t) i_lane  << LANE_SHIFT  ) );
+    uint32_t l_base_addr = 0;
+    FAPI_TRY( get_base_address( i_target, l_base_addr ) )
+    o_addr = ( i_scom_addr | l_base_addr
+               | ( (uint64_t) i_group << GROUP_SHIFT )
+               | ( (uint64_t) i_lane  << LANE_SHIFT  ) );
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
@@ -192,23 +201,24 @@ inline uint64_t build_address(
  */
 template < fapi2::TargetType K >
 inline fapi2::ReturnCode read(
-    const uint64_t&            i_scom_addr,
-    const uint8_t&             i_start,
-    const uint8_t&             i_width,
-    const fapi2::Target < K >& i_target,
-    const uint8_t&             i_group,
-    const uint8_t&             i_lane,
-    uint64_t&                  o_data )
+    const uint64_t            i_scom_addr,
+    const uint8_t             i_start,
+    const uint8_t             i_width,
+    const fapi2::Target < K > i_target,
+    const uint8_t             i_group,
+    const uint8_t             i_lane,
+    uint64_t&                 o_data )
 {
     fapi2::buffer<uint64_t> l_register_data;
 
     // Stitch together the base scom address, register info, group, lane
-    uint64_t address = build_address( i_target, i_scom_addr, i_group, i_lane );
+    uint64_t l_address = 0;
+    FAPI_TRY( build_address( i_target, i_scom_addr, i_group, i_lane, l_address ) );
 
     // Execute fapi2 getscom
-    FAPI_TRY( fapi2::getScom( i_target, address, l_register_data ),
+    FAPI_TRY( fapi2::getScom( i_target, l_address, l_register_data ),
               "getScom Failed(0x%X): Addr(0x%016llX) Data(0x%016llX)",
-              (uint64_t) fapi2::current_err, address, (uint64_t)l_register_data );
+              (uint64_t) fapi2::current_err, l_address, (uint64_t)l_register_data );
 
     o_data = l_register_data;
 fapi_try_exit:
@@ -229,23 +239,24 @@ fapi_try_exit:
  */
 template < fapi2::TargetType K >
 inline fapi2::ReturnCode write(
-    const uint64_t&            i_scom_addr,
-    const uint8_t&             i_start,
-    const uint8_t&             i_width,
-    const fapi2::Target < K >& i_target,
-    const uint8_t&             i_group,
-    const uint8_t&             i_lane,
-    const uint64_t&            i_data )
+    const uint64_t            i_scom_addr,
+    const uint8_t             i_start,
+    const uint8_t             i_width,
+    const fapi2::Target < K > i_target,
+    const uint8_t             i_group,
+    const uint8_t             i_lane,
+    const uint64_t            i_data )
 {
     fapi2::buffer<uint64_t> l_register_data( i_data );
 
     // Stitch together the base scom address, register info, group, lane
-    uint64_t address = build_address( i_target, i_scom_addr, i_group, i_lane );
+    uint64_t l_address = 0;
+    FAPI_TRY( build_address( i_target, i_scom_addr, i_group, i_lane, l_address ) );
 
     // Execute fapi2 putscom
-    FAPI_TRY( fapi2::putScom( i_target, address, l_register_data ),
+    FAPI_TRY( fapi2::putScom( i_target, l_address, l_register_data ),
               "putScom Failed(0x%X): Addr(0x%016llX) Data(0x%016llX)",
-              (uint64_t) fapi2::current_err, address, i_data );
+              (uint64_t) fapi2::current_err, l_address, i_data );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -264,13 +275,13 @@ fapi_try_exit:
  */
 template < fapi2::TargetType K >
 inline fapi2::ReturnCode rmw(
-    const uint64_t&            i_scom_addr,
-    const uint8_t&             i_start,
-    const uint8_t&             i_width,
-    const fapi2::Target < K >& i_target,
-    const uint8_t&             i_group,
-    const uint8_t&             i_lane,
-    const uint64_t&            i_data )
+    const uint64_t            i_scom_addr,
+    const uint8_t             i_start,
+    const uint8_t             i_width,
+    const fapi2::Target < K > i_target,
+    const uint8_t             i_group,
+    const uint8_t             i_lane,
+    const uint64_t            i_data )
 {
     uint64_t l_register_data = 0;
 
