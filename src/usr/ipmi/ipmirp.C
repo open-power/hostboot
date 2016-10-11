@@ -1103,8 +1103,20 @@ namespace IPMI
      */
     BmcInfo_t getBmcInfo(void)
     {
-        //@TODO-RTC:161648-Fill in data
         BmcInfo_t l_info;
+
+        l_info.bulkTransferLpcBaseAddr = REG_HOSTBMC;
+        static size_t size = sizeof(uint8_t);
+        l_info.bulkTransferSize = size;
+        l_info.chipVersion = cpu_dd_level();
+        l_info.smsAttnInterrupt = CTRL_SMS_ATN;
+        l_info.bmcToHostInterrupt = CTRL_B2H_ATN;
+
+        //TODO RTC:162537 Add in non-generic bmc vendors AMI, Aten and OpenBmc
+        char l_vendor[32] = "openpower,generic";
+        strncpy(l_info.bmcVendor,l_vendor,sizeof(l_info.bmcVendor));
+
+
         return l_info;
     }
 
