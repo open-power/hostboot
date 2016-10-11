@@ -689,7 +689,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b1, 15, 1, 63 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b0, 15, 1, 63 );
                 }
 
                 if ((l_def_TRUE == literal_1))
@@ -869,7 +869,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if ((l_def_TRUE == literal_1))
                 {
-                    l_scom_buffer.insert<uint64_t> (literal_0b1, 15, 1, 63 );
+                    l_scom_buffer.insert<uint64_t> (literal_0b0, 15, 1, 63 );
                 }
 
                 if ((l_def_TRUE == literal_1))
