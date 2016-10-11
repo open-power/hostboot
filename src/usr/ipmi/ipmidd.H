@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,37 @@
 /** @file ipmidd.H
  *  @brief Provides the interfaces to the IPMI Device Driver
  */
+
+enum {
+    // Registers. These are fixed for LPC/BT so we can hard-wire them
+    REG_CONTROL = 0xE4,
+    REG_HOSTBMC = 0xE5,
+    REG_INTMASK = 0xE6,
+
+    // Control register bits. The control register is interesting in that
+    // writing 0's never does anything; all registers are either set to 1
+    // when written with a 1 or toggled (1/0) when written with a one. So,
+    // we don't ever need to read-modify-write, we can just write an or'd
+    // mask of bits.
+    CTRL_B_BUSY        = (1 << 7),
+    CTRL_H_BUSY        = (1 << 6),
+    CTRL_OEM0          = (1 << 5),
+    CTRL_SMS_ATN       = (1 << 4),
+    CTRL_B2H_ATN       = (1 << 3),
+    CTRL_H2B_ATN       = (1 << 2),
+    CTRL_CLR_RD_PTR    = (1 << 1),
+    CTRL_CLR_WR_PTR    = (1 << 0),
+
+    IDLE_STATE = (CTRL_B_BUSY | CTRL_B2H_ATN |
+                  CTRL_SMS_ATN | CTRL_H2B_ATN),
+
+    // Bit in the INMASK register which signals to the BMC
+    // to reset it's end of things.
+    INT_BMC_HWRST      = (1 << 7),
+
+    // How long to sychronously wait for the device to change state (in ns)
+    WAIT_TIME = 100000000,
+};
 
 /**
  *  @brief IPMI Device Driver Class
