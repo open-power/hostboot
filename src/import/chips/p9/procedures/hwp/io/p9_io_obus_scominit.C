@@ -51,6 +51,7 @@
 //------------------------------------------------------------------------------
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
+#include <p9_obus_scom.H>
 #include <p9_io_obus_scominit.H>
 
 
@@ -90,16 +91,7 @@ fapi2::ReturnCode p9_io_obus_scominit(
 
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
-//TODO:
-#if 0
     FAPI_EXEC_HWP(rc, p9_obus_scom, i_target, l_system_target);
-#endif
-
-    FAPI_INF("Invoke FAPI procedure core: connected_target");
-//TODO:
-#if 0
-    FAPI_EXEC_HWP(rc, p9_obus_scom, i_connected_target, l_system_target);
-#endif
 
     // mark HWP exit
     FAPI_INF("p9_io_obus_scominit: ...Exiting");
