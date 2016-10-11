@@ -31,18 +31,26 @@
 namespace CONSOLE
 {
 
+    const uint8_t SERIAL_IRQ        = 4;
+
+    // Host SerlIRQ interrupt type for SUART1
+    const uint8_t RESERVED          = 0x00;
+    const uint8_t LOW_LEVEL_TRIG    = 0x01;
+    const uint8_t RISING_EDGE_TRIG  = 0x02;
+    const uint8_t HIGH_LEVEL_TRIG   = 0x03;
+
 /**
  * Structure to return UART information in
  */
 struct UartInfo_t
 {
-    //@TODO-RTC:161647-Add more details/comments
-    uint64_t lpcBaseAddr;
-    uint32_t lpcSize;
-    uint32_t clockFreqHz;
-    uint32_t freqHz;
-    uint8_t interruptNum;
-    uint8_t interruptTrigger;
+    uint64_t lpcBaseAddr; //< Base address of the UART device the LPC bus
+    uint32_t lpcSize; //< Size of the UART device address space on LPC bus
+    uint32_t clockFreqHz; //< Clock Frequency of the UART baud clock in Hz
+    uint32_t freqHz; //< Current baud rate of the UART device
+    uint8_t interruptNum; //< UART Interrupt Number
+    uint8_t interruptTrigger; //< UART trigger type
+        //< 0x01: low level, 0x02: rising edge, 0x03: high level
 };
 
 /**

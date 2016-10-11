@@ -226,8 +226,15 @@ namespace CONSOLE
      */
     UartInfo_t getUartInfo(void)
     {
-        //@TODO-RTC:161647-Fill in information for HDAT
         UartInfo_t l_info;
+
+        l_info.lpcBaseAddr = g_uartBase;
+        l_info.lpcSize = sizeof(uint8_t);
+        l_info.clockFreqHz = g_uartClock;
+        l_info.freqHz = g_uartBaud;
+        l_info.interruptNum = SERIAL_IRQ;
+        l_info.interruptTrigger = LOW_LEVEL_TRIG;
+
         return l_info;
     };
 }
