@@ -1,10 +1,10 @@
 config TPMDD
-    default n
+    default y
     depends on TPM_NUVOTON
     help
         Enable TPM support
 
 config TPM_NUVOTON
-    default n
+    default y
     help
         Enable Nuvoton TPM I2C driver
