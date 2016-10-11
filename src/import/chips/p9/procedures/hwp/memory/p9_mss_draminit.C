@@ -60,8 +60,8 @@ extern "C"
 
         mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
 
-        static const uint64_t PCLK_INITIAL_VALUE = 0x02;
-        static const uint64_t NCLK_INITIAL_VALUE = 0x01;
+        constexpr uint64_t PCLK_INITIAL_VALUE = 0b10;
+        constexpr uint64_t NCLK_INITIAL_VALUE = 0b01;
 
         auto l_mca = i_target.getChildren<TARGET_TYPE_MCA>();
 
@@ -96,9 +96,6 @@ extern "C"
             mss::ccs::ue_disable(i_target, l_ccs_config, mss::LOW);
             mss::ccs::copy_cke_to_spare_cke(i_target, l_ccs_config, mss::HIGH);
 
-#ifndef JIM_SAYS_TURN_OFF_ECC
-            mss::ccs::disable_ecc(i_target, l_ccs_config);
-#endif
             FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config) );
         }
 
