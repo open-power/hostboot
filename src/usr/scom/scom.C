@@ -420,7 +420,15 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 //  or we saw an error, then we're done
                 if (scomout.done || scomout.piberr)
                 {
-                    break;
+                    // we should never see this error code so we are most
+                    //  likely going to fail, but since the hardware team
+                    //  cannot explain why we get this we're going to
+                    //  poll for awhile just in case it could work with
+                    //  a retry
+                    if( scomout.piberr != PIB::PIB_RESOURCE_OCCUPIED )
+                    {
+                        break;
+                    }
                 }
 
                 nanosleep( 0, 10000 ); //sleep for 10,000 ns
