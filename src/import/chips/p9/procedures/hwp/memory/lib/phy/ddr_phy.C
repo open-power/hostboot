@@ -99,7 +99,7 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     fapi2::buffer<uint64_t> l_data;
     const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
     constexpr uint64_t l_zcal_reset_reg = pcTraits<TARGET_TYPE_MCA>::PC_RESETS_REG;
-
+    constexpr uint64_t l_zcal_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
     uint8_t is_sim = 0;
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
@@ -113,17 +113,22 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     mss::pc::set_enable_zcal(l_data, mss::HIGH);
     FAPI_TRY( mss::scom_blastah(l_ports, l_zcal_reset_reg, l_data) );
 
-    // 12. Wait at least 1024 dphy_gckn cycles
+    // 12. Wait at least 1024 dphy_gckn cycles (no sense in doing this in the polling loop as
+    // we'll end up doing this delay for every por when we only need to do it once since we
+    // kicked them all off in parallel
     fapi2::delay(mss::cycles_to_ns(i_target, 1024), mss::cycles_to_simcycles(1024));
 
-    // 13. Deassert the ZCNTL impedance controller enable, Check for DONE in DDRPHY_PC_DLL_ZCAL
-    mss::pc::set_enable_zcal(l_data, mss::LOW);
-    FAPI_TRY( mss::scom_blastah(l_ports, l_zcal_reset_reg, l_data) );
-
+    // 13. Check for DONE in DDRPHY_PC_DLL_ZCAL
     for (const auto& p : l_ports)
     {
-        FAPI_TRY( mss::pc::read_dll_zcal_status(p, l_data) );
-        FAPI_ASSERT(mss::pc::get_zcal_status(l_data) == mss::YES,
+        bool l_poll = mss::poll(p, l_zcal_status_reg, poll_parameters(),
+                                [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_INF("phy control zcal cal stat 0x%llx, remaining: %d", stat_reg, poll_remaining);
+            return mss::pc::get_zcal_status(stat_reg) == mss::YES;
+        });
+
+        FAPI_ASSERT(l_poll,
                     fapi2::MSS_ZCNTL_FAILED_TO_COMPLETE().set_MCA_IN_ERROR(p),
                     "zctl enable failed: %s", mss::c_str(p));
     }
@@ -193,7 +198,10 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
         const states i_state )
 {
     // From the DDR PHY workbook
-    constexpr uint64_t CONTINUOUS_UPDATE = 0x8004;
+    constexpr uint64_t CONTINUOUS_UPDATE = 0x8024;
+
+    FAPI_INF("continuous update: 0x%x", CONTINUOUS_UPDATE);
+
     constexpr uint64_t SIM_OVERRIDE = 0x8080;
     constexpr uint64_t PHASE_CNTL_EN = 0x8020;
 
@@ -205,6 +213,13 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
     std::vector<uint64_t> addrs(
     {
         MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0, MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1,
+        MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_0,
+        MCA_DDRPHY_DP16_SYSCLK_PR0_P0_1, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_1,
+        MCA_DDRPHY_DP16_SYSCLK_PR0_P0_2, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_2,
+        MCA_DDRPHY_DP16_SYSCLK_PR0_P0_3, MCA_DDRPHY_DP16_SYSCLK_PR1_P0_3,
+
+        // Don't enable MCA_DDRPHY_DP16_SYSCLK_PR1_P0_4 on Nimbus, there is no dp8 there
+        MCA_DDRPHY_DP16_SYSCLK_PR0_P0_4,
     } );
 
     if (l_mca.size() == 0)
@@ -243,8 +258,18 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
-    FAPI_INF("Write 0x0000 into the PC Resets Register. This deasserts the SysClk Reset.");
-    FAPI_TRY( mss::scom_blastah(mss::find_targets<TARGET_TYPE_MCA>(i_target), MCA_DDRPHY_PC_RESETS_P0, 0) );
+    typedef pcTraits<TARGET_TYPE_MCA> TT;
+
+    // Can't just cram 0's in to PC_RESETS as we can't clear the ZCTL_ENABLE bit
+    FAPI_INF("Clear SysClk reset in the PC Resets Register. This deasserts the SysClk Reset.");
+
+    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    {
+        fapi2::buffer<uint64_t> l_read;
+        FAPI_TRY( mss::getScom(p, TT::PC_RESETS_REG, l_read) );
+        l_read.clearBit<TT::SYSCLK_RESET>();
+        FAPI_TRY( mss::putScom(p, TT::PC_RESETS_REG, l_read) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -282,34 +307,87 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
     {
         // Check the ADR lock bit
         // Little duplication - makes things more clear and simpler, and allows us to callout the
-        // bugger which first caused a problem.
+        // bugger which first caused a problem. Since we waited before the check (us) was called
+        // we can just use the default poll parameters. It will also allow all the subsequent
+        // polls to complete quickly - as if they're done they don't need a delay.
 
-        FAPI_TRY( mss::getScom(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, l_read) );
-        FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>() == mss::ON,
-                     fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(0),
-                     "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 0,
-                     MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, l_read );
+        FAPI_INF("checking %s MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0 0x%016x",
+                 mss::c_str(p), MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0);
 
-        FAPI_TRY( mss::getScom(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, l_read) );
-        FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1_ADR1_BB_LOCK>() == mss::ON,
-                     fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(1),
-                     "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 1,
-                     MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, l_read );
+        FAPI_ASSERT(
+            mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, poll_parameters(),
+                      [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_INF("adr32s0 sysclk pr bb lock 0x%llx, remaining: %d", stat_reg, poll_remaining);
+            l_read = stat_reg;
+            return stat_reg.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK>() == mss::ON;
+        }),
+        fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(0),
+        "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 0,
+        MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, l_read
+        );
+
+
+        FAPI_INF("checking %s MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1 0x%016x",
+                 mss::c_str(p), MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1);
+
+        FAPI_ASSERT(
+            mss::poll(p, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, poll_parameters(),
+                      [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_INF("adr32s1 sysclk pr bb lock 0x%llx, remaining: %d", stat_reg, poll_remaining);
+            l_read = stat_reg;
+            return stat_reg.getBit<MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1_ADR1_BB_LOCK>() == mss::ON;
+        }),
+        fapi2::MSS_ADR_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ADR(1),
+        "ADR failed bb lock. ADR%d register 0x%016lx 0x%016lx", 1,
+        MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S1, l_read
+        );
 
         // Pop thru the registers on the ports and see if all the sysclks are locked.
         // FFDC regiser collection will collect interesting information so we only need
         // to catch the first fail.
         for (const auto r : l_addresses)
         {
+
             FAPI_TRY( mss::getScom(p, r, l_read) );
 
-            FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0>() == mss::ON,
-                         fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(0),
-                         "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 0, r, l_read );
+            FAPI_INF("checking %s MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0 0x%016x",
+                     mss::c_str(p), l_read);
 
-            FAPI_ASSERT( l_read.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK1>() == mss::ON,
-                         fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(1),
-                         "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 1, r, l_read );
+            FAPI_ASSERT(
+                mss::poll(p, r, poll_parameters(),
+                          [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+            {
+                FAPI_INF("dp16 sysclk pr bb lock 0x%llx, remaining: %d", stat_reg, poll_remaining);
+                l_read = stat_reg;
+                return stat_reg.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK0>() == mss::ON;
+            }),
+
+            fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(0),
+            "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 0, r, l_read
+            );
+
+            FAPI_INF("checking %s MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK1 0x%016x",
+                     mss::c_str(p), l_read);
+
+            // We're on Nimbus, there are no spares which means the BB_LOCK1 of the last dp16 will never lock
+            if (r != MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_4)
+            {
+
+                FAPI_ASSERT(
+                    mss::poll(p, r, poll_parameters(),
+                              [&l_read](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+                {
+                    FAPI_INF("dp16 sysclk pr bb lock 0x%llx, remaining: %d", stat_reg, poll_remaining);
+                    l_read = stat_reg;
+                    return stat_reg.getBit<MCA_DDRPHY_DP16_SYSCLK_PR_VALUE_P0_0_01_BB_LOCK1>() == mss::ON;
+                }),
+
+                fapi2::MSS_DP16_BANG_BANG_FAILED_TO_LOCK().set_MCA_IN_ERROR(p).set_ROTATOR(1),
+                "DP16 failed bb lock. rotator %d register 0x%016lx 0x%016lx", 1, r, l_read
+                );
+            }
         }
     }
 

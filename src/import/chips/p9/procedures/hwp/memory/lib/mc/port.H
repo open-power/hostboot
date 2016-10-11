@@ -440,7 +440,7 @@ fapi2::ReturnCode drive_mem_clks( const fapi2::Target<T>& i_target, const uint64
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Drive mem clocks");
+    FAPI_INF("Drive mem clocks pclk: 0x%x nclk 0x%x", i_pclk, i_nclk);
     FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
 
     l_data.insertFromRight<TT::CFG_DDR_DPHY_NCLK, TT::CFG_DDR_DPHY_NCLK_LEN>(i_nclk);

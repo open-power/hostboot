@@ -64,11 +64,13 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY(mss::change_force_mclk_low(i_target, mss::HIGH),
+        FAPI_TRY(mss::change_force_mclk_low(i_target, mss::LOW),
                  "force_mclk_low (set high) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
         // New for Nimbus - perform duty cycle clock distortion calibration
+#ifdef RUN_DCD
         FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target) );
+#endif
 
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
         FAPI_TRY( mss::dp16::reset_sysclk(i_target) );
@@ -150,7 +152,7 @@ extern "C"
         //
 
         // Per J. Bialas, force_mclk_low can be dasserted.
-        FAPI_TRY(mss::change_force_mclk_low(i_target, mss::LOW),
+        FAPI_TRY(mss::change_force_mclk_low(i_target, mss::HIGH),
                  "force_mclk_low (set low) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
         // If mss_unmask_ddrphy_errors gets it's own bad rc,
