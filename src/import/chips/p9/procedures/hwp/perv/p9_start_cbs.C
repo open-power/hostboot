@@ -68,6 +68,11 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     int l_timeout = 0;
     FAPI_INF("p9_start_cbs: Entering ...");
 
+    FAPI_DBG("Clearing  Selfboot message register before every boot ");
+    // buffer is init value is 0
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_MSG_FSI, l_data32));
+
+
     l_sbe_start_value = !i_sbe_start;
 
     FAPI_DBG("Configuring Prevent SBE start option");
