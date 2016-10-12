@@ -44,6 +44,7 @@
 #include <lib/spd/common/spd_decoder.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/cycle_time.H>
+#include <lib/freq/sync.H>
 #include <lib/utils/conversions.H>
 #include <lib/eff_config/timing.H>
 #include <lib/utils/find.H>
@@ -66,17 +67,19 @@ namespace mss
 /// @param[in]  i_caches decoder caches
 ///
 cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                         const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches):
+                         const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches,
+                         fapi2::ReturnCode& o_rc):
     iv_dimm_list_empty(false),
+    iv_target(i_target),
     iv_largest_taamin(0),
     iv_proposed_tck(0),
-    iv_common_CL(UINT64_MAX) // Masks out supported CLs
+    iv_common_cl(UINT64_MAX) // Masks out supported CLs
 {
-    const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(i_target);
+    const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(iv_target);
 
     if(l_dimm_list.empty())
     {
-        FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::c_str(i_target));
+        FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::c_str(iv_target));
         iv_dimm_list_empty = true;
         return;
     }
@@ -86,105 +89,169 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
         const auto l_dimm_pos = pos(l_dimm);
 
         // Find decoder factory for this dimm position
+        // Can't be const auto because HB needs to implement
+        // something - AAM
         auto l_it = i_caches.find(l_dimm_pos);
         FAPI_TRY( check::spd::invalid_cache(l_dimm,
                                             l_it != i_caches.end(),
                                             l_dimm_pos),
-                  "Failed to get valid cache");
+                  "%s. Failed to get valid cache", mss::c_str(iv_target) );
 
         {
             // Retrive timing values from the SPD
-            uint64_t l_tAAmin_in_ps = 0;
-            uint64_t l_tCKmax_in_ps = 0;
-            uint64_t l_tCKmin_in_ps = 0;
+            uint64_t l_taa_min_in_ps = 0;
+            uint64_t l_tckmax_in_ps = 0;
+            uint64_t l_tck_min_in_ps = 0;
 
-            FAPI_TRY( get_taamin(l_dimm, l_it->second, l_tAAmin_in_ps),
-                      "Failed to get tAAmin");
-            FAPI_TRY( get_tckmax(l_dimm, l_it->second, l_tCKmax_in_ps),
-                      "Failed to get tCKmax" );
-            FAPI_TRY( get_tckmin(l_dimm, l_it->second, l_tCKmin_in_ps),
-                      "Failed to get tCKmin");
+            FAPI_TRY( get_taamin(l_dimm, l_it->second, l_taa_min_in_ps),
+                      "%s. Failed to get tAAmin", mss::c_str(iv_target) );
+            FAPI_TRY( get_tckmax(l_dimm, l_it->second, l_tckmax_in_ps),
+                      "%s. Failed to get tCKmax", mss::c_str(iv_target) );
+            FAPI_TRY( get_tckmin(l_dimm, l_it->second, l_tck_min_in_ps),
+                      "%s. Failed to get tCKmin", mss::c_str(iv_target) );
 
             // Determine largest tAAmin value
-            iv_largest_taamin = std::max(iv_largest_taamin, l_tAAmin_in_ps);
+            iv_largest_taamin = std::max(iv_largest_taamin, l_taa_min_in_ps);
 
             // Determine a proposed tCK value that is greater than or equal tCKmin
             // But less than tCKmax
-            iv_proposed_tck = std::max(iv_proposed_tck, l_tCKmin_in_ps);
-            iv_proposed_tck = std::min(iv_proposed_tck, l_tCKmax_in_ps);
+            iv_proposed_tck = std::max(iv_proposed_tck, l_tck_min_in_ps);
+            iv_proposed_tck = std::min(iv_proposed_tck, l_tckmax_in_ps);
+        }
+
+        // Collecting stack type
+        // If I have at least one 3DS DIMM connected I have
+        // to use 3DS tAAmax of 21.5 ps versus 18 ps for non-3DS DDR4
+        if( iv_is_3ds != loading::IS_3DS)
+        {
+            uint8_t l_stack_type = 0;
+            FAPI_TRY( l_it->second->prim_sdram_signal_loading(l_dimm, l_stack_type) );
+
+            // Is there a more algorithmic efficient approach? - AAM
+            iv_is_3ds = (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS) ?
+                        loading::IS_3DS : loading::NOT_3DS;
         }
 
         {
             // Retrieve dimm supported cas latencies from SPD
-            uint64_t l_dimm_supported_CL = 0;
+            uint64_t l_dimm_supported_cl = 0;
             FAPI_TRY( l_it->second->supported_cas_latencies(l_dimm,
-                      l_dimm_supported_CL),
-                      "Failed to get supported CAS latency");
+                      l_dimm_supported_cl),
+                      "%s. Failed to get supported CAS latency", mss::c_str(iv_target) );
 
-            // ANDing bitmap from all modules creates a bitmap w/a common CL
-            iv_common_CL &= l_dimm_supported_CL;
+            // Bitwise ANDING the bitmap from all modules creates a bitmap w/a common CL
+            iv_common_cl &= l_dimm_supported_cl;
         }
     }// dimm
 
+    // Limit tCK from the max supported dimm speed in the system
+    // So that this is taken into account when calculating CL
+    {
+        // Defaulting to non-zero speed
+        uint64_t l_freq_override = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
+        uint64_t l_tck_override_in_ps = 0;
+
+        FAPI_TRY( select_supported_freq(iv_target, l_freq_override),
+                  "%s. Failed select_supported_freq()", mss::c_str(iv_target) );
+        FAPI_TRY( freq_to_ps(l_freq_override, l_tck_override_in_ps),
+                  "%s. Failed freq_to_ps()", mss::c_str(iv_target) );
+
+        FAPI_INF("%s. Selected supported dimm speed %d MT/s (Clock period %d in ps)",
+                 mss::c_str(iv_target), l_freq_override, l_tck_override_in_ps);
+
+        iv_proposed_tck = std::max( l_tck_override_in_ps, iv_proposed_tck );
+        FAPI_INF("%s. Initial proposed tCK in ps: %d", mss::c_str(iv_target), iv_proposed_tck);
+    }
+
     // Why didn't I encapsulate common CL operations and checking in a function
     // like the timing params? Well, I want to check the "final" common CL and
-    // the creation of common CLs (ANDing bits) is dimm level operation
-    FAPI_ASSERT(iv_common_CL != 0,
+    // the creation of common CLs (bitwise ANDING) is at the dimm level operation
+    FAPI_ASSERT(iv_common_cl != 0,
                 fapi2::MSS_NO_COMMON_SUPPORTED_CL().
-                set_CL_SUPPORTED(iv_common_CL).
-                set_MCS_TARGET(i_target),
-                "No common CAS latencies (CL bitmap = 0)");
+                set_CL_SUPPORTED(iv_common_cl).
+                set_MCS_TARGET(iv_target),
+                "%s. No common CAS latencies (CL bitmap = 0)",
+                mss::c_str(iv_target) );
 
-    FAPI_DBG("Supported CL bitmap 0x%llX", iv_common_CL);
+    FAPI_INF("%s. Supported CL bitmap 0x%llX", mss::c_str(iv_target), iv_common_cl);
 
-    // If we reach here al instance vars should have successfully initialized
+    // If we reach here all member vars should have successfully initialized
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
     // If we reach here something failed above.
 fapi_try_exit:
-    FAPI_ERR("Something went wrong retreiving dimm info");
+    o_rc = fapi2::FAPI2_RC_FALSE;
+    FAPI_ERR("%s. Something went wrong retrieving DIMM info", mss::c_str(iv_target) );
 
 }// ctor
 
 
 ///
-/// @brief      Calculates CAS latency and checks if it is supported and within JEDEC spec.
+/// @brief      Constructor that allows the user to set desired data in lieu of SPD
 /// @param[in]  i_target the controller target
+/// @param[in]  i_taa_min largest tAAmin we want to set in picoseconds
+/// @param[in]  i_tck_min proposed tCKmin in picoseconds
+/// @param[in]  i_common_cl_mask common CAS latency mask we want to force (bitmap)
+/// @param[in]  i_is_3ds boolean for whether this is a 3DS SDRAM, 3DS is true, false otherwise (default)
+///
+cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                         const uint64_t i_taa_min,
+                         const uint64_t i_tck_min,
+                         const uint64_t i_common_cl_mask,
+                         const loading i_is_3ds):
+    iv_dimm_list_empty(false),
+    iv_target(i_target),
+    iv_largest_taamin(i_taa_min),
+    iv_proposed_tck(i_tck_min),
+    iv_common_cl(i_common_cl_mask),
+    iv_is_3ds(i_is_3ds)
+{
+    const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(iv_target);
+
+    if(l_dimm_list.empty())
+    {
+        FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::c_str(iv_target));
+        iv_dimm_list_empty = true;
+    }
+}
+
+///
+/// @brief      Calculates CAS latency and checks if it is supported and within JEDEC spec.
 /// @param[out] o_cas_latency selected CAS latency
-/// @param[out] o_tCK cycle time corresponding to seleted CAS latency
+/// @param[out] o_tck cycle time corresponding to selected CAS latency
 /// @return     fapi2::FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode cas_latency::find_CL(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                       uint64_t& o_cas_latency,
-                                       uint64_t& o_tCK)
+fapi2::ReturnCode cas_latency::find_cl(uint64_t& o_cas_latency,
+                                       uint64_t& o_tck)
 {
     uint64_t l_desired_cas_latency = 0;
 
     if(!iv_dimm_list_empty)
     {
         // Create a vector filled with common CLs from buffer
-        std::vector<uint64_t> l_supported_CLs = create_common_cl_vector(iv_common_CL);
+        std::vector<uint64_t> l_supported_cls = integral_bitmap_to_vector(iv_common_cl);
 
         //For a proposed tCK value between tCKmin(all) and tCKmax, determine the desired CAS Latency.
-        l_desired_cas_latency = calc_cas_latency(iv_largest_taamin, iv_proposed_tck);
+        FAPI_TRY( calc_cas_latency(iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
+                  "%s. Failed to calculate CAS latency", mss::c_str(iv_target) );
 
         //Chose an actual CAS Latency (CLactual) that is greater than or equal to CLdesired
         //and is supported by all modules on the memory channel
-        FAPI_TRY( choose_actual_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
-                  "Failed choose_actual_CL()");
+        FAPI_TRY( is_cl_supported_in_common(l_supported_cls, l_desired_cas_latency),
+                  "%s. Failed to find a common CAS latency supported among all modules", mss::c_str(iv_target) );
 
-        // Once the calculation of CLactual is completed, the BIOS must also
+        // Once the calculation of CLactual is completed
         // verify that this CAS Latency value does not exceed tAAmax.
-        //If not, choose a lower CL value and repeat until a solution is found.
-        FAPI_TRY( validate_valid_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
-                  "Failed validate_valid_CL()");
+        FAPI_TRY( is_cl_exceeding_taa_max (l_desired_cas_latency, iv_proposed_tck),
+                  "%s. Failed to find a CL value that doesn't exceed tAAmax", mss::c_str(iv_target) );
     }
 
     // Update output values after all criteria is met
     // If the MCS has no dimm configured than both
     // l_desired_latency & iv_proposed_tck is 0 by initialization
     o_cas_latency = l_desired_cas_latency;
-    o_tCK = iv_proposed_tck;
+    o_tck = iv_proposed_tck;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -207,27 +274,32 @@ fapi2::ReturnCode cas_latency::get_taamin(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->min_cas_latency_time(i_target, l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_min_taa(i_target, l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase),
+              "%s. Failed medium_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase),
+              "%s. Failed fine_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->min_cas_latency_time(i_target, l_timing_mtb),
+              "%s. Failed min_cas_latency_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_offset_min_taa(i_target, l_timing_ftb),
+              "%s. Failed fine_offset_min_taa()", mss::c_str(iv_target) );
 
     // Calculate timing value
-    o_value = uint64_t(calc_timing_from_timebase(l_timing_mtb,
-                       l_medium_timebase,
-                       l_timing_ftb,
-                       l_fine_timebase));
+    o_value = spd::calc_timing_from_timebase(l_timing_mtb,
+              l_medium_timebase,
+              l_timing_ftb,
+              l_fine_timebase);
 
     // Sanity check
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
                 set_DIMM_TARGET(i_target),
-                "tAAmin invalid (<= 0) : %d",
+                "%s. tAAmin invalid (<= 0) : %d",
+                mss::c_str(iv_target),
                 o_value);
 
-    FAPI_DBG( "%s. tAAmin (ps): %d",
-              c_str(i_target),
+    FAPI_INF( "%s. tAAmin (ps): %d",
+              mss::c_str(iv_target),
               o_value);
 
 fapi_try_exit:
@@ -252,33 +324,37 @@ fapi2::ReturnCode cas_latency::get_tckmin(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->min_cycle_time(i_target, l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_min_tck(i_target, l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase),
+              "%s. Failed medium_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase),
+              "%s. Failed fine_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->min_cycle_time(i_target, l_timing_mtb),
+              "%s. Failed min_cycle_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_offset_min_tck(i_target, l_timing_ftb),
+              "%s. Failed fine_offset_min_tck()", mss::c_str(iv_target) );
 
     // Calculate timing value
-    o_value = uint64_t( calc_timing_from_timebase(l_timing_mtb,
-                        l_medium_timebase,
-                        l_timing_ftb,
-                        l_fine_timebase) );
+    o_value = spd::calc_timing_from_timebase(l_timing_mtb,
+              l_medium_timebase,
+              l_timing_ftb,
+              l_fine_timebase);
 
     // Sanity check
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
                 set_DIMM_TARGET(i_target),
-                "tCKmin invalid (<= 0) : %d",
+                "%s. tCKmin invalid (<= 0) : %d",
+                mss::c_str(iv_target),
                 o_value);
 
-    FAPI_DBG("%s. tCKmin (ps): %d",
-             c_str(i_target),
+    FAPI_INF("%s. tCKmin (ps): %d",
+             mss::c_str(iv_target),
              o_value );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief      Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
@@ -297,27 +373,32 @@ fapi2::ReturnCode cas_latency::get_tckmax(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->max_cycle_time(i_target, l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_max_tck(i_target, l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase),
+              "%s. Failed medium_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase),
+              "%s. Failed fine_timebase()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->max_cycle_time(i_target, l_timing_mtb),
+              "%s. Failed max_cycle_time()", mss::c_str(iv_target) );
+    FAPI_TRY( i_pDecoder->fine_offset_max_tck(i_target, l_timing_ftb),
+              "%s. Failed fine_offset_max_tck()", mss::c_str(iv_target) );
 
     // Calculate timing value
-    o_value = uint64_t(calc_timing_from_timebase(l_timing_mtb,
-                       l_medium_timebase,
-                       l_timing_ftb,
-                       l_fine_timebase) );
+    o_value = spd::calc_timing_from_timebase(l_timing_mtb,
+              l_medium_timebase,
+              l_timing_ftb,
+              l_fine_timebase);
 
     // Sanity check
     FAPI_ASSERT(o_value > 0,
                 fapi2::MSS_INVALID_TIMING_VALUE().
                 set_VALUE(o_value).
                 set_DIMM_TARGET(i_target),
-                "tCKmax invalid (<= 0) : %d",
+                "%s. tCKmax invalid (<= 0) : %d",
+                mss::c_str(iv_target),
                 o_value);
 
-    FAPI_DBG( "%s. tCKmax (ps): %d",
-              c_str(i_target),
+    FAPI_INF( "%s. tCKmax (ps): %d",
+              mss::c_str(iv_target),
               o_value);
 
 fapi_try_exit:
@@ -326,231 +407,133 @@ fapi_try_exit:
 
 ///
 /// @brief      Gets max CAS latency (CL) for the appropriate High/Low Range
-/// @param[in]  i_supported_CL
+/// @param[in]  i_supported_cl
 /// @return     the maximum supported CL
 /// @note       Depends on bit 7 of byte 23 from the DDR4 SPD
 ///
-inline uint64_t cas_latency::get_max_CL(const fapi2::buffer<uint64_t> i_supported_CL) const
+inline uint64_t cas_latency::get_max_cl(const fapi2::buffer<uint64_t> i_supported_cl) const
 {
-    constexpr uint64_t CAS_LAT_RANGE_BIT = 31;
-
     // If the last of Byte 23 of the SPD is 1, this selects CL values
     // in the High CL range (23 to 52)
 
     // If the last bit of Byte 23 of the SPD is 0, this selects CL values
     // in the Low CL range (7 to 36)
     //Assuming bitmap is right aligned
-    return i_supported_CL.getBit<CAS_LAT_RANGE_BIT>() ? HIGH_RANGE_MAX_CL_DDR4 : LOW_RANGE_MAX_CL_DDR4;
+    return i_supported_cl.getBit<CAS_LAT_RANGE_BIT>() ? HIGH_RANGE_MAX_CL_DDR4 : LOW_RANGE_MAX_CL_DDR4;
 }
 
 ///
 /// @brief      Gets min CAS latency (CL) for the appropriate High/Low Range
-/// @param[in]  i_supported_CL
+/// @param[in]  i_supported_cl
 /// @return     the minimum supported CL
 /// @note       Depends on bit 7 of byte 23 from the DDR4 SPD
 ///
-inline uint64_t cas_latency::get_min_CL(const fapi2::buffer<uint64_t>& i_supported_CL) const
+inline uint64_t cas_latency::get_min_cl(const fapi2::buffer<uint64_t>& i_supported_cl) const
 {
     // If the last of Byte 23 of the SPD is 1, this selects CL values
     // in the High CL range (23 to 52)
 
     // If the last bit of Byte 23 of the SPD is 0, this selects CL values
     // in the Low CL range (7 to 36)
-    constexpr uint64_t CAS_LAT_RANGE_BIT = 31;
-
-    return  i_supported_CL.getBit<CAS_LAT_RANGE_BIT>() ? HIGH_RANGE_MIN_CL_DDR4 : LOW_RANGE_MIN_CL_DDR4;
+    return  i_supported_cl.getBit<CAS_LAT_RANGE_BIT>() ? HIGH_RANGE_MIN_CL_DDR4 : LOW_RANGE_MIN_CL_DDR4;
 
 }
 
 ///
 /// @brief Calculates CAS latency time from tCK and tAA
-/// @param[in]  i_tAA cas latency time
-/// @param[in]  i_tCK min cycle time
-/// @return     o_cas_latency calculated CAS latency
+/// @param[in]  i_taa cas latency time
+/// @param[in]  i_tck min cycle time
+/// @param[out] o_cas_latency calculated CAS latency
+/// @return     FAPI2_RC_SUCCESS iff okay
 ///
-inline uint64_t cas_latency::calc_cas_latency(const uint64_t i_tAA, const uint64_t i_tCK) const
+inline fapi2::ReturnCode cas_latency::calc_cas_latency(const uint64_t i_taa,
+        const uint64_t i_tck,
+        uint64_t& o_cas_latency) const
 {
-    uint64_t l_quotient = i_tAA / i_tCK;
-    uint64_t l_remainder = i_tAA % i_tCK;
-    uint64_t o_cas_latency = l_quotient + (l_remainder == 0 ? 0 : 1);
+    FAPI_TRY( spd::calc_nck(i_taa, i_tck, INVERSE_DDR4_CORRECTION_FACTOR, o_cas_latency) );
 
-    FAPI_DBG("Calculated CL = tAA / tCK : %d / %d = %d",
-             i_tAA,
-             i_tCK,
+    FAPI_INF("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
+             mss::c_str(iv_target),
+             i_taa,
+             i_tck,
              o_cas_latency);
 
-    return o_cas_latency;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
 /// @brief      Helper function to create a vector of supported CAS latencies from a bitmap
-/// @param[in]  i_common_CL common CAS latency bitmap
+/// @param[in]  i_common_cl common CAS latency bitmap
 /// @return     vector of supported CAS latencies
 ///
-std::vector<uint64_t> cas_latency::create_common_cl_vector(const uint64_t i_common_CL) const
+std::vector<uint64_t> cas_latency::integral_bitmap_to_vector(const uint64_t i_common_cl) const
 {
     std::vector<uint64_t> l_vector;
-    fapi2::buffer<uint64_t> l_CL_mask(i_common_CL);
+    fapi2::buffer<uint64_t> l_cl_mask(i_common_cl);
 
-    uint64_t min_CL = get_min_CL(l_CL_mask);
-    uint64_t max_CL = get_max_CL(l_CL_mask);
+    uint64_t min_cl = get_min_cl(l_cl_mask);
+    uint64_t max_cl = get_max_cl(l_cl_mask);
 
-    FAPI_DBG("min CL %lu", min_CL);
-    FAPI_DBG("max CL %lu", max_CL);
+    FAPI_INF("%s. min CL %lu", mss::c_str(iv_target), min_cl);
+    FAPI_INF("%s. max CL %lu", mss::c_str(iv_target), max_cl);
 
-    for(uint64_t cas_latency = min_CL; cas_latency <= max_CL; ++cas_latency)
+    for(uint64_t l_cas_latency = min_cl; l_cas_latency <= max_cl; ++l_cas_latency)
     {
         // 64 bit is buffer length - indexed at 0 - 63
         constexpr uint64_t l_buffer_length = 64 - 1;
-        uint64_t l_bit_pos = l_buffer_length - (cas_latency - min_CL);
+        uint64_t l_bit_pos = l_buffer_length - (l_cas_latency - min_cl);
 
         // Traversing through buffer one bit at a time
         // 0 means unsupported CAS latency
         // 1 means supported  CAS latency
         // We are pushing supported CAS latencies into a vector for direct use
-        if( l_CL_mask.getBit(l_bit_pos) )
+        if( l_cl_mask.getBit(l_bit_pos) )
         {
-            l_vector.push_back(cas_latency);
+            // I want don't this to print all the time, DBG is fine
+            FAPI_DBG( "%s. Supported CL (%d) from common CL mask",
+                      mss::c_str(iv_target), l_cas_latency );
+
+            l_vector.push_back(l_cas_latency);
         }
     }
 
     return l_vector;
 }
 
-
 ///
 /// @brief      Determines if a requested CAS latency (CL) is supported in the bin of common CLs
-/// @param[in]  i_common_CLs vector of common CAS latencies
+/// @param[in]  i_common_cls vector of common CAS latencies
 /// @param[in]  i_cas_latency CAS latency we are comparing against
-/// @return     true if CAS latency is supported
+/// @return     FAPI2_RC_SUCCESS iff ok
 ///
-inline bool cas_latency::is_CL_supported_in_common(const std::vector<uint64_t>& i_common_CLs,
+inline fapi2::ReturnCode cas_latency::is_cl_supported_in_common(const std::vector<uint64_t>& i_common_cls,
         const uint64_t i_cas_latency) const
 {
-    return std::binary_search(i_common_CLs.begin(), i_common_CLs.end(), i_cas_latency);
+    return std::binary_search(i_common_cls.begin(), i_common_cls.end(), i_cas_latency) == true ?
+           fapi2::FAPI2_RC_SUCCESS : fapi2::FAPI2_RC_FALSE;
 }
 
 ///
 /// @brief      Checks that CAS latency doesn't exceed largest CAS latency time
 /// @param[in]  i_cas_latency cas latency
-/// @param[in]  i_tCK cycle time
-/// @return     bool true if CAS latency exceeds the largest CAS latency time
-///             false otherwise
+/// @param[in]  i_tck cycle time
+/// @return     FAPI2_RC_SUCCESS iff ok
 ///
-inline bool cas_latency::is_CL_exceeding_tAAmax(const uint64_t i_cas_latency,
-        const uint64_t i_tCK) const
+inline fapi2::ReturnCode cas_latency::is_cl_exceeding_taa_max(const uint64_t i_cas_latency,
+        const uint64_t i_tck) const
 {
-    // JEDEC spec requirement
-    return (i_cas_latency * i_tCK > TAA_MAX_DDR4);
-}
+    // JEDEC SPD spec requirement
+    const size_t l_taa_max = (iv_is_3ds == loading::NOT_3DS) ? TAA_MAX_DDR4 : TAA_MAX_DDR4_3DS;
 
+    FAPI_INF("%s. CL (%d) * tCK (%d) = %d > %d",
+             mss::c_str(iv_target),
+             i_cas_latency,
+             i_tck,
+             i_cas_latency * i_tck,
+             l_taa_max);
 
-///
-/// @brief Helper function to determines next lowest CAS latency (CL)
-/// @param[in] i_common_CLs vector of common CAS latencies
-/// @param[in] i_desired_cas_latency current CAS latency
-/// @return the next lowest CL
-///
-inline uint64_t cas_latency::next_lowest_CL(const std::vector<uint64_t>& i_common_CLs,
-        const uint64_t i_desired_cas_latency)
-{
-    auto iterator = std::lower_bound(i_common_CLs.begin(), i_common_CLs.end(), i_desired_cas_latency);
-    return  *(--iterator);
-}
-
-///
-/// @brief          Checks that CAS latency (CL) is supported among all dimms
-///                 and if it isn't we try to find a CL that is.
-/// @param[in]      i_common_CLs vector of common CAS latencies
-/// @param[in]      i_tAA CAS latency time
-/// @param[in,out]  io_tCK cycle time that corresponds to cas latency
-/// @param[in,out]  io_desired_cas_lat cas latency supported for all dimms
-/// @return         fapi2::FAPI2_RC_SUCCESS if we find a valid CL also common among all dimms
-///
-fapi2::ReturnCode cas_latency::choose_actual_CL (const std::vector<uint64_t>& i_common_CLs,
-        const uint64_t i_tAA,
-        uint64_t& io_tCK,
-        uint64_t& io_desired_cas_lat)
-{
-    if( i_common_CLs.empty() )
-    {
-        FAPI_ERR("Common CAS latency vector is empty!");
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
-
-    //check if the desired CL is supported in the common CAS latency bin
-    bool l_is_CL_supported = is_CL_supported_in_common(i_common_CLs, io_desired_cas_lat);
-
-    while( !l_is_CL_supported )
-    {
-        // If CL is not supported...
-        // Choose a higher tCKproposed value and recalculate CL
-        // Check recalculated CL is supported in common CL
-        // Repeat until a solution is found
-        FAPI_TRY( select_higher_tck(io_tCK), "Failed select_higher_tck()");
-        FAPI_DBG("Next higher tCK: %d", io_tCK);
-
-        io_desired_cas_lat = calc_cas_latency(i_tAA, io_tCK);
-        l_is_CL_supported = is_CL_supported_in_common(i_common_CLs, io_desired_cas_lat);
-    }
-
-    // If we reach here everything is okay
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief          Checks that CAS latency (CL) doesn't exceed max CAS latency time (tAAmax)
-///                 and if it does it tries to find a valid CL that doesn't exceed tAAmax.
-/// @param[in]      i_common_CLs vector of common CAS latencies
-/// @param[in]      i_tAA CAS latency time
-/// @param[in,out]  io_tCK cycle time that corresponds to cas latency
-/// @param[in,out]  io_desired_cas_lat cas latency supported for all dimms
-/// @return         fapi2::FAPI2_RC_SUCCESS if CL doesn't exceed tAAmax
-///
-fapi2::ReturnCode cas_latency::validate_valid_CL (const std::vector<uint64_t>& i_common_CLs,
-        const uint64_t i_tAA,
-        uint64_t& io_tCK,
-        uint64_t& io_desired_cas_lat)
-{
-    if( i_common_CLs.empty() )
-    {
-        FAPI_ERR("Common CAS latency vector is empty!");
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
-
-    // Check that selected CL is less than tAAmax
-    bool l_is_CL_violating_spec = is_CL_exceeding_tAAmax (io_desired_cas_lat, io_tCK);
-
-    while(l_is_CL_violating_spec)
-    {
-        // If it is not....
-        // Decrement CL to next lowest supported CL
-        // And try again
-        io_desired_cas_lat = next_lowest_CL(i_common_CLs, io_desired_cas_lat);
-        FAPI_DBG("Next lowest CAS latency %d", io_desired_cas_lat);
-
-        FAPI_TRY( choose_actual_CL(i_common_CLs, i_tAA, io_tCK, io_desired_cas_lat),
-                  "Failed choose_actual_CL()");
-
-        l_is_CL_violating_spec = is_CL_exceeding_tAAmax (io_desired_cas_lat, io_tCK);
-    }
-
-    //If we reach this point that we are not violationg tAAmax spec anymore
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    // Since a fail here could mean a fail due to choose_actual_cl and
-    // due to violation of taamax specification, this error will help
-    // distinguish error reason
-    FAPI_ASSERT(false,
-                fapi2::MSS_EXCEED_TAA_MAX_NO_CL().
-                set_CL(io_desired_cas_lat),
-                "Exceeded tAAmax");
-
-    return fapi2::current_err;
+    return (i_cas_latency * i_tck) > l_taa_max ? fapi2::FAPI2_RC_FALSE : fapi2::FAPI2_RC_SUCCESS;
 }
 
 }// mss

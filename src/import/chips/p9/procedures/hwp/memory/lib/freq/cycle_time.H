@@ -52,22 +52,6 @@ enum FREQ_MARGIN : std::uint64_t
     MAX_FREQ_MARGIN = 2799,
 };
 
-// Proposed DDR4 Full spec update(79-4A)
-// Item No. 1716.78C
-// Page 217
-// 10.1 Item No. 1716.78C
-// Speed Bin Table Note
-static const std::vector<uint64_t> tckmin_avg_ddr4
-{
-
-    // Timing in picoseconds | Application bin speed
-    750,  // 2666 MT/s
-    833,  // 2400 MT/s
-    937,  // 2133 MT/s
-    1071, // 1866 MT/s
-    /* 1250, // 1600 MT/s - don't think we support this one - AAM */
-};
-
 ///
 /// @brief          Selects DIMM frequency to run based on supported system frequencies
 /// @tparam         T the fapi2::TargetType for which the DIMM information exists.
@@ -126,28 +110,6 @@ inline fapi2::ReturnCode select_supported_freq(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief         Determines next highest min cycle time (tCK)
-/// @param[in,out] io_tCK_in_ps min cycle time in ps
-/// @return        fapi2::FAPI2_RC_SUCCESS if ok
-///
-inline fapi2::ReturnCode select_higher_tck(uint64_t& io_tCK)
-{
-    auto iterator = std::upper_bound(tckmin_avg_ddr4.begin(),
-                                     tckmin_avg_ddr4.end(),
-                                     io_tCK);
-
-    // Did we find a greater than value?
-    FAPI_ASSERT(iterator != tckmin_avg_ddr4.end(),
-                fapi2::MSS_REACHED_HIGHEST_TCK().
-                set_TCK(io_tCK),
-                "Reached highest valid tCK");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 
 }// mss
 

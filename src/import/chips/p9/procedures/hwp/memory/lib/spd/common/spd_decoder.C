@@ -1037,10 +1037,10 @@ fapi2::ReturnCode decoder::device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i
     static const std::vector<std::pair<uint8_t, uint8_t> > DEVICE_WIDTH_MAP =
     {
         // {key byte, device width (bits)}
-        {0, 4},
-        {1, 8},
-        {2, 16},
-        {3, 32},
+        {0, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4},
+        {1, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8},
+        {2, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16},
+        {3, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X32},
         // All others reserved
     };
 
@@ -1544,28 +1544,28 @@ fapi2::ReturnCode decoder::supported_cas_latencies(const fapi2::Target<TARGET_TY
     constexpr size_t FIRST_BYTE = 20;
     uint8_t first_raw_byte = iv_spd_data[FIRST_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(i_target),
+             mss::c_str(i_target),
              FIRST_BYTE,
              first_raw_byte);
 
     constexpr size_t SEC_BYTE = 21;
     uint8_t sec_raw_byte = iv_spd_data[SEC_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(i_target),
+             mss::c_str(i_target),
              SEC_BYTE,
              sec_raw_byte);
 
     constexpr size_t THIRD_BYTE = 22;
     uint8_t third_raw_byte = iv_spd_data[THIRD_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(i_target),
+             mss::c_str(i_target),
              THIRD_BYTE,
              third_raw_byte);
 
     constexpr size_t FOURTH_BYTE = 23;
     uint8_t fourth_raw_byte = iv_spd_data[FOURTH_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(i_target),
+             mss::c_str(i_target),
              FOURTH_BYTE,
              fourth_raw_byte);
 
@@ -1766,9 +1766,11 @@ fapi2::ReturnCode decoder::min_active_to_precharge_delay_time(const fapi2::Targe
 {
     constexpr size_t BYTE_INDEX_MSN = 27;
     uint8_t tRASmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TRASMIN_MSN_START, TRASMIN_MSN_LEN >(i_target, iv_spd_data);
+    FAPI_INF("MSN Field Bits value: %lu", tRASmin_MSN);
 
     constexpr size_t BYTE_INDEX_LSB = 28;
     uint8_t tRASmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TRASMIN_LSB_START, TRASMIN_LSB_LEN >(i_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tRASmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSN_START = 52;
@@ -1831,9 +1833,11 @@ fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time(const fapi2::
 {
     constexpr size_t BYTE_INDEX_MSN = 27;
     uint8_t tRCmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TRCMIN_MSN_START, TRCMIN_MSN_LEN >(i_target, iv_spd_data);
+    FAPI_INF("MSN Field Bits value: %lu", tRCmin_MSN);
 
     constexpr size_t BYTE_INDEX_LSB = 29;
     uint8_t tRCmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TRCMIN_LSB_START, TRCMIN_LSB_LEN >(i_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tRCmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSN_START = 52;
@@ -1842,7 +1846,6 @@ fapi2::ReturnCode decoder::min_active_to_active_refresh_delay_time(const fapi2::
     constexpr size_t LSB_LEN = 8;
 
     fapi2::buffer<int64_t> l_buffer;
-
     l_buffer.insertFromRight<MSN_START, MSN_LEN>( tRCmin_MSN )
     .insertFromRight<LSB_START, LSB_LEN>( tRCmin_LSB );
 
@@ -2072,9 +2075,11 @@ fapi2::ReturnCode decoder::min_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
 {
     constexpr size_t BYTE_INDEX_MSN = 36;
     uint8_t tFAWmin_MSN = extract_spd_field< BYTE_INDEX_MSN, TFAWMIN_MSN_START, TFAWMIN_MSN_LEN >(i_target, iv_spd_data);
+    FAPI_INF("MSN Field Bits value: %lu", tFAWmin_MSN);
 
     constexpr size_t BYTE_INDEX_LSB = 37;
     uint8_t tFAWmin_LSB = extract_spd_field< BYTE_INDEX_LSB, TFAWMIN_LSB_START, TFAWMIN_LSB_LEN >(i_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", tFAWmin_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSN_START = 52;
@@ -2789,9 +2794,11 @@ fapi2::ReturnCode decoder::cyclical_redundancy_code(const fapi2::Target<fapi2::T
 {
     constexpr size_t BYTE_INDEX_MSB = 127;
     uint8_t crc_MSB = extract_spd_field< BYTE_INDEX_MSB, CRC_MSB_START, CRC_MSB_LEN >(i_target, iv_spd_data);
+    FAPI_INF("MSB Field Bits value: %lu", crc_MSB);
 
     constexpr size_t BYTE_INDEX_LSB = 126;
     uint8_t crc_LSB = extract_spd_field< BYTE_INDEX_LSB, CRC_LSB_START, CRC_LSB_LEN >(i_target, iv_spd_data);
+    FAPI_INF("LSB Field Bits value: %lu", crc_LSB);
 
     // Combining bits to create timing value (in a buffer)
     constexpr size_t MSN_START = 0;

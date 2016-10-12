@@ -212,7 +212,9 @@
       <attribute>
           <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
       </attribute>
-
+      <attribute>
+          <id>ATTR_EFF_DRAM_TRRD_DLR</id>
+      </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

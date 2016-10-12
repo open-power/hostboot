@@ -56,20 +56,24 @@ namespace mss
 ///
 class eff_config
 {
-    private:
-
-        int64_t iv_tCK_in_ps;
-
     public:
         //TK - Make this constructor take this as param - AAM
         std::shared_ptr<spd::decoder> iv_pDecoder;
+        int64_t iv_tCK_in_ps;
+
+        // Assists testing with write ability on these MRW
+        // settings that are normally NOT writable
+        // using attribute accessors
+        // Could create getters & setters...
+        uint8_t iv_refresh_mode;
+        uint8_t iv_temp_refresh_range;
 
         //TODO: RTC 159777: Change eff_config class to use iv's for mcs, port and dimm position
 
         ///
         /// @brief Constructor
-        /// @param[in] i_target, the fapi2::Target which we're configuring (DIMM)
-        /// @param[out] o_rc, a return code which determines the success of the constructor
+        /// @param[in] i_target the fapi2::Target which we're configuring (DIMM)
+        /// @param[out] o_rc a return code which determines the success of the constructor
         ///
         eff_config( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
         {
@@ -84,12 +88,15 @@ class eff_config
         ///
         /// @brief Constructor
         /// @param[in] i_target  the fapi2::Target which we're configuring (MCS)
-        /// @param[out] o_rc, a return code which determines the success of the constructor
+        /// @param[out] o_rc a return code which determines the success of the constructor
         ///
         eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target, fapi2::ReturnCode& o_rc )
         {
             FAPI_TRY( clock_period(i_target, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
-            FAPI_INF("Calculated clock period (tCK): %d  on DIMM %s", iv_tCK_in_ps, mss::c_str(i_target));
+            FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
+            FAPI_TRY( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed mrw_fine_refresh_mode()" );
+
+            FAPI_INF( "Calculated clock period -  tCK (ps): %d for  %s", iv_tCK_in_ps, mss::c_str(i_target) );
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -147,21 +154,21 @@ class eff_config
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode refresh_interval_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+        fapi2::ReturnCode dram_trefi(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for refresh cycle time (tRFC)
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode refresh_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+        fapi2::ReturnCode dram_trfc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for refresh cycle time (logical ranks) (tRFC_DLR)
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode refresh_cycle_time_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+        fapi2::ReturnCode dram_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for dram density
@@ -705,6 +712,13 @@ class eff_config
         fapi2::ReturnCode dram_trcd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
+        /// @brief Determines & sets effective config for tRC
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
         /// @brief Determines & sets effective config for tWTR_L
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
@@ -719,25 +733,39 @@ class eff_config
         fapi2::ReturnCode dram_twtr_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for tRRD_S
+        /// @brief Determines & sets effective config for tRRD_S (tRRD_S_slr)
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dram_trrd_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for tRRD_L
+        /// @brief Determines & sets effective config for tRRD_L (or tRRD_L_slr)
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dram_trrd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
-        /// @brief Determines & sets effective config for tfaw
+        /// @brief Determines & sets effective config for tRRD_DLR
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_trrd_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tFAW (or tFAW_slr)
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dram_tfaw(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
+
+        ///
+        /// @brief Determines & sets effective config for tFAW_DLR
+        /// @param[in] i_target FAPI2 target
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode dram_tfaw_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
         ///
         /// @brief Determines & sets effective config for tRAS

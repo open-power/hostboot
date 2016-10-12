@@ -116,13 +116,28 @@ fapi2::ReturnCode reset_timing0( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
     l_data.insertFromRight<TT::TRP_CYCLES, TT::TRP_CYCLES_LEN>( exp_helper(l_trp) );
 
     // It's not really clear what to put here. We can have DIMM with different tRFC as they
-    // don't have to be the same (3DS v. SPD for example.) So we'll take the maximum trfc we
+    // don't have to be the same (3DS v. SDP for example.) So we'll take the maximum trfc we
     // find on the DIMM connected to this port.
     for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target))
     {
+        // tRFC is for non-3DS, tRFC_slr for 3DS is to the same logical rank,
+        // and tRFC_dlr is to different logical ranks. Unclear which to use.
         uint16_t l_trfc = 0;
-        FAPI_TRY( mss::trfc(d, l_trfc) );
-        l_trfc_max = std::max(l_trfc_max, l_trfc);
+        uint8_t l_trfc_dlr = 0;
+
+        // tRFC (or tRFC_slr) will retrieve a value for 3DS or non-3DS
+        // tRFC_dlr is only set for 3DS (should be 0 otherwise)
+        // so we opt to take the more aggressive timing,
+        // means less chance of data being corrupted
+        FAPI_TRY( mss::eff_dram_trfc(d, l_trfc) );
+        FAPI_TRY( mss::eff_dram_trfc_dlr(d, l_trfc_dlr) );
+
+        {
+            // cast needed for template deduction of std::max()
+            // HB doesn't support using std::min() with initializer lists
+            const uint16_t l_trfc_3ds_min = std::min(l_trfc, static_cast<uint16_t>(l_trfc_dlr));
+            l_trfc_max = std::min( l_trfc_3ds_min, l_trfc_max);
+        }
     }
 
     l_data.insertFromRight<TT::TRFC_CYCLES, TT::TRFC_CYCLES_LEN>( exp_helper(l_trfc_max) );
@@ -194,4 +209,3 @@ fapi_try_exit:
 
 } // close namespace seq
 } // close namespace mss
-

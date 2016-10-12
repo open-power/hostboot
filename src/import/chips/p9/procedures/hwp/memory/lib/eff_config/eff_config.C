@@ -48,6 +48,7 @@
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 #include <lib/utils/find.H>
+#include <math.h>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -387,31 +388,26 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_trefi(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    uint8_t l_temp_refresh_range = 0;
-    uint8_t l_refresh_mode = 0;
-    int64_t l_trefi_in_ps = 0;
-
-    FAPI_TRY( mss::mrw_temp_refresh_range(l_temp_refresh_range), "Failed mrw_temp_refresh_range()" );
-    FAPI_TRY( mss::mrw_fine_refresh_mode(l_refresh_mode), "Failed mrw_fine_refresh_mode()" );
+    uint64_t l_trefi_in_ps = 0;
 
     // Calculates appropriate tREFI based on fine refresh mode
-    switch(l_refresh_mode)
+    switch(iv_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF1X,
-                                  l_temp_refresh_range,
+                                  iv_temp_refresh_range,
                                   l_trefi_in_ps),
-                      "Failed to calculate tREF1 in refresh_interval_time for target %s", mss::c_str(i_target) );
+                      "Failed to calculate tREF1 for target %s", mss::c_str(i_target) );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF2X,
-                                  l_temp_refresh_range,
+                                  iv_temp_refresh_range,
                                   l_trefi_in_ps),
                       "Failed to calculate tREF2 for target %s", mss::c_str(i_target) );
             break;
@@ -420,7 +416,7 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
 
             FAPI_TRY( calc_trefi( mss::refresh_rate::REF4X,
-                                  l_temp_refresh_range,
+                                  iv_temp_refresh_range,
                                   l_trefi_in_ps),
                       "Failed to calculate tREF4  for target %s", mss::c_str(i_target) );
             break;
@@ -431,10 +427,10 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
             // if openpower messes this up we can at least catch it
             FAPI_ASSERT(false,
                         fapi2::MSS_INVALID_FINE_REFRESH_MODE().
-                        set_FINE_REF_MODE(l_refresh_mode),
+                        set_FINE_REF_MODE(iv_refresh_mode),
                         "%s Incorrect Fine Refresh Mode received: %d ",
                         mss::c_str(i_target),
-                        l_refresh_mode);
+                        iv_refresh_mode);
             break;
     }
 
@@ -444,17 +440,18 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
         const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
         std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
-        uint16_t l_trefi_in_nck  = 0;
+        uint64_t l_trefi_in_nck  = 0;
 
         // Retrieve MCS attribute data
         FAPI_TRY( eff_dram_trefi(l_mcs, l_mcs_attrs_trefi.data()) );
 
         // Calculate nck
-        // iv_tCK-in_ps will always be positive
-        FAPI_TRY(  calc_nck(l_trefi_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trefi_in_nck),
+        FAPI_TRY(  spd::calc_nck(l_trefi_in_ps, static_cast<uint64_t>(iv_tCK_in_ps), INVERSE_DDR4_CORRECTION_FACTOR,
+                                 l_trefi_in_nck),
                    "Error in calculating tREFI for target %s, with value of l_trefi_in_ps: %d", mss::c_str(i_target), l_trefi_in_ps);
 
-        FAPI_INF("Calculated tREFI (ps): %d, tREFI (nck): %d", l_trefi_in_ps, l_trefi_in_nck);
+        FAPI_INF("tCK (ps): %d, tREFI (ps): %d, tREFI (nck): %d",
+                 iv_tCK_in_ps, l_trefi_in_ps, l_trefi_in_nck);
 
         // Update MCS attribute
         l_mcs_attrs_trefi[l_port_num] = l_trefi_in_nck;
@@ -476,17 +473,13 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_trfc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    uint8_t l_refresh_mode = 0;
     int64_t l_trfc_mtb = 0;
     int64_t l_trfc_in_ps = 0;
 
-    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode),
-               "Failed to get MRW attribute for fine refresh mode" );
-
     // Selects appropriate tRFC based on fine refresh mode
-    switch(l_refresh_mode)
+    switch(iv_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
             FAPI_TRY( iv_pDecoder->min_refresh_recovery_delay_time_1(i_target, l_trfc_mtb),
@@ -511,11 +504,10 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
             // if openpower messes this up we can at least catch it
             FAPI_ASSERT(false,
                         fapi2::MSS_INVALID_FINE_REFRESH_MODE().
-                        set_FINE_REF_MODE(l_refresh_mode),
+                        set_FINE_REF_MODE(iv_refresh_mode),
                         "%s Incorrect Fine Refresh Mode received: %d ",
                         mss::c_str(i_target),
-                        l_refresh_mode);
-
+                        iv_refresh_mode);
             break;
 
     }// switch
@@ -529,7 +521,10 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
         FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
         FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
 
-        l_trfc_in_ps = calc_timing_from_timebase(l_trfc_mtb, l_mtb, l_trfc_ftb, l_ftb);
+        FAPI_INF( "medium timebase (ps): %ld, fine timebase (ps): %ld, tRFC (MTB): %ld, tRFC(FTB): %ld",
+                  l_mtb, l_ftb, l_trfc_mtb, l_trfc_ftb );
+
+        l_trfc_in_ps = spd::calc_timing_from_timebase(l_trfc_mtb, l_mtb, l_trfc_ftb, l_ftb);
     }
 
     {
@@ -545,9 +540,11 @@ fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE
                   "Failed to retrieve tRFC attribute" );
 
         // Calculate nck
-        FAPI_TRY( calc_nck(l_trfc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trfc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
                   "Error in calculating l_tRFC for target %s, with value of l_trfc_in_ps: %d", mss::c_str(i_target), l_trfc_in_ps);
-        FAPI_INF("Calculated tRFC (ps): %d, tRFC (nck): %d", l_trfc_in_ps, l_trfc_in_nck);
+
+        FAPI_INF("tCK (ps): %d, tRFC (ps): %d, tRFC (nck): %d",
+                 iv_tCK_in_ps, l_trfc_in_ps, l_trfc_in_nck);
 
         // Update MCS attribute
         l_mcs_attrs_trfc[l_port_num] = l_trfc_in_nck;
@@ -568,12 +565,11 @@ fapi_try_exit:
 /// @param[in] i_target FAPI2 target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+fapi2::ReturnCode eff_config::dram_trfc_dlr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-    uint8_t l_refresh_mode = 0;
     uint8_t l_density = 0;
     uint64_t l_tCK_in_ps = 0;
     uint64_t l_trfc_dlr_in_ps = 0;
@@ -582,21 +578,21 @@ fapi2::ReturnCode eff_config::refresh_cycle_time_dlr(const fapi2::Target<TARGET_
 
     // Retrieve map params
     FAPI_TRY( iv_pDecoder->sdram_density(i_target, l_density), "Failed to get sdram density");
-    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode), "Failed to get MRW attribute for fine refresh mode" );
+    FAPI_TRY ( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed to get MRW attribute for fine refresh mode" );
 
     FAPI_INF("Retrieved SDRAM density: %d, fine refresh mode: %d",
-             l_density, l_refresh_mode);
+             l_density, iv_refresh_mode);
 
     // Calculate refresh cycle time in ps
-    FAPI_TRY( calc_trfc_dlr(l_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
+    FAPI_TRY( calc_trfc_dlr(iv_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
 
     // Calculate clock period (tCK) from selected freq from mss_freq
     FAPI_TRY( clock_period(i_target, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
 
     // Calculate refresh cycle time in nck
-    FAPI_TRY( calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_dlr_in_nck));
+    FAPI_TRY( spd::calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_dlr_in_nck));
 
-    FAPI_INF("Calculated clock period (tCK): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
+    FAPI_INF("tCK (ps): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
              l_tCK_in_ps, l_trfc_dlr_in_ps, l_trfc_dlr_in_nck);
 
     // Retrieve MCS attribute data
@@ -716,7 +712,7 @@ fapi2::ReturnCode eff_config::dram_dqs_time(const fapi2::Target<TARGET_TYPE_DIMM
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tdqs(l_mcs, &l_attrs_dqs_time[0]) );
-    FAPI_INF("Dram width is %ld for target %s", l_dram_width, mss::c_str(i_target));
+    FAPI_INF("SDRAM width: %d for target %s", l_dram_width, mss::c_str(i_target));
 
     //Only possible dram width are x4, x8. If x8, tdqs is available, else not available
     l_attrs_dqs_time[l_port_num] = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
@@ -735,25 +731,35 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dram_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    int64_t l_tccd_mtb = 0;
-    int64_t l_tccd_ftb = 0;
     int64_t l_tccd_in_ps = 0;
 
-    //Get the tCCD timing values
-    FAPI_TRY( iv_pDecoder->min_tccd_l(i_target, l_tccd_mtb), "failed to get min_tccd_l" );
-    FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(i_target, l_tccd_ftb) );
+    // Get the tCCD_L timing values
+    // tCCD_L is speed bin independent and is
+    // the same for all bins within a speed grade.
+    // It is safe to read this from SPD because the correct nck
+    // value will be calulated based on our dimm speed.
 
-    //Calculate tccd in ps
+    // TODO: RTC 163150 Clean up eff_config timing boilerplate
     {
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
+        int64_t l_tccd_mtb = 0;
+        int64_t l_tccd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb),
+                  "Failed medium_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb),
+                  "Failed fine_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->min_tccd_l(i_target, l_tccd_mtb),
+                  "Failed min_tccd_l() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(i_target, l_tccd_ftb),
+                  "Failed fine_offset_min_tccd_l() for %s", mss::c_str(i_target) );
 
-        l_tccd_in_ps = calc_timing_from_timebase(l_tccd_mtb, l_mtb, l_tccd_ftb, l_ftb);
+        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
+                 l_mtb, l_ftb, l_tccd_mtb, l_tccd_ftb );
+
+        l_tccd_in_ps = spd::calc_timing_from_timebase(l_tccd_mtb, l_mtb, l_tccd_ftb, l_ftb);
     }
-
 
     {
         // Calculate refresh cycle time in nCK & set attribute
@@ -768,9 +774,11 @@ fapi2::ReturnCode eff_config::dram_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>&
                   "Failed to retrieve tCCD attribute" );
 
         // Calculate nck
-        FAPI_TRY ( calc_nck(l_tccd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
+        FAPI_TRY ( spd::calc_nck(l_tccd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
                    "Error in calculating tccd  for target %s, with value of l_tccd_in_ps: %d", mss::c_str(i_target), l_tccd_in_ps);
-        FAPI_INF("Calculated tCCD (ps): %d, tCCD (nck): %d", l_tccd_in_ps, l_tccd_in_nck);
+
+        FAPI_INF("tCK (ps): %d, tCCD_L (ps): %d, tCCD_L (nck): %d",
+                 iv_tCK_in_ps, l_tccd_in_ps, l_tccd_in_nck);
 
         // Update MCS attribute
         l_mcs_attrs_tccd[l_port_num] = l_tccd_in_nck;
@@ -808,7 +816,7 @@ fapi2::ReturnCode eff_config::dimm_rc00(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc00[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc00;
 
-    FAPI_INF("%s: RC00 settting: %d", c_str(i_target), l_attrs_dimm_rc00[l_port_num][l_dimm_num] );
+    FAPI_INF("%s: RC00 settting: %d", mss::c_str(i_target), l_attrs_dimm_rc00[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC00, l_mcs, l_attrs_dimm_rc00) );
 
 fapi_try_exit:
@@ -837,7 +845,7 @@ fapi2::ReturnCode eff_config::dimm_rc01(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc01[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc01;
 
-    FAPI_INF("%s: RC01 settting: %d", c_str(i_target), l_attrs_dimm_rc01[l_port_num][l_dimm_num] );
+    FAPI_INF("%s: RC01 settting: %d", mss::c_str(i_target), l_attrs_dimm_rc01[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC01, l_mcs, l_attrs_dimm_rc01) );
 
 fapi_try_exit:
@@ -866,7 +874,7 @@ fapi2::ReturnCode eff_config::dimm_rc02(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc02[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc02;
 
-    FAPI_INF("%s: RC02 settting: %d", c_str(i_target), l_attrs_dimm_rc02[l_port_num][l_dimm_num] );
+    FAPI_INF("%s: RC02 settting: %d", mss::c_str(i_target), l_attrs_dimm_rc02[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC02, l_mcs, l_attrs_dimm_rc02) );
 
 fapi_try_exit:
@@ -898,7 +906,7 @@ fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<TARGET_TYPE_DIMM>& i
     FAPI_TRY( iv_pDecoder->iv_module_decoder->ca_signal_output_driver(l_ca_output_drive) );
 
     FAPI_INF( "%s: Retrieved register output drive, for CA: %d, CS: %d",
-              c_str(i_target), l_ca_output_drive, l_cs_output_drive );
+              mss::c_str(i_target), l_ca_output_drive, l_cs_output_drive );
 
     // Lets construct encoding byte for RCD setting
     {
@@ -916,7 +924,7 @@ fapi2::ReturnCode eff_config::dimm_rc03(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc03[l_port_num][l_dimm_num] = l_buffer;
 
-    FAPI_INF("%s: RC03 settting: %d", c_str(i_target), l_attrs_dimm_rc03[l_port_num][l_dimm_num] );
+    FAPI_INF("%s: RC03 settting: %d", mss::c_str(i_target), l_attrs_dimm_rc03[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC03, l_mcs, l_attrs_dimm_rc03) );
 
 fapi_try_exit:
@@ -948,7 +956,7 @@ fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<TARGET_TYPE_DIMM>& i
     FAPI_TRY( iv_pDecoder->iv_module_decoder->cke_signal_output_driver(l_cke_output_drive) );
 
     FAPI_INF( "%s: Retrieved signal driver output, for CKE: %d, ODT: %d",
-              c_str(i_target), l_cke_output_drive, l_odt_output_drive );
+              mss::c_str(i_target), l_cke_output_drive, l_odt_output_drive );
 
     // Lets construct encoding byte for RCD setting
     {
@@ -967,7 +975,7 @@ fapi2::ReturnCode eff_config::dimm_rc04(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc04[l_port_num][l_dimm_num] = l_buffer;
 
-    FAPI_INF("%s: RC04 setting: %d", c_str(i_target), l_attrs_dimm_rc04[l_port_num][l_dimm_num] );
+    FAPI_INF("%s: RC04 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc04[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC04, l_mcs, l_attrs_dimm_rc04) );
 
 fapi_try_exit:
@@ -999,7 +1007,7 @@ fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<TARGET_TYPE_DIMM>& i
     FAPI_TRY( iv_pDecoder->iv_module_decoder->b_side_clk_output_driver(l_b_side_output_drive) );
 
     FAPI_INF( "%s: Retrieved register output drive for clock, b-side (Y0,Y2): %d, a-side (Y1,Y3): %d",
-              c_str(i_target), l_b_side_output_drive, l_a_side_output_drive );
+              mss::c_str(i_target), l_b_side_output_drive, l_a_side_output_drive );
 
     {
         // Buffer insert constants for ODT and CKE output drive
@@ -1018,7 +1026,7 @@ fapi2::ReturnCode eff_config::dimm_rc05(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc05[l_port_num][l_dimm_num] = l_buffer;
 
-    FAPI_INF( "%s: RC05 setting: %d", c_str(i_target), l_attrs_dimm_rc05[l_port_num][l_dimm_num] )
+    FAPI_INF( "%s: RC05 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc05[l_port_num][l_dimm_num] )
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC05, l_mcs, l_attrs_dimm_rc05) );
 
 fapi_try_exit:
@@ -1047,7 +1055,7 @@ fapi2::ReturnCode eff_config::dimm_rc06_07(const fapi2::Target<TARGET_TYPE_DIMM>
     // Update MCS attribute
     l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc06_07;
 
-    FAPI_INF( "%s: RC06_07 setting: %d", c_str(i_target), l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC06_07 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc06_07[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC06_07, l_mcs, l_attrs_dimm_rc06_07) );
 
 fapi_try_exit:
@@ -1076,7 +1084,7 @@ fapi2::ReturnCode eff_config::dimm_rc08(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc08[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc08;
 
-    FAPI_INF( "%s: RC08 setting: %d", c_str(i_target), l_attrs_dimm_rc08[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC08 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc08[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC08, l_mcs, l_attrs_dimm_rc08) );
 
 fapi_try_exit:
@@ -1107,7 +1115,7 @@ fapi2::ReturnCode eff_config::dimm_rc09(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc09[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc09;
 
-    FAPI_INF( "%s: RC09 setting: %d", c_str(i_target), l_attrs_dimm_rc09[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC09 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc09[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC09, l_mcs, l_attrs_dimm_rc09) );
 
 fapi_try_exit:
@@ -1162,7 +1170,7 @@ fapi2::ReturnCode eff_config::dimm_rc10(const fapi2::Target<TARGET_TYPE_DIMM>& i
             break;
     }
 
-    FAPI_INF( "%s: RC10 setting: %d", c_str(i_target), l_attrs_dimm_rc10[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC10 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc10[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC10, l_mcs, l_attrs_dimm_rc10) );
 
 fapi_try_exit:
@@ -1191,7 +1199,7 @@ fapi2::ReturnCode eff_config::dimm_rc11(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc11[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0b;
 
-    FAPI_INF( "%s: RC11 setting: %d", c_str(i_target), l_attrs_dimm_rc11[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC11 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc11[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC11, l_mcs, l_attrs_dimm_rc11) );
 
 fapi_try_exit:
@@ -1220,7 +1228,7 @@ fapi2::ReturnCode eff_config::dimm_rc12(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc12[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0c;
 
-    FAPI_INF( "%s: R12 setting: %d", c_str(i_target), l_attrs_dimm_rc12[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: R12 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc12[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC12, l_mcs, l_attrs_dimm_rc12) );
 
 fapi_try_exit:
@@ -1285,7 +1293,7 @@ fapi2::ReturnCode eff_config::dimm_rc13(const fapi2::Target<TARGET_TYPE_DIMM>& i
     FAPI_TRY( spd::base_module_type(i_target, iv_pDecoder->iv_spd_data, l_dimm_type) );
     l_attrs_dimm_rc13[l_port_num][l_dimm_num] = l_buffer;
 
-    FAPI_INF( "%s: RC13 setting: %d", c_str(i_target), l_attrs_dimm_rc13[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC13 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc13[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC13, l_mcs, l_attrs_dimm_rc13) );
 
 fapi_try_exit:
@@ -1314,7 +1322,7 @@ fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc14[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0e;
 
-    FAPI_INF( "%s: RC14 setting: 0x%0x", c_str(i_target), l_attrs_dimm_rc14[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC14 setting: 0x%0x", mss::c_str(i_target), l_attrs_dimm_rc14[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC14, l_mcs, l_attrs_dimm_rc14) );
 
 fapi_try_exit:
@@ -1343,7 +1351,7 @@ fapi2::ReturnCode eff_config::dimm_rc15(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc15[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0f;
 
-    FAPI_INF( "%s: RC15 setting: %d", c_str(i_target), l_attrs_dimm_rc15[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC15 setting: %d", mss::c_str(i_target), l_attrs_dimm_rc15[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC15, l_mcs, l_attrs_dimm_rc15) );
 
 fapi_try_exit:
@@ -1372,7 +1380,7 @@ fapi2::ReturnCode eff_config::dimm_rc1x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc1x;
 
-    FAPI_INF( "%s: RC1X setting: %d", c_str(i_target), l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC1X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_1x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_1x, l_mcs, l_attrs_dimm_rc_1x) );
 
 fapi_try_exit:
@@ -1401,7 +1409,7 @@ fapi2::ReturnCode eff_config::dimm_rc2x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc2x;
 
-    FAPI_INF( "%s: RC2X setting: %d", c_str(i_target), l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC2X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_2x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_2x, l_mcs, l_attrs_dimm_rc_2x) );
 
 fapi_try_exit:
@@ -1456,7 +1464,7 @@ fapi2::ReturnCode eff_config::dimm_rc3x(const fapi2::Target<TARGET_TYPE_DIMM>& i
             break;
     }
 
-    FAPI_INF( "%s: RC3X setting: %d", c_str(i_target), l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC3X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_3x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_3x, l_mcs, l_attrs_dimm_rc_3x) );
 
 
@@ -1486,7 +1494,7 @@ fapi2::ReturnCode eff_config::dimm_rc4x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc4x;
 
-    FAPI_INF( "%s: RC4X setting: %d", c_str(i_target), l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC4X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_4x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_4x, l_mcs, l_attrs_dimm_rc_4x) );
 
 fapi_try_exit:
@@ -1515,7 +1523,7 @@ fapi2::ReturnCode eff_config::dimm_rc5x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc5x;
 
-    FAPI_INF( "%s: RC5X setting: %d", c_str(i_target), l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC5X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_5x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_5x, l_mcs, l_attrs_dimm_rc_5x) );
 
 fapi_try_exit:
@@ -1544,7 +1552,7 @@ fapi2::ReturnCode eff_config::dimm_rc6x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc6x;
 
-    FAPI_INF( "%s: RC6X setting: %d", c_str(i_target), l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC6X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_6x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_6x, l_mcs, l_attrs_dimm_rc_6x) );
 
 fapi_try_exit:
@@ -1631,7 +1639,7 @@ fapi2::ReturnCode eff_config::dimm_rc8x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc8x;
 
-    FAPI_INF( "%s: RC8X setting: %d", c_str(i_target), l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC8X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_8x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_8x, l_mcs, l_attrs_dimm_rc_8x) );
 
 fapi_try_exit:
@@ -1660,7 +1668,7 @@ fapi2::ReturnCode eff_config::dimm_rc9x(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc9x;
 
-    FAPI_INF( "%s: RC9X setting: %d", c_str(i_target), l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RC9X setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_9x[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_9x, l_mcs, l_attrs_dimm_rc_9x) );
 
 fapi_try_exit:
@@ -1689,7 +1697,7 @@ fapi2::ReturnCode eff_config::dimm_rcax(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rcax;
 
-    FAPI_INF( "%s: RCAX setting: %d", c_str(i_target), l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RCAX setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_ax[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Ax, l_mcs, l_attrs_dimm_rc_ax) );
 
 fapi_try_exit:
@@ -1718,7 +1726,7 @@ fapi2::ReturnCode eff_config::dimm_rcbx(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Update MCS attribute
     l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rcbx;
 
-    FAPI_INF( "%s: RCBX setting: %d", c_str(i_target), l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] );
+    FAPI_INF( "%s: RCBX setting: %d", mss::c_str(i_target), l_attrs_dimm_rc_bx[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Bx, l_mcs, l_attrs_dimm_rc_bx) );
 
 fapi_try_exit:
@@ -1736,31 +1744,41 @@ fapi2::ReturnCode eff_config::dram_twr(const fapi2::Target<TARGET_TYPE_DIMM>& i_
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
     int64_t l_twr_in_ps = 0;
 
-    // Calculate twr (in ps)
+    // Get the tWR timing values
+    // tWR is speed bin independent and is
+    // the same for all bins within a speed grade.
+    // It is safe to read this from SPD because the correct nck
+    // value will be calulated based on our dimm speed.
     {
         constexpr int64_t l_twr_ftb = 0;
         int64_t l_twr_mtb = 0;
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_write_recovery_time(i_target, l_twr_mtb) );
-        FAPI_INF("Values for write_recovery (twr) in MTB units: medium timebase: %ld, fine timebase: %ld, and min write: %ld",
-                 l_mtb, l_ftb, l_twr_mtb);
-        l_twr_in_ps = calc_timing_from_timebase(l_twr_mtb, l_mtb, l_twr_ftb, l_ftb);
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb),
+                  "Failed medium_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb),
+                  "Failed fine_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->min_write_recovery_time(i_target, l_twr_mtb),
+                  "Failed min_write_recovery_time() for %s", mss::c_str(i_target) );
+
+        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
+                 l_mtb, l_ftb, l_twr_mtb, l_twr_ftb);
+
+        // Calculate twr (in ps)
+        l_twr_in_ps = spd::calc_timing_from_timebase(l_twr_mtb, l_mtb, l_twr_ftb, l_ftb);
     }
 
     {
         std::vector<uint8_t> l_attrs_dram_twr(PORTS_PER_MCS, 0);
         uint8_t l_twr_in_nck = 0;
 
-        FAPI_INF("iv tck is %d", iv_tCK_in_ps);
         // Calculate tNCK
-        FAPI_TRY( calc_nck(l_twr_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
+        FAPI_TRY( spd::calc_nck(l_twr_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
                   "Error in calculating l_twr_in_nck for target %s, with value of l_twr_in_ps: %d", mss::c_str(i_target), l_twr_in_ps);
 
-        FAPI_INF("Calculated tWR (ps): %d, tWR (nck): %d  for target: %s", l_twr_in_ps, l_twr_in_nck, mss::c_str(i_target));
+        FAPI_INF( "tCK (ps): %d, tWR (ps): %d, tWR (nck): %d  for target: %s",
+                  iv_tCK_in_ps, l_twr_in_ps, l_twr_in_nck, mss::c_str(i_target) );
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twr(l_mcs, l_attrs_dram_twr.data()) );
@@ -1885,7 +1903,7 @@ fapi2::ReturnCode eff_config::dram_cwl(const fapi2::Target<TARGET_TYPE_DIMM>& i_
                  .set_VALUE(l_preamble)
                  .set_DIMM_TARGET(i_target),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
-                 c_str(i_target),
+                 mss::c_str(i_target),
                  l_preamble );
 
     FAPI_TRY( mss::freq(l_mcbist, l_freq) );
@@ -1942,7 +1960,7 @@ fapi2::ReturnCode eff_config::dram_lpasr(const fapi2::Target<TARGET_TYPE_DIMM>& 
 
     FAPI_TRY( eff_dram_lpasr(l_mcs, l_attrs_lpasr.data()) );
 
-    l_attrs_lpasr[l_port_num] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_ASR;
+    l_attrs_lpasr[l_port_num] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_EXTENDED;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_LPASR,
                             l_mcs,
@@ -2262,7 +2280,7 @@ fapi2::ReturnCode eff_config::crc_error_clear(const fapi2::Target<TARGET_TYPE_DI
 
     FAPI_TRY( eff_crc_error_clear(l_mcs, l_attrs_crc_error_clear.data()) );
 
-    l_attrs_crc_error_clear[l_port_num] = fapi2::ENUM_ATTR_EFF_CRC_ERROR_CLEAR_ERROR;
+    l_attrs_crc_error_clear[l_port_num] = fapi2::ENUM_ATTR_EFF_CRC_ERROR_CLEAR_CLEAR;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_CRC_ERROR_CLEAR,
                             l_mcs,
@@ -2530,7 +2548,7 @@ fapi2::ReturnCode eff_config::read_preamble(const fapi2::Target<TARGET_TYPE_DIMM
                  .set_VALUE(l_preamble)
                  .set_DIMM_TARGET(i_target),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
-                 c_str(i_target),
+                 mss::c_str(i_target),
                  l_preamble );
 
     FAPI_TRY( eff_rd_preamble(l_mcs, l_attrs_rd_preamble.data()) );
@@ -2571,7 +2589,7 @@ fapi2::ReturnCode eff_config::write_preamble(const fapi2::Target<TARGET_TYPE_DIM
                  .set_VALUE(l_preamble)
                  .set_DIMM_TARGET(i_target),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
-                 c_str(i_target),
+                 mss::c_str(i_target),
                  l_preamble );
 
     FAPI_TRY( eff_wr_preamble(l_mcs, l_attrs_wr_preamble.data()) );
@@ -3064,12 +3082,26 @@ fapi2::ReturnCode eff_config::dram_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(i_target, l_trp_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(i_target, l_trp_ftb) );
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb),
+                  "Failed medium_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb),
+                  "Failed fine_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->min_row_precharge_delay_time(i_target, l_trp_mtb),
+                  "Failed min_row_precharge_delay_time() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(i_target, l_trp_ftb),
+                  "Failed fine_offset_min_trp() for %s", mss::c_str(i_target) );
 
-        l_trp_in_ps = calc_timing_from_timebase(l_trp_mtb, l_mtb, l_trp_ftb, l_ftb);
+        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
+                 l_mtb, l_ftb, l_trp_mtb, l_trp_ftb);
+
+        l_trp_in_ps = spd::calc_timing_from_timebase(l_trp_mtb, l_mtb, l_trp_ftb, l_ftb);
+    }
+
+    // SPD spec gives us the minimum... compute our worstcase (maximum) from JEDEC
+    {
+        // Declaring as int64_t to fix std::max compile
+        const int64_t l_trp = mss::ps_to_cycles(i_target, mss::trtp());
+        l_trp_in_ps = std::max( l_trp_in_ps , l_trp );
     }
 
     {
@@ -3077,10 +3109,11 @@ fapi2::ReturnCode eff_config::dram_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_
         uint8_t l_trp_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( calc_nck(l_trp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
                   "Error in calculating dram_tRP nck for target %s, with value of l_trp_in_ps: %d", mss::c_str(i_target), l_trp_in_ps);
 
-        FAPI_INF("Calculated trp (ps): %d, trp (nck): %d  for target: %s", l_trp_in_ps, l_trp_in_nck, mss::c_str(i_target));
+        FAPI_INF( "tCK (ps): %d, tRP (ps): %d, tRP (nck): %d  for target: %s",
+                  iv_tCK_in_ps, l_trp_in_ps, l_trp_in_nck, mss::c_str(i_target) );
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trp(l_mcs, l_attrs_dram_trp.data()) );
@@ -3107,31 +3140,43 @@ fapi2::ReturnCode eff_config::dram_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
     int64_t l_trcd_in_ps = 0;
 
-    // Calculate trcd (in ps)
+    // Calculate tRCD (in ps)
+    // Get the tRCD timing values
+    // tRCD is speed bin dependent and has a unique
+    // value for each speed bin so it is safe to
+    // read from SPD because the correct nck
+    // value will be calulated based on our dimm speed.
     {
         int64_t l_trcd_mtb = 0;
         int64_t l_trcd_ftb = 0;
         int64_t l_ftb = 0;
         int64_t l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(i_target, l_trcd_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(i_target, l_trcd_ftb) );
-        FAPI_INF( "trcd values are: min_trcd %d, fine offset is %d", l_trcd_mtb, l_trcd_ftb);
-        l_trcd_in_ps = calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
-    }
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb),
+                  "Failed medium_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb),
+                  "Failed fine_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->min_ras_to_cas_delay_time(i_target, l_trcd_mtb),
+                  "Failed min_ras_to_cas_delay_time() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(i_target, l_trcd_ftb),
+                  "Failed fine_offset_min_trcd() for %s", mss::c_str(i_target) );
 
+        FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
+                 l_mtb, l_ftb, l_trcd_mtb, l_trcd_ftb);
+
+        l_trcd_in_ps = spd::calc_timing_from_timebase(l_trcd_mtb, l_mtb, l_trcd_ftb, l_ftb);
+    }
 
     {
         std::vector<uint8_t> l_attrs_dram_trcd(PORTS_PER_MCS, 0);
         uint8_t l_trcd_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( calc_nck(l_trcd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trcd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
                   "Error in calculating trcd for target %s, with value of l_trcd_in_ps: %d", mss::c_str(i_target), l_trcd_in_ps);
 
-        FAPI_INF("Calculated trcd (ps): %d, trcd (nck): %d  for target: %s", l_trcd_in_ps, l_trcd_in_nck, mss::c_str(i_target));
+        FAPI_INF("tCK (ps): %d, tRCD (ps): %d, tRCD (nck): %d  for target: %s",
+                 iv_tCK_in_ps, l_trcd_in_ps, l_trcd_in_nck, mss::c_str(i_target));
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_trcd(l_mcs, l_attrs_dram_trcd.data()) );
@@ -3141,6 +3186,65 @@ fapi2::ReturnCode eff_config::dram_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i
                                 l_mcs,
                                 UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trcd, PORTS_PER_MCS)),
                   "Failed setting attribute for DRAM_TRCD");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tRC
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+    int64_t l_trc_in_ps = 0;
+
+    // Calculate trc (in ps)
+    {
+        int64_t l_trc_mtb = 0;
+        int64_t l_trc_ftb = 0;
+        int64_t l_ftb = 0;
+        int64_t l_mtb = 0;
+
+        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb),
+                  "Failed medium_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb),
+                  "Failed fine_timebase() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->min_active_to_active_refresh_delay_time(i_target, l_trc_mtb),
+                  "Failed min_active_to_active_refresh_delay_time() for %s", mss::c_str(i_target) );
+        FAPI_TRY( iv_pDecoder->fine_offset_min_trc(i_target, l_trc_ftb),
+                  "Failed fine_offset_min_trc() for %s", mss::c_str(i_target) );
+
+        FAPI_INF("medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
+                 l_mtb, l_ftb, l_trc_mtb, l_trc_ftb);
+
+        l_trc_in_ps = spd::calc_timing_from_timebase(l_trc_mtb, l_mtb, l_trc_ftb, l_ftb);
+    }
+
+    {
+        std::vector<uint8_t> l_attrs_dram_trc(PORTS_PER_MCS, 0);
+        uint8_t l_trc_in_nck = 0;
+
+        // Calculate nck
+        FAPI_TRY( spd::calc_nck(l_trc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trc_in_nck),
+                  "Error in calculating trc for target %s, with value of l_trc_in_ps: %d",
+                  mss::c_str(i_target), l_trc_in_ps );
+
+        FAPI_INF( "tCK (ps): %d, tRC (ps): %d, tRC (nck): %d  for target: %s",
+                  iv_tCK_in_ps, l_trc_in_ps, l_trc_in_nck, mss::c_str(i_target) );
+
+        // Get & update MCS attribute
+        FAPI_TRY( eff_dram_trc(l_mcs, l_attrs_dram_trc.data()) );
+
+        l_attrs_dram_trc[l_port_num] = l_trc_in_nck;
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRC,
+                                l_mcs,
+                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trc, PORTS_PER_MCS)),
+                  "Failed setting attribute for DRAM_TRC");
     }
 
 fapi_try_exit:
@@ -3169,7 +3273,10 @@ fapi2::ReturnCode eff_config::dram_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>&
         FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
         FAPI_TRY( iv_pDecoder->min_twtr_l(i_target, l_twtr_l_mtb) );
 
-        l_twtr_l_in_ps = calc_timing_from_timebase(l_twtr_l_mtb, l_mtb, l_twtr_l_ftb, l_ftb);
+        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
+                 l_mtb, l_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
+
+        l_twtr_l_in_ps = spd::calc_timing_from_timebase(l_twtr_l_mtb, l_mtb, l_twtr_l_ftb, l_ftb);
     }
 
 
@@ -3177,12 +3284,12 @@ fapi2::ReturnCode eff_config::dram_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>&
         std::vector<uint8_t> l_attrs_dram_twtr_l(PORTS_PER_MCS, 0);
         int8_t l_twtr_l_in_nck = 0;
 
-        // Calculate tNCK
-        FAPI_TRY( calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
-                  "Error in calculating twtr_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_l_in_ps );
+        // Calculate nck
+        FAPI_TRY( spd::calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
+                  "Error in calculating tWTR_L for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_l_in_ps );
 
-        FAPI_INF("Calculated twtr_l (ps): %d, twtr_l (nck): %d  for target: %s", l_twtr_l_in_ps, l_twtr_l_in_nck,
-                 mss::c_str(i_target));
+        FAPI_INF( "tCK (ps): %d,  tWTR_L (ps): %d, tWTR_L (nck): %d  for target: %s",
+                  iv_tCK_in_ps, l_twtr_l_in_ps, l_twtr_l_in_nck, mss::c_str(i_target) );
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_l(l_mcs, l_attrs_dram_twtr_l.data()) );
@@ -3220,7 +3327,10 @@ fapi2::ReturnCode eff_config::dram_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>&
         FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
         FAPI_TRY( iv_pDecoder->min_twtr_s(i_target, l_twtr_s_mtb) );
 
-        l_twtr_s_in_ps = calc_timing_from_timebase(l_twtr_s_mtb, l_mtb, l_twtr_s_ftb, l_ftb);
+        FAPI_INF("medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
+                 l_mtb, l_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
+
+        l_twtr_s_in_ps = spd::calc_timing_from_timebase(l_twtr_s_mtb, l_mtb, l_twtr_s_ftb, l_ftb);
     }
 
     {
@@ -3228,11 +3338,11 @@ fapi2::ReturnCode eff_config::dram_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>&
         uint8_t l_twtr_s_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
-                  "Error in calculating l_twtr_s  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_s_in_ps);
+        FAPI_TRY( spd::calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
+                  "Error in calculating tWTR_S for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_twtr_s_in_ps);
 
-        FAPI_INF("Calculated twtr_s (ps): %d, twtr_s (nck): %d  for target: %s", l_twtr_s_in_ps, l_twtr_s_in_nck,
-                 mss::c_str(i_target));
+        FAPI_INF("tCK (ps): %d, tWTR_S (ps): %d, tWTR_S (nck): %d  for target: %s",
+                 iv_tCK_in_ps, l_twtr_s_in_ps, l_twtr_s_in_nck, mss::c_str(i_target) );
 
         // Get & update MCS attribute
         FAPI_TRY( eff_dram_twtr_s(l_mcs, l_attrs_dram_twtr_s.data()) );
@@ -3257,42 +3367,44 @@ fapi2::ReturnCode eff_config::dram_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>&
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
-    int64_t l_trrd_s_in_ps = 0;
 
-    // Calculate trrd_s (in ps)
+    std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
+    uint64_t l_trrd_s_in_nck = 0;
+    uint8_t l_stack_type = 0;
+    uint8_t l_dram_width = 0;
+
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(i_target, l_stack_type) );
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_dram_width),
+              "Failed to access device_width()");
+
+    // From the SPD Spec:
+    // At some frequencies, a minimum number of clocks may be required resulting
+    // in a larger tRRD_Smin value than indicated in the SPD.
+    // tRRD_S (3DS) is speed bin independent.
+    // So we won't read this from SPD and choose the correct value based on mss_freq
+
+    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
     {
-        int64_t l_trrd_s_mtb = 0;
-        int64_t l_trrd_s_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
-
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_trrd_s(i_target, l_trrd_s_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_s(i_target, l_trrd_s_ftb) );
-
-        l_trrd_s_in_ps = calc_timing_from_timebase(l_trrd_s_mtb, l_mtb, l_trrd_s_ftb, l_ftb);
+        FAPI_TRY( trrd_s_slr(i_target, l_trrd_s_in_nck) );
+    }
+    else
+    {
+        // Non-3DS
+        FAPI_TRY( mss::trrd_s(i_target, l_dram_width, l_trrd_s_in_nck) );
     }
 
-    {
-        std::vector<uint8_t> l_attrs_dram_trrd_s(PORTS_PER_MCS, 0);
-        uint8_t l_trrd_s_in_nck = 0;
+    FAPI_INF("SDRAM width: %d, tRRD_S (nck): %d for target: %s",
+             l_dram_width, l_trrd_s_in_nck, mss::c_str(i_target));
 
-        // Calculate nck
-        FAPI_TRY( calc_nck(l_trrd_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
-                  "Error in calculating trrd_s  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_trrd_s_in_ps);
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_trrd_s(l_mcs, l_attrs_dram_trrd_s.data()) );
 
-        FAPI_INF("Calculated trrd_s (ps): %d, trrd_s (nck): %d  for target: %s", l_trrd_s_in_ps, l_trrd_s_in_nck,
-                 mss::c_str(i_target));
-        // Get & update MCS attribute
-        FAPI_TRY( eff_dram_trrd_s(l_mcs, l_attrs_dram_trrd_s.data()) );
+    l_attrs_dram_trrd_s[l_port_num] = l_trrd_s_in_nck;
 
-        l_attrs_dram_trrd_s[l_port_num] = l_trrd_s_in_nck;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_S,
-                                l_mcs,
-                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_s, PORTS_PER_MCS)),
-                  "Failed setting attribute for DRAM_TRRD_S");
-    }
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_S,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_s, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TRRD_S");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3307,43 +3419,72 @@ fapi2::ReturnCode eff_config::dram_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>&
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
-    int64_t l_trrd_l_in_ps = 0;
 
-    // Calculate trrd_l (in ps)
+    std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
+    uint64_t l_trrd_l_in_nck = 0;
+    uint8_t l_stack_type = 0;
+    uint8_t l_dram_width = 0;
+
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(i_target, l_stack_type),
+              "Failed prim_sdram_signal_loading()" );
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_dram_width),
+              "Failed to access device_width()");
+
+    // From the SPD Spec:
+    // At some frequencies, a minimum number of clocks may be required resulting
+    // in a larger tRRD_Smin value than indicated in the SPD.
+    // tRRD_S (3DS) is speed bin independent.
+    // So we won't read this from SPD and choose the correct value based on mss_freq
+
+    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
     {
-        int64_t l_trrd_l_mtb = 0;
-        int64_t l_trrd_l_ftb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
-
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_trrd_l(i_target, l_trrd_l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_l(i_target, l_trrd_l_ftb) );
-
-        l_trrd_l_in_ps = calc_timing_from_timebase(l_trrd_l_mtb, l_mtb, l_trrd_l_ftb, l_ftb);
+        FAPI_TRY( trrd_l_slr(i_target, l_trrd_l_in_nck) );
+    }
+    else
+    {
+        FAPI_TRY( mss::trrd_l(i_target, l_dram_width, l_trrd_l_in_nck), "Failed trrd_l()" );
     }
 
-    {
-        std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
-        uint8_t l_trrd_l_in_nck = 0;
+    FAPI_INF("SDRAM width: %d, tRRD_L (nck): %d for target: %s",
+             l_dram_width, l_trrd_l_in_nck, mss::c_str(i_target));
 
-        // Calculate nck
-        FAPI_TRY( calc_nck(l_trrd_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
-                  "Error in calculating trrd_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_trrd_l_in_ps);
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_trrd_l(l_mcs, l_attrs_dram_trrd_l.data()) );
 
-        FAPI_INF("Calculated trrd_l (ps): %d, trrd_l (nck): %d  for target: %s", l_trrd_l_in_ps, l_trrd_l_in_nck,
-                 mss::c_str(i_target));
+    l_attrs_dram_trrd_l[l_port_num] = l_trrd_l_in_nck;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_l, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TRRD_L");
 
-        // Get & update MCS attribute
-        FAPI_TRY( eff_dram_trrd_l(l_mcs, l_attrs_dram_trrd_l.data()) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-        l_attrs_dram_trrd_l[l_port_num] = l_trrd_l_in_nck;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_L,
-                                l_mcs,
-                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_l, PORTS_PER_MCS)),
-                  "Failed setting attribute for DRAM_TRRD_L");
-    }
+///
+/// @brief Determines & sets effective config for tRRD_dlr
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_trrd_dlr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+
+    std::vector<uint8_t> l_attrs_dram_trrd_dlr(PORTS_PER_MCS, 0);
+    constexpr uint64_t l_trrd_dlr_in_nck = trrd_dlr();
+
+    FAPI_INF("tRRD_dlr (nck): %d  for target: %s", l_trrd_dlr_in_nck, mss::c_str(i_target));
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_trrd_dlr(l_mcs, l_attrs_dram_trrd_dlr.data()) );
+
+    l_attrs_dram_trrd_dlr[l_port_num] = l_trrd_dlr_in_nck;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRRD_DLR,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trrd_dlr, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TRRD_DLR");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3358,41 +3499,67 @@ fapi2::ReturnCode eff_config::dram_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
-    int64_t l_tfaw_in_ps = 0;
 
-    // Calculate tfaw (in ps)
+    std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
+    uint64_t l_tfaw_in_nck = 0;
+    uint8_t l_stack_type = 0;
+    uint8_t l_dram_width = 0;
+
+    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(i_target, l_stack_type),
+              "Failed prim_sdram_signal_loading()");
+    FAPI_TRY( iv_pDecoder->device_width(i_target, l_dram_width),
+              "Failed device_width()");
+
+    if( l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
     {
-        constexpr int64_t l_tfaw_ftb = 0;
-        int64_t l_tfaw_mtb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
-
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_tfaw(i_target, l_tfaw_mtb) );
-
-        l_tfaw_in_ps = calc_timing_from_timebase(l_tfaw_mtb, l_mtb, l_tfaw_ftb, l_ftb);
+        FAPI_TRY( tfaw_slr(i_target, l_dram_width, l_tfaw_in_nck), "Failed tfaw_slr()");
+    }
+    else
+    {
+        FAPI_TRY( mss::tfaw(i_target, l_dram_width, l_tfaw_in_nck), "Failed tfaw()" );
     }
 
-    {
-        std::vector<uint8_t> l_attrs_dram_tfaw(PORTS_PER_MCS, 0);
-        uint8_t l_tfaw_in_nck = 0;
+    FAPI_INF("SDRAM width: %d, tFAW (nck): %d  for target: %s",
+             l_dram_width, l_tfaw_in_nck, mss::c_str(i_target));
 
-        // Calculate nck
-        FAPI_TRY ( calc_nck(l_tfaw_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
-                   "Error in calculating tfaw_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_tfaw_in_ps );
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_tfaw(l_mcs, l_attrs_dram_tfaw.data()) );
 
-        FAPI_INF("Calculated tFAW (ps): %d, tFAW (nck): %d  for target: %s", l_tfaw_in_ps, l_tfaw_in_nck, mss::c_str(i_target));
+    l_attrs_dram_tfaw[l_port_num] = l_tfaw_in_nck;
 
-        // Get & update MCS attribute
-        FAPI_TRY( eff_dram_tfaw(l_mcs, l_attrs_dram_tfaw.data()) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tfaw, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TFAW");
 
-        l_attrs_dram_tfaw[l_port_num] = l_tfaw_in_nck;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW,
-                                l_mcs,
-                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tfaw, PORTS_PER_MCS)),
-                  "Failed setting attribute for DRAM_TFAW");
-    }
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for tFAW_DLR
+/// @param[in] i_target FAPI2 target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::dram_tfaw_dlr(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
+{
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
+
+    std::vector<uint8_t> l_attrs_dram_tfaw_dlr(PORTS_PER_MCS, 0);
+    constexpr uint64_t l_tfaw_dlr_in_nck = tfaw_dlr();
+
+    FAPI_INF("tFAW_dlr (nck): %d  for target: %s", l_tfaw_dlr_in_nck, mss::c_str(i_target));
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_tfaw_dlr(l_mcs, l_attrs_dram_tfaw_dlr.data()) );
+
+    l_attrs_dram_tfaw_dlr[l_port_num] = l_tfaw_dlr_in_nck;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TFAW_DLR,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tfaw_dlr, PORTS_PER_MCS)),
+              "Failed setting attribute for DRAM_TFAW_DLR");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3407,41 +3574,39 @@ fapi2::ReturnCode eff_config::dram_tras(const fapi2::Target<TARGET_TYPE_DIMM>& i
 {
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_port_num = index(find_target<TARGET_TYPE_MCA>(i_target));
-    int64_t l_tras_in_ps = 0;
 
-    // Calculate tras (in ps)
-    {
-        constexpr int64_t l_tras_ftb = 0;
-        int64_t l_tras_mtb = 0;
-        int64_t l_ftb = 0;
-        int64_t l_mtb = 0;
+    // tRAS is bin independent so we don't read this from SPD
+    // which will give the best timing value for the dimm
+    // (like 2400 MT/s) which may be different than the system
+    // speed (if we were being limited by VPD or MRW restrictions)
+    const uint64_t l_tras_in_ps = mss::tras(i_target);
 
-        FAPI_TRY( iv_pDecoder->medium_timebase(i_target, l_mtb) );
-        FAPI_TRY( iv_pDecoder->fine_timebase(i_target, l_ftb) );
-        FAPI_TRY( iv_pDecoder->min_active_to_precharge_delay_time(i_target, l_tras_mtb) );
+    // Calculate nck
+    std::vector<uint8_t> l_attrs_dram_tras(PORTS_PER_MCS, 0);
+    uint8_t l_tras_in_nck = 0;
 
-        l_tras_in_ps = calc_timing_from_timebase(l_tras_mtb, l_mtb, l_tras_ftb, l_ftb);
-    }
+    // Cast needed for calculations to be done on the same integral type
+    // as required by template deduction. We have iv_tCK_in_ps as a signed
+    // integer because we have other timing values that calculations do
+    // addition with negative integers.
+    FAPI_TRY( spd::calc_nck(l_tras_in_ps,
+                            static_cast<uint64_t>(iv_tCK_in_ps),
+                            INVERSE_DDR4_CORRECTION_FACTOR,
+                            l_tras_in_nck),
+              "Error in calculating tras_l for target %s, with value of l_twtr_in_ps: %d",
+              mss::c_str(i_target), l_tras_in_ps);
 
-    {
-        std::vector<uint8_t> l_attrs_dram_tras(PORTS_PER_MCS, 0);
-        int8_t l_tras_in_nck = 0;
+    FAPI_INF("tCK (ps): %d, tRAS (ps): %d, tRAS (nck): %d  for target: %s",
+             iv_tCK_in_ps, l_tras_in_ps, l_tras_in_nck, mss::c_str(i_target));
 
-        // Calculate nck
-        FAPI_TRY( calc_nck(l_tras_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tras_in_nck),
-                  "Error in calculating tras_l for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_tras_in_ps);
+    // Get & update MCS attribute
+    FAPI_TRY( eff_dram_tras(l_mcs, l_attrs_dram_tras.data()) );
 
-        FAPI_INF("Calculated tRAS (ps): %d, tRAS (nck): %d  for target: %s", l_tras_in_ps, l_tras_in_nck, mss::c_str(i_target));
-
-        // Get & update MCS attribute
-        FAPI_TRY( eff_dram_tras(l_mcs, l_attrs_dram_tras.data()) );
-
-        l_attrs_dram_tras[l_port_num] = l_tras_in_nck;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRAS,
-                                l_mcs,
-                                UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tras, PORTS_PER_MCS)),
-                  "Failed setting attribute for tRAS");
-    }
+    l_attrs_dram_tras[l_port_num] = l_tras_in_nck;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRAS,
+                            l_mcs,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_tras, PORTS_PER_MCS)),
+              "Failed setting attribute for tRAS");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3460,22 +3625,24 @@ fapi2::ReturnCode eff_config::dram_trtp(const fapi2::Target<TARGET_TYPE_DIMM>& i
     // Values from proposed DDR4 Full spec update(79-4A)
     // Item No. 1716.78C
     // Page 241 & 246
-    constexpr int64_t l_max_trtp_in_ps = 7500;
-    constexpr int64_t l_min_trtp_in_nck = 4;
+    int64_t constexpr l_max_trtp_in_ps = trtp();
 
     std::vector<uint8_t> l_attrs_dram_trtp(PORTS_PER_MCS, 0);
-    int64_t l_calc_trtp_in_nck = 0;
+    uint8_t l_calc_trtp_in_nck = 0;
 
     // Calculate nck
-    FAPI_TRY( calc_nck(l_max_trtp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
-              "Error in calculating trtp  for target %s, with value of l_twtr_in_ps: %d", mss::c_str(i_target), l_max_trtp_in_ps);
+    FAPI_TRY( spd::calc_nck(l_max_trtp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
+              "Error in calculating trtp  for target %s, with value of l_twtr_in_ps: %d",
+              mss::c_str(i_target), l_max_trtp_in_ps);
 
-    FAPI_INF("Calculated trtp (nck): %d", l_calc_trtp_in_nck);
+    FAPI_INF("tCK (ps): %d, tRTP (ps): %d, tRTP (nck): %d",
+             iv_tCK_in_ps, l_max_trtp_in_ps, l_calc_trtp_in_nck);
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trtp(l_mcs, l_attrs_dram_trtp.data()) );
 
-    l_attrs_dram_trtp[l_port_num] = uint8_t( std::max(l_min_trtp_in_nck, l_calc_trtp_in_nck) );
+    l_attrs_dram_trtp[l_port_num] = l_calc_trtp_in_nck;
+
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRTP,
                             l_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_dram_trtp, PORTS_PER_MCS)),
@@ -3505,7 +3672,7 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
     // We need to set up all VPD info before calling getVPD, the API assumes this
     // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
     FAPI_TRY( mss::freq(find_target<TARGET_TYPE_MCBIST>(i_target), l_vpd_info.iv_freq_mhz) );
-    FAPI_INF("%s. VPD info - dimm data rate: %d MT/s", c_str(i_target), l_vpd_info.iv_freq_mhz);
+    FAPI_INF("%s. VPD info - dimm data rate: %d MT/s", mss::c_str(i_target), l_vpd_info.iv_freq_mhz);
 
     // Make sure to create 0 filled blobs for all the possible blobs, not just for the
     // chiplets which are configured. This prevents the decoder from accessing nullptrs
@@ -3542,7 +3709,7 @@ fapi2::ReturnCode eff_config::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i
         l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
 
         FAPI_INF("%s. VPD info - rank count for dimm_0: %d, dimm_1: %d",
-                 c_str(i_target), l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
+                 mss::c_str(i_target), l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
 
         // Get the MCS blob for this specific rank combination *only if* we have DIMM. Remember,
         // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.

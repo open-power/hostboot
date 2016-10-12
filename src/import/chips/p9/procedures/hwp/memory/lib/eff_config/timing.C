@@ -30,6 +30,12 @@
 namespace mss
 {
 
+enum temp_mode : uint8_t
+{
+    NORMAL = 1,
+    EXTENDED = 2,
+};
+
 // Proposed DDR4 Full spec update(79-4B)
 // Item No. 1716.78C
 // pg.46
@@ -81,9 +87,9 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
 ///
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
-                              int64_t& o_timing )
+                              uint64_t& o_timing )
 {
-    int64_t l_multiplier = 0;
+    uint64_t l_multiplier = 0;
 
     switch(i_temp_refresh_range)
     {
@@ -104,8 +110,8 @@ fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
             break;
     }
 
-    const int64_t l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
-    const int64_t l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
+    const uint64_t l_quotient = TREFI_BASE / ( int64_t(i_mode) * l_multiplier );
+    const uint64_t l_remainder = TREFI_BASE % ( int64_t(i_mode) * l_multiplier );
     o_timing = l_quotient + (l_remainder == 0 ? 0 : 1);
 
     FAPI_INF( "tREFI: %d, quotient: %d, remainder: %d, tREFI_base: %d",

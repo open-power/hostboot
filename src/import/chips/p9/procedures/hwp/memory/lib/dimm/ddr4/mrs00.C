@@ -122,7 +122,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     constexpr uint8_t wr_map[WR_COUNT] =
     {
         // 10        12         14         16         18         20         22         24         26
-        0b0000, 0, 0b0001, 0, 0b0001, 0, 0b0011, 0, 0b0100, 0, 0b0101, 0, 0b0111, 0, 0b0110, 0, 0b1000
+        0b0000, 0, 0b0001, 0, 0b0010, 0, 0b0011, 0, 0b0100, 0, 0b0101, 0, 0b0111, 0, 0b0110, 0, 0b1000
     };
 
     // Map from the CAS Latency attribute to the bits in the MRS
@@ -241,4 +241,3 @@ fapi2::ReturnCode (*mrs00_data::decode)(const ccs::instruction_t<fapi2::TARGET_T
 } // ns ddr4
 
 } // ns mss
-
