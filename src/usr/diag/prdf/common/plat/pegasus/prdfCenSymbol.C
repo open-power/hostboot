@@ -98,52 +98,6 @@ CenSymbol CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
-                                 uint8_t i_dimmDq, uint8_t i_portSlct )
-{
-    #define PRDF_FUNC "[CenSymbol::fromDimmDq] "
-
-    CenSymbol o_symbol; // default contructor is invalid.
-
-    do
-    {
-        if ( TYPE_MBA != getTargetType(i_mba) )
-        {
-            PRDF_ERR( PRDF_FUNC "i_mba is invalid" );
-            break;
-        }
-
-        WiringType wiringType = WIRING_INVALID;
-        int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getWiringType() failed" );
-            break;
-        }
-
-        uint8_t symbol;
-        l_rc = getSymbol( i_rank, wiringType, i_dimmDq, i_portSlct, symbol );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getSymbol() failed" );
-            break;
-        }
-
-        uint8_t pins = (0 == (i_dimmDq & ODD_SYMBOL_DQ)) ? EVEN_SYMBOL_DQ :
-                                                           ODD_SYMBOL_DQ;
-
-        o_symbol = CenSymbol ( i_mba, i_rank, wiringType, symbol, pins,
-                               isDramWidthX4(i_mba) );
-
-    } while (0);
-
-    return o_symbol;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 CenSymbol CenSymbol::fromGalois( TargetHandle_t i_mba, const CenRank & i_rank,
                                  uint8_t i_galois, uint8_t i_mask )
 {
@@ -242,52 +196,6 @@ uint8_t CenSymbol::getDramPins() const
     uint32_t spd = iv_x4Dram ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE;
 
     return iv_pins << (((spd - 1) - (iv_symbol % spd)) * MBA_DQS_PER_SYMBOL);
-}
-
-//------------------------------------------------------------------------------
-
-int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
-                              uint8_t i_dimmDq, uint8_t i_portSlct,
-                              uint8_t & o_symbol )
-{
-    #define PRDF_FUNC "[CenSymbol::getSymbol] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( DQS_PER_DIMM <= i_dimmDq )
-        {
-            PRDF_ERR( PRDF_FUNC "i_dimmDq is invalid" );
-            o_rc = FAIL; break;
-        }
-
-        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
-        {
-            PRDF_ERR( PRDF_FUNC "i_portSlct is invalid" );
-            o_rc = FAIL; break;
-        }
-
-        // Get the Centaur DQ.
-        uint8_t cenDq = i_dimmDq;
-
-        // TODO: RTC 67376 Add wiring type support for IS DIMMs to convert from
-        //       i_dimmDq to cenDq.
-
-        o_symbol = cenDq2Symbol( cenDq, i_portSlct );
-
-    } while(0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_rank=M%dS%d i_wiringType=%d i_dimmDq=%d "
-                  "i_portSlct=%d", i_rank.getMaster(), i_rank.getSlave(),
-                  i_wiringType, i_dimmDq, i_portSlct );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

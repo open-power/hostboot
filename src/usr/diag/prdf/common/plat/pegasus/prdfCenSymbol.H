@@ -94,24 +94,6 @@ class CenSymbol
                                  uint8_t i_pins = CEN_SYMBOL::NO_SYMBOL_DQS );
 
     /**
-     * @brief  Creates a CenSymbol from a DIMM DQ.
-     * @param  i_mba      The MBA target.
-     * @param  i_rank     The rank this symbol is on.
-     * @param  i_dimmDq   The failing DIMM DQ.
-     * @param  i_portSlct The port select.
-     * @param  o_symbol   The returned symbol object.
-     * @note   For Centaur DIMMs, a DIMM DQ is the same as a Centaur DQ.
-     *         For IS DIMMs, the mapping between DIMM DQ and Centaur DQ is
-     *         determined by card that the DIMM is plugged into. See enum
-     *         WiringType for more details.
-     * @return A CenSymbol. Must call isValid() to determine if the function was
-     *         successful in creating a valid object.
-     */
-    static CenSymbol fromDimmDq( TARGETING::TargetHandle_t i_mba,
-                                 const CenRank & i_rank, uint8_t i_dimmDq,
-                                 uint8_t i_portSlct );
-
-    /**
      * @brief  Creates a CenSymbol from a Galois field.
      * @param  i_mba    The MBA target.
      * @param  i_rank   The rank this symbol is on.
@@ -218,22 +200,6 @@ class CenSymbol
         return ( (iv_symbol == i_symbol.iv_symbol) &&
                  (iv_rank   == i_symbol.iv_rank  ) );
     }
-
-  private: // functions
-
-    /**
-     * @brief  Returns the symbol associated with the given DIMM DQ.
-     * @param  i_rank        The rank this symbol is on.
-     * @param  i_wiringType  The DIMM's wiring type.
-     * @param  i_dimmDq      The failing DIMM DQ.
-     * @param  i_portSlct    The DIMM's port select.
-     * @param  o_symbol      The returned symbol.
-     * @return Non-SUCCESS if an invalid parameter is given, SUCCESS otherwise.
-     */
-    static int32_t getSymbol( const CenRank & i_rank,
-                              CEN_SYMBOL::WiringType i_wiringType,
-                              uint8_t i_dimmDq, uint8_t i_portSlct,
-                              uint8_t & o_symbol );
 
   private: // instance variables
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -68,14 +70,6 @@ uint8_t symbol2PortSlct( uint8_t i_symbol );
  * @return The Symbol
  */
 uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram );
-
-/**
- * @brief Find the symbol of the given Centaur DQ and port select
- * @param i_CenDq The Centaur DQ
- * @param i_ps    The Port Select
- * @return The Symbol
- */
-uint8_t cenDq2Symbol( uint8_t i_CenDq, uint8_t i_ps );
 
 /**
  * @brief Find the DRAM index for the given symbol
