@@ -51,33 +51,43 @@ namespace SBEIO
     // BYTE 6 options
     enum psuCommandClass
     {
-        SBE_PSU_CLASS_UNKNOWN      = 0,
-        SBE_PSU_CLASS_CORE_STATE   = 0xD1,
-        SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3
+        SBE_PSU_CLASS_UNKNOWN           = 0,
+        SBE_PSU_CLASS_CORE_STATE        = 0xD1,
+        SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3,
+        SBE_PSU_GENERIC_MESSAGE         = 0xD7
     };
 
     /**
      * @brief enums for SBE core state control commands
      */
-
     // BYTE 7 options
     enum psuCoreStateControlCommands
     {
-        SBE_CMD_CONTROL_DEADMAN_LOOP   = 0x01,
+        SBE_CMD_CONTROL_DEADMAN_LOOP     = 0x01,
 
     };
 
     /**
      * @brief enums for SBEPutRing From Image message commands
      */
-      // BYTE 7 options
+    // BYTE 7 options
     enum putRingCommandFromImageCommands
     {
-        SBE_CMD_CONTROL_PUTRING        = 0x01
+        SBE_CMD_CONTROL_PUTRING          = 0x01
+    };
+
+
+    /**
+     * @brief enums for SBE generic message commands
+     */
+    //BYTE 7 options
+    enum psuGenericMessageCommands
+    {
+        SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06
     };
 
     /**
-     * @brief enums for SBE core state control commands
+     * @brief enums for SBE core state control flags
      */
     //BYTE 2  & 3, Control Flags
     enum psuDeadManControlFlags
@@ -86,6 +96,16 @@ namespace SBEIO
         SBE_DMCONTROL_STOP               = 0x02,
         SBE_DMCONTROL_RESPONSE_REQUIRED  = 0x0100,
         SBE_DMCONTROL_ACK_REQUIRED       = 0x0200,
+    };
+
+    /**
+    * @brief enums for SBE system config control flags
+    */
+    //BYTE 2  & 3, Control Flags
+    enum psuSystemConfigControlFlags
+    {
+        SBE_REQUIRE_RESPONSE             = 0x0100,
+        SBE_REQUIRE_ACK                  = 0x0200,
     };
 
     /**
@@ -107,6 +127,25 @@ namespace SBEIO
         SBE_DMCONTROL_START_RSP_USED_REGS     = 0x01,
         SBE_DMCONTROL_STOP_REQ_USED_REGS      = 0x01,
         SBE_DMCONTROL_STOP_RSP_USED_REGS      = 0x01,
+    };
+
+    /**
+    * @brief non reserved word enums
+    *
+    * Shows which of the request and response msg registers are
+    * not reserved. Reserved registers do not need to be written
+    * or read.
+    *
+    * This is a 4 bit field:
+    * 0x1 - Reg 0 is non-reserved (read or write this reg)
+    * 0x2 - Reg 1 is non-reserved (read or write this reg)
+    * 0x4 - Reg 2 is non-reserved (read or write this reg)
+    * 0x8 - Reg 3 is non-reserved (read or write this reg)
+    */
+    enum psuSystemConfigNonReservedMsgs
+    {
+        SBE_SYSTEM_CONFIG_REQ_USED_REGS     = 0x03,
+        SBE_SYSTEM_CONFIG_RSP_USED_REGS     = 0x01,
     };
 
     /**
@@ -167,6 +206,17 @@ namespace SBEIO
             uint64_t cd1_ControlDeadmanLoop_WaitTime ;
             uint64_t cd1_ControlDeadmanLoop_MbxReg2reserved;
             uint64_t cd1_ControlDeadmanLoop_MbxReg3reserved;
+        } PACKED;
+        struct //setSystemConfig
+        {
+            uint16_t cd2_SetSystemConfig_Reserved;
+            uint16_t cd2_SetSystemConfig_ControlFlags;
+            uint16_t cd2_SetSystemConfig_SeqID;
+            uint8_t  cd2_SetSystemConfig_CommandClass;
+            uint8_t  cd2_SetSystemConfig_Command;
+            uint64_t cd2_SetSystemConfig_SystemFabricIdMap ;
+            uint64_t cd2_SetSystemConfig_MbxReg2reserved;
+            uint64_t cd2_SetSystemConfig_MbxReg3reserved;
         } PACKED;
 
         struct //for 'Put Ring from Image' message
