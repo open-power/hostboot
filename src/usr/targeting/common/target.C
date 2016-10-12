@@ -735,7 +735,7 @@ void setFrequencyAttributes( Target * i_sys,
         l_procTarget != l_procList.end();
         ++l_procTarget )
     {
-        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_REF>(i_i2cBusDiv);
+        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_NEST>(i_i2cBusDiv);
     }
 
 }
