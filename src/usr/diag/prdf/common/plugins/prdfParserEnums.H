@@ -30,7 +30,7 @@
 #ifndef __prdfParserEnums_H
 #define __prdfParserEnums_H
 
-//#include <prdfCenConst.H> TODO: RTC 136126
+#include <prdfMemConst.H>
 
 namespace PRDF
 {
@@ -159,7 +159,7 @@ namespace DQ_BITMAP
     enum
     {
         BITMAP_SIZE = 10, // 80-bit bitmap
-        ENTRY_SIZE  = sizeof(uint8_t) + PORT_SLCT_PER_MBA * BITMAP_SIZE,
+        ENTRY_SIZE  = sizeof(uint8_t) + MBA_DIMMS_PER_RANK * BITMAP_SIZE,
     };
 
 } // namespace DQ_BITMAP

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -239,9 +239,9 @@ int32_t CenSymbol::getWiringType( TargetHandle_t i_mba, const CenRank & i_rank,
 
 uint8_t CenSymbol::getDramPins() const
 {
-    uint32_t spd = iv_x4Dram ? SYMBOLS_PER_X4DRAM : SYMBOLS_PER_X8DRAM;
+    uint32_t spd = iv_x4Dram ? MBA_SYMBOLS_PER_NIBBLE : MBA_SYMBOLS_PER_BYTE;
 
-    return iv_pins << (((spd - 1) - (iv_symbol % spd)) * DQS_PER_SYMBOL);
+    return iv_pins << (((spd - 1) - (iv_symbol % spd)) * MBA_DQS_PER_SYMBOL);
 }
 
 //------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
             o_rc = FAIL; break;
         }
 
-        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "i_portSlct is invalid" );
             o_rc = FAIL; break;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -286,7 +286,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 
     // Get the maximum capture data size.
     static const size_t sz_rank  = sizeof(uint8_t);
-    static const size_t sz_entry = PORT_SLCT_PER_MBA * DIMM_DQ_RANK_BITMAP_SIZE;
+    static const size_t sz_entry = MBA_DIMMS_PER_RANK * DIMM_DQ_RANK_BITMAP_SIZE;
     static const size_t sz_word  = sizeof(CPU_WORD);
     int32_t rc = SUCCESS;
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 // Pegasus includes
 #include <prdfCalloutUtil.H>
 #include <prdfCenAddress.H>
-#include <prdfCenConst.H>
+#include <prdfMemConst.H>
 #include <prdfCenDqBitmap.H>
 #include <prdfCenMbaDataBundle.H>
 #include <prdfCenSymbol.H>
@@ -1200,7 +1200,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Callout the failing DIMMs.
         TargetHandleList callouts;
-        for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
+        for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
         {
             bool badDqs = false;
             o_rc = bitmap.badDqs( ps, badDqs );
