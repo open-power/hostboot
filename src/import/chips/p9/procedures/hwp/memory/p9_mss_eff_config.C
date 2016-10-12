@@ -93,13 +93,12 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.dram_width(l_dimm) );
         FAPI_TRY( l_eff_config.dram_density(l_dimm) );
         FAPI_TRY( l_eff_config.ranks_per_dimm(l_dimm) );
-        // Master ranks done above
         FAPI_TRY( l_eff_config.primary_stack_type(l_dimm) );
         FAPI_TRY( l_eff_config.dimm_size(l_dimm) );
         FAPI_TRY( l_eff_config.hybrid_memory_type(l_dimm) );
-        FAPI_TRY( l_eff_config.refresh_interval_time(l_dimm) );
-        FAPI_TRY( l_eff_config.refresh_cycle_time(l_dimm) );
-        FAPI_TRY( l_eff_config.refresh_cycle_time_dlr(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trefi(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trfc(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trfc_dlr(l_dimm) );
         FAPI_TRY( l_eff_config.rcd_mirror_mode(l_dimm) );
         FAPI_TRY( l_eff_config.dram_bank_bits(l_dimm) );
         FAPI_TRY( l_eff_config.dram_row_bits(l_dimm) );
@@ -168,11 +167,14 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_config.memcal_interval(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trp(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trcd(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trc(l_dimm) );
         FAPI_TRY( l_eff_config.dram_twtr_l(l_dimm) );
         FAPI_TRY( l_eff_config.dram_twtr_s(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trrd_s(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trrd_l(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_trrd_dlr(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tfaw(l_dimm) );
+        FAPI_TRY( l_eff_config.dram_tfaw_dlr(l_dimm) );
         FAPI_TRY( l_eff_config.dram_tras(l_dimm) );
         FAPI_TRY( l_eff_config.dram_trtp(l_dimm) );
         FAPI_TRY( l_eff_config.read_dbi(l_dimm) );
