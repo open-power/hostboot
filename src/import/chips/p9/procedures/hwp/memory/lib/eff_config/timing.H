@@ -43,7 +43,7 @@
 namespace mss
 {
 
-enum GUARD_BAND : uint16_t
+enum guard_band : uint16_t
 {
     // Used for caclulating spd timing values - from JEDEC rounding algorithm
     // Correction factor is 1% (for DDR3) or 2.5% (for DDR4)
@@ -61,11 +61,8 @@ enum class refresh_rate : uint8_t
     REF4X = 4,
 };
 
-enum temp_mode : uint8_t
+namespace spd
 {
-    NORMAL = 1,
-    EXTENDED = 2,
-};
 
 ///
 /// @brief Calculates timing value
@@ -88,42 +85,134 @@ inline int64_t calc_timing_from_timebase(const int64_t i_timing_mtb,
 }
 
 ///
-/// @brief Returns clock cycles
-/// @tparam T input
-/// @tparam OT output
-/// @param[in] timing_in_ps timing parameter in ps
-/// @param[in] tck_in_ps  clock period in ps
-/// @param[in] inverse_corr_factor inverse correction factor  (defined by JEDEC)
+/// @brief Helper to compute JEDEC's SPD rounding algorithm
+/// to convert ps to nCK
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_timing_in_ps timing parameter in ps
+/// @param[in] i_tck_in_ps  clock period in ps
+/// @param[in] i_inverse_corr_factor inverse correction factor (defined by JEDEC)
 /// @param[out] o_value_nck the end calculation in nck
-/// @return the clock cycles of timing parameter (provided in ps)
+/// @return true if overflow didn't occur, false otherwise
+/// @note DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
+///
+template<typename T, typename OT>
+static inline bool jedec_spd_rounding_alg(const T& i_timing_in_ps,
+        const T& i_tck_in_ps,
+        const guard_band i_inverse_corr_factor,
+        OT& o_val_nck)
+{
+    // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
+    T l_temp_nck = (i_timing_in_ps * CONVERT_PS_IN_A_NS) / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
+    l_temp_nck += i_inverse_corr_factor;
+    l_temp_nck = l_temp_nck / CONVERT_PS_IN_A_NS;
+
+    // Check for overflow
+    // static_cast needed for HB compiler that complains about
+    // comparision of two different integral types
+    o_val_nck = l_temp_nck;
+
+    FAPI_DBG("Input timing (ps) %d, tCK (ps) %d, temp output %d, output (nCK) %d",
+             i_timing_in_ps, i_tck_in_ps, l_temp_nck, o_val_nck);
+
+    return (static_cast<T>(o_val_nck) == l_temp_nck);
+}
+
+///
+/// @brief Returns clock cycles based on input application period
+/// @tparam T input type
+/// @tparam OT output type
+/// @param[in] i_timing_in_ps timing parameter in ps
+/// @param[in] i_tck_in_ps  clock period in ps
+/// @param[in] i_inverse_corr_factor inverse correction factor  (defined by JEDEC)
+/// @param[out] o_value_nck the end calculation in nck
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
 template<typename T, typename OT>
 inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
                                   const T& i_tck_in_ps,
-                                  GUARD_BAND i_inverse_corr_factor,
+                                  const guard_band i_inverse_corr_factor,
                                   OT& o_val_nck)
 {
-    // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
-    T l_temp_nck = (i_timing_in_ps * 1000) / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
-    l_temp_nck += i_inverse_corr_factor;
-    l_temp_nck = l_temp_nck / 1000;
-
-    //Check for overflow.
-    o_val_nck = l_temp_nck;
-
-    FAPI_ASSERT(o_val_nck == l_temp_nck,
-                fapi2::MSS_INVALID_CAST_CALC_NCK().
-                set_TIMING_PS(i_timing_in_ps).
-                set_NCK_NS(i_tck_in_ps).
-                set_CORRECTION_FACTOR(i_inverse_corr_factor),
-                "Bad cast for calc_nck. Output is: %d, after cast is %d", l_temp_nck, l_temp_nck);
-    return fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ASSERT( jedec_spd_rounding_alg(i_timing_in_ps,
+                                        i_tck_in_ps,
+                                        i_inverse_corr_factor,
+                                        o_val_nck),
+                 fapi2::MSS_INVALID_CAST_CALC_NCK().
+                 set_TIMING_PS(i_timing_in_ps).
+                 set_NCK_NS(i_tck_in_ps).
+                 set_CORRECTION_FACTOR(i_inverse_corr_factor),
+                 "Overflow occured. Returned data is %d", o_val_nck);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Returns clock cycles form picoseconds based on speed bin
+/// Uses SPD rounding algorithm for DDR4
+/// @tparam T the target type from which to get the mt/s
+/// @tparam OT the output type, derrived from the parameters
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] timing_in_ps timing parameter in ps
+/// @return the clock cycles of timing parameter (provided in ps)
+/// @note Uses DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
+///
+template<fapi2::TargetType T, typename OT>
+inline OT ps_to_nck( const fapi2::Target<T>& i_target, const OT& i_timing_in_ps)
+{
+    uint64_t l_freq = 0;
+    OT l_tck_in_ps = 0;
+    OT l_temp_nck = 0;
+
+    FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
+
+    // No time if MT/s is 0 (well, infinite really but shut up)
+    if (l_freq == 0)
+    {
+        return 0;
+    }
+
+    FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
+              "Failed freq() accessor" );
+    FAPI_TRY( calc_nck(i_timing_in_ps, l_tck_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
+              "Failed calc_nck()" );
+
+    return l_temp_nck;
+
+fapi_try_exit:
+    // We simply can't work if we can't get the frequency or
+    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
+    // ...so this should be ok
+    FAPI_ERR("Can't get MSS_FREQ, obtained an invalid MSS_FREQ (%d), or overflow occurred - stopping", l_freq);
+    fapi2::Assert(false);
+
+    // Keeps compiler happy
+    return 0;
+}
+
+///
+/// @brief Returns clock cycles from nanoseconds
+/// Uses SPD rounding algorithm for DDR4
+/// @tparam T the target type from which to get the mt/s
+/// @tparam OT the output type, derrived from the parameters
+/// @param[in] timing_in_ps timing parameter in ps
+/// @param[out] o_value_nck the end calculation in nck
+/// @return the clock cycles of timing parameter (provided in ps)
+/// @note Uses DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
+///
+template<fapi2::TargetType T, typename OT>
+inline OT ns_to_nck( const fapi2::Target<T>& i_target, const OT& i_timing_in_ns)
+{
+    return ps_to_nck(i_target, i_timing_in_ns * CONVERT_PS_IN_A_NS);
+}
+
+}// spd
 
 ///
 /// @brief Returns application clock period (tCK) based on dimm transfer rate
@@ -131,7 +220,7 @@ fapi_try_exit:
 /// @tparam OT output type
 /// @param[in] i_target FAPI2 target
 /// @param[out] o_tCK_in_ps application period in ps
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
 ///
 template<fapi2::TargetType T, typename OT>
 inline fapi2::ReturnCode clock_period(const fapi2::Target<T>& i_target,
@@ -155,7 +244,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode calc_trefi( const refresh_rate i_mode,
                               const uint8_t i_temp_refresh_range,
-                              int64_t& o_timing );
+                              uint64_t& o_timing );
 
 ///
 /// @brief Calculates Minimum Refresh Recovery Delay Time (different logical rank)
@@ -318,37 +407,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Refresh cycle time
-/// @param[in] i_target the DIMM target used to get clocks (needed to know the stack type)
-/// @param[out] o_trfc the trfc *in clocks*
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-inline fapi2::ReturnCode trfc( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint16_t& o_trfc )
-{
-    // Pull down the 3DS attribute. If we have a stack we need to use
-    // tRFC_DLR if not we pull down TRFC and use that.
-    uint8_t l_stack = 0;
-
-    FAPI_TRY( mss::eff_prim_stack_type(i_target, l_stack) );
-
-    if (l_stack == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS)
-    {
-        uint8_t l_value = 0;
-        FAPI_TRY( mss::eff_dram_trfc_dlr(i_target, l_value) );
-        o_trfc = l_value;
-    }
-    else
-    {
-        FAPI_TRY( mss::eff_dram_trfc(i_target, o_trfc) );
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Direct ODT turn on Latency
 /// @param[in] i_target the DIMM target used to get attributes
 /// @param[out] o_dodt *in clocks*
@@ -460,6 +518,782 @@ inline fapi2::ReturnCode fw_rd_wr( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 
     o_fw_rd_wr = std::max(l_twtr_s + 11, l_al + l_trtp + 3);
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief tRTP *in ps*
+/// @return constexpr value of RTP = 7500 ps
+///
+constexpr uint64_t trtp()
+{
+    // Per JEDEC spec, defaults to 7500 ps for all frequencies.
+    // (technically max of 7.5 ns or 4 nclk, which is always 7.5ns for DDR4)
+    return 7500;
+}
+
+///
+/// @brief Return the minimum allowable tRAS in picoseconds
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @return value in picoseconds
+///
+template< fapi2::TargetType T >
+inline uint64_t tras(const fapi2::Target<T>& i_target)
+{
+    uint64_t l_freq = 0;
+    uint64_t l_tras = 0;
+
+    // Frequency is used to determine tRAS
+    FAPI_TRY( freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            l_tras = 34000;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            l_tras = 33000;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            l_tras = 32000;
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+    }
+
+    return l_tras;
+
+fapi_try_exit:
+
+    // We simply can't work if we can't get the frequency or
+    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
+    // ...so this should be ok
+    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
+    fapi2::Assert(false);
+
+    // Keeps compiler happy
+    return 0;
+}
+
+///
+/// @brief Helper function to find tFAW based speed (MT/s) for 1/2 KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        // static_cast is needed for template deduction of std::max API
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = std::max( 16, spd::ns_to_nck(i_target, 17) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_output = std::max( 16, spd::ns_to_nck(i_target, 15) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = std::max( 16, spd::ns_to_nck(i_target, 13) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 16, spd::ns_to_nck(i_target, 12) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tFAW based speed (MT/s) for 1KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability (and ease of debug?).
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = std::max( 20, spd::ns_to_nck(i_target, 23) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 20, spd::ns_to_nck(i_target, 21) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tFAW based speed (MT/s) for 2KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 28, spd::ns_to_nck(i_target, 30) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the minimum allowable tFAW in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_dram_width the page size
+/// @param[out] o_tFAW timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+//
+template< fapi2::TargetType T >
+fapi2::ReturnCode tfaw( const fapi2::Target<T>& i_target,
+                        const uint8_t i_dram_width,
+                        uint64_t& o_tFAW )
+{
+    switch(i_dram_width)
+    {
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
+            FAPI_TRY( tfaw_half_kb_page_helper(i_target, o_tFAW) );
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+            FAPI_TRY( tfaw_1kb_page_helper(i_target, o_tFAW) );
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
+            FAPI_TRY( tfaw_2kb_page_helper(i_target, o_tFAW) );
+            break;
+
+        default:
+            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tFAW_slr_x4 based on speed (MT/s)
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for 3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode tfaw_slr_x4_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = spd::ns_to_nck(i_target, 17);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_output = spd::ns_to_nck(i_target, 15);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = spd::ns_to_nck(i_target, 13);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+
+        default:
+            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tFAW_slr_x8 based on speed (MT/s)
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for 3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode tfaw_slr_x8_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+    FAPI_INF("Fetching timing value for %d MT/s");
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = spd::ns_to_nck(i_target, 23);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = spd::ns_to_nck(i_target, 21);
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+
+        default:
+            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the minimum allowable tFAW in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_page_size the page size
+/// @param[out] o_tFAW timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+//
+template< fapi2::TargetType T >
+fapi2::ReturnCode tfaw_slr( const fapi2::Target<T>& i_target,
+                            const uint8_t i_dram_width,
+                            uint64_t& o_tFAW )
+{
+    if( i_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4 )
+    {
+        FAPI_TRY( tfaw_slr_x4_helper(i_target, o_tFAW) );
+    }
+    else
+    {
+        FAPI_TRY( tfaw_slr_x8_helper(i_target, o_tFAW) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief tFAW_dlr *in nck*
+/// @return 16nck
+/// @note From DDR4 3DS Spec
+/// 12.2 Timing Parameters by Speed Grade
+///
+constexpr uint64_t tfaw_dlr()
+{
+    return 16;
+}
+
+///
+/// @brief tRRD_dlr *in nck*
+/// @return 4nck
+/// @note From DDR4 3DS Spec
+/// 12.2 Timing Parameters by Speed Grade
+///
+constexpr uint64_t trrd_dlr()
+{
+    return 4;
+}
+
+///
+/// @brief Find tRRD_S_slr in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for 3DS DIMM
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode trrd_s_slr(const fapi2::Target<T>& i_target,
+                             uint64_t& o_output)
+{
+
+    // Values derived from DDR4 3DS Spec
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 4200) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 3700) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 3300) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            FAPI_ERR("2666 MT/s is TBD from the DDR3 3DS spec");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+
+        default:
+            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Find tRRD_L_slr in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for 3DS DIMM
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode trrd_l_slr(const fapi2::Target<T>& i_target,
+                             uint64_t& o_output)
+{
+
+    // Values derived from DDR4 3DS Spec
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability.
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 5300) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 4900) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            FAPI_ERR("2666 MT/s is TBD from the DDR4 SPD spec");
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+
+        default:
+            FAPI_ERR( "%s: Invalid frequency received (%d)", c_str(i_target), l_freq );
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tRRD_L based speed (MT/s) for 1KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability (and ease of debug?).
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            // From the spec: Max(4nCK,5.3ns)
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 5300) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            // Max(4nCK,4.9ns)
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 4900) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tRRD_L based speed (MT/s) for 2KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode trrd_l_2kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability (and ease of debug?).
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 6400) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the minimum allowable tRRD_L in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_dram_width the page size
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
+                          const uint8_t i_dram_width,
+                          uint64_t& o_tRRD_L )
+{
+    switch(i_dram_width)
+    {
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+            FAPI_TRY( trrd_l_half_and_1kb_page_helper(i_target, o_tRRD_L) );
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
+            FAPI_TRY( trrd_l_2kb_page_helper(i_target, o_tRRD_L) );
+            break;
+
+        default:
+            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tRRD_S based speed (MT/s) for 1KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability (and ease of debug?).
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_output = std::max( 4, spd::ns_to_nck(i_target, 4200) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            o_output = std::max( 4, spd::ns_to_nck(i_target, 3700) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_output = std::max( 4, spd::ns_to_nck(i_target, 3300) );
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 4, spd::ns_to_nck(i_target, 3000) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to find tRRD_S based speed (MT/s) for 2KB page
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_output timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target,
+        uint64_t& o_output)
+{
+    // Values derived from DDR4 Spec (79-4A)
+    // 13.3 Timing Parameters by Speed Grade
+    // Table 132. Pg 240
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_freq = 0;
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed to invoke freq accessor" );
+
+    // It could have been more "efficient" to hand-calculate the answer and
+    // use compile time constants to return the answer. To avoid magic
+    // numbers and to align (more closely) with the DDR4 JEDEC spec,
+    // we let the std library do the work for us for maintainability (and ease of debug?).
+    // Could have used compile-time constants to denote the numbers below
+    // but they are "random" and vary.
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_output = std::max( 4, spd::ps_to_nck(i_target, 5300) );
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "%s Invalid frequency %lu", mss::c_str(i_target), l_freq);
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the minimum allowable tRRD_S in nck
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_dram_width the page size
+/// @param[out] o_tRRD_S timing in clocks (nck)
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note this is only for non-3DS DIMM
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
+                          const uint8_t i_dram_width,
+                          uint64_t& o_tRRD_S )
+{
+    switch(i_dram_width)
+    {
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+            FAPI_TRY( trrd_s_half_and_1kb_page_helper(i_target, o_tRRD_S) );
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
+            FAPI_TRY( trrd_s_2kb_page_helper(i_target, o_tRRD_S) );
+            break;
+
+        default:
+            FAPI_ERR("%s Recieved an invalid page size: %lu", mss::c_str(i_target), i_dram_width);
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            break;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
