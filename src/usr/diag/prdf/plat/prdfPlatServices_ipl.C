@@ -142,7 +142,7 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
-    uint8_t data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
+    uint8_t data[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE];
 
     errlHndl_t errl = NULL;
     FAPI_INVOKE_HWP( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),

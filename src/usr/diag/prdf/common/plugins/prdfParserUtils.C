@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfParserUtils.H>
-//#include <prdfCenConst.H> TODO: RTC 136126
+#include <prdfMemConst.H>
 
 namespace PRDF
 {
@@ -62,7 +62,7 @@ uint8_t symbol2CenDq( uint8_t i_symbol )
 
 uint8_t symbol2PortSlct( uint8_t i_symbol )
 {
-    uint8_t portSlct = PORT_SLCT_PER_MBA;
+    uint8_t portSlct = MBA_DIMMS_PER_RANK;
 
     if ( SYMBOLS_PER_RANK > i_symbol )
     {
@@ -77,11 +77,11 @@ uint8_t symbol2PortSlct( uint8_t i_symbol )
 
 uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
 {
-    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
-                                              : X8DRAMS_PER_RANK;
+    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
+                                              : MBA_BYTES_PER_RANK;
 
-    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
-                                              : SYMBOLS_PER_X8DRAM;
+    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
+                                              : MBA_SYMBOLS_PER_BYTE;
 
     return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
                                    : SYMBOLS_PER_RANK;
@@ -93,7 +93,7 @@ uint8_t cenDq2Symbol( uint8_t i_cenDq, uint8_t i_ps )
 {
     uint8_t sym = SYMBOLS_PER_RANK;
 
-    if ( DQS_PER_DIMM > i_cenDq && PORT_SLCT_PER_MBA > i_ps )
+    if ( DQS_PER_DIMM > i_cenDq && MBA_DIMMS_PER_RANK > i_ps )
     {
         if ( i_cenDq >= 64 )
             sym = ( (3 - ((i_cenDq - 64) / 2)) + ((0 == i_ps) ? 4 : 0) );
@@ -108,11 +108,11 @@ uint8_t cenDq2Symbol( uint8_t i_cenDq, uint8_t i_ps )
 
 uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
 {
-    const uint8_t dramsPerRank   = i_isX4Dram ? X4DRAMS_PER_RANK
-                                              : X8DRAMS_PER_RANK;
+    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
+                                              : MBA_BYTES_PER_RANK;
 
-    const uint8_t symbolsPerDram = i_isX4Dram ? SYMBOLS_PER_X4DRAM
-                                              : SYMBOLS_PER_X8DRAM;
+    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
+                                              : MBA_SYMBOLS_PER_BYTE;
 
     return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / symbolsPerDram)
                                          : dramsPerRank;

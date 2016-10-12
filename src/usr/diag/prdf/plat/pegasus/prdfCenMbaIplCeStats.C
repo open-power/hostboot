@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,7 +138,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
             iv_rankMap[rankKey] += symData[i].count;
 
             // In case of dimm select, rank select does not matter
-            CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_MBA );
+            CenRank dimmRank( dimmSlct << DIMM_SLCT_PER_PORT );
             // Increment the soft CEs per half dimm select.
             HalfRankKey dsKey = { dimmRank, portSlct };
             iv_dsMap[dsKey] += symData[i].count;

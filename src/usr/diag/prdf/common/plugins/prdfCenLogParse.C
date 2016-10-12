@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -387,7 +387,7 @@ static const char * dramCardAPortDRank4[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcA
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -420,7 +420,7 @@ static const char ** dqSiteMap_rcA
 };
 
 static const char ** dramSiteMap_rcA
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -793,7 +793,7 @@ static const char * dramCardBPortDRank45[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcB
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -826,7 +826,7 @@ static const char ** dqSiteMap_rcB
 };
 
 static const char ** dramSiteMap_rcB
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -1003,7 +1003,7 @@ static const char * dramCardCPortDRank04[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcC
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -1036,7 +1036,7 @@ static const char ** dqSiteMap_rcC
 };
 
 static const char ** dramSiteMap_rcC
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -1409,7 +1409,7 @@ static const char * dramCardDPortDRank45[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcD
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -1442,7 +1442,7 @@ static const char ** dqSiteMap_rcD
 };
 
 static const char ** dramSiteMap_rcD
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -1759,7 +1759,7 @@ static const char * dramSiteCardA4PortDRank4[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcA4
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -2077,7 +2077,7 @@ static const char * dramSiteCardB4PortDRank4[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcB4
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -2254,7 +2254,7 @@ static const char * dramSiteCardC4PortDRank04[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcC4
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -2571,7 +2571,7 @@ static const char * dramSiteCardD4PortDRank45[] =
 //------------------------------------------------------------------------------
 
 static const char ** dqSiteMap_rcD4
-                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+                [MAX_MBA_PER_MEMBUF][MBA_DIMMS_PER_RANK][MASTER_RANKS_PER_PORT] =
 {
     { // MBA 0
         { // Port 0
@@ -2648,8 +2648,8 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
     do
     {
         if ( (MAX_MBA_PER_MEMBUF   <= i_mbaPos) ||
-             (PORT_SLCT_PER_MBA    <= i_ps    ) ||
-             (MASTER_RANKS_PER_MBA <= i_mrank ) )
+             (MBA_DIMMS_PER_RANK    <= i_ps    ) ||
+             (MASTER_RANKS_PER_PORT <= i_mrank ) )
         {
             o_rc = FAIL; break;
         }
@@ -2733,7 +2733,7 @@ uint8_t transEccSpare( uint8_t i_symbol, bool i_isEccSpared )
     if ( i_isEccSpared )
     {
         // The ECC spare is on symbols 0 and 1, so adjust this symbol to match.
-        sym %= SYMBOLS_PER_X4DRAM;
+        sym %= MBA_SYMBOLS_PER_NIBBLE;
     }
 
     return sym;
@@ -2762,8 +2762,8 @@ uint8_t transDramSpare( uint8_t i_dq, bool i_isDramSpared )
 // tables above.
 uint8_t dqSiteIdx2DramSiteIdx( uint8_t i_dqSiteIdx, bool i_isX4Dram )
 {
-    const uint8_t dqsPerDram = i_isX4Dram ? DQS_PER_X4DRAM
-                                          : DQS_PER_X8DRAM;
+    const uint8_t dqsPerDram = i_isX4Dram ? DQS_PER_NIBBLE
+                                          : DQS_PER_BYTE;
     return i_dqSiteIdx / dqsPerDram;
 }
 
@@ -2792,7 +2792,7 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
     uint8_t rank; membuf >> rank;
     snprintf( o_str, DATA_SIZE, "R:%1d", rank );
 
-    for ( int32_t p = 0; p < PORT_SLCT_PER_MBA; p++ )
+    for ( int32_t p = 0; p < MBA_DIMMS_PER_RANK; p++ )
     {
         char temp[DATA_SIZE];
 
@@ -3155,7 +3155,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         // Get the DRAM site string.
         const char * dramSite_str = "";
         if ( (SUCCESS == l_rc) &&
-             (dram < (x4Dram ? X4DRAMS_PER_RANK : X8DRAMS_PER_RANK)) )
+             (dram < (x4Dram ? MBA_NIBBLES_PER_RANK : MBA_BYTES_PER_RANK)) )
         {
             // Get the DRAM index for site location table.
             uint8_t symbol  = transEccSpare( dram2Symbol(dram, x4Dram),

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ void calloutSymbolData( TargetHandle_t i_mba, const CenRank & i_rank,
                         const MemUtils::MaintSymbols & i_symData,
                         STEP_CODE_DATA_STRUCT & io_sc, PRDpriority i_priority )
 {
-    bool dimmsBad[PORT_SLCT_PER_MBA] = { false, false };
+    bool dimmsBad[MBA_DIMMS_PER_RANK] = { false, false };
 
     for ( MemUtils::MaintSymbols::const_iterator it = i_symData.begin();
           it != i_symData.end(); it++ )
@@ -86,7 +86,7 @@ void calloutSymbolData( TargetHandle_t i_mba, const CenRank & i_rank,
         dimmsBad[it->symbol.getPortSlct()] = true;
     }
 
-    for ( uint32_t port = 0; port < PORT_SLCT_PER_MBA; port++ )
+    for ( uint32_t port = 0; port < MBA_DIMMS_PER_RANK; port++ )
     {
         if ( dimmsBad[port] )
         {

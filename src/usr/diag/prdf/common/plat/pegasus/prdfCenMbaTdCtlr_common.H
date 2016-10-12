@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 
 // Pegasus includes
 #include <prdfCenAddress.H>
-#include <prdfCenConst.H>
+#include <prdfMemConst.H>
 #include <prdfCenMarkstore.H>
 #include <prdfCenMbaExtraSig.H>
 

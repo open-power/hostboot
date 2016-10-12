@@ -131,7 +131,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     {
         bool isX4 = isDramWidthX4( i_mba );
 
-        for ( uint8_t r = 0; r < MASTER_RANKS_PER_MBA; ++r )
+        for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
         {
             if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
             {
@@ -248,7 +248,7 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
         }
 
         // The 4 bits of i_badDimmMask is defined as p0d0, p0d1, p1d0, and p1d1.
-        uint8_t mask = 0x8 >> (port * PORT_SLCT_PER_MBA + dimm);
+        uint8_t mask = 0x8 >> (port * MBA_DIMMS_PER_RANK + dimm);
 
         if ( 0 != (i_badDimmMask & mask) )
         {

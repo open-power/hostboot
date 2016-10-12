@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <prdfPlatServices.H>
 
 #include <prdfCenAddress.H>
-#include <prdfCenConst.H>
+#include <prdfMemConst.H>
 
 namespace PRDF
 {
@@ -63,7 +63,7 @@ class CenDqBitmap
 
     /** @brief Constructor from components */
     CenDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-           const uint8_t (&i_d)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE] ) :
+           const uint8_t (&i_d)[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE] ) :
         iv_mba(i_mba), iv_rank(i_rank),
         iv_x4Dram(PlatServices::isDramWidthX4(i_mba))
     {
@@ -159,7 +159,7 @@ class CenDqBitmap
     void getCaptureData( CaptureData & o_cd ) const;
 
     /** @return A reference to the data array. */
-    const uint8_t (&getData()const)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE]
+    const uint8_t (&getData()const)[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE]
     {
         return iv_data;
     }
@@ -186,7 +186,7 @@ class CenDqBitmap
     bool iv_x4Dram;                   ///< TRUE if iv_mba uses x4 DRAMs
 
     /** A bitmap of all bad DQs for each port. */
-    uint8_t iv_data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
+    uint8_t iv_data[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE];
 };
 
 } // end namespace PRDF

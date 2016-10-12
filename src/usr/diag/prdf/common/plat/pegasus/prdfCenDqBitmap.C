@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ bool CenDqBitmap::badDqs() const
 {
     bool o_badDqs = false;
 
-    for ( uint32_t i = 0; i < PORT_SLCT_PER_MBA; i++ )
+    for ( uint32_t i = 0; i < MBA_DIMMS_PER_RANK; i++ )
     {
         for ( uint32_t j = 0; j < DIMM_DQ_RANK_BITMAP_SIZE; j++ )
         {
@@ -70,7 +70,7 @@ int32_t CenDqBitmap::badDqs( uint8_t i_portSlct, bool & o_badDqs ) const
 
     do
     {
-        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
@@ -108,7 +108,7 @@ int32_t CenDqBitmap::setDq( uint8_t i_dq, uint8_t i_portSlct )
             o_rc = FAIL; break;
         }
 
-        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
@@ -147,7 +147,7 @@ int32_t CenDqBitmap::setSymbol( const CenSymbol & i_symbol, uint8_t i_pins )
 
         i_pins &= 0x3; // limit to 2 bits
         uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
-        shift = (shift / DQS_PER_SYMBOL) * DQS_PER_SYMBOL; // 0,2,4,6
+        shift = (shift / MBA_DQS_PER_SYMBOL) * MBA_DQS_PER_SYMBOL; // 0,2,4,6
         iv_data[portSlct][byteIdx] |= i_pins << shift;
 
     } while (0);
@@ -250,7 +250,7 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
 
     do
     {
-        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
@@ -336,7 +336,7 @@ int32_t CenDqBitmap::isSpareAvailable( uint8_t i_portSlct,
 
     do
     {
-        if ( PORT_SLCT_PER_MBA <= i_portSlct )
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
         {
             PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;

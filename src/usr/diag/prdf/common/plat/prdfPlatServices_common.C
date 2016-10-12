@@ -289,7 +289,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
             o_rc = FAIL; break;
         }
 
-        if ( (MSS_ALL_RANKS != i_mrank && MASTER_RANKS_PER_MBA <= i_mrank) ||
+        if ( (MSS_ALL_RANKS != i_mrank && MASTER_RANKS_PER_PORT <= i_mrank) ||
              (SLAVE_RANKS_PER_MASTER_RANK <= i_srank) )
         {
             PRDF_ERR( PRDF_FUNC "The given rank is not valid" );
@@ -351,9 +351,9 @@ int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
-    uint8_t data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
+    uint8_t data[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE];
 
-    for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
+    for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
     {
         fapi::ReturnCode l_rc = dimmGetBadDqBitmap( getFapiTarget(i_mba),
                                                     ps, i_rank.getDimmSlct(),
@@ -401,10 +401,10 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     if ( !areDramRepairsDisabled() )
     {
-        const uint8_t (&data)[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE]
+        const uint8_t (&data)[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE]
                                                         = i_bitmap.getData();
 
-        for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
+        for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
         {
             errlHndl_t errl = NULL;
             FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
