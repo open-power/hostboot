@@ -336,9 +336,9 @@ void deployDramSpares( TargetHandle_t i_mba,
         // Doesn't matter which DRAM is spared as long as they are all spared.
         // Also, make sure the ECC spare is on a different DRAM than the spare
         // DRAM.
-        CenSymbol symPort0 = CenSymbol::fromDimmDq( i_mba, *rank, 0, 0 );
-        CenSymbol symPort1 = CenSymbol::fromDimmDq( i_mba, *rank, 0, 1 );
-        CenSymbol symEccSp = CenSymbol::fromDimmDq( i_mba, *rank, 8, 0 );
+        CenSymbol symPort0 = CenSymbol::fromSymbol( i_mba, *rank, 71 );
+        CenSymbol symPort1 = CenSymbol::fromSymbol( i_mba, *rank, 53 );
+        CenSymbol symEccSp = CenSymbol::fromSymbol( i_mba, *rank, 67 );
 
         int32_t l_rc = SUCCESS;
 

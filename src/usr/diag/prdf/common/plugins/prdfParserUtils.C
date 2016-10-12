@@ -89,23 +89,6 @@ uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
 
 //------------------------------------------------------------------------------
 
-uint8_t cenDq2Symbol( uint8_t i_cenDq, uint8_t i_ps )
-{
-    uint8_t sym = SYMBOLS_PER_RANK;
-
-    if ( DQS_PER_DIMM > i_cenDq && MBA_DIMMS_PER_RANK > i_ps )
-    {
-        if ( i_cenDq >= 64 )
-            sym = ( (3 - ((i_cenDq - 64) / 2)) + ((0 == i_ps) ? 4 : 0) );
-        else
-            sym = ( ((63 - i_cenDq) / 2) + ((0 == i_ps) ? 32 : 0) + 8 );
-    }
-
-    return sym;
-}
-
-//------------------------------------------------------------------------------
-
 uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
 {
     const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
