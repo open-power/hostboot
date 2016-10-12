@@ -633,7 +633,8 @@ foreach my $argnum (0 .. $#ARGV)
             if ($count == 0)
             {
                 #this rc wont be used, except to indicate the FFDC collection failed
-                $collectFfdcStr =  "\tfapi2::ReturnCode l_rc; \\\n";
+                $collectFfdcStr =   "\tfapi2::ReturnCode l_rc; \\\n";
+                $collectFfdcStr .=  "\tfapi2::ReturnCode tempRc = RC; \\\n";
             }
             $count++;
 
@@ -670,9 +671,21 @@ foreach my $argnum (0 .. $#ARGV)
             {
                 $collectFfdc .= ",";
             }
-             $collectFfdc .=  "RC";
+            # FAPI_EXEC_HWP has been modified to clear out fapi2::current_err
+            # this was done to resolve the issue of many hardware procedures
+            # not initializing current_err and thus returning random failures.
+            # In order to cover the default case where current_err is used
+            # by the FFDC requestor, we need to create a temporary ReturnCode type
+            # to pass into the exec_hwp macro, the additional data collected
+            # by the ffdc procedure can then be added to the local variable,
+            # this local will then be assigned back to the passed in RC
+            # at the end.
+            $collectFfdc .=  "tempRc";
 
             $collectFfdcStr .= "\tFAPI_EXEC_HWP(l_rc, $collectFfdc); \\\n";
+
+            # assign the tempRc with newly added ffdc back to the passed in RC
+            $collectFfdcStr .= "\tRC = tempRc; \\\n";
 
             print EIFILE "\\\n{ \\\n$collectFfdcStr \\\n}";
 
