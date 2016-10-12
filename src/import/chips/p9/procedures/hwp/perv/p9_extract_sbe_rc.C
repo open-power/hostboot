@@ -125,7 +125,8 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     // XSR and IAR
     FAPI_DBG("p9_extract_sbe_rc : Reading PPE_XIDBGPRO");
     FAPI_TRY(getScom(i_target_chip, PU_PPE_XIDBGPRO, l_data64_dbgpro));
-    l_data64_dbgpro.extractToRight(l_data32_iar, PU_PPE_XIDBGPRO_IAR, PU_PPE_XIDBGPRO_IAR_LEN);
+    l_data64_dbgpro.extractToRight(l_data32_iar, PU_PPE_XIDBGPRO_IAR,
+                                   (PU_PPE_XIDBGPRO_IAR_LEN + 2)); //To get 32 bits of address
     FAPI_DBG("p9_extract_sbe_rc : PPE_XIDBGPRO : %#018lX", l_data64_dbgpro);
     FAPI_DBG("p9_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
 
