@@ -46,32 +46,6 @@ namespace mss
 {
 
 ///
-/// @brief      Checks for frequency override and sets dimm frequency and timing values
-/// @param[in]  i_target mcbist fapi2 target
-/// @param[out] o_tCK new cycle time if there is a freq override
-/// @return     FAPI2_RC_SUCCESS iff ok
-///
-inline fapi2::ReturnCode check_for_freq_override(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-        uint64_t& o_tCK)
-{
-    uint64_t l_freq_override = 0;
-
-    FAPI_TRY(freq_override(i_target, l_freq_override),
-             "Failed to override frequency!");
-
-    // If there is no override, don't change anything
-    if ( l_freq_override != fapi2::ENUM_ATTR_MSS_FREQ_OVERRIDE_AUTO)
-    {
-        FAPI_TRY( mss::freq_to_ps(l_freq_override, o_tCK), "Failed freq_to_ps()");
-        FAPI_DBG( "Override Frequency Detected: %d", l_freq_override);
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-///
 /// @brief      Sets DRAM CAS latency attributes
 /// @param[in]  i_target the controller target
 /// @param[in]  i_cas_latency final selected CAS ltency
@@ -80,15 +54,20 @@ fapi_try_exit:
 inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                      uint64_t i_cas_latency)
 {
-    // Declaration of the vector correctly initializes it to the right size
-    // in the case the enum for PORTS_PER_MCS changes
-    std::vector<uint8_t> l_cls_vect(PORTS_PER_MCS, uint8_t(i_cas_latency) );
+    std::vector<uint8_t> l_cls(PORTS_PER_MCS, 0);
+
+    // Set configured ports
+    for( const auto& p : find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        l_cls[mss::index(p)] = i_cas_latency;
+        FAPI_INF( "Final Chosen CL: %d for %s",  i_cas_latency, mss::c_str(p));
+    }
 
     // set CAS latency attribute
     // casts vector into the type FAPI_ATTR_SET is expecting by deduction
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_CL,
                             i_target,
-                            UINT8_VECTOR_TO_1D_ARRAY(l_cls_vect, PORTS_PER_MCS)) ,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_cls, PORTS_PER_MCS)) ,
               "Failed to set CAS latency attribute");
 
 fapi_try_exit:
