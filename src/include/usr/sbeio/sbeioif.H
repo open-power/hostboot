@@ -48,6 +48,20 @@ namespace SBEIO
     errlHndl_t stopDeadmanLoop( );
 
     /**
+    * @brief Semd System Configuration
+    *
+    * @param[in] i_systemConfig Fabric grouping map bitstring
+    *                           Examples:
+    *                           bit 0  = proc 0 group 0
+    *                           bit 8  = proc 0 group 1
+    *                           bit 12 = proc 4 group 1
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig );
+
+    /**
      * @brief Get SCOM via SBE FIFO
      *
      * @param[in]  i_target  Target to access

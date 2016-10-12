@@ -37,6 +37,10 @@
 #include <targeting/common/util.H>
 #include <vpd/vpd_if.H>
 
+//SBE interfacing
+#include    <sbeio/sbeioif.H>
+#include    <sys/misc.h>
+
 #include <hbotcompid.H>
 
 using   namespace   ERRORLOG;
@@ -59,6 +63,41 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     do
     {
+        //Need to send System Configuration down to SBE
+        //Use targeting code to get a list of all processors
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+        uint64_t l_systemFabricConfigurationMap = 0x0;
+
+
+        for(auto l_proc : l_procChips)
+        {
+            //Get fabric info from proc
+            uint8_t l_fabricChipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+            uint8_t l_fabricGroupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            //Calculate what bit position this will be
+            uint8_t l_bitPos = l_fabricChipId + (8 * l_fabricGroupId);
+
+            //Set the bit @ l_bitPos to be 1 because this is a functional proc
+            l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
+        }
+
+        l_err = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap);
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "sendSystemConfig ERROR : Returning errorlog, reason=0x%x",
+                    l_err->reasonCode() );
+                    break;
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "sendSystemConfig SUCCESS"  );
+        }
+
+
+
         // Need to load up the runtime module if it isn't already loaded
         if (  !VFS::module_is_loaded( "libruntime.so" ) )
         {
