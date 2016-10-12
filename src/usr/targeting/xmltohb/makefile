@@ -223,9 +223,9 @@ $(XMLTOHB_RAN_INDICATION): ${XMLTOHB_COMPILER_SCRIPT} \
 	cp ${GENDIR_ERRL}/errludtarget.H ${GENDIR_PLUGINS}
 	touch $(XMLTOHB_RAN_INDICATION)
 
-# system-specific XML needs the generic plus the xxx.system.xml file + the
+# system-specific XML needs the generic xml plus the xxx.system.xml file + the
 # MRW file
-${GENDIR}/%.hb.xml: %.system.xml ${XMLTOHB_GENERIC_SOURCES} %.mrw.xml
+${GENDIR}/%.hb.xml: %.system.xml ${GENDIR}/${XMLTOHB_GENERIC_XML} %.mrw.xml
 	${COMMON_TARGETING_REL_PATH}/${XMLTOHB_MERGE_SCRIPT} $^ > $@
 
 # create the binary files

@@ -164,6 +164,7 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
 {
     my $fapi_attr = "";
     my $fapi_id = $TempAttr->{id}->[0];
+    $fapi_id =~ s/\s//g;
 #    print STDERR "Processing FAPI Id $fapi_id\n";
     my $generic_id = $fapi_id;
     $generic_id =~ s/ATTR_//;
@@ -174,7 +175,9 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     # First, check if attribute definition exists in fapiattrs.xml
     foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
     {
-        if ($FapiAttr->{id}->[0] eq $fapi_id)
+        my $fapi_attr_id = $FapiAttr->{id}->[0];
+        $fapi_attr_id =~ s/\s//g;
+        if ($fapi_attr_id eq $fapi_id)
         {
             $found = 1;
             $fapi_attr = $FapiAttr;
@@ -192,7 +195,7 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
                     $type =~ s/_CHIP//;
                     $type =~ s/^SYSTEM$/SYS/;
 
-                    my $msgNotNeeded = 0;
+                    my $msgNeeded = 1;
 
                     # Loop through target type info from temp_generic.xml file
                     for my $i ( 0 .. $#TgtTypeInfo)
@@ -214,18 +217,18 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
                                 push @UpdtTgt, [ $TgtTypeInfo[$i][0], $type,
                                                  $generic_id, ""];
                             }
-                            $msgNotNeeded = 1;
+                            $msgNeeded = 0;
                         }
                         elsif($TgtTypeInfo[$i][2] =~ /\s$generic_id\s/)
                         {
                             print STDERR "Target $TgtTypeInfo[$i][0] of type ".
                                   "$type already has attribute $generic_id\n";
-                            $msgNotNeeded = 1;
+                            $msgNeeded = 0;
                         }
                     }
 
                     print STDERR "Type $type not found in $fapi for attribute ".
-                          "$generic_id\n" if($msgNotNeeded == 0);
+                          "$generic_id\n" if($msgNeeded);
                 }
             }
             else
@@ -286,7 +289,7 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     }
     next if($found);
 
-    # Collect information for creating attribute and enumeration definitions
+    # Collect information for creating attribute definitions
     my $description = $fapi_attr->{description}->[0];
 
     my $valueType = $fapi_attr->{valueType}->[0];
@@ -310,47 +313,6 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
         }
     }
 
-    # Create enumeration definition to support generic attribute if FAPI
-    # attribute associated with temp FW default uses enum
-    my $enum_id = "";
-    my $enumDefault = "";
-    if(exists $fapi_attr->{enum} && (!exists $fapi_attr->{array}))
-    {
-        $enum_id = $generic_id;
-        push @NewAttr, [ "<enumerationType>\n" ];
-        push @NewAttr, [ "    <id>$enum_id</id>\n" ];
-        push @NewAttr, [ "    <description>\n" ];
-        push @NewAttr, [ "        Enumeration for FAPI attribute $fapi_id\n" ];
-        push @NewAttr, [ "    </description>\n" ];
-
-        my @enum_defs = split(',',$fapi_attr->{enum}->[0]);
-        my $previous_value = -1;
-        for my $i ( 0 .. $#enum_defs )
-        {
-            $enum_defs[$i] =~ /^\s*(.*)\s*=\s*(.*)\s*/;
-            my $enumName = $1;
-            my $enumValue = $2;
-            if ($enumValue eq "") # non-specified enum values (first enum = 0)
-            {
-                ($enumName) = $enum_defs[$i] =~ m/^\s*(.*)\s*/;
-                $enumValue = 1 + $previous_value;
-#                print STDERR "Update enum $enumName with value $enumValue\n";
-            }
-            $previous_value = $enumValue;
-            $enumName =~ s/ //;
-            $enumDefault = $enumName if($fwDefault eq $enumValue);
-            push @NewAttr, [ "    <enumerator>\n" ];
-            push @NewAttr, [ "        <name>$enumName</name>\n" ];
-            push @NewAttr, [ "        <value>$enumValue</value>\n" ];
-            push @NewAttr, [ "    </enumerator>\n" ];
-        }
-
-        push @NewAttr, [ "    <default>$enumDefault</default>\n" ]
-            if($enumDefault ne "");
-
-        push @NewAttr, [ "</enumerationType>\n\n" ];
-    }
-
     # Create generic attribute with mapping
     push @NewAttr, [ "<attribute>\n" ];
     push @NewAttr, [ "    <id>$generic_id</id>\n" ];
@@ -358,24 +320,11 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     push @NewAttr, [ "        $description\n" ];
     push @NewAttr, [ "    </description>\n" ];
     push @NewAttr, [ "    <simpleType>\n" ];
-    if($enumDefault ne "")
-    {
-        push @NewAttr, [ "        <enumeration>\n" ];
-        push @NewAttr, [ "            <id>$enum_id</id>\n" ];
-        push @NewAttr, [ "            <default>$enumDefault</default>\n" ];
-        push @NewAttr, [ "        </enumeration>\n" ];
-    }
-    elsif($fwDefault ne "")
+    if($fwDefault ne "")
     {
         push @NewAttr, [ "        <$valueType>\n" ];
         push @NewAttr, [ "            <default>$fwDefault</default>\n" ];
         push @NewAttr, [ "        </$valueType>\n" ];
-    }
-    elsif($enum_id ne "")
-    {
-        push @NewAttr, [ "        <enumeration>\n" ];
-        push @NewAttr, [ "            <id>$enum_id</id>\n" ];
-        push @NewAttr, [ "        </enumeration>\n" ];
     }
     else
     {
@@ -386,7 +335,6 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     push @NewAttr, [ "    <persistency>$persistency</persistency>\n" ];
     push @NewAttr, [ "    <readable/>\n" ];
     push @NewAttr, [ "    <writeable/>\n" ] if(exists $fapi_attr->{writeable});
-    push @NewAttr, [ "    <hasStringConversion/>\n" ] if($enum_id ne "");
     push @NewAttr, [ "    <hwpfToHbAttrMap>\n" ];
     push @NewAttr, [ "        <id>$fapi_id</id>\n" ];
     push @NewAttr, [ "        <macro>DIRECT</macro>\n" ];
