@@ -49,7 +49,6 @@ typedef struct
     uint32_t    ringIdListSize;
 } VPDRingList;
 
-extern const RingIdList  RING_ID_LIST_PG[], RING_ID_LIST_PR[];
 extern const VPDRingList ALL_VPD_RINGS[];
 
 extern const uint32_t    RING_ID_LIST_CHIP_SIZE, RING_ID_LIST_CORE_SIZE,
