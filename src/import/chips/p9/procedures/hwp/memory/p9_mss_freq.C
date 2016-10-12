@@ -99,16 +99,19 @@ extern "C"
             // Get cached decoder
             std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
             FAPI_TRY( mss::spd::populate_decoder_caches(l_mcs, l_factory_caches),
-                      "Failed to populate decoder cache");
+                      "%s. Failed to populate decoder cache", mss::c_str(i_target) );
 
             {
                 // instantiation of class that calculates CL algorithm
-                mss::cas_latency l_cas_latency(l_mcs, l_factory_caches);
+                fapi2::ReturnCode l_rc;
+                mss::cas_latency l_cas_latency(l_mcs, l_factory_caches, l_rc);
+                FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(i_target) );
 
                 if(l_cas_latency.iv_dimm_list_empty)
                 {
                     // Cannot fail out for an empty DIMM configuration, so default values are set
-                    FAPI_INF("DIMM list is empty! Setting default values for CAS latency and DIMM speed.");
+                    FAPI_INF("%s. DIMM list is empty! Setting default values for CAS latency and DIMM speed.",
+                             mss::c_str(i_target) );
                 }
                 else
                 {
@@ -121,33 +124,35 @@ extern "C"
                     uint64_t l_tCKmin = 0;
 
                     // Find CAS latency using JEDEC algorithm
-                    l_cas_latency.find_CL(l_mcs,
-                                          l_desired_cas_latency[l_index],
-                                          l_tCKmin);
+                    FAPI_TRY( l_cas_latency.find_cl(l_desired_cas_latency[l_index],
+                                                    l_tCKmin) );
+
+                    FAPI_INF("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
+                             mss::c_str(i_target), l_desired_cas_latency[l_index], l_tCKmin);
 
                     // Find dimm transfer speed from selected tCK
                     FAPI_TRY( mss::ps_to_freq(l_tCKmin, l_min_dimm_freq[l_index]),
-                              "Failed ps_to_freq()");
+                              "%s. Failed ps_to_freq()", mss::c_str(i_target) );
 
-                    FAPI_INF("DIMM speed from selected tCK: %d (%s)", l_min_dimm_freq[l_index], mss::c_str(l_mcs));
+                    FAPI_INF("DIMM speed from selected tCK (ps): %d for %s", l_min_dimm_freq[l_index], mss::c_str(l_mcs));
 
                     FAPI_TRY(mss::select_supported_freq(l_mcs, l_min_dimm_freq[l_index]),
-                             "Failed select_supported_freq() %s", mss::c_str(l_mcs));
+                             "Failed select_supported_freq() for %s", mss::c_str(l_mcs));
 
-                    FAPI_INF("Selected DIMM speed from supported speeds: %d", l_min_dimm_freq[l_index]);
+                    FAPI_INF("%s. Selected DIMM speed from supported speeds: %d",
+                             mss::c_str(i_target), l_min_dimm_freq[l_index]);
 
                 }// end else
 
             } // close scope
 
             FAPI_TRY(mss::set_CL_attr(l_mcs, l_desired_cas_latency[l_index] ),
-                     "Failed set_CL_attr()");
+                     "%s. Failed set_CL_attr()", mss::c_str(i_target) );
 
-            FAPI_INF( "Final Chosen CL: %d (%s)",  l_desired_cas_latency[l_index], mss::c_str(l_mcs));
         } // close for each mcs
 
         FAPI_TRY(mss::set_freq_attrs(l_mcbist, l_min_dimm_freq),
-                 "Failed set_freq_attrs()");
+                 "%s. Failed set_freq_attrs()", mss::c_str(i_target) );
 
     fapi_try_exit:
         return fapi2::current_err;
