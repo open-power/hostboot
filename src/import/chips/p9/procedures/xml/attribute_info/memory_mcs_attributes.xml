@@ -2865,7 +2865,14 @@
       <id>ATTR_EFF_DRAM_TREFI</id>
       <targetType>TARGET_TYPE_MCS</targetType>
       <description>
-        Average Refresh Interval (tREFI) in nck (number of clock cycles).
+        Average Refresh Interval (tREFI)
+        in nck (number of clock cycles).
+        This depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+        From DDR4 spec (79-4A).
+
+        For 3DS, the tREFI time to the same logical rank is defined as
+        tRFC_slr1, tRFC_slr2, or tRFC_slr4.
+
         creator: mss_eff_config
         consumer: various
         firmware notes: none
@@ -2881,14 +2888,14 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_TRTP</id>
-        <!-- Not an SPD byte - how to find this?? -AM -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Internal Read to Precharge Delay.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
+          Internal Read to Precharge Delay.
+          From the DDR4 spec (79-4A).
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg_timing
+          consumer: various
+          firmware notes: none
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -2901,9 +2908,9 @@
       <id>ATTR_EFF_DRAM_TRFC_DLR</id>
       <targetType>TARGET_TYPE_MCS</targetType>
       <description>
-        Minimum Refresh Recovery Delay Time
+        Minimum Refresh Recovery Delay Time (different logical ranks)
         in nck (number of clock cyles).
-        Selected tRFC value (tRFC_dl1, tRFC_dl2, or tRFC_dl4)
+        Selected tRFC value (tRFC_dlr1, tRFC_dlr2, or tRFC_dlr4)
         depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
         For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
         creator: eff_config
@@ -2935,6 +2942,26 @@
         <array> 2 </array>
         <mssUnits> nck </mssUnits>
         <mssAccessorName>eff_dram_tfaw_dlr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TRRD_DLR</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Minimum Activate to Activate Delay Time (different logical ranks)
+        in nck (number of clock cycles).
+        For 3DS, The tRRD_S time to a different logical rank is defined as tRRD_dlr.
+        Each memory channel will have a value.
+        creator: eff_confg
+        consumer: various
+        firmware notes: none
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array> 2 </array>
+      <mssUnits> nck </mssUnits>
+      <mssAccessorName>eff_dram_trrd_dlr</mssAccessorName>
     </attribute>
 
     <attribute>
