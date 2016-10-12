@@ -916,6 +916,32 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper to write and trace ctle cap and res
+/// @tparam S the start of the insertion
+/// @tparam L the length of the insertion
+/// @param[in] l_ctle_cap the value of the CAP attribute
+/// @param[in] l_start_bit the bit in the attribute to start at
+/// @param[in,out] the ctle buffer to write
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+template< uint64_t S, uint64_t L >
+fapi2::ReturnCode ctle_helper( const fapi2::buffer<uint64_t> i_ctle_cap,
+                               const uint64_t l_start_bit,
+                               fapi2::buffer<uint64_t>& io_ctle)
+{
+    fapi2::buffer<uint64_t> l_scratch;
+
+    FAPI_DBG("ctle start: %d len: %d, insert start: %d len: %d", l_start_bit, L, S, L);
+
+    FAPI_TRY(i_ctle_cap.extractToRight(l_scratch, l_start_bit, L),
+             "unable to extract ctle cap");
+    io_ctle.insertFromRight<S, L>(l_scratch);
+
+fapi_try_exit:
+    return fapi2::current_err;
+};
+
+///
 /// @brief Reset CTLE_CNTL MCA specialization - for all DP16 in the target
 /// @param[in] i_target the fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -930,10 +956,10 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
     fapi2::buffer<uint64_t> l_ctle_res;
 
     // The length of the bit fields allows us to slide along the attribute
-    uint64_t l_start_bit = 0;
+    uint64_t l_cap_start_bit = 0;
+    uint64_t l_res_start_bit = 0;
     constexpr uint64_t CAP_BIT_FIELD_LEN = 2;
     constexpr uint64_t RES_BIT_FIELD_LEN = 3;
-    constexpr uint64_t BIT_POSITION_DELTA = 8;
 
     // A little DP block indicator useful for tracing
     uint64_t l_which_dp16 = 0;
@@ -970,6 +996,9 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
 
         // Modify
 
+        // I didn't make an inner loop here as the nibbles even, odd, etc. end up just different enough to make
+        // keeping track of the cap/res starts, buffers, a mess. This, while a bit unrolled, is far esier to undertand.
+
         // Byte 0
         {
             // DP16 Block 0 Nibble 0
@@ -977,16 +1006,11 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
                 fapi2::buffer<uint64_t> l_scratch_0;
                 fapi2::buffer<uint64_t> l_scratch_1;
 
-                FAPI_TRY(l_ctle_cap.extractToRight(l_scratch_0, l_start_bit + (CAP_BIT_FIELD_LEN * 0), CAP_BIT_FIELD_LEN),
-                         "unable to extract ctle cap even");
-                l_ctle_0.insertFromRight<TT::CTLE_EVEN_CAP, TT::CTLE_EVEN_CAP_LEN>(l_scratch_0);
+                FAPI_TRY((ctle_helper<TT::CTLE_EVEN_CAP, TT::CTLE_EVEN_CAP_LEN>(l_ctle_cap, l_cap_start_bit, l_ctle_0)));
+                FAPI_TRY((ctle_helper<TT::CTLE_EVEN_RES, TT::CTLE_EVEN_RES_LEN>(l_ctle_res, l_res_start_bit, l_ctle_0)));
 
-                FAPI_TRY(l_ctle_res.extractToRight(l_scratch_1, l_start_bit + (RES_BIT_FIELD_LEN * 0), RES_BIT_FIELD_LEN),
-                         "unable to extract ctle res even");
-                l_ctle_0.insertFromRight<TT::CTLE_EVEN_RES, TT::CTLE_EVEN_RES_LEN>(l_scratch_1);
-
-                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
-                         0, mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_ctle_0, l_ctle_1);
+                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%016lx, 0x%016lx",
+                         0, mss::c_str(i_target), l_which_dp16, l_ctle_0, l_ctle_1);
 
             }
 
@@ -995,36 +1019,28 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
                 fapi2::buffer<uint64_t> l_scratch_0;
                 fapi2::buffer<uint64_t> l_scratch_1;
 
-                FAPI_TRY(l_ctle_cap.extractToRight(l_scratch_0, l_start_bit + (CAP_BIT_FIELD_LEN * 1), CAP_BIT_FIELD_LEN),
-                         "unable to extract ctle cap odd");
-                l_ctle_0.insertFromRight<TT::CTLE_ODD_CAP, TT::CTLE_ODD_CAP_LEN>(l_scratch_0);
+                l_cap_start_bit += CAP_BIT_FIELD_LEN;
+                l_res_start_bit += RES_BIT_FIELD_LEN;
 
-                FAPI_TRY(l_ctle_res.extractToRight(l_scratch_1, l_start_bit + (RES_BIT_FIELD_LEN * 1), RES_BIT_FIELD_LEN),
-                         "unable to extract ctle res odd");
-                l_ctle_0.insertFromRight<TT::CTLE_ODD_RES, TT::CTLE_ODD_RES_LEN>(l_scratch_1);
+                FAPI_TRY((ctle_helper<TT::CTLE_ODD_CAP, TT::CTLE_ODD_CAP_LEN>(l_ctle_cap, l_cap_start_bit, l_ctle_0)));
+                FAPI_TRY((ctle_helper<TT::CTLE_ODD_RES, TT::CTLE_ODD_RES_LEN>(l_ctle_res, l_res_start_bit, l_ctle_0)));
 
-                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
-                         1, mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_ctle_0, l_ctle_1);
+                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%016lx, 0x%016lx",
+                         1, mss::c_str(i_target), l_which_dp16, l_ctle_0, l_ctle_1);
             }
-        }
-
-        // Byte 1
-        {
             // DP16 Block 0 Nibble 2
             {
                 fapi2::buffer<uint64_t> l_scratch_0;
                 fapi2::buffer<uint64_t> l_scratch_1;
 
-                FAPI_TRY(l_ctle_cap.extractToRight(l_scratch_0, l_start_bit + (CAP_BIT_FIELD_LEN * 2), CAP_BIT_FIELD_LEN),
-                         "unable to extract ctle cap even (byte 1)");
-                l_ctle_1.insertFromRight<TT::CTLE_EVEN_CAP, TT::CTLE_EVEN_CAP_LEN>(l_scratch_0);
+                l_cap_start_bit += CAP_BIT_FIELD_LEN;
+                l_res_start_bit += RES_BIT_FIELD_LEN;
 
-                FAPI_TRY(l_ctle_res.extractToRight(l_scratch_1, (RES_BIT_FIELD_LEN * 2), RES_BIT_FIELD_LEN),
-                         "unable to extract ctle res even (byte 1)");
-                l_ctle_1.insertFromRight<TT::CTLE_EVEN_RES, TT::CTLE_EVEN_RES_LEN>(l_scratch_1);
+                FAPI_TRY((ctle_helper<TT::CTLE_EVEN_CAP, TT::CTLE_EVEN_CAP_LEN>(l_ctle_cap, l_cap_start_bit, l_ctle_1)));
+                FAPI_TRY((ctle_helper<TT::CTLE_EVEN_RES, TT::CTLE_EVEN_RES_LEN>(l_ctle_res, l_res_start_bit, l_ctle_1)));
 
-                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
-                         2, mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_ctle_0, l_ctle_1);
+                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%016lx, 0x%016lx",
+                         2, mss::c_str(i_target), l_which_dp16, l_ctle_0, l_ctle_1);
             }
 
             // DP16 Block 0 Nibble 3
@@ -1032,16 +1048,14 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
                 fapi2::buffer<uint64_t> l_scratch_0;
                 fapi2::buffer<uint64_t> l_scratch_1;
 
-                FAPI_TRY(l_ctle_cap.extractToRight(l_scratch_0, l_start_bit + (CAP_BIT_FIELD_LEN * 3), CAP_BIT_FIELD_LEN),
-                         "unable to extract ctle cap odd (byte 1)");
-                l_ctle_1.insertFromRight<TT::CTLE_ODD_CAP, TT::CTLE_ODD_CAP_LEN>(l_scratch_0);
+                l_cap_start_bit += CAP_BIT_FIELD_LEN;
+                l_res_start_bit += RES_BIT_FIELD_LEN;
 
-                FAPI_TRY(l_ctle_res.extractToRight(l_scratch_1, l_start_bit + (RES_BIT_FIELD_LEN * 3), RES_BIT_FIELD_LEN),
-                         "unable to extract ctle res odd (byte 1)");
-                l_ctle_1.insertFromRight<TT::CTLE_ODD_RES, TT::CTLE_ODD_RES_LEN>(l_scratch_1);
+                FAPI_TRY((ctle_helper<TT::CTLE_ODD_CAP, TT::CTLE_ODD_CAP_LEN>(l_ctle_cap, l_cap_start_bit, l_ctle_1)));
+                FAPI_TRY((ctle_helper<TT::CTLE_ODD_RES, TT::CTLE_ODD_RES_LEN>(l_ctle_res, l_res_start_bit, l_ctle_1)));
 
-                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%08lx, 0x%08lx (0x%016lx, 0x%016lx)",
-                         3, mss::c_str(i_target), l_which_dp16, l_scratch_0, l_scratch_1, l_ctle_0, l_ctle_1);
+                FAPI_INF("ctle nibble %d for %s dp16 %d: 0x%016lx, 0x%016lx",
+                         3, mss::c_str(i_target), l_which_dp16, l_ctle_0, l_ctle_1);
             }
         }
 
@@ -1049,8 +1063,10 @@ fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_targe
         FAPI_TRY( mss::putScom(i_target, r.first, l_ctle_0) );
         FAPI_TRY( mss::putScom(i_target, r.second, l_ctle_1) );
 
-        // Slide over in the attributes, bump the dp16 trace counter, and do it again
-        l_start_bit += BIT_POSITION_DELTA;
+        // Jump over the 3rd nibble so the start bits are correct at the top of the loop
+        l_cap_start_bit += CAP_BIT_FIELD_LEN;
+        l_res_start_bit += RES_BIT_FIELD_LEN;
+
         ++l_which_dp16;
     }
 
