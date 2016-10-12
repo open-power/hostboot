@@ -320,7 +320,7 @@ enum
     SGPE_IMG_HEADER             = sizeof(sgpeHeader_t),
     SGPE_DBG_PTR_AREA_SIZE      = 64,
     //SGPE_HCODE_SIZE             = 32 * ONE_KB, // FIXME RTC 155018 Revisit after Hcode optimization
-    SGPE_HCODE_SIZE             = 38 * ONE_KB,  // @todo RTC 158543 Reallocate space
+    SGPE_HCODE_SIZE             = 42 * ONE_KB,  // @todo RTC 158543 Reallocate space
 
     SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
                                    SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
