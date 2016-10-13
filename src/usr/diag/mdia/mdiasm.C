@@ -281,6 +281,51 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
     return err;
 }
 
+uint64_t getMemSize(TargetHandle_t i_target)
+{
+    uint64_t memsize = 0;
+    AttributeTraits<TARGETING::ATTR_EFF_DIMM_SIZE>::Type effDimmSizeAttr;
+    TargetHandleList targetList;
+
+    // if target is MBA
+    if( TYPE_MBA == i_target->getAttr<ATTR_TYPE>() )
+    {
+        targetList.push_back(i_target);
+    }
+    // if target is MCBIST we have to get the connected MCSs
+    else if( TYPE_MCBIST == i_target->getAttr<ATTR_TYPE>() )
+    {
+        PredicateCTM predType( CLASS_NA, TYPE_MCS );
+        PredicateIsFunctional predFunc;
+        PredicatePostfixExpr predAnd;
+        predAnd.push(&predType).push(&predFunc).And();
+
+        targetService().getAssociated( targetList, i_target,
+                                       TargetService::CHILD_BY_AFFINITY,
+                                       TargetService::ALL, &predAnd );
+    }
+
+    for (auto trgt : targetList)
+    {
+        if(trgt->tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(effDimmSizeAttr))
+        {
+            for(uint64_t port = 0;
+                    port < sizeof(effDimmSizeAttr)/sizeof(*effDimmSizeAttr);
+                    ++port)
+            {
+                for(uint64_t dimm = 0; dimm <
+                        sizeof(effDimmSizeAttr[0])/sizeof(*effDimmSizeAttr[0]);
+                        ++dimm)
+                {
+                    memsize += effDimmSizeAttr[port][dimm];
+                }
+            }
+        }
+    }
+
+    return memsize;
+}
+
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
     MDIA_FAST("sm: processCommandTimeout");
@@ -538,8 +583,6 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
 
     reset();
 
-    AttributeTraits<TARGETING::ATTR_EFF_DIMM_SIZE>::Type effDimmSizeAttr;
-
     mutex_lock(&iv_mutex);
 
     WorkFlowProperties * p = 0;
@@ -558,27 +601,10 @@ void StateMachine::setup(const WorkFlowAssocMap & i_list)
         p->status = IN_PROGRESS;
         p->log = 0;
         p->timer = 0;
-        p->memSize = 0;
         p->timeoutCnt = 0;
 
-        // get the memsize attached to this mba
-
-        if(it->first->tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(
-                    effDimmSizeAttr))
-        {
-            for(uint64_t port = 0;
-                    port < sizeof(effDimmSizeAttr)/sizeof(*effDimmSizeAttr);
-                    ++port)
-            {
-                for(uint64_t dimm = 0;
-                        dimm <
-                        sizeof(effDimmSizeAttr[0])/sizeof(*effDimmSizeAttr[0]);
-                        ++dimm)
-                {
-                    p->memSize += effDimmSizeAttr[port][dimm];
-                }
-            }
-        }
+        // get the memsize
+        p->memSize = getMemSize(it->first);
 
         p->data = NULL;
         p->chipUnit = it->first->getAttr<ATTR_CHIP_UNIT>();
