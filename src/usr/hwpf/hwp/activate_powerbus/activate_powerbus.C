@@ -64,6 +64,9 @@
 #include    <pbusLinkSvc.H>
 
 #include    "proc_build_smp/proc_build_smp.H"
+#include    "proc_use_sbe_scan_service.H"
+#include    "proc_stop_sbe_scan_service.H"
+
 #include    <intr/interrupt.H>
 #include    <fsi/fsiif.H>
 
@@ -319,6 +322,63 @@ void*    call_proc_build_smp( void    *io_pArgs )
                 ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
 
                 break;
+            }
+
+            // The processor scan service can be forced on by
+            // attribute or enabled by security policy.  If the scan
+            // service is in use on the chip, disable it since it's no longer
+            // needed.  Not disabling can lead to unwanted PIB traffic that
+            // interferes with I2C master operations, etc.
+            fapi::Target fapiProcTarget(TARGET_TYPE_PROC_CHIP,
+                (const_cast<TARGETING::Target*>(l_proc_target)));
+
+            bool useScanService=false;
+            FAPI_INVOKE_HWP(l_errl, proc_use_sbe_scan_service,
+                            fapiProcTarget, useScanService);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK " ERROR : proc_use_sbe_scan_service failed for "
+                    "PROC target 0x%08X",
+                    TARGETING::get_huid(l_proc_target));
+
+                // Create IStep error log and cross reference error that
+                // occurred
+                l_StepError.addErrorDetails(l_errl);
+
+                // Commit error
+                errlCommit( l_errl, HWPF_COMP_ID );
+                break;
+            }
+
+            if(useScanService)
+            {
+                // Note: we don't have access to the SBE image here, so if there
+                // is a failure we won't be able to capture all possible FFDC.
+                FAPI_INVOKE_HWP(l_errl, proc_stop_sbe_scan_service,
+                                fapiProcTarget,NULL);
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK " ERROR : proc_stop_sbe_scan_service failed "
+                        "for PROC target 0x%08X",
+                        TARGETING::get_huid(l_proc_target));
+
+                    // Create IStep error log and cross reference error that
+                    // occurred
+                    l_StepError.addErrorDetails(l_errl);
+
+                    // Commit error
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        INFO_MRK " SUCCESS : proc_stop_sbe_scan_service for "
+                        "PROC target 0x%08X",
+                        TARGETING::get_huid(l_proc_target));
+                }
             }
 
             ++curproc;

@@ -79,6 +79,9 @@ namespace   INITSERVICE
 const DepModInfo  g_istep09Dependancies = {
     {
 #ifndef CONFIG_VPO_COMPILE
+        DEP_LIB(libslave_sbe.so),
+        DEP_LIB(libcore_activate.so),
+        DEP_LIB(libsecure_boot.so),
         DEP_LIB(libactivate_powerbus.so),
         DEP_LIB(libdram_initialization.so),
         DEP_LIB(libsbe.so),
