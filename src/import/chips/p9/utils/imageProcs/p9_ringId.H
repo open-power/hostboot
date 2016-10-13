@@ -208,8 +208,12 @@ struct CHIPLET_DATA
     // The no.of common rings for the Chiplet
     uint8_t iv_num_common_rings;
 
-    // The no.of instance rings for the Chiplet
+    // The no.of instance rings for the Chiplet (w/different ringId values)
     uint8_t iv_num_instance_rings;
+
+    // The no.of instance rings for the Chiplet (w/different ringId values
+    // AND different scanAddress values)
+    uint8_t iv_num_instance_rings_scan_addrs;
 };
 
 // This is used to Set (Mark) the left-most bit
@@ -261,7 +265,8 @@ static const CHIPLET_DATA g_pervData =
 {
     1,  // Pervasive Chiplet ID is 1
     17, // 17 common rings for pervasive chiplet
-    3   // 3 instance specific rings for pervasive chiplet
+    3,  // 3 instance specific rings for pervasive chiplet
+    3
 };
 }; // end of namespace PERV
 
@@ -295,7 +300,8 @@ static const CHIPLET_DATA g_n0Data =
 {
     2, // N0 Chiplet ID is 2.
     9, // 9 common rings for N0 Chiplet
-    3  // 3 instance specific rings for N0 chiplet
+    3, // 3 instance specific rings for N0 chiplet
+    3
 };
 };
 
@@ -333,7 +339,8 @@ static const CHIPLET_DATA g_n1Data =
 {
     3,  // N1 Chiplet ID is 3.
     12, // 12 common rings for N1 Chiplet
-    4   // 4 instance specific rings for N1 chiplet
+    4,  // 4 instance specific rings for N1 chiplet
+    4
 };
 };
 
@@ -367,7 +374,8 @@ static const CHIPLET_DATA g_n2Data =
 {
     4, // N2 Chiplet ID is 4.
     9, // 9 common rings for N2 Chiplet
-    3  // 3 instance specific rings for N2 chiplet
+    3, // 3 instance specific rings for N2 chiplet
+    3
 };
 };
 
@@ -401,7 +409,8 @@ static const CHIPLET_DATA g_n3Data =
 {
     5, // N3 Chiplet ID is 5
     9, // 9 common rings for N3 Chiplet
-    3  // 3 instance specific rings for N3 chiplet
+    3, // 3 instance specific rings for N3 chiplet
+    3
 };
 };
 
@@ -442,7 +451,8 @@ static const CHIPLET_DATA g_xbData =
 {
     6,  // X-Bus Chiplet ID is 6
     15, // 15 common rings for X-Bus Chiplet
-    4   // 4 instance specific rings for XB chiplet
+    4,  // 4 instance specific rings for XB chiplet
+    4
 };
 }; // end of namespace XB
 
@@ -484,7 +494,8 @@ static const CHIPLET_DATA g_mcData =
 {
     7,  // MC Chiplet ID range is 7 - 8. The base ID is 7.
     16, // 16 common rings for MC Chiplet
-    3   // 3 instance specific rings for each MC instance
+    3,  // 3 instance specific rings for each MC instance
+    3
 };
 }; // end of namespace MC
 
@@ -513,7 +524,8 @@ static const CHIPLET_DATA g_ob0Data =
 {
     9,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
     6,  // 6 common rings for OB Chiplet
-    1   // 1 instance specific rings for each OB chiplet
+    1,  // 1 instance specific rings for each OB chiplet
+    1
 };
 }; // end of namespace OB0
 
@@ -540,9 +552,10 @@ enum RingOffset
 
 static const CHIPLET_DATA g_ob1Data =
 {
-    10,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,   // 6 common rings for OB Chiplet
-    1    // 1 instance specific rings for each OB chiplet
+    10, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    6,  // 6 common rings for OB Chiplet
+    1,  // 1 instance specific rings for each OB chiplet
+    1
 };
 }; // end of namespace OB1
 
@@ -570,9 +583,10 @@ enum RingOffset
 
 static const CHIPLET_DATA g_ob2Data =
 {
-    11,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,   // 6 common rings for OB Chiplet
-    1    // 1 instance specific rings for each OB chiplet
+    11, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    6,  // 6 common rings for OB Chiplet
+    1,  // 1 instance specific rings for each OB chiplet
+    1
 };
 }; // end of namespace OB2
 
@@ -599,9 +613,10 @@ enum RingOffset
 
 static const CHIPLET_DATA g_ob3Data =
 {
-    12,  // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
-    6,   // 10 common rings for OB Chiplet
-    1    // 1 instance specific rings for each OB chiplet
+    12, // O-Bus Chiplet ID range is 9 - 12. The base ID is 9.
+    6,  // 10 common rings for OB Chiplet
+    1,  // 1 instance specific rings for each OB chiplet
+    1
 };
 }; // end of namespace OB2
 namespace PCI0
@@ -629,6 +644,7 @@ static const CHIPLET_DATA g_pci0Data =
     13, // PCI0 Chiplet Chiplet ID is 13
     5,  // 5 common rings for PCI0 chiplet
     1,  // 1 instance specific rings for PCI0 chiplet
+    1
 };
 };
 
@@ -657,6 +673,7 @@ static const CHIPLET_DATA g_pci1Data =
     14, // PCI1 Chiplet Chiplet ID is 14
     5,  // 5 common rings for PCI1 chiplet
     1,  // 1 instance specific rings for PCI1 chiplet
+    1
 };
 };
 
@@ -685,6 +702,7 @@ static const CHIPLET_DATA g_pci2Data =
     15, // PCI2 Chiplet Chiplet ID is 15
     5,  // 5 common rings for PCI2 chiplet
     1,  // 1 instance specific rings for PCI2 chiplet
+    1
 };
 
 };
@@ -761,6 +779,7 @@ static const CHIPLET_DATA g_eqData =
     16, // Quad Chiplet ID range is 16 - 21. The base ID is 16.
     46, // 46 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
+    9   // 9 different rings since 2 per EX ring and 1 per EQ
 };
 }; // end of namespace EQ
 
@@ -788,7 +807,8 @@ static const CHIPLET_DATA g_ecData =
 {
     32, // Core Chiplet ID range is 32-55. The base ID is 32.
     4,  // 4 common rings for Core chiplet
-    1   // 1 instance specific ring for each Core chiplet
+    1,  // 1 instance specific ring for each Core chiplet
+    1
 };
 }; // end of namespace EC
 
