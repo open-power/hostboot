@@ -32,7 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
-#include <algorithm>
+#include <vector>
 
 #include <mss.H>
 #include <fapi2.H>
@@ -62,22 +62,42 @@ extern "C"
             throttle_type t)
     {
         FAPI_INF("Start bulk_pwr_throttles");
-
-        FAPI_TRY ( mss::bulk_thermal_throttles (i_targets) );
+//To be implemented in next commit
+#if 0
 
         //Check for THERMAL
         if (t == THERMAL)
         {
-            FAPI_TRY ( mss::bulk_thermal_throttles (i_targets) );
+            for ( const auto& l_mcs : i_targets)
+            {
+                for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
+                {
+                    //mss::power_thermal::throttle l_pwr_struct(l_mca);
+                    //FAPI_TRY (l_pwr_struct.thermal_throttles() );
+                }
+            }
+
+            //Equalize throttles
         }
         //else do POWER
         else
         {
-            FAPI_TRY ( mss::bulk_power_regulator_throttles (i_targets) );
+            for ( const auto& l_mcs : i_targets)
+            {
+                for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs))
+                {
+                    //mss::power_thermal::throttle l_pwr_struct(l_mca);
+                    //FAPI_TRY (l_pwr_struct.power_regulator_throttles() );
+                }
+            }
+
+            //Equalize throttles
         }
+
 
         FAPI_INF("End bulk_pwr_throttles");
     fapi_try_exit:
+#endif
         return fapi2::current_err;
     }
 } //extern C
