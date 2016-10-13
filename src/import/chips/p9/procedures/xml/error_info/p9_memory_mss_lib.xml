@@ -218,7 +218,24 @@
 
   <hwpError>
     <rc>RC_MSS_CCS_HUNG</rc>
-    <description>CCS failed to return from in_progress status and failed to describe an error further.</description>
+    <description>CCS failed to return from in-progress status and failed to describe an error further</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CCS_HUNG_TRYING_TO_STOP</rc>
+    <description>CCS failed to return from in-progress status while trying to stop a previous program</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>

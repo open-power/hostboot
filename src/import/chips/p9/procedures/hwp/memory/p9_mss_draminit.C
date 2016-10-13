@@ -60,10 +60,16 @@ extern "C"
 
         mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
 
+#define CENTAUR_LIKE_PN 1
+#ifdef CENTAUR_LIKE_PN
         constexpr uint64_t PCLK_INITIAL_VALUE = 0b10;
         constexpr uint64_t NCLK_INITIAL_VALUE = 0b01;
+#else
+        constexpr uint64_t PCLK_INITIAL_VALUE = 0b01;
+        constexpr uint64_t NCLK_INITIAL_VALUE = 0b10;
+#endif
 
-        auto l_mca = i_target.getChildren<TARGET_TYPE_MCA>();
+        const auto l_mca = i_target.getChildren<TARGET_TYPE_MCA>();
 
         FAPI_INF("Start draminit: %s", mss::c_str(i_target));
 
@@ -95,6 +101,7 @@ extern "C"
             mss::ccs::stop_on_err(i_target, l_ccs_config, mss::LOW);
             mss::ccs::ue_disable(i_target, l_ccs_config, mss::LOW);
             mss::ccs::copy_cke_to_spare_cke(i_target, l_ccs_config, mss::HIGH);
+            mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
 
             FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config) );
         }
@@ -110,7 +117,7 @@ extern "C"
         // 3. CCS_ADDR_MUX_SEL (FARB5Q(5)) - 1
         // 4. CKE out of high impedence
         //
-        for (auto p : l_mca)
+        for (const auto& p : l_mca)
         {
             FAPI_TRY( mss::draminit_entry_invariant(p) );
             FAPI_TRY( mss::ddr_resetn(p, mss::HIGH) );
@@ -132,7 +139,7 @@ extern "C"
 
         // Per conversation with Shelton and Steve 10/9/15, turn off addr_mux_sel after the CKE CCS but
         // before the RCD/MRS CCSs
-        for (auto p : l_mca)
+        for (const auto& p : l_mca)
         {
             FAPI_TRY( change_addr_mux_sel(p, mss::LOW) );
         }

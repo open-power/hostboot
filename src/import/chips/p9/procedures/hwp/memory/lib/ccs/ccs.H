@@ -63,10 +63,10 @@ template<>
 class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
 {
     public:
-        static const uint64_t MODEQ_REG = MCBIST_CCS_MODEQ;
-        static const uint64_t MCB_CNTL_REG = MCBIST_MCB_CNTLQ;
-        static const uint64_t CNTLQ_REG = MCBIST_CCS_CNTLQ;
-        static const uint64_t STATQ_REG = MCBIST_CCS_STATQ;
+        static constexpr uint64_t MODEQ_REG = MCBIST_CCS_MODEQ;
+        static constexpr uint64_t MCB_CNTL_REG = MCBIST_MCB_CNTLQ;
+        static constexpr uint64_t CNTLQ_REG = MCBIST_CCS_CNTLQ;
+        static constexpr uint64_t STATQ_REG = MCBIST_CCS_STATQ;
 
         enum
         {
@@ -532,14 +532,14 @@ fapi_try_exit:
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in]  the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff stop whenever failure occurs.
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffer, bool i_value)
+inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
 {
-    i_buffer.writeBit<TT::STOP_ON_ERR>(i_value);
+    io_buffer.writeBit<TT::STOP_ON_ERR>(i_value);
 }
 
 ///
@@ -547,14 +547,14 @@ inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buf
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffer)
+inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer)
 {
-    i_buffer.setBit<TT::DISABLE_ECC_ARRAY_CHK>();
-    i_buffer.setBit<TT::DISABLE_ECC_ARRAY_CORRECTION>();
+    io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CHK>();
+    io_buffer.setBit<TT::DISABLE_ECC_ARRAY_CORRECTION>();
 }
 
 ///
@@ -563,14 +563,29 @@ inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buf
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff ignore any array ue or sue errors.
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffer, bool i_value)
+inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
 {
-    i_buffer.writeBit<TT::UE_DISABLE>(i_value);
+    io_buffer.writeBit<TT::UE_DISABLE>(i_value);
+}
+
+///
+/// @brief User sets to a '1'b to force the Hdw to delay parity a cycle
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] the target to effect
+/// @param[in,out] io_buffer the buffer representing the mode register
+/// @param[in] i_value true iff delay parity a cycle
+/// @return void
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value)
+{
+    io_buffer.writeBit<TT::CFG_PARITY_AFTER_CMD>(i_value);
 }
 
 ///
@@ -578,17 +593,17 @@ inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buff
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_count the count to wait for DDR cal to complete.
 /// @param[in] i_mult the DDR calibration time multiplaction factor
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffer,
+inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer,
                        const uint64_t i_count, const uint64_t i_mult)
 {
-    i_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT, TT::DDR_CAL_TIMEOUT_CNT_LEN>(i_count);
-    i_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT_MULT, TT::DDR_CAL_TIMEOUT_CNT_MULT_LEN>(i_mult);
+    io_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT, TT::DDR_CAL_TIMEOUT_CNT_LEN>(i_count);
+    io_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT_MULT, TT::DDR_CAL_TIMEOUT_CNT_MULT_LEN>(i_mult);
 }
 
 ///
@@ -600,27 +615,27 @@ inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffe
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value bool true iff Copy CKE signals to CKE Spare on both ports
 /// @note no-op for p9n
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& i_buffer, bool i_value);
+void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const bool i_value);
 
 ///
 /// @brief Read the modeq register appropriate for this target
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
-/// @param[in] i_buffer the buffer representing the mode register
+/// @param[in,out] io_buffer the buffer representing the mode register
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& i_buffer)
+inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& io_buffer)
 {
     FAPI_DBG("read mode 0x%llx", TT::MODEQ_REG);
-    return mss::getScom(i_target, TT::MODEQ_REG, i_buffer);
+    return mss::getScom(i_target, TT::MODEQ_REG, io_buffer);
 }
 
 ///
@@ -690,7 +705,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target, ccs::prog
 /// @return FAPI2_RC_SUCCESS iff success
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, bool i_start_stop );
+fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, const bool i_start_stop );
 
 ///
 /// @brief Query the status of the CCS engine

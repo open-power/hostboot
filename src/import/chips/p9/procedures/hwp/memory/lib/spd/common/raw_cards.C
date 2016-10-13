@@ -68,71 +68,71 @@ enum raw_card_rev : uint8_t
 /// @brief raw card B0 settings
 ///
 // TODO RTC:160116 Fill in valid RCD data for LRDIMM
-raw_card_t raw_card_b0( 0x00,
-                        0x00,
-                        0x00,
-                        0x0F,
-                        0x03,
-                        0x00,
-                        0x0E,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x07);
+raw_card_t raw_card_b0( 0x00, // RC00
+                        0x00, // RC01 (C might be the right answer)
+                        0x00, // RC02
+                        0x0F, // RC06_7
+                        0x03, // RC08
+                        0x00, // RC09
+                        0x0E, // RC0B
+                        0x00, // RC0C
+                        0x00, // RC0E
+                        0x00, // RC0F
+                        0x00, // RC1X
+                        0x00, // RC2X
+                        0x00, // RC4X
+                        0x00, // RC5X
+                        0x00, // RC6C
+                        0x00, // RC8X
+                        0x00, // RC9X
+                        0x00, // RCAx
+                        0x07);// RCBX
 
 ///
 /// @brief raw card C1 settings
 ///
-raw_card_t raw_card_c1( 0x00,
-                        0x0B,
-                        0x00,
-                        0x0F,
-                        0x03,
-                        0x0F,
-                        0x0E,
-                        0x00,
-                        0x0D,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x00,
-                        0x07);
+raw_card_t raw_card_c1( 0x00, // RC00
+                        0x00, // RC01 (C might be the right answer?)
+                        0x00, // RC02
+                        0x0F, // RC06_07
+                        0x03, // RC08
+                        0x00, // RC09
+                        0x0E, // RC0B
+                        0x00, // RC0C
+                        0x0D, // RC0E
+                        0x00, // RC0F
+                        0x00, // RC1X
+                        0x00, // RC2X
+                        0x00, // RC4X
+                        0x00, // RC5X
+                        0x00, // RC6X
+                        0x00, // RC8X
+                        0x00, // RC9X
+                        0x00, // RCAX
+                        0x07);// RCBX
 
 ///
 /// @brief raw card VBU settings
 ///
-raw_card_t raw_card_vbu( 0x00,
-                         0x00,
-                         0x00,
-                         0x0F,
-                         0x03,
-                         0x00,
-                         0x0E,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x00,
-                         0x07);
+raw_card_t raw_card_vbu( 0x00, // RC00
+                         0x00, // RC01
+                         0x00, // RC02
+                         0x0F, // RC06_07
+                         0x03, // RC08
+                         0x00, // RC09
+                         0x0E, // RC0B
+                         0x00, // RC0C
+                         0x00, // RC0E
+                         0x00, // RC0F
+                         0x00, // RC1X
+                         0x00, // RC2X
+                         0x00, // RC4X
+                         0x00, // RC5X
+                         0x00, // RC6X
+                         0x00, // RC8X
+                         0x00, // RC9X
+                         0x00, // RCAX
+                         0x07);// RCBX
 
 
 // TODO - RTC:160121 Catch all for adding raw card data for DIMMs

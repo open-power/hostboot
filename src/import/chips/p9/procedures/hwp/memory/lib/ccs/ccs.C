@@ -120,7 +120,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_DBG("ccs statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        FAPI_INF("ccs statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
         status = stat_reg;
         return status.getBit<TT::CCS_IN_PROGRESS>() != 1;
     },
@@ -129,7 +129,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
     // Check for done and success. DONE being the only bit set.
     if (status == STAT_QUERY_SUCCESS)
     {
-        FAPI_DBG("CCS Executed Successfully.");
+        FAPI_INF("CCS Executed Successfully.");
         goto fapi_try_exit;
     }
 
@@ -154,16 +154,29 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                            ccs::program<TARGET_TYPE_MCBIST>& i_program,
                            const std::vector< fapi2::Target<TARGET_TYPE_MCA> >& i_ports)
 {
+    typedef ccsTraits<TARGET_TYPE_MCBIST> TT;
+
     // Subtract one for the idle we insert at the end
-    static const size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
-    static const uint64_t CCS_ARR0_ZERO = MCBIST_CCS_INST_ARR0_00;
-    static const uint64_t CCS_ARR1_ZERO = MCBIST_CCS_INST_ARR1_00;
+    constexpr size_t CCS_INSTRUCTION_DEPTH = 32 - 1;
+    constexpr uint64_t CCS_ARR0_ZERO = MCBIST_CCS_INST_ARR0_00;
+    constexpr uint64_t CCS_ARR1_ZERO = MCBIST_CCS_INST_ARR1_00;
 
     ccs::instruction_t<TARGET_TYPE_MCBIST> l_des = ccs::des_command<TARGET_TYPE_MCBIST>();
 
-    FAPI_DBG("loading ccs instructions (%d) for %s", i_program.iv_instructions.size(), mss::c_str(i_target));
+    FAPI_INF("loading ccs instructions (%d) for %s", i_program.iv_instructions.size(), mss::c_str(i_target));
 
     auto l_inst_iter = i_program.iv_instructions.begin();
+
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( start_stop(i_target, mss::states::STOP) );
+    FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
+                           [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
+        return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
+    }),
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_TARGET_IN_ERROR(i_target),
+    "CCS appears hung (trying to stop)");
 
     while (l_inst_iter != i_program.iv_instructions.end())
     {
@@ -193,7 +206,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
             l_total_delay += l_delay * (l_repeat + 1);
 
-            FAPI_DBG("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
+            FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
                      l_inst_count, l_inst_iter->arr0, l_inst_iter->arr1,
                      CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
                      l_delay, l_total_delay, mss::c_str(i_target));
@@ -211,7 +224,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             i_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(l_total_delay);
         }
 
-        FAPI_DBG("executing ccs instructions (%d:%d, %d) for %s",
+        FAPI_INF("executing ccs instructions (%d:%d, %d) for %s",
                  i_program.iv_instructions.size(), l_inst_count, i_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
 
         // Insert a DES as our last instruction. DES is idle state anyway and having this
@@ -221,14 +234,14 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
         FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
 
-        FAPI_DBG("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
+        FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
                  l_inst_count, l_des.arr0, l_des.arr1,
                  CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count, mss::c_str(i_target));
 
         // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
-        for (auto p : i_ports)
+        for (const auto& p : i_ports)
         {
-            FAPI_DBG("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
+            FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
             FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)) );
             FAPI_TRY( execute_inst_array(i_target, i_program) );
         }
@@ -244,14 +257,14 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] fapi2::Target<TARGET_TYPE_MCBIST>& the target to effect
-/// @param[in] the buffer representing the mode register
+/// @param[in,out] the buffer representing the mode register
 /// @param[in] bool true iff Copy CKE signals to CKE Spare on both ports
 /// @return void
 /// @note no-op for p9n
 ///
 template<>
-void copy_cke_to_spare_cke<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>&, fapi2::buffer<uint64_t>&,
-        bool )
+void copy_cke_to_spare_cke<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>&,
+        fapi2::buffer<uint64_t>&, bool )
 {
     return;
 }
