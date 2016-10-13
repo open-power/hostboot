@@ -270,7 +270,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                 if(i_dbgl > 2)
                 {
                     MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
-                           (ring_id_list_common + i)->ringNameImg, i, j);
+                           (ring_id_list_common + i)->ringName, i, j);
                 }
 
                 if((strcmp( (ring_id_list_common + i)->ringName,
@@ -404,7 +404,7 @@ int get_ring_from_sbe_image ( void*           i_ringSection, // Image pointer
                     if(i_dbgl > 2)
                     {
                         MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d Instance id %d\n",
-                               (ring_id_list_instance + j)->ringNameImg, j, k, i);
+                               (ring_id_list_instance + j)->ringName, j, k, i);
                     }
 
                     if  (strcmp( (ring_id_list_instance + j)->ringName,
@@ -595,7 +595,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
             if(i_dbgl > 2)
             {
                 MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
-                       (ring_id_list_common + i)->ringNameImg, i, j);
+                       (ring_id_list_common + i)->ringName, i, j);
             }
 
             if((strcmp( (ring_id_list_common + i)->ringName,
@@ -729,7 +729,7 @@ int get_ring_from_sgpe_image ( void*           i_ringSection,  // Image pointer
                 if(i_dbgl > 2)
                 {
                     MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
-                           (ring_id_list_instance + j)->ringNameImg, j, k);
+                           (ring_id_list_instance + j)->ringName, j, k);
                 }
 
                 if  (strcmp( (ring_id_list_instance + j)->ringName,
@@ -920,7 +920,7 @@ int get_ring_from_cme_image ( void*
             if(i_dbgl > 2)
             {
                 MY_INF(" Ring name %s Cplt Common ring id %d Variant id %d",
-                       (ring_id_list_common + i)->ringNameImg, i, j);
+                       (ring_id_list_common + i)->ringName, i, j);
             }
 
             if((strcmp( (ring_id_list_common + i)->ringName,
@@ -1056,7 +1056,7 @@ int get_ring_from_cme_image ( void*
                     if(i_dbgl > 2)
                     {
                         MY_INF(" Ring name %s Cplt instance ring id %d Variant id %d",
-                               (ring_id_list_instance + j)->ringNameImg, j, k);
+                               (ring_id_list_instance + j)->ringName, j, k);
                     }
 
                     if  (strcmp( (ring_id_list_instance + j)->ringName,
