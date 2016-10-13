@@ -1128,18 +1128,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_NUM_DROPS_PER_PORT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Specifies the number of DIMM dimensions that are valid per port. </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>EMPTY = 0, SINGLE = 1, DUAL = 2</enum>
-        <writeable/>
-        <array>2</array>
-        <mssAccessorName>eff_num_drops_per_port</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of master ranks per DIMM.</description>
@@ -1255,7 +1243,7 @@
             consumer: mss_bulk_pwr_throttles
         </description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array> 2 2</array>
         <mssAccessorName>total_pwr_slope</mssAccessorName>
@@ -1270,54 +1258,10 @@
             consumer: mss_bulk_pwr_throttles
         </description>
         <initToZero></initToZero>
-        <valueType>uint32</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
         <array> 2 2</array>
         <mssAccessorName>total_pwr_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_MASTER_PWR_SLOPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Master Power slope value for dimm</description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>master_pwr_slope</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_SUPPLIER_PWR_SLOPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Supplier Power slope value for dimm</description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>supplier_pwr_slope</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_MASTER_PWR_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Master Power intercept value for dimm</description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>master_pwr_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_SUPPLIER_PWR_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Supplier Power intercept value for dimm</description>
-        <initToZero></initToZero>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <array> 2 2</array>
-        <mssAccessorName>supplier_pwr_intercept</mssAccessorName>
     </attribute>
 
     <attribute>
