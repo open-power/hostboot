@@ -853,10 +853,11 @@ fapi2::ReturnCode p9_io_xbus_linktrain(
               "P9 IO Xbus Linktrain Polling Failed" );
 
 
-    // Disable the Tx Serializer Sync
-    FAPI_TRY( tx_serializer_sync_power_off( l_mtgt, l_stgt, i_grp ),
-              "tx_serializer_sync_power_off Failed.");
-
+    // >> HW390103 -- Leave Tx Unload Clock Disable Off
+    //// Disable the Tx Serializer Sync
+    //FAPI_TRY( tx_serializer_sync_power_off( l_mtgt, l_stgt, i_grp ),
+    //          "tx_serializer_sync_power_off Failed.");
+    // << HW390103 -- Leave Tx Unload Clock Disable Off
 
     // Record the Bad Lane Vectors after link training.
     FAPI_TRY( get_bad_lane_data( l_mtgt, i_grp, l_m_post_bad_data ),
