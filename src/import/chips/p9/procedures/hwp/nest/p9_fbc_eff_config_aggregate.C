@@ -78,7 +78,7 @@ fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
         // if link is valid, bump fabric ID usage count
         if (i_en[l_loc_link_id])
         {
-            l_fbc_id_active_count[i_rem_link_id[l_loc_link_id]]++;
+            l_fbc_id_active_count[i_rem_fbc_id[l_loc_link_id]]++;
         }
 
         o_addr_dis[l_loc_link_id] = 0;
@@ -212,6 +212,10 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     uint8_t l_a_addr_dis[P9_FBC_UTILS_MAX_A_LINKS];
     uint8_t l_a_aggregate;
 
+    // pump mode
+    fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_pump_mode;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
     // read attributes for this chip
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
@@ -253,16 +257,19 @@ p9_fbc_eff_config_aggregate(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
              "Error from p9_fbc_utils_get_chip_id_attr");
     FAPI_TRY(p9_fbc_utils_get_group_id_attr(i_target, l_loc_fbc_group_id),
              "Error from p9_fbc_utils_get_group_id_attr");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, FAPI_SYSTEM, l_pump_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE");
 
     // calculate aggregate configuration
-    FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(P9_FBC_UTILS_MAX_X_LINKS,
-             l_x_en,
-             l_loc_fbc_chip_id,
-             l_x_rem_link_id,
-             l_x_rem_fbc_chip_id,
-             l_x_agg_link_delay,
-             l_x_aggregate,
-             l_x_addr_dis),
+    FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(
+                 P9_FBC_UTILS_MAX_X_LINKS,
+                 l_x_en,
+                 (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? (l_loc_fbc_chip_id) : (l_loc_fbc_group_id),
+                 l_x_rem_link_id,
+                 l_x_rem_fbc_chip_id,
+                 l_x_agg_link_delay,
+                 l_x_aggregate,
+                 l_x_addr_dis),
              "Error from p9_fbc_eff_config_aggregate_link_setup (X)");
 
     FAPI_TRY(p9_fbc_eff_config_aggregate_link_setup(P9_FBC_UTILS_MAX_A_LINKS,
