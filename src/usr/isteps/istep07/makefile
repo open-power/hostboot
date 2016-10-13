@@ -72,6 +72,7 @@ include $(HWP_PATH)/p9_mss_freq_system.mk
 include $(PROCEDURES_PATH)/hwp/nest/p9_mss_eff_grouping.mk
 include $(HWP_PATH)/p9_mss_eff_config.mk
 include $(HWP_PATH)/p9_mss_eff_config_thermal.mk
+include $(HWP_PATH)/p9_mss_bulk_pwr_throttles.mk
 
 #mss_attr_update : MSS ATTR Overrides
 include $(HWP_PATH)/p9_mss_attr_update.mk
