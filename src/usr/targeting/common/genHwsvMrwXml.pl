@@ -329,15 +329,10 @@ push @systemAttr,
     "MSS_MRW_PREFETCH_ENABLE", $reqPol->{'mss_prefetch_enable'},
     "MSS_MRW_CLEANER_ENABLE", $reqPol->{'mss_cleaner_enable'},
     #TODO RTC:161768 these need to come from MRW
-    "MSS_MRW_MEM_M_DRAM_CLOCKS", 512,
-    "MSS_MRW_FINE_REFRESH_MODE", 0,
-    "MSS_MRW_TEMP_REFRESH_RANGE", 1,
-    "MSS_MRW_RESET_DELAY_BEFORE_CAL", 0,
-    "MSS_MRW_MCS_PREFETCH_RETRY_THRESHOLD", 0,
-    "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS", 0xD90C,
-    "MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS", 0x8000,
-    "MSS_MRW_DRAM_2N_MODE", 0,
-    "MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT", 32,
+    "MSS_MRW_MEM_M_DRAM_CLOCKS", $reqPol->{'mss_mrw_mem_m_dram_clocks'},
+    "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS", $reqPol->{'mss_mrw_periodic_memcal_mode_options'},
+    "MSS_MRW_PERIODIC_ZQCAL_MODE_OPTIONS", $reqPol->{'mss_mrw_periodic_zqcal_mode_options'},
+    "MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT", $reqPol->{'mss_mrw_safemode_mem_throttled_n_commands_per_port'},
     "PROC_FSP_MMIO_MASK_SIZE", 0x0000000100000000,
     "PROC_FSP_BAR_SIZE", 0xFFFFFC00FFFFFFFF,
     "PROC_FSP_BAR_BASE_ADDR_OFFSET", 0x0000030100000000 ,
@@ -347,6 +342,49 @@ push @systemAttr,
     "PROC_NX_RNG_BAR_BASE_ADDR_OFFSET", 0x00000302031D0000 ,
     "PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET", 0x0000030200000000,
 ];
+
+if ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'NORMAL')
+{
+    push @systemAttr, ['MSS_MRW_FINE_REFRESH_MODE', 0];
+}
+elsif ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'FIXED_2X')
+{
+    push @systemAttr, ['MSS_MRW_FINE_REFRESH_MODE', 1];
+}
+elsif ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'FIXED_4X')
+{
+    push @systemAttr, ['MSS_MRW_FINE_REFRESH_MODE', 2];
+}
+elsif ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'FLY_2X')
+{
+    push @systemAttr, ['MSS_MRW_FINE_REFRESH_MODE', 5];
+}
+elsif ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'FLY_4X')
+{
+    push @systemAttr, ['MSS_MRW_FINE_REFRESH_MODE', 6];
+}
+
+if ($reqPol->{'mss_mrw_temp_refresh_range'} eq 'NORMAL')
+{
+    push @systemAttr, ['MSS_MRW_TEMP_REFRESH_RANGE', 0];
+}
+elsif ($reqPol->{'mss_mrw_temp_refresh_range'} eq 'EXTEND')
+{
+    push @systemAttr, ['MSS_MRW_TEMP_REFRESH_RANGE', 1];
+}
+
+if ($reqPol->{'mss_mrw_dram_2N_mode'} eq 'AUTO')
+{
+    push @systemAttr, ['MSS_MRW_DRAM_2N_MODE', 0];
+}
+elsif ($reqPol->{'mss_mrw_dram_2N_mode'} eq 'FORCE_TO_1N_MODE')
+{
+    push @systemAttr, ['MSS_MRW_DRAM_2N_MODE', 1];
+}
+elsif ($reqPol->{'mss_mrw_dram_2N_mode'} eq 'FORCE_TO_2N_MODE')
+{
+    push @systemAttr, ['MSS_MRW_DRAM_2N_MODE', 2];
+}
 
 if ($reqPol->{'required_synch_mode'} eq 'never')
 {
