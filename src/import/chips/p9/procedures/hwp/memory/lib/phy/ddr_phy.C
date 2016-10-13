@@ -114,7 +114,7 @@ fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     FAPI_TRY( mss::scom_blastah(l_ports, l_zcal_reset_reg, l_data) );
 
     // 12. Wait at least 1024 dphy_gckn cycles (no sense in doing this in the polling loop as
-    // we'll end up doing this delay for every por when we only need to do it once since we
+    // we'll end up doing this delay for every port when we only need to do it once since we
     // kicked them all off in parallel
     fapi2::delay(mss::cycles_to_ns(i_target, 1024), mss::cycles_to_simcycles(1024));
 
