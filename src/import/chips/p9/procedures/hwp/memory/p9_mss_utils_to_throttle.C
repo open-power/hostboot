@@ -85,8 +85,8 @@ extern "C"
                           l_databus_util );
 
                 // Calculate programmable N address operations within M dram clock window
-                l_throttled_cmds_port[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
-                l_throttled_cmds_slot[l_port_num] = mss::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
+                l_throttled_cmds_port[l_port_num] = mss::power_thermal::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
+                l_throttled_cmds_slot[l_port_num] = mss::power_thermal::throttled_cmds( l_databus_util[l_port_num], l_dram_clocks );
                 //TK - actually implement function - JLH
                 //Quick hard code for API purposes
                 l_max_power[l_port_num] = 2088;
