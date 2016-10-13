@@ -37,8 +37,9 @@
 #define __P9_MSS_EFF_CONFIG_THERMAL__
 
 #include <fapi2.H>
+#include <vector>
 
-typedef fapi2::ReturnCode (*p9_mss_eff_config_thermal_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mss_eff_config_thermal_FP_t) (const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>>&);
 
 extern "C"
 {
@@ -48,7 +49,7 @@ extern "C"
 /// @param[in] i_target the controller (e.g., MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_eff_config_thermal( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
+    fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets );
 
 }
 
