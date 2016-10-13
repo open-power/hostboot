@@ -10285,7 +10285,6 @@ firmware notes: Used as override attribute for pstate procedure
     </description>
     <simpleType>
         <uint8_t>
-        <default>0</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -20906,7 +20905,6 @@ Measured in GB</description>
   <description>setup clock mux settings</description>
   <simpleType>
     <uint32_t>
-        <default>0x8c010800</default>
     </uint32_t>
   </simpleType>
   <persistency>non-volatile</persistency>
@@ -20923,7 +20921,6 @@ Measured in GB</description>
   <description>Clock Mux#0 settings</description>
   <simpleType>
     <uint8_t>
-    <default>0</default>
     </uint8_t>
   </simpleType>
   <persistency>non-volatile</persistency>

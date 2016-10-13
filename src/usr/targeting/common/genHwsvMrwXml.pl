@@ -4121,20 +4121,23 @@ sub generate_proc
         }
     }
 
-    #TODO RTC:162090 Get real values from MRW when they are available
+    my $clock_pll_mux  = $reqPol->{'clock_pll_mux'};
+    my $clock_pll_mux0 = $reqPol->{'clock_pll_mux0'};
+    my $obus_ratio     = $reqPol->{'obus_ratio_value'};
+
     print "    <attribute>\n";
     print "        <id>CLOCK_PLL_MUX</id>\n";
-    print "        <default>0x8c010000</default>\n";
+    print "        <default>$clock_pll_mux</default>\n";
     print "    </attribute>\n";
 
     print "    <attribute>\n";
     print "        <id>CLOCK_PLL_MUX0</id>\n";
-    print "        <default>0x03</default>\n";
+    print "        <default>$clock_pll_mux0</default>\n";
     print "    </attribute>\n";
 
     print "    <attribute>\n";
     print "        <id>OBUS_RATIO_VALUE</id>\n";
-    print "        <default>0x0</default>\n";
+    print "        <default>$obus_ratio</default>\n";
     print "    </attribute>\n";
 
     print "</targetInstance>\n";
