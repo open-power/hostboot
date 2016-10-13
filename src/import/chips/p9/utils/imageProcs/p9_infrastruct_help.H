@@ -34,11 +34,10 @@
 //
 // Various image/ring buffer sizes. Must be used by all users (VBU, FSP, HB, HBI, Cronus)
 //
-//@FIXME: CMO: get rid of FIXED_RING_BUF_SIZE when ring_apply no longer uses it.
-const uint32_t  FIXED_RING_BUF_SIZE     = 60000; // Fixed ring buf size for _fixed.
 const uint32_t  MAX_SEEPROM_IMAGE_SIZE  = 4 * 56 * 1024 - 256; // Max Seeprom size, excl ECC bits (4 banks).
 const uint32_t  MAX_RT_IMAGE_SIZE       = 1024 * 1024;   // Max Runtime size.
 const uint32_t  MAX_RING_BUF_SIZE       = 60000;         // Max ring buffer size.
+const uint32_t  FIXED_RING_BUF_SIZE     = 60000;         //@TODO: RTC156706
 const uint32_t  MAX_OVERRIDES_SIZE      = 2 * 1024;      // Max overrides section size.
 const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section size.
 

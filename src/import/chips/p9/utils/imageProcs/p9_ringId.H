@@ -36,7 +36,6 @@ typedef struct
     uint8_t      ringId;
     uint8_t      instanceIdMin;    // the min instanceId
     uint8_t      instanceIdMax;    // the max instanceId
-    const char*  ringNameImg; // Ring name in image: ringName + "_ring"
     uint8_t      vpdKeyword;
     uint8_t      pllCopy;     // 0,1,2,3,4,5 -- No of PLL copies required
     uint64_t     scanRegionType;
