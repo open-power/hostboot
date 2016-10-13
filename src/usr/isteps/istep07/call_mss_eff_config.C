@@ -31,6 +31,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
+#include    <map>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -204,32 +205,62 @@ void*    call_mss_eff_config( void *io_pArgs )
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
             "SUCCESS :  p9_mss_eff_config HWP");
+    } // end membuf loop
 
+    std::map<ATTR_VDDR_ID_type,TARGETING::TargetHandleList> l_domainIdGroups;
+    TARGETING::TargetHandleList l_mcbistTargetList;
+    getAllChiplets(l_mcsTargetList, TYPE_MCBIST);
+
+    // Iterate over all MCBIST, calling mss_eff_config_thermal
+    for (const auto & l_mcbist_target : l_mcbistTargetList)
+    {
+        TARGETING::TargetHandleList l_mcsChildren;
+        getChildChiplets(l_mcsChildren,l_mcbist_target, TARGETING::TYPE_MCS);
+
+        ATTR_VDDR_ID_type l_vddr_id = l_mcbist_target->getAttr<ATTR_VDDR_ID>();
+        if(l_domainIdGroups.find(l_vddr_id) == l_domainIdGroups.end())
+        {
+            std::pair<ATTR_VDDR_ID_type, TARGETING::TargetHandleList> tuple(l_vddr_id, l_mcsChildren);
+            l_domainIdGroups.insert(tuple);
+        }
+        else
+        {
+            l_domainIdGroups[l_vddr_id].insert(l_domainIdGroups[l_vddr_id].end(), l_mcsChildren.begin(), l_mcsChildren.end());
+        }
+    }
+
+    for (auto & l_tuple : l_domainIdGroups)
+    {
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_fapi_mcs_targs;
+        for(const auto & l_mcs_target : l_tuple.second)
+        {
+            // Create a FAPI target representing the MCS
+            const fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_mcs_target
+            (l_mcs_target);
+            l_fapi_mcs_targs.push_back(l_fapi_mcs_target);
+        }
         // Call the mss_eff_config_thermal HWP
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p9_mss_eff_config_thermal HWP. MCS HUID %.8X", l_huid);
-        FAPI_INVOKE_HWP(l_err, p9_mss_eff_config_thermal,l_fapi_mcs_target);
+                   "p9_mss_eff_config_thermal HWP. ");
+        FAPI_INVOKE_HWP(l_err, p9_mss_eff_config_thermal,l_fapi_mcs_targs);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9_mss_eff_config_thermal HWP "
-                "ran on MCS target HUID %.8X",
-                l_err->reasonCode());
+                        "ERROR 0x%.8X:  p9_mss_eff_config_thermal HWP ",
+                        l_err->reasonCode());
 
             // Ensure istep error created and has same plid as this error
-            ErrlUserDetailsTarget(l_mcs_target).addToLog(l_err);
             l_StepError.addErrorDetails(l_err);
             errlCommit(l_err, HWPF_COMP_ID);
         }
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS : p9_mss_eff_config_thermal HWP "
-                "ran on MCS target HUID %.8X",
-                l_huid);
+                        "SUCCESS : p9_mss_eff_config_thermal HWP");
         }
-    } // end membuf loop
+    }
+
 
     if (l_StepError.isNull())
     {

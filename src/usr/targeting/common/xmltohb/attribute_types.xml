@@ -12110,7 +12110,6 @@ Measured in GB</description>
     </description>
     <simpleType>
       <uint8_t>
-      <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -31761,7 +31760,7 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint16_t></uint16_t>
         <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
@@ -31783,7 +31782,7 @@ Measured in GB</description>
 
     </description>
     <simpleType>
-        <uint32_t></uint32_t>
+        <uint16_t></uint16_t>
         <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>

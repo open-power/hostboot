@@ -262,6 +262,52 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
 fapi_try_exit:
     return fapi2::current_err;
 }
+///
+/// @brief find the power curve attributes for each dimm on an MCS target
+/// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding and values for MSS_MRW_POWER_SLOPE
+/// @param[in] i_intercept vector of generated hashes for encoding and values for MSS_MRW_POWER_INTERCEPT
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding and values for MSS_MRW_THERMAL_MEMORY_POWER_LIMIT
+/// @param[out] o_vddr_slope the VDDR power curve slope for each dimm
+/// @param[out] o_vddr_int the VDDR power curve intercept for each dimm
+/// @param[out] o_total_slope the VDDR+VPP power curve slope for each dimm
+/// @param[out] o_total_int the VDDR+VPP power curve intercept for each dimm
+/// @param[out] o_thermal_power the thermal power limit for the dimm
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note used to set power curve attributes in calling function
+/// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
+///
+fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcs,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_slope,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_intercept,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_thermal_power_limit,
+                                   uint16_t o_vddr_slope [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_vddr_int [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_total_slope[PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_total_int [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint32_t o_thermal_power [PORTS_PER_MCS][MAX_DIMM_PER_PORT])
+{
+    for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_mcs))
+    {
+        const auto l_mca_pos = mss::index (find_target<TARGET_TYPE_MCA>(l_dimm));
+        const auto l_dimm_pos = mss::index (l_dimm);
+        mss::dimm::kind l_kind (l_dimm);
+        mss::power_thermal::decoder l_decoder(l_kind);
+        FAPI_TRY( l_decoder.generate_encoding() );
+        FAPI_TRY( l_decoder.find_slope(i_slope) );
+        FAPI_TRY( l_decoder.find_intercept(i_intercept) );
+        FAPI_TRY( l_decoder.find_thermal_power_limit(i_thermal_power_limit) );
+
+        o_vddr_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_slope;
+        o_vddr_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_intercept;
+        o_total_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_slope;
+        o_total_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_intercept;
+        o_thermal_power [l_mca_pos][l_dimm_pos] = l_decoder.iv_thermal_power_limit;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } //ns power_thermal
 } // ns mss

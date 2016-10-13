@@ -145,4 +145,36 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
+    <description>
+      There are 2 DIMMS on the port but both have 0 databus utilization
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CALC_PORT_POWER_CURVE_DIVIDE_BY_ZERO</rc>
+    <description>
+      Denominator equals 0
+    </description>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <ffdc>UTIL_CONVERSION</ffdc>
+    <ffdc>IDLE_UTIL</ffdc>
+    <callout>
+      <target>MCA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MCA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

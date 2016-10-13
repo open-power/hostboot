@@ -67,7 +67,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>ffffe0001700</default>
+    <default>ffffe000000006A4</default>
     <array>10</array>
     <platInit/>
     <initToZero/>
@@ -247,7 +247,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Memory power control settings programmed during IPL 
-        Used by OCC when exiting idle powersave mode
+        Used by OCC when exiting idle power-save mode
     </description>
     <valueType>uint8</valueType>
     <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
@@ -263,7 +263,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
         Memory power control settings for IDLE powersave mode
-        Used by OCC when entering idle powersave mode
+        Used by OCC when entering idle power-save mode
     </description>
     <valueType>uint8</valueType>
     <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
