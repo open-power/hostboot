@@ -76,23 +76,20 @@ extern "C"
 
             // It's unclear if we want to run with this true or false. Right now (10/15) this
             // has to be false. Shelton was unclear if this should be on or off in general BRS
-            mss::ccs::stop_on_err(i_target, l_ccs_config, false);
-            mss::ccs::ue_disable(i_target, l_ccs_config, false);
-            mss::ccs::copy_cke_to_spare_cke(i_target, l_ccs_config, true);
+            mss::ccs::stop_on_err(i_target, l_ccs_config, mss::LOW);
+            mss::ccs::ue_disable(i_target, l_ccs_config, mss::LOW);
+            mss::ccs::copy_cke_to_spare_cke(i_target, l_ccs_config, mss::HIGH);
+            mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
 
             // Hm. Centaur sets this up for the longest duration possible. Can we do better?
             mss::ccs::cal_count(i_target, l_ccs_config, ~0, ~0);
-
-#ifndef JIM_SAYS_TURN_OFF_ECC
-            mss::ccs::disable_ecc(i_target, l_ccs_config);
-#endif
             FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config) );
         }
 
         // Clean out any previous calibration results, set bad-bits and configure the ranks.
         FAPI_DBG("MCA's on this McBIST: %d", i_target.getChildren<TARGET_TYPE_MCA>().size());
 
-        for( auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+        for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
             mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
 
@@ -159,7 +156,7 @@ extern "C"
             // For each rank pair we need to calibrate, pop a ccs instruction in an array and execute it.
             // NOTE: IF YOU CALIBRATE MORE THAN ONE RANK PAIR PER CCS PROGRAM, MAKE SURE TO CHANGE
             // THE PROCESSING OF THE ERRORS. (it's hard to figure out which DIMM failed, too) BRS.
-            for (auto rp : l_pairs)
+            for (const auto& rp : l_pairs)
             {
                 auto l_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(rp);
 
