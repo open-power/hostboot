@@ -41,6 +41,12 @@
 #include <lib/utils/count_dimm.H>
 namespace mss
 {
+enum size_of_attrs : size_t
+{
+    SIZE_OF_POWER_CURVES_ATTRS = 100,
+    SIZE_OF_THERMAL_ATTR = 10,
+};
+
 
 namespace power_thermal
 {
@@ -221,6 +227,31 @@ class decoder
         fapi2::ReturnCode find_thermal_power_limit (const std::vector<fapi2::buffer<uint64_t>>& i_thermal_limits);
 
 };
+
+///
+/// @brief find the power curve attributes for each dimm on an MCS target
+/// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding and values for MSS_MRW_POWER_SLOPE
+/// @param[in] i_intercept vector of generated hashes for encoding and values for MSS_MRW_POWER_INTERCEPT
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding and values for MSS_MRW_THERMAL_MEMORY_POWER_LIMIT
+/// @param[out] o_vddr_slope the VDDR power curve slope for each dimm
+/// @param[out] o_vddr_int the VDDR power curve intercept for each dimm
+/// @param[out] o_total_slope the VDDR+VPP power curve slope for each dimm
+/// @param[out] o_total_int the VDDR+VPP power curve intercept for each dimm
+/// @param[out] o_thermal_power the thermal power limit for the dimm
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note used to get power curve attributes in calling function
+/// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
+///
+fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_targets,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_slope,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_intercept,
+                                   const std::vector< fapi2::buffer< uint64_t > >& i_thermal_power_limit,
+                                   uint16_t o_vddr_slope       [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_vddr_int         [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_total_slope      [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_total_int        [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint32_t o_thermal_power    [PORTS_PER_MCS][MAX_DIMM_PER_PORT]);
 
 ///
 /// @brief Encode the attribute into a bit encoding
