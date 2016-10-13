@@ -494,10 +494,11 @@ sub processCkeVpdTextFile
         my $actionWriteFile=0;
 
         my $line = <VPDINPUTTEXT>;
+        $line =~ s/(\r|\n)//g;
+
         $row++;
         if ($line)  #determine all actions based on text line
         {
-            chomp($line);
             if ($line =~ /ATTR_/)  #first since will be the most of these
             {
                 if ($stateProcHeader)
@@ -605,10 +606,11 @@ sub processVpdTextFile
         my $actionWriteFile=0;
 
         my $line = <VPDINPUTTEXT>;
+        $line =~ s/(\r|\n)//g;
+
         $row++;
         if ($line)  #determine all actions based on text line
         {
-            chomp($line);
             if ($line =~ /ATTR_/)  #first since will be the most of these
             {
                 if ($stateProcHeader)
