@@ -958,7 +958,7 @@ namespace SBE
         uint32_t tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
         uint32_t coreMask = 0x00FFFFFF; // Bits(8:31) = EC00:EC23
         size_t maxCores = P9_MAX_EC_PER_PROC;
-        int coreCount = 0;
+        uint32_t coreCount = 0;
         uint32_t procIOMask = 0;
         bool procedure_success = false;
 
@@ -997,10 +997,19 @@ namespace SBE
                 break;
             }
 
+            // Get Target Service
+            // System target check done earlier, so no assert check necessary
+            TargetService& tS = targetService();
+            TARGETING::Target* sys = NULL;
+            (void) tS.getTopLevelTarget( sys );
+
             // setup loop parameters
             coreCount = __builtin_popcount(coreMask);
+            uint32_t min_cores =
+                sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
+            min_cores *= (is_fused_mode()) ? 2 : 1; // double minimum for fused
 
-            while( coreCount >= 2 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
+            while( coreCount >= min_cores )
             {
                 // copy customized SBE image to destination
                 memcpy ( io_imgPtr,
@@ -1109,7 +1118,7 @@ namespace SBE
 
                     // Check if loop will execute again
                     // Clean up some data if it will
-                    if( coreCount >= 2 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ )
+                    if( coreCount >= min_cores )
                     {
                         // Reset size and clear image buffer
                         tmpImgSize = static_cast<uint32_t>(i_maxImgSize);
@@ -1155,9 +1164,10 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"procCustomizeSbeImg() - "
                            "Failure to successfully complete p9_xip_customize()"
                            ". HUID=0x%X, rc=0x%X, coreCount=%d, coreMask=0x%.8X"
-                           " procIOMask=0x%.8X, maxCores=0x%X",
+                           " procIOMask=0x%.8X, maxCores=0x%X, min_cores=0x%X",
                            TARGETING::get_huid(i_target), ERRL_GETRC_SAFE(err),
-                           coreCount, coreMask, procIOMask, maxCores);
+                           coreCount, coreMask, procIOMask, maxCores,
+                           min_cores);
                 /*@
                  * @errortype
                  * @moduleid          SBE_CUSTOMIZE_IMG
@@ -1320,7 +1330,9 @@ namespace SBE
             TARGETING::Target* sys = NULL;
             (void) tS.getTopLevelTarget( sys );
 
-            uint32_t min_cores = 3 /* sys->getAttr< ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>() @TODO RTC:161050 */ ;
+            uint32_t min_cores =
+                sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
+            min_cores *= (is_fused_mode()) ? 2 : 1; // double minimum for fused
             if ( coreCount < min_cores )
             {
                 remainingEcs = trimBitMask(remainingEcs,
