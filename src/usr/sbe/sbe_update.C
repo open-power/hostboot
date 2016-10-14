@@ -190,8 +190,8 @@ namespace SBE
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                    "updateProcessorSbeSeeproms() FIXED_SEEPROM_WORK_SPACE "
                    "too large");
-            assert((FIXED_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
-                   "updateProcessorSbeSeeproms() FIXED_RING_BUF_SIZE too "
+            assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
+                   "updateProcessorSbeSeeproms() MAX_RING_BUF_SIZE too "
                    "large");
 
             // reset global variables for MBOX Ipl Query
@@ -3557,8 +3557,8 @@ namespace SBE
             //Make sure procedure constants keep within expected range.
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                 "createSbeImageVmmSpace() FIXED_SEEPROM_WORK_SPACE too large");
-            assert((FIXED_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
-                "createSbeImageVmmSpace() FIXED_RING_BUF_SIZE too large");
+            assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
+                "createSbeImageVmmSpace() MAX_RING_BUF_SIZE too large");
 
 
             // Create a memory block to serve as XIP Customize scratch space
