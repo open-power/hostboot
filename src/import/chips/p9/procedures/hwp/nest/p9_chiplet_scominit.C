@@ -48,7 +48,6 @@
 #include <p9_mcs_scom.H>
 #include <p9_cxa_scom.H>
 #include <p9_nx_scom.H>
-#include <p9_mmu_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
 
@@ -195,17 +194,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
-    }
-
-    // Invoke MMU SCOM initfile
-    FAPI_DBG("Invoking p9.mmu.scom.initfile on target %s...", l_procTargetStr);
-    FAPI_EXEC_HWP(l_rc, p9_mmu_scom, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from p9_mmu_scom");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
     }
 
     // Invoke INT SCOM initfile
