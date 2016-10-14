@@ -226,7 +226,7 @@ int32_t CenSymbol::setPins( uint8_t i_pins )
 
 uint8_t CenSymbol::getEvenDq() const
 {
-    return symbol2CenDq( iv_symbol );
+    return symbol2Dq<TYPE_MBA>( iv_symbol );
 }
 
 //------------------------------------------------------------------------------

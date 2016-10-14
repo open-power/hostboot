@@ -2881,7 +2881,8 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
     // Get the DQ indexes for site location tables, adjusting for spare DRAM, if
     // needed.
-    uint8_t dqIdx = transDramSpare( symbol2CenDq(symbol), mm.s.dramSpared );
+    uint8_t dqIdx = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
+                                    mm.s.dramSpared );
 
     // Add the DRAM site info to the current data.
     if ( i_extMemMru.isBufDimm ) // Buffered DIMMs
@@ -3160,7 +3161,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
             // Get the DRAM index for site location table.
             uint8_t symbol  = transEccSpare( dram2Symbol(dram, x4Dram),
                                              (1 == isEcc) );
-            uint8_t dqIdx   = transDramSpare( symbol2CenDq(symbol),
+            uint8_t dqIdx   = transDramSpare( symbol2Dq<TYPE_MBA>(symbol),
                                               (1 == isSp) );
             uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
