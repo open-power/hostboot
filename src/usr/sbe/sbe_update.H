@@ -141,7 +141,7 @@ namespace SBE
         FIXED_SEEPROM_WORK_SPACE = 256 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE,
         RING_BUF1_VADDR = FIXED_SEEPROM_WORK_SPACE + SBE_IMG_VADDR,
-        RING_BUF2_VADDR = RING_BUF1_VADDR + FIXED_RING_BUF_SIZE,
+        RING_BUF2_VADDR = RING_BUF1_VADDR + MAX_RING_BUF_SIZE,
         //NOTE: recycling the same memory space for different
         //steps in the process.
         SBE_ECC_IMG_VADDR = VMM_VADDR_SBE_UPDATE + (VMM_SBE_UPDATE_SIZE / 2),

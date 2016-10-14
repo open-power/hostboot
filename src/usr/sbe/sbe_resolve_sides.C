@@ -136,8 +136,8 @@ errlHndl_t resolveProcessorSbeSeeproms()
         assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
                "resolveProcessorSbeSeeproms() FIXED_SEEPROM_WORK_SPACE "
                "too large");
-        assert((FIXED_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
-               "resolveProcessorSbeSeeproms() FIXED_RING_BUF_SIZE too "
+        assert((MAX_RING_BUF_SIZE <= VMM_SBE_UPDATE_SIZE/4),
+               "resolveProcessorSbeSeeproms() MAX_RING_BUF_SIZE too "
                "large");
 
         // Create VMM space for p8_xip_customize() procedure

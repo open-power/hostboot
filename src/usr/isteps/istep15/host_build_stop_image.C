@@ -328,8 +328,8 @@ void* host_build_stop_image (void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_build_stop_image entry" );
 
     // allocate two temporary work buffer
-    void* l_temp_buffer0 = malloc(FIXED_RING_BUF_SIZE);
-    void* l_temp_buffer1 = malloc(FIXED_RING_BUF_SIZE);
+    void* l_temp_buffer0 = malloc(MAX_RING_BUF_SIZE);
+    void* l_temp_buffer1 = malloc(MAX_RING_BUF_SIZE);
 
     do  {
         // Get the node-offset for our instance by looking at the HRMOR
@@ -442,9 +442,9 @@ void* host_build_stop_image (void *io_pArgs)
                                  PHASE_IPL,
                                  img_type,
                                  l_temp_buffer0,
-                                 FIXED_RING_BUF_SIZE,
+                                 MAX_RING_BUF_SIZE,
                                  l_temp_buffer1,
-                                 FIXED_RING_BUF_SIZE );
+                                 MAX_RING_BUF_SIZE );
 
                 if ( l_errl )
                 {
