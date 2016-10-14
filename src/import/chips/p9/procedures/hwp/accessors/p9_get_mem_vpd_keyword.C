@@ -58,10 +58,28 @@ enum mappingKeywordEnum
 
     MAPPING_LAYOUT_MCS_0        = 0x8000, //mcs position 0
     MAPPING_LAYOUT_MCS_15       = 0x0001, //mcs position 15
+
     MAPPING_LAYOUT_RANKPAIR_00  = 0x8000, //Rank pair 0x00
+    MAPPING_LAYOUT_RANKPAIR_01  = 0x4000, //Rank pair 0x01
+    MAPPING_LAYOUT_RANKPAIR_02  = 0x2000, //Rank pair 0x02
+    MAPPING_LAYOUT_RANKPAIR_04  = 0x1000, //Rank pair 0x04
+    MAPPING_LAYOUT_RANKPAIR_10  = 0x0800, //Rank pair 0x10
+    MAPPING_LAYOUT_RANKPAIR_11  = 0x0400, //Rank pair 0x11
+    MAPPING_LAYOUT_RANKPAIR_12  = 0x0200, //Rank pair 0x12
+    MAPPING_LAYOUT_RANKPAIR_14  = 0x0100, //Rank pair 0x14
+    MAPPING_LAYOUT_RANKPAIR_20  = 0x0080, //Rank pair 0x20
+    MAPPING_LAYOUT_RANKPAIR_21  = 0x0040, //Rank pair 0x21
+    MAPPING_LAYOUT_RANKPAIR_22  = 0x0020, //Rank pair 0x22
+    MAPPING_LAYOUT_RANKPAIR_24  = 0x0010, //Rank pair 0x24
+    MAPPING_LAYOUT_RANKPAIR_40  = 0x0008, //Rank pair 0x40
+    MAPPING_LAYOUT_RANKPAIR_41  = 0x0004, //Rank pair 0x41
+    MAPPING_LAYOUT_RANKPAIR_42  = 0x0002, //Rank pair 0x42
     MAPPING_LAYOUT_RANKPAIR_44  = 0x0001, //Rank pair 0x44
-    MAPPING_LAYOUT_FREQ_0       = 0x80,   //Frequency index 0
-    MAPPING_LAYOUT_FREQ_3       = 0x10,   //Frequency index 3
+
+    MAPPING_LAYOUT_FREQ_0       = 0x80,   //Frequency index 0 - 1866
+    MAPPING_LAYOUT_FREQ_1       = 0x40,   //Frequency index 1 - 2133
+    MAPPING_LAYOUT_FREQ_2       = 0x20,   //Frequency index 2 - 2400
+    MAPPING_LAYOUT_FREQ_3       = 0x10,   //Frequency index 3 - 2666
 };
 
 struct mappingHeader_t //header is first in mapping keyword
@@ -149,6 +167,10 @@ extern "C"
 
         size_t l_mapping_layout_maxsize;
         uint8_t l_mapping_layout_version;
+
+        // Fill in a data buffer for FFDC purposes
+        uint64_t l_ffdc_MAPROW[MAPPING_LAYOUT_MAXROWS];
+        memset( l_ffdc_MAPROW, 0, sizeof(l_ffdc_MAPROW) );
 
         // Validate vpd type and set first keyword name character based on type
         switch (i_vpd_info.iv_vpd_type)
@@ -253,6 +275,11 @@ extern "C"
 
             for (uint8_t i = 0; i < l_mappingHeader->numEntries; i++)
             {
+                // Copy data into FFDC buffer
+                memcpy( &(l_ffdc_MAPROW[i]),
+                        &(l_dqmapping[i]),
+                        sizeof(l_dqmapping[i]) );
+
                 if (l_dqmapping[i].qPosition == l_mcsPos)
                 {
                     l_second = l_dqmapping[i].qNum;
@@ -353,6 +380,7 @@ extern "C"
                 l_indexMax = l_mappingHeader->numEntries;
             }
 
+            // Loop through all of the rows until we find a match
             for (l_index = 0; l_index < l_indexMax; l_index++)
             {
                 if (MAPPING_LAYOUT_LAST == l_mapping[l_index].keywordChar)
@@ -361,6 +389,12 @@ extern "C"
                     //The keyword is zero padded by genMemVpd.pl
                 }
 
+                // Copy data into FFDC buffer
+                memcpy( &(l_ffdc_MAPROW[l_index]),
+                        &(l_mapping[l_index]),
+                        sizeof(l_mapping[l_index]) );
+
+                // Look for a match
                 if ( (l_mcsMask  &
                       (((l_mapping[l_index].mcsMaskMSB) << 8) | //endian sensitive
                        l_mapping[l_index].mcsMaskLSB))  &&
@@ -385,7 +419,17 @@ extern "C"
                     set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
                     set_HEADER(mappingHeader_t(*l_mappingHeader)).
                     set_TARGET(i_target).
-                    set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                    set_VPDTYPE(i_vpd_info.iv_vpd_type).
+                    set_MAPROW0(l_ffdc_MAPROW[0]).
+                    set_MAPROW1(l_ffdc_MAPROW[1]).
+                    set_MAPROW2(l_ffdc_MAPROW[2]).
+                    set_MAPROW3(l_ffdc_MAPROW[3]).
+                    set_MAPROW4(l_ffdc_MAPROW[4]).
+                    set_MAPROW5(l_ffdc_MAPROW[5]).
+                    set_MAPROW6(l_ffdc_MAPROW[6]).
+                    set_MAPROW7(l_ffdc_MAPROW[7]).
+                    set_MAPROW8(l_ffdc_MAPROW[8]).
+                    set_MAPROW9(l_ffdc_MAPROW[9]),
                     "No match in mapping table");
 
         //Was a valid keyword name found?
