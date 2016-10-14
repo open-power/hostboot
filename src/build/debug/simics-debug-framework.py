@@ -488,14 +488,14 @@ def magic_instruction_callback(user_arg, cpu, arg):
     # Disable our handler if someone tells us to
     if( os.environ.has_key('HB_DISABLE_MAGIC')
         and (os.environ['HB_DISABLE_MAGIC'] == '1') ):
-        print 'Skipping HB magic (disabled)', arg
+        #print 'Skipping HB magic (disabled)', arg
         return;
 
     # Disable our handler if we aren't inside HB part of IPL
     #   If HB is running then HRMOR==128MB (ignoring high bits)
     #   0x40000000=1GB, 0x8000000=128MB
     if( (getHRMOR() % 0x40000000) != 0x8000000 ):
-        print 'Skipping HB magic (outside of HB)', arg
+        #print 'Skipping HB magic (outside of HB)', arg
         return;
 
     if arg == 7006:   # MAGIC_SHUTDOWN
