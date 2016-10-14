@@ -82,6 +82,18 @@
     <ffdc>HEADER</ffdc>
     <ffdc>TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <!-- Contents of mapping keyword, i.e. MR, MT, DQ -->
+    <ffdc>MAPROW0</ffdc>
+    <ffdc>MAPROW1</ffdc>
+    <ffdc>MAPROW2</ffdc>
+    <ffdc>MAPROW3</ffdc>
+    <ffdc>MAPROW4</ffdc>
+    <ffdc>MAPROW5</ffdc>
+    <ffdc>MAPROW6</ffdc>
+    <ffdc>MAPROW7</ffdc>
+    <ffdc>MAPROW8</ffdc>
+    <ffdc>MAPROW9</ffdc>
+    <!-- Should use a variable ffdc for the rows but that isn't supported -->
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -100,13 +112,13 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-      <rc>RC_GET_MEM_VPD_ENTRY_NOT_FOUND</rc>
-      <description>Entry outside of possible entries</description>
-      <ffdc>ENTRY</ffdc>
-      <ffdc>MAX_ENTRIES</ffdc>
-      <ffdc>VERSION</ffdc>
-      <ffdc>TARGET</ffdc>
-      <ffdc>VPDTYPE</ffdc>
+    <rc>RC_GET_MEM_VPD_ENTRY_NOT_FOUND</rc>
+    <description>Entry outside of possible entries</description>
+    <ffdc>ENTRY</ffdc>
+    <ffdc>MAX_ENTRIES</ffdc>
+    <ffdc>VERSION</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>VPDTYPE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
