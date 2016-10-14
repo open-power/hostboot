@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenSymbol.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemSymbol.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,25 +23,20 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfCenSymbol_H
-#define prdfCenSymbol_H
+#ifndef __prdfMemSymbol_H
+#define __prdfMemSymbol_H
 
-/** @file  prdfCenSymbol.H
- *  @brief Utility functions that help decode memory syndromes.
+/** @file  prdfMemSymbol.H
+ *  @brief Utility functions that help decode memory symbols.
  */
 
-//------------------------------------------------------------------------------
-//  Includes
-//------------------------------------------------------------------------------
-
-#include <prdfCenAddress.H>
+#include <prdfMemAddress.H>
 #include <prdfMemConst.H>
+#include <prdfParserUtils.H>
 #include <prdfPlatServices.H>
-#include <prdfTargetFwdRef.H>
-#include <prdfParserEnums.H>
 
 //##############################################################################
-//                           class CenSymbol
+//                           class MemSymbol
 //##############################################################################
 
 namespace PRDF
@@ -50,78 +45,67 @@ namespace PRDF
 /**
  * @brief Container for a memory symbol.
  */
-class CenSymbol
+template <TARGETING::TYPE T>
+class MemSymbol
 {
 
   public: // constructor
 
-    /**
-     * @brief Default constructor
-     */
-    CenSymbol() :
-        iv_mbaTarget(NULL), iv_rank(),
-        iv_wiringType( CEN_SYMBOL::WIRING_INVALID ),
+    /** @brief Default constructor. Intentionally creates an invalid symbol. */
+    MemSymbol() :
+        iv_trgt(NULL), iv_rank(),
         iv_symbol( SYMBOLS_PER_RANK ), iv_pins( CEN_SYMBOL::NO_SYMBOL_DQS ),
-        iv_x4Dram(false),iv_isDramSpared(false), iv_isEccSpared(false)
+        iv_isDramSpared(false), iv_isEccSpared(false)
     {}
 
   private: // constructor
 
-    /**
-     * @brief Constructor from components
-     */
-    CenSymbol( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-               CEN_SYMBOL::WiringType i_wiringType, uint8_t i_symbol,
-               uint8_t i_pins, bool i_x4Dram ) :
-        iv_mbaTarget(i_mba), iv_rank(i_rank), iv_wiringType(i_wiringType),
-        iv_symbol(i_symbol), iv_pins(i_pins), iv_x4Dram(i_x4Dram),
-        iv_isDramSpared(false), iv_isEccSpared(false)
-    {}
+    /** @brief Constructor from components. Used only by the static initializer
+     *         functions below. Guarantees the symbol is valid or asserts. */
+    MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
+               uint8_t i_symbol, uint8_t i_pins ) :
+        iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
+        iv_pins(i_pins), iv_isDramSpared(false), iv_isEccSpared(false)
+    {
+        PRDF_ASSERT( NULL != i_trgt );
+        PRDF_ASSERT( T == PlatServices::getTargetType(i_trgt) );
+        PRDF_ASSERT( i_symbol < SYMBOLS_PER_RANK );
+        PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
+    }
 
   public: // functions
 
     /**
-     * @brief  Creates a CenSymbol from a symbol.
-     * @param  i_mba    The MBA target.
+     * @brief  Creates a MemSymbol from a symbol.
+     * @param  i_trgt   The target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @param  i_pins   See enum DqMask.
-     * @return A CenSymbol. Must call isValid() to determine if the function was
+     * @return A MemSymbol. Must call isValid() to determine if the function was
      *         successful in creating a valid object.
      */
-    static CenSymbol fromSymbol( TARGETING::TargetHandle_t i_mba,
-                                 const CenRank & i_rank, uint8_t i_symbol,
-                                 uint8_t i_pins = CEN_SYMBOL::NO_SYMBOL_DQS );
+    static MemSymbol<T> fromSymbol( TARGETING::TargetHandle_t i_trgt,
+                                    const MemRank & i_rank, uint8_t i_symbol,
+                                    uint8_t i_pins = CEN_SYMBOL::NO_SYMBOL_DQS )
+    {
+        return MemSymbol ( i_trgt, i_rank, i_symbol, i_pins );
+    }
 
     /**
-     * @brief  Creates a CenSymbol from a Galois field.
-     * @param  i_mba    The MBA target.
+     * @brief  Creates a MemSymbol from a Galois field.
+     * @param  i_trgt   The target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_galois The Galois field.
      * @param  i_mask   The bit mask.
-     * @return A CenSymbol. Must call isValid() to determine if the function was
+     * @return A MemSymbol. Must call isValid() to determine if the function was
      *         successful in creating a valid object.
      */
-    static CenSymbol fromGalois( TARGETING::TargetHandle_t i_mba,
-                                 const CenRank & i_rank, uint8_t i_galois,
-                                 uint8_t i_mask = 0 );
-
-    /**
-     * @brief  Returns the dimm's wiring type.
-     * @param  i_mba        MBA Target handle.
-     * @param  i_rank       The rank this symbol is on.
-     * @param  o_wiringType See enum WiringType.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    static int32_t getWiringType( TARGETING::TargetHandle_t i_mba,
-                                  const CenRank & i_rank,
-                                  CEN_SYMBOL::WiringType & o_wiringType );
+    static MemSymbol<T> fromGalois( TARGETING::TargetHandle_t i_trgt,
+                                    const MemRank & i_rank, uint8_t i_galois,
+                                    uint8_t i_mask = 0 );
 
     /** @return true if symbol is within the valid range, false otherwise. */
     bool isValid() const { return iv_symbol < SYMBOLS_PER_RANK; }
-
-    /** @return This symbol's wiring type. */
-    CEN_SYMBOL::WiringType getWiringType() const { return iv_wiringType; }
 
     /** @return This symbol's numerical value (0-71). */
     uint8_t getSymbol() const { return iv_symbol; }
@@ -129,38 +113,11 @@ class CenSymbol
     /** @return The bad pins associated with this symbol (2-bits). */
     uint8_t getPins() const { return iv_pins; }
 
-    /** @return The even Centaur DQ of this symbol. */
-    uint8_t getEvenDq() const;
-
-    /** @return The port select for this symbol. */
-    uint8_t getPortSlct() const;
-
-    /** @return The DRAM index for this symbol. */
-    uint8_t getDram() const;
-
-    /**
-     * @return The first symbol of the DRAM associated with this symbol.
-     * @note   Needed for input into mss_put_mark_store and mss_put_steer_mux
-     *         hardware procedures.
-     */
-    uint8_t getDramSymbol() const;
-
-    /** @return The bad pins associated with this symbol in relation to the DRAM
-     *          (x4 mode is 4-bits, x8 mode is 8-bits,). */
-    uint8_t getDramPins() const;
+    /** @return The the first DQ of this symbol. */
+    uint8_t getDq() const { return PARSERUTILS::symbol2Dq<T>(iv_symbol); }
 
     /** @return rank associated with this symbol. */
-    CenRank getRank() const { return iv_rank; };
-
-    /**
-     * @brief  Sets this symbol's pin to a new set of bad pins.
-     * @param  The new pins.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    int32_t setPins( uint8_t i_pins );
-
-    /** @return TRUE this symbol is on a x4 DRAM, FALSE otherwise. */
-    bool isX4Dram() const { return iv_x4Dram; }
+    MemRank getRank() const { return iv_rank; };
 
     /** @return Marks this symbol as steered to a DRAM spare. */
     void setDramSpared() { iv_isDramSpared = true; }
@@ -179,9 +136,9 @@ class CenSymbol
      * @param   i_symbol The symbol to compare with.
      * @return  TRUE if this symbol is less than i_symbol, FALSE otherwise.
      * @note    Compares against iv_symbol and iv_rank. There is currently no
-     *          need to compare against iv_mbaTarget.
+     *          need to compare against iv_trgt.
      */
-    bool operator < ( const CenSymbol & i_symbol ) const
+    bool operator < ( const MemSymbol<T> & i_symbol ) const
     {
         return ( (iv_symbol < i_symbol.iv_symbol) ||
                  ( (iv_symbol == i_symbol.iv_symbol) &&
@@ -193,9 +150,9 @@ class CenSymbol
      * @param  i_symbol The symbol to compare with.
      * @return TRUE if the two symbols are equivalent, FALSE otherwise.
      * @note   Compares against iv_symbol and iv_rank. There is currently no
-     *         need to compare against iv_mbaTarget.
+     *         need to compare against iv_trgt.
      */
-    bool operator == ( const CenSymbol & i_symbol ) const
+    bool operator == ( const MemSymbol<T> & i_symbol ) const
     {
         return ( (iv_symbol == i_symbol.iv_symbol) &&
                  (iv_rank   == i_symbol.iv_rank  ) );
@@ -203,17 +160,15 @@ class CenSymbol
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_mbaTarget; ///< MBA Target handle.
-    CenRank iv_rank;                        ///< The rank this symbol is on.
-    CEN_SYMBOL::WiringType iv_wiringType;   ///< This symbol's wiring type.
-    uint8_t iv_symbol;                      ///< This symbol's numerical value.
-    uint8_t iv_pins;                        ///< See enum DqMask.
-    bool iv_x4Dram;                         ///< TRUE x4 DRAM, FALSE x8 DRAM.
+    TARGETING::TargetHandle_t iv_trgt; ///< Target handle.
+    MemRank iv_rank;                   ///< The rank this symbol is on.
+    uint8_t iv_symbol;                 ///< This symbol's numerical value.
+    uint8_t iv_pins;                   ///< See enum DqMask.
     bool iv_isDramSpared; ///< TRUE if symbol resides on DRAM spare.
     bool iv_isEccSpared;  ///< TRUE if symbol resides on ECC spare.
 };
 
 } // end namespace PRDF
 
-#endif // prdfCenSymbol_H
+#endif // __prdfMemSymbol_H
 
