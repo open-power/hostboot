@@ -42,24 +42,53 @@ namespace FSP
 namespace PARSERUTILS
 {
 
-/* TODO: RTC 136126
-uint8_t symbol2CenDq( uint8_t i_symbol )
+template<>
+uint8_t symbol2Dq<TARGETING::TYPE_MBA>( uint8_t i_symbol )
 {
-    uint8_t cenDq = DQS_PER_DIMM;
+    uint8_t dq = DQS_PER_DIMM;
 
     if ( SYMBOLS_PER_RANK > i_symbol )
     {
         if ( 8 > i_symbol )
-            cenDq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
+            dq = ( ((3 - (i_symbol % 4)) * 2) + 64 );
         else
-            cenDq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
+            dq = ( (31 - (((i_symbol - 8) % 32))) * 2 );
     }
 
-    return cenDq;
+    return dq;
 }
 
 //------------------------------------------------------------------------------
 
+template<>
+uint8_t symbol2Dq<TARGETING::TYPE_MCA>( uint8_t i_symbol )
+{
+    uint8_t dq = DQS_PER_DIMM;
+
+    static const uint8_t symbol2dq[] =
+    {
+        71, 70, 69, 68, 67, 66, 65, 64, // symbols  0- 7
+        63, 62, 61, 60, 55, 54, 53, 52, // symbols  8-15
+        47, 46, 45, 44, 39, 38, 37, 36, // symbols 16-23
+        31, 30, 29, 28, 23, 22, 21, 20, // symbols 24-31
+        15, 14, 13, 12,  7,  6,  5,  4, // symbols 32-39
+        59, 58, 57, 56, 51, 50, 49, 48, // symbols 40-47
+        43, 42, 41, 40, 35, 34, 33, 32, // symbols 48-55
+        27, 26, 25, 24, 19, 18, 17, 16, // symbols 56-63
+        11, 10,  9,  8,  3,  2,  1,  0, // symbols 64-71
+    };
+
+    if ( SYMBOLS_PER_RANK > i_symbol )
+    {
+        dq = symbol2dq[i_symbol];
+    }
+
+    return dq;
+}
+
+//------------------------------------------------------------------------------
+
+/* TODO: RTC 136126
 uint8_t symbol2PortSlct( uint8_t i_symbol )
 {
     uint8_t portSlct = MBA_DIMMS_PER_RANK;

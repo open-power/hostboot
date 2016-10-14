@@ -32,6 +32,8 @@
  */
 
 #include <stdint.h>
+#include <prdfMemConst.H>
+#include <attributeenums.H> // For TARGETING::TYPE
 
 namespace PRDF
 {
@@ -50,11 +52,16 @@ namespace PARSERUTILS
 {
 
 /**
- * @brief Find the even Centaur DQ of the given symbol
- * @param i_symbol The symbol
- * @return The Centaur DQ
+ * Depending on system configuration, a symbol may have more than one DQ. The DQ
+ * numbering within a symbol will always be contiguous. Therefore, the first DQ
+ * withing the symbol will be will be returned. The user will need to calculate
+ * the other DQ values if needed.
+ *
+ * @param  i_symbol Target symbol.
+ * @return The first DQ of the given symbol.
  */
-uint8_t symbol2CenDq( uint8_t i_symbol );
+template<TARGETING::TYPE T>
+uint8_t symbol2Dq( uint8_t i_symbol );
 
 /**
  * @brief Find the port select for given symbol
