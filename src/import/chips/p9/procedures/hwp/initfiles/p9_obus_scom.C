@@ -43,6 +43,7 @@ constexpr auto literal_0b0010 = 0b0010;
 constexpr auto literal_0b0001 = 0b0001;
 constexpr auto literal_0b101 = 0b101;
 constexpr auto literal_0b100 = 0b100;
+constexpr auto literal_0b110 = 0b110;
 constexpr auto literal_0b00100 = 0b00100;
 constexpr auto literal_0b0010101 = 0b0010101;
 constexpr auto literal_0b0010110 = 0b0010110;
@@ -6961,6 +6962,50 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x8008c00009010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x8009700009010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x8009700009010c3full)");
+                break;
+            }
+
+            {
+                constexpr auto l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_RC_ENABLE_CTLE_1ST_LATCH_OFFSET_CAL_ON = 0x1;
+                l_scom_buffer.insert<uint64_t>
+                (l_IOO0_IOO_CPLT_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_RC_ENABLE_CTLE_1ST_LATCH_OFFSET_CAL_ON, 48, 1, 63 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x8009700009010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x8009700009010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x8009880009010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x8009880009010c3full)");
+                break;
+            }
+
+            {
+                l_scom_buffer.insert<uint64_t> (literal_0b110, 48, 3, 61 );
+            }
+
+            l_rc = fapi2::putScom(TGT0, 0x8009880009010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x8009880009010c3full)");
                 break;
             }
         }
