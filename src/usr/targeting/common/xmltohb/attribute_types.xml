@@ -31779,6 +31779,26 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SBE_IMAGE_MINIMUM_VALID_ECS</id>
+    <description>
+        The minimum number of valid ECs that is required to be used when
+        customizing an SBE image. The customization will fail if it cannot
+        create an image with at least this many ECs.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>2</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>REL_POS</id>
     <description>
         Logical position of this unit/dimm relative to its immediate parent
@@ -31866,26 +31886,6 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_CAL_ABORT_ON_ERROR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>SBE_IMAGE_MINIMUM_VALID_ECS</id>
-    <description>
-      The minimum number of valid ECs that is required to be used when
-      customizing an SBE image. The customization will fail if it cannot
-      create an image with at least this many ECs.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>2</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
