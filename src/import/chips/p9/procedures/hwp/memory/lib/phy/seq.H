@@ -109,6 +109,8 @@ class seqTraits<fapi2::TARGET_TYPE_MCA>
             TRC_CYCLES_LEN = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TRC_CYCLES_LEN,
             TMRSC_CYCLES = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TMRSC_CYCLES,
             TMRSC_CYCLES_LEN = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TMRSC_CYCLES_LEN,
+
+            DELAYED_PARITY = MCA_DDRPHY_SEQ_CONFIG0_P0_DELAYED_PAR,
         };
 
 };
@@ -322,7 +324,12 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 {
     // TK ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
-    FAPI_TRY( write_config0(i_target, 0) );
+
+    fapi2::buffer<uint64_t> l_data;
+
+    // DDR4 needs delayed partiy TK for DDR5/DDR3 ...
+    l_data.setBit<TT::DELAYED_PARITY>();
+    FAPI_TRY( write_config0(i_target, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
