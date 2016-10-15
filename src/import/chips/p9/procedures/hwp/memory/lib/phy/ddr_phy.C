@@ -688,6 +688,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::reset_data_bit_enable(p) );
         FAPI_TRY( mss::dp16::reset_bad_bits(p) );
 
+        // New for Nimbus reset the DLL
+        FAPI_TRY( mss::dp16::reset_dll(p) );
+
         FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
@@ -1069,14 +1072,20 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         {
             std::vector< std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > i_read;
 
-            FAPI_TRY(mss::scom_suckah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
-            std::for_each( i_read.begin(), i_read.end(),
-                           [](std::pair< fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& b)
+            FAPI_TRY(mss::scom_suckah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG, i_read));
+
+            size_t l_index = 0;
+
+            for (const auto& r : dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG)
             {
-                dp16::set_dll_cal_reset(b.first);
-                dp16::set_dll_cal_reset(b.second);
-            } );
-            FAPI_TRY(mss::scom_blastah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG, i_read));
+                mss::states l_state = (r.second == MCA_DDRPHY_DP16_DLL_CNTL1_P0_4) ? mss::HIGH : mss::LOW;
+
+                dp16::set_dll_cal_reset(i_read[l_index].first,  mss::LOW);
+                dp16::set_dll_cal_reset(i_read[l_index].second, l_state);
+                l_index += 1;
+            }
+
+            FAPI_TRY(mss::scom_blastah(p, dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG, i_read));
         }
     }
 
