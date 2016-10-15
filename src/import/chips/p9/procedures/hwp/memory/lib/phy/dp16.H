@@ -138,7 +138,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t RD_VREF_DAC_STEP = 6500;
 
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
-        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNFG_REG;
+        static const std::vector< uint64_t > DLL_CNFG_REG;
+        static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_LOWER_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_UPPER_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_SLAVE_LOWER_REG;
@@ -404,7 +405,7 @@ inline fapi2::ReturnCode read_dll_cntl( const fapi2::Target<T>& i_target, fapi2:
     static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
 
     // The pair represents the upper and lower bytes of the DP16 - each has its own DLL registers
-    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
+    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNTRL_REG[I].first : TT::DLL_CNTRL_REG[I].second;
 
     FAPI_TRY( mss::getScom(i_target, l_addr, o_data) );
     FAPI_INF("dll_cntl dp16<%d, %d>: 0x%016lx", I, D, o_data);
@@ -431,7 +432,7 @@ inline fapi2::ReturnCode write_dll_cntl( const fapi2::Target<T>& i_target, const
     static_assert( D < TT::DLL_PER_DP16, "dll instance out of range");
 
     // The pair represents the upper and lower bytes of the DP16 - each has its own DLL registers
-    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNFG_REG[I].first : TT::DLL_CNFG_REG[I].second;
+    const uint64_t& l_addr = (D == 0) ? TT::DLL_CNTRL_REG[I].first : TT::DLL_CNTRL_REG[I].second;
 
     FAPI_INF("dll_cntl dp16<%d,%d>: 0x%016lx", I, D, i_data);
     FAPI_TRY( mss::putScom(i_target, l_addr, i_data) );
