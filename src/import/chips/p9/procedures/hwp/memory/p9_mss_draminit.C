@@ -38,6 +38,7 @@
 
 #include <p9_mss_draminit.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/fir/training_fir.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -60,16 +61,12 @@ extern "C"
 
         mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
 
-#define CENTAUR_LIKE_PN 1
-#ifdef CENTAUR_LIKE_PN
+        // Up, down P down, up N. Somewhat magic numbers - came from Centaur and proven to be the
+        // same on Nimbus. Why these are what they are might be lost to time ...
         constexpr uint64_t PCLK_INITIAL_VALUE = 0b10;
         constexpr uint64_t NCLK_INITIAL_VALUE = 0b01;
-#else
-        constexpr uint64_t PCLK_INITIAL_VALUE = 0b01;
-        constexpr uint64_t NCLK_INITIAL_VALUE = 0b10;
-#endif
 
-        const auto l_mca = i_target.getChildren<TARGET_TYPE_MCA>();
+        const auto l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
         FAPI_INF("Start draminit: %s", mss::c_str(i_target));
 
@@ -149,6 +146,9 @@ extern "C"
 
         // Load MRS
         FAPI_TRY( mss::mrs_load(i_target) );
+
+        // If we're all good, set up things so training's errors are in the right state
+        FAPI_TRY( mss::unmask_training_errors(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit: %s (0x%lx)", mss::c_str(i_target), uint64_t(fapi2::current_err));
