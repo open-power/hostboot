@@ -60,7 +60,20 @@ namespace mss
 // DP16 DLL registers all come in pairs - DLL per 8 bits
 // 5 DLL per MCA gives us 10 DLL Config Registers.
 // All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
-const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG =
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DLL_CNFG_REG =
+{
+    MCA_DDRPHY_DP16_DLL_CONFIG1_P0_0,
+    MCA_DDRPHY_DP16_DLL_CONFIG1_P0_1,
+    MCA_DDRPHY_DP16_DLL_CONFIG1_P0_2,
+    MCA_DDRPHY_DP16_DLL_CONFIG1_P0_3,
+    MCA_DDRPHY_DP16_DLL_CONFIG1_P0_4,
+};
+
+// Definition of the DP16 DLL Control registers
+// DP16 DLL registers all come in pairs - DLL per 8 bits
+// 5 DLL per MCA gives us 10 DLL Control Registers.
+// All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
+const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::DLL_CNTRL_REG =
 {
     { MCA_DDRPHY_DP16_DLL_CNTL0_P0_0, MCA_DDRPHY_DP16_DLL_CNTL1_P0_0 },
     { MCA_DDRPHY_DP16_DLL_CNTL0_P0_1, MCA_DDRPHY_DP16_DLL_CNTL1_P0_1 },
@@ -1086,6 +1099,7 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
     // magic numbers ...
     // TK How about a little broadcast action here? BRS
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x0060) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_LOWER_REG,   0x8000) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_UPPER_REG,   0xffe0) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
@@ -1095,13 +1109,14 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
 
-    // Can't blast the DLL_CNFG_REG as we need to do magic for the 'last' DP16's DP8
+    // Can't blast the DLL_CNTRL_REG as we need to do magic for the 'last' DP16's DP8
     // Doing the conditional is far cheaper than a fix-up scom
-    for (const auto& a : TT::DLL_CNFG_REG)
+    for (const auto& a : TT::DLL_CNTRL_REG)
     {
         constexpr uint64_t l_dll_reset_data = 0x8100;
         constexpr uint64_t l_dll_reset_data_no_cal = 0x0100;
         const uint64_t l_data = (a.second == MCA_DDRPHY_DP16_DLL_CNTL1_P0_4) ? l_dll_reset_data_no_cal : l_dll_reset_data;
+
         FAPI_TRY( mss::putScom(i_target, a.first, l_dll_reset_data) );
         FAPI_TRY( mss::putScom(i_target, a.second, l_data) );
     }

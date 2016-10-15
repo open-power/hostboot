@@ -22,3 +22,33 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file training_fir.H
+/// @brief Subroutines for training FIR
+///
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef _MSS_TRAINING_FIR_H_
+#define _MSS_TRAINING_FIR_H_
+
+#include <fapi2.H>
+
+namespace mss
+{
+
+///
+/// @brief Unmask and setup actions for training related FIR
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode unmask_training_errors( const fapi2::Target<T>& i_target );
+
+}
+#endif

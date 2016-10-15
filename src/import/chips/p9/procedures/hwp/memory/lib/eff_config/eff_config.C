@@ -1299,8 +1299,6 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    constexpr uint8_t DISABLE_PARITY_MASK = 0b11111110;
-
     // Targets
     const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
     const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
@@ -1309,17 +1307,12 @@ fapi2::ReturnCode eff_config::dimm_rc14(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
-    uint8_t l_hacked_rc14;
-
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc14[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc14(l_mcs, &l_attrs_dimm_rc14[0][0]) );
 
-    // Disable parity checking
-    l_hacked_rc14 = iv_pDecoder->iv_raw_card.iv_rc0e & DISABLE_PARITY_MASK;
-
     // Update MCS attribute
-    l_attrs_dimm_rc14[l_port_num][l_dimm_num] = l_hacked_rc14;
+    l_attrs_dimm_rc14[l_port_num][l_dimm_num] = iv_pDecoder->iv_raw_card.iv_rc0e;
 
     FAPI_INF( "%s: RC14 setting: 0x%0x", c_str(i_target), l_attrs_dimm_rc14[l_port_num][l_dimm_num] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC14, l_mcs, l_attrs_dimm_rc14) );

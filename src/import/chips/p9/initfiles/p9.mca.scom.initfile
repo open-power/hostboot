@@ -83,6 +83,9 @@ define MCBIST = TGT1; # If referencing Attr from mcbist, add "MCBIST." in front
 define MCS = TGT2; # If referencing Attr from mcs, add "MCS." in front
 define SYS = TGT3; # If referencing Attr from system, add "SYS." in front
 
+define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
+define def_IS_SIM = SYS.ATTR_IS_SIMULATION == 1;
+
 #--******************************************************************************
 #-- Systems Config
 #--******************************************************************************
@@ -277,30 +280,29 @@ ispy  MCP.PORT0.SRQ.MBA_TMR1Q_CFG_ACT_TO_DIFF_RANK_DLY [when=S] {
 # TODO ANDRE will make ATTR_EFF_RDTAG_DLY a precalculated attribute
 # Can tie this off CL and frequency
 ispy  MCP.PORT0.SRQ.MBA_DSM0Q_CFG_RDTAG_DLY [when=S] {         # ATTR_EFF_DIMM_TYPE:  CDIMM = 0 RDIMM = 1 UDIMM = 2 LRDIMM = 3
-# spyv;
-# 17;  # TEMPORARY since right now we only support 16-16-16 2400
   spyv, expr;
-  14,                                ((def_MEM_TYPE_1866_13_13_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  15,                                ((def_MEM_TYPE_1866_14_14_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  16,                                ((def_MEM_TYPE_2133_15_15_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  17,                                ((def_MEM_TYPE_2133_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  17,                                ((def_MEM_TYPE_2400_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  18,                                ((def_MEM_TYPE_2400_17_17_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  19,                                ((def_MEM_TYPE_2400_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  19,                                ((def_MEM_TYPE_2667_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  20,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
-  21,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1));
+  17,                                def_IS_SIM;
+  19,                                ((def_MEM_TYPE_1866_13_13_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  20,                                ((def_MEM_TYPE_1866_14_14_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  21,                                ((def_MEM_TYPE_2133_15_15_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  22,                                ((def_MEM_TYPE_2133_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  22,                                ((def_MEM_TYPE_2400_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  23,                                ((def_MEM_TYPE_2400_17_17_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  24,                                ((def_MEM_TYPE_2400_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  24,                                ((def_MEM_TYPE_2667_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  25,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
+  26,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==1)) && def_IS_HW;
 
-  16,                                ((def_MEM_TYPE_1866_13_13_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  17,                                ((def_MEM_TYPE_1866_14_14_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  18,                                ((def_MEM_TYPE_2133_15_15_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  19,                                ((def_MEM_TYPE_2133_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  19,                                ((def_MEM_TYPE_2400_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  20,                                ((def_MEM_TYPE_2400_17_17_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  21,                                ((def_MEM_TYPE_2400_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  21,                                ((def_MEM_TYPE_2667_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  22,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
-  23,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3));
+  21,                                ((def_MEM_TYPE_1866_13_13_13==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  22,                                ((def_MEM_TYPE_1866_14_14_14==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  23,                                ((def_MEM_TYPE_2133_15_15_15==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  24,                                ((def_MEM_TYPE_2133_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  24,                                ((def_MEM_TYPE_2400_16_16_16==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  25,                                ((def_MEM_TYPE_2400_17_17_17==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  26,                                ((def_MEM_TYPE_2400_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  26,                                ((def_MEM_TYPE_2667_18_18_18==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  27,                                ((def_MEM_TYPE_2667_19_19_19==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
+  28,                                ((def_MEM_TYPE_2667_20_20_20==1) && (MCS.ATTR_EFF_DIMM_TYPE[def_PORT_INDEX][0]==3)) && def_IS_HW;
 }
 
 # TODO ANDRE will make ATTR_EFF_WRDATA_DLY a precalculated attribute
