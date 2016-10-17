@@ -29,6 +29,7 @@ ROOTPATH = ../../..
 MODULE = pnor
 OBJS += pnor_utils.o
 OBJS += pnorrp.o
+OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += pnordd.o
 OBJS += pnor_common.o
 OBJS += pnorvalid.o

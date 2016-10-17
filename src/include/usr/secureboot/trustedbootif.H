@@ -37,6 +37,8 @@
 #include <i2c/tpmddif.H>
 #include <errl/errlentry.H>
 #include <list>
+#include <pnor/pnorif.H>
+#include <secureboot/containerheader.H>
 
 namespace TRUSTEDBOOT
 {
@@ -159,6 +161,32 @@ namespace TRUSTEDBOOT
      * @retval true if trustboot enabled and functional TPM's are available
      */
     bool enabled();
+
+    /**
+     * @brief Wrapper around pcrExtend for measuring PNOR sections
+     * @param[in] i_conHdr  Reference to ContainerHeader of a section
+     * @param[in] i_vaddr   Pointer to a virtual address for the protected
+     *                      portion of the PNOR section.
+     *                      [Not used if SECUREBOOT::enabled()]
+     * @param[in] i_sec     Section ID of PNOR section
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
+                                     const void* i_vaddr,
+                                     const PNOR::SectionId i_sec);
+
+    /**
+     *
+     *  @brief Extends the Hostboot base image to the TPM
+     *
+     *  @warning No-op if trusted boot compiled out
+     *
+     *  @return errHndl_t Error log pointer
+     *  @retval NULL  Successfully extended Hostboot base image to the TPM
+     *  @retval !NULL Failed to extend Hostboot base image to TPM
+     *                                     */
+    errlHndl_t extendBaseImage();
 
 } // end TRUSTEDBOOT namespace
 

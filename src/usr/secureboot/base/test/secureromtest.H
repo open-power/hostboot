@@ -136,8 +136,7 @@ class SecureROMTest : public CxxTest::TestSuite
         // Warn about the exception being handled during verification
         printkd("test_verify(): expect to see 'mfsr r2 to CFAR handled': ");
 
-        l_errl = l_sRom.verifyContainer( signedFile_pageAddr,
-                                         signedFile_size     );
+        l_errl = l_sRom.verifyContainer( signedFile_pageAddr);
 
         if (l_errl)
         {

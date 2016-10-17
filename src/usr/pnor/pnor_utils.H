@@ -220,6 +220,15 @@ void parseEntries (ffs_hdr* i_ffs_hdr,
                     SectionData_t* io_TOC,
                     ffs_entry*& o_err_entry);
 
+/**
+ * @brief Determines whether the given section is secured by secure boot
+ *
+ * @param[in] i_section PNOR section to test.
+ *
+ * @return bool True if secure section, false otherwise.
+ */
+bool isSecureSection(const uint32_t i_section);
+
 }  // End namespace PNOR
 
 

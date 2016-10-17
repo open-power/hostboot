@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 #include <builtins.h>
+#include <config.h>
 
 namespace PNOR
 {
@@ -67,7 +68,6 @@ enum SectionId
     RINGOVD,        /**< Ring override data */
     NUM_SECTIONS,   /**< Number of defined sections */
 
-
     FIRST_SECTION = TOC,  /**< First section (for looping) */
     /**< Used for error cases, initialization */
     INVALID_SECTION = NUM_SECTIONS,
@@ -79,6 +79,7 @@ enum SectionId
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
+    SectionInfo_t(): id(INVALID_SECTION) {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
     uint64_t vaddr;     /**< Virtual address of the start of the section */
@@ -88,6 +89,11 @@ struct SectionInfo_t
     bool sha512Version; /**< Version Checking */
     bool sha512perEC; /**< Version Checking perEC */
     bool readOnly; /**< Section is read only */
+#ifdef CONFIG_SECUREBOOT
+    size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
+                                            that the secure container only
+                                            needs to be parsed once */
+#endif
 };
 
 /**

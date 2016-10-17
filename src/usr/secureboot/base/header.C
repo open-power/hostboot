@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,13 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "header.H"
+#include <secureboot/header.H>
 #include <sys/mm.h>
 #include <sys/mmio.h>
 #include <kernel/console.H>
 
 namespace SECUREBOOT
 {
+    Header& baseHeader()
+    {
+        return Singleton<Header>::instance();
+    }
+
+    // TODO securebootp9 this implementation native to p9 appears to be doing
+    // approximately the same thing as p8's loadSecurely() method. We need to
+    // confirm and merge together or leave separate and merely remove comment.
     void Header::loadBaseHeader()
     {
         // Calculate original address of the secureboot header.
@@ -53,5 +63,24 @@ namespace SECUREBOOT
         mm_block_unmap(origHeader);
 
         return;
+    }
+
+    // TODO securebootp9 this implementation of the follwoing two methods need
+    // to be added based on p8 code
+    void Header::loadSecurely()
+    {
+    }
+
+    void Header::setNonSecurely(
+        const void* i_pHeader)
+    {
+    }
+
+    void Header::getHeader(
+        const void*& o_pHeader ) const
+    {
+        // Fatal code bug if queried before loaded
+        assert(iv_data!=nullptr);
+        o_pHeader = iv_data;
     }
 }

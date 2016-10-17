@@ -96,6 +96,18 @@ namespace PNOR
 
         // pnor_common.C
         MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
+
+        // spnorrp.C
+        // Note: 0xD0 is available, so should be the next one used for spnorrp.
+        // Remove this comment after doing so.
+        MOD_SPNORRP_DIDSTARTUPFAIL      = 0xD1, /**< didSecureStartupFail(rc) */
+        MOD_SPNORRP_ALLOCATE_BLOCK      = 0xD2, /**< SPnorRP::initDaemon */
+        MOD_SPNORRP_WAITFORMESSAGE      = 0xD3, /**< SPnorRP::waitForMessage */
+        MOD_SPNORRP_VERIFYSECTIONS      = 0xD4, /**< SPnorRP::verifySections */
+        MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
+        MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
+        MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
+        MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
     };
 
     enum PNORReasonCode
@@ -157,6 +169,10 @@ namespace PNOR
         RC_TOC_HDR_CHECKSUM_ERR      = PNOR_COMP_ID | 0x2C,
         RC_PNOR_PARSE_ENTRIES_ERR    = PNOR_COMP_ID | 0x2D,
         RC_PNOR_SET_VADDR_FAILED     = PNOR_COMP_ID | 0x2E,
+        RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2F,
+        RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x30,
+        RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x31,
+
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

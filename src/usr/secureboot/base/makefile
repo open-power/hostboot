@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = secureboot_base
+include ../common/common.mk
 SUBDIRS += test.d
 
 OBJS += service.o
@@ -33,6 +34,10 @@ OBJS += securerom.o
 OBJS += rom_entry.o
 OBJS += trustedboot_base.o
 OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
+OBJS += containerheader.o
+OBJS += ${SECUREBOOT_COMMON_OBJS}
+
+VPATH += ../common
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
 VPATH += ${ROOTPATH}/src/usr/secureboot/trusted/base

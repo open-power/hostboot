@@ -62,23 +62,27 @@ errlHndl_t initializeSecureROM(void)
     return Singleton<SecureROM>::instance().initialize();
 }
 
+
+// TODO securebootp9 - the method signature below was brought in from
+// p8. There are many more changes need to this file however, in order to
+// be considered up-to-date.
 /**
  * @brief Verify Signed Container
  */
-errlHndl_t verifyContainer(void * i_container, size_t i_size)
+errlHndl_t verifyContainer(void * i_container, const sha2_hash_t* i_hwKeyHash)
 {
     TRACUCOMP(g_trac_secure, "verifyContainer(): i_container=%p, size=0x%x",
               i_container, i_size);
 
     return Singleton<SecureROM>::instance().verifyContainer(i_container,
-                                                            i_size);
+                                                            i_hwKeyHash);
 }
 
 /**
  * @brief Hash Signed Blob
  *
  */
-errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
+errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf)
 {
     return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size, io_buf);
 
@@ -297,10 +301,13 @@ errlHndl_t SecureROM::initialize()
 /**
  * @brief Verify Container against system hash keys
  */
-errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
+errlHndl_t SecureROM::verifyContainer(void * i_container,
+// TODO securebootp9 - this is dummy parameter added to aid in p9 port
+// need to replace the method below with up-to-date version
+                                      const sha2_hash_t* i_hwKeyHash)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureROM::verifyContainer(): "
-              "i_container=%p, size=0x%x", i_container, i_size);
+              "i_container=%p", i_container);
 
 
     errlHndl_t  l_errl = NULL;
@@ -410,7 +417,7 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 /**
  * @brief Hash Blob
  */
-errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
+errlHndl_t SecureROM::hashBlob(const void * i_blob, size_t i_size, SHA512_t io_buf) const
 {
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
