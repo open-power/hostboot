@@ -814,9 +814,14 @@ class PnorRpTest : public CxxTest::TestSuite
         // APIs are callable; they should return success always
         // until 156118 implements the real support.  At that time
         // this testcase should be updated.
+#ifdef CONFIG_SECUREBOOT
         errlHndl_t pError=NULL;
-
         do {
+
+        if (!PNOR::isSecureSection(PNOR::SBE_IPL))
+        {
+            break;
+        }
 
         pError = PNOR::loadSecureSection(PNOR::SBE_IPL);
         if(pError != NULL)
@@ -837,6 +842,7 @@ class PnorRpTest : public CxxTest::TestSuite
         }
 
         } while (0);
+#endif
     }
 };
 

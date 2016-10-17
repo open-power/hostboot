@@ -337,8 +337,8 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                                 ((io_TOC[secId].size * 8 ) / 9);
         }
 
-        // TODO RTC:96009 handle version header w/secureboot
-        if (io_TOC[secId].version == FFS_VERS_SHA512)
+        if (io_TOC[secId].version == FFS_VERS_SHA512
+            && !PNOR::isSecureSection(secId))
         {
               //increment flash addr for sha header
             if (io_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
@@ -349,11 +349,31 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
             {
                 io_TOC[secId].flashAddr += PAGESIZE ;
             }
+
+            // now that we've skipped the header
+            // adjust the size to reflect that
             io_TOC[secId].size -= PAGESIZE;
         }
 
     } // For TOC Entries
 }
 
-
+bool PNOR::isSecureSection(const uint32_t i_section)
+{
+// TODO securebootp9 uncomment these sections as they become ready for
+// inclusion in p9. Remove this comment after the last one.
+#ifdef CONFIG_SECUREBOOT
+//    return i_section == HB_EXT_CODE ||
+//           i_section == HB_DATA ||
+//           i_section == SBE_IPL ||
+//           i_section == CENTAUR_SBE ||
+//           i_section == PAYLOAD ||
+//           i_section == SBKT ||
+//           i_section == OCC ||
+//           i_section == HB_RUNTIME;
+    return false;
+#else
+    return false;
+#endif
+}
 

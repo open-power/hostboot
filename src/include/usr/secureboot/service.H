@@ -33,8 +33,22 @@ typedef uint8_t SHA512_t[64];
 typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
                 SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
 
+// TODO securebootp9 added for spnorrp.C - service.H needs many more updates
+// in order to match the p8 version
+const size_t HASH_PAGE_TABLE_ENTRY_SIZE = 32;
+typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
+
+
 namespace SECUREBOOT
 {
+    // TODO securebootp9 - the two constants below were taken from master-p8
+    // branch (version 2257b1) of service.H underneath secureboot.
+    // The p9 version of service.H needs many more updates in order to match
+    // the p8 version.
+    const uint64_t PROC_SECURITY_SWITCH_REGISTER = 0x00010005ull;
+    const uint64_t
+          PROC_SECURITY_SWITCH_TRUSTED_BOOT_MASK = 0x8000000000000000ull;
+
     /** @brief Perform initialization of Secureboot for the Base image.
      *
      *  - Copy secure header from original location.
@@ -60,11 +74,13 @@ namespace SECUREBOOT
      * @brief Verify Signed Container
      *
      * @param[in] i_container  Void pointer to effective address of container
-     * @param[in] i_size       Size of container in bytes
+     * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
+     *                         [default = nullptr, use current hw hash key]
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t verifyContainer(void * i_container, size_t i_size);
+    errlHndl_t verifyContainer(void * i_container,
+                               const sha2_hash_t* i_hwKeyHash = nullptr);
 
     /**
      * @brief Hash Signed Blob
@@ -75,7 +91,7 @@ namespace SECUREBOOT
      *
      * @return errlHndl_t  NULL on success
      */
-    errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t o_buf);
+    errlHndl_t hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
 
     /**
      * @brief Retrieve the internal hardware hash key from secure ROM
@@ -84,6 +100,15 @@ namespace SECUREBOOT
      *                     hash to.
      */
     void getHwHashKeys(sha2_hash_t o_hash);
+
+    /**
+     * @brief Common secureboot handler for secureboot failures.
+     *        Properly handles callouts etc.
+     *
+     * @return i_err   - Error log to cascade through failure path.
+     */
+    void handleSecurebootFailure(errlHndl_t &i_err);
+
 }
 
 #endif

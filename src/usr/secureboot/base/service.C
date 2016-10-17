@@ -28,50 +28,98 @@
 #include <util/singleton.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <config.h>
-
+#include <devicefw/userif.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/targetservice.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
+#include <initservice/initserviceif.H>
 #include "settings.H"
-#include "header.H"
+#include <secureboot/header.H>
 #include "purge.H"
 #include <kernel/misc.H>
+#include <kernel/console.H>
+#include <console/consoleif.H>
+
+extern trace_desc_t* g_trac_secure;
+
+// Quick change for unit testing
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
+
+
+using namespace ERRORLOG;
+using namespace TARGETING;
 
 namespace SECUREBOOT
 {
-    void* initializeBase(void* unused)
-    {
-        errlHndl_t l_errl = NULL;
 
-        do
+// TODO securebootp9 - Do a diff of this file with the p8 version make sure
+// all the missing parts are brought in.
+
+void* initializeBase(void* unused)
+{
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+
+        // Load original secureboot header.
+        if (enabled())
         {
+            Singleton<Header>::instance().loadBaseHeader();
+        }
 
-            // Load original secureboot header.
-            if (enabled())
-            {
-                Singleton<Header>::instance().loadBaseHeader();
-            }
+        // Extend memory footprint into lower portion of cache.
+        assert(0 == mm_extend(MM_EXTEND_PARTIAL_CACHE));
 
-            // Extend memory footprint into lower portion of cache.
-            assert(0 == mm_extend(MM_EXTEND_PARTIAL_CACHE));
-
-            // Don't extend more than 1/2 cache in VPO as fake PNOR is there
-            // Don't enable SecureROM in VPO
+        // Don't extend more than 1/2 cache in VPO as fake PNOR is there
+        // Don't enable SecureROM in VPO
 #ifndef CONFIG_P9_VPO_COMPILE
-            // Run dcbz on the entire 10MB cache
-            assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
+        // Run dcbz on the entire 10MB cache
+        assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
 
-            // Initialize the Secure ROM
-            l_errl = initializeSecureROM();
-            if (l_errl)
-            {
-                break;
-            }
+        // Initialize the Secure ROM
+        l_errl = initializeSecureROM();
+        if (l_errl)
+        {
+            break;
+        }
 #endif
-        } while(0);
+    } while(0);
 
-        return l_errl;
-    }
+    return l_errl;
+}
 
-    bool enabled()
-    {
-        return Singleton<Settings>::instance().getEnabled();
-    }
+bool enabled()
+{
+    return Singleton<Settings>::instance().getEnabled();
+}
+
+void handleSecurebootFailure(errlHndl_t &i_err)
+{
+    TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
+
+    assert(i_err != NULL, "Secureboot Failure has a NULL error log")
+
+    // Grab errlog reason code before committing.
+    uint16_t l_rc = i_err->reasonCode();
+
+#ifdef CONFIG_CONSOLE
+    CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+                      i_err->plid(), l_rc);
+#endif
+    printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+           i_err->plid(),l_rc);
+
+    // Add Verification callout
+    i_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
+                               HWAS::SRCI_PRIORITY_HIGH);
+    errlCommit(i_err, SECURE_COMP_ID);
+
+    // Shutdown with Secureboot error status
+    INITSERVICE::doShutdown(l_rc);
+}
+
 }

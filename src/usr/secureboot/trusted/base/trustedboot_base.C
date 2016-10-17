@@ -255,4 +255,27 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     return err;
 }
 
+errlHndl_t extendPnorSectionHash(const SECUREBOOT::ContainerHeader& i_conHdr,
+                                 const void* i_vaddr,
+                                 const PNOR::SectionId i_sec)
+{
+    errlHndl_t l_errhdl = NULL;
+
+    // TODO securebootp9
+    // remove the following code and implement based on p8 code
+    TRACFCOMP(g_trac_trustedboot, "ExtendPnorSectionHash called for section %d and "
+              " address %.16llX with payload text size %i"
+              "but not unimplemented in p9", i_sec, i_vaddr);
+
+    return l_errhdl;
+}
+
+errlHndl_t extendBaseImage()
+{
+    errlHndl_t pError = NULL;
+    // TODO securebootp9
+    // implement extendBaseImage based on p8 code
+    return pError;
+}
+
 } // end TRUSTEDBOOT

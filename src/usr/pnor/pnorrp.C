@@ -24,6 +24,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include "pnorrp.H"
+#include "spnorrp.H"
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
 #include <sys/msg.h>
@@ -44,9 +45,18 @@
 #include <endian.h>
 #include <util/align.H>
 #include <config.h>
+#include <pnor/pnorif.H>
 #include "pnor_common.H"
 #include <hwas/common/hwasCallout.H>
 #include <console/consoleif.H>
+
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <secureboot/containerheader.H>
+//#include <secureboot/settings.H>      TODO securebootp9 include settings.H
+#include <secureboot/header.H>
+#include <secureboot/trustedbootif.H>
+#endif
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -87,29 +97,6 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
                                  PNOR::SectionInfo_t& o_info )
 {
     return Singleton<PnorRP>::instance().getSectionInfo(i_section,o_info);
-}
-
-/**
- *  @brief Loads requested PNOR section to secure virtual address space
- */
-errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
-{
-    //@TODO RTC 156118
-    // Replace with call to secure provider to load the section
-    errlHndl_t pError=NULL;
-    return pError;
-}
-
-/**
- *  @brief Flushes any applicable pending writes and unloads requested PNOR
- *      section from secure virtual address space
- */
-errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
-{
-    //@TODO RTC 156118
-    // Replace with call to secure provider to load the section
-    errlHndl_t pError=NULL;
-    return pError;
 }
 
 /**
@@ -175,16 +162,21 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::init> " );
     uint64_t rc = 0;
+    uint64_t rcs = 0; // spnorrp return code
     errlHndl_t  l_errl  =   NULL;
 
-    if( Singleton<PnorRP>::instance().didStartupFail(rc) )
+    if( Singleton<PnorRP>::instance().didStartupFail(rc)
+#ifdef CONFIG_SECUREBOOT
+        || Singleton<SPnorRP>::instance().didStartupFail(rcs)
+#endif
+      )
     {
         /*@
          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
          *  @moduleid       PNOR::MOD_PNORRP_DIDSTARTUPFAIL
          *  @reasoncode     PNOR::RC_BAD_STARTUP_RC
-         *  @userdata1      return code
-         *  @userdata2      0
+         *  @userdata1      return code pnorrp
+         *  @userdata2      return code spnorrp
          *
          *  @devdesc        PNOR startup task returned an error.
          * @custdesc    A problem occurred while accessing the boot flash.
@@ -194,10 +186,21 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
                                 PNOR::MOD_PNORRP_DIDSTARTUPFAIL,
                                 PNOR::RC_BAD_STARTUP_RC,
                                 rc,
-                                0,
+                                rcs,
                                 true /*Add HB SW Callout*/ );
 
         l_errl->collectTrace(PNOR_COMP_NAME);
+    }
+    else
+    {
+        // Extend base image (HBB) when Hostboot first starts.  Since HBB is
+        // never re-loaded, inhibit extending this image in runtime code.
+        #ifndef __HOSTBOOT_RUNTIME
+        #ifdef CONFIG_SECUREBOOT
+        // Extend the base image to the TPM, regardless of how it was obtained
+        l_errl = TRUSTEDBOOT::extendBaseImage();
+        #endif
+        #endif
     }
 
     io_rtaskRetErrl=l_errl;
@@ -326,6 +329,53 @@ void PnorRP::initDaemon()
             break;
         }
 
+        #ifndef __HOSTBOOT_RUNTIME
+        #ifdef CONFIG_SECUREBOOT
+        if(!SECUREBOOT::enabled())
+        {
+
+            // If in secure mode, we already have securely obtained the header
+            // because we copied it before the blind purge.  In non-secure mode,
+            // cache the header from PNOR (susceptible to attacks).  This is ok
+            // because there are already no security guarantees in non-secure
+            // mode.  We need to get the HBB address separately because the
+            // OC ignores the header
+            PNOR::SideInfo_t pnorInfo = {PNOR::WORKING};
+            l_errhdl = PnorRP::getSideInfo(PNOR::WORKING, pnorInfo);
+            if(l_errhdl != NULL)
+            {
+                break;
+            }
+
+            const SectionData_t* pHbb = &iv_TOC[PNOR::HB_BASE_CODE];
+            bool ecc = (pHbb->integrity == FFS_INTEG_ECC_PROTECT) ? true :false;
+
+            // We have to read two pages because the secure header is a page by
+            // itself, but it is prefixed by the SBE header
+            uint8_t pHeader[PAGESIZE] = {0};
+            uint64_t fatalError = 0;
+            l_errhdl = readFromDevice(
+                    pnorInfo.hbbAddress,
+                    pHbb->chip,
+                    ecc,
+                    pHeader,
+                    fatalError);
+
+            // If fatalError != 0 there is an uncorrectable ECC error (UE).
+            // In that case, continue on with inaccurate data, as
+            // readFromDevice API will initiate a shutdown
+            if(l_errhdl != NULL)
+            {
+                break;
+            }
+
+            // Skip the SBE header on the HBB image to get the real header
+            (void)SECUREBOOT::baseHeader().setNonSecurely(
+                pHeader);
+        }
+        #endif
+        #endif
+
         // start task to wait on the queue
         task_create( wait_for_message, NULL );
     } while(0);
@@ -418,25 +468,49 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             break;
         }
 
+        // inhibit any attempt to getSectionInfo on any attribute override
+        // sections if secureboot is enabled
+        bool l_inhibited = isInhibitedSection(id);
+
         // Zero-length means the section is invalid
-        if( 0 == iv_TOC[id].size )
+        if( 0 == iv_TOC[id].size
+            // attribute overrides inhibited by secure boot
+            || l_inhibited
+        )
         {
             TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d", i_section );
-            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }", iv_TOC[i_section].id, iv_TOC[i_section].size );
+            #ifdef CONFIG_SECUREBOOT
+            if (l_inhibited)
+            {
+                TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> "
+                "attribute override inhibited by secureboot");
+            }
+            #endif
+            uint64_t size = iv_TOC[i_section].size;
+            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }",
+                             iv_TOC[i_section].id, size );
             /*@
              * @errortype
-             * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
-             * @reasoncode   PNOR::RC_INVALID_SECTION
-             * @userdata1    Requested Section
-             * @userdata2    TOC used
-             * @devdesc      PnorRP::getSectionInfo> Invalid Address for read/write
-             * @custdesc     A problem occurred while accessing the boot flash.
-            */
+             * @moduleid         PNOR::MOD_PNORRP_GETSECTIONINFO
+             * @reasoncode       PNOR::RC_INVALID_SECTION
+             * @userdata1        Size of section
+             * @userdata2[0:7]   TOC used
+             * @userdata2[8:15]  Inhibited flag
+             * @userdata2[16:23] Requested Section
+             * @devdesc          PnorRP::getSectionInfo> Invalid Address for
+             *                   read/write or prohibited by secureboot
+             * @custdesc         A problem occurred while accessing the boot
+             *                   flash.
+             */
             l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                PNOR::MOD_PNORRP_GETSECTIONINFO,
                                                PNOR::RC_INVALID_SECTION,
-                                               TO_UINT64(i_section),
-                                               iv_TOC_used,
+                                               size,
+                                               TO_UINT64(FOUR_UINT8_TO_UINT32(
+                                                   iv_TOC_used,
+                                                   l_inhibited,
+                                                   i_section,
+                                                   0)),
                                                true /*Add HB SW Callout*/);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
 
@@ -444,27 +518,108 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             id = PNOR::INVALID_SECTION;
             break;
         }
+
+
+        if (PNOR::INVALID_SECTION != id)
+        {
+            TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
+
+            // copy my data into the external format
+            o_info.id = iv_TOC[id].id;
+            o_info.name = cv_EYECATCHER[id];
+
+#ifdef CONFIG_SECUREBOOT
+            o_info.secureProtectedPayloadSize = 0; // for non secure sections
+                                                   // the protected payload size
+                                                   // defaults to zero
+            // handle secure sections in SPnorRP's address space
+            if (PNOR::isSecureSection(o_info.id))
+            {
+                uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
+                // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
+                // address into a secure pnor address, since pnor, temp, and spnor
+                // spaces are equidistant.
+                // See comments in SPnorRP::verifySections() method in spnorrp.C
+                // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
+                // for specifics.
+                o_info.vaddr = reinterpret_cast<uint64_t>(l_vaddr)
+                                                           + VMM_VADDR_SPNOR_DELTA
+                                                           + VMM_VADDR_SPNOR_DELTA;
+
+                // Get size of the secured payload for the secure section
+                // Note: the payloadSize we get back is untrusted because
+                // we are parsing the header in pnor (non secure space).
+                size_t payloadTextSize = 0;
+                // Do an existence check on the container to see if it's non-empty
+                // and has valid beginning bytes. For optional Secure PNOR sections.
+
+                if (PNOR::cmpSecurebootMagicNumber(l_vaddr))
+                {
+                    SECUREBOOT::ContainerHeader l_conHdr(l_vaddr);
+                    payloadTextSize = l_conHdr.payloadTextSize();
+                    assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+                }
+                else
+                {
+                    uint32_t l_badMagicHeader = 0;
+                    memcpy(&l_badMagicHeader, l_vaddr, sizeof(MAGIC_NUMBER));
+                    TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: magic number not valid to parse container for section = %s magic number = 0x%X",
+                               o_info.name, l_badMagicHeader);
+                /*@
+                 * @errortype
+                 * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
+                 * @reasoncode   PNOR::RC_BAD_SECURE_MAGIC_NUM
+                 * @userdata1    Requested Section
+                 * @userdata2    Bad magic number
+                 * @devdesc      PNOR section does not have the known secureboot magic number
+                 * @custdesc     Corrupted flash image or firmware error during system boot
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                       PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                                       PNOR::RC_BAD_SECURE_MAGIC_NUM,
+                                                       TO_UINT64(i_section),
+                                                       TO_UINT64(l_badMagicHeader),
+                                                       true /*Add HB SW Callout*/);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    break;
+                }
+                // skip secure header for secure sections at this point in time
+                o_info.vaddr += PAGESIZE;
+                // now that we've skipped the header we also need to adjust the
+                // size of the section to reflect that.
+                // Note: For unsecured sections, the header skip and size decrement
+                // was done previously in pnor_common.C
+                o_info.size -= PAGESIZE;
+
+                // cache the value in SectionInfo struct so that we can
+                // parse the container header less often
+                o_info.secureProtectedPayloadSize = payloadTextSize;
+            }
+            else
+#endif
+            {
+                o_info.vaddr = iv_TOC[id].virtAddr;
+            }
+
+            o_info.flashAddr = iv_TOC[id].flashAddr;
+            o_info.size = iv_TOC[id].size;
+            o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
+                                    != 0) ? true : false;
+            o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)
+                                     != 0) ? true : false;
+            o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
+                                   != 0) ? true : false;
+            o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
+                                   != 0) ? true : false;
+// TODO securebootp9 the following field does not exist in p9. If the field is
+// to be added to p9 we need to enable this line at that time, or remove and
+// replace with appropriate code.
+//            o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
+//                                   != 0) ? true : false;
+        }
+
     } while(0);
-
-    if (PNOR::INVALID_SECTION != id)
-    {
-        TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
-
-        // copy my data into the external format
-        o_info.id = iv_TOC[id].id;
-        o_info.name = cv_EYECATCHER[id];
-        o_info.vaddr = iv_TOC[id].virtAddr;
-        o_info.flashAddr = iv_TOC[id].flashAddr;
-        o_info.size = iv_TOC[id].size;
-        o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
-                                != 0) ? true : false;
-        o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)
-                                 != 0) ? true : false;
-        o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
-                               != 0) ? true : false;
-        o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
-                               != 0) ? true : false;
-    }
 
     return l_errhdl;
 }
