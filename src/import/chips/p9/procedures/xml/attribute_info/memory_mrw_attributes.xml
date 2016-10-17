@@ -245,7 +245,10 @@
   <attribute>
     <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Capable power control settings. In MRW.</description>
+    <description>
+        Memory power control settings programmed during IPL 
+        Used by OCC when exiting idle powersave mode
+    </description>
     <valueType>uint8</valueType>
     <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
     <platInit/>
@@ -253,6 +256,22 @@
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
     <mssAccessorName>mrw_power_control_requested</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Memory power control settings for IDLE powersave mode
+        Used by OCC when entering idle powersave mode
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, POWER_DOWN = 0x01, STR = 0x02, PD_AND_STR = 0x03</enum>
+    <platInit/>
+    <default>OFF</default>
+    <initToZero/>
+    <!-- little comment to tell us this might change during power/thermal implemetation -->
+    <mssAccessorName>mrw_idle_power_control_requested</mssAccessorName>
   </attribute>
 
   <attribute>

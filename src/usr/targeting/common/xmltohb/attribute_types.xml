@@ -16320,8 +16320,8 @@ Measured in GB</description>
 <attribute>
     <id>MSS_MRW_POWER_CONTROL_REQUESTED</id>
     <description>
-        Type of memory power control requested
-
+        Memory power control settings programmed during IPL
+        Used by OCC when exiting idle powersave mode
         Producer: MRW
 
         0x00 = OFF
@@ -16339,6 +16339,57 @@ Measured in GB</description>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_MRW_POWER_CONTROL_REQUESTED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+    <description>
+        Enumeration defining the type of power control requested
+    </description>
+    <enumerator>
+        <name>OFF</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_DOWN</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>STR</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>PD_AND_STR</name>
+        <value>3</value>
+    </enumerator>
+    <default>NONE</default>
+</enumerationType>
+
+
+<attribute>
+    <id>MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+    <description>
+        Memory power control settings for IDLE powersave mode
+        Used by OCC when entering idle powersave mode
+        Producer: MRW
+
+        0x00 = OFF
+        0x01 = POWER_DOWN
+        0x02 = STR
+        0x03 = PD_AND_STR
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
+            <default>OFF</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
