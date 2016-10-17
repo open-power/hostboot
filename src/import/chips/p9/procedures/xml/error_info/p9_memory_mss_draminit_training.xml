@@ -59,26 +59,6 @@
   <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_2</scomRegister>
   <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_3</scomRegister>
   <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_4</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_0</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_1</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_2</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_3</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_4</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_0</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_1</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_2</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_3</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_4</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_0</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_1</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_2</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_3</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_4</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_0</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_1</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_2</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_3</scomRegister>
-  <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_4</scomRegister>
 </registerFfdc>
 
 <registerFfdc>
@@ -438,6 +418,29 @@
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DISABLED_BITS</rc>
+  <description>
+    The PHY has disabled too many bits to continue
+  </description>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <deconfigure>
+    <target>TARGET_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_IN_ERROR</target>
+  </gard>
 </hwpError>
 
 </hwpErrors>
