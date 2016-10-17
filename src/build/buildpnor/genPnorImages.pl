@@ -122,43 +122,50 @@ if ($help)
     exit 0;
 }
 
-# Hardcoded defined order that binfiles should be handled.
-my %partitionDeps = ( HBB => 0,
-                      HBI => 1);
+################################################################################
+# Environment Setup, Checking, and Variable Initialization
+################################################################################
 
-# Custom sort to ensure images are handled in the correct dependency order.
-# If a dependency is not specified in the hash used, use default behavior.
-sub partitionDepSort
+if ($secureboot)
 {
-    # If $a exists but $b does not, set $a < $b
-    if (exists $partitionDeps{$a} && !exists $partitionDeps{$b})
+    # Ensure all values of partitionsToCorrupt hash are valid.
+    # Allow some flexibiliy for the user and do a regex, case insensitive check
+    # to properly clean up the corrupt partition hash.
+    foreach my $key (keys %partitionsToCorrupt)
     {
-        -1
+        my $value = $partitionsToCorrupt{$key};
+        # ${\(CONST)} is the syntax to allow mixing other regex options like '^'
+        # and '/i' with a perl constant
+        if ($value eq "" || $value =~ m/^${\(CORRUPT_PROTECTED)}/i)
+        {
+            $partitionsToCorrupt{uc($key)} = CORRUPT_PROTECTED
+        }
+        elsif ($value =~ m/^${\(CORRUPT_UNPROTECTED)}/i)
+        {
+            $partitionsToCorrupt{uc($key)} = CORRUPT_UNPROTECTED;
+        }
+        else
+        {
+            die "Error> Unsupported option for --corrupt, value \"$key=$value\"";
+        }
     }
-    # If $a does not exists but $b does, set $a > $b
-    elsif (!exists $partitionDeps{$a} && exists $partitionDeps{$b})
-    {
-        1
-    }
-    # If both $a and $b exist, actually compare values.
-    elsif (exists $partitionDeps{$a} && exists $partitionDeps{$b})
-    {
-        if ($partitionDeps{$a} < $partitionDeps{$b}) {-1}
-        elsif ($partitionDeps{$a} > $partitionDeps{$b}) {1}
-        else {0}
-    }
-    # If neither $a or $b have a dependency, order doesn't matter
-    else {0}
 }
-
-################################################################################
-# main
-################################################################################
 
 # @TODO RTC: 155374 add official signing support including up to 3 sw keys
 # Signing and Dev key directory location set via env vars
 my $SIGNING_DIR = $ENV{'SIGNING_DIR'};
 my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
+
+if ($secureboot)
+{
+    # Check all components needed for developer signing
+    die "Signing Dir = $SIGNING_DIR DNE" if(! -d $SIGNING_DIR);
+    die "Dev Key Dir = $DEV_KEY_DIR DNE" if(! -d $DEV_KEY_DIR);
+    die "hw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_a*"));
+    die "hw_key_b DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_b*"));
+    die "hw_key_c DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_c*"));
+    die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
+}
 
 my $openSigningTool = 0;
 my $SIGNING_TOOL_EDITION = $ENV{'SIGNING_TOOL_EDITION'};
@@ -167,8 +174,7 @@ if($SIGNING_TOOL_EDITION eq COMMUNITY)
     $openSigningTool = 1;
 }
 
-
-# Secureboot command strings
+### Local development signing
 # Requires naming convention of hw/sw keys in DEV_KEY_DIR
 my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
 
@@ -184,6 +190,24 @@ if ( $testRun )
 {
     # Note: simply reordered the keys to create a pseudo production key.
     $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
+            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
+            . "-skp ${DEV_KEY_DIR}/sw_key_a";
+}
+
+### Open POWER signing
+my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
+    . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
+    . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
+    . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
+    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key ";
+
+# Key prefix used for secureboot key transition partition.
+# Default key transition to same keys.
+my $OPEN_SIGN_KEY_TRANS_REQUEST =  $OPEN_SIGN_REQUEST;
+if ( $testRun )
+{
+    # Note: simply reordered the keys to create a pseudo production key.
+    $OPEN_SIGN_KEY_TRANS_REQUEST =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
             . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
             . "-skp ${DEV_KEY_DIR}/sw_key_a";
 }
@@ -211,85 +235,50 @@ my %sb_hdrs = (
     }
 );
 
-my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl -v "
-    . "-hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
-    . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
-    . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
-    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key ";
+################################################################################
+# main
+################################################################################
 
-# Key prefix used for secureboot key transition partition.
-# Default key transition to same keys.
-my $OPEN_SIGN_KEY_TRANS_REQUEST =  $OPEN_SIGN_REQUEST;
-if ( $testRun )
+# Print all settings in one print statement to avoid parallel build to mess
+# up output.
+my $SETTINGS = "\n//========== Generate PNOR Image Settings ==========/\n";
+$SETTINGS .= $build_all ? "Build Phase = build_all\n" : "";
+$SETTINGS .= $install_all ? "Build Phase = install_all\n" : "";
+$SETTINGS .= $testRun ? "Test Mode = Yes\n" : "Test Mode = No\n";
+$SETTINGS .= $secureboot ? "Secureboot = Enabled\n" : "Secureboot = Disabled\n";
+$SETTINGS .= %partitionsToCorrupt && $secureboot ? "Corrupt Partitions: ".Dumper \%partitionsToCorrupt : "";
+$SETTINGS .= "//====================================================//\n\n";
+print $SETTINGS;
+
+if($secureboot && !$openSigningTool)
 {
-    # Note: simply reordered the keys to create a pseudo production key.
-    $OPEN_SIGN_KEY_TRANS_REQUEST =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
-            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
-            . "-skp ${DEV_KEY_DIR}/sw_key_a";
-}
-
-if ($secureboot)
-{
-    # Check all components needed for developer signing
-    die "Signing Dir = $SIGNING_DIR DNE" if(! -d $SIGNING_DIR);
-    die "Dev Key Dir = $DEV_KEY_DIR DNE" if(! -d $DEV_KEY_DIR);
-    die "hw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_a*"));
-    die "hw_key_b DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_b*"));
-    die "hw_key_c DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_c*"));
-    die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
-
-    # Ensure all values of partitionsToCorrupt hash are valid.
-    # Allow some flexibiliy for the user and do a regex, case insensitive check
-    # to properly clean up the corrupt partition hash.
-    foreach my $key (keys %partitionsToCorrupt)
+    # Generate each secureboot header file
+    foreach my $header (keys %sb_hdrs)
     {
-        my $value = $partitionsToCorrupt{$key};
-        # ${\(CONST)} is the syntax to allow mixing other regex options like '^'
-        # and '/i' with a perl constant
-        if ($value eq "" || $value =~ m/^${\(CORRUPT_PROTECTED)}/i)
+        next if($header eq "SBKT" && !$key_transition);
+
+        # SBKT parition has 2 sections outer and inner, need to create both
+        if ($header eq "SBKT")
         {
-            $partitionsToCorrupt{uc($key)} = CORRUPT_PROTECTED
-        }
-        elsif ($value =~ m/^${\(CORRUPT_UNPROTECTED)}/i)
-        {
-            $partitionsToCorrupt{uc($key)} = CORRUPT_UNPROTECTED;
+            foreach my $section (keys %{$sb_hdrs{$header}})
+            {
+                run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{$section}{file}".
+                            LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{$section}{flags}".
+                            " $sb_hdrs{$header}{$section}{prefix}");
+            }
         }
         else
         {
-            die "Error> Unsupported option for --corrupt, value \"$key=$value\"";
+            run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
+                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
+                        " $sb_hdrs{$header}{prefix}");
         }
     }
 
-    if(!$openSigningTool)
+    # Generate test containers once and limit to build phase
+    if ($build_all)
     {
-        # Generate each secureboot header file
-        foreach my $header (keys %sb_hdrs)
-        {
-            next if($header eq "SBKT" && !$key_transition);
-
-            # SBKT parition has 2 sections outer and inner, need to create both
-            if ($header eq "SBKT")
-            {
-                foreach my $section (keys %{$sb_hdrs{$header}})
-                {
-                    run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{$section}{file}".
-                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{$section}{flags}".
-                        " $sb_hdrs{$header}{$section}{prefix}");
-                }
-            }
-            else
-            {
-                run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
-                            LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
-                            " $sb_hdrs{$header}{prefix}");
-            }
-        }
-
-        # Generate test containers once and limit to build phase
-        if ($build_all)
-        {
-            gen_test_containers();
-        }
+        gen_test_containers();
     }
 }
 
@@ -337,6 +326,42 @@ foreach my $header (keys %sb_hdrs)
         system("rm -f $sb_hdrs{$header}{file}");
         die "Could not delete $sb_hdrs{$header}{file}" if $?;
     }
+}
+
+################################################################################
+# Subroutines
+################################################################################
+
+################################################################################
+# partitionDepSort
+# Custom sort to ensure images are handled in the correct dependency order.
+# If a dependency is not specified in the hash used, use default behavior.
+################################################################################
+# Hardcoded defined order that binfiles should be handled.
+my %partitionDeps = ( HBB => 0,
+                      HBI => 1);
+
+sub partitionDepSort
+{
+    # If $a exists but $b does not, set $a < $b
+    if (exists $partitionDeps{$a} && !exists $partitionDeps{$b})
+    {
+        -1
+    }
+    # If $a does not exists but $b does, set $a > $b
+    elsif (!exists $partitionDeps{$a} && exists $partitionDeps{$b})
+    {
+        1
+    }
+    # If both $a and $b exist, actually compare values.
+    elsif (exists $partitionDeps{$a} && exists $partitionDeps{$b})
+    {
+        if ($partitionDeps{$a} < $partitionDeps{$b}) {-1}
+        elsif ($partitionDeps{$a} > $partitionDeps{$b}) {1}
+        else {0}
+    }
+    # If neither $a or $b have a dependency, order doesn't matter
+    else {0}
 }
 
 ################################################################################
