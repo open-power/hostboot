@@ -883,6 +883,7 @@
     <attribute><id>SUPPORTED_STOP_STATES</id></attribute>
     <attribute><id>SYSTEM_FAMILY</id></attribute>
     <attribute><id>SYSTEM_TYPE</id></attribute>
+    <attribute><id>MSS_CAL_ABORT_ON_ERROR</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

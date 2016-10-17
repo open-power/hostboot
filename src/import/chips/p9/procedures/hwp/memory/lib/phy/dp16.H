@@ -1685,6 +1685,17 @@ fapi2::ReturnCode reset_wr_vref_registers( const fapi2::Target<T>& i_target );
 template< fapi2::TargetType T, typename TT = dp16Traits<T> >
 fapi2::ReturnCode reset_read_delay_offset_registers( const fapi2::Target<T>& i_target );
 
+///
+/// @brief Process disable bits and setup controller as necessary
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dimm the fapi2 target of the failed DIMM
+/// @param[in] i_rp the rank pairs to check as a bit-map
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode process_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                    const uint64_t l_rp );
+
 } // close namespace dp16
 } // close namespace mss
 
