@@ -48,10 +48,12 @@ extern "C"
     /// @brief Train dram
     /// @param[in] i_target, the McBIST of the ports of the dram you're training
     /// @param[in] i_special_training, optional CAL_STEP_ENABLE override. Used in sim, debug
+    /// @param[in] i_abort_on_error, optional CAL_ABORT_ON_ERROR override. Used in sim, debug
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-            const uint16_t i_special_training )
+            const uint16_t i_special_training,
+            const uint8_t i_abort_on_error)
     {
         fapi2::buffer<uint16_t> l_cal_steps_enabled = i_special_training;
 
@@ -159,6 +161,12 @@ extern "C"
             for (const auto& rp : l_pairs)
             {
                 auto l_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(rp);
+                uint8_t cal_abort_on_error = i_abort_on_error;
+
+                if (i_abort_on_error == CAL_ABORT_SENTINAL)
+                {
+                    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
+                }
 
                 FAPI_DBG("exeecuting training CCS instruction: 0x%llx, 0x%llx", l_inst.arr0, l_inst.arr1);
                 l_program.iv_instructions.push_back(l_inst);
@@ -176,7 +184,18 @@ extern "C"
                 // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
                 // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
                 FAPI_TRY( mss::ccs::execute(i_target, l_program, p) );
-                FAPI_TRY( mss::process_initial_cal_errors(p) );
+
+                // If we're aborting on error we can just FAPI_TRY. If we're not, we don't want to exit if there's
+                // an error but we want to log the error and keep on keeping on.
+                if ((fapi2::current_err = mss::process_initial_cal_errors(p)) != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::logError(fapi2::current_err);
+
+                    if (cal_abort_on_error)
+                    {
+                        goto fapi_try_exit;
+                    }
+                }
             }
         }
 
