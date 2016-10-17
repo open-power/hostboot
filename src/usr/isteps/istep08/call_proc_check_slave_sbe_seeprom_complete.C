@@ -217,11 +217,15 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         else if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : proc_check_slave_sbe_seeprom_complete",
-                      "completed ok for proc 0x%.8X",
+                      "SUCCESS : proc_check_slave_sbe_seeprom_complete"
+                      " completed ok for proc 0x%.8X",
                       TARGETING::get_huid(l_cpu_target));
         }
 
+/* @TODO-RTC:100963 This should only be called when the SBE has completely
+              crashed. There is a path in OpenPower where HB may get an
+              attention and need to call it. For now, though, just associate
+              with this story for tracking.
 
         // Not a way to pass in -soft_err, assuming that is default behavior
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -238,7 +242,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : proc_check_slave_sbe_seeprom_complete",
+                "ERROR : proc_check_slave_sbe_seeprom_complete "
                 "failed, p9_extract_sbe_rc HWP returning errorlog PLID=0x%x",
                 l_errl->plid());
 
@@ -251,6 +255,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
         }
+**/
     }   // end of going through all processors
 
 
@@ -296,7 +301,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         else // Not functional, proc deconfigured, don't report error
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : p9_getecid",
+                    "ERROR : p9_getecid"
                     " failed, proc target deconfigured" );
             delete l_errl;
             l_errl = NULL;
@@ -305,7 +310,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
       else
       {
           TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : proc_getecid",
+                    "SUCCESS : proc_getecid"
                     " completed ok");
 
       }
