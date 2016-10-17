@@ -154,4 +154,10 @@
     </description>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SPCWKUP_DD1_HW389511_TIMEOUT</rc>
+    <description>Maximum number of retries reached for SCOM write (DD1 HW389511)
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
