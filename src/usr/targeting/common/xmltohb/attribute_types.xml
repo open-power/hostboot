@@ -32074,4 +32074,24 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<attribute>
+    <id>MSS_CAL_ABORT_ON_ERROR</id>
+    <description>
+    Whether or not to abort on the first DDR PHY calibration error.
+    Firmware should always have this set to NO. YES can be used in the
+    lab for troubleshooting, screening, etc.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_CAL_ABORT_ON_ERROR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
