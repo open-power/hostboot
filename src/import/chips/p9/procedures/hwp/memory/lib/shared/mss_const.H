@@ -50,6 +50,9 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
+    NIBBLES_PER_DP = 4,
+    BITS_PER_NIBBLE = 4,
+    BITS_PER_DQS = 2,              ///< Differential clock pair
     MAX_RANKS_DIMM1 = 2,           ///< DIMM1 (inner DIMM) can't be a 4R DIMM
     MAX_PRIMARY_RANKS_PER_PORT = 4,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
@@ -116,9 +119,6 @@ enum states
     NO_N = 1,
     INVALID = 0xFF,
     NO_CHIP_SELECT_ACTIVE = 0xFF,
-
-    // This needs to be an attribute I think - BRS. Used as a boolean.
-    CAL_ABORT_ON_ERROR = 1,
 };
 
 // Static consts describing the bits used in the cal_step_enable attribute
