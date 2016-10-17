@@ -77,6 +77,7 @@ static const uint64_t SPCWKUP_GPMMR_ADDR[NUM_CHIPLET_TYPES] =
     C_PPM_GPMMR_SCOM, EQ_PPM_GPMMR_SCOM
 };
 
+static const uint32_t SPECIAL_WAKEUP_MAX_SCOM_RETRIES   =  1000;
 static const uint32_t SPECIAL_WAKE_UP_POLL_INTERVAL_NS  =  1000000;   //1ms
 static const uint32_t SPECIAL_WAKEUP_TIMEOUT_NS         =  (100 * SPECIAL_WAKE_UP_POLL_INTERVAL_NS);     //100 ms
 static const uint32_t SPWKUP_BIT            = 0;
@@ -332,6 +333,7 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
 
     uint32_t                l_pollcount = 0;
     bool                    b_poll_during_xstop_flag;
+    uint8_t                 l_attr_ppm_reg_collision_hw389511 = 0;
 
     // Get the parent chip to deal with chip level accesses
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_parentTarget;
@@ -340,6 +342,10 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
     uint32_t l_special_wakeup_poll_interval_ns = SPECIAL_WAKE_UP_POLL_INTERVAL_NS;
     /// Calculate the maximum number of polls until a timeout is thrown
     uint32_t l_special_wakeup_max_polls =  (SPECIAL_WAKEUP_TIMEOUT_NS / l_special_wakeup_poll_interval_ns);
+
+    // Determine if the polling-loop for putscoms is necessary based on attribute
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW389511, l_parentTarget,
+                           l_attr_ppm_reg_collision_hw389511));
 
     // This is done in two phases:  1) assert the special wake-ups to all elements;
     //                              2) poll for done from all elements
@@ -359,10 +365,35 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
         // for debug
         i_processing_info.b_wakeup_on_entry_flag = l_spwkup[i].getBit<SPWKUP_BIT>();
 
-        l_spwkup[i].flush<0>().setBit<SPWKUP_BIT>();
-        FAPI_TRY(fapi2::putScom(l_parentTarget, i_processing_info.spwkup_address[i], l_spwkup[i]),
-                 "PutScom of Special Wake-up failed");
+        if(l_attr_ppm_reg_collision_hw389511)
+        {
+            uint32_t l_poll_retry_count = 0;
 
+            do
+            {
+                ++l_poll_retry_count;
+
+                l_spwkup[i].flush<0>().setBit<SPWKUP_BIT>();
+
+                FAPI_TRY(fapi2::putScom(l_parentTarget, i_processing_info.spwkup_address[i], l_spwkup[i]),
+                         "PutScom of Special Wake-up failed");
+
+                FAPI_TRY(fapi2::getScom(l_parentTarget, i_processing_info.spwkup_address[i], l_spwkup[i]),
+                         "GetScom of Special Wake-up failed");
+            }
+            while((l_poll_retry_count < SPECIAL_WAKEUP_MAX_SCOM_RETRIES) && !(l_spwkup[i].getBit<SPWKUP_BIT>()));
+
+            // The special-wakeup bit should be asserted at this point
+            FAPI_ASSERT((l_spwkup[i].getBit<SPWKUP_BIT>()),
+                        fapi2::SPCWKUP_DD1_HW389511_TIMEOUT(),
+                        "Maximum number of retries for putscom to assert spcwkup reached");
+        }
+        else
+        {
+            l_spwkup[i].flush<0>().setBit<SPWKUP_BIT>();
+            FAPI_TRY(fapi2::putScom(l_parentTarget, i_processing_info.spwkup_address[i], l_spwkup[i]),
+                     "PutScom of Special Wake-up failed");
+        }
     } // num_addresses
 
     for (uint32_t i = 0; i < i_processing_info.num_addresses; ++i)
@@ -474,16 +505,47 @@ fapi2::ReturnCode _spwkup_deassert( const fapi2::Target<K>& i_chipletTarget,
     FAPI_INF("> spwkup_deassert" );
 
     fapi2::buffer<uint64_t> l_data64 = 0;
+    uint8_t                 l_attr_ppm_reg_collision_hw389511 = 0;
+
     // Get the parent chip to deal with chip level accesses
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_parentTarget;
     l_parentTarget = get_chip_target<K> (i_chipletTarget);
 
-    FAPI_TRY(fapi2::putScom(l_parentTarget, i_address, l_data64),
-             "PutScom of Special Wake-up register failed");
-    FAPI_DBG("  %s: After clear putscom of SPWKUP_REG (0x%08llx) => 0x%016llx",
-             *(p9specialWakeup::SPWK_MSG_LIST[i_msgId]),
-             i_address,
-             l_data64);
+    // Determine if the polling-loop for putscoms is necessary based on attribute
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW389511, l_parentTarget,
+                           l_attr_ppm_reg_collision_hw389511)); // TODO which target to use here?
+
+    if(l_attr_ppm_reg_collision_hw389511)
+    {
+        uint32_t                l_poll_retry_count = 0;
+        fapi2::buffer<uint64_t> l_spwkup = 0;
+
+        do
+        {
+            ++l_poll_retry_count;
+
+            FAPI_TRY(fapi2::putScom(l_parentTarget, i_address, l_data64),
+                     "PutScom of Special Wake-up failed");
+
+            FAPI_TRY(fapi2::getScom(l_parentTarget, i_address, l_spwkup),
+                     "GetScom of Special Wake-up failed");
+        }
+        while((l_poll_retry_count < SPECIAL_WAKEUP_MAX_SCOM_RETRIES) && (l_spwkup.getBit<SPWKUP_BIT>()));
+
+        // The special-wakeup bit should be deasserted at this point
+        FAPI_ASSERT((!(l_spwkup.getBit<SPWKUP_BIT>())),
+                    fapi2::SPCWKUP_DD1_HW389511_TIMEOUT(),
+                    "Maximum number of retries for putscom to deassert spcwkup reached");
+    }
+    else
+    {
+        FAPI_TRY(fapi2::putScom(l_parentTarget, i_address, l_data64),
+                 "PutScom of Special Wake-up register failed");
+        FAPI_DBG("  %s: After clear putscom of SPWKUP_REG (0x%08llx) => 0x%016llx",
+                 *(p9specialWakeup::SPWK_MSG_LIST[i_msgId]),
+                 i_address,
+                 l_data64);
+    }
 
     // This puts an inherent delay in the propagation of the reset transition.
     FAPI_TRY(fapi2::getScom(l_parentTarget, i_address, l_data64),
