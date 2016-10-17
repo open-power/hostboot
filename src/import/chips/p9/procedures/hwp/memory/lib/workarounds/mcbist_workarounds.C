@@ -60,17 +60,17 @@ namespace mcbist
 
 ///
 /// @brief Replace reads with displays in the passed in MCBIST program
-/// @param[in] the MCBIST program to check for read/display replacement
+/// @param[in,out] the MCBIST program to check for read/display replacement
 /// @note Useful for testing
 ///
-void replace_read_helper(mss::mcbist::program<TARGET_TYPE_MCBIST>& i_program)
+void replace_read_helper(mss::mcbist::program<TARGET_TYPE_MCBIST>& io_program)
 {
     using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
 
-    i_program.change_maint_broadcast_mode(mss::OFF);
-    i_program.change_end_boundary(mss::mcbist::end_boundary::STOP_AFTER_ADDRESS);
+    io_program.change_maint_broadcast_mode(mss::OFF);
+    io_program.change_end_boundary(mss::mcbist::end_boundary::STOP_AFTER_ADDRESS);
 
-    for (auto& st : i_program.iv_subtests)
+    for (auto& st : io_program.iv_subtests)
     {
         uint64_t l_op = 0;
         st.iv_mcbmr.extractToRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(l_op);
@@ -92,17 +92,19 @@ void replace_read_helper(mss::mcbist::program<TARGET_TYPE_MCBIST>& i_program)
 /// conditions to immediate. However, because that doesn't work (by design) with
 /// read, we also must change all reads to displays (slow read.)
 /// @param[in] i_target the fapi2 target of the mcbist
-/// @param[in] i_program the mcbist program to check
+/// @param[in,out] io_program the mcbist program to check
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                               mss::mcbist::program<TARGET_TYPE_MCBIST>& i_program )
+                               mss::mcbist::program<TARGET_TYPE_MCBIST>& io_program )
 {
+    using TT = mss::mcbistTraits<TARGET_TYPE_MCBIST>;
+
     // TODO RTC:160353 - implement DD1 checking when that attribute is available
 
     // First things first - lets find out if we have an 1R DIMM on our side of the chip.
     const auto l_dimm_kinds = dimm::kind::vector( mss::find_targets<TARGET_TYPE_DIMM>(i_target) );
-    auto l_kind = std::find_if(l_dimm_kinds.begin(), l_dimm_kinds.end(), [](const dimm::kind & k) -> bool
+    const auto l_kind = std::find_if(l_dimm_kinds.begin(), l_dimm_kinds.end(), [](const dimm::kind & k) -> bool
     {
         // If total ranks are 1, we have a 1R DIMM, SDP. This is the fellow of concern
         return k.iv_total_ranks == 1;
@@ -115,9 +117,15 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         return FAPI2_RC_SUCCESS;
     }
 
+    if( ! io_program.iv_config.getBit<TT::MCBIST_CFG_PAUSE_AFTER_RANK>() )
+    {
+        FAPI_INF("not checking rank boundaries on this MCBIST (%s), we're ok", mss::c_str(i_target));
+        return FAPI2_RC_SUCCESS;
+    }
+
     // If we're here, we need to fix up our program. We need to set our stop to stop immediate, which implies
     // we don't do broadcasts and we can't do read, we have to do display.
-    replace_read_helper(i_program);
+    replace_read_helper(io_program);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }
