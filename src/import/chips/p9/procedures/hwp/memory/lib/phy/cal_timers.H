@@ -198,7 +198,10 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     uint64_t l_write_cntr_cycles = 0;
     uint64_t l_total_cycles = 0;
     int64_t l_ns_left = 0;
+    uint8_t cal_abort_on_error = 0;
+
     FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles) );
+    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
 
     // First, calculate the total number of cycles this cal should take if everything
     // runs to completion
@@ -245,7 +248,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_poll_count *= 2;
 
     FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
-             (CAL_ABORT_ON_ERROR ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
+             (cal_abort_on_error ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
              i_poll.iv_initial_sim_delay, i_poll.iv_delay, i_poll.iv_sim_delay, i_poll.iv_poll_count);
 
     return fapi2::FAPI2_RC_SUCCESS;
