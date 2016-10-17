@@ -40,13 +40,14 @@ const uint32_t NEST_PLL_FREQ_LIST[NEST_PLL_FREQ_BUCKETS] =
 
 // I2C bus divisor
 // index is bucket number
+// The values in this list will be factor of 1:64 to the NEST_PLL_FREQ_LIST
 const uint32_t NEST_PLL_FREQ_I2CDIV_LIST[NEST_PLL_FREQ_BUCKETS] =
 {
-    234,
-    500,
-    12,
-    20,
-    23
+    25,
+    29,
+    31,
+    33,
+    37
 };
 
 // constant defining number of MEM PLL frequency options ('buckets')
