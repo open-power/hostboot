@@ -474,23 +474,13 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     uint64_t l_errors = 0;
     uint64_t l_rank_pairs = 0;
+    uint8_t cal_abort_on_error = 0;
 
     fapi2::buffer<uint64_t> l_err_data;
 
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
-    // Check the PC error status. If it's !0, we'll log an informational message
-    // which records the states of the individual PHY block error registers (this is
-    // in the collect register section in the XML)
-    FAPI_TRY( pc::read_error_status0(i_target, l_err_data) );
-
-    if (l_err_data != 0)
-    {
-        FAPI_ERR("seeing %s pc error_status0 0x%016lx", mss::c_str(i_target), l_err_data);
-        fapi2::MSS_DRAMINIT_PC_ERROR_INFO()
-        .set_PC_ERROR0(l_err_data)
-        .set_TARGET_IN_ERROR(i_target).execute(fapi2::FAPI2_ERRL_SEV_RECOVERED, true);
-    }
+    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
 
     FAPI_TRY( pc::read_init_cal_error(i_target, l_err_data) );
 
@@ -504,6 +494,8 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    // Error information from other registers is gathered in the FFDC from the XML
+
     // Get the DIMM which failed. We should only have one rank pair as we calibrate the
     // rank pairs individually (we do this so we can see which DIMM failed if more than one
     // fails ...) Note first_bit_set gives a bit position (0 being left most.) So, the rank
@@ -512,6 +504,24 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target, mss::first_bit_set(l_rank_pairs) - TT::INIT_CAL_ERROR_RANK_PAIR,
               l_failed_dimm) );
     FAPI_ERR("initial cal failed for %s", mss::c_str(l_failed_dimm));
+
+    // If we aborted on error, the disable bits aren't complete so we can't make a determination about
+    // whether the port is repairable.
+    if (cal_abort_on_error == fapi2::ENUM_ATTR_MSS_CAL_ABORT_ON_ERROR_YES)
+    {
+        FAPI_INF("can't process disable bits as we aborted on error - disable bits might be incomplete");
+    }
+    else
+    {
+        // Process the disable bits. The PHY will disable bits that it finds don't work for whatever reason.
+        // However, we can handle a number of bad bits without resorting to killing the DIMM. Do the bad
+        // bit processing here, and if we can go on and ignore these bad bits, we'll see a succcess here.
+        if (dp16::process_bad_bits(i_target, l_failed_dimm, l_rank_pairs) == fapi2::FAPI2_RC_SUCCESS)
+        {
+            FAPI_INF("Initial cal - errors reported but repaired ok on %s", mss::c_str(l_failed_dimm));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
 
     // So we can do a few things here. If we're aborting on the first calibration error,
     // we only expect to have one error bit set. If we ran all the calibrations, we can
@@ -761,11 +771,15 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     fapi2::buffer<uint64_t> l_cal_config;
     fapi2::buffer<uint64_t> l_vref_config;
     uint8_t is_sim = 0;
+    uint8_t cal_abort_on_error = 0;
+
+    FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
+    FAPI_TRY( mss::is_simulation(is_sim) );
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
     // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
     // bit ahead of time.
-    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(CAL_ABORT_ON_ERROR);
+    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(cal_abort_on_error);
 
     // Check the write centering bits - if write centering is defined, don't run 2D. Vice versa.
     if (i_cal_steps_enabled.getBit<WRITE_CTR>() && i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
@@ -773,8 +787,6 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_INF("Both 1D and 2D write centering were defined - only performing 2D");
         i_cal_steps_enabled.clearBit<WRITE_CTR>();
     }
-
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
 
     // Sadly, the bits in the register don't align directly with the bits in the attribute.
     // So, arrange the bits accordingly and write the config register.
