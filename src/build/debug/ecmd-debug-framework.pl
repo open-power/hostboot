@@ -169,7 +169,7 @@ sub readData
 
     my (undef, $debugfile) = tempfile(OPEN => 0);
     my (undef, $filename) = tempfile(OPEN => 0);
-    my $getmemcmd = "cipgetmempba";
+    my $getmemcmd = "getmempba";
     if( $memMode =~ /adu/ ) { $getmemcmd = "getmemproc"; }
     my $command = sprintf("%s -n%d -p%d -fb %s %x %d -quiet > %s",
                           $getmemcmd,
@@ -218,7 +218,7 @@ sub writeData
     print $file $value;
     close $file;
 
-    my $putmemcmd = "cipputmempba";
+    my $putmemcmd = "putmempba";
     if( $memMode =~ /adu/ ) { $putmemcmd = "putmemproc"; }
     my $command = sprintf(
           "$putmemcmd -n%d -p%d -cft -fb %s %x -quiet -mode inj > %s",
@@ -368,17 +368,8 @@ sub determineMemMode
 {
     if( $memMode =~ /check/ )
     {
-        # Cannot use pba access if the OCC is active
-        $bar0 = readScom( 0x02013F00, 64 ); #PBABAR0
-        if( $bar0 == 0 )
-        {
-            # BAR0 is zero so OCC is not in use
-            $memMode = "pba"; #use the PBA
-        }
-        else
-        {
-            $memMode = "adu"; #use the ADU
-        }
+        # for P9 we can always use PBA
+        $memMode = "pba"; #use the PBA
     }
     elsif( $memMode =~ /proc/ )
     {
