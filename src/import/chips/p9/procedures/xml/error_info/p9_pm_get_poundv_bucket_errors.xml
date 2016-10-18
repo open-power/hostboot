@@ -44,9 +44,25 @@
   <hwpError>
     <rc>RC_INVALID_MATCHING_FREQ_NUMBER</rc>
     <description>
-    Number of buckets with matching pbFreq is not equal to one
+    Found either zero or multiple buckets for the desired powerbus frequency
     </description>
     <ffdc>MATCHES_FOUND</ffdc>
+    <ffdc>DESIRED_FREQPB</ffdc>
+    <ffdc>LRPREC</ffdc>
+    <ffdc>BUCKETA_FREQPB</ffdc>
+    <ffdc>BUCKETB_FREQPB</ffdc>
+    <ffdc>BUCKETC_FREQPB</ffdc>
+    <ffdc>BUCKETD_FREQPB</ffdc>
+    <ffdc>BUCKETE_FREQPB</ffdc>
+    <ffdc>BUCKETF_FREQPB</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <target>EQ</target>
+        <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
