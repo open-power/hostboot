@@ -48,8 +48,7 @@
 ///----------------------------------------------------------------------------
 /// Constant definitions
 ///----------------------------------------------------------------------------
-const uint8_t MBA_N_M_COUNTER_TYPE    = 0b00001000;   // Bit 12 (offset 8)
-const uint8_t MBA_POWER_CONTROL_TYPE  = 0b00000001;   // Bit 15
+const uint8_t SUPER_SYNC_BIT   = 14;
 
 ///
 /// @brief Perform throttle sync on the Memory Controllers
@@ -77,7 +76,6 @@ fapi2::ReturnCode throttleSync(
     fapi2::Target<fapi2::TARGET_TYPE_MCA> l_mca;
     uint8_t l_masterMcsPos = 0;
     uint8_t l_mcaPos = 0;
-    uint8_t l_mcSyncChannelSelect = 0;
 
     // Initialize
     memset(l_mcaWithDimm, false, sizeof(l_mcaWithDimm));
@@ -136,14 +134,11 @@ fapi2::ReturnCode throttleSync(
         FAPI_DBG("    MCA[%u] %u", ii, l_mcaWithDimm[ii]);
     }
 
-
     // -------------------------------------------------------------------
     // 2. Reset sync command on both channels to make sure they are clean
     // -------------------------------------------------------------------
     // Reset the sync command on both channels to make sure they are clean
-    l_scomMask.flush<0>()
-    .setBit<MCS_MCSYNC_SYNC_GO_CH0>()
-    .setBit<MCS_MCSYNC_SYNC_GO_CH1>();
+    l_scomMask.flush<0>().setBit<MCS_MCSYNC_SYNC_GO_CH0>();
     l_scomData.flush<0>();
 
     FAPI_TRY(fapi2::putScomUnderMask(l_masterMcs, MCS_MCSYNC,
@@ -160,27 +155,18 @@ fapi2::ReturnCode throttleSync(
     l_scomMask.flush<0>();
 
     // Setup MCSYNC_CHANNEL_SELECT
-    for (uint8_t l_mcaPort = 0; l_mcaPort < MAX_MCA_PER_PROC; l_mcaPort++)
-    {
-        if (l_mcaWithDimm[l_mcaPort] == true)
-        {
-            l_mcSyncChannelSelect |= (0x80 >> l_mcaPort );
-        }
-    }
-
+    // Set ALL channels with or without DIMMs (bits 0:7)
+    l_scomData.setBit<MCS_MCSYNC_CHANNEL_SELECT,
+                      MCS_MCSYNC_CHANNEL_SELECT_LEN>();
     l_scomMask.setBit<MCS_MCSYNC_CHANNEL_SELECT,
                       MCS_MCSYNC_CHANNEL_SELECT_LEN>();
-    FAPI_TRY(l_scomData.insert(l_mcSyncChannelSelect,
-                               MCS_MCSYNC_CHANNEL_SELECT,
-                               MCS_MCSYNC_CHANNEL_SELECT_LEN),
-             "Buffer insertion returns an error");
 
-    // Setup MCSYNC_SYNC_TYPE to MBA N/M Counter and MBA Power Controls
+    // Setup MCSYNC_SYNC_TYPE
+    // Set all sync types except Super Sync
+    l_scomData.setBit<MCS_MCSYNC_SYNC_TYPE,
+                      MCS_MCSYNC_SYNC_TYPE_LEN>().clearBit(SUPER_SYNC_BIT);
     l_scomMask.setBit<MCS_MCSYNC_SYNC_TYPE,
                       MCS_MCSYNC_SYNC_TYPE_LEN>();
-    l_scomData.insertFromRight<MCS_MCSYNC_SYNC_TYPE,
-                               MCS_MCSYNC_SYNC_TYPE_LEN>
-                               (MBA_N_M_COUNTER_TYPE | MBA_POWER_CONTROL_TYPE);
 
     // Setup SYNC_GO, pick either MCA port of the master MCS, but the port
     // must have DIMM connected.
@@ -190,11 +176,6 @@ fapi2::ReturnCode throttleSync(
     {
         l_scomMask.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
         l_scomData.setBit<MCS_MCSYNC_SYNC_GO_CH0>();
-    }
-    else // If 1st MCA doesn't have DIMM, the 2nd MCA must have it
-    {
-        l_scomMask.setBit<MCS_MCSYNC_SYNC_GO_CH1>();
-        l_scomData.setBit<MCS_MCSYNC_SYNC_GO_CH1>();
     }
 
     // --------------------------------------------------------------
