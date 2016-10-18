@@ -353,8 +353,6 @@ void VfsRp::msgHandler()
                             if(l_errl)
                             {
                                 SECUREBOOT::handleSecurebootFailure(l_errl);
-                                // The previous call will never return, but
-                                // just in case set proper kernel rc.
                                 msg->data[1] = -EACCES;
                                 break;
                             }

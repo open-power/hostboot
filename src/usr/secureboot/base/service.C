@@ -297,7 +297,6 @@ void handleSecurebootFailure(errlHndl_t &i_err)
 #ifdef CONFIG_CONSOLE
     CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
                       i_err->plid(), l_rc);
-    CONSOLE::flush();
 #endif
     printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
            i_err->plid(),l_rc);
@@ -308,7 +307,7 @@ void handleSecurebootFailure(errlHndl_t &i_err)
     errlCommit(i_err, SECURE_COMP_ID);
 
     // Shutdown with Secureboot error status
-    INITSERVICE::doShutdown(l_rc);
+    INITSERVICE::doShutdown(l_rc, true);
 }
 
 }  //namespace SECUREBOOT

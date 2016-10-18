@@ -105,7 +105,8 @@ gen_default_images: cp_hbfiles
 	# HBI + HBB partitions and ZERO_FILL_IMAGES
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
 		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
-		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition}
+		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition} \
+		${CORRUPT_PARAMS}
 
 clobber_gen_default_images:
 	rm -f ${ALL_HB_IMAGES} \
