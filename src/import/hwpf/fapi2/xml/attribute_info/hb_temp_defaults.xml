@@ -87,6 +87,26 @@
         <id>ATTR_PERF_24x7_INVOCATION_TIME_MS</id>
         <default>0x1</default>
       </attribute>
+     <attribute>
+         <id>ATTR_IO_OBUS_DCCAL_FLAGS</id>
+         <default>0x0</default>
+     </attribute>
+     <attribute>
+         <id>ATTR_IO_O_DEBUG</id>
+         <default>0x0</default>
+     </attribute>
+     <attribute>
+         <id>ATTR_IO_OBUS_TX_MARGIN_RATIO</id>
+         <default>0x0</default>
+     </attribute>
+     <attribute>
+         <id>ATTR_IO_OBUS_TX_FFE_PRECURSOR</id>
+         <default>0x0</default>
+     </attribute>
+     <attribute>
+         <id>ATTR_IO_OBUS_TX_FFE_POSTCURSOR</id>
+         <default>0x0</default>
+     </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
