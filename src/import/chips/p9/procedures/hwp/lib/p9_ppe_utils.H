@@ -64,12 +64,12 @@ typedef struct
 /**
  * @brief Offsets from base address for XIRs.
  */
-const static uint64_t PPE_XIXCR    = 0x0;
-const static uint64_t PPE_XIRAMRA  = 0x1;
-const static uint64_t PPE_XIRAMGA  = 0x2;
-const static uint64_t PPE_XIRAMDBG = 0x3;
-const static uint64_t PPE_XIRAMEDR = 0x4;
-const static uint64_t PPE_XIDBGPRO = 0x5;
+const static uint64_t PPE_XIXCR    = 0x0; //XCR_NONE
+const static uint64_t PPE_XIRAMRA  = 0x1; //XCR_SPRG0
+const static uint64_t PPE_XIRAMGA  = 0x2; //IR_SPRG0
+const static uint64_t PPE_XIRAMDBG = 0x3; //XSR_SPRG0
+const static uint64_t PPE_XIRAMEDR = 0x4; //IR_EDR
+const static uint64_t PPE_XIDBGPRO = 0x5; //XSR_IAR
 
 enum PPE_DUMP_MODE
 {
