@@ -170,26 +170,26 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
 /// @brief translates HB target types to SBE target type groups
 /// @param[in] i_hbTarget includes the HB target type
 /// @return SBEIO::SBE_TARGET_TYPES returns SBE_TARGET_TYPE_UNKNOWN in error
-SBE_TARGET_TYPES translateToSBETargetType(TARGETING::Target * i_hbTarget)
+SbePsu::SBE_TARGET_TYPES translateToSBETargetType(TARGETING::Target *i_hbTarget)
 {
 
     TRACDCOMP( g_trac_scandd,
             ENTER_MRK "entering translateToSBETargetType()");
-    SBE_TARGET_TYPES sbeType;
-    sbeType =  SBE_TARGET_TYPE_UNKNOWN;
+    SbePsu::SBE_TARGET_TYPES sbeType;
+    sbeType =  SbePsu::SBE_TARGET_TYPE_UNKNOWN;
 
 
     switch( i_hbTarget->getAttr<TARGETING::ATTR_TYPE>()){
 
         case(TARGETING::TYPE_PROC):
         {
-            sbeType = SBE_TARGET_TYPE_PROC;
+            sbeType = SbePsu::SBE_TARGET_TYPE_PROC;
             break;
         }
 
         case(TARGETING::TYPE_EX):
         {
-            sbeType = SBE_TARGET_TYPE_EX;
+            sbeType = SbePsu::SBE_TARGET_TYPE_EX;
             break;
         }
 
@@ -203,12 +203,12 @@ SBE_TARGET_TYPES translateToSBETargetType(TARGETING::Target * i_hbTarget)
         case(TARGETING::TYPE_L4):
         case(TARGETING::TYPE_CORE):
         {
-            sbeType = SBE_TARGET_TYPE_PERV;
+            sbeType = SbePsu::SBE_TARGET_TYPE_PERV;
             break;
         }
         case(TARGETING::TYPE_MCS):
         {
-            sbeType = SBE_TARGET_TYPE_MCS;
+            sbeType = SbePsu::SBE_TARGET_TYPE_MCS;
             break;
         }
         default:
@@ -269,14 +269,14 @@ errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
     errlHndl_t l_errl = NULL;
     TRACFCOMP( g_trac_scandd, ENTER_MRK "sbeScanPerformOp()");
 
-    psuCommand   l_psuCommand(
+    SbePsu::psuCommand   l_psuCommand(
     //control flags are hardcoded here, no need to pass them into sbe function
-            SBE_DMCONTROL_RESPONSE_REQUIRED,
+            SbePsu::SBE_DMCONTROL_RESPONSE_REQUIRED,
             //command class
-            SBE_PSU_PUT_RING_FROM_IMAGE_CMD,
+            SbePsu::SBE_PSU_PUT_RING_FROM_IMAGE_CMD,
             //command
-            SBE_CMD_CONTROL_PUTRING);
-    psuResponse  l_psuResponse;
+            SbePsu::SBE_CMD_CONTROL_PUTRING);
+    SbePsu::psuResponse  l_psuResponse;
 
     //Ring ID for this message
     RingID l_ringID = static_cast<RingID>(va_arg(i_args,uint64_t));
@@ -317,11 +317,11 @@ errlHndl_t sbeScanPerformOp(TARGETING::Target * i_target, va_list i_args)
                       ":: sbeScanPerformOp() RingMode:%.8X ",
                       l_psuCommand.cd3_PutRing_RingMode );
 
-    l_errl = performPsuChipOp(&l_psuCommand,
+    l_errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
                     &l_psuResponse,
-                    MAX_PSU_SHORT_TIMEOUT_NS,
-                    SBE_DMCONTROL_START_REQ_USED_REGS,
-                    SBE_DMCONTROL_START_RSP_USED_REGS);
+                    SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                    SbePsu::SBE_DMCONTROL_START_REQ_USED_REGS,
+                    SbePsu::SBE_DMCONTROL_START_RSP_USED_REGS);
 
     TRACFCOMP( g_trac_scandd, EXIT_MRK "exiting :: sbeScanPerformOp()");
 

@@ -71,7 +71,7 @@ errlHndl_t scanDoScan(    DeviceFW::OperationType i_opType,
 /// @brief translates HB target types to SBE target type groups
 /// @param[in] i_hbTarget includes the HB target type
 /// @return SBEIO::SBE_TARGET_TYPES returns SBE_TARGET_TYPE_UNKNOWN in error
-SBEIO::SBE_TARGET_TYPES
+SBEIO::SbePsu::SBE_TARGET_TYPES
     translateToSBETargetType(TARGETING::Target * i_hbTarget);
 
 /// @brief returns a ChipletID for a give target

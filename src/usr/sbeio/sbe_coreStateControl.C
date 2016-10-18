@@ -59,20 +59,21 @@ errlHndl_t startDeadmanLoop(const uint64_t i_waitTime )
 
     SBE_TRACD(ENTER_MRK "startDeadmanLoop waitTime=0x%x",i_waitTime);
 
-    psuCommand   l_psuCommand(
-         SBE_DMCONTROL_START | SBE_DMCONTROL_RESPONSE_REQUIRED, //control flags
-         SBE_PSU_CLASS_CORE_STATE,                              //command class
-         SBE_CMD_CONTROL_DEADMAN_LOOP);                         //command
-    psuResponse  l_psuResponse;
+    SbePsu::psuCommand   l_psuCommand(
+         SbePsu::SBE_DMCONTROL_START |
+             SbePsu::SBE_DMCONTROL_RESPONSE_REQUIRED,      //control flags
+         SbePsu::SBE_PSU_CLASS_CORE_STATE,                 //command class
+         SbePsu::SBE_CMD_CONTROL_DEADMAN_LOOP);            //command
+    SbePsu::psuResponse  l_psuResponse;
 
     // set up PSU command message
     l_psuCommand.cd1_ControlDeadmanLoop_WaitTime = i_waitTime;
 
-    errl = performPsuChipOp(&l_psuCommand,
+    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
                             &l_psuResponse,
-                            MAX_PSU_SHORT_TIMEOUT_NS,
-                            SBE_DMCONTROL_START_REQ_USED_REGS,
-                            SBE_DMCONTROL_START_RSP_USED_REGS);
+                            SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                            SbePsu::SBE_DMCONTROL_START_REQ_USED_REGS,
+                            SbePsu::SBE_DMCONTROL_START_RSP_USED_REGS);
 
     SBE_TRACD(EXIT_MRK "startDeadmanLoop");
 
@@ -93,17 +94,18 @@ errlHndl_t stopDeadmanLoop()
 
     SBE_TRACD(ENTER_MRK "stopDeadmanLoop");
 
-    psuCommand   l_psuCommand(
-         SBE_DMCONTROL_STOP + SBE_DMCONTROL_RESPONSE_REQUIRED, //control flags
-         SBE_PSU_CLASS_CORE_STATE,                             //command class
-         SBE_CMD_CONTROL_DEADMAN_LOOP);                        //comand
-    psuResponse  l_psuResponse;
+    SbePsu::psuCommand   l_psuCommand(
+         SbePsu::SBE_DMCONTROL_STOP +
+             SbePsu::SBE_DMCONTROL_RESPONSE_REQUIRED,        //control flags
+         SbePsu::SBE_PSU_CLASS_CORE_STATE,                   //command class
+         SbePsu::SBE_CMD_CONTROL_DEADMAN_LOOP);              //comand
+    SbePsu::psuResponse  l_psuResponse;
 
-    errl = performPsuChipOp(&l_psuCommand,
+    errl = SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
                             &l_psuResponse,
-                            MAX_PSU_SHORT_TIMEOUT_NS,
-                            SBE_DMCONTROL_STOP_REQ_USED_REGS,
-                            SBE_DMCONTROL_STOP_RSP_USED_REGS);
+                            SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                            SbePsu::SBE_DMCONTROL_STOP_REQ_USED_REGS,
+                            SbePsu::SBE_DMCONTROL_STOP_RSP_USED_REGS);
 
     SBE_TRACD(EXIT_MRK "stopDeadmanLoop");
 

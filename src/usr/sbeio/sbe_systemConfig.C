@@ -63,20 +63,20 @@ namespace SBEIO
 
         SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x",i_systemConfig);
 
-        psuCommand   l_psuCommand(
-                                  SBE_REQUIRE_RESPONSE,             //control flags
-                                  SBE_PSU_GENERIC_MESSAGE,          //command class
-                                  SBE_CMD_CONTROL_SYSTEM_CONFIG);   //command
-        psuResponse  l_psuResponse;
+        SbePsu::psuCommand   l_psuCommand(
+                                  SbePsu::SBE_REQUIRE_RESPONSE,  //control flags
+                                  SbePsu::SBE_PSU_GENERIC_MESSAGE, //command class
+                                  SbePsu::SBE_CMD_CONTROL_SYSTEM_CONFIG); //command
+        SbePsu::psuResponse  l_psuResponse;
 
         // set up PSU command message
         l_psuCommand.cd2_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
 
-        errl = performPsuChipOp(&l_psuCommand,
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(&l_psuCommand,
                                 &l_psuResponse,
-                                MAX_PSU_SHORT_TIMEOUT_NS,
-                                SBE_SYSTEM_CONFIG_REQ_USED_REGS,
-                                SBE_SYSTEM_CONFIG_RSP_USED_REGS);
+                                SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                                SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
+                                SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS);
 
         SBE_TRACD(EXIT_MRK "sendSystemConfig");
 

@@ -237,6 +237,7 @@ TESTCASE_MODULES += testfapi2
 #TESTCASE_MODULES += testi2c
 
 TESTCASE_MODULES += testsbe
+TESTCASE_MODULES += testsbeio
 
 
 #*******************************************************

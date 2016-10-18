@@ -36,10 +36,13 @@
 #include <errl/errludtarget.H>
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <errl/errlreasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
 #include <sbeio/sbe_psudd.H>
 #include <arch/ppc.H>
+#include <util/utilbyte.H>
+#include <kernel/pagemgr.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -51,10 +54,56 @@ TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
 
 using namespace ERRORLOG;
 
-//TODO RTC 144313 implement error recovery and ffdc.
-
 namespace SBEIO
 {
+
+SbePsu & SbePsu::getTheInstance()
+{
+    return Singleton<SbePsu>::instance();
+}
+
+/**
+ * @brief  Constructor
+ **/
+SbePsu::SbePsu()
+{
+    iv_ffdcPackageBuffer = PageManager::allocatePage(ffdcPackageSize, true);
+    initFFDCPackageBuffer();
+
+    /*
+    * TODO RTC 164405
+    *
+    * call performPsuChipOp to tell SBE where to write when SBE is ready
+    *
+    * psuCommand   l_psuCommand(
+    *         SBE_REQUIRE_RESPONSE,
+    *         SBE_PSU_GENERIC_MESSAGE,
+    *         SBE_CMD_CONTROL_SYSTEM_CONFIG);
+    *
+    * psuResponse  l_psuResponse;
+    *
+    * // Create FFDCPackage struct in psuCommand union
+    * uint64_t cd4_FFDCPackage_MbxReg2reserved = &iv_ffdcPackageBuffer;
+    *
+    * performPsuChipOp(&l_psuCommand,
+    *        &l_psuResponse,
+    *        MAX_PSU_SHORT_TIMEOUT_NS,
+    *        SBE_SYSTEM_CONFIG_REQ_USED_REGS,
+    *        SBE_SYSTEM_CONFIG_RSP_USED_REGS);
+    *
+    */
+}
+
+/**
+ * @brief  Destructor
+ **/
+SbePsu::~SbePsu()
+{
+    if(iv_ffdcPackageBuffer != NULL)
+    {
+        PageManager::freePage(iv_ffdcPackageBuffer);
+    }
+}
 
 /**
  * @brief perform SBE PSU chip-op
@@ -65,7 +114,7 @@ namespace SBEIO
  * @param[in]  i_reqMsgs      4 bit mask telling which regs to write
  * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
  */
-errlHndl_t performPsuChipOp(psuCommand     * i_pPsuRequest,
+errlHndl_t SbePsu::performPsuChipOp(psuCommand     * i_pPsuRequest,
                             psuResponse    * o_pPsuResponse,
                             const uint64_t   i_timeout,
                             uint8_t          i_reqMsgs,
@@ -155,9 +204,9 @@ errlHndl_t performPsuChipOp(psuCommand     * i_pPsuRequest,
 /**
  * @brief write PSU Request message
  */
-errlHndl_t writeRequest(TARGETING::Target * i_target,
-                        psuCommand        * i_pPsuRequest,
-                        uint8_t             i_reqMsgs)
+errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
+                                psuCommand        * i_pPsuRequest,
+                                uint8_t             i_reqMsgs)
 {
     errlHndl_t errl = NULL;
     static uint16_t l_seqID = 0;
@@ -203,7 +252,8 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
                                  SBEIO_PSU_NOT_READY,
                                  i_pPsuRequest->mbxReg0,
                                  l_data);
-            //TODO RTC 144313 review callouts and ffdc
+
+            handleFFDCError(errl);
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -246,11 +296,11 @@ errlHndl_t writeRequest(TARGETING::Target * i_target,
 /**
  * @brief Read PSU response messages
  */
-errlHndl_t readResponse(TARGETING::Target  * i_target,
-                        psuCommand         * i_pPsuRequest,
-                        psuResponse        * o_pPsuResponse,
-                        const uint64_t       i_timeout,
-                        uint8_t              i_rspMsgs)
+errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
+                                psuCommand         * i_pPsuRequest,
+                                psuResponse        * o_pPsuResponse,
+                                const uint64_t       i_timeout,
+                                uint8_t              i_rspMsgs)
 {
     errlHndl_t errl = NULL;
 
@@ -321,7 +371,8 @@ errlHndl_t readResponse(TARGETING::Target  * i_target,
                                  SBEIO_PSU_RESPONSE_ERROR,
                                  i_pPsuRequest->mbxReg0,
                                  o_pPsuResponse->mbxReg4);
-            //TODO RTC 144313 review callouts and ffdc
+
+            handleFFDCError(errl);
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -342,8 +393,8 @@ errlHndl_t readResponse(TARGETING::Target  * i_target,
 /**
  * @brief poll for PSU to complete command
  */
-errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
-                              const uint64_t i_timeout)
+errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
+                                      const uint64_t i_timeout)
 {
     errlHndl_t errl = NULL;
 
@@ -385,7 +436,8 @@ errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
                                  SBEIO_PSU_RESPONSE_TIMEOUT,
                                  i_timeout,
                                  0);
-            //TODO RTC 144313 review callouts and ffdc
+
+            handleFFDCError(errl);
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -418,10 +470,10 @@ errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
 /**
  * @brief read Scom
  */
-errlHndl_t readScom(TARGETING::Target * i_target,
-                     uint64_t   i_addr,
-                     uint64_t * o_pData,
-                     bool       i_trace)
+errlHndl_t SbePsu::readScom(TARGETING::Target * i_target,
+                             uint64_t   i_addr,
+                             uint64_t * o_pData,
+                             bool       i_trace)
 {
     errlHndl_t errl = NULL;
 
@@ -444,9 +496,9 @@ errlHndl_t readScom(TARGETING::Target * i_target,
 /**
  * @brief write Scom
  */
-errlHndl_t writeScom(TARGETING::Target * i_target,
-                     uint64_t   i_addr,
-                     uint64_t * i_pData)
+errlHndl_t SbePsu::writeScom(TARGETING::Target * i_target,
+                             uint64_t   i_addr,
+                             uint64_t * i_pData)
 {
     errlHndl_t errl = NULL;
 
@@ -460,6 +512,133 @@ errlHndl_t writeScom(TARGETING::Target * i_target,
                     DEVICE_SCOM_ADDRESS(i_addr));
 
     return errl;
+}
+
+/**
+ * @brief zero out FFDC Package Buffer
+ */
+
+void SbePsu::initFFDCPackageBuffer()
+{
+    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * ffdcPackageSize);
+}
+
+/**
+ * @brief populate FFDC package buffer
+ * @param[in]  i_data        FFDC error data
+ * @param[in]  i_len         data buffer len to copy
+ */
+void SbePsu::writeFFDCBuffer( void * i_data, uint8_t i_len) {
+    if(i_len <= PAGESIZE * ffdcPackageSize)
+    {
+        initFFDCPackageBuffer();
+        memcpy(iv_ffdcPackageBuffer, i_data, i_len);
+    }
+    else
+    {
+        SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
+                      i_len);
+    }
+}
+
+/**
+ * @brief Read FFDC package(s) iv_ffdcPackageBuffer
+ *
+ * @param[in]  io_errl Error entry object to inject FFDC errors
+ *
+ * FFDC package according to the SBE Interface Specification:
+ * Dword 0:
+ *     byte 0,1: Magic Byte: 0xFFDC
+ *     byte 2,3: Length in words (N + 6)
+ *     byte 4,5: Sequence Id
+ *     byte 6  : Command Class
+ *     byte 7  : Command
+ * Dword 1:
+ *     byte 0-3: Return Code
+ *     byte 4-7: Word 0
+ * Dword M:
+ *     byte 0-3: Word N - 1
+ *     byte 4-7: Word N
+ */
+
+bool SbePsu::handleFFDCError(ERRORLOG::ErrlEntry * io_errl)
+{
+    uint16_t l_magicByte = 0x00;
+    uint8_t            i = 0;
+    bool              rc = true;
+
+    SBE_TRACD(ENTER_MRK "handleFFDCError");
+    do {
+        // Magic Byte is 1st 2 bytes
+        l_magicByte = UtilByte::bufferTo16uint(
+                    static_cast<char *>(iv_ffdcPackageBuffer) + i);
+
+        if(l_magicByte == ffdcMagicByte)
+        {
+            // Length is next 2 bytes (in words, each word is 4 bytes)
+            uint16_t l_packageLen = UtilByte::bufferTo16uint(
+                    static_cast<char *>(iv_ffdcPackageBuffer) + (i + 2));
+            // In FFDC packet, byte 2 & byte 3 holds the length in words,
+            // which is 6 bytes less than the total package length.
+            uint8_t l_words = l_packageLen - ffdcPadLen;
+            uint8_t l_wordLen = ffdcWordLen * l_words;
+            SBE_TRACD(INFO_MRK"handleFFDCError: Package length: %d, Words: %d", l_packageLen, l_words);
+
+            // Check to see if what we're copying is beyond the buffer size
+            if((uint8_t) (i + wordPadding + l_wordLen) >
+                  PAGESIZE * ffdcPackageSize)
+            {
+                SBE_TRACF(ERR_MRK"handleFFDCError: FFDC Package buffer overflow detected.");
+                rc = false;
+                break;
+            }
+            else
+            {
+                // Extract the words and add to errl
+                void * l_wordBuffer = (void *) malloc(l_wordLen);
+                if(l_wordBuffer == NULL)
+                {
+                    SBE_TRACF(ERR_MRK"handleFFDCError: Failure to allocate memory.");
+                    rc = false;
+                    break;
+                }
+                // Copy data from ffdcPackageBuffer to wordBuffer
+                // starting at 12th byte from current pointer
+                memcpy(static_cast<char *>(iv_ffdcPackageBuffer) + wordPadding,
+                                           l_wordBuffer, l_wordLen);
+
+                ErrlUD *l_errlud = io_errl->addFFDC( SBE_COMP_ID,
+                               l_wordBuffer,
+                               sizeof(l_wordBuffer),
+                               0,                           // version
+                               ERRL_UDT_NOFORMAT,           // subversion
+                               false );
+
+                if(l_errlud == NULL)
+                {
+                    SBE_TRACF(ERR_MRK"handleFFDCError: Failure to add FFDC to error log.");
+                    rc = false;
+                }
+
+                free(l_wordBuffer);
+            }
+            // Skip length of whole package
+            i += l_wordLen + wordPadding;
+        }
+        else
+        {
+            SBE_TRACD(ERR_MRK"handleFFDCError: Invalid FFDC Magic Byte: 0x%04lx",
+                      l_magicByte);
+            break;
+        }
+    } while (l_magicByte != 0x00);
+
+    // zero out the whole thing
+    initFFDCPackageBuffer();
+
+    SBE_TRACD(EXIT_MRK "handleFFDCError");
+    return rc;
+
 }
 
 } //end of namespace SBEIO

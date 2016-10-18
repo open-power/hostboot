@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/sbeio/makefile $
+# $Source: src/usr/sbeio/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,17 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-MODULE = sbeio
+EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 
-OBJS += sbe_psudd.o
-OBJS += sbe_coreStateControl.o
-OBJS += sbe_systemConfig.o
-OBJS += sbe_fifodd.o
-OBJS += sbe_scomAccess.o
-OBJS += sbe_scomAccessdd.o
+MODULE = testsbeio
 
-SUBDIRS = test.d
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
