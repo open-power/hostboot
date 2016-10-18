@@ -46,6 +46,7 @@ OBJS += call_host_ipl_complete.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_block_wakeup_intr.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_dump_stop_info.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
 include  ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase2.mk
