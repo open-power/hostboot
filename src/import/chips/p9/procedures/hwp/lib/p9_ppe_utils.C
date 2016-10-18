@@ -395,7 +395,7 @@ fapi2::ReturnCode ppe_resume(
     //Before reume always clear debug status (Michael's comment)
     FAPI_INF("   Clear debug status via XCR...");
     l_data64.flush<0>();
-    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to resume condition");
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to clear dbg status");
 
     FAPI_INF("   Send RESUME command via XCR...");
     l_data64.flush<0>().insertFromRight(p9hcd::RESUME, 1, 3);
@@ -547,7 +547,21 @@ fapi2::ReturnCode ppe_single_step(
 {
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_dbcr_save;
+    fapi2::buffer<uint32_t> l_gpr31_save;
+    fapi2::buffer<uint64_t> l_sprg0_save;
+
     FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    // Save SPRG0 i_Rs before getting dbcr
+    FAPI_DBG("Save SPRG0");
+    FAPI_TRY(getScom(i_target, i_base_address + PPE_XIRAMDBG, l_data64), "Error in GETSCOM");
+    l_data64.extractToRight(l_sprg0_save, 32, 32);
+    FAPI_DBG("Saved SPRG0 value : 0x%08llX", l_sprg0_save );
+    FAPI_DBG("Save i_Rs");
+    l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMtsprInstruction(%d, SPRG0): 0x%16llX", R31, l_data64 );
+    FAPI_TRY(ppe_RAMRead(i_target, i_base_address, l_data64, l_gpr31_save));
+    FAPI_DBG("Saved GPR31 value : 0x%08llX", l_gpr31_save );
+
     FAPI_INF("   Read and Save DBCR");
     FAPI_DBG("Move DBCR to i_Rs");
     l_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, DBCR), 0, 32);
@@ -566,6 +580,18 @@ fapi2::ReturnCode ppe_single_step(
     FAPI_DBG("clear DBCR[8] IACE and DBCR[12:13] DACE");
     FAPI_TRY(ppe_update_dbcr(i_target, i_base_address, ANDIS_CONST, 0x0F73, R31));
 
+    //Restore i_Rs and SPRG0 before single step
+    FAPI_DBG("Restore i_Rs");
+    l_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMfsprInstruction(R31, SPRG0): 0x%16llX",  l_data64 );
+    l_data64.insertFromRight(l_gpr31_save, 32, 32);
+    FAPI_DBG("Final Instr + SPRG0: 0x%16llX", l_data64 );
+    //write sprg0 with address and ram mfsprg0 to i_Rs
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMGA, l_data64 ));
+    FAPI_DBG("Restore SPRG0");
+    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIRAMDBG , l_sprg0_save), "Error in GETSCOM");
+
     while(i_step_count != 0)
     {
         FAPI_DBG("   Send Single step command via XCR...step count = 0x%16llx", i_step_count);
@@ -575,6 +601,17 @@ fapi2::ReturnCode ppe_single_step(
         --i_step_count;  //Decrement step count
         FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
     }
+
+    // Save SPRG0 i_Rs before getting dbcr
+    FAPI_DBG("Save SPRG0");
+    FAPI_TRY(getScom(i_target, i_base_address + PPE_XIRAMDBG, l_data64), "Error in GETSCOM");
+    l_data64.extractToRight(l_sprg0_save, 32, 32);
+    FAPI_DBG("Saved SPRG0 value : 0x%08llX", l_sprg0_save );
+    FAPI_DBG("Save i_Rs");
+    l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMtsprInstruction(%d, SPRG0): 0x%16llX", R31, l_data64 );
+    FAPI_TRY(ppe_RAMRead(i_target, i_base_address, l_data64, l_gpr31_save));
+    FAPI_DBG("Saved GPR31 value : 0x%08llX", l_gpr31_save );
 
     FAPI_INF("   Restore DBCR");
     FAPI_INF("   Write orig. DBCR into SPRG0");
@@ -590,6 +627,18 @@ fapi2::ReturnCode ppe_single_step(
     l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, DBCR), 0, 32);
     FAPI_DBG("getMtsprInstruction(%d, DBCR): 0x%16llX", i_Rs, l_data64  );
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
+
+    //Restore i_Rs and SPRG0 after dbcr updates
+    FAPI_DBG("Restore i_Rs");
+    l_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, SPRG0), 0, 32);
+    FAPI_DBG("getMfsprInstruction(R31, SPRG0): 0x%16llX",  l_data64 );
+    l_data64.insertFromRight(l_gpr31_save, 32, 32);
+    FAPI_DBG("Final Instr + SPRG0: 0x%16llX", l_data64 );
+    //write sprg0 with address and ram mfsprg0 to i_Rs
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMGA, l_data64 ));
+    FAPI_DBG("Restore SPRG0");
+    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIRAMDBG , l_sprg0_save), "Error in GETSCOM");
 
 
 fapi_try_exit:
@@ -624,5 +673,165 @@ fapi2::ReturnCode ppe_regs_populate_name(
         }
     }
 
+    return fapi2::current_err;
+}
+
+
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief clear the dbg status engine
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR to clear dbg status.
+ */
+fapi2::ReturnCode ppe_clear_dbg(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_INF("   Clear debug status via XCR...");
+    l_data64.flush<0>();
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to clear dbg status");
+
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief toggle TRH
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR to toggle trh.
+ */
+fapi2::ReturnCode ppe_toggle_trh(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_INF("   Toggle TRH via XCR...");
+    l_data64.flush<0>().insertFromRight(4, 1, 3);
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to toggle TRH");
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief xcr soft reset
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR to give soft reset
+ */
+fapi2::ReturnCode ppe_soft_reset(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_INF("   Soft reset via XCR...");
+    l_data64.flush<0>().insertFromRight(5, 1, 3);
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to do soft reset");
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief xcr hard reset
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR to give hard reset
+ */
+fapi2::ReturnCode ppe_hard_reset(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_INF("   Hard reset via XCR...");
+    l_data64.flush<0>().insertFromRight(6, 1, 3);
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to do hard reset");
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief xcr resume only
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR to only resume
+ */
+fapi2::ReturnCode ppe_resume_only(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_INF("   Resume only through XCR...");
+    l_data64.flush<0>().insertFromRight(p9hcd::RESUME, 1, 3);
+    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR only resume");
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//-----------------------------------------------------------------------------
+
+/**
+ * @brief only single step the engine
+ * @param[in]   i_target  target register number
+ * @return  fapi2::ReturnCode
+ * @note    programs XCR with single step no clearing DBCR
+ */
+fapi2::ReturnCode ppe_ss_only(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    uint64_t i_step_count)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+
+
+    while(i_step_count != 0)
+    {
+        FAPI_DBG("   Send Single step command via XCR...step count = 0x%16llx", i_step_count);
+        l_data64.flush<0>().insertFromRight(p9hcd::SINGLE_STEP, 1, 3);
+        FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64),
+                 "Error in PUTSCOM in XCR to generate Single Step condition");
+        --i_step_count;  //Decrement step count
+        FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+//PPE write  IAR
+fapi2::ReturnCode ppe_write_iar(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint64_t l_address
+)
+{
+
+    fapi2::buffer<uint64_t> temp_data64;
+    temp_data64.flush<0>().insertFromRight(l_address, 32, 32);
+    FAPI_DBG("IAR: 0x%16llX",  temp_data64  );
+    FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIDBGPRO, temp_data64));
+fapi_try_exit:
     return fapi2::current_err;
 }
