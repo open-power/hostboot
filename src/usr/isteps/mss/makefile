@@ -33,23 +33,28 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/lrdimm/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+
+EXTRAINCDIR += ${MSS_LIB}
 
 # Add common and generated parts to object list.
 
@@ -65,20 +70,4 @@ $(call BUILD_MODULE)
 include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
 
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ecc/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/eff_config/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/freq/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mcbist/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/phy/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/common/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/lrdimm/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/spd/rdimm/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/termination/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
-VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+VPATH += ${MSS_LIB}
