@@ -1102,6 +1102,7 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     // magic numbers ...
     // TK How about a little broadcast action here? BRS
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x0060) );
+    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNTRL_REG,       0x8100) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_LOWER_REG,   0x8000) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_UPPER_REG,   0xffe0) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
@@ -1110,18 +1111,6 @@ fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targ
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  0x6740) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
     FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
-
-    // Can't blast the DLL_CNTRL_REG as we need to do magic for the 'last' DP16's DP8
-    // Doing the conditional is far cheaper than a fix-up scom
-    for (const auto& a : TT::DLL_CNTRL_REG)
-    {
-        constexpr uint64_t l_dll_reset_data = 0x8100;
-        constexpr uint64_t l_dll_reset_data_no_cal = 0x0100;
-        const uint64_t l_data = (a.second == MCA_DDRPHY_DP16_DLL_CNTL1_P0_4) ? l_dll_reset_data_no_cal : l_dll_reset_data;
-
-        FAPI_TRY( mss::putScom(i_target, a.first, l_dll_reset_data) );
-        FAPI_TRY( mss::putScom(i_target, a.second, l_data) );
-    }
 
 fapi_try_exit:
     return fapi2::current_err;
