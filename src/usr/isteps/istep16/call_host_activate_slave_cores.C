@@ -43,6 +43,7 @@
 
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_cpu_special_wakeup.H>
+#include    <p9_dump_stop_info.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -56,7 +57,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 {
     IStepError  l_stepError;
 
-//     errlHndl_t  l_timeout_errl  =   NULL;
+    errlHndl_t  l_timeout_errl  =   NULL;
     errlHndl_t  l_errl          =   NULL;
 
 
@@ -122,30 +123,39 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                         rc,
                         pir);
 
-//@TODO RTC:147376
-//Spoke with Thi and he said this is not planned for awhile
-//FAPI_INVOKE_HWP( l_timeout_errl, proc_check_slw_done,
-//l_fapi2_ex_target);
-//                 if (l_timeout_errl)
-//                 {
-//                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-//                             "ERROR : proc_check_slw_done" );
-//                     // Add chip target info
-//                     ErrlUserDetailsTarget(l_processor).addToLog(
-//                                                             l_timeout_errl );
-//                     // Create IStep error log
-//                     l_stepError.addErrorDetails(l_timeout_errl);
-//                     // Commit error
-//                     errlCommit( l_timeout_errl, HWPF_COMP_ID );
-//                     break;
-//                 }
-//                 else
-//                 {
-//                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-//                             "SUCCESS : proc_check_slw_done - "
-//                               "SLW is in clean state");
-//                 }
-            }
+                // only called if the core doesn't report in
+                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2ProcTarget(
+                        const_cast<TARGETING::Target*>(l_processor) );
+
+                TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+                fapi2::toString( l_fapi2ProcTarget,
+                                 l_targName,
+                                 sizeof(l_targName) );
+    
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Call p9_dump_stop_info on processor %s", l_targName );
+
+                FAPI_INVOKE_HWP( l_timeout_errl,
+                                 p9_dump_stop_info,
+                                 l_fapi2ProcTarget );
+
+                if (l_timeout_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : p9_dump_stop_info" );
+
+                    // Add chip target info
+                    ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
+
+                    // Create IStep error log
+                    l_stepError.addErrorDetails(l_timeout_errl);
+
+                    // Commit error
+                    errlCommit( l_timeout_errl, HWPF_COMP_ID );
+                }
+            } // End of handle time out error
+
             // Create error log
             if (0 != rc)
             {
@@ -165,13 +175,12 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                   * @devdesc Kernel returned error when trying to activate
                   *          core.
                   */
-                errlHndl_t l_errl =
-                    new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            MOD_HOST_ACTIVATE_SLAVE_CORES,
-                            RC_BAD_RC,
-                            pir,
-                            rc );
+                l_errl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             MOD_HOST_ACTIVATE_SLAVE_CORES,
+                             RC_BAD_RC,
+                             pir,
+                             rc );
 
                 // Callout core that failed to wake up.
                 l_errl->addHwCallout(*l_core,
