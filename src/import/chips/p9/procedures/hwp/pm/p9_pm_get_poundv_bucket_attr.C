@@ -57,7 +57,6 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procParent =
         i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-
     //Need to determine which LRP record to read from depending on which
     //bucket we are getting the power management data from. FapiPos will
     //tell us which LRP record to use.
@@ -169,6 +168,9 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
             // Set the size of the bucket
             l_bucketSize = VERSION_3_BUCKET_SIZE;
 
+            //Save off some FFDC data about the #V data itself
+            uint16_t l_bucketNestFreqs[NUM_BUCKETS] = { 0, 0, 0, 0, 0, 0 };
+
             // Version 3 uses the nest frequency to choose the bucket Id
             // get the system target to find the NEST_FREQ_MHZ
             fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sysParent;
@@ -192,10 +194,11 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                     {
                         FAPI_ERR("p9_pm_get_poundv_bucket_attr::"
                                  " Multiple buckets (%d) reporting the same nest frequency"
-                                 " Bucket Nest = %d Bucket ID = %d",
+                                 " Bucket Nest = %d Bucket ID = %d, First Bucket = %d",
                                  l_numMatches,
                                  l_buckets[i].pbFreq,
-                                 (i + 1));
+                                 (i + 1),
+                                 l_currentBucket);
 
                     }
                     else
@@ -203,6 +206,9 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                         l_currentBucket = &l_buckets[i];
                     }
                 }
+
+                //save FFDC in case we fail
+                l_bucketNestFreqs[i] = l_buckets[i].pbFreq;
             }
 
             if(l_numMatches == 1)
@@ -212,11 +218,20 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
             else
             {
 
-                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching nest freqs found. Matches found = %d",
-                         l_numMatches );
+                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching nest freqs found for PBFreq=%d. Matches found = %d",
+                         l_sysNestFreq, l_numMatches );
                 FAPI_ASSERT(false,
                             fapi2::INVALID_MATCHING_FREQ_NUMBER().
-                            set_MATCHES_FOUND(l_numMatches),
+                            set_MATCHES_FOUND(l_numMatches).
+                            set_DESIRED_FREQPB(l_sysNestFreq).
+                            set_LRPREC(lrpRecord).
+                            set_BUCKETA_FREQPB(l_bucketNestFreqs[0]).
+                            set_BUCKETB_FREQPB(l_bucketNestFreqs[1]).
+                            set_BUCKETC_FREQPB(l_bucketNestFreqs[2]).
+                            set_BUCKETD_FREQPB(l_bucketNestFreqs[3]).
+                            set_BUCKETE_FREQPB(l_bucketNestFreqs[4]).
+                            set_BUCKETF_FREQPB(l_bucketNestFreqs[5]).
+                            set_EQ(i_target),
                             "Matches found is NOT 1" );
             }
         }
