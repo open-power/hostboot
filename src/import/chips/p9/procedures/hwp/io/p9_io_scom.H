@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@
 #define P9_XBUS_PHY_BASE_0x06010C00      0x06010C00
 #define P9_ABUS0_PHY_BASE_0x09011000     0x09011000
 #define P9_ABUS3_PHY_BASE_0x0C011000     0x0C011000
-#define P9_OBUS0_PHY_BASE_0x09010C00     0x09011000
+#define P9_OBUS0_PHY_BASE_0x09010C00     0x09010C00
 #define P9_OBUS1_PHY_BASE_0x0A010C00     0x0A010C00
 #define P9_OBUS2_PHY_BASE_0x0B010C00     0x0B010C00
 #define P9_OBUS3_PHY_BASE_0x0C010C00     0x0C010C00
@@ -132,14 +132,11 @@ inline uint32_t get_base_address( const fapi2::Target < K > i_target, uint32_t& 
             o_base_addr = P9_XBUS_PHY_BASE_0x06010C00;
             break;
 
-        case fapi2::TargetType::TARGET_TYPE_ABUS:
-            o_base_addr = P9_ABUS0_PHY_BASE_0x09011000;
-            break;
-
         case fapi2::TargetType::TARGET_TYPE_MCS:
             o_base_addr = P9_DMI0_PHY_BASE_0x02011A00;
             break;
 
+        case fapi2::TargetType::TARGET_TYPE_ABUS:
         case fapi2::TargetType::TARGET_TYPE_OBUS:
             o_base_addr = P9_OBUS0_PHY_BASE_0x09010C00;
             break;

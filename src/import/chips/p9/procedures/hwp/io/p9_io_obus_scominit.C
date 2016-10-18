@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,9 +65,7 @@
 //------------------------------------------------------------------------------
 
 // HWP entry point, comments in header
-fapi2::ReturnCode p9_io_obus_scominit(
-    const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_connected_target)
+fapi2::ReturnCode p9_io_obus_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target )
 {
     // mark HWP entry
     FAPI_INF("p9_io_obus_scominit: Entering...");
@@ -87,8 +85,6 @@ fapi2::ReturnCode p9_io_obus_scominit(
     FAPI_TRY( fapi2::delay( 10, 1000 ) );
 
     FAPI_TRY( io::rmw( OPT_IORESET_HARD_BUS0, i_target, GROUP_00, LANE_00, CLEAR_RESET ) );
-
-
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
     FAPI_EXEC_HWP(rc, p9_obus_scom, i_target, l_system_target);

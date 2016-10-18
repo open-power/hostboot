@@ -1,0 +1,56 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_io_obus_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_io_obus_image_build_errors.xml. -->
+<!-- Error definitions for p9_io_obus_image_build.C -->
+<hwpErrors>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_OBUS_RX_DCCAL_TIMEOUT</rc>
+        <ffdc>LANE</ffdc>
+        <ffdc>TARGET</ffdc>
+        <description>I/O Obus Rx Dccal(Offset calibration) Timeout</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>TARGET</target>
+        </gard>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_P9_IO_PPE_OBUS_IMG_PTR_ERROR</rc>
+        <description>Image pointer passed in is bad.</description>
+        <ffdc>HW_IMG_PTR</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
+</hwpErrors>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,8 +54,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_io_obus_scominit_FP_t)
-(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
- const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_connected_target);
+(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target);
 
 extern "C" {
 
@@ -69,14 +68,11 @@ extern "C" {
      * Should be called for all valid/connected OBUS endpoints
      *
      * @param[in] i_target           Reference to OBUS chiplet target
-     *            i_connected_target Reference to connected OBUS chiplet target
      *                                    - p9.obus.scom.initfile
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
-    fapi2::ReturnCode p9_io_obus_scominit(
-        const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_connected_target);
+    fapi2::ReturnCode p9_io_obus_scominit(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target);
 
 
 } // extern "C"
