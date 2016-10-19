@@ -1554,6 +1554,10 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 void IntrRp::shutDown(uint64_t i_status)
 {
     msg_t * rmsg = msg_allocate();
+    errlHndl_t l_err = NULL;
+
+    TRACFCOMP(g_trac_intr, "IntrRp::shutDown - Sending shutdown message"
+              " to registered handlers");
 
     // Call everyone and say shutting down!
     for(Registry_t::iterator r = iv_registry.begin();
@@ -1579,9 +1583,17 @@ void IntrRp::shutDown(uint64_t i_status)
 
     msg_free(rmsg);
 
-    //Reset PSIHB Interrupt Space
-    TRACDCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
+    //Mask any future interrupts to avoid receiving anymore while in the process
+    // of resetting the rest of the Interrupt Logic
+    l_err = maskAllInterruptSources();
+    if (l_err)
+    {
+        delete l_err; //errl comp already shutdown. Log error and continue
+        TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error masking all interrupt sources.");
+    }
 
+    //Reset PSIHB Interrupt Space
+    TRACFCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
 
     //First reset INTRP logic for slave procs
     for(ChipList_t::iterator targ_itr = iv_chipList.begin();
@@ -1598,7 +1610,7 @@ void IntrRp::shutDown(uint64_t i_status)
     //Then reset master proc INTRP logic
     PSIHB_SW_INTERFACES_t * this_psihb_ptr = iv_masterHdlr->psiHbBaseAddr;
     this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
-    TRACDCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
+    TRACFCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
 
     //Reset XIVE Interrupt unit
     resetIntUnit(iv_masterHdlr);
