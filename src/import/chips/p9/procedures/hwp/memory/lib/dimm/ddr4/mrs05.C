@@ -183,11 +183,62 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs05_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_crc_error_clear the crc error clear setting
+/// @param[out] o_ca_parity_error_status the c/a parity error status
+/// @param[out] o_odt_input_buffer the odt input buffer during power down mode setting
+/// @param[out] o_ca_parity the c/a parity persistent error setting
+/// @param[out] o_data_mask the data mask setting
+/// @param[out] o_write_dbi the write dbi setting
+/// @param[out] o_read_dbi the read dbi setting
+/// @param[out] o_ca_parity_latency_buffer the c/a parity latency mode setting
+/// @param[out] o_rtt_park_buffer the rtt_park setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_crc_error_clear,
+                                      uint8_t& o_ca_parity_error_status,
+                                      uint8_t& o_odt_input_buffer,
+                                      uint8_t& o_ca_parity,
+                                      uint8_t& o_data_mask,
+                                      uint8_t& o_write_dbi,
+                                      uint8_t& o_read_dbi,
+                                      fapi2::buffer<uint8_t>& o_ca_parity_latency_buffer,
+                                      fapi2::buffer<uint8_t>& o_rtt_park_buffer)
+{
+    o_ca_parity_latency_buffer = 0;
+    o_rtt_park_buffer = 0;
+
+    mss::swizzle<5, 3, A2>(i_inst.arr0, o_ca_parity_latency_buffer);
+    mss::swizzle<5, 3, A8>(i_inst.arr0, o_rtt_park_buffer);
+
+    o_crc_error_clear = i_inst.arr0.getBit<A3>();
+    o_ca_parity_error_status = i_inst.arr0.getBit<A4>();
+    o_odt_input_buffer = i_inst.arr0.getBit<A5>();
+
+    o_ca_parity = i_inst.arr0.getBit<A9>();
+    o_data_mask = i_inst.arr0.getBit<A10>();
+    o_write_dbi = i_inst.arr0.getBit<A11>();
+    o_read_dbi = i_inst.arr0.getBit<A12>();
+
+    FAPI_INF("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
+             "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x", i_rank,
+             uint8_t(o_ca_parity_latency_buffer), o_crc_error_clear, o_ca_parity_error_status,
+             o_odt_input_buffer, uint8_t(o_rtt_park_buffer), o_ca_parity, o_data_mask,
+             o_write_dbi, o_read_dbi);
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS5,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
 /// @param[in] i_rank ths rank in question
-/// @return void
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
@@ -195,25 +246,17 @@ fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_i
     fapi2::buffer<uint8_t> l_ca_parity_latency_buffer;
     fapi2::buffer<uint8_t> l_rtt_park_buffer;
 
-    mss::swizzle<5, 3, A2>(i_inst.arr0, l_ca_parity_latency_buffer);
-    mss::swizzle<5, 3, A8>(i_inst.arr0, l_rtt_park_buffer);
+    uint8_t l_crc_error_clear = 0;
+    uint8_t l_ca_parity_error_status = 0;
+    uint8_t l_odt_input_buffer = 0;
+    uint8_t l_ca_parity = 0;
+    uint8_t l_data_mask = 0;
+    uint8_t l_write_dbi = 0;
+    uint8_t l_read_dbi = 0;
 
-    uint8_t l_crc_error_clear = i_inst.arr0.getBit<A3>();
-    uint8_t l_ca_parity_error_status = i_inst.arr0.getBit<A4>();
-    uint8_t l_odt_input_buffer = i_inst.arr0.getBit<A5>();
-
-    uint8_t l_ca_parity = i_inst.arr0.getBit<A9>();
-    uint8_t l_data_mask = i_inst.arr0.getBit<A10>();
-    uint8_t l_write_dbi = i_inst.arr0.getBit<A11>();
-    uint8_t l_read_dbi = i_inst.arr0.getBit<A12>();
-
-    FAPI_INF("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
-             "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x", i_rank,
-             uint8_t(l_ca_parity_latency_buffer), l_crc_error_clear, l_ca_parity_error_status,
-             l_odt_input_buffer, uint8_t(l_rtt_park_buffer), l_ca_parity, l_data_mask,
-             l_write_dbi, l_read_dbi);
-
-    return FAPI2_RC_SUCCESS;
+    return mrs05_decode_helper(i_inst, i_rank, l_crc_error_clear, l_ca_parity_error_status,
+                               l_odt_input_buffer, l_ca_parity, l_data_mask, l_write_dbi,
+                               l_read_dbi, l_ca_parity_latency_buffer, l_rtt_park_buffer);
 }
 
 fapi2::ReturnCode (*mrs05_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
