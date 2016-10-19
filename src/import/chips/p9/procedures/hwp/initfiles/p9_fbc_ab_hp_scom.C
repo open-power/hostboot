@@ -111,6 +111,15 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             break;
         }
 
+        fapi2::ATTR_CHIP_EC_FEATURE_HW386013_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW386013;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW386013, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW386013);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW386013)");
+            break;
+        }
+
         fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE;
         l_rc = FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ADDR_BAR_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ADDR_BAR_MODE);
 
@@ -329,7 +338,12 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
 
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
+                if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW386013 != literal_0))
+                {
+                    constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 58 );
+                }
+                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
                 {
                     constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 58 );
@@ -1524,7 +1538,12 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
 
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
+                if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW386013 != literal_0))
+                {
+                    constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 60 );
+                }
+                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
                 {
                     constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 60 );
@@ -2655,7 +2674,12 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
 
             {
-                if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
+                if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW386013 != literal_0))
+                {
+                    constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
+                    l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 62 );
+                }
+                else if ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP))
                 {
                     constexpr auto l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP = 0x0;
                     l_scom_buffer.insert<uint64_t> (l_PB_COM_PB_CFG_OPT3_MODE_NEXT_SMP, 38, 2, 62 );
