@@ -243,71 +243,230 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 /// @{
 
 ///
+/// @brief Helper function for mrs00_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_burst_length the burst length
+/// @param[out] o_read_burst_type the burst type
+/// @param[out] o_dll_reset the dll reset bit
+/// @param[out] o_test_mode the test mode bit
+/// @param[out] o_wr_index the write index
+/// @param[out] o_cas_latency the cas latency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_burst_length,
+                                      uint8_t& o_read_burst_type,
+                                      uint8_t& o_dll_reset,
+                                      uint8_t& o_test_mode,
+                                      fapi2::buffer<uint8_t>& o_wr_index,
+                                      fapi2::buffer<uint8_t>& o_cas_latency);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS00,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs01_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_dll_enable the dll enable bit
+/// @param[out] o_wrl_enable the write leveling enable bit
+/// @param[out] o_tdqs the tdqs enable bit
+/// @param[out] o_qoff the qoff bit
+/// @param[out] o_odic the output driver impedance control setting
+/// @param[out] o_additive_latency the additive latency setting
+/// @param[out] o_rtt_nom the rtt_nom setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_dll_enable,
+                                      uint8_t& o_wrl_enable,
+                                      uint8_t& o_tdqs,
+                                      uint8_t& o_qoff,
+                                      fapi2::buffer<uint8_t>& o_odic,
+                                      fapi2::buffer<uint8_t>& o_additive_latency,
+                                      fapi2::buffer<uint8_t>& o_rtt_nom);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS01,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs02_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_write_crc the write crc bit
+/// @param[out] o_lpasr the low power array self refresh setting
+/// @param[out] o_cwl the cas write latency setting
+/// @param[out] o_rtt_wr the rtt_wr setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_write_crc,
+                                      fapi2::buffer<uint8_t>& o_lpasr,
+                                      fapi2::buffer<uint8_t>& o_cwl,
+                                      fapi2::buffer<uint8_t>& o_rtt_wr);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS02,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs03_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_mpr_mode the mpr operation setting
+/// @param[out] o_geardown the geardown mode setting
+/// @param[out] o_pda the per dram addressability setting
+/// @param[out] o_temp_readout the temperature sensor readout setting
+/// @param[out] o_mpr_page the mpr page selection
+/// @param[out] o_fine_refresh the fine granularity refresh mode setting
+/// @param[out] o_crc_wr_latency_buffer the write cmd latency when crc and dm are enabled
+/// @param[out] o_read_fromat the mpr read format setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_mpr_mode,
+                                      uint8_t& o_geardown,
+                                      uint8_t& o_pda,
+                                      uint8_t& o_temp_readout,
+                                      fapi2::buffer<uint8_t>& o_mpr_page,
+                                      fapi2::buffer<uint8_t>& o_fine_refresh,
+                                      fapi2::buffer<uint8_t>& o_crc_wr_latency_buffer,
+                                      fapi2::buffer<uint8_t>& o_read_format);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS03,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs04_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_max_pd_mode the maximum power down mode setting
+/// @param[out] o_temp_refresh_range the temperature controlled refresh range setting
+/// @param[out] o_temp_ref_mode the temperature controlled refresh mode setting
+/// @param[out] o_vref_mon the internal vref monitor setting
+/// @param[out] o_ref_abort the self refresh abort setting
+/// @param[out] o_rd_pre_train_mode the read preamble training mode setting
+/// @param[out] o_rd_preamble the read preamble setting
+/// @param[out] o_wr_preamble the write preamble setting
+/// @param[out] o_ppr the ppr setting
+/// @param[out] o_cs_cmd_latency_buffer the cs to cmd/addr latency mode setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_max_pd_mode,
+                                      uint8_t& o_temp_refresh_range,
+                                      uint8_t& o_temp_ref_mode,
+                                      uint8_t& o_vref_mon,
+                                      uint8_t& o_ref_abort,
+                                      uint8_t& o_rd_pre_train_mode,
+                                      uint8_t& o_rd_preamble,
+                                      uint8_t& o_wr_preamble,
+                                      uint8_t& o_ppr,
+                                      fapi2::buffer<uint8_t>& o_cs_cmd_latency_buffer);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS04,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs05_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_crc_error_clear the crc error clear setting
+/// @param[out] o_ca_parity_error_status the c/a parity error status
+/// @param[out] o_odt_input_buffer the odt input buffer during power down mode setting
+/// @param[out] o_ca_parity the c/a parity persistent error setting
+/// @param[out] o_data_mask the data mask setting
+/// @param[out] o_write_dbi the write dbi setting
+/// @param[out] o_read_dbi the read dbi setting
+/// @param[out] o_ca_parity_latency_buffer the c/a parity latency mode setting
+/// @param[out] o_rtt_park_buffer the rtt_park setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_crc_error_clear,
+                                      uint8_t& o_ca_parity_error_status,
+                                      uint8_t& o_odt_input_buffer,
+                                      uint8_t& o_ca_parity,
+                                      uint8_t& o_data_mask,
+                                      uint8_t& o_write_dbi,
+                                      uint8_t& o_read_dbi,
+                                      fapi2::buffer<uint8_t>& o_ca_parity_latency_buffer,
+                                      fapi2::buffer<uint8_t>& o_rtt_park_buffer);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS05,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs05_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
 
 ///
+/// @brief Helper function for mrs06_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_vrefdq_train_range the vrefdq training range setting
+/// @param[out] o_vrefdq_train_enable the vrefdq training enable setting
+/// @param[out] o_tccd_l_buffer the tccd_l setting
+/// @param[out] o_vrefdq_train_value_buffer the vrefdq training value
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_vrefdq_train_range,
+                                      uint8_t& o_vrefdq_train_enable,
+                                      fapi2::buffer<uint8_t>& o_tccd_l_buffer,
+                                      fapi2::buffer<uint8_t>& o_vrefdq_train_value_buffer);
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS06,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank);
