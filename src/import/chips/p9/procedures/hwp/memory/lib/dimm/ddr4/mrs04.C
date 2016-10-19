@@ -163,37 +163,83 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Given a CCS instruction which contains address bits with an encoded MRS4,
-/// decode and trace the contents
+/// @brief Helper function for mrs04_decode
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @param[out] o_max_pd_mode the maximum power down mode setting
+/// @param[out] o_temp_refresh_range the temperature controlled refresh range setting
+/// @param[out] o_temp_ref_mode the temperature controlled refresh mode setting
+/// @param[out] o_vref_mon the internal vref monitor setting
+/// @param[out] o_ref_abort the self refresh abort setting
+/// @param[out] o_rd_pre_train_mode the read preamble training mode setting
+/// @param[out] o_rd_preamble the read preamble setting
+/// @param[out] o_wr_preamble the write preamble setting
+/// @param[out] o_ppr the ppr setting
+/// @param[out] o_cs_cmd_latency_buffer the cs to cmd/addr latency mode setting
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
-                               const uint64_t i_rank)
+fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_max_pd_mode,
+                                      uint8_t& o_temp_refresh_range,
+                                      uint8_t& o_temp_ref_mode,
+                                      uint8_t& o_vref_mon,
+                                      uint8_t& o_ref_abort,
+                                      uint8_t& o_rd_pre_train_mode,
+                                      uint8_t& o_rd_preamble,
+                                      uint8_t& o_wr_preamble,
+                                      uint8_t& o_ppr,
+                                      fapi2::buffer<uint8_t>& o_cs_cmd_latency_buffer)
 {
-    uint8_t l_max_pd_mode = i_inst.arr0.getBit<A1>();
-    uint8_t l_temp_refresh_range = i_inst.arr0.getBit<A2>();
-    uint8_t l_temp_ref_mode = i_inst.arr0.getBit<A3>();
-    uint8_t l_vref_mon = i_inst.arr0.getBit<A4>();
+    o_max_pd_mode = i_inst.arr0.getBit<A1>();
+    o_temp_refresh_range = i_inst.arr0.getBit<A2>();
+    o_temp_ref_mode = i_inst.arr0.getBit<A3>();
+    o_vref_mon = i_inst.arr0.getBit<A4>();
 
-    fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
-    mss::swizzle<5, 3, A8>(i_inst.arr0, l_cs_cmd_latency_buffer);
+    o_cs_cmd_latency_buffer = 0;
+    mss::swizzle<5, 3, A8>(i_inst.arr0, o_cs_cmd_latency_buffer);
 
-    uint8_t l_ref_abort = i_inst.arr0.getBit<A9>();
-    uint8_t l_rd_pre_train_mode = i_inst.arr0.getBit<A10>();
-    uint8_t l_rd_preamble = i_inst.arr0.getBit<A11>();
-    uint8_t l_wr_preamble = i_inst.arr0.getBit<A12>();
-    uint8_t l_ppr = i_inst.arr0.getBit<A13>();
+    o_ref_abort = i_inst.arr0.getBit<A9>();
+    o_rd_pre_train_mode = i_inst.arr0.getBit<A10>();
+    o_rd_preamble = i_inst.arr0.getBit<A11>();
+    o_wr_preamble = i_inst.arr0.getBit<A12>();
+    o_ppr = i_inst.arr0.getBit<A13>();
 
     FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
              "WR_PRE: 0x%x, PPR: 0x%x", i_rank,
-             l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode, l_vref_mon,
-             uint8_t(l_cs_cmd_latency_buffer), l_ref_abort,
-             l_rd_pre_train_mode, l_rd_preamble, l_wr_preamble, l_ppr);
+             o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode, o_vref_mon,
+             uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
+             o_rd_pre_train_mode, o_rd_preamble, o_wr_preamble, o_ppr);
 
     return FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Given a CCS instruction which contains address bits with an encoded MRS4,
+/// decode and trace the contents
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs04_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                               const uint64_t i_rank)
+{
+    uint8_t l_max_pd_mode = 0;
+    uint8_t l_temp_refresh_range = 0;
+    uint8_t l_temp_ref_mode = 0;
+    uint8_t l_vref_mon = 0;
+    uint8_t l_ref_abort = 0;
+    uint8_t l_rd_pre_train_mode = 0;
+    uint8_t l_rd_preamble = 0;
+    uint8_t l_wr_preamble = 0;
+    uint8_t l_ppr = 0;
+
+    fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
+
+    return mrs04_decode_helper(i_inst, i_rank, l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode,
+                               l_vref_mon, l_ref_abort, l_rd_pre_train_mode, l_rd_preamble,
+                               l_wr_preamble, l_ppr, l_cs_cmd_latency_buffer);
 }
 
 fapi2::ReturnCode (*mrs04_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
