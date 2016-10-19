@@ -142,28 +142,54 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs06_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_vrefdq_train_range the vrefdq training range setting
+/// @param[out] o_vrefdq_train_enable the vrefdq training enable setting
+/// @param[out] o_tccd_l_buffer the tccd_l setting
+/// @param[out] o_vrefdq_train_value_buffer the vrefdq training value
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_vrefdq_train_range,
+                                      uint8_t& o_vrefdq_train_enable,
+                                      fapi2::buffer<uint8_t>& o_tccd_l_buffer,
+                                      fapi2::buffer<uint8_t>& o_vrefdq_train_value_buffer)
+{
+    o_tccd_l_buffer = 0;
+    o_vrefdq_train_value_buffer = 0;
+
+    mss::swizzle<2, 6, A5>(i_inst.arr0, o_vrefdq_train_value_buffer);
+    o_vrefdq_train_range = i_inst.arr0.getBit<A6>();
+    o_vrefdq_train_enable = i_inst.arr0.getBit<A7>();
+    mss::swizzle<5, 3, A12>(i_inst.arr0, o_tccd_l_buffer);
+
+    FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x", i_rank,
+             uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
+             o_vrefdq_train_enable, uint8_t(o_tccd_l_buffer));
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS6,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
 {
     fapi2::buffer<uint8_t> l_tccd_l_buffer;
     fapi2::buffer<uint8_t> l_vrefdq_train_value_buffer;
+    uint8_t l_vrefdq_train_range = 0;
+    uint8_t l_vrefdq_train_enable = 0;
 
-    mss::swizzle<2, 6, A5>(i_inst.arr0, l_vrefdq_train_value_buffer);
-    uint8_t l_vrefdq_train_range = i_inst.arr0.getBit<A6>();
-    uint8_t l_vrefdq_train_enable = i_inst.arr0.getBit<A7>();
-    mss::swizzle<5, 3, A12>(i_inst.arr0, l_tccd_l_buffer);
-
-    FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x", i_rank,
-             uint8_t(l_vrefdq_train_value_buffer), l_vrefdq_train_range,
-             l_vrefdq_train_enable, uint8_t(l_tccd_l_buffer));
-
-    return FAPI2_RC_SUCCESS;
+    return mrs06_decode_helper(i_inst, i_rank, l_vrefdq_train_range, l_vrefdq_train_enable,
+                               l_tccd_l_buffer, l_vrefdq_train_value_buffer);
 }
 
 fapi2::ReturnCode (*mrs06_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,

@@ -82,6 +82,9 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
         static const uint64_t PC_CONFIG0_REG = MCA_DDRPHY_PC_CONFIG0_P0;
         static const uint64_t PC_CONFIG1_REG = MCA_DDRPHY_PC_CONFIG1_P0;
 
+        // MCA phy MR shadow registers, indexed by [rank_pair][MR index]
+        static const std::vector< std::vector<uint64_t> > PC_MR_SHADOW_REGS;
+
         enum
         {
             INIT_CAL_ERROR_WR_LEVEL = MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WR_LEVEL,

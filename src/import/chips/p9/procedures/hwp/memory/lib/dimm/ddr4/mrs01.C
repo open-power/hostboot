@@ -172,6 +172,50 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs01_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
+/// @param[out] o_dll_enable the dll enable bit
+/// @param[out] o_wrl_enable the write leveling enable bit
+/// @param[out] o_tdqs the tdqs enable bit
+/// @param[out] o_qoff the qoff bit
+/// @param[out] o_odic the output driver impedance control setting
+/// @param[out] o_additive_latency the additive latency setting
+/// @param[out] o_rtt_nom the rtt_nom setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_dll_enable,
+                                      uint8_t& o_wrl_enable,
+                                      uint8_t& o_tdqs,
+                                      uint8_t& o_qoff,
+                                      fapi2::buffer<uint8_t>& o_odic,
+                                      fapi2::buffer<uint8_t>& o_additive_latency,
+                                      fapi2::buffer<uint8_t>& o_rtt_nom)
+{
+    o_odic = 0;
+    o_additive_latency = 0;
+    o_rtt_nom = 0;
+
+    o_dll_enable = i_inst.arr0.getBit<A0>();
+    o_wrl_enable = i_inst.arr0.getBit<A7>();
+    o_tdqs = i_inst.arr0.getBit<A11>();
+    o_qoff = i_inst.arr0.getBit<A12>();
+
+    mss::swizzle<6, 2, A2>(i_inst.arr0, o_odic);
+    mss::swizzle<6, 2, A4>(i_inst.arr0, o_additive_latency);
+    mss::swizzle<5, 3, A10>(i_inst.arr0, o_rtt_nom);
+
+    FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
+             "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x", i_rank,
+             o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency), o_wrl_enable, uint8_t(o_rtt_nom),
+             o_tdqs, o_qoff);
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS1,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
@@ -181,25 +225,16 @@ fapi_try_exit:
 fapi2::ReturnCode mrs01_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
 {
+    uint8_t l_dll_enable = 0;
+    uint8_t l_wrl_enable = 0;
+    uint8_t l_tdqs = 0;
+    uint8_t l_qoff = 0;
     fapi2::buffer<uint8_t> l_odic;
     fapi2::buffer<uint8_t> l_additive_latency;
     fapi2::buffer<uint8_t> l_rtt_nom;
 
-    uint8_t l_dll_enable = i_inst.arr0.getBit<A0>();
-    uint8_t l_wrl_enable = i_inst.arr0.getBit<A7>();
-    uint8_t l_tdqs = i_inst.arr0.getBit<A11>();
-    uint8_t l_qoff = i_inst.arr0.getBit<A12>();
-
-    mss::swizzle<6, 2, A2>(i_inst.arr0, l_odic);
-    mss::swizzle<6, 2, A4>(i_inst.arr0, l_additive_latency);
-    mss::swizzle<5, 3, A10>(i_inst.arr0, l_rtt_nom);
-
-    FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x", i_rank,
-             l_dll_enable, uint8_t(l_odic), uint8_t(l_additive_latency), l_wrl_enable, uint8_t(l_rtt_nom),
-             l_tdqs, l_qoff);
-
-    return FAPI2_RC_SUCCESS;
+    return mrs01_decode_helper(i_inst, i_rank, l_dll_enable, l_wrl_enable, l_tdqs, l_qoff, l_odic,
+                               l_additive_latency, l_rtt_nom);
 }
 
 fapi2::ReturnCode (*mrs01_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
