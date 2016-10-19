@@ -77,7 +77,6 @@
 
 #ifdef CONFIG_SECUREBOOT
 #include <secureboot/service.H>
-#include <util/misc.H>
 #endif
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
@@ -471,13 +470,7 @@ void* host_prd_hwreconfig( void *io_pArgs )
     {
         #ifdef CONFIG_SECUREBOOT
         // check the BAR values for all processors
-        // TODO RTC 156484 Remove the simics check below from around the BAR
-        // check as soon as simics has support for the BAR value registers.
-        // Also will need to remove include <util/misc.H> from top of this file.
-        if (!Util::isSimicsRunning())
-        {
-            enforce_bar_values_for_all_proc();
-        }
+        enforce_bar_values_for_all_proc();
         #endif
 
         // Flip the scom path back to FSI in case we enabled IBSCOM previously
