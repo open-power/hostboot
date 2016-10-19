@@ -100,6 +100,16 @@ fapi2::ReturnCode p9_get_proc_fabric_chip_id(
     uint8_t&                                        o_chip_id );
 
 /**
+ * @brief Sets the Msb Swap Register based upon an attribute
+ * @param[in]  i_tgt    Fapi2 Target
+ * @param[out] o_grp    Group
+ * @retval     ReturnCode  Fapi2 ReturnCode
+ */
+fapi2::ReturnCode set_msb_swap(
+    const fapi2::Target< fapi2::TARGET_TYPE_XBUS > i_tgt,
+    const uint8_t                                  i_grp );
+
+/**
  * @brief HWP that calls the XBUS SCOM initfiles
  * Should be called for all valid/connected XBUS endpoints
  * @param[in] i_target           Reference to XBUS chiplet target
@@ -152,6 +162,10 @@ fapi2::ReturnCode p9_io_xbus_scominit(
     // The scominit procedure will reference the attribute to set the register field.
     FAPI_TRY( set_rx_master_mode( i_target, i_connected_target ),
               "Setting Rx Master Mode Attribute Failed." );
+
+    // Set Msb Swap based upon attribute data.
+    FAPI_TRY( set_msb_swap( i_target, i_group ), "Failed Setting MSB Swap" );
+    FAPI_TRY( set_msb_swap( i_connected_target, i_group ), "Failed Setting MSB Swap" );
 
     switch(i_group)
     {
@@ -308,6 +322,53 @@ fapi2::ReturnCode p9_get_proc_fabric_chip_id(
 
 fapi_try_exit:
     FAPI_IMP("I/O Xbus Scominit: Get Proc Chip Id Exit.");
+    return fapi2::current_err;
+}
+
+/**
+ * @brief Sets the Msb Swap Register based upon an attribute
+ * @param[in]  i_tgt    Fapi2 Target
+ * @param[out] o_grp    Group
+ * @retval     ReturnCode  Fapi2 ReturnCode
+ */
+fapi2::ReturnCode set_msb_swap(
+    const fapi2::Target< fapi2::TARGET_TYPE_XBUS > i_tgt,
+    const uint8_t                                  i_grp )
+{
+    FAPI_IMP("Set Msb Swap Start.");
+    const uint8_t LN0   = 0;
+    uint8_t tx_msb_swap = 0x0;
+    uint8_t field_data  = 0x0;
+
+    // Retrieve msb swap attribute
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_EI_BUS_TX_MSBSWAP, i_tgt, tx_msb_swap ),
+              "(PROC): Error getting ATTR_EI_BUS_TX_MSB_SWAP, l_rc 0x%.8X",
+              (uint64_t)fapi2::current_err );
+
+    switch( i_grp )
+    {
+        case ENUM_ATTR_XBUS_GROUP_0:
+            if( tx_msb_swap & fapi2::ENUM_ATTR_EI_BUS_TX_MSBSWAP_GROUP_0_SWAP )
+            {
+                field_data = 1;
+            }
+
+            break;
+
+        case ENUM_ATTR_XBUS_GROUP_1:
+            if( tx_msb_swap & fapi2::ENUM_ATTR_EI_BUS_TX_MSBSWAP_GROUP_1_SWAP )
+            {
+                field_data = 1;
+            }
+
+            break;
+    }
+
+    FAPI_TRY( io::rmw( EDIP_TX_MSBSWAP, i_tgt, i_grp, LN0, field_data ) );
+
+
+fapi_try_exit:
+    FAPI_IMP("Set Msb Swap Exit.");
     return fapi2::current_err;
 }
 
