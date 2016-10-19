@@ -234,4 +234,22 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** --> 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PSI_HALF_SPEED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 only: enable half speed PSI link operation due to relaxed
+      chip timing closure
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** --> 
 </attributes>
