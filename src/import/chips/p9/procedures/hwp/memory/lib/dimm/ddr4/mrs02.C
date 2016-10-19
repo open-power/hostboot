@@ -177,6 +177,38 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs02_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_write_crc the write crc bit
+/// @param[out] o_lpasr the low power array self refresh setting
+/// @param[out] o_cwl the cas write latency setting
+/// @param[out] o_rtt_wr the rtt_wr setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_write_crc,
+                                      fapi2::buffer<uint8_t>& o_lpasr,
+                                      fapi2::buffer<uint8_t>& o_cwl,
+                                      fapi2::buffer<uint8_t>& o_rtt_wr)
+{
+    o_lpasr = 0;
+    o_cwl = 0;
+    o_rtt_wr = 0;
+
+    o_write_crc = i_inst.arr0.getBit<A12>();
+    mss::swizzle<5, 3, A5>(i_inst.arr0, o_cwl);
+    mss::swizzle<6, 2, A7>(i_inst.arr0, o_lpasr);
+    mss::swizzle<5, 3, A11>(i_inst.arr0, o_rtt_wr);
+
+    FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x", i_rank,
+             uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS2,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
@@ -186,19 +218,12 @@ fapi_try_exit:
 fapi2::ReturnCode mrs02_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
 {
+    uint8_t l_write_crc = 0;
     fapi2::buffer<uint8_t> l_lpasr;
     fapi2::buffer<uint8_t> l_cwl;
     fapi2::buffer<uint8_t> l_rtt_wr;
 
-    uint8_t l_write_crc = i_inst.arr0.getBit<A12>();
-    mss::swizzle<5, 3, A5>(i_inst.arr0, l_cwl);
-    mss::swizzle<6, 2, A7>(i_inst.arr0, l_lpasr);
-    mss::swizzle<5, 3, A11>(i_inst.arr0, l_rtt_wr);
-
-    FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x", i_rank,
-             uint8_t(l_lpasr), uint8_t(l_cwl), uint8_t(l_rtt_wr), l_write_crc);
-
-    return FAPI2_RC_SUCCESS;
+    return mrs02_decode_helper(i_inst, i_rank, l_write_crc, l_lpasr, l_cwl, l_rtt_wr);
 }
 
 fapi2::ReturnCode (*mrs02_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
