@@ -253,6 +253,24 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW386013</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 only: enable workarounds for HW386013
+      pb_cfg_cent_opt3_mode must be configured as an smp to allow vas data
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_PSI_HALF_SPEED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
