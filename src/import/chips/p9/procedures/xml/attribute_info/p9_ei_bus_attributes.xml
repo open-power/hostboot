@@ -61,7 +61,13 @@
         the correct target endpoints.
 
     </description>
-  <valueType>uint8</valueType>
+    <valueType>uint8</valueType>
+    <enum>
+        NO_SWAP      = 0x00,
+        ALL_SWAP     = 0xFF,
+        GROUP_0_SWAP = 0x80,
+        GROUP_1_SWAP = 0x40
+    </enum>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
