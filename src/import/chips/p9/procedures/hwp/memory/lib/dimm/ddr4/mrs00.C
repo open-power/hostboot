@@ -186,6 +186,57 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs00_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
+/// @param[out] o_burst_length the burst length
+/// @param[out] o_read_burst_type the burst type
+/// @param[out] o_dll_reset the dll reset bit
+/// @param[out] o_test_mode the test mode bit
+/// @param[out] o_wr_index the write index
+/// @param[out] o_cas_latency the cas latency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_burst_length,
+                                      uint8_t& o_read_burst_type,
+                                      uint8_t& o_dll_reset,
+                                      uint8_t& o_test_mode,
+                                      fapi2::buffer<uint8_t>& o_wr_index,
+                                      fapi2::buffer<uint8_t>& o_cas_latency)
+{
+    static const uint8_t wr_map[9] = { 10, 12, 14, 16, 18, 20, 24, 22, 26 };
+
+    o_wr_index = 0;
+    o_cas_latency = 0;
+
+    i_inst.arr0.extractToRight<A0, 2>(o_burst_length);
+    o_read_burst_type = i_inst.arr0.getBit<A3>();
+    o_test_mode = i_inst.arr0.getBit<A7>();
+    o_dll_reset = i_inst.arr0.getBit<A8>();
+
+    // CAS Latency takes a little effort - the bits aren't contiguous
+    o_cas_latency.writeBit<3>(i_inst.arr0.getBit<A12>());
+    o_cas_latency.writeBit<4>(i_inst.arr0.getBit<A6>());
+    o_cas_latency.writeBit<5>(i_inst.arr0.getBit<A5>());
+    o_cas_latency.writeBit<6>(i_inst.arr0.getBit<A4>());
+    o_cas_latency.writeBit<7>(i_inst.arr0.getBit<A2>());
+
+    // Write Recovery/Read to Precharge is not contiguous either.
+    o_wr_index.writeBit<4>(i_inst.arr0.getBit<A13>());
+    o_wr_index.writeBit<5>(i_inst.arr0.getBit<A11>());
+    o_wr_index.writeBit<6>(i_inst.arr0.getBit<A10>());
+    o_wr_index.writeBit<7>(i_inst.arr0.getBit<A9>());
+
+    FAPI_INF("MR0 Decode BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: (0x%x)0x%x",
+             o_burst_length, o_read_burst_type, uint8_t(o_cas_latency), o_test_mode, o_dll_reset,
+             wr_map[uint8_t(o_wr_index)], uint8_t(o_wr_index));
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS0,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
@@ -195,39 +246,15 @@ fapi_try_exit:
 fapi2::ReturnCode mrs00_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
 {
-    static const uint8_t wr_map[9] = { 10, 12, 14, 16, 18, 20, 24, 22, 26 };
-
     uint8_t l_burst_length = 0;
     uint8_t l_read_burst_type = 0;
     uint8_t l_dll_reset = 0;
     uint8_t l_test_mode = 0;
-
     fapi2::buffer<uint8_t> l_wr_index;
     fapi2::buffer<uint8_t> l_cas_latency;
 
-    i_inst.arr0.extractToRight<A0, 2>(l_burst_length);
-    l_read_burst_type = i_inst.arr0.getBit<A3>();
-    l_test_mode = i_inst.arr0.getBit<A7>();
-    l_dll_reset = i_inst.arr0.getBit<A8>();
-
-    // CAS Latency takes a little effort - the bits aren't contiguous
-    l_cas_latency.writeBit<3>(i_inst.arr0.getBit<A12>());
-    l_cas_latency.writeBit<4>(i_inst.arr0.getBit<A6>());
-    l_cas_latency.writeBit<5>(i_inst.arr0.getBit<A5>());
-    l_cas_latency.writeBit<6>(i_inst.arr0.getBit<A4>());
-    l_cas_latency.writeBit<7>(i_inst.arr0.getBit<A2>());
-
-    // Write Recovery/Read to Precharge is not contiguous either.
-    l_wr_index.writeBit<4>(i_inst.arr0.getBit<A13>());
-    l_wr_index.writeBit<5>(i_inst.arr0.getBit<A11>());
-    l_wr_index.writeBit<6>(i_inst.arr0.getBit<A10>());
-    l_wr_index.writeBit<7>(i_inst.arr0.getBit<A9>());
-
-    FAPI_INF("MR0 Decode BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: (0x%x)0x%x",
-             l_burst_length, l_read_burst_type, uint8_t(l_cas_latency), l_test_mode, l_dll_reset,
-             wr_map[uint8_t(l_wr_index)], uint8_t(l_wr_index));
-
-    return FAPI2_RC_SUCCESS;
+    return mrs00_decode_helper(i_inst, i_rank, l_burst_length, l_read_burst_type, l_dll_reset, l_test_mode,
+                               l_wr_index, l_cas_latency);
 }
 
 fapi2::ReturnCode (*mrs00_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
