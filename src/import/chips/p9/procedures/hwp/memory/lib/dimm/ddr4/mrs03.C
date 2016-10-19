@@ -137,8 +137,8 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_crc_wr_latency_buffer = crc_wr_latency_map[i_data.iv_crc_wr_latency - LOWEST_WL];
 
-    mss::swizzle<A0, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_mpr_mode), io_inst.arr0);
-    io_inst.arr0.writeBit<A2>(i_data.iv_mpr_page);
+    mss::swizzle<A0, 2, 7>(fapi2::buffer<uint8_t>(i_data.iv_mpr_page), io_inst.arr0);
+    io_inst.arr0.writeBit<A2>(i_data.iv_mpr_mode);
     io_inst.arr0.writeBit<A3>(i_data.iv_geardown);
     io_inst.arr0.writeBit<A4>(i_data.iv_pda);
     io_inst.arr0.writeBit<A5>(i_data.iv_temp_readout);
@@ -156,37 +156,74 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function for mrs03_decode
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank the rank in question
+/// @param[out] o_mpr_mode the mpr operation setting
+/// @param[out] o_geardown the geardown mode setting
+/// @param[out] o_pda the per dram addressability setting
+/// @param[out] o_temp_readout the temperature sensor readout setting
+/// @param[out] o_mpr_page the mpr page selection
+/// @param[out] o_fine_refresh the fine granularity refresh mode setting
+/// @param[out] o_crc_wr_latency_buffer the write cmd latency when crc and dm are enabled
+/// @param[out] o_read_fromat the mpr read format setting
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
+                                      const uint64_t i_rank,
+                                      uint8_t& o_mpr_mode,
+                                      uint8_t& o_geardown,
+                                      uint8_t& o_pda,
+                                      uint8_t& o_temp_readout,
+                                      fapi2::buffer<uint8_t>& o_mpr_page,
+                                      fapi2::buffer<uint8_t>& o_fine_refresh,
+                                      fapi2::buffer<uint8_t>& o_crc_wr_latency_buffer,
+                                      fapi2::buffer<uint8_t>& o_read_format)
+{
+    o_mpr_page = 0;
+    o_fine_refresh = 0;
+    o_crc_wr_latency_buffer = 0;
+    o_read_format = 0;
+
+    o_mpr_mode = i_inst.arr0.getBit<A2>();
+    o_geardown = i_inst.arr0.getBit<A3>();
+    o_pda = i_inst.arr0.getBit<A4>();
+    o_temp_readout = i_inst.arr0.getBit<A5>();
+
+    mss::swizzle<6, 2, A1>(i_inst.arr0, o_mpr_page);
+    mss::swizzle<5, 3, A8>(i_inst.arr0, o_fine_refresh);
+    mss::swizzle<6, 2, A10>(i_inst.arr0, o_crc_wr_latency_buffer);
+    mss::swizzle<6, 2, A12>(i_inst.arr0, o_read_format);
+
+    FAPI_INF("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
+             "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_rank,
+             uint8_t(o_mpr_mode), o_mpr_page, o_geardown, o_pda, uint8_t(o_temp_readout),
+             uint8_t(o_fine_refresh), uint8_t(o_crc_wr_latency_buffer), uint8_t(o_read_format));
+
+    return FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS3,
 /// decode and trace the contents
 /// @param[in] i_inst the CCS instruction
-/// @param[in] i_rank ths rank in question
-/// @return void
+/// @param[in] i_rank the rank in question
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode mrs03_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
                                const uint64_t i_rank)
 {
-    fapi2::buffer<uint8_t> l_mpr_mode;
-
+    uint8_t l_mpr_mode = 0;
+    uint8_t l_geardown = 0;
+    uint8_t l_pda = 0;
+    uint8_t l_temp_readout = 0;
+    fapi2::buffer<uint8_t> l_mpr_page;
     fapi2::buffer<uint8_t> l_fine_refresh;
     fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
     fapi2::buffer<uint8_t> l_read_format;
 
-    uint8_t l_mpr_page = i_inst.arr0.getBit<A2>();
-    uint8_t l_geardown = i_inst.arr0.getBit<A3>();
-    uint8_t l_pda = i_inst.arr0.getBit<A4>();
-    uint8_t l_temp_readout = i_inst.arr0.getBit<A5>();
-
-    mss::swizzle<6, 2, A1>(i_inst.arr0, l_mpr_mode);
-    mss::swizzle<5, 3, A7>(i_inst.arr0, l_fine_refresh);
-    mss::swizzle<6, 2, A10>(i_inst.arr0, l_crc_wr_latency_buffer);
-    mss::swizzle<6, 2, A12>(i_inst.arr0, l_read_format);
-
-    FAPI_INF("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
-             "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_rank,
-             uint8_t(l_mpr_mode), l_mpr_page, l_geardown, l_pda, uint8_t(l_temp_readout),
-             uint8_t(l_fine_refresh), uint8_t(l_crc_wr_latency_buffer), uint8_t(l_read_format));
-
-    return FAPI2_RC_SUCCESS;
+    return mrs03_decode_helper(i_inst, i_rank, l_mpr_mode, l_geardown, l_pda, l_temp_readout,
+                               l_mpr_page, l_fine_refresh, l_crc_wr_latency_buffer, l_read_format);
 }
 
 fapi2::ReturnCode (*mrs03_data::make_ccs_instruction)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
