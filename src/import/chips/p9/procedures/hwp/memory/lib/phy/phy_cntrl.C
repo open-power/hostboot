@@ -46,6 +46,48 @@ using fapi2::TARGET_TYPE_MCA;
 namespace mss
 {
 
+// Definition of the PHY PC MR shadow registers
+// indexed by [rank_pair][MR index]
+const std::vector< std::vector<uint64_t> > pcTraits<TARGET_TYPE_MCA>::PC_MR_SHADOW_REGS =
+{
+    {
+        MCA_DDRPHY_PC_MR0_PRI_RP0_P0,
+        MCA_DDRPHY_PC_MR1_PRI_RP0_P0,
+        MCA_DDRPHY_PC_MR2_PRI_RP0_P0,
+        MCA_DDRPHY_PC_MR3_PRI_RP0_P0,
+        MCA_DDRPHY_PC_MR0_SEC_RP0_P0,
+        MCA_DDRPHY_PC_MR1_SEC_RP0_P0,
+        MCA_DDRPHY_PC_MR2_SEC_RP0_P0,
+    },
+    {
+        MCA_DDRPHY_PC_MR0_PRI_RP1_P0,
+        MCA_DDRPHY_PC_MR1_PRI_RP1_P0,
+        MCA_DDRPHY_PC_MR2_PRI_RP1_P0,
+        MCA_DDRPHY_PC_MR3_PRI_RP1_P0,
+        MCA_DDRPHY_PC_MR0_SEC_RP1_P0,
+        MCA_DDRPHY_PC_MR1_SEC_RP1_P0,
+        MCA_DDRPHY_PC_MR2_SEC_RP1_P0,
+    },
+    {
+        MCA_DDRPHY_PC_MR0_PRI_RP2_P0,
+        MCA_DDRPHY_PC_MR1_PRI_RP2_P0,
+        MCA_DDRPHY_PC_MR2_PRI_RP2_P0,
+        MCA_DDRPHY_PC_MR3_PRI_RP2_P0,
+        MCA_DDRPHY_PC_MR0_SEC_RP2_P0,
+        MCA_DDRPHY_PC_MR1_SEC_RP2_P0,
+        MCA_DDRPHY_PC_MR2_SEC_RP2_P0,
+    },
+    {
+        MCA_DDRPHY_PC_MR0_PRI_RP3_P0,
+        MCA_DDRPHY_PC_MR1_PRI_RP3_P0,
+        MCA_DDRPHY_PC_MR2_PRI_RP3_P0,
+        MCA_DDRPHY_PC_MR3_PRI_RP3_P0,
+        MCA_DDRPHY_PC_MR0_SEC_RP3_P0,
+        MCA_DDRPHY_PC_MR1_SEC_RP3_P0,
+        MCA_DDRPHY_PC_MR2_SEC_RP3_P0,
+    },
+};
+
 namespace pc
 {
 
