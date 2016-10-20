@@ -1927,7 +1927,7 @@
         <id>ATTR_MSS_CAL_STEP_ENABLE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            A bit vector denoting valid cal steps to run (0 is left most bit)
+            A bit map of vector denoting valid cal steps to run (0 is left most bit)
             [0] EXT_ZQCAL
             [1] WR_LEVEL
             [2] DQS_ALIGN
