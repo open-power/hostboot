@@ -276,9 +276,9 @@
         <id>EEPROM_SBE_PRIMARY_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x100</value></field>
             <field><id>chipCount</id><value>0x04</value></field>
@@ -290,9 +290,9 @@
         <id>EEPROM_SBE_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>3</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x100</value></field>
             <field><id>chipCount</id><value>0x04</value></field>
@@ -304,9 +304,9 @@
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>2</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x80</value></field>
             <field><id>chipCount</id><value>0x02</value></field>
@@ -318,9 +318,9 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x80</value></field>
             <field><id>chipCount</id><value>0x02</value></field>
@@ -368,8 +368,8 @@
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>
-            400, 0, 0, 0,
-            0, 400, 0, 400,
+            0, 0, 0, 0,
+            400, 400, 400, 400,
             400, 0, 0, 0,
             0, 0, 0, 0
         </default>
@@ -5104,6 +5104,15 @@
         <id>PROC_MASTER_TYPE</id>
         <default>NOT_MASTER</default>
     </attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>
+            0, 0, 0, 0,
+            400, 400, 400, 400,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        </default>
+    </attribute>
     <!-- FSI connections -->
     <attribute>
         <id>FSI_MASTER_TYPE</id>
@@ -5170,9 +5179,9 @@
         <id>EEPROM_SBE_PRIMARY_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>1</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x100</value></field>
             <field><id>chipCount</id><value>0x04</value></field>
@@ -5184,9 +5193,9 @@
         <id>EEPROM_SBE_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
-            <field><id>port</id><value>0</value></field>
+            <field><id>port</id><value>3</value></field>
             <field><id>devAddr</id><value>0xA8</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x100</value></field>
             <field><id>chipCount</id><value>0x04</value></field>
@@ -5198,9 +5207,9 @@
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>2</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x80</value></field>
             <field><id>chipCount</id><value>0x02</value></field>
@@ -5212,9 +5221,9 @@
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
-            <field><id>port</id><value>1</value></field>
+            <field><id>port</id><value>0</value></field>
             <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>engine</id><value>0</value></field>
+            <field><id>engine</id><value>1</value></field>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
             <field><id>maxMemorySizeKB</id><value>0x80</value></field>
             <field><id>chipCount</id><value>0x02</value></field>
