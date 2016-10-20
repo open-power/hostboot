@@ -185,7 +185,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     //  listed in ring_identification.C: One for each of the two EX, even and odd.
     //  Each of these two rings have the same [EQ] chipletId encoded in their
     //  iv_chipletId (current RS4 header) or iv_scanAddress (next gen RS4 header).
-    //  They are distinguished by their even-odd bits in iv_scanSelect as follows:
+    //  They are distinguished by their even-odd bits in iv_scanAddress and so
+    //  for each EQ chipletId there's two EX rings to be accommodated.
     if (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS)
     {
         l_ringsPerChipletId = 2;
@@ -413,25 +414,8 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                 }
                 else
                 {
-
-                    //@TODO: Temporary fix to convert VPD RS4 container format to
-                    //       to RingLayout format. Remove/replace in connection
-                    //       with RS4 header shrinkage (RTC158101)
-                    uint32_t i;
-
-                    for (i = 0; i < l_vpdRingSize; i++)
-                    {
-                        *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 + sizeof(P9_TOR::RingLayout_t) - i) =
-                            *(((uint8_t*)i_vpdRing) + l_vpdRingSize - 1 - i);
-                    }
-
-                    uint32_t l_sizeOfThisRing = l_vpdRingSize + sizeof(P9_TOR::RingLayout_t);
-                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfThis = htobe32(l_sizeOfThisRing);
-                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfCmsk = 0;
-                    ((P9_TOR::RingLayout_t*)i_vpdRing)->sizeOfMeta = 0;
-
                     // Checking for potential image overflow BEFORE appending the ring.
-                    if ( (io_ringSectionSize + l_sizeOfThisRing) > i_maxRingSectionSize )
+                    if ( (io_ringSectionSize + l_vpdRingSize) > i_maxRingSectionSize )
                     {
                         //@TODO: We can't update bootCoreMask until RTC158106. So for now
                         //       we're simply returning the requested bootCoreMask. Thus,
@@ -444,7 +428,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                      fapi2::XIPC_IMAGE_WOULD_OVERFLOW().
                                      set_CHIP_TARGET(i_proc_target).
                                      set_CURRENT_RING_SECTION_SIZE(io_ringSectionSize).
-                                     set_SIZE_OF_THIS_RING(l_sizeOfThisRing).
+                                     set_SIZE_OF_THIS_RING(l_vpdRingSize).
                                      set_MAX_RING_SECTION_SIZE(i_maxRingSectionSize).
                                      set_RING_ID(i_ring.ringId).
                                      set_CHIPLET_ID(l_chipletId).
@@ -478,7 +462,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance TOR Index
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == TOR_APPEND_RING_DONE)
+                            if (l_rc == TOR_SUCCESS)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);
@@ -508,7 +492,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == TOR_APPEND_RING_DONE)
+                            if (l_rc == TOR_SUCCESS)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);
@@ -540,7 +524,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                        l_chipletTorId,  // Chiplet instance ID
                                        i_vpdRing );     // The VPD RS4 ring container
 
-                            if (l_rc == TOR_APPEND_RING_DONE)
+                            if (l_rc == TOR_SUCCESS)
                             {
                                 FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                                          i_ring.ringId, l_evenOdd, l_chipletId);
