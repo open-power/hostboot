@@ -33,13 +33,11 @@
 /// the current state of the ring and the desired final state of the ring.
 ///
 /// Both the data to be compressed and the final compressed data are treated
-/// as strings of 4-bit nibbles. When packaged in the scan data structure
-/// however the compressed string must begin on an 8-byte boundary and is
-/// always read 8 bytes at a time.  In the scan data structure the compressed
-/// strings are also padded with 0x0 nibbles to the next even multiple of 8
-/// bytes. The compressed string consists of control nibbles and data nibbles.
-/// The string format includes a special control/data sequence that marks the
-/// end of the string and the final bits of scan data.
+/// as strings of 4-bit nibbles. In the scan data structure the compressed
+/// strings are padded with 0x0 nibbles to the next even multiple of 2 for
+/// convenience. The compressed string consists of control nibbles and data
+/// nibbles. The string format includes a special control/data sequence that
+/// marks the end of the string and the final bits of scan data.
 ///
 /// Special control/data sequences have been been added for RS4v2 to
 /// store pairs of care mask nibble and data nibble. This enhancement
@@ -602,15 +600,15 @@ rs4_max_compressed_bytes(uint32_t nibbles)
 
     bytes  = ((nibbles + 1) / 2);        // nibbles rounded up to full bytes
     bytes += sizeof(CompressedScanData); // plus rs4 header
-    bytes  = ((bytes + 7) / 8) * 8;      // rounded up to multiple of 8 bytes
+    bytes  = ((bytes + 1) / 2) * 2;      // rounded up to multiple of 2 bytes
 
     return bytes;
 }
 
 
 // We always require the worst-case amount of memory including the header and
-// any rounding required to guarantee that the data size is a multiple of 8
-// bytes. The final image size is also rounded up to a multiple of 8 bytes.
+// any rounding required to guarantee that the data size is a multiple of 2
+// bytes. The final image size is also rounded up to a multiple of 2 bytes.
 //
 // Returns a scan compression return code.
 
@@ -659,7 +657,7 @@ _rs4_compress(CompressedScanData* io_rs4,
 
 // We always allocate the worst-case amount of memory including the header
 // and any rounding required to guarantee that the allocated length is a
-// multiple of 8 bytes.  The final size is also rounded up to a multiple of 8
+// multiple of 2 bytes.  The final size is also rounded up to a multiple of 2
 // bytes.
 //
 // Returns a scan compression return code.
