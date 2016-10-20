@@ -127,7 +127,6 @@ fapi2::ReturnCode pm_init(
     FAPI_INF("Entering pm_init...");
 
     fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> l_data64;
 
     //  ************************************************************************
     //  Initialize Cores and Quads
@@ -211,13 +210,6 @@ fapi2::ReturnCode pm_init(
     FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
     */
-
-    // Clear the OCC's PIB I2C engine locks.
-    // All other OCC owned flag bits are retained.
-    l_data64.setBit<17>().setBit<19>().setBit<21>();
-    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM1, l_data64),
-             "ERROR: Failed to write to OCC FLAG");
-
 
     //  ************************************************************************
     //  Start OCC PPC405

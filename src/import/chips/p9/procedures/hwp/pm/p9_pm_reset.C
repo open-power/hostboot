@@ -124,6 +124,12 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(l_rc, "ERROR: Failed to mask OCC,PBA & CME FIRs.");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs"));
 
+    // Clear the OCC's PIB I2C engine locks.
+    // All other OCC owned flag bits are retained.
+    l_data64.setBit<17>().setBit<19>().setBit<21>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM1, l_data64),
+             "ERROR: Failed to write to OCC FLAG");
+
     //  ************************************************************************
     //  Halt the OCC PPC405 and reset it safely
     //  ************************************************************************
@@ -156,7 +162,7 @@ fapi2::ReturnCode p9_pm_reset(
     //  Reset the PSTATE GPE (Bring it to HALT)
     //  ************************************************************************
     FAPI_DBG("Executing p9_pm_pstate_gpe_init to reset PGPE");
-    /* Enable once the procedure is available
+    /* TODO: RTC 157096 - Enable once the procedure is available
     FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_RESET);
     FAPI_TRY(l_rc, "ERROR: Failed to reset PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PGPE"));
