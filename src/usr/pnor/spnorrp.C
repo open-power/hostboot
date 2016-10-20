@@ -764,9 +764,9 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
             l_errl = baseExtVersCheck((i_vaddr + PAGESIZE));
             break;
         case SBKT:
-            // Ensure the SBKT partition has a valid key transition container
-            // Add PAGESIZE to skip outer container
-            l_errl = keyTransitionCheck((i_vaddr + PAGESIZE));
+            // Ensure the outer container of the SBKT partition has a valid key
+            // transition container
+            l_errl = keyTransitionCheck(i_vaddr);
             break;
         default:
             break;
@@ -848,8 +848,8 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     do {
     // Check if the header flags have the key transition bit set
-    SECUREBOOT::ContainerHeader l_nestedConHdr(i_vaddr);
-    if (!l_nestedConHdr.sb_flags()->hw_key_transition)
+    SECUREBOOT::ContainerHeader l_outerConHdr(i_vaddr);
+    if (!l_outerConHdr.sb_flags()->hw_key_transition)
     {
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - Key transition flag not set");
         /*@
@@ -859,7 +859,7 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
          * @reasoncode      RC_KEY_TRAN_FLAG_UNSET
          * @userdata1       0
          * @userdata2       0
-         * @devdesc         Key transition flag not set in nested SBKT container containing new hw keys
+         * @devdesc         Key transition flag not set in outer SBKT container containing new hw keys
          * @custdesc        Secureboot key transition failure
          */
          l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
@@ -874,7 +874,9 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
     }
 
     // Validate nested container is properly signed using new hw keys
-    l_errl = SECUREBOOT::verifyContainer(const_cast<uint8_t*>(i_vaddr),
+    uint8_t * l_nestedVaddr = const_cast<uint8_t*>(i_vaddr) + PAGESIZE;
+    SECUREBOOT::ContainerHeader l_nestedConHdr(l_nestedVaddr);
+    l_errl = SECUREBOOT::verifyContainer(l_nestedVaddr,
                                          l_nestedConHdr.hwKeyHash());
     if (l_errl)
     {

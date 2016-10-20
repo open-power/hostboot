@@ -181,10 +181,7 @@ class SPnorRP
     /**
      * @brief  Check if SBKT is properly formatted to then provide the new HW
      *         key hash to transition the system to.
-     * @param[in]  i_vaddr - vaddr points to start SBKT's nested container
-     *                       NOTE: Since this expects the vaddr to point to the
-     *                       start of the nested container, the outer secureboot
-     *                       header must be skipped prior by the caller.
+     * @param[in]  i_vaddr - vaddr points to start of the SBKT container
      *                       NULL will assert
      * @return  errlHndl_t - NULL if success, errlHndl_t otherwise.
      */

@@ -47,6 +47,7 @@
 #include <sys/msg.h>
 #include <hwas/common/deconfigGard.H>
 #include <initservice/initserviceif.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <console/consoleif.H>
 #include <config.h>
 #include <sbe/sbeif.H>
@@ -422,8 +423,8 @@ namespace SBE
             /**************************************************************/
             /*  Perform System Operation                                  */
             /**************************************************************/
-            // Restart IPL if SBE Update requires it
-            if ( l_restartNeeded == true )
+            // Restart IPL if SBE Update requires it or key transition occurred
+            if ( l_restartNeeded == true || g_do_hw_keys_hash_transition )
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
@@ -465,22 +466,39 @@ namespace SBE
 #endif
 
 #ifdef CONFIG_CONSOLE
-            if(!g_do_hw_keys_hash_transition)
-            {
-                CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
-                                  "Perform SBE Update\n");
-
-                CONSOLE::flush();
-            }
+                if(g_do_hw_keys_hash_transition)
+                {
+                    CONSOLE::displayf(SBE_COMP_NAME, "Performing Secureboot Key Transition\n");
+                    CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
+                    CONSOLE::flush();
+                }
+                else
+                {
+                    CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
+                                      "Perform SBE Update\n");
+                    CONSOLE::flush();
+                }
 #endif
 
 #ifndef CONFIG_BMC_IPMI
-                TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"updateProcessorSbeSeeproms(): Calling "
-                           "INITSERVICE::doShutdown() with "
-                           "SBE_UPDATE_REQUEST_REIPL = 0x%X",
-                           SBE_UPDATE_REQUEST_REIPL );
-                INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+                if(g_do_hw_keys_hash_transition)
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms(): Performing Secureboot Key Transition Calling "
+                               "INITSERVICE::doShutdown() with SHUTDOWN_NOT_RECONFIG_LOOP = 0x%X",
+                               INITSERVICE::SHUTDOWN_NOT_RECONFIG_LOOP );
+                    INITSERVICE::doShutdown(INITSERVICE::
+                                            SHUTDOWN_NOT_RECONFIG_LOOP);
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms(): Calling "
+                               "INITSERVICE::doShutdown() with "
+                               "SBE_UPDATE_REQUEST_REIPL = 0x%X",
+                               SBE_UPDATE_REQUEST_REIPL );
+                    INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+                }
 #endif
             }
 
@@ -4742,13 +4760,7 @@ errlHndl_t determineHwKeysHash(const void* i_imgPtr,
                    g_hw_keys_hash_transition_data,
                    SBE_HW_KEY_HASH_SIZE);
 
-            // Copy from Struct to customized image below 
-
-        #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(SBE_COMP_NAME, "Performing Secureboot Key Transition\n");
-            CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
-            CONSOLE::flush();
-        #endif
+            // Copy from Struct to customized image below
 
         }
 

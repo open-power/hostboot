@@ -112,9 +112,6 @@ GetOptions("binDir:s" => \$bin_dir,
            "corrupt:s" => \%partitionsToCorrupt,
            "help" => \$help);
 
-# If in test mode, set key transition
-$key_transition = 1 if($testRun);
-
 if ($help)
 {
     usage();
@@ -207,9 +204,17 @@ my %sb_hdrs = (
         file => "$bin_dir/$randPrefix.phyp.secureboot.hdr.bin"
     },
     SBKT => {
-        flags => sprintf("0x%08X", HB_FW_FLAG | KEY_TRANSITION_FLAG),
-        prefix => $SIGN_SBKT_PREFIX_PARAMS,
-        file => "$bin_dir/$randPrefix.sbkt.secureboot.hdr.bin"
+        outer => {
+            flags => sprintf("0x%08X", HB_FW_FLAG | KEY_TRANSITION_FLAG),
+            prefix => $SIGN_PREFIX_PARAMS,
+            file => "$bin_dir/$randPrefix.sbkt.outer.secureboot.hdr.bin"
+        },
+        inner => {
+            flags => sprintf("0x%08X", HB_FW_FLAG),
+            prefix => $SIGN_SBKT_PREFIX_PARAMS,
+            file => "$bin_dir/$randPrefix.sbkt.inner.secureboot.hdr.bin"
+        }
+
     }
 );
 
@@ -268,9 +273,23 @@ if ($secureboot)
         foreach my $header (keys %sb_hdrs)
         {
             next if($header eq "SBKT" && !$key_transition);
-            run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
-                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
-                        " $sb_hdrs{$header}{prefix}");
+
+            # SBKT parition has 2 sections outer and inner, need to create both
+            if ($header eq "SBKT")
+            {
+                foreach my $section (keys %{$sb_hdrs{$header}})
+                {
+                    run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{$section}{file}".
+                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{$section}{flags}".
+                        " $sb_hdrs{$header}{$section}{prefix}");
+                }
+            }
+            else
+            {
+                run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
+                            LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
+                            " $sb_hdrs{$header}{prefix}");
+            }
         }
 
         # Generate test containers once and limit to build phase
@@ -625,8 +644,7 @@ sub manipulateImages
             elsif ($eyeCatch eq "SBKT" && $secureboot && $key_transition)
             {
                 $callerHwHdrFields{configure} = 1;
-                create_sb_key_transition_container($openSigningFlags,
-                                                   $tempImages{PAD_PHASE});
+                create_sb_key_transition_container($tempImages{PAD_PHASE});
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
             }
             # Other partitions fill with FF's if no empty bin file provided
@@ -905,7 +923,7 @@ sub gen_test_containers
 ################################################################################
 sub create_sb_key_transition_container
 {
-    my ($i_opSigningFlags, $o_file) = @_;
+    my ($o_file) = @_;
 
     my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
     my %tempImages = (
@@ -919,22 +937,20 @@ sub create_sb_key_transition_container
     if($openSigningTool)
     {
         # Create a signed container with new production keys
-        run_command("$OPEN_SIGN_KEY_TRANS_REQUEST "
-            . "$i_opSigningFlags "
-            . "-protectedPayload $tempImages{RAND_BLOB} "
+        run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
+            . "$sb_hdrs{SBKT}{inner}{flags} -protectedPayload $tempImages{RAND_BLOB} "
             . "-out $tempImages{PRD_KEY_FILE}");
         # Sign new production key container with imprint keys
-        run_command("$OPEN_SIGN_REQUEST "
-            . "$i_opSigningFlags "
-            . "-protectedPayload $tempImages{PRD_KEY_FILE} "
+        run_command("$OPEN_SIGN_REQUEST ".OP_SIGNING_FLAG
+            . "$sb_hdrs{SBKT}{outer}{flags} -protectedPayload $tempImages{PRD_KEY_FILE} "
             . "-out $o_file");
     }
     else
     {
         # Create a signed container with new production keys
-        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
+        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{inner}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
         # Sign new production key container with imprint keys
-        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
+        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{outer}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
     }
 
 
