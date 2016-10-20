@@ -51,45 +51,48 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 # Having external users acquire from OBJ dir as there are packaging
 # changes expected in the future which will require using OBJ version.
 #################################################
-BASE_IMAGE = hostboot.bin
-BASE_ECC_IMAGE = hostboot.bin.ecc
-BASE_FINAL_IMAGE = HBB.bin
-EXT_IMAGE =  hostboot_extended.bin
-EXT_FINAL_IMAGE = HBI.bin
-HBRT_IMAGE = hostboot_runtime.bin
-HBRT_FINAL_IMAGE = HBRT.bin
-BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
-BASE_W_HEADER_IMAGE = hostboot.header.bin
-BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
-BASE_ECC_IMAGE = hostboot.bin.ecc
-BASE_SHA_IMAGE = hostboot.sha.bin
-# Zero filled sections final bin names
-TEST_IMAGE = TEST.bin
-TESTRO_IMAGE = TESTRO.bin
-HBEL_IMAGE = HBEL.bin
-GUARD_IMAGE = GUARD.bin
-GLOBAL_IMAGE = GLOBAL.bin
-DJVPD_IMAGE = DJVPD.bin
-MVPD_IMAGE = MVPD.bin
-CVPD_IMAGE = CVPD.bin
-PAYLOAD_IMAGE = PAYLOAD.bin
-SBKT_IMAGE = SBKT.bin
-ZERO_FILL_IMAGES = ${TEST_IMAGE} ${TESTRO_IMAGE} ${HBEL_IMAGE} ${GUARD_IMAGE} \
-                   ${GLOBAL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} ${CVPD_IMAGE} \
-                   ${PAYLOAD_IMAGE} ${SBKT_IMAGE}
-ALL_HB_IMAGES = ${BASE_IMAGES} ${BASE_W_HEADER_IMAGE} ${BASE_ECC_IMAGE}\
-                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE} ${HBRT_FINAL_IMAGE} \
-                ${EXT_FINAL_IMAGE} ${BASE_FINAL_IMAGE} ${ZERO_FILL_IMAGES}
+# Input default images
+HBB_IMG = hostboot.bin
+HBB_ECC_IMG = hostboot.bin.ecc
+HBI_IMG =  hostboot_extended.bin
+HBRT_IMG = hostboot_runtime.bin
+BASE_IMAGES = ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
+DEFAULT_INPUT_IMAGES = ${BASE_IMAGES} ${HBB_ECC_IMAGE}
+# Output final images
+HBB_FINAL_IMG = HBB.bin
+HBI_FINAL_IMG = HBI.bin
+HBRT_FINAL_IMG = HBRT.bin
+TEST_FINAL_IMG = TEST.bin
+TESTRO_FINAL_IMG = TESTRO.bin
+HBEL_FINAL_IMG = HBEL.bin
+GUARD_FINAL_IMG = GUARD.bin
+GLOBAL_FINAL_IMG = GLOBAL.bin
+DJVPD_FINAL_IMG = DJVPD.bin
+MVPD_FINAL_IMG = MVPD.bin
+CVPD_FINAL_IMG = CVPD.bin
+PAYLOAD_FINAL_IMG = PAYLOAD.bin
+SBKT_FINAL_IMG = SBKT.bin
+FINAL_OUTPUT_IMAGES = ${HBB_FINAL_IMG} ${HBI_FINAL_IMG} ${HBRT_FINAL_IMG} \
+                      ${TEST_FINAL_IMG} ${TESTRO_FINAL_IMG} ${HBEL_FINAL_IMG} \
+                      ${GUARD_FINAL_IMG} ${GLOBAL_FINAL_IMG} ${DJVPD_FINAL_IMG} \
+                      ${MVPD_FINAL_IMG} ${CVPD_FINAL_IMG} ${PAYLOAD_FINAL_IMG} \
+                      ${SBKT_FINAL_IMG}
+# Aggregate
+ALL_DEFAULT_IMAGES = ${DEFAULT_INPUT_IMAGES} ${FINAL_OUTPUT_IMAGES}
+
+# Default pnor xml to use
+DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
 
 # Script to manipulate bin files to prepare for buildpnor (install_all phase)
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
-# Paramemter passed into GEN_PNOR_IMAGE_SCRIPT. Note zero filled images pass
-# EMPTY as their file name. This is so the script knows it needs to generate
-# them, rather than use an input.
+
+# Default input parameters
+# Note: sections with no input files are zero filled images and pass EMPTY as
+#       their input file name. This is so the script knows it needs to generate
+#       them, rather than use an input.
 # Note: HBI depends on HBB for sw signatures. Ensure that both are passed into
 #       the same --systemBinFiles parameter for genPnorImages
-GEN_DEFAULT_BIN_FILES = HBB=${BASE_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_IMAGE},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,SBKT=EMPTY
-DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
+GEN_DEFAULT_BIN_FILES = HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,SBKT=EMPTY
 
 ################################################################################
 # build_all start
@@ -100,17 +103,16 @@ cp_hbfiles: .SPECTARG
 
 gen_default_images: cp_hbfiles
 	currentsb -chain
-	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
-	# Eventually use genPnorImages for every default image
-	# HBI + HBB partitions and ZERO_FILL_IMAGES
+	ecc --inject ${HBB_IMAGE} --output ${HBB_ECC_IMG} --p8
+
+	# Call script to generate final bin files for default images
 	${GEN_PNOR_IMAGE_SCRIPT} --build-all ${TARGET_TEST:b--test} \
 		${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
 		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION:b--key-transition} \
 		${CORRUPT_PARAMS}
 
 clobber_gen_default_images:
-	rm -f ${ALL_HB_IMAGES} \
-	      sbe.header secureboot.header hb.footer hostboot.stage.bin
+	rm -f ${ALL_DEFAULT_IMAGES}
 
 ################################################################################
 # install_all start
@@ -187,43 +189,42 @@ GEN_FAKE_HEADER_SCRIPT = ${genfakeheader.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-ZERO_FILL_SECTIONS = TEST=${TEST_IMAGE},TESTRO=${TESTRO_IMAGE},HBEL=${HBEL_IMAGE},GUARD=${GUARD_IMAGE},GLOBAL=${GLOBAL_IMAGE},PAYLOAD=${PAYLOAD_IMAGE},CVPD=${CVPD_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE},SBKT=${SBKT_IMAGE}
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_FINAL_IMAGE},HBI=${EXT_FINAL_IMAGE},HBRT=${HBRT_FINAL_IMAGE},${ZERO_FILL_SECTIONS}
-
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
-# Define system name strings
+
+## Define system name strings
 MURANO = MURANO
 NAPLES = NAPLES
 VENICE = VENICE
-MURANO_TARG_IMG = simics_MURANO_targeting.bin
-NAPLES_TARG_IMG = simics_NAPLES_targeting.bin
-VENICE_TARG_IMG = simics_VENICE_targeting.bin
-MURANO_TARG_FINAL_IMG = ${MURANO}.HBD.bin
-NAPLES_TARG_FINAL_IMG = ${NAPLES}.HBD.bin
-VENICE_TARG_FINAL_IMG = ${VENICE}.HBD.bin
+# Input system specific images
+MURANO_HBD_IMG = simics_${MURANO}_targeting.bin
+NAPLES_HBD_IMG = simics_${NAPLES}_targeting.bin
+VENICE_HBD_IMG = simics_${VENICE}_targeting.bin
 MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.bin}
 NAPLES_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.bin}
 VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.bin}
-MURANO_SLW_FINAL_IMG = ${MURANO}.WINK.bin
-NAPLES_SLW_FINAL_IMG = ${NAPLES}.WINK.bin
-VENICE_SLW_FINAL_IMG = ${VENICE}.WINK.bin
 MURANO_SBE_IMG = s1SbePartition.bin
 NAPLES_SBE_IMG = s1SbePartition.bin
 VENICE_SBE_IMG = p8SbePartition.bin
+SBEC_IMG = centSbePartition.bin
+# Output final images
+MURANO_HBD_FINAL_IMG = ${MURANO}.HBD.bin
+NAPLES_HBD_FINAL_IMG = ${NAPLES}.HBD.bin
+VENICE_HBD_FINAL_IMG = ${VENICE}.HBD.bin
+MURANO_SLW_FINAL_IMG = ${MURANO}.WINK.bin
+NAPLES_SLW_FINAL_IMG = ${NAPLES}.WINK.bin
+VENICE_SLW_FINAL_IMG = ${VENICE}.WINK.bin
 MURANO_SBE_FINAL_IMG = ${MURANO}.SBE.bin
 NAPLES_SBE_FINAL_IMG = ${NAPLES}.SBE.bin
 VENICE_SBE_FINAL_IMG = ${VENICE}.SBE.bin
-SBEC_IMG = centSbePartition.bin
 SBEC_FINAL_IMG = SBEC.bin
 # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
-GEN_MURANO_BIN_FILES = ${MURANO}:HBD=${${MURANO_TARG_IMG}:P},SBE=${${MURANO_SBE_IMG}:P},WINK=${${MURANO_SLW_IMG}:P}
-GEN_NAPLES_BIN_FILES = ${NAPLES}:HBD=${${NAPLES_TARG_IMG}:P},SBE=${${NAPLES_SBE_IMG}:P},WINK=${${NAPLES_SLW_IMG}:P}
-GEN_VENICE_BIN_FILES = ${VENICE}:HBD=${${VENICE_TARG_IMG}:P},SBE=${${VENICE_SBE_IMG}:P},WINK=${${VENICE_SLW_IMG}:P}
+GEN_MURANO_BIN_FILES = ${MURANO}:HBD=${${MURANO_HBD_IMG}:P},SBE=${${MURANO_SBE_IMG}:P},WINK=${${MURANO_SLW_IMG}:P}
+GEN_NAPLES_BIN_FILES = ${NAPLES}:HBD=${${NAPLES_HBD_IMG}:P},SBE=${${NAPLES_SBE_IMG}:P},WINK=${${NAPLES_SLW_IMG}:P}
+GEN_VENICE_BIN_FILES = ${VENICE}:HBD=${${VENICE_HBD_IMG}:P},SBE=${${VENICE_SBE_IMG}:P},WINK=${${VENICE_SLW_IMG}:P}
 
 gen_system_specific_images: build_sbe_partitions
-	# SBE and SBECs and WINK partitions handled with genPnorImages below
-	# Eventually use genPnorImages for every system specific image
+	# Call script to generate final bin files for system specific images
 	${GEN_PNOR_IMAGE_SCRIPT} ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
 		--pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
 		--systemBinFiles ${GEN_MURANO_BIN_FILES} \
@@ -231,14 +232,16 @@ gen_system_specific_images: build_sbe_partitions
 		--systemBinFiles ${GEN_VENICE_BIN_FILES} \
 		--systemBinFile  SBEC=${${SBEC_IMG}:P}
 
-MURANO_SECT = HBD=${MURANO_TARG_FINAL_IMG},SBE=${MURANO_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${MURANO_SLW_FINAL_IMG}
-NAPLES_SECT = HBD=${NAPLES_TARG_FINAL_IMG},SBE=${NAPLES_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${NAPLES_SLW_FINAL_IMG}
-VENICE_SECT = HBD=${VENICE_TARG_FINAL_IMG},SBE=${VENICE_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${VENICE_SLW_FINAL_IMG}
+MURANO_SECT = HBD=${MURANO_HBD_FINAL_IMG},SBE=${MURANO_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${MURANO_SLW_FINAL_IMG}
+NAPLES_SECT = HBD=${NAPLES_HBD_FINAL_IMG},SBE=${NAPLES_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${NAPLES_SLW_FINAL_IMG}
+VENICE_SECT = HBD=${VENICE_HBD_FINAL_IMG},SBE=${VENICE_SBE_FINAL_IMG},SBEC=${SBEC_FINAL_IMG},WINK=${VENICE_SLW_FINAL_IMG}
+
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG}
 
 PNOR_IMG_INFO = \
-   murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
-   naples.pnor:defaultPnorLayout.xml:${NAPLES_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
-   venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   murano.pnor:${DEFAULT_PNOR_LAYOUT}:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   naples.pnor:${DEFAULT_PNOR_LAYOUT}:${NAPLES_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   venice.pnor:${DEFAULT_PNOR_LAYOUT}:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FIPS_PNOR_INFO}
 
 # Added a different dependency chain for hostboot standalone so we can compile
@@ -288,7 +291,7 @@ clobber_build_pnor_images:
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
-FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
+FLASH_IMG = ${HBB_IMG} ${HBB_ECC_IMG}
 
 update_images_for_sandbox: gen_default_images gen_system_specific_images build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
