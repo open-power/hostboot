@@ -275,8 +275,9 @@ enum SLAVE_CONFIG_DEFS
 #define EX_1_CME_SCOM_SICR_CLEAR         EX_1_CME_SCOM_SICR_SCOM1
 #define EX_0_CME_SCOM_SICR_OR            EX_0_CME_SCOM_SICR_SCOM2
 #define EX_1_CME_SCOM_SICR_OR            EX_1_CME_SCOM_SICR_SCOM2
-#define CME_LCL_SICR_OR                  0xc0000510
-#define CME_LCL_SICR_CLR                 0xc0000518
-#define CME_LCL_SISR                     0xc0000520
+#define EX_0_CME_SCOM_LMCR_CLEAR         EX_0_CME_SCOM_LMCR_SCOM1
+#define EX_1_CME_SCOM_LMCR_CLEAR         EX_1_CME_SCOM_LMCR_SCOM1
+#define EX_0_CME_SCOM_LMCR_OR            EX_0_CME_SCOM_LMCR_SCOM2
+#define EX_1_CME_SCOM_LMCR_OR            EX_1_CME_SCOM_LMCR_SCOM2
 
 #endif  // __P9_HCD_COMMON_H__
