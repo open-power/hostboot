@@ -799,9 +799,20 @@ extern "C"
         uint32_t rc = IMG_BUILD_SUCCESS;
         uint32_t tempBufLength = io_copyLength;
         P9_TOR::RingType ringType = (i_instanceId == IGNORE_CHIPLET_INSTANCE ) ? P9_TOR::COMMON : P9_TOR::INSTANCE;
+        uint32_t torChipletId = 0;
 
         do
         {
+            //FIXME RTC 163264 Review chiplet id manipulation for common rings.
+            if( P9_TOR::COMMON == ringType )
+            {
+                torChipletId = ( PLAT_CME == i_platId ) ? CORE0_CHIPLET_ID : CACH0_CHIPLET_ID;
+            }
+            else
+            {
+                torChipletId = i_instanceId;
+            }
+
             P9XipSection ppeSection;
             rc = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_RINGS, &ppeSection );
 
@@ -832,7 +843,7 @@ extern "C"
                                          ((PLAT_CME == i_platId) ? P9_TOR::CME : P9_TOR::SGPE),
                                          ringType,
                                          BASE,
-                                         i_instanceId,
+                                         torChipletId,
                                          &i_pBuf1,
                                          tempBufLength );
 
@@ -917,13 +928,24 @@ extern "C"
             }
 
             uint32_t tempBufLength = io_bufLength;
+            uint32_t torChipletId = 0;
+
+            //FIXME RTC 163264 Review chiplet id manipulation for common rings.
+            if( P9_TOR::COMMON == i_ringType )
+            {
+                torChipletId = ( PLAT_CME == i_platId ) ? CORE0_CHIPLET_ID : CACH0_CHIPLET_ID;
+            }
+            else
+            {
+                torChipletId = i_instanceId;
+            }
 
             rc = tor_get_block_of_rings( i_pOverride,
                                          i_ddLevel,
                                          ((PLAT_CME == i_platId) ? P9_TOR::CME : P9_TOR::SGPE),
                                          i_ringType,
                                          OVERRIDE,
-                                         i_instanceId,
+                                         torChipletId,
                                          &i_pTempBuf,
                                          io_bufLength );
 
@@ -1230,7 +1252,7 @@ extern "C"
                                         i_pBuf1,
                                         tempLength,
                                         PLAT_CME,
-                                        IGNORE_CHIPLET_INSTANCE);
+                                        IGNORE_CHIPLET_INSTANCE );
 
                     if( rc  )
                     {
