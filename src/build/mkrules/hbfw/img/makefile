@@ -38,12 +38,13 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-build_all: cp_hbfiles
-install_all: inject_ecc build_sbe_partitions build_pnor_images
+build_all: cp_hbfiles gen_default_images
+install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
 #Some useful search paths
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
+ENGD_SRCPATH = ${SRCPATH:S/hbfw\/img/engd\/href/g}
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -51,164 +52,89 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 # Having external users acquire from OBJ dir as there are packaging
 # changes expected in the future which will require using OBJ version.
 #################################################
-BOOTLDR_IMAGE = hostboot_bootloader.bin
-HBBL_IMAGE = hbbl.bin
-HBBL_ECC_IMAGE = hbbl.bin.ecc
-BASE_IMAGE = hostboot.bin
-EXT_IMAGE =  hostboot_extended.bin
-EXT_FAKE_IMAGE = hostboot_extended.bin.fake
-HBRT_IMAGE = hostboot_runtime.bin
-HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
-HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
-HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
-BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE} ${BOOTLDR_IMAGE}
-BASE_W_HEADER_IMAGE = hostboot.header.bin
-BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
-BASE_ECC_IMAGE = hostboot.bin.ecc
-BASE_SHA_IMAGE = hostboot.sha.bin
-EXT_PAD_IMAGE = hostboot_extended.bin.pad
-EXT_ECC_IMAGE = hostboot_extended.bin.ecc
-EXT_ECC_HEADER_IMAGE = hostboot_extended.header.bin.ecc
-EXT_SHA_IMAGE = hostboot_extended.sha.bin
-EXT_HEADER_IMAGE = hostboot_extended.header.bin
-TEMP_IMAGE = hostboot.temp.bin
-TESTDATA = hbtestdata.bin
-TESTDATA_ECC = hbtestdata.bin.ecc
-HBEL_ECC_IMAGE = hbel.bin.ecc
-HBEL_IMAGE = hbel.bin
-GUARD_ECC_IMAGE = guard.bin.ecc
-GLOBAL_ECC_IMAGE = global.bin.ecc
-DJVPD_ECC_IMAGE = djvpd.bin.ecc
-DJVPD_IMAGE = djvpd.bin
-MVPD_ECC_IMAGE = mvpd.bin.ecc
-MVPD_IMAGE = mvpd.bin
-CVPD_ECC_IMAGE = cvpd.bin.ecc
-PAYLOAD_ECC_IMAGE = payload.bin.ecc
-SECUREBOOT_HEADER = secureboot.header
-SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
-# DEV_KEY_DIR set by env variable
-SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a
-SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
+
+# Input default images
+BOOTLDR_IMG = hostboot_bootloader.bin
+HBBL_IMG = hbbl.bin
+HBB_IMG = hostboot.bin
+HBB_ECC_IMG = hostboot.bin.ecc
+HBI_IMG =  hostboot_extended.bin
+HBRT_IMG = hostboot_runtime.bin
+BASE_IMAGES = ${BOOTLDR_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
+
+# Input fake images
+HBI_FAKE_IMG = hostboot_extended.bin.fake
 VPO_FAKE_MVPD = vpo_sysmvpd.dat
 VPO_FAKE_DJVPD = vpo_djvpd.dat
 VPO_FAKE_DVPD = dvpd.dat
-RING_OVERRIDE_ECC_IMAGE = ring_override.bin.ecc
-RING_OVERRIDE_IMAGE = ring_override.bin
+FAKE_IMAGES = ${HBI_FAKE_IMG} ${VPO_FAKE_MVPD} ${VPO_FAKE_DJVPD} ${VPO_FAKE_DVPD}
+DEFAULT_INPUT_IMAGES = ${BASE_IMAGES} ${HBB_ECC_IMG} ${HBBL_IMG} ${FAKE_IMAGES}
 
-ALL_HB_IMAGES = ${BASE_IMAGES} \
-                ${BASE_W_HEADER_IMAGE} \
-                ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
-                ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE}\
-                ${HBRT_SHA_IMAGE} \
-                ${HBRT_HEADER_IMAGE} ${HBRT_ECC_HEADER_IMAGE} \
-                ${EXT_PAD_IMAGE} \
-                ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
-                ${EXT_ECC_HEADER_IMAGE} \
-                ${BOOTLDR_IMAGE} ${HBBL_IMAGE} ${HBBL_ECC_IMAGE} \
-                ${TESTDATA} ${TESTDATA_ECC} \
-                ${HBEL_ECC_IMAGE} ${GUARD_ECC_IMAGE} ${GLOBAL_ECC_IMAGE} \
-                ${DJVPD_ECC_IMAGE} ${MVPD_ECC_IMAGE} ${CVPD_ECC_IMAGE} \
-                ${HBEL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} \
-                ${PAYLOAD_ECC_IMAGE} ${RING_OVERRIDE_ECC_IMAGE}
+# Output final images
+HBBL_FINAL_IMG = HBBL.bin
+HBB_FINAL_IMG = HBB.bin
+HBI_FINAL_IMG = HBI.bin
+HBRT_FINAL_IMG = HBRT.bin
+TEST_FINAL_IMG = TEST.bin
+TESTRO_FINAL_IMG = TESTRO.bin
+HBEL_FINAL_IMG = HBEL.bin
+GUARD_FINAL_IMG = GUARD.bin
+GLOBAL_FINAL_IMG = GLOBAL.bin
+DJVPD_FINAL_IMG = DJVPD.bin
+MVPD_FINAL_IMG = MVPD.bin
+CVPD_FINAL_IMG = CVPD.bin
+PAYLOAD_FINAL_IMG = PAYLOAD.bin
+RINGOVD_FINAL_IMG = RINGOVD.bin
+SBKT_FINAL_IMG = SBKT.bin
+FINAL_OUTPUT_IMAGES = ${HBBL_FINAL_IMG} ${HBB_FINAL_IMG} ${HBI_FINAL_IMG} \
+					  ${HBRT_FINAL_IMG} ${TEST_FINAL_IMG} ${TESTRO_FINAL_IMG} \
+					  ${HBEL_FINAL_IMG} ${GUARD_FINAL_IMG} ${GLOBAL_FINAL_IMG} \
+					  ${DJVPD_FINAL_IMG} ${MVPD_FINAL_IMG} ${CVPD_FINAL_IMG} \
+					  ${PAYLOAD_FINAL_IMG} ${RINGOVD_FINAL_IMG} ${SBKT_FINAL_IMG}
+
+# Aggregate
+ALL_DEFAULT_IMAGES = ${DEFAULT_INPUT_IMAGES} ${FINAL_OUTPUT_IMAGES}
+
+# Script to manipulate bin files to prepare for buildpnor (install_all phase)
+# Note: sections with no input files are zero filled images and pass EMPTY as
+#       their input file name. This is so the script knows it needs to generate
+#       them, rather than use an input.
+# Note: HBI depends on HBB for sw signatures. Ensure that both are passed into
+#       the same --systemBinFiles parameter for genPnorImages
+GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
+
+# Decide which PNOR to build
+.if(${FAKEPNOR} == "")
+    DEFAULT_PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
+    # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
+    GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY
+    DEFAULT_PARAMS = --build-all ${TARGET_TEST:b--test} \
+                     ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
+                     --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS}
+.else
+    DEFAULT_PNOR_LAYOUT = ${pnorLayoutFake.xml:P}
+    # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
+    GEN_DEFAULT_BIN_FILES = HBI=${HBI_IMG},HBEL=EMPTY,MVPD=${${VPO_FAKE_MVPD}:P},DJVPD=${${VPO_FAKE_DJVPD}:P}
+    DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${DEFAULT_PNOR_LAYOUT}
+.endif
 
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
-	# add version header w/ HBB sha hash
-	echo -en VERSION\\0 > ${BASE_SHA_IMAGE}
-	sha512sum ${BASE_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${BASE_SHA_IMAGE}
-	dd if=${BASE_SHA_IMAGE} of=secureboot.header ibs=4k conv=sync
-	dd if=/dev/zero of=hbb.footer count=1 bs=128K
-	cat secureboot.header ${BASE_IMAGE} hbb.footer > hostboot.stage.bin
-	head -c 524288  hostboot.stage.bin > ${BASE_W_HEADER_IMAGE}
+
+gen_default_images: cp_hbfiles
 	currentsb -chain
-	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
-	ecc --inject ${BASE_W_HEADER_IMAGE} --output ${BASE_W_HEADER_ECC_IMAGE} --p8
+	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
-	# Add version header w/ HBRT sha hash
-	echo -en VERSION\\0 > ${HBRT_SHA_IMAGE}
-	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
-	dd if=${HBRT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
-	cat ${HBRT_IMAGE} >> ${TEMP_IMAGE}
-	# HBRT partition size w/o ECC = 4MB (4096K)
-	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=4096K conv=sync
-	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
-	# Add version header w/ HBI sha hash
-	echo -en VERSION\\0 > ${EXT_SHA_IMAGE}
-	sha512sum ${EXT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${EXT_SHA_IMAGE}
-	dd if=${EXT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
-	cat ${EXT_IMAGE} >> ${TEMP_IMAGE}
-	# HBI partition size w/o ECC = 5.5MB (5632K)
-	# If "--test" flag set do not pad to ibs=5632k, as the test HBI images is
-	# possibly larger than parition size and does not need to be fully padded.
-	# Size adjustments made in buildpnor.pl
-	.if(${TARGET_TEST})
-		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
-	.else
-		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5632k conv=sync
-	.endif
-	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
-	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
-	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
-        .if(${FAKEPNOR} != "")
-	dd if=${EXT_IMAGE} of=${EXT_FAKE_IMAGE} ibs=5080k conv=sync
-        .endif
+    # Remove offset from start of Bootloader image for HBBL partition
+    # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
+    # reserved for exception vectors)
+	dd if=${BOOTLDR_IMG} of=${HBBL_IMG} ibs=1k skip=12 conv=sync
 
-
-	# Test signed container, SIGNING_DIR set by env variable
-	.if(${SECUREBOOT} && ${SIGNING_DIR})
-        # Key prefix used for all partitions
-		${SIGNING_DIR}/prefix -good -of ${SECUREBOOT_HEADER} ${SIGN_PREFIX_PARAMS}
-		dd if=/dev/zero count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-		${SIGNING_DIR}/build -good -if ${SECUREBOOT_HEADER} -of ${SECUREBOOT_SIGNED_CONTAINER} -bin ${TEMP_IMAGE} ${SIGN_BUILD_PARAMS}
-	.endif
-
-	# Pad and add ECC to other partitions that do not need headers
-	# create data for a test partition in pnor
-	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
-	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
-	# Fill the following partitions with FF's and then ECC them
-	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${HBEL_ECC_IMAGE} --p8
-        .if(${FAKEPNOR} != "")
-	dd if=/dev/zero bs=64K count=1 | tr "\000" "\377" > ${HBEL_IMAGE}
-        .endif
-	# GUARD partition
-	dd if=/dev/zero bs=16K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${GUARD_ECC_IMAGE} --p8
-	# GLOBAL partition
-	dd if=/dev/zero bs=32K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${GLOBAL_ECC_IMAGE} --p8
-	# DJVPD partition
-	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
-        .if(${FAKEPNOR} != "")
-	dd if=${${VPO_FAKE_DJVPD}:P} bs=32K count=1 > ${DJVPD_IMAGE}
-        .endif
-	# MVPD partition
-	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${MVPD_ECC_IMAGE} --p8
-        .if(${FAKEPNOR} != "")
-	dd if=${${VPO_FAKE_MVPD}:P} bs=128K count=1 > ${MVPD_IMAGE}
-        .endif
-	# CVPD partition
-	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${CVPD_ECC_IMAGE} --p8
-	# PAYLOAD partition
-	dd if=/dev/zero bs=19456K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${PAYLOAD_ECC_IMAGE} --p8
-	# RINGOVD partition
-	dd if=/dev/zero bs=16K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${RING_OVERRIDE_ECC_IMAGE} --p8
-	rm ${TEMP_IMAGE}
-        # Remove offset from start of Bootloader image for HBBL partition
-        # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
-        # reserved for exception vectors)
-	dd if=${BOOTLDR_IMAGE} of=${HBBL_IMAGE} ibs=1k skip=12 conv=sync
-	ecc --inject ${HBBL_IMAGE} --output ${HBBL_ECC_IMAGE} --p8
+	# Call script to generate final bin files for default images
+	${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS}
 
 clobber_cp_hbfiles:
-	rm -f ${ALL_HB_IMAGES} \
-	      secureboot.header hb.footer hostboot.stage.bin
+	rm -f ${ALL_DEFAULT_IMAGES}
 
 #################################################
 ###  SAMPLE for building an SBE Partition with multiple ECs
@@ -273,65 +199,89 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},HBBL=${HBBL_ECC_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE},RINGOVD=${RING_OVERRIDE_ECC_IMAGE}
-HOSTBOOT_FAKEPNOR_SECTIONS = HBI=${EXT_FAKE_IMAGE},HBEL=${HBEL_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE},CVPD=${VPO_FAKE_DVPD}
-
-
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
-NIMBUS_TARG_IMG = simics_NIMBUS_targeting.bin
-NIMBUS_VPO_TARG_IMG = vbu_NIMBUS_targeting.bin
-NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
-NIMBUS_TARG_IMG_FAKE = vbu_NIMBUS_targeting.bin.fake
-NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp9n.hw_ref_image.hdr.bin}
-NIMBUS_LOCAL_SLW_IMG = p9n.hw_ref_image.hdr.bin
-NIMBUS_LOCAL_SLW_IMG_ECC = p9n.hw_ref_image.hdr.bin.ecc
+
+## Define system name strings
+NIMBUS = NIMBUS
+
+# Input system specific images
+NIMBUS_HBD_IMG = simics_${NIMBUS}_targeting.bin
+NIMBUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9n.hw_ref_image.bin}
 NIMBUS_SBE_IMG = p9nSbePartition.bin
-NIMBUS_SBE_IMG_ECC = p9nSbePartition.bin.ecc
 SBEC_IMG = centSbePartition.bin
-SBEC_IMG_ECC = centSbePartition.bin.ecc
+
+# Input fake images
+NIMBUS_VPO_HBD_IMG = vbu_${NIMBUS}_targeting.bin
+
+# Output final images
+NIMBUS_HBD_FINAL_IMG = ${NIMBUS}.HBD.bin
+NIMBUS_HCODE_FINAL_IMG = ${NIMBUS}.HCODE.bin
+NIMBUS_SBE_FINAL_IMG = ${NIMBUS}.SBE.bin
+SBEC_FINAL_IMG = SBEC.bin
 TEMP_IMG = temp.bin
 
-inject_ecc: build_sbe_partitions
-	# cp file with full path to one with local path
-	cp ${NIMBUS_SLW_IMG} ${NIMBUS_LOCAL_SLW_IMG}
-	# HBD partition
-	dd if=${${NIMBUS_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NIMBUS_TARG_IMG_ECC} --p8; \
-	#for NIMBUS fake pnor skip version header
-	dd if=${${NIMBUS_VPO_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k skip=1 conv=sync; \
-	# SBE partition
-	dd if=${${NIMBUS_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NIMBUS_SBE_IMG_ECC} --p8; \
-        #@fixme - put this back after we adjust the layout (RTC:154286)
-	# SBEC partition
-	#dd if=${${SBEC_IMG}:P} of=${TEMP_IMG} ibs=512k conv=sync; \
-	#ecc --inject ${TEMP_IMG} --output ${SBEC_IMG_ECC} --p8; \
-	# WINK partition
-	dd if=${${NIMBUS_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NIMBUS_LOCAL_SLW_IMG_ECC} --p8; \
-	rm ${TEMP_IMG}
+# Decide which PNOR to build
+.if(${FAKEPNOR} == "")
+    # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
+    #@TODO securebootp9 - Put `HBD=${${NIMBUS_HBD_IMG}:P},` back into genPnorImage parameters
+    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P}
+    #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
+    SYSTEM_SPECIFIC_PARAMS = ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot} \
+                             --pnorLayout ${DEFAULT_PNOR_LAYOUT} ${CORRUPT_PARAMS} \
+                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
+.else
+    # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
+    #@TODO securebootp9 - Put `HBD=${${NIMBUS_VPO_HBD_IMG}:P}` back into genPnorImage parameters
+    GEN_NIMBUS_BIN_FILES = ${NIMBUS}:HCODE=${${NIMBUS_HCODE_IMG}:P}
+    #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
+    SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${DEFAULT_PNOR_LAYOUT} \
+                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
+.endif
 
-#@fixme - Put SBEC back (RTC:154286)  "SBEC=${SBEC_IMG_ECC},"
-NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},HCODE=${NIMBUS_LOCAL_SLW_IMG_ECC}
-FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE},HCODE=${NIMBUS_LOCAL_SLW_IMG}
+gen_system_specific_images: build_sbe_partitions
+	# Call script to generate final bin file for system specific images
+	${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
+	#@TODO securebootp9 - Remove all dd/ecc commands and add HBD back into genPnorImage
+	# HBD partition
+	dd if=${${NIMBUS_HBD_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync
+	ecc --inject ${TEMP_IMG} --output ${NIMBUS_HBD_FINAL_IMG} --p8
+	#for NIMBUS fake pnor skip version header
+	.if(${FAKEPNOR} != "")
+	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
+	.endif
+	rm -f ${TEMP_IMG}
+
+HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG}
+#@TODO RTC:163810 - Put SBEC back "SBEC=${SBEC_FINAL_IMG},"
+NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},SBE=${NIMBUS_SBE_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG}
+PNOR_IMG_INFO = \
+   nimbus.pnor:${DEFAULT_PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   ${FIPS_PNOR_INFO}
 
 # To build fake PNOR, set FAKEPNOR to filename of file to build,
 #    ie, 'export FAKEPNOR=fake8m.pnor'
 # To not build fake PNOR, do not set FAKEPNOR or clear its setting,
 #    ie, 'export FAKEPNOR='
+# Note: If FAKEPNOR defined, ONLY a FAKEPNOR will be generated, this is due to
+#    some limitations of GEN_PNOR_IMAGE_SCRIPT at the time of porting to p9
 .if(${FAKEPNOR} != "")
-    FAKE_PNOR_IMG_INFO = \
-        ${FAKEPNOR}:pnorLayoutFake.xml:${FAKE_SECT},${HOSTBOOT_FAKEPNOR_SECTIONS}
+    HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},CVPD=${VPO_FAKE_DVPD}
+    NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG}
+    PNOR_IMG_INFO = \
+        ${FAKEPNOR}:${DEFAULT_PNOR_LAYOUT}:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+        ${FIPS_PNOR_INFO}
 .endif
 
-PNOR_IMG_INFO = \
-   nimbus.pnor:defaultPnorLayout.xml:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
-   ${FAKE_PNOR_IMG_INFO} \
-   ${FIPS_PNOR_INFO}
-
-
-__IMAGE_BUILD/% : .SPECTARG .PMAKE cp_hbfiles inject_ecc
+# Added a different dependency chain for hostboot standalone so we can compile
+# faster and call one rule in dist.targets.mk 'update_images_for_sandbox'
+.if( ${HB_STANDALONE} == 1)
+__IMAGE_BUILD/% : .SPECTARG .PMAKE gen_default_images gen_system_specific_images
+# In FSP this is run at install_all phase, so it's assumed all build_all rules
+# have completed. If build_all rule dependencies are added they will run again.
+.else
+__IMAGE_BUILD/% : .SPECTARG .PMAKE gen_system_specific_images
+.endif
 	@${MAKE:T:R} BUILD_SPECIFIC_IMAGE \
 	    "IMAGE_PARAMS=${.TARGET:s/__IMAGE_BUILD\///:s/:/ /g}"
 
@@ -349,21 +299,12 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BINARIES ${IMAGE_BINS}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
-
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
-	.if empty(FFSCMD)
-		.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "" || \
-                    ${FAKEPNOR} == ${IMAGE_TARGET})
-			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-				${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
-		.endif
-	.else
-		.if(${PNOR} == ${IMAGE_TARGET})
-			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-				${IMAGE_BIN_OPTION} --ffsCmd "ffs"
-		.endif
+	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "" || \
+			${FAKEPNOR} == ${IMAGE_TARGET})
+		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
 	.endif
 .endif
 
@@ -376,22 +317,24 @@ clobber_build_pnor_images:
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
-FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE} ${HBBL_IMAGE}
+FLASH_IMG = ${HBB_IMG} ${HBB_ECC_IMG} ${HBBL_IMG}
 FAKE_PNOR = fake6m.pnor
 
-update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
+update_images_for_sandbox:  gen_default_images gen_system_specific_images build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image and bootloader image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Truncate fake pnor image down to 6MB and copy to flash dir
-	${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \
-	    cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR};!e}@}
+	.if(${FAKEPNOR} != "")
+		${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \
+			cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR};!e}@}
+	.endif
 	#Copy pnor images to flash dir
 	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; \
-            if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || \
-               [ "${PNOR}" == "" ] || \
-               [ "${FAKEPNOR}" == "${image:s/:/ /g:xs/ .*//}" ]; \
-            then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
+		if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || \
+			[ "${PNOR}" == "" ] || \
+			[ "${FAKEPNOR}" == "${image:s/:/ /g:xs/ .*//}" ]; \
+		then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
 
 .endif
 

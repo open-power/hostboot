@@ -41,4 +41,4 @@ fi
 mkdir -p $SANDBOXBASE/img || exit -1
 
 # Copy files.
-hbDistribute --test || exit -1
+hbDistribute --test --hb-standalone  || exit -1

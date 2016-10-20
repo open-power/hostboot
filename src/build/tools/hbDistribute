@@ -48,52 +48,88 @@ print_usage()
     echo "    --release: Create a full release distribution (all targets)."
     echo "    --vpo: Generate just 'vpo' content."
     echo "    --simics/--fsp: *default* Generate just 'fsp' content"
+    echo "    --hb-standalone: Indicate if in hb-standalone mode for compile optimizing"
+    echo "    --corrupt <Partition name>[= pro|unpro] (Note: requires '--secureboot')"
+    echo "        Partition 'eyeCatch' name to corrupt a byte of."
+    echo "        Optional '= pro|unpro' to indicate which section of the secure container to corrupt."
+    echo "            Default (empty string '') is protected section."
+    echo "            [Note: Some sections only have a protected section so not relevant for all.]"
+    echo "        Multiple '--corrupt' options are allowed, but note the system will checkstop on the"
+    echo "            first bad partition so multiple may not be that useful."
+    echo "        Example: --corrupt HBI --corrupt HBD=unpro"
+    echo "    --key-transition <imprint|production>   Indicates a key transition is needed and creates a secureboot key transition container."
+    echo "        Note: \"--sign-mode production\" is not allowed with \"--key-transition imprint"
+    echo "        With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys."
 }
 
 # Parse arguments
-for ARG in $*
+while [[ $# -gt 0 ]]
 do
-    case $ARG in
+    case $1 in
         "--help")
             print_usage
-            exit
+            exit -1
         ;;
 
         "--test")
             TARGET_TEST=1
+            shift
         ;;
 
         "--vpo")
             TARGET="vpo_TARGET"
+            shift
         ;;
 
         "--simics" | "--fsp")
             TARGET="fsp_TARGET"
+            shift
         ;;
 
         "--openpower")
             TARGET="openpower_TARGET"
+            shift
         ;;
 
         "--release")
             TARGET="ALL"
+            shift
         ;;
 
         "--debug")
             DEBUG="-d"
+            shift
         ;;
 
-        "--secureboot")
-            SECUREBOOT=1
+        "--hb-standalone")
+            HB_STANDALONE=1
+            shift
+        ;;
+
+        "--corrupt")
+            # Format is "--corrupt <partition[=pro|unpro]>"
+            CORRUPT_PARAMS="$CORRUPT_PARAMS $1"
+            shift
+            CORRUPT_PARAMS="$CORRUPT_PARAMS $1"
+            shift
+        ;;
+
+        "--key-transition")
+            # Format is "--key-transition <imprint|production>"
+            KEY_TRANSITION_PARAMS="$KEY_TRANSITION_PARAMS $1"
+            shift
+            KEY_TRANSITION_PARAMS="$KEY_TRANSITION_PARAMS $1"
+            shift
         ;;
 
         --*)
-            echo "ERROR: Unknown option: $ARG"
-            exit
+            echo "ERROR: Unknown option: $1"
+            exit -1
         ;;
 
         *)
-            TARGET_DIR=$ARG
+            TARGET_DIR=$1
+            shift
         ;;
 
     esac
@@ -137,13 +173,38 @@ else
     fi
 fi
 
+# @TODO RTC:157356
+# Temporary development signing tools to create valid container headers
+export SIGNING_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/secure-boot-scripts/rom_new_header/sign/obj"
+export DEV_KEY_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/dev_keys"
+# Dynamically check config file if secureboot enabled build occurred
+if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
+    if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then
+        echo "In secure mode"
+        export CONFIG_SECUREBOOT=1
+    else
+        echo "In unsecure mode"
+    fi
+else
+    echo "File DNE ${PROJECT_ROOT}/obj/genfiles/config.h"
+    exit -1
+fi
+
 # Execute makefile for distribution.
 mkdir -p $TARGET_DIR
 mkdir -p $SBFW_DIR
 export TARGET_TEST
 export TARGET_DIR
 export SBFW_DIR
-export SECUREBOOT
+export HB_STANDALONE
+export CORRUPT_PARAMS
+if [ -n "$CORRUPT_PARAMS" ]; then
+    echo "Corruption options = $CORRUPT_PARAMS"
+fi
+export KEY_TRANSITION_PARAMS
+if [ -n "$KEY_TRANSITION_PARAMS" ]; then
+    echo "Key transition options = $KEY_TRANSITION_PARAMS"
+fi
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
 
