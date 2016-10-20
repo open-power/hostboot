@@ -62,7 +62,17 @@ const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::OUTPUT_DRIVER_
 const std::vector<uint64_t> adr32sTraits<fapi2::TARGET_TYPE_MCA>::DUTY_CYCLE_DISTORTION_REG =
 {
     MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0,
-    MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1
+    MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1,
+    MCA_DDRPHY_DP16_DCD_CONTROL0_P0_0,
+    MCA_DDRPHY_DP16_DCD_CONTROL1_P0_0,
+    MCA_DDRPHY_DP16_DCD_CONTROL0_P0_1,
+    MCA_DDRPHY_DP16_DCD_CONTROL1_P0_1,
+    MCA_DDRPHY_DP16_DCD_CONTROL0_P0_2,
+    MCA_DDRPHY_DP16_DCD_CONTROL1_P0_2,
+    MCA_DDRPHY_DP16_DCD_CONTROL0_P0_3,
+    MCA_DDRPHY_DP16_DCD_CONTROL1_P0_3,
+    MCA_DDRPHY_DP16_DCD_CONTROL0_P0_4,
+    MCA_DDRPHY_DP16_DCD_CONTROL1_P0_4,
 };
 
 // Definition of the ADR32S write clock static offset registers
@@ -172,6 +182,7 @@ fapi2::ReturnCode dcd_cal_helper( const fapi2::Target<TARGET_TYPE_MCA>& i_target
 
     FAPI_ASSERT( l_current_adjust != l_overrun,
                  fapi2::MSS_DUTY_CLOCK_DISTORTION_CAL_FAILED()
+                 .set_TARGET(i_target)
                  .set_CURRENT_ADJUST(l_current_adjust)
                  .set_SIDE(i_side)
                  .set_REGISTER(i_reg)
