@@ -96,6 +96,9 @@ enum times
     DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
     DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
 
+    // Not *exactly* a time but go with it.
+    MHZ_TO_KHZ              = 1000,
+
     SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
     BG_SCRUB_IN_HOURS       = 12,
 
