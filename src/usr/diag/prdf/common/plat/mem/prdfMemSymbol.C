@@ -25,6 +25,7 @@
 
 #include <prdfMemSymbol.H>
 #include <prdfTrace.H>
+#include <prdfParserUtils.H>
 
 using namespace TARGETING;
 
@@ -53,38 +54,22 @@ static const uint8_t symbol2Galois[] =
 //                           class MemSymbol
 //##############################################################################
 
-template <>
-MemSymbol<TYPE_MBA> MemSymbol<TYPE_MBA>::fromGalois( TargetHandle_t i_trgt,
-                                                     const MemRank & i_rank,
-                                                     uint8_t i_galois,
-                                                     uint8_t i_mask )
+MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
+                      uint8_t i_symbol, uint8_t i_pins ) :
+    iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
+    iv_pins(i_pins), iv_isDramSpared(false), iv_isEccSpared(false)
 {
-    // Get symbol from Galois field.
-    uint8_t symbol = SYMBOLS_PER_RANK;
-    for ( uint32_t i = 0; i < SYMBOLS_PER_RANK; i++ )
-    {
-        if ( symbol2Galois[i] == i_galois )
-        {
-            symbol = i;
-            break;
-        }
-    }
-
-    // Get pins from mask (2 pins for MBA).
-    uint8_t pins = NO_SYMBOL_DQS;
-    if ( 0 != (i_mask & 0xaa) ) pins |= EVEN_SYMBOL_DQ;
-    if ( 0 != (i_mask & 0x55) ) pins |= ODD_SYMBOL_DQ;
-
-    return MemSymbol<TYPE_MBA>( i_trgt, i_rank, symbol, pins );
+    PRDF_ASSERT( NULL != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) ||
+                 TYPE_MCA == getTargetType(i_trgt) );
+    PRDF_ASSERT( i_symbol < SYMBOLS_PER_RANK );
+    PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
 }
 
 //------------------------------------------------------------------------------
 
-template <>
-MemSymbol<TYPE_MCA> MemSymbol<TYPE_MCA>::fromGalois( TargetHandle_t i_trgt,
-                                                     const MemRank & i_rank,
-                                                     uint8_t i_galois,
-                                                     uint8_t i_mask )
+MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
+                                 uint8_t i_galois, uint8_t i_mask )
 {
     // Get symbol from Galois field.
     uint8_t symbol = SYMBOLS_PER_RANK;
@@ -97,11 +82,30 @@ MemSymbol<TYPE_MCA> MemSymbol<TYPE_MCA>::fromGalois( TargetHandle_t i_trgt,
         }
     }
 
-    // Get pins from mask (1 pin for MCA).
+    // Get pins from mask.
     uint8_t pins = NO_SYMBOL_DQS;
-    if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
+    if ( TYPE_MBA == getTargetType(i_trgt) )
+    {
+        // 2 pins for MBA.
+        if ( 0 != (i_mask & 0xaa) ) pins |= EVEN_SYMBOL_DQ;
+        if ( 0 != (i_mask & 0x55) ) pins |= ODD_SYMBOL_DQ;
+    }
+    else
+    {
+        // 1 pin for MCA.
+        if ( 0 != (i_mask & 0xff) ) pins |= ODD_SYMBOL_DQ;
+    }
 
-    return MemSymbol<TYPE_MCA>( i_trgt, i_rank, symbol, pins );
+    return MemSymbol( i_trgt, i_rank, symbol, pins );
 }
+
+//------------------------------------------------------------------------------
+
+uint8_t MemSymbol::getDq() const
+{
+    return TYPE_MBA == getTargetType(iv_trgt) ? symbol2Dq<TYPE_MBA>(iv_symbol)
+                                              : symbol2Dq<TYPE_MCA>(iv_symbol);
+}
+
 
 } // end namespace PRDF
