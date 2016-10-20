@@ -10007,7 +10007,7 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
     <id>MSS_CAL_STEP_ENABLE</id>
     <description>
-    A bit vector denoting valid cal steps to run (0 is left most bit)
+    A bit map ofvector denoting valid cal steps to run (0 is left most bit)
     [0] EXT_ZQCAL
     [1] WR_LEVEL
     [2] DQS_ALIGN
