@@ -221,6 +221,7 @@ fsp.tar_CONTENTS = \
     $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
     $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
     $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
+    $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/hb_plat_attr_srvc.H \
