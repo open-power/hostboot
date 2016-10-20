@@ -496,6 +496,10 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     l_err_data.extractToRight<TT::INIT_CAL_ERROR_RANK_PAIR, TT::INIT_CAL_ERROR_RANK_PAIR_LEN>(l_rank_pairs);
     FAPI_INF("initial cal err: 0x%016llx, rp: 0x%016llx (0x%016llx)", l_errors, l_rank_pairs, uint64_t(l_err_data));
 
+    // Check for RDVREF calibration errors. This fapi_try catches scom errors. Any errors from the
+    // RDVREF itself are assumed errors only after read centering
+    FAPI_TRY( dp16::process_rdvref_cal_errors(i_target) );
+
     if ((l_rank_pairs == 0) || (l_errors == 0))
     {
         FAPI_INF("Initial cal - no errors reported");
@@ -796,9 +800,11 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     fapi2::buffer<uint64_t> l_vref_config;
     uint8_t is_sim = 0;
     uint8_t cal_abort_on_error = 0;
+    uint16_t l_vref_cal_enable = 0;
 
     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
     FAPI_TRY( mss::is_simulation(is_sim) );
+    FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
     // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
@@ -839,25 +845,26 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         }
     }
 
-    // Blast the VREF config with the proper setting for these cal bits.
-    // Read Centering
+    // Blast the VREF config with the proper setting for these cal bits if there were any enable bits set
+    if (l_vref_cal_enable != 0)
     {
         fapi2::buffer<uint64_t> l_data;
 
         // The two bits we care about are the calibration enable and skip read centering
-        // bits in rc_vref_config1. If CALIBRATION_ENABLE is set, the vref is run before
-        // read centering. If SKIPRDCENTERING is set, the cal stops after vref centering.
-        // So
-        // If READ_CNTR == 1 && READ_CTR_2D_VREF == 1, CALIBRATION_ENABLE = 1 and SKIP = 0
-        // If READ_CNTR == 0 && READ_CTR_2D_VREF == 1, CALIBRATION_ENABLE = 1 and SKIP = 1
-        // If READ_CNTR == 1 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
-        // If READ_CNTR == 0 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
+        // bits in rc_vref_config1. We always run RDVREF config, but sometimes skip
+        // read centering after (if we're not doing those steps.
         FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data) );
 
-        l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE>(
-            i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
-        l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING>(
-            ! i_cal_steps_enabled.getBit<WRITE_CTR>());
+        FAPI_INF("enabling read VREF cal, read centering is %s", i_cal_steps_enabled.getBit<READ_CTR>() ? "yup" : "nope");
+        l_data.setBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE>();
+
+        if ((i_cal_steps_enabled.getBit<READ_CTR>() == mss::LOW) &&
+            (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() == mss::LOW))
+        {
+
+            FAPI_INF("skipping read centering");
+            l_data.clearBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING>();
+        }
 
         FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data) );
     }
