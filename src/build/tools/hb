@@ -125,6 +125,7 @@ hb_helptext()
         echo
         echo "  Options:"
         echo "      --test : Copy test images (as opposed to non-test)."
+        echo "      --secureboot : Build a secure pnor with proper signing"
         echo
         echo "  See also:"
         echo "      simsetup"
@@ -312,7 +313,7 @@ hb_prime()
          fi
     fi
 
-    hbDistribute $*
+    hbDistribute --hb-standalone $*
 }
 
 hb_fipssetup()

@@ -30,39 +30,19 @@
 # number fields must be 4 or 8 bytes
 # numbers cannot be over 32 bits
 
-
 use strict;
-use XML::Simple;
 use Data::Dumper;
 use File::Basename;
-
-# Digest::SHA1 module is now Digest::SHA in newer version of perl.  Need to
-# do the below eval blocks to support both modules.
-BEGIN
-{
-    eval "use Digest::SHA;";
-    if ($@)
-    {
-        eval "use Digest::SHA1;";
-        die $@ if $@;
-    }
-}
-
-################################################################################
-# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
-# bugs that result in XML parse errors that can be fixed by adjusting white-
-# space (i.e. parse errors that do not make sense).
-################################################################################
-$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
-
-my $TRAC_ERR = 0;
-# 0=errors, >0 for more traces, leaving at 1 to keep key milestone traces.
-my $g_trace = 1;
+use Cwd qw(abs_path);
+use lib dirname abs_path($0);
+use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command
+                 findLayoutKeyByEyeCatch checkSpaceConstraints);
 
 my $programName = File::Basename::basename $0;
 my %pnorLayout;
 my %PhysicalOffsets;
 my %binFiles;
+my %finalBinFiles=();
 my $pnorLayoutFile;
 my $pnorBinName = "";
 my $tocVersion = 0x1;
@@ -76,7 +56,6 @@ my %SideOptions = (
         B => "B",
         sideless => "sideless",
     );
-use constant PAGE_SIZE => 4096;
 
 if ($#ARGV < 0) {
     usage();
@@ -133,16 +112,13 @@ if (-e $pnorBinName)
 }
 
 #Load PNOR Layout XML file
-loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
+loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets, $testRun);
 
 #Verify all the section files exist
 verifyFilesExist(\%pnorLayout, \%binFiles);
 
-#Perform any data integrity manipulation (ECC, shaw-hash, etc)
-robustifyImgs(\%pnorLayout, \%binFiles);
-
-checkSpaceConstraints(\%pnorLayout, \%binFiles);
-trace(1, "Done checkSpaceConstraints");
+# Make sure provided files will fit in their sections
+checkSpaceConstraints(\%pnorLayout, \%binFiles, $testRun);
 
 # Create all Partition Tables at each TOC offset
 # Each side has 2 TOC's created at different offsets for backup purposes.
@@ -176,169 +152,12 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 {
     my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
 
-    fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
-                        $tocOffset);
+    fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId, $tocOffset);
 }
 
 exit 0;
 
 #########################  Begin Utility Subroutines ###########################
-
-################################################################################
-# loadPnorLayout
-################################################################################
-sub loadPnorLayout
-{
-    my ($i_pnorFile, $i_pnorLayoutRef, $i_physicalOffsets) = @_;
-    my $this_func = (caller(0))[3];
-
-    unless(-e $i_pnorFile)
-    {
-        traceErr("$this_func: File not found: $i_pnorFile");
-        return -1;
-    }
-
-    #parse the input XML file
-    my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
-    my $xml = $xs->XMLin($i_pnorFile);
-    my $imageSize = 0;
-    my $chipSize = 0;
-    # Save the metadata - imageSize, blockSize, toc Information etc.
-    foreach my $metadataEl (@{$xml->{metadata}})
-    {
-        # Get meta data
-        $imageSize   = $metadataEl->{imageSize}[0];
-        $chipSize    = $metadataEl->{chipSize}[0];
-        my $blockSize   = $metadataEl->{blockSize}[0];
-        my $tocSize     = $metadataEl->{tocSize}[0];
-        my $arrangement = $metadataEl->{arrangement}[0];
-        $chipSize       = getNumber($chipSize);
-        $imageSize      = getNumber($imageSize);
-        $blockSize      = getNumber($blockSize);
-        $tocSize        = getNumber($tocSize);
-        $$i_pnorLayoutRef{metadata}{chipSize}    = $chipSize;
-        $$i_pnorLayoutRef{metadata}{imageSize}   = $imageSize;
-        $$i_pnorLayoutRef{metadata}{blockSize}   = $blockSize;
-        $$i_pnorLayoutRef{metadata}{tocSize}     = $tocSize;
-        $$i_pnorLayoutRef{metadata}{arrangement} = $arrangement;
-
-        my $numOfSides  = scalar (@{$metadataEl->{side}});
-        my $sideSize = ($imageSize)/($numOfSides);
-
-        trace(1, " $this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize");
-
-        #determine the TOC offsets from the arrangement and side Information
-        #stored in the layout xml
-        #
-        #Arrangement A-B-D means that the layout had Primary TOC (A), then backup TOC (B), then Data (pnor section information).
-        #Similaryly, arrangement A-D-B means that primary toc is followed by the data (section information) and then
-        #the backup TOC. In order for the parsing tools to find the TOC, the TOCs must be at TOP_OF_FLASH-(2) * TOC_SIZE
-        # and the other at 0x0 of flash memory.
-        if ($arrangement eq "A-B-D")
-        {
-            my $count = 0;
-            foreach my $side (@{$metadataEl->{side}})
-            {
-                my $golden     = (exists $side->{golden} ? "yes" : "no");
-                my $sideId     = $side->{id}[0];
-                my $primaryTOC = ($sideSize)*($count);
-                my $backupTOC  = ($primaryTOC)+($tocSize);
-
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
-
-                $count = $count + 1;
-                trace(1, "A-B-D: side:$sideId primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
-            }
-        }
-        elsif ($arrangement eq "A-D-B")
-        {
-            my $count = 0;
-            foreach my $side (@{$metadataEl->{side}})
-            {
-                my $golden     = (exists $side->{golden} ? "yes" : "no");
-                my $sideId     = $side->{id}[0];
-
-                #Leave 1 block sized pad because the top addr of flash special
-                # and simics broke we had the toc touching it
-                my $primaryTOC = ($sideSize)*($count + 1) - ($tocSize + $blockSize) ;
-                my $backupTOC  = ($sideSize)*($count);
-
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
-                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
-                $count = $count + 1;
-                trace(1, "A-D-B: side:$sideId, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
-            }
-        }
-        else
-        {
-            trace(0, "Arrangement:$arrangement is not supported");
-            exit(1);
-        }
-
-        #Iterate over the <section> elements.
-        foreach my $sectionEl (@{$xml->{section}})
-        {
-            my $description = $sectionEl->{description}[0];
-            my $eyeCatch = $sectionEl->{eyeCatch}[0];
-            my $physicalOffset = $sectionEl->{physicalOffset}[0];
-            my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
-            my $side = $sectionEl->{side}[0];
-            my $testonly = $sectionEl->{testonly}[0];
-            my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
-            my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
-            my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
-            my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
-            my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
-            if (($testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
-            {
-                next;
-            }
-
-            trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
-
-            $physicalOffset = getNumber($physicalOffset);
-            $physicalRegionSize = getNumber($physicalRegionSize);
-
-            if($physicalRegionSize  + $physicalOffset > $imageSize)
-            {
-                die "ERROR: $this_func: Image size ($imageSize) smaller than $eyeCatch's offset + $eyeCatch's size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
-            }
-
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
-            $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
-
-            #store the physical offsets of each section in a hash, so, it is easy
-            #to search physicalOffsets based on the name of the section (eyecatch)
-            if ($side eq "sideless")
-            {
-                foreach my $metadata (@{$xml->{metadata}})
-                {
-                    foreach my $sides (@{$metadata->{side}})
-                    {
-                        $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
-                    }
-                }
-            }
-            else
-            {
-                $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
-            }
-        }
-
-    }
-    return 0;
-}
 
 ################################################################################
 # createPnorImg - Create PNOR image based on input data.
@@ -416,6 +235,10 @@ sub addUserData
     {
         $miscFlags |= 0x40;
     }
+    if( ($i_sectionHash{$i_key}{reprovision} eq "yes") )
+    {
+        $miscFlags |= 0x10;
+    }
 
     #First User Data Word
     #[1:chip][1:compressType][2:dataInteg]
@@ -428,6 +251,7 @@ sub addUserData
     my $userflags1 = ($verCheck << 24)
         | ($miscFlags << 16);
 
+
     trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value userflags0=$userflags0");
     system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value $userflags0");
     die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
@@ -435,6 +259,7 @@ sub addUserData
     trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value userflags1=$userflags1");
     system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value $userflags1");
     die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
+
 }
 
 ################################################################################
@@ -580,59 +405,6 @@ sub addTOCInfo
         $sideShift = $sideShift + $numOfTOCs;
     }
 }
-################################################################################
-# robustifyImgs - Perform any ECC or ShawHash manipulations
-################################################################################
-sub robustifyImgs
-{
-    my ($i_pnorLayoutRef, $i_binFiles) = @_;
-    my $this_func = (caller(0))[3];
-
-    #@TODO: ECC Correction
-    #@TODO: maybe a little SHA hashing?
-
-    return 0;
-}
-
-################################################################################
-# align_down: Align the input to the lower end of the PNOR side
-################################################################################
-sub align_down
-{
-    my ($addr,$n) = @_;
-    return (($addr) - ($addr)%($n));
-}
-
-################################################################################
-# align_up: Align the input address to the higher end of the PNOR side
-################################################################################
-sub align_up
-{
-    my ($addr,$n) = @_;
-    return ((($addr) + ($n-1)) & ~($n-1));
-}
-
-################################################################################
-# findLayoutKeyByEyeCatch - Figure out hash key based on eyeCatcher
-################################################################################
-sub findLayoutKeyByEyeCatch
-{
-    my $layoutKey = -1;
-    my($eyeCatch, $i_pnorLayoutRef) = @_;
-    my $key;
-
-    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-    for $key ( keys %sectionHash)
-    {
-        if($sectionHash{$key}{eyeCatch} eq $eyeCatch)
-        {
-            $layoutKey = $key;
-            last;
-        }
-    }
-
-    return $layoutKey;
-}
 
 ################################################################################
 # verifyFilesExist - Verify all the input files exist
@@ -658,89 +430,6 @@ sub verifyFilesExist
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
 }
-
-################################################################################
-# checkSpaceConstraints - Make sure provided files will fit in their sections
-################################################################################
-sub checkSpaceConstraints
-{
-    my ($i_pnorLayoutRef, $i_binFiles) = @_;
-    my $this_func = (caller(0))[3];
-    my $key;
-
-    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-
-    for $key ( keys %{$i_binFiles})
-    {
-        my $filesize = -s $$i_binFiles{$key};
-
-        my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
-        if( $layoutKey == -1)
-        {
-            die "ERROR: $this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key" if($?);
-        }
-
-        my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
-        my $physicalRegionSize = $sectionHash{$layoutKey}{physicalRegionSize};
-
-        if($filesize > $physicalRegionSize)
-        {
-            # If this is a test run increase HBI size by PAGE_SIZE until all test
-            # cases fit
-            if ($testRun && $eyeCatch eq "HBI")
-            {
-                print "Adjusting HBI size - ran out of space for test cases\n";
-                my $hbbKey = findLayoutKeyByEyeCatch("HBB", \%$i_pnorLayoutRef);
-                adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize, $hbbKey);
-            }
-            else
-            {
-                die "ERROR: $this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!";
-            }
-        }
-    }
-}
-
-###############################################################################
-# adjustHbiPhysSize - Adjust HBI physical size when running test cases and fix
-#                     up physical offsets of partitions between HBI and HBB
-################################################################################
-sub adjustHbiPhysSize
-{
-    my ($i_sectionHashRef, $i_hbiKey, $i_filesize, $i_hbbKey) = @_;
-
-    my %sectionHash = %$i_sectionHashRef;
-
-    # Increment HBI physical size by PAGE_SIZE until the HBI file can fit
-    my $hbi_old = $sectionHash{$i_hbiKey}{physicalRegionSize};
-    while ($i_filesize > $sectionHash{$i_hbiKey}{physicalRegionSize})
-    {
-        $sectionHash{$i_hbiKey}{physicalRegionSize} += PAGE_SIZE;
-    }
-    my $hbi_move = $sectionHash{$i_hbiKey}{physicalRegionSize} - $hbi_old;
-    my $hbi_end = $sectionHash{$i_hbiKey}{physicalRegionSize} + $hbi_move;
-
-    # Fix up physical offset affected by HBI size change
-    foreach my $section (keys %sectionHash)
-    {
-        # Only fix partitions after HBI and before HBB
-        if ( ( $sectionHash{$section}{physicalOffset} >
-               $sectionHash{$i_hbiKey}{physicalOffset} ) &&
-             ( $sectionHash{$section}{physicalOffset} <
-               $sectionHash{$i_hbbKey}{physicalOffset} )
-            )
-        {
-            $sectionHash{$section}{physicalOffset} += $hbi_move;
-            # Ensure section adjustment does not cause an overlap with HBB
-            if ($sectionHash{$section}{physicalOffset} >
-                $sectionHash{$i_hbbKey}{physicalOffset})
-            {
-                die "Error detected $sectionHash{$section}{eyeCatch}'s adjusted size overlaps HBB";
-            }
-        }
-    }
-}
-
 
 ###############################################################################
 # fillPnorImage - Load actual PNOR image with data using the provided input images
@@ -828,52 +517,6 @@ sub insertPadBytes
 }
 
 ################################################################################
-# getNumber - handle hex or decimal input string
-################################################################################
-sub getNumber
-{
-    my $inVal = shift;
-    if($inVal =~ "0x")
-    {
-	return oct($inVal);
-    }
-    else
-    {
-	return $inVal;
-    }
-}
-
-################################################################################
-# trace
-################################################################################
-sub traceErr
-{
-    my $i_string = shift;
-    trace($TRAC_ERR, $i_string);
-}
-
-################################################################################
-# trace
-################################################################################
-sub trace
-{
-    my $i_traceLevel;
-    my $i_string;
-
-    ($i_traceLevel, $i_string) = @_;
-
-    #traceLevel 0 is for errors
-    if($i_traceLevel == 0)
-    {
-	print "ERROR: ".$i_string."\n";
-    }
-    elsif ($g_trace >= $i_traceLevel)
-    {
-	print "TRACE: ".$i_string."\n";
-    }
-}
-
-################################################################################
 # getSideInfo - return side info of certain sections and determine if value is
 #               a supported value
 ################################################################################
@@ -929,7 +572,6 @@ sub getOtherSide
 
     return $other_side;
 }
-
 
 ################################################################################
 # print usage instructions

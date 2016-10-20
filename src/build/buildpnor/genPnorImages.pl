@@ -471,7 +471,6 @@ sub manipulateImages
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
         my %tempImages = (
             HDR_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.bin",
-            PREFIX_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.hdr.prefix.bin",
             TEMP_SHA_IMG => "$bin_dir/$parallelPrefix.$eyeCatch.temp.sha.bin",
             PAD_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.pad.bin",
             ECC_PHASE => "$bin_dir/$parallelPrefix.$eyeCatch.temp.bin.ecc",
@@ -495,14 +494,15 @@ sub manipulateImages
 
         # Sections that have secureboot support. Secureboot still must be
         # enabled for secureboot actions on these partitions to occur.
-        my $isNormalSecure =    ($eyeCatch eq "SBE")
-                             || ($eyeCatch eq "SBEC")
-                             || ($eyeCatch eq "PAYLOAD")
-                             || ($eyeCatch eq "SBKT")
-                             || ($eyeCatch eq "OCC")
-                             || ($eyeCatch eq "HBRT")
-                             || ($eyeCatch eq "CAPP")
-                             || ($eyeCatch eq "BOOTKERNEL");
+        # @TODO securebootp9 re-enable with SBE/SBEC/PAYLOAD secureboot ports
+        my $isNormalSecure =  ($eyeCatch eq "SBKT")
+                             || ($eyeCatch eq "HBRT");
+                             #|| ($eyeCatch eq "SBE")
+                             #|| ($eyeCatch eq "SBEC")
+                             #|| ($eyeCatch eq "PAYLOAD")
+                             #|| ($eyeCatch eq "OCC")
+                             #|| ($eyeCatch eq "CAPP")
+                             #|| ($eyeCatch eq "BOOTKERNEL");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
                               || ($eyeCatch eq "HBI")
@@ -539,7 +539,8 @@ sub manipulateImages
                 if ($secureboot)
                 {
                     $callerHwHdrFields{configure} = 1;
-                    if (exists $hashPageTablePartitions{$eyeCatch})
+                    # @TODO securebootp9 re-enable hash page table with vfs page table port
+                    if (0) #exists $hashPageTablePartitions{$eyeCatch})
                     {
                         if ($eyeCatch eq "HBI")
                         {
@@ -553,7 +554,8 @@ sub manipulateImages
                         }
                     }
                     # Add hash page table
-                    if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
+                    # @TODO securebootp9 re-enable hash page table with vfs page table port
+                    if (0) #$tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
                     {
                         trace(1,"Adding hash page table for $eyeCatch");
                         my $hashPageTableSize = -s $tempImages{hashPageTable};
@@ -665,9 +667,10 @@ sub manipulateImages
                     run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
                 }
             }
-            elsif($secureboot
-                  &&  (   ($sectionHash{$layoutKey}{sha512perEC} eq "yes")
-                       || ($isNormalSecure)))
+            # @TODO securebootp9 re-enable with SBE/SBEC secureboot ports
+            elsif(0) #$secureboot
+                     #&&  (   ($sectionHash{$layoutKey}{sha512perEC} eq "yes")
+                     #  || ($isNormalSecure)))
             {
                 $callerHwHdrFields{configure} = 1;
                 if($openSigningTool)
@@ -689,30 +692,17 @@ sub manipulateImages
 
             setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
 
-            # Prefix phase
-            # Add SBE header to HBB
-            if($eyeCatch eq "HBB")
-            {
-                run_command("echo \"00000000001800000000000008000000000000000007EF80\" | xxd -r -ps - $tempImages{PREFIX_PHASE}");
-                run_command("cat $tempImages{HDR_PHASE} >> $tempImages{PREFIX_PHASE}");
-            }
-            # Otherwise propagate image to next phase
-            else
-            {
-                run_command("mv $tempImages{HDR_PHASE} $tempImages{PREFIX_PHASE}");
-            }
-
             # Padding Phase
             if ($eyeCatch eq "HBI" && $testRun)
             {
                 # If "--test" flag set do not pad as the test HBI images is
                 # possibly larger than partition size and does not need to be
                 # fully padded. Size adjustments made in checkSpaceConstraints
-                run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
             }
             else
             {
-                run_command("dd if=$tempImages{PREFIX_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
             }
 
             # Create .header.bin file for FSP

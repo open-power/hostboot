@@ -75,6 +75,8 @@ COPY_FILES = \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
     src/build/buildpnor/buildpnor.pl:openpower \
+    src/build/buildpnor/genPnorImages.pl:openpower \
+    src/build/buildpnor/PnorUtils.pm:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
     src/usr/targeting/common/xmltohb/mergexml.sh:openpower \
@@ -215,6 +217,8 @@ fsp.tar_CONTENTS = \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
+    src/build/buildpnor/genPnorImages.pl \
+    src/build/buildpnor/PnorUtils.pm \
     src/build/buildpnor/defaultPnorLayout.xml \
     src/build/buildpnor/pnorLayoutFSP.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \

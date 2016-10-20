@@ -128,7 +128,7 @@ Layout Description
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Hostboot Extended image (3MB)</description>
+        <description>Hostboot Extended image (4.96MB)</description>
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x10A000</physicalOffset>
         <physicalRegionSize>0x4F6000</physicalRegionSize>

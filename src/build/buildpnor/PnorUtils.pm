@@ -64,83 +64,24 @@ sub loadPnorLayout
     #parse the input XML file
     my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
     my $xml = $xs->XMLin($i_pnorFile);
+    my $imageSize = 0;
+    my $chipSize = 0;
 
-    #Iterate over the <section> elements.
-    foreach my $sectionEl (@{$xml->{section}})
-    {
-        my $description = $sectionEl->{description}[0];
-        my $eyeCatch = $sectionEl->{eyeCatch}[0];
-        my $physicalOffset = $sectionEl->{physicalOffset}[0];
-        my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
-        my $side = $sectionEl->{side}[0];
-        my $testonly = $sectionEl->{testonly}[0];
-        my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
-        my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
-        my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
-        my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
-        my $reprovision = (exists $sectionEl->{reprovision} ? "yes" : "no");
-        my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
-        my $xz = "";
-        my $xzSize = 0;
-        if((exists $sectionEl->{compressed}) &&
-           ($sectionEl->{compressed}[0]->{algorithm}[0] eq "xz"))
-        {
-            $xz = "xz";
-            $xzSize = $sectionEl->{compressed}[0]->{uncompressedSize}[0];
-        }
-        if (($i_testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
-        {
-            next;
-        }
-
-        trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
-
-        $physicalOffset = getNumber($physicalOffset);
-        $physicalRegionSize = getNumber($physicalRegionSize);
-
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{reprovision} = $reprovision;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{compressed}{algorithm} = $xz;
-        $$i_pnorLayoutRef{sections}{$physicalOffset}{compressed}{uncompressedSize} = $xzSize;
-
-        #store the physical offsets of each section in a hash, so, it is easy
-        #to search physicalOffsets based on the name of the section (eyecatch)
-        if ($side eq "sideless")
-        {
-            foreach my $metadata (@{$xml->{metadata}})
-            {
-                foreach my $sides (@{$metadata->{side}})
-                {
-                    $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
-                }
-            }
-        }
-        else
-        {
-            $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
-        }
-    }
     # Save the metadata - imageSize, blockSize, toc Information etc.
     foreach my $metadataEl (@{$xml->{metadata}})
     {
         # Get meta data
-        my $imageSize   = $metadataEl->{imageSize}[0];
+        $imageSize   = $metadataEl->{imageSize}[0];
+        $chipSize    = $metadataEl->{chipSize}[0];
         my $blockSize   = $metadataEl->{blockSize}[0];
         my $tocSize     = $metadataEl->{tocSize}[0];
         my $arrangement = $metadataEl->{arrangement}[0];
         $imageSize      = getNumber($imageSize);
+        $chipSize       = getNumber($chipSize);
         $blockSize      = getNumber($blockSize);
         $tocSize        = getNumber($tocSize);
         $$i_pnorLayoutRef{metadata}{imageSize}   = $imageSize;
+        $$i_pnorLayoutRef{metadata}{chipSize}    = $chipSize;
         $$i_pnorLayoutRef{metadata}{blockSize}   = $blockSize;
         $$i_pnorLayoutRef{metadata}{tocSize}     = $tocSize;
         $$i_pnorLayoutRef{metadata}{arrangement} = $arrangement;
@@ -155,7 +96,8 @@ sub loadPnorLayout
         #
         #Arrangement A-B-D means that the layout had Primary TOC (A), then backup TOC (B), then Data (pnor section information).
         #Similaryly, arrangement A-D-B means that primary toc is followed by the data (section information) and then
-        #the backup TOC.
+        #the backup TOC. In order for the parsing tools to find the TOC, the TOCs must be at TOP_OF_FLASH-(2) * TOC_SIZE
+        # and the other at 0x0 of flash memory.
         if ($arrangement eq "A-B-D")
         {
             my $count = 0;
@@ -176,24 +118,85 @@ sub loadPnorLayout
         }
         elsif ($arrangement eq "A-D-B")
         {
+            my $count = 0;
             foreach my $side (@{$metadataEl->{side}})
             {
                 my $golden     = (exists $side->{golden} ? "yes" : "no");
                 my $sideId     = $side->{id}[0];
-                my $hbbAddr    = $$i_physicalOffsets{side}{$sideId}{eyecatch}{"HBB"};
-                my $primaryTOC = align_down($hbbAddr, $sideSize);
-                my $backupTOC  = align_up($hbbAddr, $sideSize) - $tocSize;
+                #Leave 1 block sized pad because the top addr of flash special
+                # and simics broke we had the toc touching it
+                my $primaryTOC = ($sideSize)*($count + 1) - ($tocSize + $blockSize) ;
+                my $backupTOC  = ($sideSize)*($count);
 
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
-                trace(1, "A-D-B: side:$sideId HBB:$hbbAddr, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+                $count = $count + 1;
+                trace(1, "A-D-B: side:$sideId, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
             }
         }
         else
         {
             trace(0, "Arrangement:$arrangement is not supported");
             exit(1);
+        }
+
+        #Iterate over the <section> elements.
+        foreach my $sectionEl (@{$xml->{section}})
+        {
+            my $description = $sectionEl->{description}[0];
+            my $eyeCatch = $sectionEl->{eyeCatch}[0];
+            my $physicalOffset = $sectionEl->{physicalOffset}[0];
+            my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
+            my $side = $sectionEl->{side}[0];
+            my $testonly = $sectionEl->{testonly}[0];
+            my $ecc = (exists $sectionEl->{ecc} ? "yes" : "no");
+            my $sha512Version = (exists $sectionEl->{sha512Version} ? "yes" : "no");
+            my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
+            my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
+            my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
+            if (($i_testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
+            {
+                next;
+            }
+
+            trace(3, "$this_func: description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side");
+
+            $physicalOffset = getNumber($physicalOffset);
+            $physicalRegionSize = getNumber($physicalRegionSize);
+
+            if($physicalRegionSize  + $physicalOffset > $imageSize)
+            {
+                die "ERROR: $this_func: Image size ($imageSize) smaller than $eyeCatch's offset + $eyeCatch's size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
+            }
+
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{ecc} = $ecc;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512Version} = $sha512Version;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
+
+            #store the physical offsets of each section in a hash, so, it is easy
+            #to search physicalOffsets based on the name of the section (eyecatch)
+            if ($side eq "sideless")
+            {
+                foreach my $metadata (@{$xml->{metadata}})
+                {
+                    foreach my $sides (@{$metadata->{side}})
+                    {
+                        $$i_physicalOffsets{side}{$sides->{id}[0]}{eyecatch}{$eyeCatch} = $physicalOffset;
+                    }
+                }
+            }
+            else
+            {
+                $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
+            }
         }
     }
     return 0;
@@ -225,11 +228,11 @@ sub getNumber
     my $inVal = shift;
     if($inVal =~ "0x")
     {
-	return oct($inVal);
+        return oct($inVal);
     }
     else
     {
-	return $inVal;
+        return $inVal;
     }
 }
 
@@ -255,11 +258,11 @@ sub trace
     #traceLevel 0 is for errors
     if($i_traceLevel == 0)
     {
-	print "ERROR: ".$i_string."\n";
+        print "ERROR: ".$i_string."\n";
     }
     elsif ($g_trace >= $i_traceLevel)
     {
-	print "TRACE: ".$i_string."\n";
+        print "TRACE: ".$i_string."\n";
     }
 }
 

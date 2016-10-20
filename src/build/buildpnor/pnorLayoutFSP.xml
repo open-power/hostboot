@@ -149,7 +149,7 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
-    <!-- @fixme - Put this back later (RTC:154286)
+    <!-- #@TODO RTC:163810 - Put this back later if needed
     <section>
         <description>Centaur SBE (576K)</description>
         <eyeCatch>SBEC</eyeCatch>
@@ -199,6 +199,14 @@ Layout Description
         <eyeCatch>RINGOVD</eyeCatch>
         <physicalOffset>0x1D38000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>SecureBoot Key Transition Partition (16K)</description>
+        <eyeCatch>SBKT</eyeCatch>
+        <physicalOffset>0x1D3D000</physicalOffset>
+        <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>
