@@ -400,15 +400,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief reset rc_vref_config0
+/// @brief vref_config guess time
 /// @param[in] i_target fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @return time to wait for read vref centering in cycles
 ///
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
-inline fapi2::ReturnCode reset_vref_config0( const fapi2::Target<T>& i_target )
+inline uint64_t vref_guess_time( const fapi2::Target<T>& i_target )
 {
-    fapi2::buffer<uint64_t> l_data;
-    uint16_t l_guess_time = 0;
+    constexpr uint64_t THRESHOLD_KHZ = 500;
+    constexpr uint64_t FUDGE = 100;
+    uint64_t l_guess_time = 0;
+    uint64_t l_freq;
+    FAPI_TRY( mss::freq(i_target.template getParent<fapi2::TARGET_TYPE_MCBIST>(), l_freq) );
 
     // This 16 bit integer denotes the number of memory clock cycles to wait for the analog
     // D/A converter to settle to a value. The digital value in the D/A converter can
@@ -418,16 +421,33 @@ inline fapi2::ReturnCode reset_vref_config0( const fapi2::Target<T>& i_target )
     // exceeds the 500 KHz threshold.
     // For example, a 1333 MHz clock must have value be slight more than 1333 MHz /
     // 500 KHz = 2,666, rounded up to a final value of 2700.
-    //
-    // So this means we just add a smidge to MSS_FREQ, right? Round up to the nearest '00
-    // and jump 100 if we're divisible by 100 (e.g., 2400. This should yield 2500.)
-    uint64_t l_freq;
-    FAPI_TRY( mss::freq(i_target.template getParent<fapi2::TARGET_TYPE_MCBIST>(), l_freq) );
-
-    l_guess_time = (l_freq + 100) / 100 * 100;
+    l_guess_time = (l_freq * MHZ_TO_KHZ) / THRESHOLD_KHZ + FUDGE;
     FAPI_INF("VREF guess wait time: %u (freq: %lu)", l_guess_time, l_freq);
+    return l_guess_time;
 
-    l_data.insertFromRight<TT::GUESS_WAIT_TIME, TT::GUESS_WAIT_TIME_LEN>((l_freq + 100) / 100 * 100);
+fapi_try_exit:
+    // If we can't get a freq we're freqed.
+    FAPI_ERR("unable to get frequency for %s", mss::c_str(i_target));
+    fapi2::Assert(false);
+    return 0;
+}
+
+///
+/// @brief reset rc_vref_config0
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rcTraits<T> >
+inline fapi2::ReturnCode reset_vref_config0( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+#ifdef DONT_SLOW_RDVREF_CAL
+    l_data.insertFromRight<TT::GUESS_WAIT_TIME, TT::GUESS_WAIT_TIME_LEN>(vref_guess_time(i_target));
+#else
+    constexpr uint64_t SLOW_AS_YOU_CAN_GO = 0xFFFF;
+    l_data.insertFromRight<TT::GUESS_WAIT_TIME, TT::GUESS_WAIT_TIME_LEN>(SLOW_AS_YOU_CAN_GO);
+#endif
 
     FAPI_TRY( write_vref_config0(i_target, l_data) );
 
@@ -445,14 +465,18 @@ template< fapi2::TargetType T, typename TT = rcTraits<T> >
 inline fapi2::ReturnCode reset_vref_config1( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
+    uint8_t l_al = 0;
+    uint8_t l_cl = 0;
+    FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
+    FAPI_TRY( mss::eff_dram_cl(i_target, l_cl) );
 
-    // TK: WAG at CMD_PRECEDE_TIME
-    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(0 + 4 + 2);
-    l_data.insertFromRight<TT::MPR_PAGE, TT::MPR_PAGE_LEN>(0); // TK: <shrug>
+    // PHY databook p 506
+    // The recommended setting is (AL + CL + 12).
+    l_data.insertFromRight<TT::CMD_PRECEDE_TIME, TT::CMD_PRECEDE_TIME_LEN>(l_al + l_cl + 12);
+    l_data.insertFromRight<TT::MPR_PAGE, TT::MPR_PAGE_LEN>(0b0100); // From R. King
 
     // Note: when initial cal is setup, this register will change to accomodate the
     // initial cal read centering and read vref centering cal steps.
-
     FAPI_TRY( write_vref_config1(i_target, l_data) );
 
 fapi_try_exit:
