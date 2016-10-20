@@ -525,6 +525,8 @@ sub validateAttributes {
     $elements{"display-name"} = { required => 0, isscalar => 1};
     $elements{"virtual"}     = { required => 0, isscalar => 0};
     $elements{"tempAttribute"} = { required => 0, isscalar => 0};
+    $elements{"serverwizReadonly"} = { required => 0, isscalar => 0};
+    $elements{"serverwizHide"} = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -580,6 +582,8 @@ sub validateTargetTypes {
     $elements{"attribute"}        = { required => 0, isscalar => 0};
     $elements{"fspOnly"}          = { required => 0, isscalar => 0};
     $elements{"compileAttribute"} = { required => 0, isscalar => 0};
+    $elements{"parent_type"}      = { required => 0, isscalar => 0};
+
 
     foreach my $targetType (@{$attributes->{targetType}})
     {
