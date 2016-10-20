@@ -40,6 +40,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/eff_config/timing.H>
 #include <lib/utils/poll.H>
+#include <lib/phy/read_cntrl.H>
 
 namespace mss
 {
@@ -199,9 +200,11 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     uint64_t l_total_cycles = 0;
     int64_t l_ns_left = 0;
     uint8_t cal_abort_on_error = 0;
+    uint16_t l_vref_cal_enable = 0;
 
     FAPI_TRY( mss::write_ctr_cycles(i_target, l_write_cntr_cycles) );
     FAPI_TRY( mss::cal_abort_on_error(cal_abort_on_error) );
+    FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
 
     // First, calculate the total number of cycles this cal should take if everything
     // runs to completion
@@ -212,6 +215,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     l_total_cycles += i_cal_steps_enabled.getBit<WRITE_CTR>()   ? l_write_cntr_cycles          : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_WR>()   ? coarse_wr_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_RD>()   ? coarse_rd_cycles(i_target)   : 0;
+    l_total_cycles +=
+        ((l_vref_cal_enable != 0) && i_cal_steps_enabled.getBit<READ_CTR>()) ? rc::vref_guess_time(i_target) : 0;
 
     // Now we have to decide if we're going to abort on an error or keep going. If we keep going,
     // then we want our initial delay to be the expected time to completion - we don't have much

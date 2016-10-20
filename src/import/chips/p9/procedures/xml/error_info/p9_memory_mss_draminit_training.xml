@@ -443,4 +443,29 @@
   </gard>
 </hwpError>
 
+<hwpError>
+  <rc>RC_MSS_FAILED_RDVREF_CAL</rc>
+  <description>
+    A DP16 has failed read vREF calibration
+  </description>
+  <ffdc>REGISTER</ffdc>
+  <ffdc>VALUE</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <deconfigure>
+    <target>TARGET_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_IN_ERROR</target>
+  </gard>
+</hwpError>
+
 </hwpErrors>

@@ -262,6 +262,27 @@ const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::
     { MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4 },
 };
 
+// Definition of the DP16 RD_VREF Calibration enable registers
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ENABLE_REG =
+{
+    MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_0,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_1,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_2,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_3,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_4,
+};
+
+// Definition of the DP16 RD_VREF Calibration enable registers
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ERROR_REG =
+{
+    MCA_DDRPHY_DP16_RD_VREF_CAL_ERROR_P0_0,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_ERROR_P0_1,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_ERROR_P0_2,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_ERROR_P0_3,
+    MCA_DDRPHY_DP16_RD_VREF_CAL_ERROR_P0_4,
+};
+
+
 // Definition of the DP16 Phase Rotator Static Offset registers
 // All-caps (as opposed to the others) as it's really in the dp16Traits class which is all caps <shrug>)
 const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::PR_STATIC_OFFSET_REG
@@ -312,6 +333,7 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_STATUS1_REG =
     MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_3,
     MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_4,
 };
+
 // Definition of the error mask registers element is DP16 number, first is mask 0 second is mask 1
 const std::vector< std::pair<uint64_t, uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_VREF_ERROR_MASK_REG =
 {
@@ -1181,21 +1203,31 @@ fapi2::ReturnCode reset_rd_vref( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
     // Leave the values as-is if we're on VBU or Awan, since we know that works. Use the real value for unit test and HW
     if (!is_sim)
     {
-        // Do a read/modify/write
-        FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
-
-        for (auto& l_regpair : l_data)
+        // Setup the rd vref from VPD
         {
-            // Write the same value for all the DQ and DQS nibbles
-            l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_vref_bitfield);
-            l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
-            l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB2, TT::RD_VREF_BYTE1_NIB2_LEN>(l_vref_bitfield);
-            l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB3, TT::RD_VREF_BYTE1_NIB3_LEN>(l_vref_bitfield);
+            // Do a read/modify/write
+            FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+
+            for (auto& l_regpair : l_data)
+            {
+                // Write the same value for all the DQ and DQS nibbles
+                l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_vref_bitfield);
+                l_regpair.first.insertFromRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_vref_bitfield);
+                l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB2, TT::RD_VREF_BYTE1_NIB2_LEN>(l_vref_bitfield);
+                l_regpair.second.insertFromRight<TT::RD_VREF_BYTE1_NIB3, TT::RD_VREF_BYTE1_NIB3_LEN>(l_vref_bitfield);
+            }
+
+            FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF byte0 and byte1");
+
+            FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
         }
 
-        FAPI_INF("blasting VREF settings from VPD to dp16 RD_VREF byte0 and byte1");
-
-        FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CNTRL_REG, l_data) );
+        // Turn on the rd vref calibration. We leverage an attribute to control this.
+        {
+            uint16_t l_vref_cal_enable = 0;
+            FAPI_TRY( mss::vref_cal_enable(i_target, l_vref_cal_enable) );
+            FAPI_TRY( mss::scom_blastah(i_target, TT::RD_VREF_CAL_ENABLE_REG, l_vref_cal_enable) );
+        }
     }
 
 fapi_try_exit:
@@ -1939,10 +1971,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         // Find the first bit set in the rank pairs - this will tell us which rank pair has a fail
         const auto l_fbs = mss::first_bit_set(uint64_t(l_rpb)) - RP_OFFSET;
 
-        const auto l_addr = TT::BIT_DISABLE_REG[l_fbs];
         FAPI_INF("checking bad bits for RP%d", l_fbs);
-
-        FAPI_TRY( mss::scom_suckah(i_target, l_addr, l_read) );
+        FAPI_TRY( mss::scom_suckah(i_target, TT::BIT_DISABLE_REG[l_fbs], l_read) );
 
         // Loop over the read information for the DP
         for (auto& v : l_read)
@@ -2284,6 +2314,46 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
             }
         }
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Process read vref calibration errors
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    // We want the index as we want to grab the register for the error log too.
+    size_t l_index = 0;
+    std::vector<fapi2::buffer<uint64_t>> l_data;
+
+    // Suck all the cal error bits out ...
+    FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CAL_ERROR_REG, l_data) );
+
+    FAPI_INF("processing RD_VREF_CAL_ERROR");
+
+    for (const auto& v : l_data)
+    {
+        // They should all be 0's. If they're not, we have a problem we should log.
+        // We don't need to fail out, as read centering will fail and we can process
+        // the errors and the disables there.
+        FAPI_ASSERT_NOEXIT(v == 0,
+                           fapi2::MSS_FAILED_RDVREF_CAL()
+                           .set_TARGET_IN_ERROR(i_target)
+                           .set_REGISTER(TT::RD_VREF_CAL_ERROR_REG[l_index])
+                           .set_VALUE(v),
+                           "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
+                           mss::c_str(i_target), TT::RD_VREF_CAL_ERROR_REG[l_index], v);
+        l_index += 1;
+    }
+
+    FAPI_INF("RD_VREF_CAL_ERROR complete");
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;

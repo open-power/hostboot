@@ -139,6 +139,14 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< uint64_t > DLL_CNFG_REG;
+        static const std::vector< uint64_t > RD_VREF_CAL_ENABLE_REG;
+        static const std::vector< uint64_t > RD_VREF_CAL_ERROR_REG;
+        static const std::vector< uint64_t > DATA_BIT_DIR1;
+        static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
+        static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
+        static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
+        static const std::vector< uint64_t > READ_DELAY_OFFSET_REG;
+
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_LOWER_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > DLL_DAC_UPPER_REG;
@@ -153,11 +161,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > AC_BOOST_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > RD_VREF_CNTRL_REG;
-        static const std::vector< uint64_t > DATA_BIT_DIR1;
-        static const std::vector< uint64_t > PR_STATIC_OFFSET_REG;
-        static const std::vector< uint64_t > IO_TX_FET_SLICE_REG;
-        static const std::vector< uint64_t > IO_TX_PFET_TERM_REG;
-        static const std::vector< uint64_t > READ_DELAY_OFFSET_REG;
+
+        static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 
         //WR VREF registers
         static const std::vector< uint64_t > WR_VREF_CONFIG0_REG;
@@ -170,8 +175,6 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP1_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
-
-        static const std::vector< std::vector<std::pair<uint64_t, uint64_t>> > BIT_DISABLE_REG;
 
         enum
         {
@@ -1739,6 +1742,13 @@ fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 ///
 fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         uint8_t (&o_bad_dq)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] );
+
+///
+/// @brief Process read vref calibration errors
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+///
+fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 } // close namespace dp16
 } // close namespace mss
