@@ -700,14 +700,6 @@ void setFrequencyAttributes( Target * i_sys,
     uint32_t l_oldNestFreq = i_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
     uint32_t l_newPll = (i_newNestFreq * l_oldPll)/l_oldNestFreq;
 
-    //NEST_FREQ
-    //TODO RTC: 161596 - Remove references to deprecated NEST_FREQ_MHZ
-    i_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>(i_newNestFreq);
-    TRACFCOMP(g_trac_targeting,
-            "ATTR_NEST_FREQ_MHZ getting set from %d to %d",
-            l_oldNestFreq,
-            i_newNestFreq );
-
     //FREQ_PB_MHZ
     uint32_t l_freqPb = i_newNestFreq;
     i_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(l_freqPb);

@@ -6358,39 +6358,6 @@ firmware notes: Used as override attribute for pstate procedure
 </attribute>
 
 <attribute>
-    <id>PREV_NEST_FREQ_MHZ</id>
-    <description>
-        The Nest frequency in MHz the system booted on last.
-        Populated in istep 6.12 from the SBE.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>NEST_FREQ_MHZ</id>
-    <!-- TODO RTC: 161596 - Remove deprecated NEST_FREQ_MHZ -->
-    <description>
-        Nest frequency in MHz
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_NEST_FREQ_MHZ</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>CHIP_REGIONS_TO_ENABLE</id>
     <description>
       Called to get data to customize an IPL or SLW image with data indicating
