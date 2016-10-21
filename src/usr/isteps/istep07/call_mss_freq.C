@@ -191,9 +191,6 @@ void*    call_mss_freq( void *io_pArgs )
     uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
     uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 
-    // TODO RTC: 161596 - Set ATTR_NEST_FREQ_MHZ as well until we know it is not being used anymore
-    l_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>( l_newNest );
-
     if(l_StepError.getErrorHandle() == NULL)
     {
         //Trigger sbe update if the nest frequency changed.
