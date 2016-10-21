@@ -178,6 +178,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             INIT_IO = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_INIT_IO,
             ADV_PP = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_ADVANCE_PING_PONG,
             DELAY_PP_HALF = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_DELAY_PING_PONG_HALF,
+            DISABLE_PING_PONG = MCA_DDRPHY_DP16_DATA_BIT_DIR1_P0_0_01_DISABLE_PING_PONG,
 
             TSYS_DATA = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS,
             TSYS_DATA_LEN = MCA_DDRPHY_DP16_WRCLK_PR_P0_0_01_TSYS_LEN,
@@ -718,7 +719,7 @@ inline void set_output_flush( fapi2::buffer<uint64_t>& o_data, const states i_st
 }
 
 ///
-/// @brief Set the init io state
+/// @brief Set the init IO state
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
 /// @tparam TT traits type defaults to dp16Traits<T>
 /// @param[out] o_data the value of the register
@@ -759,7 +760,32 @@ inline void set_delay_pp_half( fapi2::buffer<uint64_t>& o_data, const states i_s
     o_data.writeBit<TT::DELAY_PP_HALF>(i_state);
 }
 
+///
+/// @brief Set the ping pong disable IO state
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state mss::LOW or mss::HIGH representing the state of the bit
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_disable_ping_pong( fapi2::buffer<uint64_t>& io_data, const states i_state )
+{
+    FAPI_INF("set_init_io %s", (i_state == mss::LOW ? "low" : "high"));
+    io_data.writeBit<TT::DISABLE_PING_PONG>(i_state);
+}
 
+///
+/// @brief Get the ping pong disable IO state
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data the value of the register
+/// @return value of the ping pong disable bit
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline bool get_disable_ping_pong( const fapi2::buffer<uint64_t>& i_data )
+{
+    return i_data.getBit<TT::DISABLE_PING_PONG>();
+}
 
 ///
 /// @brief Configure the DP16 sysclk
