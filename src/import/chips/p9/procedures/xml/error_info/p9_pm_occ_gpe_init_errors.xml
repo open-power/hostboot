@@ -33,7 +33,11 @@
   <hwpError>
       <rc>RC_PM_OCC_GPE_RESET_TIMEOUT</rc>
       <description>Failed to halt OCC GPE during RESET operation.</description>
-      <ffdc>OCCGPESTATUS</ffdc>
+      <collectRegisterFfdc>
+        <id>OCCGPE_FFDC_REGISTERS</id>
+        <target>CHIP</target>
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      </collectRegisterFfdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
