@@ -245,7 +245,6 @@ fapi2::ReturnCode stop_gpe_init(
                  l_ir,
                  l_timeout_in_MS);
         fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
-
     }
     while((!((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1) &&
              (l_xsr.getBit<p9hcd::HALTED_STATE>() == 0))) &&
@@ -260,8 +259,7 @@ fapi2::ReturnCode stop_gpe_init(
 
     FAPI_ASSERT((l_timeout_in_MS != 0),
                 fapi2::STOP_GPE_INIT_TIMEOUT()
-                .set_OCCFLGSTAT(l_occ_flag)
-                .set_XSR(l_xsr),
+                .set_CHIP(i_target),
                 "STOP GPE Init timeout");
 
 fapi_try_exit:
@@ -287,7 +285,6 @@ fapi2::ReturnCode stop_gpe_reset(
     fapi2::buffer<uint64_t> l_data64;
     uint32_t                l_timeout_in_MS = 100;
 
-
     FAPI_IMP(">> stop_gpe_reset...");
 
     // Program XCR to HALT SGPE
@@ -306,12 +303,13 @@ fapi2::ReturnCode stop_gpe_reset(
     do
     {
         FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIXSR_SCOM, l_data64));
+        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
     }
     while((l_data64.getBit<p9hcd::HALTED_STATE>() == 0) && (--l_timeout_in_MS != 0));
 
     FAPI_ASSERT((l_timeout_in_MS != 0),
                 fapi2::STOP_GPE_RESET_TIMEOUT()
-                .set_SGPEXSRNOTHALT(l_data64),
+                .set_CHIP(i_target),
                 "STOP GPE Init timeout");
 
     FAPI_INF("   Clear SGPE_ACTIVE in OCC Flag Register...");

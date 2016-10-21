@@ -27,6 +27,7 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <registerFfdc>
+    <!--TODO: RTC 163970: Add the register GPE[n] XISIB to FFDC -->
     <id>CME_FFDC_REGISTERS</id>
     <scomRegister>EX_PPE_XIRAMDBG</scomRegister>
     <scomRegister>EX_CME_LCL_EISR_SCOM</scomRegister>
@@ -60,4 +61,43 @@
     <scomRegister>EX_CME_SCOM_SRTCH1_SCOM</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>SGPE_FFDC_REGISTERS</id>
+    <scomRegister>PU_OCB_OCI_OCCFLG_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEXIXSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEXIIAR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPETSEL_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPESTR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEMACR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_MIB_XISGB</scomRegister>
+    <scomRegister>PU_GPE3_MIB_XIICAC</scomRegister>
+    <scomRegister>PU_GPE3_MIB_XIDCAC_SCOM</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>OCCGPE_FFDC_REGISTERS</id>
+    <scomRegister>PU_GPE0_GPEXIXSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPEXIIAR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEXIXSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEXIIAR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPETSEL_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPESTR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPEMACR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_MIB_XISGB</scomRegister>
+    <scomRegister>PU_GPE0_MIB_XIICAC</scomRegister>
+    <scomRegister>PU_GPE0_MIB_XIDCAC_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPETSEL_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPESTR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEMACR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_MIB_XISGB</scomRegister>
+    <scomRegister>PU_GPE1_MIB_XIICAC</scomRegister>
+    <scomRegister>PU_GPE1_MIB_XIDCAC_SCOM</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>

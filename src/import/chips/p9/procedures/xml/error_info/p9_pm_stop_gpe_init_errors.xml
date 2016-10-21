@@ -22,7 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_pm_ocb_init procedure -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -34,17 +33,24 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_STOP_GPE_INIT_TIMEOUT</rc>
-    <description> Stop GPE init timedout while waiting for SGPE ACtive in OCCFLG register.
+    <description> Stop GPE init timed out while waiting for SGPE Active in OCCFLG register.
     </description>
-    <ffdc>OCCFLGSTAT</ffdc>
-    <ffdc>XSR</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_STOP_GPE_RESET_TIMEOUT</rc>
     <description> Stop GPE init timedout while waiting for HALT status in XSR register.
     </description>
-    <ffdc>SGPEXSRNOTHALT</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
