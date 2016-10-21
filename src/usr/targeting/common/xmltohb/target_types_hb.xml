@@ -104,12 +104,6 @@
     </attribute>
     <attribute><id>SCAN_MUTEX</id></attribute>
     <attribute>
-        <id>HCODE_IMAGE_ADDR</id>
-    </attribute>
-    <attribute>
-        <id>HCODE_IMAGE_SIZE</id>
-    </attribute>
-    <attribute>
         <id>HOMER_PHYS_ADDR</id>
     </attribute>
     <attribute>

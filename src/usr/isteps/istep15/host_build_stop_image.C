@@ -413,11 +413,9 @@ void* host_build_stop_image (void *io_pArgs)
                 uint32_t    l_sizeImageOut  =
                   ((P9_MAX_PROCS * (4 * MEGABYTE)));
 
-                //Set default values, p9_hcode_build will provide actual size
-                l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_ADDR>
-                                                        ( l_procRealMemAddr );
-                l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_SIZE>
-                                                        ( l_sizeImageOut ) ;
+                //Set default values, used later by p9_hcode_build
+                l_procChip->setAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>
+                                                        (l_procRealMemAddr);
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "Real mem  buffer for cpu 0x%08x = %p, virtAddr=%p",
@@ -455,11 +453,6 @@ void* host_build_stop_image (void *io_pArgs)
                     //  drop out of block with errorlog.
                     break;
                 }
-
-
-                //  set the actual size of the image now.
-                l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_SIZE>
-                ( l_sizeImageOut );
 
                 l_errl =   applyHcodeGenCpuRegs( l_procChip,
                                                 l_pImageOut,
