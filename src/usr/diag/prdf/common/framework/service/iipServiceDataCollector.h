@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -302,6 +302,14 @@ public:
      */
     void SetErrorSig( uint32_t i_signature )
     {  error_signature.setSigId( i_signature );  }
+
+    /**
+     * @brief Sets the entire signature all at once.
+     * @param i_chipId The chip's ID.
+     * @param i_sigId  The signature ID.
+     */
+    void setSignature( uint32_t i_chipId, uint32_t i_sigId )
+    { error_signature.setSignature( i_chipId, i_sigId ); }
 
   /**
    Get access to the captureData object
