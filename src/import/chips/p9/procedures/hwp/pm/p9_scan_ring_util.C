@@ -241,14 +241,14 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { ex_l3_refr_time,      0x19  },
 
             { eq_repr,              0x15  },
-            { ex_l3_repr,           0x20  },
-            { ex_l3_repr,           0x21  },
-            { ex_l2_repr,           0x20  },
-            { ex_l2_repr,           0x21  },
-            { ex_l3_refr_repr,      0x20  },
-            { ex_l3_refr_repr,      0x21  },
-            { ex_l3_refr_time,      0x20  },
-            { ex_l3_refr_time,      0x21  },
+            { ex_l3_repr,           0x1A  },
+            { ex_l3_repr,           0x1B  },
+            { ex_l2_repr,           0x1A  },
+            { ex_l2_repr,           0x1B  },
+            { ex_l3_refr_repr,      0x1A  },
+            { ex_l3_refr_repr,      0x1B  },
+            { ex_l3_refr_time,      0x1A  },
+            { ex_l3_refr_time,      0x1B  },
 
         };
 
@@ -562,6 +562,36 @@ const char* RingBucket::getRingName( RingID i_ringId )
 }
 
 //-------------------------------------------------------------------------
+void RingBucket::extractRing( void* i_ptr, uint32_t i_ringSize, uint32_t i_ringId )
+{
+    do
+    {
+        if( SCAN_RING_NO_DEBUG == iv_debugMode )
+        {
+            break;
+        }
+
+        if( !i_ptr )
+        {
+            break;
+        }
+
+        uint8_t* pRing = (uint8_t*)(i_ptr);
+        uint16_t maxLines = i_ringSize / sizeof(uint64_t);
+        FAPI_DBG("Ring Id 0x%08x", i_ringId );
+
+        for( uint32_t ringId = 0; ringId < maxLines; ringId++ )
+        {
+            FAPI_DBG("%02x %02x %02x %02x %02x %02x %02x %02x",
+                     (*pRing ), *(pRing + 1), *(pRing + 2 ), *(pRing + 3 ),
+                     *(pRing + 4 ), *(pRing + 5 ), *(pRing + 6 ), *(pRing + 7 ) );
+            pRing = pRing + sizeof(uint64_t);
+        }
+
+    }
+    while(0);
+}
+//-------------------------------------------------------------------------
 
 void RingBucket::dumpRings( )
 {
@@ -736,6 +766,9 @@ P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_
         iv_funcExes     =   iv_funcExes   | (1 << (l_corePos >> 1) );
         iv_funcQuads    =   iv_funcQuads  | (1 << (l_corePos >> 2) );
     }
+
+    FAPI_DBG("functional core 0x%08x, Ex 0x%08x quad 0x%08x",
+             iv_funcCores, iv_funcExes, iv_funcQuads );
 }
 
 //---------------------------------------------------------------------------
