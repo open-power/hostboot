@@ -187,23 +187,10 @@ void*    call_mss_freq( void *io_pArgs )
     }
 
 
-    // Check MC_SYNC_MODE
+    // Get latest MC_SYNC_MODE and FREQ_PB_MHZ
     uint8_t l_mcSyncMode = l_masterProc->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-    uint32_t l_newNest = 0;
+    uint32_t l_newNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
 
-    // TODO RTC: 161197 Remove logic to set nest based off sync mode
-    // Set the nest frequency based off mc_sync_mode
-    if( l_mcSyncMode == 0 )
-    {
-        l_newNest = l_sys->getAttr<TARGETING::ATTR_ASYNC_NEST_FREQ_MHZ>();
-    }
-    else
-    {
-        TARGETING::TargetHandleList l_mcbists;
-        TARGETING::getAllChiplets(l_mcbists, TARGETING::TYPE_MCBIST);
-        l_newNest = l_mcbists.at(0)->getAttr<TARGETING::ATTR_MSS_FREQ>();
-    }
-    l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>( l_newNest );
     // TODO RTC: 161596 - Set ATTR_NEST_FREQ_MHZ as well until we know it is not being used anymore
     l_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>( l_newNest );
 
