@@ -46,11 +46,6 @@ void* call_mss_memdiag (void* io_pArgs)
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_mss_memdiag entry");
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "!!!Skipping memdiags until it works!!!");
-    return NULL;
-
-
     TARGETING::Target* masterproc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle(masterproc);
 
