@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,6 +97,19 @@ class ErrorSignature
         iv_chipId   = 0;
         iv_regId    = 0;
         iv_errCode  = 0;
+        TraceSignature();
+    }
+
+    /**
+     * @brief Sets the entire signature all at once.
+     * @param i_chipId The chip's ID.
+     * @param i_sigId  The signature ID.
+     */
+    void setSignature( uint32_t i_chipId, uint32_t i_sigId )
+    {
+        iv_chipId   = i_chipId;
+        iv_regId    = (uint16_t)(i_sigId >> 16);
+        iv_errCode  = (uint16_t)(i_sigId & 0xffff);
         TraceSignature();
     }
 
