@@ -140,4 +140,14 @@
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_IMG_EXCEED_SRAM_SIZE</rc>
+    <description>Size of image exceeded the SRAM size of platform</description>
+    <ffdc>BAD_IMG_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
