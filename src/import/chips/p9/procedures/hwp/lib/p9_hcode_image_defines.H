@@ -58,6 +58,7 @@ CONST_UINT32_T(QPMR_HEADER_SIZE, 512);
 HCD_MAGIC_NUMBER(CPMR_MAGIC_NUMBER, ULL(0x43504d525f312e30));  // CPMR_1.0
 HCD_MAGIC_NUMBER(QPMR_MAGIC_NUMBER, ULL(0x51504d525f312e30));  // QPMR_1.0
 HCD_MAGIC_NUMBER(CME_MAGIC_NUMBER , ULL(0x434d455f5f312e30));  // CME__1.0
+HCD_MAGIC_NUMBER(SGPE_MAGIC_NUMBER, ULL(0x534750455f312e30 )); // SGPE_1.0
 HCD_MAGIC_NUMBER(PGPE_MAGIC_NUMBER , ULL(0x504750455F312E30)); // PGPE_1.0
 
 
@@ -86,13 +87,16 @@ HCD_HDR_UINT32( sgpeImgOffset, 0);
 HCD_HDR_UINT32( sgpeImgLength, 0);
 HCD_HDR_UINT32( quadCommonRingOffset, 0);
 HCD_HDR_UINT32( quadCommonRingLength, 0);
+HCD_HDR_UINT32( quadCommonOvrdOffset, 0 );
+HCD_HDR_UINT32( quadCommonOvrdLength, 0 );
 HCD_HDR_UINT32( quadSpecRingOffset, 0);
 HCD_HDR_UINT32( quadSpecRingLength, 0);
-HCD_HDR_UINT32( quadSpecScomOffset, 0);
-HCD_HDR_UINT32( quadSpecScomLength, 0);
-HCD_HDR_UINT32( quadCmnRingOccOffset, 0);
-HCD_HDR_UINT32( quadSpecRingOccOffset, 0);
-HCD_HDR_UINT32( quadCmnScomOccOffset, 0);
+HCD_HDR_UINT32( quadScomOffset, 0);
+HCD_HDR_UINT32( quadScomLength, 0);
+HCD_HDR_UINT32( quad24x7Offset, 0);
+HCD_HDR_UINT32( quad24x7Length, 0);
+HCD_HDR_UINT32( stopFfdcOffset, 0);
+HCD_HDR_UINT32( stopFfdcLength, 0);
 HCD_HDR_PAD(512);
 #ifdef __ASSEMBLER__
 .endm
@@ -176,9 +180,9 @@ HCD_HDR_UINT64(g_sgpe_reserve_flags, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_ovrd_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);
-HCD_HDR_UINT32(g_sgpe_cmn_scom_offset, 0);
-HCD_HDR_UINT32(g_sgpe_cmn_scom_mem_offset, 0);
-HCD_HDR_UINT32(g_sgpe_cmn_scom_length, 0);
+HCD_HDR_UINT32(g_sgpe_scom_offset, 0);
+HCD_HDR_UINT32(g_sgpe_scom_mem_offset, 0);
+HCD_HDR_UINT32(g_sgpe_scom_mem_length, 0);
 HCD_HDR_UINT32(g_sgpe_24x7_offset, 0);
 HCD_HDR_UINT32(g_sgpe_24x7_length, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
@@ -217,12 +221,12 @@ HCD_HDR_UINT32(g_cme_common_ring_length, 0);
 HCD_HDR_UINT32(g_cme_pstate_region_offset, 0);
 HCD_HDR_UINT32(g_cme_pstate_region_length, 0);
 HCD_HDR_UINT32(g_cme_core_spec_ring_offset, 0);
-HCD_HDR_UINT32(g_cme_core_spec_ring_ovrd_offset, 0);
 HCD_HDR_UINT32(g_cme_max_spec_ring_length, 0);
 HCD_HDR_UINT32(g_cme_scom_offset, 0);
 HCD_HDR_UINT32(g_cme_scom_length, 0);
 HCD_HDR_UINT32(g_cme_mode_flags, 0);
 HCD_HDR_UINT32(g_cme_reserved1, 0);
+HCD_HDR_UINT32(g_cme_reserved2, 0); //Retain next field at 8B boundary
 HCD_HDR_UINT64(g_cme_cpmr_PhyAddr, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
@@ -301,8 +305,8 @@ enum
     CORE0_CHIPLET_ID            = 0x20,
     PAD_OPCODE                  = 0x00000200,   //ATTN Opcode
     PPE_RESERVE_AREA            = 0x200,
-    FUSE_STATE                  = 0xAA,
-    UNFUSE_STATE                = 0xBB,
+    FUSED_MODE                  = 0xBB,
+    NONFUSED_MODE               = 0xAA,
     PK_DBG_PTR_AREA_SIZE        = 64,
     SCOM_ENTRY_SIZE             = 16,           // 4B pad, 4B address, 8B data
 
@@ -319,8 +323,7 @@ enum
     SGPE_DBG_PTR_AREA_SIZE      = 64,
     SGPE_HCODE_SIZE             = (45 * ONE_KB) + HALF_KB,  // @todo RTC 158543 Reallocate space
 
-    SGPE_EXE_SIZE               = (SGPE_HCODE_SIZE - ( SGPE_INT_VECT +
-                                   SGPE_IMG_HEADER + PK_DBG_PTR_AREA_SIZE )),
+    SGPE_IMAGE_SIZE             = 80 * ONE_KB,
 
     SGPE_ALLOCATED_SIZE         = SGPE_HCODE_SIZE,   // @todo RTC 158543 Reallocate space (collapse??)
 
@@ -369,10 +372,11 @@ enum
     CME_INT_VECTOR_SIZE         = 384,
     CME_IMG_HEADER_SIZE         = 64,
     CPMR_CME_HCODE_OFFSET       = (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    CME_HCODE_SIZE              = (30 * ONE_KB), //FIXME RTC 159737 Needs review before merge of P-State
+    CME_REGION_SIZE             =  (64 * ONE_KB), // CME hcode and data's footprint in HOMER
+    CME_SRAM_SIZE               =  (32 * ONE_KB ),
 
     //** Scan
-    CORE_COMMON_RING_SIZE       = 1  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
+    CORE_COMMON_RING_SIZE       = 2  * ONE_KB, // common ring( 2KB) + common overrides (1KB)
     MAX_SIZE_CME_INST_RING      = 1 * ONE_KB,
     CORE_OVERRIDE_RING          = 1 * ONE_KB,   // common for all cores
     QUAD_PSTATE_SIZE            = HALF_KB,      // common for all cores
@@ -381,10 +385,6 @@ enum
     CME_SRAM_HCODE_OFFSET       = 0x00, //(???)
     CME_INST_SPEC_RING_START    = 300 * ONE_KB,
     CME_REGION_START            =  (CORE_SCOM_START + CORE_SCOM_RES_SIZE),
-    RESERVE_CME_RING_AREA       =  ( CME_INST_SPEC_RING_START  - ( CME_REGION_START +
-                                     CME_HCODE_SIZE +
-                                     CORE_COMMON_RING_SIZE +
-                                     QUAD_PSTATE_SIZE)),
     CME_BLOCK_READ_LEN          = 32,
     CME_BLK_SIZE_SHIFT          = 0x05,
 
@@ -442,6 +442,9 @@ enum ImgBldRetCode_t
     BUILD_SEC_SIZE_OVERFLOW     =   28,
     BUILD_FAIL_INVALID_SECTN    =   29,
     BUILD_FAIL_RING_EXTRACTN    =   30,
+    CME_SRAM_IMG_SIZE_ERR       =   31,
+    SGPE_SRAM_IMG_SIZE_ERR      =   32,
+    PGPE_SRAM_IMG_SIZE_ERR      =   33,
 };
 
 /**
@@ -599,12 +602,7 @@ typedef struct
     uint8_t qpmrHeader[sizeof(QpmrHeaderLayout_t)];
     uint8_t l1BootLoader[SGPE_LVL_1_BOOT_LOAD_SIZE];
     uint8_t l2BootLoader[SGPE_LVL_2_BOOT_LOAD_SIZE];
-    uint8_t hcodeIntVect[SGPE_INT_VECT];
-    uint8_t imgHeader[sizeof(sgpeHeader_t)];
-    uint8_t debugPtrs[PK_DBG_PTR_AREA_SIZE];
-    uint8_t hcode[SGPE_EXE_SIZE];
-    CmnRingLayoutSgpe_t quadCmnRingArea;
-    InstRingLayoutSgpe_t quadSpecRingArea;
+    uint8_t sgpeSramImage[SGPE_IMAGE_SIZE];
 } SgpeLayout_t;
 
 typedef union CPMRSelfRestoreLayout
@@ -628,26 +626,10 @@ typedef struct
     uint8_t                 coreScom[CORE_SCOM_RES_SIZE];
 } SelfRestoreLayout_t;
 
-typedef union CmeHcodeLayout
-{
-    uint8_t hcode[CME_HCODE_SIZE];
-    struct
-    {
-        uint8_t     cmeIntVector[CME_INT_VECTOR_SIZE];
-        cmeHeader_t imgHeader;
-        uint8_t     exe[CME_HCODE_SIZE - CME_INT_VECTOR_SIZE - sizeof(cmeHeader_t)];
-    } elements;
-} CmeHcodeLayout_t;
-
-
 typedef struct
 {
     SelfRestoreLayout_t     selfRestoreRegion;
-    CmeHcodeLayout_t        cmeBin;
-    CoreCmnRingLayout_t     coreCmnRingArea;
-    uint8_t                 quadPstateArea[QUAD_PSTATE_SIZE];
-    uint8_t                 resvRingArea[RESERVE_CME_RING_AREA];
-    CoreSpecRingLayout_t    coreSpecRingArea[MAX_CME_PER_CHIP];
+    uint8_t                 cmeSramRegion[CME_REGION_SIZE];
 } CPMRLayout_t;
 
 /**
