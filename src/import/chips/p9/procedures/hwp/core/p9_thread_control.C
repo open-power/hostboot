@@ -575,63 +575,76 @@ fapi2::ReturnCode p9_thread_control_stop(
     FAPI_DBG("p9_thread_control_stop : Initiating stop command to core PC logic for threads 0x%x",
              i_threads);
 
-    // Pre-condition for stopping is that the threads are running (see figure 5.3 in the workbook)
-    // How to reconcile with 5.5.1 which says "invalid in maint mode?" Is that just a sub-precondition?
-    // TODO: Do we want to check to see if all threads are stopped and just bypass this if they are?
-    {
-        bool l_running = false;
-        FAPI_TRY(threads_running(i_target, i_threads, o_rasStatusReg, l_running),
-                 "p9_thread_control_stop: unable to determine if threads are running. threads: 0x%x",
-                 i_threads);
-
-        PTC_ASSERT_WARN(l_running == true,
-                        i_warncheck,
-                        fapi2::P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING()
-                        .set_CORE_TARGET(i_target)
-                        .set_THREAD(i_threads),
-                        "p9_thread_control_stop: ERROR: Threads cannot be stopped because they aren't running (threads=%x).", i_threads);
-    }
-
-    // Block interrupts while stopped
-    {
-        fapi2::buffer<uint64_t> l_mode_data;
-        FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
-                 i_threads);
-
-        l_mode_data.setBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
-        FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
-                 "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
-                 i_threads);
-    }
-
-    // Stop the threads
-    {
-        fapi2::buffer<uint64_t> l_scom_data(g_control_reg_map[i_threads] >> CORE_STOP);
-
-        FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
-                 "p9_thread_control_stop: putScom error when issuing sp_stop for threads 0x%x",
-                 i_threads);
-    }
-
-    // Post-conditions check
-    {
-        bool l_stopped = false;
-        FAPI_TRY(threads_stopped(i_target, i_threads, o_rasStatusReg, l_stopped),
-                 "p9_thread_control_stop: unable to determine if threads are stopped. threads: 0x%x",
-                 i_threads);
-
-        PTC_ASSERT_WARN(l_stopped == true,
-                        i_warncheck,
-                        fapi2::P9_THREAD_CONTROL_STOP_FAIL()
-                        .set_CORE_TARGET(i_target)
-                        .set_THREAD(i_threads),
-                        "p9_thread_control_stop: ERROR: Thread Stop issued, but the threads are running. "
-                        "Stop might have failed for threads 0x%x", i_threads);
-    }
-
-    FAPI_INF("p9_thread_control_stop : stop command issued for threads 0x%x",
+    // Check if the thread is already stopped, in that condition the procedure
+    // should simply say thread stop success and no error.
+    bool l_isStopped = false;
+    FAPI_TRY(threads_stopped(i_target, i_threads, o_rasStatusReg, l_isStopped),
+             "p9_thread_control_stop: unable to determine if threads are stopped. threads: 0x%x",
              i_threads);
+
+    if(false == l_isStopped)
+    {
+        // Pre-condition for stopping is that the threads are running (see figure 5.3 in the workbook)
+        // How to reconcile with 5.5.1 which says "invalid in maint mode?" Is that just a sub-precondition?
+        {
+            bool l_running = false;
+            FAPI_TRY(threads_running(i_target, i_threads, o_rasStatusReg, l_running),
+                     "p9_thread_control_stop: unable to determine if threads are running. threads: 0x%x",
+                     i_threads);
+
+            PTC_ASSERT_WARN(l_running == true,
+                            i_warncheck,
+                            fapi2::P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING()
+                            .set_CORE_TARGET(i_target)
+                            .set_THREAD(i_threads),
+                            "p9_thread_control_stop: ERROR: Threads cannot be stopped because they aren't running (threads=%x).", i_threads);
+        }
+
+        // Block interrupts while stopped
+        {
+            fapi2::buffer<uint64_t> l_mode_data;
+            FAPI_TRY(fapi2::getScom(i_target, C_RAS_MODEREG, l_mode_data),
+                     "p9_thread_control_step: getScom error when reading ras_modreg for threads 0x%x",
+                     i_threads);
+
+            l_mode_data.setBit<RAS_MODE_MR_FENCE_INTERRUPTS>();
+            FAPI_TRY(fapi2::putScom(i_target, C_RAS_MODEREG, l_mode_data),
+                     "p9_thread_control_step: putScom error when issuing ras_modreg step mode for threads 0x%x",
+                     i_threads);
+        }
+
+        // Stop the threads
+        {
+            fapi2::buffer<uint64_t> l_scom_data(g_control_reg_map[i_threads] >> CORE_STOP);
+
+            FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
+                     "p9_thread_control_stop: putScom error when issuing sp_stop for threads 0x%x",
+                     i_threads);
+        }
+
+        // Post-conditions check
+        {
+            bool l_stopped = false;
+            FAPI_TRY(threads_stopped(i_target, i_threads, o_rasStatusReg, l_stopped),
+                     "p9_thread_control_stop: unable to determine if threads are stopped. threads: 0x%x",
+                     i_threads);
+
+            PTC_ASSERT_WARN(l_stopped == true,
+                            i_warncheck,
+                            fapi2::P9_THREAD_CONTROL_STOP_FAIL()
+                            .set_CORE_TARGET(i_target)
+                            .set_THREAD(i_threads),
+                            "p9_thread_control_stop: ERROR: Thread Stop issued, but the threads are running. "
+                            "Stop might have failed for threads 0x%x", i_threads);
+        }
+        FAPI_INF("p9_thread_control_stop : stop command issued for threads 0x%x",
+                 i_threads);
+    }
+    else
+    {
+        FAPI_INF("p9_thread_control_stop : skipped calling stop cmd, since "
+                 "thread [0x%x] already in stop mode", i_threads);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
