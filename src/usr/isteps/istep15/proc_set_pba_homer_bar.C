@@ -53,6 +53,11 @@ using namespace fapi2;
 
 namespace ISTEP_15
 {
+enum
+{
+    HOMER_SIZE_IN_MB    =4,
+};
+
 void* proc_set_pba_homer_bar (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_set_pba_homer_bar entry" );
@@ -80,7 +85,7 @@ void* proc_set_pba_homer_bar (void *io_pArgs)
                         p9_pm_set_homer_bar,
                         l_fapiCpuTarget,
                         homerAddr,
-                        3);
+                        HOMER_SIZE_IN_MB);
 
         if(l_errl)
         {

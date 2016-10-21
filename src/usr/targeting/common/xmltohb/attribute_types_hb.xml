@@ -313,38 +313,6 @@
 </attribute>
 
 <attribute>
-    <id>HCODE_IMAGE_ADDR</id>
-    <description>
-        Address of HCODE Image
-        Written by host_build_stop_image (istep 15.1)
-    </description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HCODE_IMAGE_SIZE</id>
-    <description>
-      Size of HCODE Image
-      Written by host_build_stop_image (istep 15.1)
-    </description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
     <id>IBSCOM_VIRTUAL_ADDR</id>
     <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
     <simpleType>
@@ -493,6 +461,10 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_HOMER_PHYS_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
     <hbOnly/>
 </attribute>
 

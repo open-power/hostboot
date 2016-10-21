@@ -37,4 +37,16 @@
   <enum> CORE_UNFUSED = 0x0, CORE_FUSED = 0x1 </enum>
   <platInit/>
 </attribute>
+
+<attribute>
+  <id>ATTR_HOMER_PHYS_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Physical real address of the HOMER image for this chip.  Used to
+    tell the CME where this HOMER image will be placed. Must be
+    aligned to a 4MB boundary
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+</attribute>
 </attributes>

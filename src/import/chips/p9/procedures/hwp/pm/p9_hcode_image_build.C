@@ -1540,10 +1540,8 @@ extern "C"
             // copy sections pertaining to CME
             FAPI_INF("CPMR / CME building");
             uint64_t cpmrPhyAdd = 0;
-            fapi2::buffer<uint64_t> regData;
-            regData.flush<0>();
-            FAPI_TRY(getScom(i_procTgt, PU_PBABAR0, regData ));
-            regData.extract<0, 64>(cpmrPhyAdd);
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOMER_PHYS_ADDR, i_procTgt, cpmrPhyAdd ),
+                     "Error from FAPI_ATTR_GET for ATTR_HOMER_PHYS_ADDR");
             FAPI_DBG("HOMER base address 0x%016lX", cpmrPhyAdd );
             ppeImgRc = buildCmeImage( i_pImageIn, pChipHomer, i_imgType, cpmrPhyAdd );
 
