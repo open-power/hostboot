@@ -395,7 +395,7 @@ namespace HBPM
                       pQpmrHeader->bootLoaderLength);
 
             sgpeHeader_t* pSgpeImageHeader = (sgpeHeader_t*)
-                (&(pChipHomer->qpmrRegion.sgpeRegion.imgHeader));
+                    & pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECT];
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SGPE header -- Date:0x%08X, Version:0x%08X, "
                       "Image offset:0x%08X, Image length:0x%08X",
@@ -419,7 +419,7 @@ namespace HBPM
                       pCpmrHeader->cmeImgLength);
 
             cmeHeader_t* pCmeHeader = (cmeHeader_t*)
-                (&(pChipHomer->cpmrRegion.cmeBin.elements.imgHeader));
+                    & pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "CME header  -- Hcode offset:0x%08X, Hcode length:0x%08X",
                       pCmeHeader->g_cme_hcode_offset,
