@@ -263,6 +263,13 @@ class RingBucket
          */
         void dumpOverrideRings();
 
+        /**
+         * @brief   prints a given ring for content debug
+         * @param   i_ptr       points to a work buffer containing ring.
+         * @param   i_ringSize  size of a ring.
+         * @param   i_ringId    ring id
+         */
+        void extractRing( void* i_ptr, uint32_t i_ringSize, uint32_t i_ringId );
     private:
         std::map<uint16_t, RingProfile> iv_cmnRingMap;
         std::map<uint16_t, RingProfile> iv_instRingMap;
