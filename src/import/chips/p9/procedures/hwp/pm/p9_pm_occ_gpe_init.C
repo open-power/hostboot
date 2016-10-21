@@ -182,7 +182,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
 
     FAPI_ASSERT((l_pollCount != 0),
                 fapi2::PM_OCC_GPE_RESET_TIMEOUT()
-                .set_OCCGPESTATUS(l_data64),
+                .set_CHIP(i_target),
                 "OCC GPE could not be halted during reset operation.");
 
     //Clear status (Instruction Address) register
