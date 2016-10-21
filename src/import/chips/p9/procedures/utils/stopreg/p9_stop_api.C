@@ -487,6 +487,13 @@ StopReturnCode_t p9_stop_save_cpureg(  void* const i_pImage,
 
         l_rc = getCoreAndThread( i_pImage, i_pir, &coreId, &threadId );
 
+        if( l_rc )
+        {
+            MY_ERR("Failed to determine Core Id and Thread Id from PIR 0x%016llx",
+                   i_pir);
+            break;
+        }
+
         MY_INF( " PIR 0x%016llx coreId %d threadid %d "
                 " registerId %d", i_pir, coreId,
                 threadId, i_regId );

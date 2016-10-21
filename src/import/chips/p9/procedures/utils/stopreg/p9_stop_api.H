@@ -78,7 +78,8 @@ typedef enum
     STOP_SAVE_SCOM_INVALID_ADDRESS       = 10,
     STOP_SAVE_SCOM_INVALID_CHIPLET       = 11,
     STOP_SAVE_SCOM_ENTRY_UPDATE_FAILED   = 12,
-    STOP_SAVE_FAIL   = 13,  // for internal failure within firmware.
+    STOP_SAVE_INVALID_FUSED_CORE_STATUS  = 13,
+    STOP_SAVE_FAIL                       = 14,  // for internal failure within firmware.
 } StopReturnCode_t;
 
 /**

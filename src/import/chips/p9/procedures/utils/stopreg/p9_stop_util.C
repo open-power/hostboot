@@ -45,53 +45,53 @@ namespace stopImageSection
 /**
  * @brief   Returns proc chip's fuse mode status.
  * @param   i_pImage    points to start of chip's HOMER image.
- * @param   o_fuseMode  points to fuse mode information.
+ * @param   o_fusedMode  points to fuse mode information.
  * @return  STOP_SAVE_SUCCESS if functions succeeds, error code otherwise.
  */
-StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fuseMode )
+StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
 {
-    *o_fuseMode = false;
-    StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
+*o_fusedMode = false;
+StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
 
-    do
+do
+{
+    if( !i_pImage )
     {
-        if( !i_pImage )
-        {
-            MY_ERR( "invalid pointer to HOMER image");
-            l_rc = STOP_SAVE_ARG_INVALID_IMG;
-            break;
-        }
-
-        HomerSection_t* pHomerDesc = ( HomerSection_t* ) i_pImage;
-        HomerImgDesc_t* pHomer =  (HomerImgDesc_t*)( pHomerDesc->interrruptHandler );
-
-        if( SWIZZLE_8_BYTE(HOMER_MAGIC_WORD) != pHomer->homerMagicNumber )
-        {
-            MY_ERR("corrupt or invalid HOMER image location 0x%016llx",
-                   pHomer->homerMagicNumber );
-            break;
-        }
-
-
-        if( (uint8_t) FUSE_MODE == pHomer->fuseModeStatus )
-        {
-            *o_fuseMode = true;
-            break;
-        }
-
-        if( (uint8_t) REGULAR_MODE == pHomer->fuseModeStatus )
-        {
-            break;
-        }
-
-        MY_ERR("Unexpected value 0x%08x for fuse mode. Bad or corrupt "
-               "HOMER location", pHomer->fuseModeStatus );
-        l_rc = STOP_SAVE_FAIL;
-
+        MY_ERR( "invalid pointer to HOMER image");
+        l_rc = STOP_SAVE_ARG_INVALID_IMG;
+        break;
     }
-    while(0);
 
-    return l_rc;
+    HomerSection_t* pHomerDesc = ( HomerSection_t* ) i_pImage;
+    HomerImgDesc_t* pHomer =  (HomerImgDesc_t*)( pHomerDesc->interrruptHandler );
+
+    if( SWIZZLE_8_BYTE(CPMR_MAGIC_WORD) != pHomer->cpmrMagicWord )
+    {
+        MY_ERR("corrupt or invalid HOMER image location 0x%016llx",
+               SWIZZLE_8_BYTE(pHomer->cpmrMagicWord) );
+        l_rc = STOP_SAVE_ARG_INVALID_IMG;
+        break;
+    }
+
+    if( (uint8_t) FUSED_MODE == pHomer->fusedModeStatus )
+    {
+        *o_fusedMode = true;
+        break;
+    }
+
+    if( (uint8_t) NONFUSED_MODE == pHomer->fusedModeStatus )
+    {
+        break;
+    }
+
+    MY_ERR("Unexpected value 0x%08x for fused mode. Bad or corrupt "
+           "HOMER location", pHomer->fuseModeStatus );
+    l_rc = STOP_SAVE_INVALID_FUSED_CORE_STATUS ;
+
+}
+while(0);
+
+return l_rc;
 }
 
 //----------------------------------------------------------------------
@@ -99,80 +99,81 @@ StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fuseMode )
 StopReturnCode_t getCoreAndThread( void* const i_pImage, const uint64_t i_pir,
                                    uint32_t* o_pCoreId, uint32_t* o_pThreadId )
 {
-    StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
+StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
 
-    do
+do
+{
+    // for SPR restore using 'Virtual Thread' and 'Physical Core' number
+    // In Fused Mode:
+    // bit b28 and b31 of PIR give physical core and b29 and b30 gives
+    // virtual thread id.
+    // In Non Fused Mode
+    // bit 28 and b29 of PIR give both logical and physical core number
+    // whereas b30 and b31 gives logical and virtual thread id.
+    bool fusedMode = false;
+    uint8_t coreThreadInfo = (uint8_t)i_pir;
+    *o_pCoreId = 0;
+    *o_pThreadId = 0;
+    l_rc = isFusedMode( i_pImage, &fusedMode );
+
+    if( l_rc )
     {
-        // for SPR restore using 'Virtual Thread' and 'Physical Core' number
-        // In Fuse Mode:
-        // bit b28 and b31 of PIR give physical core and b29 and b30 gives
-        // virtual thread id.
-        // In Non Fuse Mode
-        // bit 28 and b29 of PIR give both logical and physical core number
-        // whereas b30 and b31 gives logical and virtual thread id.
-        bool fuseMode = false;
-        uint8_t coreThreadInfo = (uint8_t)i_pir;
-        *o_pCoreId = 0;
-        *o_pThreadId = 0;
-        l_rc = isFusedMode( i_pImage, &fuseMode );
-
-        if( l_rc )
-        {
-            MY_ERR(" Checking Fuse mode. Read failed 0x%08x", l_rc );
-            break;
-        }
-
-        if( fuseMode )
-        {
-            if( coreThreadInfo & FUSE_BIT1 )
-            {
-                *o_pThreadId = 2;
-            }
-
-            if( coreThreadInfo & FUSE_BIT2 )
-            {
-                *o_pThreadId += 1;
-            }
-
-            if( coreThreadInfo & FUSE_BIT0 )
-            {
-                *o_pCoreId = 2;
-            }
-
-            if( coreThreadInfo & FUSE_BIT3 )
-            {
-                *o_pCoreId += 1;
-            }
-        }
-        else
-        {
-            if( coreThreadInfo & FUSE_BIT0 )
-            {
-                *o_pCoreId = 2;
-            }
-
-            if ( coreThreadInfo & FUSE_BIT1 )
-            {
-                *o_pCoreId += 1;
-            }
-
-            if( coreThreadInfo & FUSE_BIT2 )
-            {
-                *o_pThreadId = 2;
-            }
-
-            if( coreThreadInfo & FUSE_BIT3 )
-            {
-                *o_pThreadId += 1;
-            }
-        }
-
-        //quad field is not affected by fuse mode
-        *o_pCoreId += 4 * (( coreThreadInfo & 0x70 ) >> 4 );
+        MY_ERR(" Checking Fused mode. Read failed 0x%08x", l_rc );
+        break;
     }
-    while(0);
 
-    return l_rc;
+    if( fusedMode )
+    {
+        if( coreThreadInfo & FUSED_CORE_BIT1 )
+        {
+            *o_pThreadId = 2;
+        }
+
+        if( coreThreadInfo & FUSED_CORE_BIT2 )
+        {
+            *o_pThreadId += 1;
+        }
+
+        if( coreThreadInfo & FUSED_CORE_BIT0 )
+        {
+            *o_pCoreId = 2;
+        }
+
+        if( coreThreadInfo & FUSED_CORE_BIT3 )
+        {
+            *o_pCoreId += 1;
+        }
+    }
+    else
+    {
+        if( coreThreadInfo & FUSED_CORE_BIT0 )
+        {
+            *o_pCoreId = 2;
+        }
+
+        if ( coreThreadInfo & FUSED_CORE_BIT1 )
+        {
+            *o_pCoreId += 1;
+        }
+
+        if( coreThreadInfo & FUSED_CORE_BIT2 )
+        {
+            *o_pThreadId = 2;
+        }
+
+        if( coreThreadInfo & FUSED_CORE_BIT3 )
+        {
+            *o_pThreadId += 1;
+        }
+    }
+
+    MY_INF("Core Type %s", fusedMode ? "Fused" : "Un-Fused" );
+    //quad field is not affected by fuse mode
+    *o_pCoreId += 4 * (( coreThreadInfo & 0x70 ) >> 4 );
+}
+while(0);
+
+return l_rc;
 }
 
 #ifdef __cplusplus
