@@ -88,11 +88,11 @@ namespace stopImageSection
 typedef struct
 {
     uint64_t attnOpcodes;
-    uint64_t homerMagicNumber;
+    uint64_t cpmrMagicWord;
     uint32_t buildDate;
     uint32_t version;
     uint8_t  reserve1[7];
-    uint8_t  fuseModeStatus;
+    uint8_t  fusedModeStatus;
     uint32_t cmeImgOffset;
     uint32_t cmeImgLength;
     uint32_t cmeCommonRingOffset;
@@ -111,10 +111,10 @@ typedef struct
  */
 enum
 {
-    FUSE_BIT0 = 0x08,
-    FUSE_BIT1 = 0x04,
-    FUSE_BIT2 = 0x02,
-    FUSE_BIT3 = 0x01,
+    FUSED_CORE_BIT0 = 0x08,
+    FUSED_CORE_BIT1 = 0x04,
+    FUSED_CORE_BIT2 = 0x02,
+    FUSED_CORE_BIT3 = 0x01,
     QUAD_BITS = 0x70
 };
 
