@@ -116,21 +116,20 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
 
-        // Each slave sbe gets 1s to respond with the fact that it's
+        // Each slave sbe gets 60s to respond with the fact that it's
         // booted and at runtime (stable state)
-        const uint32_t SLAVE_SBE_TIMEOUT_1S = 1000000000;
-        const uint32_t SLAVE_SBE_WAIT_SLEEP = (SLAVE_SBE_TIMEOUT_1S/10);
-        uint32_t l_time = 0;
+        const uint64_t SBE_TIMEOUT_NSEC = 60*NS_PER_SEC; //60sec
+        const uint64_t SBE_NUM_LOOPS = 100;
+        const uint64_t SBE_WAIT_SLEEP = (SBE_TIMEOUT_NSEC/SBE_NUM_LOOPS);
         sbeMsgReg_t l_sbeReg;
 
-        for(l_time=0; l_time<SLAVE_SBE_TIMEOUT_1S; l_time+=SLAVE_SBE_WAIT_SLEEP)
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running p9_get_sbe_msg_register HWP"
+                   " on processor target %.8X",
+                   TARGETING::get_huid(l_cpu_target));
+
+        for( uint64_t l_loops = 0; l_loops < SBE_NUM_LOOPS; l_loops++ )
         {
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running p9_get_sbe_msg_register HWP"
-                    " on processor target %.8X",
-                    TARGETING::get_huid(l_cpu_target));
-
             l_sbeReg.reg = 0;
             FAPI_INVOKE_HWP(l_errl, p9_get_sbe_msg_register,
                             l_fapi2ProcTarget,l_sbeReg);
@@ -145,24 +144,25 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             else if(l_sbeReg.currState == SBE_STATE_RUNTIME)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SBE 0x%.8X booted and at runtime, l_sbeReg=0x%.8X",
-                            TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
+                           "SBE 0x%.8X booted and at runtime, l_sbeReg=0x%.8X",
+                           TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
                 break;
             }
             else
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                            "SBE 0x%.8X NOT booted yet, l_sbeReg=0x%.8X",
-                            TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
+                if( !(l_loops % 10) )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "%d> SBE 0x%.8X NOT booted yet, l_sbeReg=0x%.8X",
+                               l_loops, TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
 
-                nanosleep(0,SLAVE_SBE_WAIT_SLEEP);
+                }
+                l_loops++;
+                nanosleep(0,SBE_WAIT_SLEEP);
             }
         }
-        if((!l_errl) && (l_time == SLAVE_SBE_TIMEOUT_1S))
+        if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        ERR_MRK"Timeout hit waiting for sbe slave 0x%.8X",
-                        TARGETING::get_huid(l_cpu_target));
             /*@
              * @errortype
              * @reasoncode  RC_SBE_SLAVE_TIMEOUT
@@ -197,8 +197,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // we can still at least boot with master proc
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
-
-        if (l_errl)
+        else if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "ERROR : call p9_check_slave_sbe_seeprom_complete, "
@@ -232,7 +231,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 "Running p9_extract_sbe_rc HWP"
                 " on processor target %.8X",
                   TARGETING::get_huid(l_cpu_target) );
-
+                  
         //@TODO-RTC:100963-Do something with the RETURN_ACTION
         P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction
           = P9_EXTRACT_SBE_RC::RE_IPL;

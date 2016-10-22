@@ -141,6 +141,13 @@ namespace SBE
     */
     errlHndl_t getBootMcSyncMode( uint8_t& o_mcSyncMode );
 
+   /**
+    * @brief Set all of the attributes that are based on the PB/Nest Freq
+    *
+    * @param[in] i_nestFreq - Nest/PB Frequency to base settings on.
+    */
+    void setNestFreqAttributes( uint32_t i_nestFreq );
+
 } //end namespace SBE
 
 #endif /* _SBEIF_H */

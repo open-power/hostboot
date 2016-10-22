@@ -43,6 +43,9 @@
 //SBE
 #include    <sbe/sbeif.H>
 
+#include <initservice/mboxRegs.H>
+#include <p9_frequency_buckets.H>
+
 using namespace TARGETING;
 
 
@@ -291,6 +294,24 @@ void* call_host_voltage_config( void *io_pArgs )
                 "Turbo = %d, UltraTurbo = %d",
                 l_nominalFreq, l_floorFreq, l_ceilingFreq,
                 l_turboFreq, l_ultraTurboFreq );
+
+        // Setup the remaining attributes that are based on PB/Nest
+        SBE::setNestFreqAttributes(l_nestFreq);
+
+        //NEST_PLL_BUCKET
+        for( size_t l_bucket = 1; l_bucket <= NEST_PLL_FREQ_BUCKETS; l_bucket++ )
+        {
+            // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
+            // take zero-based indexing into account.
+            if( NEST_PLL_FREQ_LIST[l_bucket-1] == l_nestFreq )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ATTR_NEST_PLL_BUCKET getting set to %x",
+                          l_bucket);
+                l_sys->setAttr<TARGETING::ATTR_NEST_PLL_BUCKET>(l_bucket);
+                break;
+            }
+        }
 
     } while( 0 );
 
