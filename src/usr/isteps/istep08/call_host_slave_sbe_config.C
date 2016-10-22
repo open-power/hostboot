@@ -102,6 +102,12 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     // write the attribute
     l_sys->setAttr<ATTR_BOOT_FLAGS>(l_scratch3.data32);
 
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "ATTR_BOOT_FLAGS=%.8X", l_scratch3.data32 );
+
+    // grab the boot flags from the master proc
+    INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
+    l_scratch5.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_5];
+    
 
     // execute p9_setup_sbe_config.C for non-primary processor targets
     TARGETING::TargetHandleList l_cpuTargetList;
@@ -117,6 +123,8 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         {
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (l_cpu_target);
+
+            l_cpu_target->setAttr<ATTR_MC_SYNC_MODE>(l_scratch5.mcSyncMode);
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_setup_sbe_config HWP on processor target %.8X",

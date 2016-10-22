@@ -103,7 +103,7 @@ void* call_host_cbs_start(void *io_pArgs)
                      "Running p9_start_cbs HWP on processor target %.8X",
                      TARGETING::get_huid(l_cpu_target) );
 
-            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target);
+            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
             if(l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
