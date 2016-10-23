@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_npu_scominit
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/initfiles)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/perv)
 $(call BUILD_PROCEDURE)

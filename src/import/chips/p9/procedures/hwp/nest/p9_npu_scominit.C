@@ -37,7 +37,7 @@
 //------------------------------------------------------------------------------
 #include <p9_npu_scominit.H>
 #include <p9_npu_scom.H>
-
+#include <p9_nv_ref_clk_enable.H>
 
 ///
 /// p9_npu_scominit HWP entry point (Defined in .H file)
@@ -47,16 +47,35 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
 {
     fapi2::ReturnCode l_rc;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    auto l_nv_targets = i_target.getChildren<fapi2::TARGET_TYPE_NV>();
 
     FAPI_DBG("Entering ...");
-    FAPI_DBG("Invoking p9.npu.scom.initfile...");
-    FAPI_EXEC_HWP(l_rc, p9_npu_scom, i_target, FAPI_SYSTEM);
 
-    if (l_rc)
+    if (l_nv_targets.size())
     {
-        FAPI_ERR("Error from p9.npu.scom.initfile");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
+        FAPI_DBG("Invoking p9.npu.scom.initfile...");
+        FAPI_EXEC_HWP(l_rc, p9_npu_scom, i_target, FAPI_SYSTEM);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p9.npu.scom.initfile");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+
+        FAPI_DBG("Invoking p9_nv_ref_clk_enable...");
+        FAPI_EXEC_HWP(l_rc, p9_nv_ref_clk_enable, i_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p9_nv_ref_clk_enable");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+    }
+    else
+    {
+        FAPI_DBG("Skipping NPU initialization");
     }
 
 fapi_try_exit:
