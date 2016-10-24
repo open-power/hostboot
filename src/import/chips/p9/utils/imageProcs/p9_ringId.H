@@ -252,20 +252,17 @@ enum RingOffset
     perv_pll_bndy_bucket_4 = 12,
     perv_pll_bndy_bucket_5 = 13,
     perv_pll_func   = 14,
-    perv_pibnet_gptr = 15,
-    perv_pibnet_time = 16,
     // Instance Rings
     perv_repr     = (0 | INSTANCE_RING_MARK),
     occ_repr      = (1 | INSTANCE_RING_MARK),
-    perv_pibnet_repr = (2 | INSTANCE_RING_MARK)
 };
 
 static const CHIPLET_DATA g_pervData =
 {
     1,  // Pervasive Chiplet ID is 1
-    17, // 17 common rings for pervasive chiplet
-    3,  // 3 instance specific rings for pervasive chiplet
-    3
+    15, // 15 common rings for pervasive chiplet
+    2,  // 2 instance specific rings for pervasive chiplet
+    2
 };
 }; // end of namespace PERV
 
@@ -850,11 +847,11 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_bndy_bucket_4       , "perv_pll_bndy_bucket_4"      , PERV_TYPE  }, // 13
     { PERV::perv_pll_bndy_bucket_5       , "perv_pll_bndy_bucket_5"      , PERV_TYPE  }, // 14
     { PERV::perv_pll_func                , "perv_pll_func"               , PERV_TYPE  }, // 15
-    { PERV::perv_pibnet_gptr             , "perv_pibnet_gptr"            , PERV_TYPE  }, // 16
-    { PERV::perv_pibnet_time             , "perv_pibnet_time"            , PERV_TYPE  }, // 17
-    { PERV::perv_repr                    , "perv_repr"                   , PERV_TYPE  }, // 18
-    { PERV::occ_repr                     , "occ_repr"                    , PERV_TYPE  }, // 19
-    { PERV::perv_pibnet_repr             , "perv_pibnet_repr"            , PERV_TYPE  }, // 20
+    { PERV::perv_repr                    , "perv_repr"                   , PERV_TYPE  }, // 16
+    { PERV::occ_repr                     , "occ_repr"                    , PERV_TYPE  }, // 17
+    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 18
+    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 19
+    { INVALID_RING                       , "invalid"                     , PERV_TYPE  }, // 20
     { N0::n0_fure                        , "n0_fure"                     , N0_TYPE    }, // 21
     { N0::n0_gptr                        , "n0_gptr"                     , N0_TYPE    }, // 22
     { N0::n0_time                        , "n0_time"                     , N0_TYPE    }, // 23
@@ -1084,11 +1081,11 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_bndy_bucket_4       , PERV_TYPE  }, // 13
     { PERV::perv_pll_bndy_bucket_5       , PERV_TYPE  }, // 14
     { PERV::perv_pll_func                , PERV_TYPE  }, // 15
-    { PERV::perv_pibnet_gptr             , PERV_TYPE  }, // 16
-    { PERV::perv_pibnet_time             , PERV_TYPE  }, // 17
-    { PERV::perv_repr                    , PERV_TYPE  }, // 18
-    { PERV::occ_repr                     , PERV_TYPE  }, // 19
-    { PERV::perv_pibnet_repr             , PERV_TYPE  }, // 20
+    { PERV::perv_repr                    , PERV_TYPE  }, // 16
+    { PERV::occ_repr                     , PERV_TYPE  }, // 17
+    { INVALID_RING                       , PERV_TYPE  }, // 18
+    { INVALID_RING                       , PERV_TYPE  }, // 19
+    { INVALID_RING                       , PERV_TYPE  }, // 20
     { N0::n0_fure                        , N0_TYPE    }, // 21
     { N0::n0_gptr                        , N0_TYPE    }, // 22
     { N0::n0_time                        , N0_TYPE    }, // 23
