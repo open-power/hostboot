@@ -34,8 +34,6 @@ const RingIdList RING_ID_LIST_PDG[] =
     {"occ_time",              occ_time, 0x01, 0x01, VPD_KEYWORD_PDG, VPD_RING_CLASS_NEST},
     {"perv_ana_gptr",    perv_ana_gptr, 0x01, 0x01, VPD_KEYWORD_PDG, VPD_RING_CLASS_GPTR},
     {"perv_pll_gptr",    perv_pll_gptr, 0x01, 0x01, VPD_KEYWORD_PDG, VPD_RING_CLASS_GPTR},
-    {"perv_pibnet_gptr", perv_pibnet_gptr, 0x01, 0x01, VPD_KEYWORD_PDG, VPD_RING_CLASS_GPTR},
-    {"perv_pibnet_time", perv_pibnet_time, 0x01, 0x01, VPD_KEYWORD_PDG, VPD_RING_CLASS_NEST},
     {"n0_gptr",                n0_gptr, 0x02, 0x02, VPD_KEYWORD_PDG, VPD_RING_CLASS_GPTR},
     {"n0_time",                n0_time, 0x02, 0x02, VPD_KEYWORD_PDG, VPD_RING_CLASS_NEST},
     {"n0_nx_gptr",          n0_nx_gptr, 0x02, 0x02, VPD_KEYWORD_PDG, VPD_RING_CLASS_GPTR},
@@ -115,7 +113,6 @@ const RingIdList RING_ID_LIST_PDR[] =
     /*                            min   max                 */
     {"perv_repr",          perv_repr, 0x01, 0x01, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"occ_repr",            occ_repr, 0x01, 0x01, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
-    {"perv_pibnet_repr", perv_pibnet_repr, 0x01, 0x01, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"n0_repr",              n0_repr, 0x02, 0x02, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"n0_nx_repr",        n0_nx_repr, 0x02, 0x02, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"n0_cxa0_repr",    n0_cxa0_repr, 0x02, 0x02, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},

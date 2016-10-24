@@ -54,11 +54,9 @@ enum RingID
     perv_pll_bndy_bucket_4 = 13,
     perv_pll_bndy_bucket_5 = 14,
     perv_pll_func = 15,
-    perv_pibnet_gptr = 16,
-    perv_pibnet_time = 17,
-    perv_repr = 18,
-    occ_repr = 19,
-    perv_pibnet_repr = 20,
+    perv_repr = 16,
+    occ_repr = 17,
+    // values 18-20 unused
 
     // Nest Chiplet Rings - N0
     n0_fure = 21,
