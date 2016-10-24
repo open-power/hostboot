@@ -97,11 +97,11 @@ const uint32_t TRACE_MUX_POSITIONS       = 1 << TRCTRL_MUX0_SEL_LEN;
 struct ta_def
 {
     /* One entry per mux setting; value of 0 means N/A */
-    proc_gettracearray_bus_id bus_ids[TRACE_MUX_POSITIONS];
+    p9_tracearray_bus_id bus_ids[TRACE_MUX_POSITIONS];
     uint32_t debug_scom_base, trace_scom_base, ex_odd_scom_offset;
 };
 
-proc_gettracearray_bus_id NO_TB = (proc_gettracearray_bus_id)0;
+p9_tracearray_bus_id NO_TB = (p9_tracearray_bus_id)0;
 
 static const ta_def ta_defs[] =
 {
@@ -170,7 +170,7 @@ class TraceArrayFinder
         const ta_def* pdef;
         uint32_t mux_sel;
 
-        TraceArrayFinder(proc_gettracearray_bus_id i_trace_bus) : pdef(NULL), mux_sel(0)
+        TraceArrayFinder(p9_tracearray_bus_id i_trace_bus) : pdef(NULL), mux_sel(0)
         {
             for (unsigned int i = 0; i < ARRAY_SIZE(ta_defs); i++)
             {
@@ -280,10 +280,10 @@ extern "C" fapi2::ReturnCode p9_proc_gettracearray(
     if (i_args.collect_dump)
     {
         fapi2::buffer<uint64_t> buf;
-        o_ta_data.resize(PROC_GETTRACEARRAY_NUM_ENTRIES * PROC_GETTRACEARRAY_BITS_PER_ENTRY).flush<0>();
+        o_ta_data.resize(P9_TRACEARRAY_NUM_ROWS * P9_TRACEARRAY_BITS_PER_ROW).flush<0>();
 
         /* Start with the low data register because that's where the "trace running" bit is. */
-        for (int i = 0; i < PROC_GETTRACEARRAY_NUM_ENTRIES; i++)
+        for (int i = 0; i < P9_TRACEARRAY_NUM_ROWS; i++)
         {
             FAPI_TRY(fapi2::getScom(target, TRACE_SCOM_BASE + tra_scom_offset + TRACE_LO_DATA_OFS, buf),
                      "Failed to read trace array low data register, iteration %d", i);
@@ -300,7 +300,7 @@ extern "C" fapi2::ReturnCode p9_proc_gettracearray(
         }
 
         /* Then dump the high data */
-        for (int i = 0; i < PROC_GETTRACEARRAY_NUM_ENTRIES; i++)
+        for (int i = 0; i < P9_TRACEARRAY_NUM_ROWS; i++)
         {
             FAPI_TRY(fapi2::getScom(target, TRACE_SCOM_BASE + tra_scom_offset + TRACE_HI_DATA_OFS, buf),
                      "Failed to read trace array high data register, iteration %d", i);
