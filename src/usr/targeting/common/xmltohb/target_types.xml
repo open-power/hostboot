@@ -1932,6 +1932,7 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
 </targetType>
 
 <targetType>
@@ -2212,6 +2213,7 @@
     <attribute><id>IO_XBUS_MASTER_MODE</id></attribute>
     <attribute><id>IO_XBUS_TX_MARGIN_RATIO</id></attribute>
     <attribute><id>IO_XBUS_TX_FFE_PRECURSOR</id></attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id></attribute>
 </targetType>
 
 <targetType>
