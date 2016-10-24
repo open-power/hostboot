@@ -31,18 +31,19 @@
 
 namespace HBOCC
 {
-
     /**
      * @brief Read OCC SRAM
      *
      * @param[in]     i_pTarget   PROC or OCC target pointer
      * @param[in]     i_addr      OCI Address to be used for the operation
      * @param[in,out] io_dataBuf  Reference to data buffer
+     * @param[in]     i_dataLen   Size of the data to read
      * @return errlHndl_t   Error log if operation failed
      */
     errlHndl_t readSRAM(const TARGETING::Target*i_pTarget,
-                             const uint32_t i_addr,
-                             ecmdDataBufferBase & io_dataBuf);
+                        const uint32_t i_addr,
+                        uint64_t * io_dataBuf,
+                        size_t i_dataLen );
 
     /**
      * @brief Write OCC SRAM
@@ -50,11 +51,13 @@ namespace HBOCC
      * @param[in]     i_pTarget   PROC or OCC target pointer
      * @param[in]     i_addr      OCI Address to be used for the operation
      * @param[in]     i_dataBuf   Reference to data buffer
+     * @param[in]     i_dataLen   Size of the data to write
      * @return errlHndl_t   Error log if operation failed
      */
     errlHndl_t writeSRAM(const TARGETING::Target*i_pTarget,
-                              const uint32_t i_addr,
-                              ecmdDataBufferBase & io_dataBuf);
+                         const uint32_t i_addr,
+                         uint64_t * io_dataBuf,
+                         size_t i_dataLen );
 
     /**
      * @brief Write OCC Circular Buffer
@@ -64,7 +67,7 @@ namespace HBOCC
      * @return errlHndl_t   Error log if operation failed
      */
     errlHndl_t writeCircularBuffer(const TARGETING::Target*i_pTarget,
-                              ecmdDataBufferBase & i_dataBuf);
+                                   uint64_t * i_dataBuf);
 
 } //end OCC namespace
 

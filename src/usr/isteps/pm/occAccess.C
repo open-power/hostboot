@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/occ/occAccess.C $                                     */
+/* $Source: src/usr/isteps/pm/occAccess.C $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -30,18 +30,22 @@
 #include    <targeting/common/utilFilter.H>
 
 // Fapi
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
 #include    <isteps/hwpf_reasoncodes.H>
 
 // Procedures
-#include <p8_ocb_init.H>
-#include <p8_ocb_indir_setup_linear.H>
-#include <p8_ocb_indir_access.H>
+#include <p9_pm_ocb_init.H>
+#include <p9_pm_ocb_indir_setup_linear.H>
+#include <p9_pm_ocb_indir_access.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
+#define CIRCULAR_OCB_DATA_SIZE 8
+
+
 
 namespace HBOCC
 {
@@ -52,14 +56,14 @@ namespace HBOCC
 errlHndl_t getChipTarget(const TARGETING::Target* i_target,
                             TARGETING::Target* & o_pChipTarget)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     TARGETING::TYPE  l_type  = TARGETING::TYPE_NA;
     bool l_found = false;    //error if no chip target found
     uint32_t l_huid = 0xFFFFFFFF;  //read for error FFDC
 
     do
     {
-        if(NULL == i_target) //unexpected error
+        if(nullptr == i_target) //unexpected error
         {
             TRACFCOMP( g_fapiTd, ERR_MRK"getChipTarget: null target passed");
             break; // log and return error
@@ -71,7 +75,7 @@ errlHndl_t getChipTarget(const TARGETING::Target* i_target,
             const TARGETING::Target * l_pChipTarget = getParentChip(
                       const_cast<TARGETING::Target *>(i_target));
             o_pChipTarget =  const_cast<TARGETING::Target *>(l_pChipTarget);
-            if (NULL == o_pChipTarget)
+            if (nullptr == o_pChipTarget)
             {
                 l_huid  = i_target->getAttr<TARGETING::ATTR_HUID>();
                 TRACFCOMP( g_fapiTd, ERR_MRK"getChipTarget:"
@@ -133,17 +137,29 @@ enum accessOCBIndirectCmd
     ACCESS_OCB_WRITE_CIRCULAR,
 };
 
+/*
+ * @brief Interface for communicating with the OCC via OCB channels
+ *
+ * @param[in] i_cmd - OCB Command type
+ * @param[in] i_pTarget - The OCC Target
+ * @param[in] i_addr - The address to read from/write to
+ * @param[in/out] io_dataBuf - The input/output buffer
+ * @param[in] i_dataLen - The length of the buffer in bytes
+ *
+ * @return - nullptr on success, error log handle on failure
+ */
 errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
-              const TARGETING::Target * i_pTarget,
-              const uint32_t       i_addr,
-              ecmdDataBufferBase & io_dataBuf)
+                                    const TARGETING::Target * i_pTarget,
+                                    const uint32_t i_addr,
+                                    uint64_t * io_dataBuf,
+                                    size_t i_dataLen )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     uint32_t   l_len  = 0;
-    TARGETING::Target* l_pChipTarget = NULL;
+    TARGETING::Target* l_pChipTarget = nullptr;
 
-    uint32_t   l_channel = OCB_CHAN0;  // OCB channel (0,1,2,3)
-    uint32_t   l_operation = OCB_GET;  // Operation(Get, Put)
+    p9ocb::PM_OCB_CHAN_NUM   l_channel = p9ocb::OCB_CHAN0;  // OCB channel (0,1,2,3)
+    p9ocb::PM_OCB_ACCESS_OP   l_operation = p9ocb::OCB_GET;  // Operation(Get, Put)
     bool       l_ociAddrValid = true;  // use oci_address
     bool       l_setup=true;           // set up linear
 
@@ -154,11 +170,11 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         case (ACCESS_OCB_READ_LINEAR):
             break; // use defaults
         case (ACCESS_OCB_WRITE_LINEAR):
-            l_operation = OCB_PUT;
+            l_operation = p9ocb::OCB_PUT;
             break;
         case (ACCESS_OCB_WRITE_CIRCULAR):
-            l_channel = OCB_CHAN1;
-            l_operation = OCB_PUT;
+            l_channel = p9ocb::OCB_CHAN1;
+            l_operation = p9ocb::OCB_PUT;
             l_ociAddrValid = false;
             l_setup = false;
             break;
@@ -179,16 +195,17 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
                     get_huid(l_pChipTarget),
                     l_pChipTarget->getAttr<TARGETING::ATTR_TYPE>());
 
-        fapi::Target l_fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
-                 reinterpret_cast<void *> (l_pChipTarget) );
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarget( l_pChipTarget );
 
-        // buffer must be multiple of bytes
-        if(io_dataBuf.getByteLength()%8 != 0)
+        // buffer must be multiple of 8 bytes
+        if( i_dataLen%8 != 0)
         {
+
             TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                     " Error Improper data size:%d(in bytes),size of data"
                     " requested to be read is not aligned in size of 8 Bytes",
-                    io_dataBuf.getByteLength());
+                    i_dataLen );
+
             /*@
              * @errortype
              * @moduleid     fapi::MOD_ACCESS_OCB_INDIRECT_CHANNEL
@@ -205,7 +222,7 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 fapi::MOD_ACCESS_OCB_INDIRECT_CHANNEL,
                                 fapi::RC_INVALID_DATA_BUFFER_LENGTH,
-                                io_dataBuf.getByteLength(),
+                                i_dataLen,
                                 i_addr,
                                 hbSwError);
             break; // return with error
@@ -218,8 +235,15 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         // b) circular write may need to be set up once
         if (l_setup)
         {
-            FAPI_INVOKE_HWP(l_errl, p8_ocb_indir_setup_linear, l_fapiTarget,
-                    OCB_CHAN0, OCB_TYPE_LINSTR, i_addr);
+
+            FAPI_INVOKE_HWP( l_errl,
+                             p9_pm_ocb_indir_setup_linear,
+                             l_fapiTarget,
+                             p9ocb::OCB_CHAN0,
+                             p9ocb::OCB_TYPE_LINSTR,
+                             i_addr );
+
+
             if(l_errl)
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
@@ -231,9 +255,17 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         }
 
         // perform operation
-        FAPI_INVOKE_HWP(l_errl, p8_ocb_indir_access, l_fapiTarget,
-                    l_channel,l_operation,io_dataBuf.getByteLength()/8,
-                    io_dataBuf,l_len,l_ociAddrValid,i_addr);
+        FAPI_INVOKE_HWP( l_errl,
+                         p9_pm_ocb_indir_access,
+                         l_fapiTarget,
+                         l_channel,
+                         l_operation,
+                         i_dataLen/8, // Number of 8-byte blocks
+                         l_ociAddrValid,
+                         i_addr,
+                         l_len,
+                         io_dataBuf );
+
         if(l_errl)
         {
             TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
@@ -254,38 +286,43 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
 // Read OCC SRAM
 errlHndl_t readSRAM(const TARGETING::Target * i_pTarget,
                              const uint32_t i_addr,
-                             ecmdDataBufferBase & io_dataBuf)
+                             uint64_t * io_dataBuf,
+                             size_t i_dataLen )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     l_errl = accessOCBIndirectChannel(ACCESS_OCB_READ_LINEAR,
                                         i_pTarget,
                                         i_addr,
-                                        io_dataBuf);
+                                        io_dataBuf,
+                                        i_dataLen );
     return l_errl;
 }
 
 // Write OCC SRAM
 errlHndl_t writeSRAM(const TARGETING::Target * i_pTarget,
                              const uint32_t i_addr,
-                             ecmdDataBufferBase & i_dataBuf)
+                             uint64_t * i_dataBuf,
+                             size_t i_dataLen)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     l_errl = accessOCBIndirectChannel(ACCESS_OCB_WRITE_LINEAR,
                                         i_pTarget,
                                         i_addr,
-                                        i_dataBuf);
+                                        i_dataBuf,
+                                        i_dataLen );
     return l_errl;
 }
 
 // Write OCC Circular Buffer
 errlHndl_t writeCircularBuffer(const TARGETING::Target * i_pTarget,
-                             ecmdDataBufferBase & i_dataBuf)
+                               uint64_t * i_dataBuf)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     l_errl = accessOCBIndirectChannel(ACCESS_OCB_WRITE_CIRCULAR,
                                         i_pTarget,
                                         0,
-                                        i_dataBuf);
+                                        i_dataBuf,
+                                        CIRCULAR_OCB_DATA_SIZE);
     return l_errl;
 }
 

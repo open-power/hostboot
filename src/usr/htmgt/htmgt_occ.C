@@ -37,11 +37,11 @@
 #include <targeting/common/targetservice.H>
 #include <console/consoleif.H>
 #include <sys/time.h>
-#include <ecmdDataBufferBase.H>
 #include <occ/occAccess.H>
 #include <occ/occ.H>
 #include <occ/occ_common.H>
 #include <errl/errludlogregister.H>
+#include <buffer.H>
 
 namespace HTMGT
 {
@@ -932,14 +932,17 @@ namespace HTMGT
                     // Read SRAM response buffer to check for OCC checkpoint
                      errlHndl_t l_err = NULL;
                     const uint16_t l_length = 8;
-                    ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+
+                    fapi2::buffer<uint64_t> l_buffer;
                     l_err = HBOCC::readSRAM(occ->getTarget(),
                                             OCC_RSP_SRAM_ADDR,
-                                            l_buffer);
+                                            l_buffer.pointer(),
+                                            l_length);
                     if (NULL == l_err)
                     {
                         // Check response status for checkpoint (byte 6-7)
-                        const uint16_t checkpoint = l_buffer.getHalfWord(3);
+                        uint16_t checkpoint = 0;
+                        l_buffer.extractToRight<48,16>(checkpoint);
                         if (checkpoint != lastCheckpoint)
                         {
                             TMGT_INF("_waitForOccCheckpoint: OCC%d Checkpoint "
