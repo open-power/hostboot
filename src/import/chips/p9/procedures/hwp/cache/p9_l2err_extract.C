@@ -81,11 +81,11 @@ extern "C"
 
         //the index into the trace entry that is N cycles before the fail
         uint32_t                indexes[L2ERR_MAX_CYCLES_BACK];
-        fapi2::variable_buffer  trace_array[PROC_GETTRACEARRAY_NUM_ENTRIES];
+        fapi2::variable_buffer  trace_array[P9_TRACEARRAY_NUM_ROWS];
         uint8_t                 syndrome = 0;
         uint8_t                 dw = 0;
         uint32_t                ta_length = i_ta_data.getBitLength();
-        uint32_t                exp_ta_length = PROC_GETTRACEARRAY_NUM_ENTRIES * PROC_GETTRACEARRAY_BITS_PER_ENTRY;
+        uint32_t                exp_ta_length = P9_TRACEARRAY_NUM_ROWS * P9_TRACEARRAY_BITS_PER_ROW;
 
         //bool                    back_of_2to1 = false;
         bool                    back_of_2to1_nextcycle = false;
@@ -130,10 +130,10 @@ extern "C"
                     ta_length, exp_ta_length);
 
         //build the indexable array and print out contents at the same time for debug
-        for(uint8_t i = 0; i < PROC_GETTRACEARRAY_NUM_ENTRIES; i++)
+        for(uint8_t i = 0; i < P9_TRACEARRAY_NUM_ROWS; i++)
         {
-            trace_array[i].resize(PROC_GETTRACEARRAY_BITS_PER_ENTRY);
-            rc_ecmd |= i_ta_data.extract(trace_array[i], PROC_GETTRACEARRAY_BITS_PER_ENTRY * i, PROC_GETTRACEARRAY_BITS_PER_ENTRY);
+            trace_array[i].resize(P9_TRACEARRAY_BITS_PER_ROW);
+            rc_ecmd |= i_ta_data.extract(trace_array[i], P9_TRACEARRAY_BITS_PER_ROW * i, P9_TRACEARRAY_BITS_PER_ROW);
             FAPI_DBG("%2X: 0x%016llX%016llX", i, trace_array[i].get<uint64_t>( 0 ), trace_array[i].get<uint64_t>( 1 ));
         }
 
@@ -197,7 +197,7 @@ extern "C"
 
         //look for CE/UE
         error_found = false;
-        trace_index = PROC_GETTRACEARRAY_NUM_ENTRIES; //the last entry in the array is the newest
+        trace_index = P9_TRACEARRAY_NUM_ROWS; //the last entry in the array is the newest
         FAPI_DBG("trace_index = %X", trace_index);
 
         while( !error_found && (trace_index > 0) )
@@ -531,4 +531,3 @@ extern "C"
     } // p9_l2err_extract
 
 } // extern "C"
-

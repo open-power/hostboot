@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/perv/p9_proc_gettracearray.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/perv/p9_sbe_tracearray.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-/// @file  p9_proc_gettracearray.H
+/// @file  p9_sbe_tracearray.H
 ///
 /// @brief Collect contents of specified trace array via SCOM.
 ///
@@ -32,7 +32,7 @@
 /// trace array data collection.  Trace array data can be collected only
 /// when its controlling chiplet trace engine is stopped.
 ///
-/// Trace array entries will be packed into data buffer from
+/// Request number of Trace array entries will be packed into data buffer from
 /// oldest->youngest entry.
 ///
 /// Calling code is expected to pass the proper target type based on the
@@ -41,15 +41,14 @@
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Joachim Fenkes <fenkes@de.ibm.com>
 // *HWP HW Backup Owner : Joe McGill <jmcgill@us.ibm.com>
-// *HWP FW Owner        : Thi Tran <thi@us.ibm.com>
+// *HWP FW Owner        : Shakeeb Pasha<shakeebbk@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
-// *HWP Consumed by     : FSP
+// *HWP Level           : 1
+// *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
-#ifndef _PROC_GETTRACEARRAY_H_
-#define _PROC_GETTRACEARRAY_H_
-
+#ifndef _P9_SBE_TRACEARRAY_H
+#define _P9_SBE_TRACEARRAY_H
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -57,51 +56,48 @@
 #include <fapi2.H>
 #include "p9_tracearray_defs.H"
 
-static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
-    fapi2::TARGET_TYPE_PROC_CHIP |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MCBIST |
-    fapi2::TARGET_TYPE_EX |
-    fapi2::TARGET_TYPE_CORE;
-
 // structure to represent HWP arguments
 struct proc_gettracearray_args
 {
-    p9_tracearray_bus_id trace_bus;      ///< The trace bus whose associated trace array should be dumped
-    bool stop_pre_dump;                  ///< Stop the trace array before starting the dump
-    bool ignore_mux_setting;             ///< Do not fail if the primary trace mux is set to a different bus
-    bool collect_dump;                   ///< Do dump the trace array; useful if you just want to start/stop
-    bool reset_post_dump;                ///< Reset the debug logic after dumping
-    bool restart_post_dump;              ///< Start the trace array after dumping
+    p9_tracearray_bus_id trace_bus; ///< The trace bus whose associated trace array should be dumped
+    bool stop_pre_dump;             ///< Stop the trace array before starting the dump
+    bool ignore_mux_setting;        ///< Do not fail if the primary trace mux is set to a different bus
+    bool collect_dump;              ///< Do dump the trace array; useful if you just want to start/stop
+    bool reset_post_dump;           ///< Reset the debug logic after dumping
+    bool restart_post_dump;         ///< Start the trace array after dumping
 };
 
-// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_proc_gettracearray_FP_t)(const fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES>&,
-                              const proc_gettracearray_args&,
-                              fapi2::variable_buffer& o_ta_data);
+static const fapi2::TargetType P9_SBE_TRACEARRAY_TARGET_TYPES =
+    fapi2::TARGET_TYPE_PROC_CHIP |
+    fapi2::TARGET_TYPE_EX |
+    fapi2::TARGET_TYPE_CORE;
 
-extern "C"
-{
+//function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_sbe_tracearray_FP_t) (
+    const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
+    const proc_gettracearray_args& i_args,
+    uint8_t* o_ta_data,
+    const uint32_t i_num_rows
+);
 
+extern "C" {
     /**
      * @brief Return the target type needed to access a given trace array
+     *
      * @param ta_id The trace array / trace bus ID requested.
-     * @return The type of target to hand to proc_gettracearray to clearly identify the array instance.
+     *
+     * @return The type of target to hand to p9_sbe_tracearray to clearly
+     *         identify the array instance.
      */
     static inline fapi2::TargetType proc_gettracearray_target_type(p9_tracearray_bus_id i_trace_bus)
     {
-        if (i_trace_bus <= _PROC_TB_LAST_PROC_TARGET)
+        /* On SBE there is no support for MCBIST and OBUS fapi targets.
+         * But since the usage related to these targets in p9_sbe_tracearray
+         * is only for SCOMs with fully qualified adresses, PROC
+         * target is used for MCBIST and OBUS as well */
+        if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
         {
             return fapi2::TARGET_TYPE_PROC_CHIP;
-        }
-        else if (i_trace_bus <= _PROC_TB_LAST_OBUS_TARGET)
-        {
-            return fapi2::TARGET_TYPE_OBUS;
-        }
-        else if (i_trace_bus <= _PROC_TB_LAST_MC_TARGET)
-        {
-            return fapi2::TARGET_TYPE_MCBIST;
         }
         else if (i_trace_bus <= _PROC_TB_LAST_EX_TARGET)
         {
@@ -113,40 +109,43 @@ extern "C"
         }
     }
 
-//------------------------------------------------------------------------------
-// Function prototype
-//------------------------------------------------------------------------------
 
-    /**
-     * @brief Retrieve trace array data from selected trace array via SCOM,
-     *        optionally performing trace stop (prior to dump) and/or
-     *        trace restart (after dump)
+
+    /* TODO via RTC:164528 - Look at optimization to improve performance
+     * @brief Retrieve trace array data, based on the number of
+     *        rows requested, from selected trace array via SCOM.
+     *        Optionally performing trace stop (prior to dump) and/or
+     *        trace restart, reset (after dump).
+     *        If dump is requested along with other control flags, pre-dump control
+     *        would take effect before reading row 0 and post-dump control would
+     *        take effect after reading last row.
      *
-     * @param i_target  Chip or chiplet target. The necessary target type can be
-     *                  queried through proc_gettracearray_target_type().
-     * @param i_args    Argument structure with additional parameters
-     * @param o_ta_data Trace array data. Will contain all trace entries read
-     *                  from the array concatenated, starting with the oldest trace
-     *                  entry and ending with the newest.
+     * @param i_target      Chip or chiplet target. The necessary target type can be
+     *                      queried through proc_gettracearray_target_type().
+     * @param i_args        Argument structure with additional parameters
+     * @param o_ta_data     Trace array data. Will contain requested number of trace
+     *                      rows from the array concatenated,
+     *                      starting with the oldest trace entry after the previous
+     *                      dump call and ending with the newest
+     * @param i_num_rows    Number of rows of the tracearray to read.
+     *                      By default P9_TRACEARRAY_NUM_ROWS are read
+     *
      * @return FAPI2_RC_SUCCESS
      *             if trace array dump sequence completes successfully,
      *         RC_PROC_GETTRACEARRAY_INVALID_BUS
      *             if an invalid trace bus ID has been requested
-     *         RC_PROC_GETTRACEARRAY_INVALID_TARGET
-     *             if the supplied target type does not match the requested trace bus
      *         RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE
      *             if a core trace array has been requested but the chip's core
      *             is not dumpable via SCOM -> use fastarray instead
-     *         RC_PROC_GETTRACEARRAY_TRACE_RUNNING
-     *             if trace array is running when dump collection is attempted,
      *         RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT
      *             if the primary trace mux is not set up to trace the requested bus,
      *         else FAPI getscom/putscom return code for failing operation
      */
-    fapi2::ReturnCode p9_proc_gettracearray(const fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES>& i_target,
-                                            const proc_gettracearray_args& i_args,
-                                            fapi2::variable_buffer& o_ta_data);
-
+    fapi2::ReturnCode p9_sbe_tracearray(
+        const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
+        const proc_gettracearray_args& i_args,
+        uint64_t* o_ta_data,
+        const uint32_t i_num_rows = P9_TRACEARRAY_NUM_ROWS
+    );
 } // extern "C"
-
-#endif // _PROC_GETTRACEARRAY_H_
+#endif //_P9_SBE_TRACEARRAY_H
