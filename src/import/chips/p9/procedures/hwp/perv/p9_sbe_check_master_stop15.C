@@ -118,7 +118,7 @@ fapi2::ReturnCode p9_sbe_check_master_stop15(
 
     if (l_stop_gated == p9ssh::SSH_GATED &&
         l_stop_transition == p9ssh::SSH_COMPLETE &&
-        (l_stop_actual_level == 11 || l_stop_actual_level == 15))
+        (l_stop_requested_level == 11 || l_stop_requested_level == 15))
     {
         FAPI_INF("SUCCESS!!  Valid STOP entry state has been achieved.");
     }
