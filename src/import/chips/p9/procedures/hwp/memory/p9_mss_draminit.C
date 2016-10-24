@@ -144,11 +144,12 @@ extern "C"
         // Load RCD control words
         FAPI_TRY( mss::rcd_load(i_target) );
 
+        // Register has been configured, so we can unmask 'training' errors which includes parity
+        // which we want to see during MRS load
+        FAPI_TRY( mss::unmask_training_errors(i_target) );
+
         // Load MRS
         FAPI_TRY( mss::mrs_load(i_target) );
-
-        // If we're all good, set up things so training's errors are in the right state
-        FAPI_TRY( mss::unmask_training_errors(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit: %s (0x%lx)", mss::c_str(i_target), uint64_t(fapi2::current_err));
