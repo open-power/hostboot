@@ -75,9 +75,14 @@ p9_hcd_core_stopclocks(
     uint32_t                                       l_loops1ms;
     uint8_t                                        l_attr_chip_unit_pos;
     uint8_t                                        l_attr_vdm_enable;
+    uint8_t                                        l_attr_sdisn_setup;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto  l_quad = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
     auto  l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
+    auto  l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SDISN_SETUP, l_chip,
+                           l_attr_sdisn_setup));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,       l_sys,
                            l_attr_vdm_enable));
@@ -221,9 +226,11 @@ p9_hcd_core_stopclocks(
     FAPI_DBG("Assert regional fences via CPLT_CTRL1[4-14]");
     FAPI_TRY(putScom(i_target, C_CPLT_CTRL1_OR, p9hcd::CLK_REGION_ALL));
 
-    /// @todo RTC158181 add DD1 attribute control
-    FAPI_DBG("DD1 only: reset sdis_n(flushing LCBES condition workaround");
-    FAPI_TRY(putScom(i_target, C_CPLT_CONF0_CLEAR, MASK_SET(34)));
+    if (l_attr_sdisn_setup)
+    {
+        FAPI_DBG("DD1 Only: Drop sdis_n(flushing LCBES condition) vai CPLT_CONF0[34]");
+        FAPI_TRY(putScom(i_target, C_CPLT_CONF0_CLEAR, MASK_SET(34)));
+    }
 
     // -------------------------------
     // Disable VDM
