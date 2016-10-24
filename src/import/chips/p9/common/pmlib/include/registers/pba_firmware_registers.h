@@ -41,7 +41,7 @@
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
-
+#include "pba_firmware_constants.h"
 
 
 
