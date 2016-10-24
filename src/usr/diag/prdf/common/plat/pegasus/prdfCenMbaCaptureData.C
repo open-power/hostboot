@@ -450,7 +450,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     memcpy( &buf[8], &extMemMru.dqMapping[0], sizeof(extMemMru.dqMapping) );
 
     // Add the extended MemoryMru to the error log.
-    PRDF_ADD_FFDC( io_errl, buf, sz_buf, ErrlVer1, ErrlMruData_2 );
+    PRDF_ADD_FFDC( io_errl, buf, sz_buf, ErrlVer1, ErrlMruData );
 
     #undef PRDF_FUNC
 }

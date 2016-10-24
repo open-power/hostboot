@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,9 +70,7 @@ enum ErrlSubsect
     ErrlSectPFA5_2   = 52,
     ErrlCapData_1    = 1,
     ErrlCapData_2    = 2,
-    ErrlMruData_1    = 61, // This will only be used in non-attenion code when
-                           // we want to add MRU.
-    ErrlMruData_2    = 62, // For the 80 byte centaur DQ pin map
+    ErrlMruData      = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
 };
 

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plugins/prdfCenLogParse.H $          */
+/* $Source: src/usr/diag/prdf/common/plugins/prdfMemLogParse.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCenLogParse.H
+/** @file  prdfMemLogParse.H
  *  @brief Error log parsing code specific to the memory subsystem.
  */
 
-#ifndef __prdfCenLogParse_H
-#define __prdfCenLogParse_H
+#ifndef __prdfMemLogParse_H
+#define __prdfMemLogParse_H
 
 #include <stdint.h>
 #include <prdfMemoryMruData.H>
@@ -43,17 +43,6 @@ namespace HOSTBOOT
 namespace FSP
 #endif
 {
-
-/**
- * @brief Parses MemoryMru data.
- * @note  Since this will be used in several different sections, this function
- *        simply parses the data. It does not print header information (i.e.
- *        "MemoryMru") or print out the uint32_t value of the MemoryMru. It is
- *        up to the caller to add that data.
- * @param i_parser The error log parser.
- * @param i_memMru A MemoryMru.
- */
-void parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru );
 
 /**
  * @brief Parses extended MemoryMru data.
@@ -135,5 +124,5 @@ bool parseTdCtlrStateData( uint8_t * i_buffer, uint32_t i_buflen,
 } // namespace FSP/HOSTBBOT
 } // end namespace PRDF
 
-#endif // __prdfCenLogParse_H
+#endif // __prdfMemLogParse_H
 

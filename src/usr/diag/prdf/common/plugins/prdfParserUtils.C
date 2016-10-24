@@ -88,7 +88,6 @@ uint8_t symbol2Dq<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 
 //------------------------------------------------------------------------------
 
-/* TODO: RTC 136126
 uint8_t symbol2PortSlct( uint8_t i_symbol )
 {
     uint8_t portSlct = MBA_DIMMS_PER_RANK;
@@ -103,7 +102,7 @@ uint8_t symbol2PortSlct( uint8_t i_symbol )
 }
 
 //------------------------------------------------------------------------------
-
+/* TODO: RTC 136126
 uint8_t dram2Symbol( uint8_t i_dram, bool i_isX4Dram )
 {
     const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
