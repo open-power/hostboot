@@ -48,7 +48,7 @@
 #include <errlusrparser.H>
 #include <attributeenums.H>     // For TARGETING::TYPE enum
 
-//#include <prdfCenLogParse.H> TODO: RTC 136126
+#include <prdfMemLogParse.H>
 //#include <prdfProcLogParse.H> TODO: RTC 136050
 #include <prdfParserEnums.H>
 #include <prdfMemoryMruData.H>
@@ -671,17 +671,17 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
                 snprintf( data, 50, "0x%08x ", pfa.mruList[i].callout );
                 tmpStr = gardTypeToStr( pfa.mruList[i].gardState );
+                MemoryMruData::ExtendedData
+                    extMemMru( pfa.mruList[i].callout );
 
                 switch ( pfa.mruList[i].type )
                 {
-/* TODO: RTC 162065
                     case PRDcalloutData::TYPE_MEMMRU:
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
-                        parseMemMruData( i_parser, pfa.mruList[i].callout );
+                        parseMemMruData( i_parser, extMemMru );
                         break;
-*/
 
                     case PRDcalloutData::TYPE_SYMFRU:
                         strcat( data, "(SymbolicFru) " );
@@ -751,40 +751,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
-{
-    bool o_rc = true; // Don't dump the hex buffer at the end.
-
-    i_parser.PrintBlank();
-
-    if ( i_buflen != sizeof(uint32_t) )
-    {
-        i_parser.PrintString( "                   ERROR",
-                              "Unable to parse MRU data" );
-        o_rc = false; // Dump the hex buffer at the end.
-    }
-    else
-    {
-        uint8_t * buf = (uint8_t *)i_buffer;
-        uint32_t memMru = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
-
-        char heading[72];
-        snprintf( heading, 72, "MemoryMru (0x%08x)", memMru );
-        i_parser.PrintHeading( heading );
-        i_parser.PrintBlank();
-
-/* TODO: RTC 162065
-        parseMemMruData( i_parser, memMru );
-*/
-
-        i_parser.PrintBlank();
-    }
-
-    return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
 bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
                      ErrlUsrParser & i_parser )
 {
@@ -821,9 +787,7 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
-/* TODO: RTC 162065
         parseMemMruData( i_parser, extMemMru );
-*/
 
         i_parser.PrintBlank();
 
@@ -910,11 +874,7 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
             rc = parseCaptureData(i_buffer, i_buflen, i_parser, i_ver);
             break;
 
-        case ErrlMruData_1:
-            rc = parseMemMru( i_buffer, i_buflen, i_parser );
-            break;
-
-        case ErrlMruData_2:
+        case ErrlMruData:
             rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
             break;
 
