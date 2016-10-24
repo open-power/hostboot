@@ -55,134 +55,7 @@
 //------------------------------------------------------------------------------
 
 #include <fapi2.H>
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-// maximum trace array entries supported by P9 chip design
-const uint8_t PROC_GETTRACEARRAY_NUM_ENTRIES = 128;
-// bits to store per trace array entry
-const uint8_t PROC_GETTRACEARRAY_BITS_PER_ENTRY = 128;
-
-
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
-
-/**
- * @brief Identifiers for supported trace arrays.
- *
- * There is an identifier for each available trace bus. Many arrays are shared
- * between multiple trace buses; in that case, several identifiers point to the
- * same trace array.
- */
-enum proc_gettracearray_bus_id
-{
-    /* Pervasive chiplet - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_PIB     = 1,
-    PROC_TB_OCC,
-    PROC_TB_TOD,
-    PROC_TB_SBE,
-    PROC_TB_PIB_ALT,  /* alternate sink for PIB trace */
-
-    /* Nest chiplets - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_PB0,
-    PROC_TB_PB1,
-    PROC_TB_PB2,
-    PROC_TB_PB3,
-    PROC_TB_PB4,
-    PROC_TB_PB5,
-    PROC_TB_PB6,
-    PROC_TB_PB7,
-    PROC_TB_PB8,
-    PROC_TB_PB9,
-    PROC_TB_PB10,
-    PROC_TB_PB11,
-    PROC_TB_PB12,
-    PROC_TB_PB13,
-    PROC_TB_MCS0,
-    PROC_TB_MCS1,
-    PROC_TB_MCS2,
-    PROC_TB_MCS3,
-    PROC_TB_MCD0,
-    PROC_TB_MCD1,
-    PROC_TB_VAS,
-    PROC_TB_PBIO0,
-    PROC_TB_PBIO1,
-    PROC_TB_PBIOE0,
-    PROC_TB_PBIOE1,
-    PROC_TB_CXA0,
-    PROC_TB_CXA1,
-    PROC_TB_NX,
-    PROC_TB_IOPSI,
-    PROC_TB_PCIS0,
-    PROC_TB_PCIS1,
-    PROC_TB_PCIS2,
-    PROC_TB_NPU0,
-    PROC_TB_NPU1,
-    PROC_TB_NMMU0,
-    PROC_TB_NMMU1,
-    PROC_TB_INT,
-    PROC_TB_BRIDGE,
-
-    /* XBUS chiplet - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_IOX0,
-    PROC_TB_IOX1,
-    PROC_TB_IOX2,
-    PROC_TB_PBIOX0,
-    PROC_TB_PBIOX1,
-    PROC_TB_PBIOX2,
-
-    /* PCI chiplets - TARGET_TYPE_PROC_CHIP */
-    PROC_TB_PCI0X,
-    PROC_TB_PCI00,
-    PROC_TB_PCI1X,
-    PROC_TB_PCI11,
-    PROC_TB_PCI12,
-    PROC_TB_PCI2X,
-    PROC_TB_PCI23,
-    PROC_TB_PCI24,
-    PROC_TB_PCI25,
-
-    _PROC_TB_LAST_PROC_TARGET = PROC_TB_PCI25,
-
-    /* OBus chiplets - TARGET_TYPE_OBUS */
-    PROC_TB_PBIOOA,
-    PROC_TB_IOO,
-
-    _PROC_TB_LAST_OBUS_TARGET = PROC_TB_IOO,
-
-    /* MemCtrl chiplets - TARGET_TYPE_MCS */
-    PROC_TB_MCA0,
-    PROC_TB_MCA1,
-    PROC_TB_IOMC0,
-    PROC_TB_IOMC1,
-    PROC_TB_IOMC2,
-    PROC_TB_IOMC3,
-
-    _PROC_TB_LAST_MC_TARGET = PROC_TB_IOMC3,
-
-    /* Cache chiplets - TARGET_TYPE_EX */
-    PROC_TB_L30,
-    PROC_TB_L31,
-    PROC_TB_NCU0,
-    PROC_TB_NCU1,
-    PROC_TB_CME,
-    PROC_TB_EQPB,    // note: only for odd EX instances
-    PROC_TB_IVRM,
-    PROC_TB_SKEWADJ, // note: only for even EX instances
-    PROC_TB_L20,
-    PROC_TB_L21,
-    PROC_TB_SKIT10,
-    PROC_TB_SKIT11,
-
-    _PROC_TB_LAST_EX_TARGET = PROC_TB_SKIT11,
-
-    /* Core chiplets - TARGET_TYPE_CORE */
-    PROC_TB_CORE0,
-    PROC_TB_CORE1,
-};
+#include "p9_tracearray_defs.H"
 
 static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
     fapi2::TARGET_TYPE_PROC_CHIP |
@@ -194,7 +67,7 @@ static const fapi2::TargetType PROC_GETTRACEARRAY_TARGET_TYPES =
 // structure to represent HWP arguments
 struct proc_gettracearray_args
 {
-    proc_gettracearray_bus_id trace_bus; ///< The trace bus whose associated trace array should be dumped
+    p9_tracearray_bus_id trace_bus;      ///< The trace bus whose associated trace array should be dumped
     bool stop_pre_dump;                  ///< Stop the trace array before starting the dump
     bool ignore_mux_setting;             ///< Do not fail if the primary trace mux is set to a different bus
     bool collect_dump;                   ///< Do dump the trace array; useful if you just want to start/stop
@@ -216,7 +89,7 @@ extern "C"
      * @param ta_id The trace array / trace bus ID requested.
      * @return The type of target to hand to proc_gettracearray to clearly identify the array instance.
      */
-    static inline fapi2::TargetType proc_gettracearray_target_type(proc_gettracearray_bus_id i_trace_bus)
+    static inline fapi2::TargetType proc_gettracearray_target_type(p9_tracearray_bus_id i_trace_bus)
     {
         if (i_trace_bus <= _PROC_TB_LAST_PROC_TARGET)
         {
