@@ -53,6 +53,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 
 #common PM Complex functions between ipl and runtime
 OBJS += pm_common.o
+OBJS += occAccess.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}

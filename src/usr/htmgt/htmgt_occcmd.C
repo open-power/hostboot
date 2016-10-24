@@ -43,7 +43,8 @@
 #include <errl/errlmanager.H>
 #include <stdio.h>
 #include <console/consoleif.H>
-
+#include <variable_buffer.H>
+#include <fapi2.H>
 
 namespace HTMGT
 {
@@ -794,24 +795,24 @@ namespace HTMGT
 #ifdef CONFIG_HTMGT
         // Read SRAM to check for exception
         // (Exception data not copied into HOMER)
-        const uint16_t l_length = 4*KILOBYTE;
-        uint8_t l_sram_data[l_length];
-        ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+        const size_t l_length = 4*KILOBYTE;
+
+        fapi2::variable_buffer l_buffer(l_length*8); // convert to bits
+
         errlHndl_t l_err = HBOCC::readSRAM(iv_Occ->getTarget(),
-                                           OCC_RSP_SRAM_ADDR,
-                                           l_buffer);
+                               OCC_RSP_SRAM_ADDR,
+                               reinterpret_cast<uint64_t*>(l_buffer.pointer()),
+                               l_length );
         if (NULL == l_err)
         {
-            const uint32_t l_flatSize = l_buffer.flattenSize();
-            l_buffer.flatten(l_sram_data, l_flatSize);
-            // Skip 8 byte ecmd header
-            const uint8_t *sramRspPtr = &l_sram_data[8];
+            auto sramRspPtr = reinterpret_cast<uint8_t*>(l_buffer.pointer());
+            uint32_t l_sramDataLen = l_buffer.getLength<uint8_t>();
             // Check buffer status for exception
-            if ((l_flatSize >= 3) && (0xE0 == (sramRspPtr[2] & 0xE0)))
+            if ((l_sramDataLen >= 3) && (0xE0 == (sramRspPtr[2] & 0xE0)))
             {
                 const uint8_t exceptionType = sramRspPtr[2];
                 uint16_t exceptionDataLength = 0;
-                if (l_flatSize >= 5)
+                if (l_sramDataLen >= 5)
                 {
                     exceptionDataLength = UINT16_GET(&sramRspPtr[3]);
                 }
@@ -819,9 +820,9 @@ namespace HTMGT
                 // the data length
                 uint32_t exceptionLength = OCC_RSP_HDR_LENGTH - 2 +
                     exceptionDataLength;
-                if (exceptionLength > l_flatSize)
+                if (exceptionLength > l_sramDataLen)
                 {
-                    exceptionLength = l_flatSize;
+                    exceptionLength = l_sramDataLen;
                 }
 
                 TMGT_ERR("handleOccException: OCC%d SRAM has exception"
@@ -896,21 +897,24 @@ namespace HTMGT
 
         // Notify OCC that command is available (via circular buffer)
         const uint32_t l_bitsToSend = sizeof(occCircBufferCmd_t) * 8;
-        ecmdDataBufferBase l_circ_buffer(l_bitsToSend);
+
         const occCircBufferCmd_t tmgtDataWriteAttention =
         {
             0x10,   // sender: HTMGT
             0x01,   // command: Command Write Attention
             {0, 0, 0, 0, 0, 0} // reserved
         };
-        l_circ_buffer.insert((uint8_t*)&tmgtDataWriteAttention, 0,
-                             l_bitsToSend);
+
+        fapi2::buffer<uint64_t> l_circ_buffer;
+        l_circ_buffer.insert((*(uint64_t*)&tmgtDataWriteAttention),0, l_bitsToSend);
+
+
         if (G_debug_trace & DEBUG_TRACE_VERBOSE)
         {
             TMGT_INF("writeOccCmd: Calling writeCircularBuffer()");
         }
 #ifdef CONFIG_HTMGT
-        l_err = HBOCC::writeCircularBuffer(iv_Occ->iv_target, l_circ_buffer);
+        l_err = HBOCC::writeCircularBuffer(iv_Occ->iv_target, l_circ_buffer.pointer());
         if (NULL != l_err)
         {
             TMGT_ERR("writeOccCmd: Error writing to OCC Circular Buffer,"

@@ -29,11 +29,10 @@
 #include "occError.H"
 #include "htmgt_occcmd.H"
 
-#include <ecmdDataBufferBase.H>
 #include <occ/occAccess.H>
 #include <console/consoleif.H>
 #include <targeting/targplatutil.H>
-
+#include <variable_buffer.H>
 
 namespace HTMGT
 {
@@ -93,19 +92,20 @@ namespace HTMGT
         errlHndl_t  l_errlHndl = NULL;
 
         // Read data from SRAM (length must be multiple of 8 bytes)
-        const uint16_t l_length = (i_length + 8) & 0xFFF8;
-        uint8_t l_sram_data[8 + l_length];
-        ecmdDataBufferBase l_buffer(l_length*8); // convert to bits
+        const uint16_t l_length = (i_length) & 0xFFF8;
+        fapi2::variable_buffer l_buffer(l_length*8); //convert to bits
 // HBOCC is only defined for HTMGT
 #ifdef CONFIG_HTMGT
-        l_errlHndl = HBOCC::readSRAM(iv_target, i_address, l_buffer);
+        l_errlHndl = HBOCC::readSRAM( iv_target,
+                            i_address,
+                            reinterpret_cast<uint64_t*>(l_buffer.pointer()),
+                            l_length );
 #endif
         if (NULL == l_errlHndl)
         {
-            const uint32_t l_flatSize = l_buffer.flattenSize();
-            l_buffer.flatten(l_sram_data, l_flatSize);
-            // Skip 8 byte ecmd header
-            const occErrlEntry_t *l_occElog=(occErrlEntry_t *)&l_sram_data[8];
+
+            const occErrlEntry_t * l_occElog= reinterpret_cast<occErrlEntry_t*>
+                                                    (l_buffer.pointer());
 
             TMGT_BIN("OCC ELOG", l_occElog, 256);
 
