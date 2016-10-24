@@ -5149,6 +5149,7 @@ sub generate_xbus
     my $p_proc;
     my $p_port;
     my $p_node;
+    my $tx_swap;
 
     # See if this bus is connected to anything
     foreach my $pbus ( @pbus )
@@ -5166,6 +5167,7 @@ sub generate_xbus
                 $p_proc =~ s/^.*:p(.*):.*$/$1/;
                 $p_port =~ s/.*:p.*:.(.*)$/$1/;
                 my $node_config = $pbus->[PBUS_NODE_CONFIG_FLAG];
+                $tx_swap = $pbus->[PBUS_TX_MSB_LSB_SWAP];
                 last;
             }
         }
@@ -5212,6 +5214,10 @@ sub generate_xbus
     <attribute>
         <id>IO_XBUS_TX_FFE_PRECURSOR</id>
         <default>$ffePrecursor</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>$tx_swap</default>
     </attribute>
     ";
 
