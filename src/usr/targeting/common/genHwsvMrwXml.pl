@@ -341,7 +341,27 @@ push @systemAttr,
     "PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET", 0x0000030201400000 ,
     "PROC_NX_RNG_BAR_BASE_ADDR_OFFSET", 0x00000302031D0000 ,
     "PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET", 0x0000030200000000,
+    "CP_REFCLOCK_RCVR_TERM", $reqPol->{'processor-refclock-receiver-termination'},
+    "IO_REFCLOCK_RCVR_TERM", $reqPol->{'pci-refclock-receiver-termination'},
+    #TODO RTC: 163418 Set Power Management Attribute Defaults based on MRW values
 ];
+
+if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
+{
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 0];
+}
+elsif ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'DOUBLE')
+{
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 1];
+}
+elsif ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE_10_PERCENT_FASTER')
+{
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 2];
+}
+elsif ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'DOUBLE_10_PERCENT_FASTER')
+{
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 3];
+}
 
 if ($reqPol->{'mss_mrw_fine_refresh_mode'} eq 'NORMAL')
 {

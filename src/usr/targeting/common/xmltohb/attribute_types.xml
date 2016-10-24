@@ -12815,7 +12815,7 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint64_t>
-        <default>0x000006A4</default>
+         <default>0xffffe000000006a4,0,0,0,0,0,0,0,0,0</default>
         </uint64_t>
         <array>10</array>
     </simpleType>
@@ -31673,23 +31673,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>PM_SAFE_VOLTAGE_MV</id>
-    <description>
-        Voltage (in mV) to move to if the Power Management function fails.
-        Provided by the MRW.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PM_SAFE_VOLTAGE_MV</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>MSS_OCC_THROTTLED_N_CMDS</id>
     <description>
 
@@ -32142,5 +32125,341 @@ Measured in GB</description>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>SBE_IMAGE_MINIMUM_VALID_ECS</id>
+    <description>
+      The minimum number of valid ECs that is required to be used when
+      customizing an SBE image. The customization will fail if it cannot
+      create an image with at least this many ECs.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>2</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_IMAGE_MINIMUM_VALID_ECS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SBE_SYS_CONFIG</id>
+    <description>
+        System Configuration information - 1 indicates a chip present
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x0</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_SYS_CONFIG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
+    <description>
+        To deconfigure a TPM in a secure system - 01 to set TDP bit
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SECUREBOOT_PROTECT_DECONFIGURED_TPM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>CP_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of processor refclock receiver termination
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CP_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_REFCLOCK_RCVR_TERM</id>
+    <description>
+        Defines system specific value of PCI refclock receiver termination
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_REFCLOCK_RCVR_TERM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_PWR_INTERCEPT</id>
+    <description>
+        Machine Readable Workbook Power Curve Intercept for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-9,
+        DIMM_DENSITY = 10-12,
+        DIMM_STACK_TYPE = 13-14,
+        DRAM_MFGID = 15-16,
+        DIMMS_PER_PORT = 17-18,
+        Bits 19-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <simpleType>
+        <uint64_t>
+        <default>
+          0xffffe00002CC03AE,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0
+          </default>
+        </uint64_t>
+        <array>100</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_PWR_INTERCEPT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_MRW_PWR_SLOPE</id>
+    <description>
+        Machine Readable Workbook Power Curve Slope for DIMM
+        Used to get the VDDR and VDDR+VPP power curve for each DIMM
+        Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
+        Key Value pair
+        KEY (0-19): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-7,
+        DIMM_WIDTH = 8-9,
+        DIMM_DENSITY = 10-12,
+        DIMM_STACK_TYPE = 13-14,
+        DRAM_MFGID = 15-16,
+        DIMMS_PER_PORT = 17-18,
+        Bits 19-32: Not used
+        VALUE (bits 32-63) in cW:
+        VMEM power curve = 32-47
+        VMEM+VPP power curve = 48-63
+        Consumers: eff_config_thermal
+    </description>
+    <simpleType>
+        <uint64_t>
+          <default>
+          0xffffe00003FD0546,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+          0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0
+          </default>
+        </uint64_t>
+        <array>100</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_PWR_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>MSS_MRW_REFRESH_RATE_REQUEST</id>
+    <description>
+        Machine Readable Workbook Refresh Rate
+        Desired refresh interval used in refresh register 0, MBAREF0Q_CFG_REFRESH_INTERVAL
+        7.8 us (SINGLE)
+        3.9 us (DOUBLE)
+        7.02 us (SINGLE_10_PERCENT_FASTER)
+        3.51 us (DOUBLE_10_PERCENT_FASTER)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_MRW_REFRESH_RATE_REQUEST</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<!--TODO RTC:163418 Get Attribute defaults from MRW for the following (START)-->
+<attribute>
+    <id>PM_SAFE_VOLTAGE_MV</id>
+    <description>
+        Voltage (in mV) to move to if the Power Management function fails.
+        Provided by the MRW.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_SAFE_VOLTAGE_MV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_STRENGTH_LOOKUP</id>
+    <description>
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>64</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_STRENGTH_LOOKUP</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_VIN_MULTIPLIER</id>
+    <description>
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+        <array>64</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_VIN_MULTIPLIER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_VIN_MAX_MV</id>
+    <description>
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_VIN_MAX_MV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_STEP_DELAY_NS</id>
+    <description>
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_STEP_DELAY_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_STABILIZATION_DELAY_NS</id>
+    <description>
+    Producer: MRWB.
+    </description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_ENABLE</id> <!-- <vdm_enable>OFF</vdm_enable> ??-->
+    <description>
+      Controls the enablement of resonant clocking in the system.
+
+      Producer:  Machine Readable Workbook
+
+      Consumers:
+        p9_pstate_parameter_block to set flag for CME QuadManager Hcode
+            reaction
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<!--TODO RTC:163418 Get Attribute defaults from MRW for the previous (END)-->
 
 </attributes>

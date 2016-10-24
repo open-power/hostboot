@@ -885,6 +885,19 @@
     <attribute><id>SYSTEM_FAMILY</id></attribute>
     <attribute><id>SYSTEM_TYPE</id></attribute>
     <attribute><id>MSS_CAL_ABORT_ON_ERROR</id></attribute>
+    <attribute><id>SBE_IMAGE_MINIMUM_VALID_ECS</id></attribute>
+    <attribute><id>SBE_SYS_CONFIG</id></attribute>
+    <attribute><id>CP_REFCLOCK_RCVR_TERM</id></attribute>
+    <attribute><id>IO_REFCLOCK_RCVR_TERM</id></attribute>
+    <attribute><id>MSS_MRW_PWR_INTERCEPT</id></attribute>
+    <attribute><id>MSS_MRW_PWR_SLOPE</id></attribute>
+    <attribute><id>IVRM_STRENGTH_LOOKUP</id></attribute>
+    <attribute><id>IVRM_VIN_MULTIPLIER</id></attribute>
+    <attribute><id>IVRM_VIN_MAX_MV</id></attribute>
+    <attribute><id>IVRM_STEP_DELAY_NS</id></attribute>
+    <attribute><id>IVRM_STABILIZATION_DELAY_NS</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_ENABLE</id></attribute>
+    <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -1272,6 +1285,7 @@
     <attribute><id>DEVICE_ID</id></attribute>
     <attribute><id>TOD_CPU_DATA</id></attribute>
     <attribute><id>PM_SPWUP_IGNORE_XSTOP_FLAG</id></attribute>
+    <attribute><id>SECUREBOOT_PROTECT_DECONFIGURED_TPM</id></attribute>
 </targetType><!-- chip-processor-power9 -->
 
 <!-- chip-processor-nimbus -->
