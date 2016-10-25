@@ -76,7 +76,8 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 {
     fapi2::buffer<uint64_t> l_data;
 
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    // Need to run on the magic port too
+    for (const auto& p : mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target))
     {
         FAPI_INF("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
@@ -96,8 +97,10 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode enable_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
+    // We only need to zcal the magic ports - they have the logic for all the other ports.
+    const auto l_ports = mss::find_magic_targets<TARGET_TYPE_MCA>(i_target);
+
     fapi2::buffer<uint64_t> l_data;
-    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
     constexpr uint64_t l_zcal_reset_reg = pcTraits<TARGET_TYPE_MCA>::PC_RESETS_REG;
     constexpr uint64_t l_zcal_status_reg = pcTraits<TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
     uint8_t is_sim = 0;
@@ -164,6 +167,11 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     fapi2::buffer<uint64_t> l_data;
     uint8_t is_sim = 0;
 
+    // We want to force the memory clocks low for all ports, including the magic port if it's not
+    // otherwise functional. We don't want to re-enable memory clocks for the magic port if it's
+    // not otherwise functional.
+    auto l_ports = (i_state == mss::LOW) ? mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target) :
+                   mss::find_targets<TARGET_TYPE_MCA>(i_target);
     FAPI_INF("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<TARGET_TYPE_SYSTEM>(), is_sim) );
@@ -175,8 +183,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Might as well do this for all the ports while we're here.
-    for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
+    for (const auto& p : l_ports)
     {
         FAPI_TRY( mss::getScom(p, MCA_MBA_FARB5Q, l_data) );
         l_data.writeBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>(i_state);
@@ -1145,7 +1152,8 @@ fapi2::ReturnCode flush_output_drivers( const fapi2::Target<fapi2::TARGET_TYPE_M
     fapi2::buffer<uint64_t> l_adr_data;
     fapi2::buffer<uint64_t> l_dp16_data;
 
-    const auto l_ports = mss::find_targets<TARGET_TYPE_MCA>(i_target);
+    // Need to run on the magic ports too
+    const auto l_ports = mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target);
     const auto& l_force_atest_reg = adr32sTraits<TARGET_TYPE_MCA>::OUTPUT_DRIVER_REG;
     const auto& l_data_dir_reg = dp16Traits<TARGET_TYPE_MCA>::DATA_BIT_DIR1;
 

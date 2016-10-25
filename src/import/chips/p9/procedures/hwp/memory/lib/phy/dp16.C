@@ -727,7 +727,8 @@ fapi2::ReturnCode reset_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
         l_data.setBit<MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ROT_OVERRIDE_EN>();
     }
 
-    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
+    // Need to run on the magic port too
+    for (const auto& p : mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target))
     {
         FAPI_DBG("set dp16_sysclk for %s", mss::c_str(p));
 
