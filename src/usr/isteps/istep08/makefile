@@ -129,6 +129,7 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
 # proc_npu_scominit : Apply scom inits to NPU bus
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
+include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
 
 # proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
