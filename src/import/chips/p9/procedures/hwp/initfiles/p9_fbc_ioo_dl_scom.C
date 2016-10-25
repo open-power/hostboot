@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0xFFFFFFFFFFFFFFFF = 0xFFFFFFFFFFFFFFFF;
 
 fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT0)
 {
@@ -38,16 +37,6 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, TGT0, l_TGT0_ATTR_OPTICS_CONFIG_MODE));
         uint64_t l_def_OBUS_FBC_ENABLED = (l_TGT0_ATTR_OPTICS_CONFIG_MODE == ENUM_ATTR_OPTICS_CONFIG_MODE_SMP);
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x9010803ull, l_scom_buffer ));
-
-            if (l_def_OBUS_FBC_ENABLED)
-            {
-                l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x9010803ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x901080aull, l_scom_buffer ));
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,40 @@
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
+
+#include <p9_xbus_scom_addresses.H>
+#include <p9_xbus_scom_addresses_fld.H>
+#include <p9_obus_scom_addresses.H>
+#include <p9_obus_scom_addresses_fld.H>
+#include <p9_misc_scom_addresses.H>
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint64_t FBC_IOE_TL_FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FBC_IOE_TL_FIR_ACTION1 = 0x004B000000000000ULL;
+const uint64_t FBC_IOE_TL_FIR_MASK    = 0xFF24F0303FFFFFFFULL;
+
+const uint64_t FBC_IOO_TL_FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FBC_IOO_TL_FIR_ACTION1 = 0x0002400000000000ULL;
+const uint64_t FBC_IOO_TL_FIR_MASK    = 0xFF6DB0000FFFFFFFULL;
+
+const uint64_t FBC_IOE_DL_FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FBC_IOE_DL_FIR_ACTION1 = 0x0303C00000001FFCULL;
+const uint64_t FBC_IOE_DL_FIR_MASK    = 0xFCFC3FFFFFFFE003ULL;
+
+const uint64_t FBC_IOO_DL_FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FFFCULL;
+const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF0003ULL;
+
+const uint64_t HCA_EH_FIR_ACTION0     = 0x0000000000000000ULL;
+const uint64_t HCA_EH_FIR_ACTION1     = 0x0000000000000000ULL;
+const uint64_t HCA_EH_FIR_MASK        = 0xFFFFFFFFF0000000ULL;
+
+const uint64_t HCA_EN_FIR_ACTION0     = 0x0000000000000000ULL;
+const uint64_t HCA_EN_FIR_ACTION1     = 0x0000000000000000ULL;
+const uint64_t HCA_EN_FIR_MASK        = 0xFFFFFF0000000000ULL;
+
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -100,7 +134,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         goto fapi_try_exit;
     }
 
-    // invoke IOE (XBUS FBC IO) SCOM initfiles
+    // setup IOE (XBUS FBC IO) TL SCOMs
     FAPI_DBG("Invoking p9.fbc.ioe_tl.scom.initfile on target %s...", l_procTargetStr);
     FAPI_EXEC_HWP(l_rc, p9_fbc_ioe_tl_scom, i_target, FAPI_SYSTEM);
 
@@ -113,6 +147,17 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
     l_xbus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_XBUS>();
 
+    if (l_xbus_chiplets.size())
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION0_REG, FBC_IOE_TL_FIR_ACTION0),
+                 "Error from putScom (PU_PB_IOE_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION1_REG, FBC_IOE_TL_FIR_ACTION1),
+                 "Error from putScom (PU_PB_IOE_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_MASK_REG, FBC_IOE_TL_FIR_MASK),
+                 "Error from putScom (PU_PB_IOE_FIR_MASK_REG)");
+    }
+
+    // setup IOE (XBUS FBC IO) DL SCOMs
     for (auto l_iter = l_xbus_chiplets.begin();
          l_iter != l_xbus_chiplets.end();
          l_iter++)
@@ -127,6 +172,14 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
+
+        // configure action registers & unmask
+        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION0_REG, FBC_IOE_DL_FIR_ACTION0),
+                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION1_REG, FBC_IOE_DL_FIR_ACTION1),
+                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK),
+                 "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
     }
 
     // invoke IOO (OBUS FBC IO) SCOM initfiles
@@ -141,6 +194,16 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     }
 
     l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
+
+    if (l_obus_chiplets.size())
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_IOE_PB_IOO_FIR_ACTION0_REG, FBC_IOO_TL_FIR_ACTION0),
+                 "Error from putScom (PU_IOE_PB_IOO_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_IOE_PB_IOO_FIR_ACTION1_REG, FBC_IOO_TL_FIR_ACTION1),
+                 "Error from putScom (PU_IOE_PB_IOO_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_IOE_PB_IOO_FIR_MASK_REG, FBC_IOO_TL_FIR_MASK),
+                 "Error from putScom (PU_IOE_PB_IOO_FIR_MASK_REG)");
+    }
 
     for (auto l_iter = l_obus_chiplets.begin();
          l_iter != l_obus_chiplets.end();
@@ -162,6 +225,14 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
+
+        // configure action registers & unmask
+        FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_PB_IOOL_FIR_ACTION0_REG, FBC_IOO_DL_FIR_ACTION0),
+                 "Error from putScom (OBUS_LL0_PB_IOOL_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_PB_IOOL_FIR_ACTION1_REG, FBC_IOO_DL_FIR_ACTION1),
+                 "Error from putScom (OBUS_LL0_PB_IOOL_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG, FBC_IOO_DL_FIR_MASK),
+                 "Error from putScom (OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG)");
     }
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE, i_target, l_fbc_optics_cfg_mode),
@@ -216,6 +287,23 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         FAPI_ERR("Error from p9_vas_scom");
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
+    }
+
+    // HCA setup
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_ACTION0_REG, HCA_EH_FIR_ACTION0),
+                 "Error from putScom (PU_EHHCA_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_ACTION1_REG, HCA_EH_FIR_ACTION1),
+                 "Error from putScom (PU_EHHCA_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_EHHCA_FIR_MASK_REG, HCA_EH_FIR_MASK),
+                 "Error from putScom (PU_EHHCA_FIR_MASK_REG)");
+
+        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_ACTION0_REG, HCA_EN_FIR_ACTION0),
+                 "Error from putScom (PU_ENHCA_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_ACTION1_REG, HCA_EN_FIR_ACTION1),
+                 "Error from putScom (PU_ENHCA_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_ENHCA_FIR_MASK_REG, HCA_EN_FIR_MASK),
+                 "Error from putScom (PU_ENHCA_FIR_MASK_REG)");
     }
 
 fapi_try_exit:

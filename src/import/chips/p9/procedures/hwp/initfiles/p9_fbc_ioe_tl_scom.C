@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,11 +30,9 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_2 = 2;
-constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0xFFFFFFFFFFFFFFFF = 0xFFFFFFFFFFFFFFFF;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x20 = 0x20;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_10 = 10;
@@ -46,6 +44,7 @@ constexpr uint64_t literal_0b0001110 = 0b0001110;
 constexpr uint64_t literal_0b0001101 = 0b0001101;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_0b0001100 = 0b0001100;
+constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0x1F = 0x1F;
 constexpr uint64_t literal_0x3E = 0x3E;
 constexpr uint64_t literal_0x3C = 0x3C;
@@ -62,8 +61,6 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
                                l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] != literal_0);
-        uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] != literal_0);
         uint64_t l_def_X0_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] != literal_0);
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
@@ -81,17 +78,9 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                         (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_10_13 = ((literal_13 * (l_TGT1_ATTR_FREQ_X_MHZ * literal_8)) >=
                                         (literal_10 * l_TGT1_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] != literal_0);
+        uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] != literal_0);
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x5013403ull, l_scom_buffer ));
-
-            if (((l_def_X0_ENABLED || l_def_X1_ENABLED) || l_def_X2_ENABLED))
-            {
-                l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x5013403ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501340aull, l_scom_buffer ));
 

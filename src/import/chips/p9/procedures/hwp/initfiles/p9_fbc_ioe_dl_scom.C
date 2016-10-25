@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0xFFFFFFFFFFFFFFFF = 0xFFFFFFFFFFFFFFFF;
 constexpr uint64_t literal_0xE00 = 0xE00;
 constexpr uint64_t literal_0x0000 = 0x0000;
 constexpr uint64_t literal_0x0 = 0x0;
@@ -39,12 +38,6 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
 {
     {
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x6011803ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x6011803ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x601180aull, l_scom_buffer ));
 
