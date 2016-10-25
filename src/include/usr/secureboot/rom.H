@@ -40,9 +40,8 @@ const size_t MAX_SECURE_HEADER_SIZE = 4096;
 // HW Security Flags
 enum HW_SB_FLAGS
 {
-    HB_FW_FLAG = 0x80000000,
-    OPAL_FLAG = 0x40000000,
-    PHYP_FLAG = 0x20000000,
+    OP_BUILD_FLAG   = 0x80000000,
+    FIPS_BUILD_FLAG = 0x40000000,
     KEY_TRANSITION_FLAG = 0x00000001
 };
 
@@ -55,11 +54,11 @@ enum SW_SB_FLAGS
 // Structure to store all hw and sw flag values in a container header
 struct sb_flags_t
 {
-    sb_flags_t() : hw_hb_fw(false), hw_opal(false), hw_phyp(false),
+    sb_flags_t() : hw_op_build(false), hw_fips_build(false),
                    hw_key_transition(false) {}
-    bool hw_hb_fw;
-    bool hw_opal;
-    bool hw_phyp;
+
+    bool hw_op_build;
+    bool hw_fips_build;
     bool hw_key_transition;
 };
 

@@ -74,10 +74,14 @@ use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
 use constant LOCAL_SIGNING_FLAG => " -flag ";
 use constant OP_SIGNING_FLAG => " -flags ";
 # Security bits HW flag strings
-use constant HB_FW_FLAG => 0x80000000;
-use constant OPAL_FLAG => 0x40000000;
-use constant PHYP_FLAG => 0x20000000;
+use constant OP_BUILD_FLAG => 0x80000000;
+use constant FIPS_BUILD_FLAG => 0x40000000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
+
+# TODO: RTC 163655
+# Implement dynamic support for choosing FSP or op-build flag type.
+# For now, assume OP build
+my $buildFlag = OP_BUILD_FLAG;
 
 # Corrupt parameter strings
 use constant CORRUPT_PROTECTED => "pro";
@@ -188,33 +192,22 @@ if ( $testRun )
 # Contains the appropriate flags, prefix, and file names.
 my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
 my %sb_hdrs = (
-    HB_FW => {
-        flags =>  sprintf("0x%08X",HB_FW_FLAG),
+    DEFAULT => {
+        flags =>  sprintf("0x%08X",$buildFlag),
         prefix => $SIGN_PREFIX_PARAMS,
-        file => "$bin_dir/$randPrefix.hb.fw.secureboot.hdr.bin"
-    },
-    OPAL => {
-        flags =>  sprintf("0x%08X",OPAL_FLAG),
-        prefix => $SIGN_PREFIX_PARAMS,
-        file => "$bin_dir/$randPrefix.opal.secureboot.hdr.bin"
-    },
-    PHYP => {
-        flags => sprintf("0x%08X", PHYP_FLAG),
-        prefix => $SIGN_PREFIX_PARAMS,
-        file => "$bin_dir/$randPrefix.phyp.secureboot.hdr.bin"
+        file => "$bin_dir/$randPrefix.default.secureboot.hdr.bin"
     },
     SBKT => {
         outer => {
-            flags => sprintf("0x%08X", HB_FW_FLAG | KEY_TRANSITION_FLAG),
+            flags => sprintf("0x%08X", $buildFlag | KEY_TRANSITION_FLAG),
             prefix => $SIGN_PREFIX_PARAMS,
             file => "$bin_dir/$randPrefix.sbkt.outer.secureboot.hdr.bin"
         },
         inner => {
-            flags => sprintf("0x%08X", HB_FW_FLAG),
+            flags => sprintf("0x%08X", $buildFlag),
             prefix => $SIGN_SBKT_PREFIX_PARAMS,
             file => "$bin_dir/$randPrefix.sbkt.inner.secureboot.hdr.bin"
         }
-
     }
 );
 
@@ -331,8 +324,19 @@ foreach my $binFilesCSV (@systemBinFiles)
 # Clean up temp header files
 foreach my $header (keys %sb_hdrs)
 {
-    system("rm -f $sb_hdrs{$header}{file}");
-    die "Could not delete $sb_hdrs{$header}{file}" if $?;
+    if($header eq "SBKT")
+    {
+        foreach my $section (keys %{$sb_hdrs{$header}})
+        {
+            system("rm -f $sb_hdrs{$header}{$section}{file}");
+            die "Could not delete $sb_hdrs{$header}{$section}{file}" if $?;
+        }
+    }
+    else
+    {
+        system("rm -f $sb_hdrs{$header}{file}");
+        die "Could not delete $sb_hdrs{$header}{file}" if $?;
+    }
 }
 
 ################################################################################
@@ -398,19 +402,16 @@ sub manipulateImages
                              || ($eyeCatch eq "PAYLOAD")
                              || ($eyeCatch eq "SBKT")
                              || ($eyeCatch eq "OCC")
-                             || ($eyeCatch eq "HBRT");
+                             || ($eyeCatch eq "HBRT")
+                             || ($eyeCatch eq "CAPP")
+                             || ($eyeCatch eq "BOOTKERNEL");
 
         my $isSpecialSecure =    ($eyeCatch eq "HBB")
                               || ($eyeCatch eq "HBI")
                               || ($eyeCatch eq "HBD");
 
-        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{HB_FW}{flags};
-        my $secureboot_hdr =  $sb_hdrs{HB_FW}{file};
-        if ($eyeCatch eq "PAYLOAD")
-        {
-            $secureboot_hdr = $sb_hdrs{OPAL}{file};
-            $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{OPAL}{flags};
-        }
+        my $openSigningFlags = OP_SIGNING_FLAG.$sb_hdrs{DEFAULT}{flags};
+        my $secureboot_hdr =  $sb_hdrs{DEFAULT}{file};
 
         # Used for corrupting partitions. By default all protected offsets start
         # immediately after the container header which is size = PAGE_SIZE.
@@ -892,14 +893,14 @@ sub gen_test_containers
     # name = secureboot_signed_container (no prefix in hb cacheadd)
     my $test_container = "$bin_dir/secureboot_signed_container";
     run_command("dd if=/dev/zero count=1 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{DEFAULT}{file} -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
 
     # Create a signed test container with a hash page table
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
     run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
     $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{HB_FW}{file} -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
+    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{DEFAULT}{file} -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");
 
     # Clean up temp images

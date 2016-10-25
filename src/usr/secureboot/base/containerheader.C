@@ -231,9 +231,9 @@ bool ContainerHeader::isValid() const
 
 void ContainerHeader::parseFlags()
 {
-    iv_sbFlags.hw_hb_fw = iv_headerInfo.hw_prefix_hdr.flags & HB_FW_FLAG;
-    iv_sbFlags.hw_opal = iv_headerInfo.hw_prefix_hdr.flags & OPAL_FLAG;
-    iv_sbFlags.hw_phyp = iv_headerInfo.hw_prefix_hdr.flags & PHYP_FLAG;
+    iv_sbFlags.hw_op_build = iv_headerInfo.hw_prefix_hdr.flags & OP_BUILD_FLAG;
+    iv_sbFlags.hw_fips_build =
+        iv_headerInfo.hw_prefix_hdr.flags & FIPS_BUILD_FLAG;
     iv_sbFlags.hw_key_transition = iv_headerInfo.hw_prefix_hdr.flags
                                    & KEY_TRANSITION_FLAG;
 }
