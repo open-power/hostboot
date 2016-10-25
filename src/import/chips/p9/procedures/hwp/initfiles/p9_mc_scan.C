@@ -29,9 +29,9 @@
 
 using namespace fapi2;
 
-constexpr auto literal_0b111111 = 0b111111;
-constexpr auto literal_8 = 8;
-constexpr auto literal_0b1 = 0b1;
+constexpr uint64_t literal_0b111111 = 0b111111;
+constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_0b1 = 0b1;
 
 fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
