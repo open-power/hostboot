@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.117 2016/08/24 09:21:15 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.118 2016/10/19 09:14:56 sauchadh Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.118 |preeragh|17-OCT-16| Fix scenario x4 and x8 Bad Bits
 //   1.117 |preeragh|24-AUG-16| Bad Bits update fix scenario x4 and x8
 //   1.116 |preeragh|17-AUG-16| Added BOX Schmoo
 //   1.115 |preeragh|28-JUL-16| Add Bad Bits Update at Sanity
@@ -575,7 +576,11 @@ extern "C"
 	//------------------------------------------------------    
     // Get l_dramWidth
     //------------------------------------------------------  
-		FAPI_INF("Preet - checking sanity ");	
+	FAPI_INF("Sanity Check with  SW366284");	
+	//Initialize Bad bit map to Zero	
+	for (l_p = 0; l_p <10; l_p++)
+	{l_dqBitmap[l_p] = 0;}
+
 		rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dramWidth);
 			if(rc)
 				{
@@ -618,10 +623,19 @@ extern "C"
                             l_faulted_port = l_p;
                             if(rank>3) {
                                 l_faulted_dimm = 1;
+								rank = rank % 4;
                             } else {
                                 l_faulted_dimm = 0;
                             }
 							
+							
+							// Get the bad DQ Bitmap for l_port, l_dimm, l_rank
+							rc = dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank,l_dqBitmap);
+							if (rc)
+							{
+								FAPI_ERR("Error from dimmGetBadDqBitmap on %s.",i_target.toEcmdString());
+								return rc;
+							}   
 							// x8 mode:
 							if(l_dramWidth == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
 								{
@@ -630,11 +644,11 @@ extern "C"
 							// x4 mode
                             else if ((l_dramWidth == fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4) && (l_nibble == 0))
 							{	
-								l_dqBitmap[l_byte] = 0x0f; 
+								l_dqBitmap[l_byte] = l_dqBitmap[l_byte] | 0xf0; 
 							}
 							else
 							{
-								l_dqBitmap[l_byte] = 0xf0;
+								l_dqBitmap[l_byte] = l_dqBitmap[l_byte] | 0x0f;
 							}
                                 FAPI_INF("Warning dimm_bad bits found ---> Updating Bad Bits: port%d, dimm%d, rank%d, l_dqBitmap[%d] = %02x",
                                 l_p, l_faulted_dimm, rank, l_byte, l_dqBitmap[l_byte]);
@@ -643,10 +657,10 @@ extern "C"
 							rc = dimmSetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank,l_dqBitmap);
 							if (rc)
 							{
-								FAPI_ERR("Error from dimmGetBadDqBitmap on %s.",i_target.toEcmdString());
+								FAPI_ERR("Error from dimmSetBadDqBitmap on %s.",i_target.toEcmdString());
 								return rc;
 							}   
-                            break;
+                            
                         }
 
                         l_n++;
