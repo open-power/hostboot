@@ -3877,8 +3877,6 @@ namespace SBE
             /*  Also, there are special checks for the Master Processor      */
             /*****************************************************************/
 
-            // @todo RTC 107721 - Need to handle Habanero 'Golden' SEEPROM side
-
             for ( uint8_t i=0; i < io_sbeStates_v.size(); i++ )
             {
 
@@ -3937,7 +3935,7 @@ namespace SBE
                          * @devdesc      SBE Image Verion Miscompare with
                          *               Master Target
                          */
-                        err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                        err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                             SBE_MASTER_VERSION_COMPARE,
                                             SBE_MASTER_VERSION_DOWNLEVEL,
                                             TARGETING::get_huid(
@@ -4026,7 +4024,7 @@ namespace SBE
                      * @userdata2[32:63]    Original Error Reason Code
                      * @devdesc      Error Associated with Updating this Target
                      */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_ERROR_ON_UPDATE,
                                         TWO_UINT32_TO_UINT64(
@@ -4094,7 +4092,7 @@ namespace SBE
                      * @userdata2    Comparison Target HUID
                      * @devdesc      SBE Verion Miscompare with Master Target
                      */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_MISCOMPARE_WITH_MASTER_VERSION,
                                         TARGETING::get_huid(
